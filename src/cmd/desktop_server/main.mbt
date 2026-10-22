@@ -264,10 +264,17 @@ fn static_relative_path(path : String) -> String {
 }
 
 ///|
-async fn serve_static(conn : @http.ServerConnection, path : String) -> Bool {
+async fn serve_static(
+  request : @http.Request,
+  conn : @http.ServerConnection,
+  path : String,
+) -> Bool {
   let relative = static_relative_path(path)
   guard safe_relative_path(relative) else { return false }
-  serve_file(conn, static_root() + "/" + relative)
+  if relative.has_suffix(".etag") || relative.has_suffix(".gz") {
+    return false
+  }
+  serve_product_asset(request, conn, relative)
 }
 
 ///|
@@ -980,7 +987,7 @@ async fn handle_request(
       return
     }
   }
-  if request.meth is Get && serve_static(conn, path) {
+  if request.meth is Get && serve_static(request, conn, path) {
     return
   }
   send_json(conn, 404, { "ok": false, "error": "not found" })

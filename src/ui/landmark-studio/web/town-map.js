@@ -1,69 +1,15 @@
-import * as THREE from 'three';
-import {buildStudy, createMaterials} from './scene-adapter.js';
+import {loadTownTiles, decodeTile} from './town-tiles.js';
 
 // Rendering boundary only. Placement, map registration, path search and actor
 // movement are MoonBit. These are camera-matched renders of the original models,
 // not rotated thumbnails and not a second terrain/road scene.
 const tiles = new Map();
-let renderer, selected, api, inspector, pins, status, progress, viewer;
+let selected, api, inspector, pins, status, progress, viewer;
 let frameActor, baked = false, paused=false, pauseButton, stopButton;
-const materials = createMaterials();
 document.documentElement.dataset.landmarkModels='loading';
 const bridge = p => p.id.endsWith('bridge');
 const screen = (p,f,h=0) => [f.w/2+(32*(p[0]-p[1])-f.cx)*f.z, f.h/2+(16*(p[0]+p[1])-f.cy-h)*f.z];
 const render = () => globalThis.__moontownGoldenValleyRender?.('landmark-interaction');
-
-function matrix(p) {
-  const [ex,ey]=p.east, [sx,sy]=p.south, up=p.elevation;
-  return new THREE.Matrix4().set(32*(ex-ey),0,32*(sx-sy),0,
-    -16*(ex+ey),up,-16*(sx+sy),-up*(bridge(p)?10.2:2.3),
-    16*(ex+ey),up,16*(sx+sy),0, 0,0,0,1);
-}
-
-function frontPart(part,p) {
-  const ps = part.kind==='triangles' ? part.points : [part.position,...(part.kind==='beam'||part.kind==='girder'?part.points:[])];
-  const mean=ps.reduce((a,b)=>a.map((x,i)=>x+b[i]/ps.length),[0,0,0]);
-  // Front rail/rib/lattice pass occludes a traveller; road/deck stays beneath.
-  return mean[1]>11 && mean[2]*(p.south[0]+p.south[1])>0;
-}
-
-function bake(study,p,frontOnly=false) {
-  const parts=study.parts.filter(part => {
-    if(frontOnly) return part.layer!=='context' && frontPart(part,p);
-    if(part.layer!=='context') return true;
-    // Do not import the study's rectangular terrain, roads, water or banks.
-    const courtyard=part.kind==='round' && part.material==='paving' && part.scale[0]===263 && part.scale[2]===151;
-    return !bridge(p) && (courtyard || (Math.abs(part.position[0])<128 && Math.abs(part.position[2])<73 &&
-      part.scale[0]<140 && part.scale[2]<140 && part.material!=='asphalt'));
-  });
-  const model=buildStudy({...study,parts},materials);
-  // Object3D.applyMatrix4 decomposes to TRS and would discard calibrated shear
-  // on the next update. Keep the full affine camera basis authoritative.
-  model.root.matrixAutoUpdate=false;model.root.matrix.copy(matrix(p));model.root.updateMatrixWorld(true);
-  const box=new THREE.Box3().setFromObject(model.root);
-  const pad=8, left=box.min.x-pad, right=box.max.x+pad, bottom=box.min.y-pad, top=box.max.y+pad;
-  const width=right-left,height=top-bottom;
-  const scene=new THREE.Scene();scene.add(model.root);
-  scene.add(new THREE.AmbientLight(0xfff8e5,2));
-  const sun=new THREE.DirectionalLight(0xffffff,2.3);sun.position.set(-350,600,900);scene.add(sun);
-  const camera=new THREE.OrthographicCamera(left,right,top,bottom,1,20000);camera.position.z=10000;
-  const ratio=Math.min(4,2048/Math.max(width,height));
-  renderer.setSize(Math.ceil(width*ratio),Math.ceil(height*ratio),false);
-  renderer.render(scene,camera);
-  const image=document.createElement('canvas');image.width=renderer.domElement.width;image.height=renderer.domElement.height;
-  image.getContext('2d').drawImage(renderer.domElement,0,0);
-  // Repeated 2:1 reduction prefilters fine mullions/lattice at town-scale zoom.
-  // A single large downsample shimmers even when Canvas smoothing is enabled.
-  const levels=[image];
-  while(Math.max(levels.at(-1).width,levels.at(-1).height)>96){
-    const previous=levels.at(-1),next=document.createElement('canvas');
-    next.width=Math.max(1,Math.ceil(previous.width/2));next.height=Math.max(1,Math.ceil(previous.height/2));
-    const c=next.getContext('2d');c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
-    c.drawImage(previous,0,0,next.width,next.height);levels.push(next);
-  }
-  model.dispose();
-  return {image,levels,left,top,width,height};
-}
 
 function paint(ctx,p,t,f) {
   const [x,y]=screen([p.x,p.y],f);
@@ -106,6 +52,7 @@ function focus(p) {
 }
 
 function openStudy(kind) {
+  globalThis.__moontownStudioOpen=true;
   const url = kind==='indoor' ? 'interior.html' : kind==='compute' ? 'datacenter.html' : `index.html#${selected.id}`;
   viewer=document.createElement('dialog');viewer.className='town-studio-dialog';
   const header=document.createElement('header');
@@ -117,7 +64,7 @@ function openStudy(kind) {
     // Context label only; the standalone studies and geometry remain unchanged.
     try{const badge=frame.contentDocument?.querySelector('.stage');if(badge)badge.textContent='小镇空间门户 · 设计研究';}catch{/* External reference navigation has no parent access. */}
   });
-  viewer.append(header,frame);document.body.append(viewer);viewer.addEventListener('close',()=>{viewer.remove();viewer=null;inspector.querySelector('[data-action="study"]').focus();render();},{once:true});viewer.showModal();close.focus();
+  viewer.append(header,frame);document.body.append(viewer);viewer.addEventListener('close',()=>{viewer.remove();viewer=null;globalThis.__moontownStudioOpen=false;inspector.querySelector('[data-action="study"]').focus();render();},{once:true});viewer.showModal();close.focus();
 }
 
 function walk(a,b) {
@@ -165,25 +112,23 @@ function setupUI() {
 }
 
 async function install() {
-  if(baked||!globalThis.__townLandmarks||!globalThis.wenyuLandmarkStudies)return;
+  if(baked||!globalThis.__townLandmarks)return;
   baked=true;api=globalThis.__townLandmarks;
   try {
-    renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,preserveDrawingBuffer:true});
-    renderer.setClearColor(0,0);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
+    const records=await loadTownTiles(api.places);
     for(const p of api.places){
-      const study=globalThis.wenyuLandmarkStudies.find(s=>s.id===p.id);
-      const tile=bake(study,p);const front=bridge(p)?bake(study,p,true):null;
+      const record=records.find(r=>r.id===p.id);
+      const tile=await decodeTile(record), front=record.front?await decodeTile(record.front):null;
       tiles.set(p.id,{...tile,front,depth:Math.floor(p.x+p.y)});
       // Yield between expensive studies; no continuous WebGL renderer on map.
       await new Promise(resolve=>requestAnimationFrame(resolve));
     }
-    renderer.dispose();renderer.forceContextLoss();renderer=null;
     setupUI();
     globalThis.__townLandmarkPainter.ready=true;
     document.documentElement.dataset.landmarkModels='ready';render();
   } catch(error) {
     console.error('Landmark projection unavailable',error);
-    renderer?.dispose();document.documentElement.dataset.landmarkModels='error';
+    document.documentElement.dataset.landmarkModels='error';
     const notice=document.createElement('p');notice.className='town-landmark-error';notice.textContent='3D 地标未载入；原地图保留。刷新可重试。';document.body.append(notice);
   }
 }

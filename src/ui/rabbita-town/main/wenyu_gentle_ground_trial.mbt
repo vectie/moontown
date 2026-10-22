@@ -10,8 +10,8 @@ extern "js" fn wenyu_gentle_bank_requested() -> Bool =
 ///|
 /// Start this explicit review at whole-map scale; subsequent pan/zoom is free.
 extern "js" fn wenyu_gentle_ground_trial_fit_camera(
-  width : Int,
-  height : Int,
+  width : Int32,
+  height : Int32,
 ) -> Unit =
   #| (width, height) => {
   #|   const camera = globalThis.__moontownGoldenValleyCamera;
@@ -30,8 +30,8 @@ extern "js" fn wenyu_gentle_ground_overlay(
   camera_x : Double,
   camera_y : Double,
   zoom : Double,
-  width : Int,
-  height : Int,
+  width : Int32,
+  height : Int32,
 ) -> Unit =
   #| (context, cameraX, cameraY, zoom, width, height) => {
   #|   const params = new URLSearchParams(globalThis.location?.search || '');
@@ -81,8 +81,8 @@ fn draw_wenyu_gentle_ground_trial(
   context : @dom.CanvasRenderingContext2D,
   snapshot : @energy_valley_contract.TownSnapshot,
   view : TownCanvasViewState,
-  width : Int,
-  height : Int,
+  width : Int32,
+  height : Int32,
 ) -> Unit {
   wenyu_gentle_ground_trial_fit_camera(width, height)
   golden_valley_clear_canvas_frame()
@@ -93,7 +93,7 @@ fn draw_wenyu_gentle_ground_trial(
     town_landmark_prepare()
   }
   let bearing_review = scene_ready && town_bearing_buildings_requested()
-  let buildings : Map[Int, Array[IntersectionRoadPreviewBuilding]] = if scene_ready {
+  let buildings : Map[Int32, Array[IntersectionRoadPreviewBuilding]] = if scene_ready {
     intersection_road_preview_buildings_by_depth(snapshot)
   } else {
     Map([])
@@ -105,100 +105,124 @@ fn draw_wenyu_gentle_ground_trial(
   let roads = town_snapshot_canvas_road_lookup(
     town_snapshot_canvas_roads(snapshot),
   )
-  let chunks = golden_canvas_visible_tile_chunks(
-    town_snapshot_canvas_cols(snapshot),
-    town_snapshot_canvas_rows(snapshot),
-    width,
-    height,
-    golden_valley_camera_x(),
-    golden_valley_camera_y(),
-    golden_valley_camera_zoom(),
-  )
-  for chunk in chunks {
-    for y in chunk.min_y..<chunk.max_y {
-      for x in chunk.min_x..<chunk.max_x {
-        let terrain_override = if scene_ready &&
-          town_landmark_reserved(x.to_double() + 0.5, y.to_double() + 0.5, 0) {
-          Some(intersection_road_view_stale_ground_terrain(x, y))
-        } else if bearing_review {
-          Some(
-            if reference_tile_kind_at(x, y) == Some("bridge") {
-              "water"
-            } else {
-              intersection_road_view_stale_ground_terrain(x, y)
-            },
-          )
-        } else if scene_ready {
-          // Remove obsolete snapshot pads and spine; terrain evidence stays fixed.
-          Some(
-            land
-            .get(town_canvas_road_key(x, y))
-            .unwrap_or(
+  if !wenyu_ground_cache_restore(
+      context,
+      snapshot.world,
+      intersection_road_preview_cache_key(snapshot),
+      width,
+      height,
+      golden_valley_camera_x(),
+      golden_valley_camera_y(),
+      golden_valley_camera_zoom(),
+    ) {
+    let target = context
+    let context = wenyu_ground_cache_context(target)
+    let width = width + 2 * wenyu_ground_cache_padding()
+    let height = height + 2 * wenyu_ground_cache_padding()
+    let chunks = golden_canvas_visible_tile_chunks(
+      town_snapshot_canvas_cols(snapshot),
+      town_snapshot_canvas_rows(snapshot),
+      width,
+      height,
+      golden_valley_camera_x(),
+      golden_valley_camera_y(),
+      golden_valley_camera_zoom(),
+    )
+    for chunk in chunks {
+      for y in chunk.min_y..<chunk.max_y {
+        for x in chunk.min_x..<chunk.max_x {
+          let terrain_override = if scene_ready &&
+            town_landmark_reserved(x.to_double() + 0.5, y.to_double() + 0.5, 0) {
+            Some(intersection_road_view_stale_ground_terrain(x, y))
+          } else if bearing_review {
+            Some(
               if reference_tile_kind_at(x, y) == Some("bridge") {
                 "water"
               } else {
                 intersection_road_view_stale_ground_terrain(x, y)
               },
-            ),
-          )
-        } else if roads.contains(town_canvas_road_key(x, y)) {
-          Some(intersection_road_view_stale_ground_terrain(x, y))
-        } else {
-          None
-        }
-        golden_draw_tile(
-          context, snapshot, roads, true, false, false, terrain_override, x, y, width,
-          height,
-        )
-        if scene_ready &&
-          !town_landmark_reserved(x.to_double() + 0.5, y.to_double() + 0.5, 0.4) &&
-          !land.contains(town_canvas_road_key(x, y)) &&
-          wenyu_scene_region_clear(wenyu_scene_prefix, x, y, 1, 1) {
-          let flower = town_botanical_flower_kind(x, y)
-          if flower >= 0 {
-            town_botanical_draw_flowers(
-              context,
-              golden_screen_x(x.to_double() + 0.5, y.to_double() + 0.5, width),
-              golden_screen_y(x.to_double() + 0.5, y.to_double() + 0.5, height),
-              golden_valley_camera_zoom(),
-              flower,
             )
+          } else if scene_ready {
+            // Remove obsolete snapshot pads and spine; terrain evidence stays fixed.
+            Some(
+              land
+              .get(town_canvas_road_key(x, y))
+              .unwrap_or(
+                if reference_tile_kind_at(x, y) == Some("bridge") {
+                  "water"
+                } else {
+                  intersection_road_view_stale_ground_terrain(x, y)
+                },
+              ),
+            )
+          } else if roads.contains(town_canvas_road_key(x, y)) {
+            Some(intersection_road_view_stale_ground_terrain(x, y))
+          } else {
+            None
+          }
+          golden_draw_tile(
+            context, snapshot, roads, true, false, false, terrain_override, x, y,
+            width, height,
+          )
+          if scene_ready &&
+            !town_landmark_reserved(
+              x.to_double() + 0.5,
+              y.to_double() + 0.5,
+              0.4,
+            ) &&
+            !land.contains(town_canvas_road_key(x, y)) &&
+            wenyu_scene_region_clear(wenyu_scene_prefix, x, y, 1, 1) {
+            let flower = town_botanical_flower_kind(x, y)
+            if flower >= 0 {
+              town_botanical_draw_flowers(
+                context,
+                golden_screen_x(x.to_double() + 0.5, y.to_double() + 0.5, width),
+                golden_screen_y(
+                  x.to_double() + 0.5,
+                  y.to_double() + 0.5,
+                  height,
+                ),
+                golden_valley_camera_zoom(),
+                flower,
+              )
+            }
           }
         }
       }
     }
-  }
-  if scene_ready {
-    for _, items in buildings {
-      for building in items {
-        let (x, y) = intersection_road_preview_building_center(building)
-        if town_landmark_reserved(x, y, building.width.to_double() / 2.0) {
-          continue
+    if scene_ready {
+      for _, items in buildings {
+        for building in items {
+          let (x, y) = intersection_road_preview_building_center(building)
+          if town_landmark_reserved(x, y, building.width.to_double() / 2.0) {
+            continue
+          }
+          if bearing_review {
+            town_bearing_draw_lot(context, building, width, height)
+            continue
+          }
+          golden_draw_intersection_road_preview_building_lot(
+            context,
+            golden_screen_x(x, y, width),
+            golden_screen_y(x, y, height),
+            golden_valley_camera_zoom(),
+            intersection_road_preview_building_land_type(building.style),
+            building.width.to_double(),
+          )
+          wenyu_scene_draw_access(context, x, y, width, height)
         }
-        if bearing_review {
-          town_bearing_draw_lot(context, building, width, height)
-          continue
-        }
-        golden_draw_intersection_road_preview_building_lot(
-          context,
-          golden_screen_x(x, y, width),
-          golden_screen_y(x, y, height),
-          golden_valley_camera_zoom(),
-          intersection_road_preview_building_land_type(building.style),
-          building.width.to_double(),
-        )
-        wenyu_scene_draw_access(context, x, y, width, height)
       }
     }
+    wenyu_gentle_ground_overlay(
+      context,
+      golden_valley_camera_x(),
+      golden_valley_camera_y(),
+      golden_valley_camera_zoom(),
+      width,
+      height,
+    )
+    wenyu_ground_cache_present(target)
   }
-  wenyu_gentle_ground_overlay(
-    context,
-    golden_valley_camera_x(),
-    golden_valley_camera_y(),
-    golden_valley_camera_zoom(),
-    width,
-    height,
-  )
   if scene_ready {
     let production = wenyu_scene_default_requested()
     // Keep explicit user changes above the replacement base-road presentation.

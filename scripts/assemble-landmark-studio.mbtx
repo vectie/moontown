@@ -1,5 +1,6 @@
+///|
 import {
-  "moonbitlang/x@0.4.40/fs",
+  "moonbitlang/x@0.5.5/fs",
 }
 
 ///|

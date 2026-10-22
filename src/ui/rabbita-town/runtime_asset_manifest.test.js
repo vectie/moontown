@@ -15,6 +15,10 @@ test('runtime asset manifest covers modules, residents, and operating art', asyn
   const paths = await runtimeAssetPaths(assetRoot)
   const pathSet = new Set(paths)
   assert.ok(pathSet.has('moonsuite-i18n.js'))
+  assert.ok(pathSet.has('landmark-studio/town-projections/manifest.json'))
+  for (const id of ['center','vision','east-bridge','arch-bridge','east-bridge-front','arch-bridge-front']) {
+    assert.ok(pathSet.has(`landmark-studio/town-projections/${id}.png`))
+  }
   const moduleConfig = JSON.parse(
     await readFile(
       path.join(assetRoot, 'tilemap/modules/wenyu-town-modules.json'),

@@ -139,6 +139,7 @@ const FIXED_RUNTIME_ASSETS = [
 const RUNTIME_ASSET_DIRECTORIES = [
   'landmark-studio',
   'landmark-studio/vendor',
+  'landmark-studio/town-projections',
   'tilemap/districts',
   'tilemap/objects',
   'tilemap/tiles',

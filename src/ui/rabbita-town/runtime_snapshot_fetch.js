@@ -4,14 +4,17 @@ export function versionedUrl(url) {
 
 const SNAPSHOT_FETCH_TIMEOUT_MS = 1600
 
-async function fetchSnapshot(url) {
+async function fetchSnapshot(url, readValue, cacheable) {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), SNAPSHOT_FETCH_TIMEOUT_MS)
   try {
-    return await fetch(versionedUrl(url), {
-      cache: 'no-store',
+    const response = await fetch(cacheable ? url : versionedUrl(url), {
+      cache: cacheable ? 'default' : 'no-store',
       signal: controller.signal,
     })
+    if (!response.ok) throw new Error(`Snapshot HTTP ${response.status}`)
+    // Keep the deadline active through body download and parsing.
+    return await readValue(response)
   } finally {
     clearTimeout(timeout)
   }
@@ -37,13 +40,8 @@ export function setSnapshotValue(snapshot, value, options = {}) {
 
 async function loadSnapshotValue(snapshot, readValue, options = {}) {
   try {
-    const response = await fetchSnapshot(snapshot.url)
-    if (!response.ok) {
-      setSnapshotFallback(snapshot, options)
-      return
-    }
-
-    setSnapshotValue(snapshot, await readValue(response), options)
+    const value = await fetchSnapshot(snapshot.url, readValue, options.cacheable)
+    setSnapshotValue(snapshot, value, options)
   } catch {
     setSnapshotFallback(snapshot, options)
   }
@@ -61,5 +59,5 @@ export async function refreshTextSnapshot(snapshot) {
 }
 
 export async function loadJsonGlobal(snapshot) {
-  await loadSnapshotValue(snapshot, response => response.json())
+  await loadSnapshotValue(snapshot, response => response.json(), {cacheable: true})
 }

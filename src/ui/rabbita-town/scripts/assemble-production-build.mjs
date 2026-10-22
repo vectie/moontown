@@ -10,6 +10,7 @@ import {
   writeFile,
 } from 'node:fs/promises'
 import path from 'node:path'
+import { execFileSync } from 'node:child_process'
 import {
   KNOWLEDGE_DOMAIN_CATALOG_SOURCE,
   KNOWLEDGE_DOMAIN_CATALOG_TARGET,
@@ -28,6 +29,7 @@ const compiledMainPath = path.join(
 
 const BROWSER_FILES = [
   'index.html',
+  'performance-probe.js',
   'viewport.html',
   'operations.html',
   'hackathon.html',
@@ -142,6 +144,9 @@ async function assemble() {
     KNOWLEDGE_DOMAIN_CATALOG_TARGET,
   )
 
+  execFileSync('moon', ['run', 'scripts/optimize-town-ui.mbtx', stagingRoot], {
+    cwd: path.resolve(frontendRoot, '../../..'), stdio: 'inherit',
+  })
   await writeAssetManifest()
   await rm(distRoot, { recursive: true, force: true })
   await rename(stagingRoot, distRoot)

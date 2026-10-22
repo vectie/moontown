@@ -10,9 +10,7 @@ import {
   startRuntimeSnapshotRefresh,
 } from './runtime_snapshots.js'
 import './viewport_drag_pan.js'
-import { installAccountManagement } from './account_management.js'
 import { ACCOUNT_DEMO_FIXTURES } from './account_demo_fixtures.js'
-import { installPackBridgePanel } from './pack_bridge_panel.js'
 
 const app = document.getElementById('app')
 if (globalThis.location?.pathname?.startsWith('/moontown/') &&
@@ -62,6 +60,7 @@ async function fetchAccountContext(token) {
   if (!token) return null
   const response = await fetch('/miniapp/me', {
     cache: 'no-store',
+    signal: AbortSignal.timeout(4000),
     headers: { 'x-miniapp-session': token },
   })
   if (!response.ok) return null
@@ -72,6 +71,7 @@ async function createVisitorAccount() {
   const response = await fetch('/miniapp/auth/visitor', {
     method: 'POST',
     cache: 'no-store',
+    signal: AbortSignal.timeout(4000),
     headers: { 'content-type': 'application/json' },
     body: '{}',
   })
@@ -162,7 +162,6 @@ if (app) {
 async function prepareRuntimeBridge() {
   await Promise.allSettled([
     prepareAccountContext(),
-    refreshRuntimeSnapshots(),
     loadEnergyValleyOsmBlockGraph(),
     loadWenyuReferenceBuildings(),
     loadWenyuReferenceIntersections(),
@@ -175,8 +174,13 @@ async function prepareRuntimeBridge() {
 
 async function startMoontown() {
   await prepareRuntimeBridge()
-  startRuntimeSnapshotRefresh()
   await import('./main.js?landmarks-v3')
+  // Identity and map registration are still critical. Operational reports are
+  // versioned inputs consumed by the normal MoonBit tick, not a mount barrier.
+  void refreshRuntimeSnapshots().finally(startRuntimeSnapshotRefresh)
+  const [{ installAccountManagement }, { installPackBridgePanel }] = await Promise.all([
+    import('./account_management.js'), import('./pack_bridge_panel.js'),
+  ])
   installAccountManagement()
   installPackBridgePanel()
 }

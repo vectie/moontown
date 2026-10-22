@@ -1,0 +1,49 @@
+///|
+import {
+  "moonbitlang/x@0.5.5/fs",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/base64",
+}
+
+///|
+fn save_tile(value : Json, name : String, root : String) -> Json raise {
+  guard value is Object(fields) &&
+    fields.get("source") is Some(String(source)) &&
+    source.has_prefix("data:image/png;base64,") else {
+    fail("Expected lossless PNG projection")
+  }
+  let bytes = @base64.decode(source[22:])
+  @fs.write_bytes_to_file(root + "/" + name + ".png", bytes)
+  fields["source"] = Json::string("town-projections/" + name + ".png")
+  if fields.get("front") is Some(Object(_) as front) {
+    fields["front"] = save_tile(front, name + "-front", root)
+  }
+  value
+}
+
+///|
+fn main raise {
+  let pack = @json.parse(@fs.read_file_to_string(@env.args().last().unwrap()))
+  guard pack
+    is { "schema": "moontown.town-projections.v1", "tiles": Array(tiles), .. } else {
+    fail("Wrong projection format")
+  }
+  assert_eq(tiles.length(), 4)
+  let root = "src/ui/landmark-studio/web/town-projections"
+  if !@fs.path_exists(root) {
+    @fs.create_dir(root)
+  }
+  let seen : Map[String, Bool] = Map([])
+  for tile in tiles {
+    guard tile is { "id": String(id), .. } else { fail("Missing tile ID") }
+    assert_true(["center", "vision", "east-bridge", "arch-bridge"].contains(id))
+    assert_false(seen.contains(id))
+    seen[id] = true
+    ignore(save_tile(tile, id, root))
+  }
+  @fs.write_string_to_file(root + "/manifest.json", pack.stringify(indent=2))
+  println(
+    "Imported four lossless model projections and two bridge occlusion layers",
+  )
+}

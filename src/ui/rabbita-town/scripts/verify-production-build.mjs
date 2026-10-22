@@ -14,7 +14,8 @@ const distRoot = path.join(frontendRoot, 'dist')
 // The governed spatial layers include two transparent authored prop atlases.
 // Keep their release cost inside a narrow, explicit ceiling.
 // Add the preserved offline Three.js studio and its pinned vendor modules.
-// Current generated application code and the studio total 72.2 MiB.
+// Complete studio + six lossless projections + gzip sidecars total 70.2 MiB.
+// Keep the existing release ceiling; minification pays for the new projections.
 const MAX_DIST_BYTES = 73 * 1024 * 1024
 const REQUIRED_BROWSER_FILES = [
   'index.html',
@@ -158,7 +159,7 @@ assert.match(viewportAlias, /src="\.\/bootstrap\.js(?:\?[^"\s]+)?"/)
 
 const bootstrap = await readFile(path.join(distRoot, 'bootstrap.js'), 'utf8')
 assert.match(bootstrap, /import\('\.\/main\.js(?:\?[^'\s]+)?'\)/)
-assert.match(bootstrap, /from '\.\/account_management\.js'/)
+assert.match(bootstrap, /import\('\.\/account_management\.js'\)/)
 assert.doesNotMatch(bootstrap, /vite|react|typescript|\.tsx/i)
 assert.doesNotMatch(
   bootstrap,

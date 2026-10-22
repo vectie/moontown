@@ -189,7 +189,8 @@ extern "js" fn install_golden_valley_canvas_input(
   #|       const started = globalThis.performance?.now?.() ?? Date.now();
   #|       lifecycle.render?.();
   #|       const finished = globalThis.performance?.now?.() ?? Date.now();
-  #|       lifecycle.lastPaint = finished;
+  #|       // Frame cadence is measured start-to-start, not after work completes.
+  #|       lifecycle.lastPaint = started;
   #|       const metrics = globalThis.__moontownGoldenValleyRenderBenchmark;
   #|       if (metrics) {
   #|         metrics.invokedFullPaints = (metrics.invokedFullPaints ?? 0) + 1;
@@ -706,9 +707,14 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     // The map remains interactive under reduced motion, but continuous
   #|     // canvas animation is suppressed. Normal motion is capped at 30fps.
   #|     if (!motion?.matches && !globalThis.document?.hidden &&
+  #|         !globalThis.__moontownStudioOpen &&
   #|         !lifecycle.cameraDragging && !lifecycle.interactionRaf &&
   #|         timestamp - lifecycle.lastPaint >= animationFrameIntervalMs) {
   #|       invoke("animation");
+  #|       // rAF timestamps precede callback execution. Anchor the animation
+  #|       // clock to that timestamp so sub-ms callback delay cannot skip the
+  #|       // next 30fps slot on a 60Hz display.
+  #|       lifecycle.lastPaint = timestamp;
   #|     }
   #|     if (lifecycle.running) {
   #|       lifecycle.animationRaf = globalThis.requestAnimationFrame(frame);

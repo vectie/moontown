@@ -22,8 +22,11 @@ export function runtimeRefreshIntervalMs() {
   }
 }
 
-export async function refreshRuntimeSnapshots() {
-  await Promise.all(RUNTIME_TEXT_SNAPSHOTS.map(refreshTextSnapshot))
+let refreshInFlight;
+export function refreshRuntimeSnapshots() {
+  // Slow/hidden tabs must not accumulate overlapping polling batches.
+  return refreshInFlight ||= Promise.all(RUNTIME_TEXT_SNAPSHOTS.map(refreshTextSnapshot))
+    .finally(() => { refreshInFlight = null })
 }
 
 export function startRuntimeSnapshotRefresh() {
@@ -31,7 +34,7 @@ export function startRuntimeSnapshotRefresh() {
     clearInterval(globalThis.__moontownTownSnapshotRefreshTimer)
   }
   globalThis.__moontownTownSnapshotRefreshTimer = setInterval(
-    refreshRuntimeSnapshots,
+    () => { if (!document.hidden) void refreshRuntimeSnapshots() },
     runtimeRefreshIntervalMs(),
   )
 }

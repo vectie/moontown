@@ -3,6 +3,8 @@ import test from 'node:test'
 import {
   setSnapshotFallback,
   setSnapshotValue,
+  loadJsonGlobal,
+  refreshTextSnapshot,
 } from './runtime_snapshot_fetch.js'
 
 function snapshotFixture(suffix) {
@@ -43,4 +45,36 @@ test('fallback transition bumps once and then remains stable', () => {
   assert.equal(globalThis[snapshot.versionGlobal], 2)
 
   clearSnapshot(snapshot)
+})
+
+test('static reference data revalidates; operational snapshots never cache', async t => {
+  const calls = []
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    calls.push({url, options})
+    return new Response('{"ok":true}')
+  })
+  const asset = {...snapshotFixture('static'), url:'./tilemap/reference.json'}
+  const live = {...snapshotFixture('live'), url:'./secret-compute-room.json'}
+  try {
+    await loadJsonGlobal(asset)
+    await refreshTextSnapshot(live)
+    assert.equal(calls[0].url, asset.url)
+    assert.equal(calls[0].options.cache, 'default')
+    assert.match(calls[1].url, /secret-compute-room\.json\?ts=/)
+    assert.equal(calls[1].options.cache, 'no-store')
+    assert.deepEqual(globalThis[asset.jsonGlobal], {ok:true})
+    assert.equal(globalThis[live.versionGlobal], 1)
+  } finally {clearSnapshot(asset);clearSnapshot(live)}
+})
+
+test('snapshot deadline remains active while a response body stalls', async t => {
+  const snapshot = {...snapshotFixture('body-timeout'), url:'./live.json'}
+  t.mock.method(globalThis, 'fetch', async (_url, {signal}) => ({
+    ok:true,
+    text:() => new Promise((_resolve,reject) => signal.addEventListener('abort',()=>reject(signal.reason),{once:true})),
+  }))
+  try {
+    await refreshTextSnapshot(snapshot)
+    assert.equal(globalThis[snapshot.jsonGlobal], snapshot.fallback)
+  } finally {clearSnapshot(snapshot)}
 })

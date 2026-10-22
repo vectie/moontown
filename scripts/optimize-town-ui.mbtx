@@ -1,0 +1,80 @@
+///|
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/shell",
+  "moonbitlang/x@0.5.5/fs",
+  "moonbitlang/x@0.5.5/crypto",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+fn paths(root : String) -> Array[String] raise {
+  let result : Array[String] = []
+  for name in @fs.read_dir(root) {
+    let path = root + "/" + name
+    if @fs.is_dir(path) {
+      result.append(paths(path))
+    } else {
+      result.push(path)
+    }
+  }
+  result
+}
+
+///|
+async fn main {
+  let root = @env.args()[1]
+  let ui = "src/ui/rabbita-town"
+  let esbuild = ui + "/node_modules/.bin/esbuild"
+  // Minify the compiled MoonBit application; never regenerate/reduce models.
+  @shell.Cmd(esbuild, [
+    root + "/main.js",
+    "--minify",
+    "--format=esm",
+    "--target=es2022",
+    "--outfile=" + root + "/main.js",
+    "--allow-overwrite",
+  ]).run()
+  // Bundle CSS without changing rule order. Existing asset URLs are absolute.
+  @shell.Cmd(esbuild, [
+    ui + "/styles.css",
+    "--bundle",
+    "--minify",
+    "--external:/tilemap/*",
+    "--outfile=" + root + "/styles.css",
+  ]).run()
+  let hash = @crypto.SHA256::new()
+  for
+    path in [
+      "src/ui/landmark-studio/web/models.js", "src/ui/landmark-studio/web/scene-adapter.js",
+      "src/ui/landmark-studio/web/town-bake.js", "src/ui/landmark-studio/web/vendor/three.core.js",
+      "src/ui/landmark-studio/web/vendor/three.module.js",
+    ] {
+    hash.update(@fs.read_file_to_bytes(path))
+  }
+  let version : Json = {
+    "sha256": @crypto.bytes_to_hex_string(hash.finalize()),
+  }
+  @fs.write_string_to_file(
+    root + "/landmark-studio/town-projection-version.json",
+    version.stringify(),
+  )
+  // Registration matrices are checked separately at runtime; a new calibration
+  // cannot accidentally reuse an old image even if model inputs are unchanged.
+  for path in paths(root) {
+    if path.has_suffix(".gz") || path.has_suffix(".etag") {
+      continue
+    }
+    let bytes = @fs.read_file_to_bytes(path)
+    let etag = "\"" + @crypto.bytes_to_hex_string(@crypto.sha256(bytes)) + "\""
+    @fs.write_string_to_file(path + ".etag", etag)
+    if bytes.length() > 1024 &&
+      [".js", ".css", ".json", ".svg", ".html"].any(ext => path.has_suffix(ext)) {
+      @shell.Cmd("gzip", ["-n", "-9", "-k", "-f", path]).run()
+    }
+  }
+  println(
+    "MoonBit UI optimized: minified entry, bundled CSS, gzip, content ETags",
+  )
+}

@@ -1,0 +1,3798 @@
+{
+  "baselineCommit": "4d39baf2",
+  "method": "Same local save and viewport; three repeat navigations per build. Baseline no-store; optimized ETag revalidation. One identical 10-second pan phase per build. Not a throttled cold-cache or GPU benchmark.",
+  "baseline": [
+    {
+      "canvasMs": 1144.6,
+      "phases": [
+        {
+          "durationMs": 10173,
+          "gapsOver50ms": 82,
+          "longTasks": 84,
+          "name": "idle",
+          "paintFps": 8.26,
+          "paintMeanMs": 70.76,
+          "paintP95Ms": 77.5,
+          "paints": 84,
+          "rafP95Ms": 82.8
+        },
+        {
+          "durationMs": 10224.1,
+          "gapsOver50ms": 118,
+          "longTasks": 119,
+          "name": "pan",
+          "paintFps": 11.74,
+          "paintMeanMs": 74.51,
+          "paintP95Ms": 82.3,
+          "paints": 120,
+          "rafP95Ms": 149.3
+        }
+      ],
+      "readyMs": 5444.6,
+      "resources": [
+        {
+          "bytes": 3015,
+          "ms": 50.4,
+          "path": "/landmark-studio/town-map.css",
+          "transfer": 3315
+        },
+        {
+          "bytes": 5059,
+          "ms": 51,
+          "path": "/styles.css",
+          "transfer": 5359
+        },
+        {
+          "bytes": 3847,
+          "ms": 28.6,
+          "path": "/performance-probe.js",
+          "transfer": 4147
+        },
+        {
+          "bytes": 4597,
+          "ms": 50.8,
+          "path": "/platform-base.js",
+          "transfer": 4897
+        },
+        {
+          "bytes": 146,
+          "ms": 46.6,
+          "path": "/platform-scope.js",
+          "transfer": 446
+        },
+        {
+          "bytes": 5502,
+          "ms": 51.2,
+          "path": "/bootstrap.js",
+          "transfer": 5802
+        },
+        {
+          "bytes": 14982,
+          "ms": 55.1,
+          "path": "/landmark-studio/town-map.js",
+          "transfer": 15282
+        },
+        {
+          "bytes": 447269,
+          "ms": 167.7,
+          "path": "/landmark-studio/models.js",
+          "transfer": 447569
+        },
+        {
+          "bytes": 11769,
+          "ms": 18.3,
+          "path": "/styles/app-shell.css",
+          "transfer": 12069
+        },
+        {
+          "bytes": 5480,
+          "ms": 15.5,
+          "path": "/styles/request-desk.css",
+          "transfer": 5780
+        },
+        {
+          "bytes": 16613,
+          "ms": 21,
+          "path": "/styles/account-experience.css",
+          "transfer": 16913
+        },
+        {
+          "bytes": 26628,
+          "ms": 21.7,
+          "path": "/styles/town-dashboard.css",
+          "transfer": 26928
+        },
+        {
+          "bytes": 10607,
+          "ms": 21.3,
+          "path": "/styles/scene-workers.css",
+          "transfer": 10907
+        },
+        {
+          "bytes": 12866,
+          "ms": 23.5,
+          "path": "/styles/energy-valley-shell.css",
+          "transfer": 13166
+        },
+        {
+          "bytes": 3827,
+          "ms": 24.3,
+          "path": "/styles/sidebar-panels.css",
+          "transfer": 4127
+        },
+        {
+          "bytes": 6155,
+          "ms": 25.1,
+          "path": "/styles/research-handoff.css",
+          "transfer": 6455
+        },
+        {
+          "bytes": 45271,
+          "ms": 26.3,
+          "path": "/styles/viewport-map.css",
+          "transfer": 45571
+        },
+        {
+          "bytes": 14963,
+          "ms": 28.3,
+          "path": "/styles/knowledge-library.css",
+          "transfer": 15263
+        },
+        {
+          "bytes": 25267,
+          "ms": 33.7,
+          "path": "/styles/energy-valley-golden.css",
+          "transfer": 25567
+        },
+        {
+          "bytes": 14903,
+          "ms": 39.1,
+          "path": "/styles/resident-explorer.css",
+          "transfer": 15203
+        },
+        {
+          "bytes": 35962,
+          "ms": 39.6,
+          "path": "/styles/town-life.css",
+          "transfer": 36262
+        },
+        {
+          "bytes": 40029,
+          "ms": 43,
+          "path": "/styles/energy-valley-life-hud.css",
+          "transfer": 40329
+        },
+        {
+          "bytes": 20929,
+          "ms": 48.3,
+          "path": "/styles/kimi-town-shell.css",
+          "transfer": 21229
+        },
+        {
+          "bytes": 9903,
+          "ms": 40.8,
+          "path": "/styles/energy-valley-ecosystem.css",
+          "transfer": 10203
+        },
+        {
+          "bytes": 9217,
+          "ms": 41.7,
+          "path": "/styles/town-chronicle.css",
+          "transfer": 9517
+        },
+        {
+          "bytes": 2879,
+          "ms": 42.4,
+          "path": "/styles/semantic-interior.css",
+          "transfer": 3179
+        },
+        {
+          "bytes": 10321,
+          "ms": 43.9,
+          "path": "/styles/map-lab.css",
+          "transfer": 10621
+        },
+        {
+          "bytes": 7232,
+          "ms": 45,
+          "path": "/styles/building-interior-layer.css",
+          "transfer": 7532
+        },
+        {
+          "bytes": 7915,
+          "ms": 45.6,
+          "path": "/styles/pack-bridge-panel.css",
+          "transfer": 8215
+        },
+        {
+          "bytes": 14915,
+          "ms": 50.2,
+          "path": "/styles/building-interior-scene.css",
+          "transfer": 15215
+        },
+        {
+          "bytes": 7439,
+          "ms": 51.9,
+          "path": "/styles/spatial-world-canvas.css",
+          "transfer": 7739
+        },
+        {
+          "bytes": 14375,
+          "ms": 52.5,
+          "path": "/styles/secret-compute-room.css",
+          "transfer": 14675
+        },
+        {
+          "bytes": 19434,
+          "ms": 54.1,
+          "path": "/styles/secret-compute-room-scene.css",
+          "transfer": 19734
+        },
+        {
+          "bytes": 8336,
+          "ms": 51.2,
+          "path": "/landmark-studio/scene-adapter.js",
+          "transfer": 8636
+        },
+        {
+          "bytes": 603113,
+          "ms": 166.1,
+          "path": "/landmark-studio/vendor/three.module.js",
+          "transfer": 603413
+        },
+        {
+          "bytes": 3429,
+          "ms": 25.3,
+          "path": "/styles/viewport-map-effects.css",
+          "transfer": 3729
+        },
+        {
+          "bytes": 9476,
+          "ms": 9.1,
+          "path": "/landmark-studio/vendor/Reflector.js",
+          "transfer": 9776
+        },
+        {
+          "bytes": 11770,
+          "ms": 9,
+          "path": "/viewport_drag_pan.js",
+          "transfer": 12070
+        },
+        {
+          "bytes": 3227,
+          "ms": 13.4,
+          "path": "/account_demo_fixtures.js",
+          "transfer": 3527
+        },
+        {
+          "bytes": 29125,
+          "ms": 15.7,
+          "path": "/runtime_snapshots.js",
+          "transfer": 29425
+        },
+        {
+          "bytes": 28444,
+          "ms": 16.2,
+          "path": "/account_management.js",
+          "transfer": 28744
+        },
+        {
+          "bytes": 23628,
+          "ms": 17.3,
+          "path": "/pack_bridge_panel.js",
+          "transfer": 23928
+        },
+        {
+          "bytes": 6023,
+          "ms": 5.3,
+          "path": "/runtime_snapshot_manifest.js",
+          "transfer": 6323
+        },
+        {
+          "bytes": 1743,
+          "ms": 4.6,
+          "path": "/runtime_snapshot_fetch.js",
+          "transfer": 2043
+        },
+        {
+          "bytes": 6676,
+          "ms": 5.7,
+          "path": "/pack_material_groups.js",
+          "transfer": 6976
+        },
+        {
+          "bytes": 5330,
+          "ms": 4.7,
+          "path": "/pack_candidate_sources.js",
+          "transfer": 5630
+        },
+        {
+          "bytes": 6727,
+          "ms": 12.5,
+          "path": "/pack_cross_pack_question.js",
+          "transfer": 7027
+        },
+        {
+          "bytes": 9073,
+          "ms": 13,
+          "path": "/pack_material_review.js",
+          "transfer": 9373
+        },
+        {
+          "bytes": 8677,
+          "ms": 14.2,
+          "path": "/pack_observation_changes.js",
+          "transfer": 8977
+        },
+        {
+          "bytes": 12095,
+          "ms": 16,
+          "path": "/pack_question_composer.js",
+          "transfer": 12395
+        },
+        {
+          "bytes": 9667,
+          "ms": 19.9,
+          "path": "/pack_vocabulary.js",
+          "transfer": 9967
+        },
+        {
+          "bytes": 12480,
+          "ms": 20.9,
+          "path": "/pack_observation_review.js",
+          "transfer": 12780
+        },
+        {
+          "bytes": 12696,
+          "ms": 21.9,
+          "path": "/pack_vocabulary_explorer.js",
+          "transfer": 12996
+        },
+        {
+          "bytes": 1433,
+          "ms": 11.6,
+          "path": "/runtime_snapshot_parser.js",
+          "transfer": 1733
+        },
+        {
+          "bytes": 1403455,
+          "ms": 78.5,
+          "path": "/landmark-studio/vendor/three.core.js",
+          "transfer": 1403755
+        },
+        {
+          "bytes": 11769,
+          "ms": 10.7,
+          "path": "/system-settings.json",
+          "transfer": 12069
+        },
+        {
+          "bytes": 206,
+          "ms": 67.4,
+          "path": "/energy-valley-runtime.json",
+          "transfer": 506
+        },
+        {
+          "bytes": 1141,
+          "ms": 8.3,
+          "path": "/secret-compute-room.json",
+          "transfer": 1441
+        },
+        {
+          "bytes": 0,
+          "ms": 8.6,
+          "path": "/visual-projection.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 8.8,
+          "path": "/town.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 64,
+          "ms": 9.4,
+          "path": "/moondesk-bridge.json",
+          "transfer": 364
+        },
+        {
+          "bytes": 15,
+          "ms": 10.9,
+          "path": "/civic-status.json",
+          "transfer": 315
+        },
+        {
+          "bytes": 69,
+          "ms": 37.3,
+          "path": "/module-projections.json",
+          "transfer": 369
+        },
+        {
+          "bytes": 5268,
+          "ms": 24.7,
+          "path": "/tilemap/modules/moondesk-handoff.json",
+          "transfer": 5568
+        },
+        {
+          "bytes": 0,
+          "ms": 11,
+          "path": "/daemon.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 12.7,
+          "path": "/live-autonomy.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 2,
+          "ms": 13,
+          "path": "/standing-goals.json",
+          "transfer": 302
+        },
+        {
+          "bytes": 0,
+          "ms": 13.2,
+          "path": "/editor-pipeline.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 2,
+          "ms": 24.9,
+          "path": "/watchers/index.json",
+          "transfer": 302
+        },
+        {
+          "bytes": 2,
+          "ms": 24.9,
+          "path": "/operator-requests.json",
+          "transfer": 302
+        },
+        {
+          "bytes": 15,
+          "ms": 25,
+          "path": "/book-template-requests.json",
+          "transfer": 315
+        },
+        {
+          "bytes": 117039,
+          "ms": 93.5,
+          "path": "/tilemap/wenyu_reference_buildings.json",
+          "transfer": 117339
+        },
+        {
+          "bytes": 216300,
+          "ms": 103.3,
+          "path": "/tilemap/energy-valley-osm-block-graph-v1.json",
+          "transfer": 216600
+        },
+        {
+          "bytes": 40507,
+          "ms": 43.5,
+          "path": "/tilemap/wenyu_reference_labels.json",
+          "transfer": 40807
+        },
+        {
+          "bytes": 83506,
+          "ms": 93,
+          "path": "/tilemap/wenyu_reference_roads.json",
+          "transfer": 83806
+        },
+        {
+          "bytes": 287202,
+          "ms": 108.9,
+          "path": "/tilemap/wenyu_reference_intersections.json",
+          "transfer": 287502
+        },
+        {
+          "bytes": 16358,
+          "ms": 46.2,
+          "path": "/tilemap/modules/wenyu-town-modules.json",
+          "transfer": 16658
+        },
+        {
+          "bytes": 76063,
+          "ms": 96.7,
+          "path": "/knowledge-domain-catalog.json",
+          "transfer": 76363
+        },
+        {
+          "bytes": 8691598,
+          "ms": 534.4,
+          "path": "/main.js",
+          "transfer": 8691898
+        },
+        {
+          "bytes": 711,
+          "ms": 2.4,
+          "path": "/moontown.svg",
+          "transfer": 1011
+        },
+        {
+          "bytes": 312001,
+          "ms": 77.1,
+          "path": "/tilemap/wenyu-unshifted-scene.json",
+          "transfer": 312301
+        },
+        {
+          "bytes": 402838,
+          "ms": 71.6,
+          "path": "/tilemap/wenyu-unshifted-road-overlay.svg",
+          "transfer": 403138
+        },
+        {
+          "bytes": 109346,
+          "ms": 9.9,
+          "path": "/landmark-studio/navigation.json",
+          "transfer": 109646
+        },
+        {
+          "bytes": 298872,
+          "ms": 44.8,
+          "path": "/tilemap/actors/researcher_walk_strip.png",
+          "transfer": 299172
+        },
+        {
+          "bytes": 27864,
+          "ms": 11.2,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/campus-3.webp",
+          "transfer": 28164
+        },
+        {
+          "bytes": 80693,
+          "ms": 17.8,
+          "path": "/tilemap/actors/roster/resident_6_walk_strip.png",
+          "transfer": 80993
+        },
+        {
+          "bytes": 275946,
+          "ms": 41.6,
+          "path": "/tilemap/actors/keeper_walk_strip.png",
+          "transfer": 276246
+        },
+        {
+          "bytes": 21610,
+          "ms": 10.7,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/industrial-3.webp",
+          "transfer": 21910
+        },
+        {
+          "bytes": 27570,
+          "ms": 11,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-3.webp",
+          "transfer": 27870
+        },
+        {
+          "bytes": 24490,
+          "ms": 18.4,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-4.webp",
+          "transfer": 24790
+        },
+        {
+          "bytes": 30526,
+          "ms": 18.6,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/courtyard-3.webp",
+          "transfer": 30826
+        },
+        {
+          "bytes": 86317,
+          "ms": 25,
+          "path": "/tilemap/actors/roster/resident_10_walk_strip.png",
+          "transfer": 86617
+        },
+        {
+          "bytes": 16062,
+          "ms": 26.5,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-9.webp",
+          "transfer": 16362
+        },
+        {
+          "bytes": 280016,
+          "ms": 87.4,
+          "path": "/tilemap/actors/worker_walk_strip.png",
+          "transfer": 280316
+        },
+        {
+          "bytes": 29878,
+          "ms": 28.3,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-0.webp",
+          "transfer": 30178
+        },
+        {
+          "bytes": 27992,
+          "ms": 40.6,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-4.webp",
+          "transfer": 28292
+        },
+        {
+          "bytes": 35670,
+          "ms": 43,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/industrial-1.webp",
+          "transfer": 35970
+        },
+        {
+          "bytes": 10732,
+          "ms": 39,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/tower-9.webp",
+          "transfer": 11032
+        },
+        {
+          "bytes": 18154,
+          "ms": 43.3,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-9.webp",
+          "transfer": 18454
+        },
+        {
+          "bytes": 16218,
+          "ms": 45.9,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-7.webp",
+          "transfer": 16518
+        },
+        {
+          "bytes": 32222,
+          "ms": 55.3,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-0.webp",
+          "transfer": 32522
+        },
+        {
+          "bytes": 19404,
+          "ms": 51.5,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/tower-6.webp",
+          "transfer": 19704
+        },
+        {
+          "bytes": 31168,
+          "ms": 56,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-1.webp",
+          "transfer": 31468
+        },
+        {
+          "bytes": 87630,
+          "ms": 77.8,
+          "path": "/tilemap/actors/roster/resident_2_walk_strip.png",
+          "transfer": 87930
+        },
+        {
+          "bytes": 24494,
+          "ms": 54.4,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-5.webp",
+          "transfer": 24794
+        },
+        {
+          "bytes": 34544,
+          "ms": 83,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-2.webp",
+          "transfer": 34844
+        },
+        {
+          "bytes": 34842,
+          "ms": 85,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/courtyard-1.webp",
+          "transfer": 35142
+        },
+        {
+          "bytes": 23712,
+          "ms": 79.9,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-8.webp",
+          "transfer": 24012
+        },
+        {
+          "bytes": 16328,
+          "ms": 66.4,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-6.webp",
+          "transfer": 16628
+        },
+        {
+          "bytes": 22160,
+          "ms": 85.9,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/campus-4.webp",
+          "transfer": 22460
+        },
+        {
+          "bytes": 21104,
+          "ms": 86.1,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/row-3.webp",
+          "transfer": 21404
+        }
+      ],
+      "schema": "moontown.ui-performance.v1",
+      "startupBlockingMs": 3517,
+      "startupLongTasks": 16,
+      "status": "complete",
+      "viewport": [
+        1105,
+        1043,
+        2
+      ]
+    },
+    {
+      "canvasMs": 2170.7,
+      "phases": [
+        {
+          "durationMs": 10016.7,
+          "gapsOver50ms": 75,
+          "longTasks": 74,
+          "name": "idle",
+          "paintFps": 7.29,
+          "paintMeanMs": 86.78,
+          "paintP95Ms": 109.2,
+          "paints": 73,
+          "rafP95Ms": 100.1
+        }
+      ],
+      "readyMs": 7237.4,
+      "resources": [
+        {
+          "bytes": 3847,
+          "ms": 20.4,
+          "path": "/performance-probe.js",
+          "transfer": 4147
+        },
+        {
+          "bytes": 5059,
+          "ms": 20.3,
+          "path": "/styles.css",
+          "transfer": 5359
+        },
+        {
+          "bytes": 3015,
+          "ms": 20.5,
+          "path": "/landmark-studio/town-map.css",
+          "transfer": 3315
+        },
+        {
+          "bytes": 146,
+          "ms": 19.3,
+          "path": "/platform-scope.js",
+          "transfer": 446
+        },
+        {
+          "bytes": 4597,
+          "ms": 20.2,
+          "path": "/platform-base.js",
+          "transfer": 4897
+        },
+        {
+          "bytes": 14982,
+          "ms": 24.4,
+          "path": "/landmark-studio/town-map.js",
+          "transfer": 15282
+        },
+        {
+          "bytes": 447269,
+          "ms": 288,
+          "path": "/landmark-studio/models.js",
+          "transfer": 447569
+        },
+        {
+          "bytes": 5502,
+          "ms": 25,
+          "path": "/bootstrap.js",
+          "transfer": 5802
+        },
+        {
+          "bytes": 5480,
+          "ms": 23.4,
+          "path": "/styles/request-desk.css",
+          "transfer": 5780
+        },
+        {
+          "bytes": 11769,
+          "ms": 26.5,
+          "path": "/styles/app-shell.css",
+          "transfer": 12069
+        },
+        {
+          "bytes": 16613,
+          "ms": 30.7,
+          "path": "/styles/account-experience.css",
+          "transfer": 16913
+        },
+        {
+          "bytes": 26628,
+          "ms": 34.1,
+          "path": "/styles/town-dashboard.css",
+          "transfer": 26928
+        },
+        {
+          "bytes": 10607,
+          "ms": 29.2,
+          "path": "/styles/scene-workers.css",
+          "transfer": 10907
+        },
+        {
+          "bytes": 3827,
+          "ms": 31.1,
+          "path": "/styles/sidebar-panels.css",
+          "transfer": 4127
+        },
+        {
+          "bytes": 12866,
+          "ms": 36.2,
+          "path": "/styles/energy-valley-shell.css",
+          "transfer": 13166
+        },
+        {
+          "bytes": 45271,
+          "ms": 41.3,
+          "path": "/styles/viewport-map.css",
+          "transfer": 45571
+        },
+        {
+          "bytes": 6155,
+          "ms": 41.7,
+          "path": "/styles/research-handoff.css",
+          "transfer": 6455
+        },
+        {
+          "bytes": 14963,
+          "ms": 44.1,
+          "path": "/styles/knowledge-library.css",
+          "transfer": 15263
+        },
+        {
+          "bytes": 25267,
+          "ms": 69.1,
+          "path": "/styles/energy-valley-golden.css",
+          "transfer": 25567
+        },
+        {
+          "bytes": 20929,
+          "ms": 71.1,
+          "path": "/styles/kimi-town-shell.css",
+          "transfer": 21229
+        },
+        {
+          "bytes": 35962,
+          "ms": 92.9,
+          "path": "/styles/town-life.css",
+          "transfer": 36262
+        },
+        {
+          "bytes": 40029,
+          "ms": 93.1,
+          "path": "/styles/energy-valley-life-hud.css",
+          "transfer": 40329
+        },
+        {
+          "bytes": 14903,
+          "ms": 71.6,
+          "path": "/styles/resident-explorer.css",
+          "transfer": 15203
+        },
+        {
+          "bytes": 9217,
+          "ms": 81,
+          "path": "/styles/town-chronicle.css",
+          "transfer": 9517
+        },
+        {
+          "bytes": 9903,
+          "ms": 89.9,
+          "path": "/styles/energy-valley-ecosystem.css",
+          "transfer": 10203
+        },
+        {
+          "bytes": 10321,
+          "ms": 90.8,
+          "path": "/styles/map-lab.css",
+          "transfer": 10621
+        },
+        {
+          "bytes": 2879,
+          "ms": 92.6,
+          "path": "/styles/semantic-interior.css",
+          "transfer": 3179
+        },
+        {
+          "bytes": 7232,
+          "ms": 106.8,
+          "path": "/styles/building-interior-layer.css",
+          "transfer": 7532
+        },
+        {
+          "bytes": 14915,
+          "ms": 108.7,
+          "path": "/styles/building-interior-scene.css",
+          "transfer": 15215
+        },
+        {
+          "bytes": 14375,
+          "ms": 110.6,
+          "path": "/styles/secret-compute-room.css",
+          "transfer": 14675
+        },
+        {
+          "bytes": 19434,
+          "ms": 112.5,
+          "path": "/styles/secret-compute-room-scene.css",
+          "transfer": 19734
+        },
+        {
+          "bytes": 7439,
+          "ms": 108,
+          "path": "/styles/spatial-world-canvas.css",
+          "transfer": 7739
+        },
+        {
+          "bytes": 7915,
+          "ms": 111.8,
+          "path": "/styles/pack-bridge-panel.css",
+          "transfer": 8215
+        },
+        {
+          "bytes": 8336,
+          "ms": 117.6,
+          "path": "/landmark-studio/scene-adapter.js",
+          "transfer": 8636
+        },
+        {
+          "bytes": 603113,
+          "ms": 457.7,
+          "path": "/landmark-studio/vendor/three.module.js",
+          "transfer": 603413
+        },
+        {
+          "bytes": 3429,
+          "ms": 69.7,
+          "path": "/styles/viewport-map-effects.css",
+          "transfer": 3729
+        },
+        {
+          "bytes": 3227,
+          "ms": 16.5,
+          "path": "/account_demo_fixtures.js",
+          "transfer": 3527
+        },
+        {
+          "bytes": 11770,
+          "ms": 24,
+          "path": "/viewport_drag_pan.js",
+          "transfer": 12070
+        },
+        {
+          "bytes": 29125,
+          "ms": 53.2,
+          "path": "/runtime_snapshots.js",
+          "transfer": 29425
+        },
+        {
+          "bytes": 28444,
+          "ms": 53.4,
+          "path": "/account_management.js",
+          "transfer": 28744
+        },
+        {
+          "bytes": 23628,
+          "ms": 53.8,
+          "path": "/pack_bridge_panel.js",
+          "transfer": 23928
+        },
+        {
+          "bytes": 9476,
+          "ms": 47.5,
+          "path": "/landmark-studio/vendor/Reflector.js",
+          "transfer": 9776
+        },
+        {
+          "bytes": 1743,
+          "ms": 6.2,
+          "path": "/runtime_snapshot_fetch.js",
+          "transfer": 2043
+        },
+        {
+          "bytes": 6023,
+          "ms": 11.2,
+          "path": "/runtime_snapshot_manifest.js",
+          "transfer": 6323
+        },
+        {
+          "bytes": 5330,
+          "ms": 11,
+          "path": "/pack_candidate_sources.js",
+          "transfer": 5630
+        },
+        {
+          "bytes": 6676,
+          "ms": 11.5,
+          "path": "/pack_material_groups.js",
+          "transfer": 6976
+        },
+        {
+          "bytes": 9073,
+          "ms": 14.7,
+          "path": "/pack_material_review.js",
+          "transfer": 9373
+        },
+        {
+          "bytes": 6727,
+          "ms": 17.5,
+          "path": "/pack_cross_pack_question.js",
+          "transfer": 7027
+        },
+        {
+          "bytes": 8677,
+          "ms": 17.7,
+          "path": "/pack_observation_changes.js",
+          "transfer": 8977
+        },
+        {
+          "bytes": 12095,
+          "ms": 18,
+          "path": "/pack_question_composer.js",
+          "transfer": 12395
+        },
+        {
+          "bytes": 12480,
+          "ms": 39.2,
+          "path": "/pack_observation_review.js",
+          "transfer": 12780
+        },
+        {
+          "bytes": 9667,
+          "ms": 39.9,
+          "path": "/pack_vocabulary.js",
+          "transfer": 9967
+        },
+        {
+          "bytes": 12696,
+          "ms": 40.3,
+          "path": "/pack_vocabulary_explorer.js",
+          "transfer": 12996
+        },
+        {
+          "bytes": 1433,
+          "ms": 25.7,
+          "path": "/runtime_snapshot_parser.js",
+          "transfer": 1733
+        },
+        {
+          "bytes": 1403455,
+          "ms": 345.9,
+          "path": "/landmark-studio/vendor/three.core.js",
+          "transfer": 1403755
+        },
+        {
+          "bytes": 11769,
+          "ms": 45.8,
+          "path": "/system-settings.json",
+          "transfer": 12069
+        },
+        {
+          "bytes": 206,
+          "ms": 142.3,
+          "path": "/energy-valley-runtime.json",
+          "transfer": 506
+        },
+        {
+          "bytes": 1141,
+          "ms": 28.2,
+          "path": "/secret-compute-room.json",
+          "transfer": 1441
+        },
+        {
+          "bytes": 0,
+          "ms": 28.8,
+          "path": "/visual-projection.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 29.1,
+          "path": "/town.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 64,
+          "ms": 29.6,
+          "path": "/moondesk-bridge.json",
+          "transfer": 364
+        },
+        {
+          "bytes": 15,
+          "ms": 46.6,
+          "path": "/civic-status.json",
+          "transfer": 315
+        },
+        {
+          "bytes": 5268,
+          "ms": 100.6,
+          "path": "/tilemap/modules/moondesk-handoff.json",
+          "transfer": 5568
+        },
+        {
+          "bytes": 69,
+          "ms": 104.9,
+          "path": "/module-projections.json",
+          "transfer": 369
+        },
+        {
+          "bytes": 0,
+          "ms": 48.6,
+          "path": "/daemon.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 87.3,
+          "path": "/live-autonomy.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 87.8,
+          "path": "/editor-pipeline.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 2,
+          "ms": 88.9,
+          "path": "/standing-goals.json",
+          "transfer": 302
+        },
+        {
+          "bytes": 2,
+          "ms": 99.9,
+          "path": "/watchers/index.json",
+          "transfer": 302
+        },
+        {
+          "bytes": 2,
+          "ms": 99.9,
+          "path": "/operator-requests.json",
+          "transfer": 302
+        },
+        {
+          "bytes": 15,
+          "ms": 101.6,
+          "path": "/book-template-requests.json",
+          "transfer": 315
+        },
+        {
+          "bytes": 40507,
+          "ms": 124.3,
+          "path": "/tilemap/wenyu_reference_labels.json",
+          "transfer": 40807
+        },
+        {
+          "bytes": 83506,
+          "ms": 182,
+          "path": "/tilemap/wenyu_reference_roads.json",
+          "transfer": 83806
+        },
+        {
+          "bytes": 117039,
+          "ms": 218.6,
+          "path": "/tilemap/wenyu_reference_buildings.json",
+          "transfer": 117339
+        },
+        {
+          "bytes": 216300,
+          "ms": 276.8,
+          "path": "/tilemap/energy-valley-osm-block-graph-v1.json",
+          "transfer": 216600
+        },
+        {
+          "bytes": 287202,
+          "ms": 307.3,
+          "path": "/tilemap/wenyu_reference_intersections.json",
+          "transfer": 287502
+        },
+        {
+          "bytes": 16358,
+          "ms": 178.6,
+          "path": "/tilemap/modules/wenyu-town-modules.json",
+          "transfer": 16658
+        },
+        {
+          "bytes": 76063,
+          "ms": 222.4,
+          "path": "/knowledge-domain-catalog.json",
+          "transfer": 76363
+        },
+        {
+          "bytes": 8691598,
+          "ms": 903.8,
+          "path": "/main.js",
+          "transfer": 8691898
+        },
+        {
+          "bytes": 711,
+          "ms": 3.3,
+          "path": "/moontown.svg",
+          "transfer": 1011
+        },
+        {
+          "bytes": 312001,
+          "ms": 46.9,
+          "path": "/tilemap/wenyu-unshifted-scene.json",
+          "transfer": 312301
+        },
+        {
+          "bytes": 402838,
+          "ms": 68.6,
+          "path": "/tilemap/wenyu-unshifted-road-overlay.svg",
+          "transfer": 403138
+        },
+        {
+          "bytes": 109346,
+          "ms": 24.6,
+          "path": "/landmark-studio/navigation.json",
+          "transfer": 109646
+        },
+        {
+          "bytes": 298872,
+          "ms": 175.3,
+          "path": "/tilemap/actors/researcher_walk_strip.png",
+          "transfer": 299172
+        },
+        {
+          "bytes": 27864,
+          "ms": 25.5,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/campus-3.webp",
+          "transfer": 28164
+        },
+        {
+          "bytes": 80693,
+          "ms": 63.4,
+          "path": "/tilemap/actors/roster/resident_6_walk_strip.png",
+          "transfer": 80993
+        },
+        {
+          "bytes": 275946,
+          "ms": 140.6,
+          "path": "/tilemap/actors/keeper_walk_strip.png",
+          "transfer": 276246
+        },
+        {
+          "bytes": 21610,
+          "ms": 22,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/industrial-3.webp",
+          "transfer": 21910
+        },
+        {
+          "bytes": 27570,
+          "ms": 25.2,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-3.webp",
+          "transfer": 27870
+        },
+        {
+          "bytes": 24490,
+          "ms": 35.6,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-4.webp",
+          "transfer": 24790
+        },
+        {
+          "bytes": 86317,
+          "ms": 78.9,
+          "path": "/tilemap/actors/roster/resident_10_walk_strip.png",
+          "transfer": 86617
+        },
+        {
+          "bytes": 30526,
+          "ms": 42.3,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/courtyard-3.webp",
+          "transfer": 30826
+        },
+        {
+          "bytes": 16062,
+          "ms": 52.3,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-9.webp",
+          "transfer": 16362
+        },
+        {
+          "bytes": 280016,
+          "ms": 181.6,
+          "path": "/tilemap/actors/worker_walk_strip.png",
+          "transfer": 280316
+        },
+        {
+          "bytes": 29878,
+          "ms": 76.3,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-0.webp",
+          "transfer": 30178
+        },
+        {
+          "bytes": 27992,
+          "ms": 79.8,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-4.webp",
+          "transfer": 28292
+        },
+        {
+          "bytes": 35670,
+          "ms": 104.1,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/industrial-1.webp",
+          "transfer": 35970
+        },
+        {
+          "bytes": 18154,
+          "ms": 102.3,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-9.webp",
+          "transfer": 18454
+        },
+        {
+          "bytes": 10732,
+          "ms": 101.6,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/tower-9.webp",
+          "transfer": 11032
+        },
+        {
+          "bytes": 16218,
+          "ms": 138.2,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-7.webp",
+          "transfer": 16518
+        },
+        {
+          "bytes": 32222,
+          "ms": 139.9,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-0.webp",
+          "transfer": 32522
+        },
+        {
+          "bytes": 19404,
+          "ms": 139.1,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/tower-6.webp",
+          "transfer": 19704
+        },
+        {
+          "bytes": 31168,
+          "ms": 171.7,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-1.webp",
+          "transfer": 31468
+        },
+        {
+          "bytes": 24494,
+          "ms": 171.2,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-5.webp",
+          "transfer": 24794
+        },
+        {
+          "bytes": 87630,
+          "ms": 181.6,
+          "path": "/tilemap/actors/roster/resident_2_walk_strip.png",
+          "transfer": 87930
+        },
+        {
+          "bytes": 34544,
+          "ms": 174.9,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-2.webp",
+          "transfer": 34844
+        },
+        {
+          "bytes": 34842,
+          "ms": 180.8,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/courtyard-1.webp",
+          "transfer": 35142
+        },
+        {
+          "bytes": 23712,
+          "ms": 178.6,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-8.webp",
+          "transfer": 24012
+        },
+        {
+          "bytes": 16328,
+          "ms": 181,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-6.webp",
+          "transfer": 16628
+        },
+        {
+          "bytes": 22160,
+          "ms": 182.3,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/campus-4.webp",
+          "transfer": 22460
+        },
+        {
+          "bytes": 21104,
+          "ms": 182.1,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/row-3.webp",
+          "transfer": 21404
+        }
+      ],
+      "schema": "moontown.ui-performance.v1",
+      "startupBlockingMs": 4322,
+      "startupLongTasks": 17,
+      "status": "complete",
+      "viewport": [
+        1105,
+        1043,
+        2
+      ]
+    },
+    {
+      "canvasMs": 745.5,
+      "phases": [
+        {
+          "durationMs": 10059.6,
+          "gapsOver50ms": 38,
+          "longTasks": 102,
+          "name": "idle",
+          "paintFps": 9.54,
+          "paintMeanMs": 57.35,
+          "paintP95Ms": 64.1,
+          "paints": 96,
+          "rafP95Ms": 50.9
+        }
+      ],
+      "readyMs": 4561.8,
+      "resources": [
+        {
+          "bytes": 146,
+          "ms": 23.2,
+          "path": "/platform-scope.js",
+          "transfer": 446
+        },
+        {
+          "bytes": 3015,
+          "ms": 28.8,
+          "path": "/landmark-studio/town-map.css",
+          "transfer": 3315
+        },
+        {
+          "bytes": 3847,
+          "ms": 28.9,
+          "path": "/performance-probe.js",
+          "transfer": 4147
+        },
+        {
+          "bytes": 5059,
+          "ms": 29.9,
+          "path": "/styles.css",
+          "transfer": 5359
+        },
+        {
+          "bytes": 14982,
+          "ms": 33,
+          "path": "/landmark-studio/town-map.js",
+          "transfer": 15282
+        },
+        {
+          "bytes": 447269,
+          "ms": 102.2,
+          "path": "/landmark-studio/models.js",
+          "transfer": 447569
+        },
+        {
+          "bytes": 4597,
+          "ms": 29.3,
+          "path": "/platform-base.js",
+          "transfer": 4897
+        },
+        {
+          "bytes": 5502,
+          "ms": 31,
+          "path": "/bootstrap.js",
+          "transfer": 5802
+        },
+        {
+          "bytes": 5480,
+          "ms": 9.9,
+          "path": "/styles/request-desk.css",
+          "transfer": 5780
+        },
+        {
+          "bytes": 11769,
+          "ms": 11.3,
+          "path": "/styles/app-shell.css",
+          "transfer": 12069
+        },
+        {
+          "bytes": 16613,
+          "ms": 13.1,
+          "path": "/styles/account-experience.css",
+          "transfer": 16913
+        },
+        {
+          "bytes": 26628,
+          "ms": 15.3,
+          "path": "/styles/town-dashboard.css",
+          "transfer": 26928
+        },
+        {
+          "bytes": 45271,
+          "ms": 21.2,
+          "path": "/styles/viewport-map.css",
+          "transfer": 45571
+        },
+        {
+          "bytes": 10607,
+          "ms": 9.9,
+          "path": "/styles/scene-workers.css",
+          "transfer": 10907
+        },
+        {
+          "bytes": 3827,
+          "ms": 12.4,
+          "path": "/styles/sidebar-panels.css",
+          "transfer": 4127
+        },
+        {
+          "bytes": 12866,
+          "ms": 14,
+          "path": "/styles/energy-valley-shell.css",
+          "transfer": 13166
+        },
+        {
+          "bytes": 6155,
+          "ms": 16,
+          "path": "/styles/research-handoff.css",
+          "transfer": 6455
+        },
+        {
+          "bytes": 14963,
+          "ms": 17.7,
+          "path": "/styles/knowledge-library.css",
+          "transfer": 15263
+        },
+        {
+          "bytes": 25267,
+          "ms": 19.7,
+          "path": "/styles/energy-valley-golden.css",
+          "transfer": 25567
+        },
+        {
+          "bytes": 20929,
+          "ms": 22.3,
+          "path": "/styles/kimi-town-shell.css",
+          "transfer": 21229
+        },
+        {
+          "bytes": 14903,
+          "ms": 23,
+          "path": "/styles/resident-explorer.css",
+          "transfer": 15203
+        },
+        {
+          "bytes": 35962,
+          "ms": 23.9,
+          "path": "/styles/town-life.css",
+          "transfer": 36262
+        },
+        {
+          "bytes": 40029,
+          "ms": 27.1,
+          "path": "/styles/energy-valley-life-hud.css",
+          "transfer": 40329
+        },
+        {
+          "bytes": 9217,
+          "ms": 22.7,
+          "path": "/styles/town-chronicle.css",
+          "transfer": 9517
+        },
+        {
+          "bytes": 9903,
+          "ms": 24.2,
+          "path": "/styles/energy-valley-ecosystem.css",
+          "transfer": 10203
+        },
+        {
+          "bytes": 10321,
+          "ms": 24.3,
+          "path": "/styles/map-lab.css",
+          "transfer": 10621
+        },
+        {
+          "bytes": 2879,
+          "ms": 25,
+          "path": "/styles/semantic-interior.css",
+          "transfer": 3179
+        },
+        {
+          "bytes": 7232,
+          "ms": 25.4,
+          "path": "/styles/building-interior-layer.css",
+          "transfer": 7532
+        },
+        {
+          "bytes": 14915,
+          "ms": 28.3,
+          "path": "/styles/building-interior-scene.css",
+          "transfer": 15215
+        },
+        {
+          "bytes": 7915,
+          "ms": 27,
+          "path": "/styles/pack-bridge-panel.css",
+          "transfer": 8215
+        },
+        {
+          "bytes": 7439,
+          "ms": 27.6,
+          "path": "/styles/spatial-world-canvas.css",
+          "transfer": 7739
+        },
+        {
+          "bytes": 14375,
+          "ms": 28.2,
+          "path": "/styles/secret-compute-room.css",
+          "transfer": 14675
+        },
+        {
+          "bytes": 19434,
+          "ms": 28.8,
+          "path": "/styles/secret-compute-room-scene.css",
+          "transfer": 19734
+        },
+        {
+          "bytes": 8336,
+          "ms": 25.9,
+          "path": "/landmark-studio/scene-adapter.js",
+          "transfer": 8636
+        },
+        {
+          "bytes": 603113,
+          "ms": 70.3,
+          "path": "/landmark-studio/vendor/three.module.js",
+          "transfer": 603413
+        },
+        {
+          "bytes": 3429,
+          "ms": 7.1,
+          "path": "/styles/viewport-map-effects.css",
+          "transfer": 3729
+        },
+        {
+          "bytes": 3227,
+          "ms": 3.4,
+          "path": "/account_demo_fixtures.js",
+          "transfer": 3527
+        },
+        {
+          "bytes": 11770,
+          "ms": 4.7,
+          "path": "/viewport_drag_pan.js",
+          "transfer": 12070
+        },
+        {
+          "bytes": 28444,
+          "ms": 7.2,
+          "path": "/account_management.js",
+          "transfer": 28744
+        },
+        {
+          "bytes": 29125,
+          "ms": 7.2,
+          "path": "/runtime_snapshots.js",
+          "transfer": 29425
+        },
+        {
+          "bytes": 23628,
+          "ms": 10.7,
+          "path": "/pack_bridge_panel.js",
+          "transfer": 23928
+        },
+        {
+          "bytes": 9476,
+          "ms": 5.4,
+          "path": "/landmark-studio/vendor/Reflector.js",
+          "transfer": 9776
+        },
+        {
+          "bytes": 6023,
+          "ms": 3.3,
+          "path": "/runtime_snapshot_manifest.js",
+          "transfer": 6323
+        },
+        {
+          "bytes": 1743,
+          "ms": 2.6,
+          "path": "/runtime_snapshot_fetch.js",
+          "transfer": 2043
+        },
+        {
+          "bytes": 1433,
+          "ms": 3.7,
+          "path": "/runtime_snapshot_parser.js",
+          "transfer": 1733
+        },
+        {
+          "bytes": 5330,
+          "ms": 4.8,
+          "path": "/pack_candidate_sources.js",
+          "transfer": 5630
+        },
+        {
+          "bytes": 6676,
+          "ms": 5.5,
+          "path": "/pack_material_groups.js",
+          "transfer": 6976
+        },
+        {
+          "bytes": 9073,
+          "ms": 7.5,
+          "path": "/pack_material_review.js",
+          "transfer": 9373
+        },
+        {
+          "bytes": 6727,
+          "ms": 8.5,
+          "path": "/pack_cross_pack_question.js",
+          "transfer": 7027
+        },
+        {
+          "bytes": 12480,
+          "ms": 17.8,
+          "path": "/pack_observation_review.js",
+          "transfer": 12780
+        },
+        {
+          "bytes": 12095,
+          "ms": 17.8,
+          "path": "/pack_question_composer.js",
+          "transfer": 12395
+        },
+        {
+          "bytes": 8677,
+          "ms": 18,
+          "path": "/pack_observation_changes.js",
+          "transfer": 8977
+        },
+        {
+          "bytes": 9667,
+          "ms": 18.1,
+          "path": "/pack_vocabulary.js",
+          "transfer": 9967
+        },
+        {
+          "bytes": 12696,
+          "ms": 21.7,
+          "path": "/pack_vocabulary_explorer.js",
+          "transfer": 12996
+        },
+        {
+          "bytes": 1403455,
+          "ms": 57.2,
+          "path": "/landmark-studio/vendor/three.core.js",
+          "transfer": 1403755
+        },
+        {
+          "bytes": 1141,
+          "ms": 12.5,
+          "path": "/secret-compute-room.json",
+          "transfer": 1441
+        },
+        {
+          "bytes": 0,
+          "ms": 12.8,
+          "path": "/visual-projection.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 12.8,
+          "path": "/town.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 11769,
+          "ms": 12.9,
+          "path": "/system-settings.json",
+          "transfer": 12069
+        },
+        {
+          "bytes": 206,
+          "ms": 29.1,
+          "path": "/energy-valley-runtime.json",
+          "transfer": 506
+        },
+        {
+          "bytes": 64,
+          "ms": 13.3,
+          "path": "/moondesk-bridge.json",
+          "transfer": 364
+        },
+        {
+          "bytes": 15,
+          "ms": 13.9,
+          "path": "/civic-status.json",
+          "transfer": 315
+        },
+        {
+          "bytes": 0,
+          "ms": 14.5,
+          "path": "/daemon.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 14.9,
+          "path": "/live-autonomy.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 15,
+          "path": "/editor-pipeline.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 2,
+          "ms": 15.4,
+          "path": "/standing-goals.json",
+          "transfer": 302
+        },
+        {
+          "bytes": 2,
+          "ms": 16,
+          "path": "/watchers/index.json",
+          "transfer": 302
+        },
+        {
+          "bytes": 5268,
+          "ms": 17.1,
+          "path": "/tilemap/modules/moondesk-handoff.json",
+          "transfer": 5568
+        },
+        {
+          "bytes": 68,
+          "ms": 20.3,
+          "path": "/module-projections.json",
+          "transfer": 368
+        },
+        {
+          "bytes": 2,
+          "ms": 16.3,
+          "path": "/operator-requests.json",
+          "transfer": 302
+        },
+        {
+          "bytes": 15,
+          "ms": 16.4,
+          "path": "/book-template-requests.json",
+          "transfer": 315
+        },
+        {
+          "bytes": 40507,
+          "ms": 22.3,
+          "path": "/tilemap/wenyu_reference_labels.json",
+          "transfer": 40807
+        },
+        {
+          "bytes": 16358,
+          "ms": 29.6,
+          "path": "/tilemap/modules/wenyu-town-modules.json",
+          "transfer": 16658
+        },
+        {
+          "bytes": 83506,
+          "ms": 49.6,
+          "path": "/tilemap/wenyu_reference_roads.json",
+          "transfer": 83806
+        },
+        {
+          "bytes": 117039,
+          "ms": 56.3,
+          "path": "/tilemap/wenyu_reference_buildings.json",
+          "transfer": 117339
+        },
+        {
+          "bytes": 76063,
+          "ms": 57.9,
+          "path": "/knowledge-domain-catalog.json",
+          "transfer": 76363
+        },
+        {
+          "bytes": 216300,
+          "ms": 65.1,
+          "path": "/tilemap/energy-valley-osm-block-graph-v1.json",
+          "transfer": 216600
+        },
+        {
+          "bytes": 287202,
+          "ms": 70.1,
+          "path": "/tilemap/wenyu_reference_intersections.json",
+          "transfer": 287502
+        },
+        {
+          "bytes": 8691598,
+          "ms": 311.3,
+          "path": "/main.js",
+          "transfer": 8691898
+        },
+        {
+          "bytes": 711,
+          "ms": 3.6,
+          "path": "/moontown.svg",
+          "transfer": 1011
+        },
+        {
+          "bytes": 312001,
+          "ms": 26.8,
+          "path": "/tilemap/wenyu-unshifted-scene.json",
+          "transfer": 312301
+        },
+        {
+          "bytes": 402838,
+          "ms": 21.8,
+          "path": "/tilemap/wenyu-unshifted-road-overlay.svg",
+          "transfer": 403138
+        },
+        {
+          "bytes": 109346,
+          "ms": 7.9,
+          "path": "/landmark-studio/navigation.json",
+          "transfer": 109646
+        },
+        {
+          "bytes": 27864,
+          "ms": 21.3,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/campus-3.webp",
+          "transfer": 28164
+        },
+        {
+          "bytes": 298872,
+          "ms": 70.7,
+          "path": "/tilemap/actors/researcher_walk_strip.png",
+          "transfer": 299172
+        },
+        {
+          "bytes": 21610,
+          "ms": 21.5,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/industrial-3.webp",
+          "transfer": 21910
+        },
+        {
+          "bytes": 275946,
+          "ms": 69.5,
+          "path": "/tilemap/actors/keeper_walk_strip.png",
+          "transfer": 276246
+        },
+        {
+          "bytes": 80693,
+          "ms": 38.2,
+          "path": "/tilemap/actors/roster/resident_6_walk_strip.png",
+          "transfer": 80993
+        },
+        {
+          "bytes": 27570,
+          "ms": 21.1,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-3.webp",
+          "transfer": 27870
+        },
+        {
+          "bytes": 24490,
+          "ms": 37.8,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-4.webp",
+          "transfer": 24790
+        },
+        {
+          "bytes": 86317,
+          "ms": 45.4,
+          "path": "/tilemap/actors/roster/resident_10_walk_strip.png",
+          "transfer": 86617
+        },
+        {
+          "bytes": 30526,
+          "ms": 38.1,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/courtyard-3.webp",
+          "transfer": 30826
+        },
+        {
+          "bytes": 16062,
+          "ms": 45.9,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-9.webp",
+          "transfer": 16362
+        },
+        {
+          "bytes": 29878,
+          "ms": 49.7,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-0.webp",
+          "transfer": 30178
+        },
+        {
+          "bytes": 280016,
+          "ms": 82.6,
+          "path": "/tilemap/actors/worker_walk_strip.png",
+          "transfer": 280316
+        },
+        {
+          "bytes": 27992,
+          "ms": 54.6,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-4.webp",
+          "transfer": 28292
+        },
+        {
+          "bytes": 35670,
+          "ms": 55.2,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/industrial-1.webp",
+          "transfer": 35970
+        },
+        {
+          "bytes": 10732,
+          "ms": 55.5,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/tower-9.webp",
+          "transfer": 11032
+        },
+        {
+          "bytes": 16218,
+          "ms": 66.5,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-7.webp",
+          "transfer": 16518
+        },
+        {
+          "bytes": 32222,
+          "ms": 67.3,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-0.webp",
+          "transfer": 32522
+        },
+        {
+          "bytes": 18154,
+          "ms": 68.5,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-9.webp",
+          "transfer": 18454
+        },
+        {
+          "bytes": 19404,
+          "ms": 75.8,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/tower-6.webp",
+          "transfer": 19704
+        },
+        {
+          "bytes": 31168,
+          "ms": 76.6,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-1.webp",
+          "transfer": 31468
+        },
+        {
+          "bytes": 34544,
+          "ms": 78.4,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-2.webp",
+          "transfer": 34844
+        },
+        {
+          "bytes": 24494,
+          "ms": 76.4,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-5.webp",
+          "transfer": 24794
+        },
+        {
+          "bytes": 87630,
+          "ms": 83.6,
+          "path": "/tilemap/actors/roster/resident_2_walk_strip.png",
+          "transfer": 87930
+        },
+        {
+          "bytes": 34842,
+          "ms": 82.7,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/courtyard-1.webp",
+          "transfer": 35142
+        },
+        {
+          "bytes": 16328,
+          "ms": 80.3,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-6.webp",
+          "transfer": 16628
+        },
+        {
+          "bytes": 23712,
+          "ms": 81.5,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-8.webp",
+          "transfer": 24012
+        },
+        {
+          "bytes": 22160,
+          "ms": 82.8,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/campus-4.webp",
+          "transfer": 22460
+        },
+        {
+          "bytes": 21104,
+          "ms": 84.2,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/row-3.webp",
+          "transfer": 21404
+        }
+      ],
+      "schema": "moontown.ui-performance.v1",
+      "startupBlockingMs": 2743,
+      "startupLongTasks": 18,
+      "status": "complete",
+      "viewport": [
+        1105,
+        1043,
+        2
+      ]
+    }
+  ],
+  "optimized": [
+    {
+      "canvasMs": 106.7,
+      "phases": [
+        {
+          "durationMs": 10010.4,
+          "gapsOver50ms": 0,
+          "longTasks": 0,
+          "name": "idle",
+          "paintFps": 27.67,
+          "paintMeanMs": 13.15,
+          "paintP95Ms": 16,
+          "paints": 277,
+          "rafP95Ms": 18.5
+        },
+        {
+          "durationMs": 10025.6,
+          "gapsOver50ms": 6,
+          "longTasks": 2,
+          "name": "pan",
+          "paintFps": 55.26,
+          "paintMeanMs": 14.5,
+          "paintP95Ms": 16.5,
+          "paints": 554,
+          "rafP95Ms": 33.3
+        }
+      ],
+      "readyMs": 3540.1,
+      "resources": [
+        {
+          "bytes": 0,
+          "ms": 11.4,
+          "path": "/performance-probe.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 60057,
+          "ms": 13.2,
+          "path": "/styles.css",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 11.7,
+          "path": "/platform-base.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 1117,
+          "ms": 12.9,
+          "path": "/landmark-studio/town-map.css",
+          "transfer": 300
+        },
+        {
+          "bytes": 4613,
+          "ms": 11.9,
+          "path": "/landmark-studio/town-map.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 20.3,
+          "path": "/platform-scope.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 2147,
+          "ms": 21.2,
+          "path": "/bootstrap.js",
+          "transfer": 2447
+        },
+        {
+          "bytes": 557433,
+          "ms": 64.9,
+          "path": "/main.js",
+          "transfer": 557733
+        },
+        {
+          "bytes": 1585,
+          "ms": 3.9,
+          "path": "/landmark-studio/town-tiles.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 2803,
+          "ms": 3.2,
+          "path": "/viewport_drag_pan.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 767,
+          "ms": 3.7,
+          "path": "/account_demo_fixtures.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 6530,
+          "ms": 3.2,
+          "path": "/runtime_snapshots.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 729,
+          "ms": 3.3,
+          "path": "/runtime_snapshot_fetch.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 1616,
+          "ms": 3.2,
+          "path": "/runtime_snapshot_manifest.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 570,
+          "ms": 3.1,
+          "path": "/runtime_snapshot_parser.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 6666,
+          "ms": 5.7,
+          "path": "/tilemap/wenyu_reference_buildings.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 37579,
+          "ms": 6.8,
+          "path": "/tilemap/energy-valley-osm-block-graph-v1.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 10864,
+          "ms": 7.1,
+          "path": "/tilemap/wenyu_reference_labels.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 65691,
+          "ms": 7.3,
+          "path": "/tilemap/wenyu_reference_intersections.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 16358,
+          "ms": 9.6,
+          "path": "/tilemap/modules/wenyu-town-modules.json",
+          "transfer": 16658
+        },
+        {
+          "bytes": 5585,
+          "ms": 9.4,
+          "path": "/tilemap/wenyu_reference_roads.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 76063,
+          "ms": 17.2,
+          "path": "/knowledge-domain-catalog.json",
+          "transfer": 76363
+        },
+        {
+          "bytes": 0,
+          "ms": 9.5,
+          "path": "/moontown.svg",
+          "transfer": 300
+        },
+        {
+          "bytes": 11769,
+          "ms": 2.7,
+          "path": "/system-settings.json",
+          "transfer": 12069
+        },
+        {
+          "bytes": 1141,
+          "ms": 2.8,
+          "path": "/secret-compute-room.json",
+          "transfer": 1441
+        },
+        {
+          "bytes": 206,
+          "ms": 10.2,
+          "path": "/energy-valley-runtime.json",
+          "transfer": 506
+        },
+        {
+          "bytes": 0,
+          "ms": 2.9,
+          "path": "/visual-projection.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 3,
+          "path": "/town.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 64,
+          "ms": 3.3,
+          "path": "/moondesk-bridge.json",
+          "transfer": 364
+        },
+        {
+          "bytes": 15,
+          "ms": 3.4,
+          "path": "/civic-status.json",
+          "transfer": 315
+        },
+        {
+          "bytes": 5268,
+          "ms": 4.4,
+          "path": "/tilemap/modules/moondesk-handoff.json",
+          "transfer": 5568
+        },
+        {
+          "bytes": 69,
+          "ms": 7.9,
+          "path": "/module-projections.json",
+          "transfer": 369
+        },
+        {
+          "bytes": 0,
+          "ms": 3.5,
+          "path": "/daemon.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 3.7,
+          "path": "/live-autonomy.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 3.8,
+          "path": "/editor-pipeline.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 2,
+          "ms": 4.2,
+          "path": "/standing-goals.json",
+          "transfer": 302
+        },
+        {
+          "bytes": 2,
+          "ms": 4.6,
+          "path": "/watchers/index.json",
+          "transfer": 302
+        },
+        {
+          "bytes": 2,
+          "ms": 4.8,
+          "path": "/operator-requests.json",
+          "transfer": 302
+        },
+        {
+          "bytes": 15,
+          "ms": 5.1,
+          "path": "/book-template-requests.json",
+          "transfer": 315
+        },
+        {
+          "bytes": 6993,
+          "ms": 6.7,
+          "path": "/account_management.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 6386,
+          "ms": 7.3,
+          "path": "/pack_bridge_panel.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 89270,
+          "ms": 5.5,
+          "path": "/tilemap/wenyu-unshifted-scene.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 3.8,
+          "path": "/tilemap/wenyu-unshifted-road-overlay.svg",
+          "transfer": 300
+        },
+        {
+          "bytes": 1988,
+          "ms": 4.7,
+          "path": "/pack_candidate_sources.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 2859,
+          "ms": 4.8,
+          "path": "/pack_material_review.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 2251,
+          "ms": 5.5,
+          "path": "/pack_material_groups.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 2286,
+          "ms": 12.9,
+          "path": "/pack_cross_pack_question.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 2835,
+          "ms": 13.9,
+          "path": "/pack_observation_changes.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 3721,
+          "ms": 15.3,
+          "path": "/pack_observation_review.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 3683,
+          "ms": 16.5,
+          "path": "/pack_question_composer.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 3227,
+          "ms": 16.1,
+          "path": "/pack_vocabulary.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 4094,
+          "ms": 15.8,
+          "path": "/pack_vocabulary_explorer.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 24930,
+          "ms": 3.4,
+          "path": "/landmark-studio/navigation.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 7.7,
+          "path": "/tilemap/actors/researcher_walk_strip.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 9.5,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/campus-3.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 6.7,
+          "path": "/tilemap/actors/roster/resident_6_walk_strip.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 12.1,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/industrial-3.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 11.5,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-3.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 11,
+          "path": "/tilemap/actors/keeper_walk_strip.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 12.8,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-4.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 12.2,
+          "path": "/tilemap/actors/roster/resident_10_walk_strip.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 12.3,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/courtyard-3.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 17,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-9.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 17.6,
+          "path": "/tilemap/actors/worker_walk_strip.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 16.6,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-0.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 15.4,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-4.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 14,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/industrial-1.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 15.7,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/tower-9.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 19.9,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-9.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 19.4,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-7.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 20.8,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-0.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 19.8,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/tower-6.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 20.4,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-1.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 20.7,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-5.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 27.5,
+          "path": "/tilemap/actors/roster/resident_2_walk_strip.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 26.9,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-2.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 25.8,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/courtyard-1.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 27,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-6.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 27.3,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-8.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 26.5,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/campus-4.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 25,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/row-3.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 77,
+          "ms": 6.3,
+          "path": "/landmark-studio/town-projection-version.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 873,
+          "ms": 5.7,
+          "path": "/landmark-studio/town-projections/manifest.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 7.6,
+          "path": "/landmark-studio/town-projections/center.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 6.4,
+          "path": "/landmark-studio/town-projections/vision.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 2.9,
+          "path": "/landmark-studio/town-projections/east-bridge.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 3.1,
+          "path": "/landmark-studio/town-projections/east-bridge-front.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 3.8,
+          "path": "/landmark-studio/town-projections/arch-bridge.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 3.6,
+          "path": "/landmark-studio/town-projections/arch-bridge-front.png",
+          "transfer": 300
+        }
+      ],
+      "schema": "moontown.ui-performance.v1",
+      "startupBlockingMs": 2643,
+      "startupLongTasks": 6,
+      "status": "complete",
+      "viewport": [
+        1105,
+        1043,
+        2
+      ]
+    },
+    {
+      "canvasMs": 92.1,
+      "phases": [
+        {
+          "durationMs": 10015.9,
+          "gapsOver50ms": 0,
+          "longTasks": 0,
+          "name": "idle",
+          "paintFps": 26.96,
+          "paintMeanMs": 12.18,
+          "paintP95Ms": 13.6,
+          "paints": 270,
+          "rafP95Ms": 18.4
+        }
+      ],
+      "readyMs": 3375.5,
+      "resources": [
+        {
+          "bytes": 0,
+          "ms": 18.3,
+          "path": "/performance-probe.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 14.8,
+          "path": "/platform-base.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 1117,
+          "ms": 15.1,
+          "path": "/landmark-studio/town-map.css",
+          "transfer": 300
+        },
+        {
+          "bytes": 60057,
+          "ms": 16.2,
+          "path": "/styles.css",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 15.8,
+          "path": "/platform-scope.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 4613,
+          "ms": 15.1,
+          "path": "/landmark-studio/town-map.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 2147,
+          "ms": 15.5,
+          "path": "/bootstrap.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 557433,
+          "ms": 24.9,
+          "path": "/main.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 767,
+          "ms": 8.8,
+          "path": "/account_demo_fixtures.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 2803,
+          "ms": 9.2,
+          "path": "/viewport_drag_pan.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 6530,
+          "ms": 8.9,
+          "path": "/runtime_snapshots.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 1662,
+          "ms": 9.6,
+          "path": "/landmark-studio/town-tiles.js",
+          "transfer": 1962
+        },
+        {
+          "bytes": 729,
+          "ms": 4.5,
+          "path": "/runtime_snapshot_fetch.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 1616,
+          "ms": 4.6,
+          "path": "/runtime_snapshot_manifest.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 570,
+          "ms": 5.5,
+          "path": "/runtime_snapshot_parser.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 6666,
+          "ms": 8.6,
+          "path": "/tilemap/wenyu_reference_buildings.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 10864,
+          "ms": 9,
+          "path": "/tilemap/wenyu_reference_labels.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 65691,
+          "ms": 10.3,
+          "path": "/tilemap/wenyu_reference_intersections.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 37579,
+          "ms": 9.6,
+          "path": "/tilemap/energy-valley-osm-block-graph-v1.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 5585,
+          "ms": 13.6,
+          "path": "/tilemap/wenyu_reference_roads.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 16358,
+          "ms": 9.7,
+          "path": "/tilemap/modules/wenyu-town-modules.json",
+          "transfer": 16658
+        },
+        {
+          "bytes": 76063,
+          "ms": 21,
+          "path": "/knowledge-domain-catalog.json",
+          "transfer": 76363
+        },
+        {
+          "bytes": 0,
+          "ms": 31.6,
+          "path": "/moontown.svg",
+          "transfer": 300
+        },
+        {
+          "bytes": 11769,
+          "ms": 10.9,
+          "path": "/system-settings.json",
+          "transfer": 12069
+        },
+        {
+          "bytes": 1141,
+          "ms": 3.1,
+          "path": "/secret-compute-room.json",
+          "transfer": 1441
+        },
+        {
+          "bytes": 0,
+          "ms": 3.4,
+          "path": "/town.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 206,
+          "ms": 34.8,
+          "path": "/energy-valley-runtime.json",
+          "transfer": 506
+        },
+        {
+          "bytes": 0,
+          "ms": 3.2,
+          "path": "/visual-projection.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 64,
+          "ms": 4.6,
+          "path": "/moondesk-bridge.json",
+          "transfer": 364
+        },
+        {
+          "bytes": 15,
+          "ms": 14.9,
+          "path": "/civic-status.json",
+          "transfer": 315
+        },
+        {
+          "bytes": 0,
+          "ms": 17.1,
+          "path": "/daemon.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 5268,
+          "ms": 25.1,
+          "path": "/tilemap/modules/moondesk-handoff.json",
+          "transfer": 5568
+        },
+        {
+          "bytes": 69,
+          "ms": 29.5,
+          "path": "/module-projections.json",
+          "transfer": 369
+        },
+        {
+          "bytes": 6993,
+          "ms": 26.4,
+          "path": "/account_management.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 18.1,
+          "path": "/live-autonomy.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 18.6,
+          "path": "/editor-pipeline.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 2,
+          "ms": 20.3,
+          "path": "/standing-goals.json",
+          "transfer": 302
+        },
+        {
+          "bytes": 2,
+          "ms": 21.1,
+          "path": "/watchers/index.json",
+          "transfer": 302
+        },
+        {
+          "bytes": 2,
+          "ms": 21.1,
+          "path": "/operator-requests.json",
+          "transfer": 302
+        },
+        {
+          "bytes": 15,
+          "ms": 22.5,
+          "path": "/book-template-requests.json",
+          "transfer": 315
+        },
+        {
+          "bytes": 6386,
+          "ms": 26.7,
+          "path": "/pack_bridge_panel.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 89270,
+          "ms": 26.5,
+          "path": "/tilemap/wenyu-unshifted-scene.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 5.4,
+          "path": "/tilemap/wenyu-unshifted-road-overlay.svg",
+          "transfer": 300
+        },
+        {
+          "bytes": 2251,
+          "ms": 5.6,
+          "path": "/pack_material_groups.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 1988,
+          "ms": 5.4,
+          "path": "/pack_candidate_sources.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 2859,
+          "ms": 4.8,
+          "path": "/pack_material_review.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 2286,
+          "ms": 7.8,
+          "path": "/pack_cross_pack_question.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 2835,
+          "ms": 8,
+          "path": "/pack_observation_changes.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 4094,
+          "ms": 8.8,
+          "path": "/pack_vocabulary_explorer.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 3227,
+          "ms": 10.2,
+          "path": "/pack_vocabulary.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 3683,
+          "ms": 9.9,
+          "path": "/pack_question_composer.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 3721,
+          "ms": 10.7,
+          "path": "/pack_observation_review.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 24930,
+          "ms": 10.8,
+          "path": "/landmark-studio/navigation.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 298872,
+          "ms": 12.3,
+          "path": "/tilemap/actors/researcher_walk_strip.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 80693,
+          "ms": 11.4,
+          "path": "/tilemap/actors/roster/resident_6_walk_strip.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 275946,
+          "ms": 12.6,
+          "path": "/tilemap/actors/keeper_walk_strip.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 21610,
+          "ms": 11.1,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/industrial-3.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 27864,
+          "ms": 11.8,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/campus-3.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 27570,
+          "ms": 12,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-3.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 30526,
+          "ms": 16.4,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/courtyard-3.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 24490,
+          "ms": 16.6,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-4.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 86317,
+          "ms": 17.1,
+          "path": "/tilemap/actors/roster/resident_10_walk_strip.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 16062,
+          "ms": 16,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-9.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 29878,
+          "ms": 16.3,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-0.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 280016,
+          "ms": 17.6,
+          "path": "/tilemap/actors/worker_walk_strip.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 35670,
+          "ms": 37.4,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/industrial-1.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 27992,
+          "ms": 37.4,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-4.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 10732,
+          "ms": 37.1,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/tower-9.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 16218,
+          "ms": 37.5,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-7.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 32222,
+          "ms": 37.6,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-0.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 18154,
+          "ms": 38.1,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-9.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 24494,
+          "ms": 64.6,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-5.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 31168,
+          "ms": 64.5,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-1.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 19404,
+          "ms": 64.4,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/tower-6.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 34842,
+          "ms": 64.8,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/courtyard-1.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 34544,
+          "ms": 64.7,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-2.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 87630,
+          "ms": 65.4,
+          "path": "/tilemap/actors/roster/resident_2_walk_strip.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 23712,
+          "ms": 95.3,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-8.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 22160,
+          "ms": 93.8,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/campus-4.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 16328,
+          "ms": 94.3,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-6.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 21104,
+          "ms": 94.4,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/row-3.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 77,
+          "ms": 7.9,
+          "path": "/landmark-studio/town-projection-version.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 873,
+          "ms": 4,
+          "path": "/landmark-studio/town-projections/manifest.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 283661,
+          "ms": 6.5,
+          "path": "/landmark-studio/town-projections/center.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 315156,
+          "ms": 7,
+          "path": "/landmark-studio/town-projections/vision.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 328034,
+          "ms": 4.3,
+          "path": "/landmark-studio/town-projections/east-bridge.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 142194,
+          "ms": 4.4,
+          "path": "/landmark-studio/town-projections/east-bridge-front.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 250592,
+          "ms": 5.3,
+          "path": "/landmark-studio/town-projections/arch-bridge.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 104133,
+          "ms": 3.9,
+          "path": "/landmark-studio/town-projections/arch-bridge-front.png",
+          "transfer": 300
+        }
+      ],
+      "schema": "moontown.ui-performance.v1",
+      "startupBlockingMs": 2125,
+      "startupLongTasks": 5,
+      "status": "complete",
+      "viewport": [
+        1105,
+        1043,
+        2
+      ]
+    },
+    {
+      "canvasMs": 85.9,
+      "phases": [
+        {
+          "durationMs": 10017,
+          "gapsOver50ms": 0,
+          "longTasks": 0,
+          "name": "idle",
+          "paintFps": 27.15,
+          "paintMeanMs": 12.9,
+          "paintP95Ms": 14.4,
+          "paints": 272,
+          "rafP95Ms": 18.3
+        }
+      ],
+      "readyMs": 2935.9,
+      "resources": [
+        {
+          "bytes": 0,
+          "ms": 11.9,
+          "path": "/performance-probe.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 60057,
+          "ms": 16.4,
+          "path": "/styles.css",
+          "transfer": 300
+        },
+        {
+          "bytes": 557433,
+          "ms": 22.7,
+          "path": "/main.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 1117,
+          "ms": 12.9,
+          "path": "/landmark-studio/town-map.css",
+          "transfer": 300
+        },
+        {
+          "bytes": 4613,
+          "ms": 13.7,
+          "path": "/landmark-studio/town-map.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 12.1,
+          "path": "/platform-base.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 13.5,
+          "path": "/platform-scope.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 2147,
+          "ms": 14.8,
+          "path": "/bootstrap.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 1662,
+          "ms": 4.7,
+          "path": "/landmark-studio/town-tiles.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 767,
+          "ms": 5,
+          "path": "/account_demo_fixtures.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 2803,
+          "ms": 4.8,
+          "path": "/viewport_drag_pan.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 6530,
+          "ms": 4.9,
+          "path": "/runtime_snapshots.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 1616,
+          "ms": 3.1,
+          "path": "/runtime_snapshot_manifest.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 729,
+          "ms": 3.1,
+          "path": "/runtime_snapshot_fetch.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 570,
+          "ms": 2.7,
+          "path": "/runtime_snapshot_parser.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 6666,
+          "ms": 4.6,
+          "path": "/tilemap/wenyu_reference_buildings.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 37579,
+          "ms": 5.3,
+          "path": "/tilemap/energy-valley-osm-block-graph-v1.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 65691,
+          "ms": 7.7,
+          "path": "/tilemap/wenyu_reference_intersections.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 10864,
+          "ms": 5.8,
+          "path": "/tilemap/wenyu_reference_labels.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 5585,
+          "ms": 6.4,
+          "path": "/tilemap/wenyu_reference_roads.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 16358,
+          "ms": 5,
+          "path": "/tilemap/modules/wenyu-town-modules.json",
+          "transfer": 16658
+        },
+        {
+          "bytes": 76063,
+          "ms": 11.3,
+          "path": "/knowledge-domain-catalog.json",
+          "transfer": 76363
+        },
+        {
+          "bytes": 0,
+          "ms": 7.5,
+          "path": "/moontown.svg",
+          "transfer": 300
+        },
+        {
+          "bytes": 11769,
+          "ms": 3.4,
+          "path": "/system-settings.json",
+          "transfer": 12069
+        },
+        {
+          "bytes": 1141,
+          "ms": 2.8,
+          "path": "/secret-compute-room.json",
+          "transfer": 1441
+        },
+        {
+          "bytes": 0,
+          "ms": 3.6,
+          "path": "/visual-projection.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 4.1,
+          "path": "/town.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 64,
+          "ms": 5.6,
+          "path": "/moondesk-bridge.json",
+          "transfer": 364
+        },
+        {
+          "bytes": 15,
+          "ms": 6.1,
+          "path": "/civic-status.json",
+          "transfer": 315
+        },
+        {
+          "bytes": 5268,
+          "ms": 7.8,
+          "path": "/tilemap/modules/moondesk-handoff.json",
+          "transfer": 5568
+        },
+        {
+          "bytes": 0,
+          "ms": 8.4,
+          "path": "/daemon.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 8.8,
+          "path": "/live-autonomy.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 9.1,
+          "path": "/editor-pipeline.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 2,
+          "ms": 9.9,
+          "path": "/standing-goals.json",
+          "transfer": 302
+        },
+        {
+          "bytes": 2,
+          "ms": 10.3,
+          "path": "/watchers/index.json",
+          "transfer": 302
+        },
+        {
+          "bytes": 69,
+          "ms": 13,
+          "path": "/module-projections.json",
+          "transfer": 369
+        },
+        {
+          "bytes": 206,
+          "ms": 21.8,
+          "path": "/energy-valley-runtime.json",
+          "transfer": 506
+        },
+        {
+          "bytes": 2,
+          "ms": 10.4,
+          "path": "/operator-requests.json",
+          "transfer": 302
+        },
+        {
+          "bytes": 15,
+          "ms": 10.8,
+          "path": "/book-template-requests.json",
+          "transfer": 315
+        },
+        {
+          "bytes": 6993,
+          "ms": 13.5,
+          "path": "/account_management.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 6386,
+          "ms": 13.7,
+          "path": "/pack_bridge_panel.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 89270,
+          "ms": 12.5,
+          "path": "/tilemap/wenyu-unshifted-scene.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 6.4,
+          "path": "/tilemap/wenyu-unshifted-road-overlay.svg",
+          "transfer": 300
+        },
+        {
+          "bytes": 1988,
+          "ms": 8.4,
+          "path": "/pack_candidate_sources.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 2859,
+          "ms": 4.7,
+          "path": "/pack_material_review.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 2251,
+          "ms": 5.7,
+          "path": "/pack_material_groups.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 2286,
+          "ms": 11,
+          "path": "/pack_cross_pack_question.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 3683,
+          "ms": 11.3,
+          "path": "/pack_question_composer.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 3721,
+          "ms": 17.8,
+          "path": "/pack_observation_review.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 2835,
+          "ms": 17.7,
+          "path": "/pack_observation_changes.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 4094,
+          "ms": 18.2,
+          "path": "/pack_vocabulary_explorer.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 3227,
+          "ms": 17.9,
+          "path": "/pack_vocabulary.js",
+          "transfer": 300
+        },
+        {
+          "bytes": 24930,
+          "ms": 4,
+          "path": "/landmark-studio/navigation.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 6.7,
+          "path": "/tilemap/actors/researcher_walk_strip.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 6.3,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/campus-3.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 6.9,
+          "path": "/tilemap/actors/roster/resident_6_walk_strip.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 6.1,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/industrial-3.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 7.2,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-3.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 6.5,
+          "path": "/tilemap/actors/keeper_walk_strip.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 12.7,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-4.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 13,
+          "path": "/tilemap/actors/roster/resident_10_walk_strip.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 11.5,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/courtyard-3.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 11.6,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-9.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 12.5,
+          "path": "/tilemap/actors/worker_walk_strip.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 11.1,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-0.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 17.7,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-4.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 15.6,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/industrial-1.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 16.4,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/tower-9.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 15.4,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-9.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 16.1,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-7.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 16.6,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-0.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 21.4,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/tower-6.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 20.6,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-1.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 20.1,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/block-5.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 20.6,
+          "path": "/tilemap/actors/roster/resident_2_walk_strip.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 20.1,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-2.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 20.2,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/courtyard-1.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 22.8,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-8.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 23,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/lowrise-6.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 22,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/campus-4.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 18.7,
+          "path": "/tilemap/buildings/moontown-spring-ambient-v1/row-3.webp",
+          "transfer": 300
+        },
+        {
+          "bytes": 77,
+          "ms": 3.9,
+          "path": "/landmark-studio/town-projection-version.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 873,
+          "ms": 3.1,
+          "path": "/landmark-studio/town-projections/manifest.json",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 7.6,
+          "path": "/landmark-studio/town-projections/center.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 5.8,
+          "path": "/landmark-studio/town-projections/vision.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 2.8,
+          "path": "/landmark-studio/town-projections/east-bridge.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 3.5,
+          "path": "/landmark-studio/town-projections/east-bridge-front.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 2.8,
+          "path": "/landmark-studio/town-projections/arch-bridge.png",
+          "transfer": 300
+        },
+        {
+          "bytes": 0,
+          "ms": 3.6,
+          "path": "/landmark-studio/town-projections/arch-bridge-front.png",
+          "transfer": 300
+        }
+      ],
+      "schema": "moontown.ui-performance.v1",
+      "startupBlockingMs": 1893,
+      "startupLongTasks": 4,
+      "status": "complete",
+      "viewport": [
+        1105,
+        1043,
+        2
+      ]
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "schema": "moontown.town-projections.v1",
+  "version": "07145f7a56e1a46d4b025d2aafccbc2c2d445eb9f69162b9cfd6106cc0e26752",
+  "registration": "[{\"id\":\"center\",\"east\":[0.025931168136537508,0.008134934723571519],\"south\":[-0.006014960822909643,0.020270574493153504],\"elevation\":0.7791453246906349},{\"id\":\"vision\",\"east\":[0.026236586842202314,0.007375278985037426],\"south\":[-0.005450982318166098,0.01951668133409612],\"elevation\":0.7684556274345116},{\"id\":\"east-bridge\",\"east\":[0.02097611277220378,-0.01432632159377269],\"south\":[0.0238207329185288,0.021192111307920505],\"elevation\":0.8923408992654497},{\"id\":\"arch-bridge\",\"east\":[0.009123309717859306,-0.020644319768352803],\"south\":[0.030423463656539917,0.010867562782592509],\"elevation\":0.8564958188498718}]",
+  "tiles": [
+    {
+      "id": "center",
+      "left": -146.39240352536945,
+      "top": 145.868639876451,
+      "width": 292.7848070507389,
+      "height": 243.0800554791357,
+      "source": "town-projections/center.png",
+      "front": null
+    },
+    {
+      "id": "vision",
+      "left": -147.69025884681537,
+      "top": 145.66416612833834,
+      "width": 295.38051769363074,
+      "height": 241.68612078386232,
+      "source": "town-projections/vision.png",
+      "front": null
+    },
+    {
+      "id": "east-bridge",
+      "left": -208.14477000992483,
+      "top": 55.70400435984145,
+      "width": 417.45600321982977,
+      "height": 100.24094138599042,
+      "source": "town-projections/east-bridge.png",
+      "front": {
+        "left": -206.09234228844952,
+        "top": 38.13099024857224,
+        "width": 415.4035754983544,
+        "height": 75.9507260871281,
+        "source": "town-projections/east-bridge-front.png"
+      }
+    },
+    {
+      "id": "arch-bridge",
+      "left": -189.73153789558873,
+      "top": 100.47329604030044,
+      "width": 380.33670878512504,
+      "height": 162.16212371100934,
+      "source": "town-projections/arch-bridge.png",
+      "front": {
+        "left": -174.3854073052635,
+        "top": 84.42075955534935,
+        "width": 364.9905781947998,
+        "height": 139.4176953296729,
+        "source": "town-projections/arch-bridge-front.png"
+      }
+    }
+  ]
+}
