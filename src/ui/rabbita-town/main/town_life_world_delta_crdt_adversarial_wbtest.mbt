@@ -2,14 +2,14 @@
 fn adversarial_world_event(
   epoch : TownLifeWorldEpoch,
   writer : String,
-  sequence : Int,
-  lamport : Int,
+  sequence : Int32,
+  lamport : Int32,
   label : String,
   kind : TownLifeWorldKind,
   entity_id : String,
   incarnation_id : String,
   action : TownLifeWorldAction,
-  budget_delta : Int,
+  budget_delta : Int32,
 ) -> TownLifeWorldEvent {
   {
     id: "\{writer}:\{sequence}:\{label}",
@@ -28,8 +28,8 @@ fn adversarial_world_event(
 fn adversarial_world_road_event(
   epoch : TownLifeWorldEpoch,
   writer : String,
-  sequence : Int,
-  lamport : Int,
+  sequence : Int32,
+  lamport : Int32,
   label : String,
   point : SavedWorldDeltaGridPoint,
 ) -> TownLifeWorldEvent {
@@ -50,8 +50,8 @@ fn adversarial_world_road_event(
 
 ///|
 fn adversarial_world_reachable_road_points(
-  seed : Int,
-  count : Int,
+  seed : Int32,
+  count : Int32,
 ) -> Array[SavedWorldDeltaGridPoint] {
   let world = energy_valley_base_contract_world_for_seed(seed)
   let result : Array[SavedWorldDeltaGridPoint] = []
@@ -75,8 +75,8 @@ fn adversarial_world_reachable_road_points(
 
 ///|
 fn adversarial_world_custom_road_stroke(
-  seed : Int,
-  count : Int,
+  seed : Int32,
+  count : Int32,
 ) -> Array[SavedWorldDeltaGridPoint] {
   if count <= 0 {
     return []
@@ -218,7 +218,7 @@ fn adversarial_world_three_cell_dependent_chain(
 
 ///|
 fn adversarial_world_diagonal_frontage_fixture(
-  seed : Int,
+  seed : Int32,
 ) -> (GoldenValleyBuilding, SavedWorldDeltaGridPoint)? {
   ignore(seed)
   Some(

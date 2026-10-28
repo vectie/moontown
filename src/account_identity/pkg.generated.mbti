@@ -1,0 +1,43 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/account_identity"
+
+import {
+  "vectie/moontown/account_system",
+}
+
+// Values
+pub fn enabled() -> Bool
+
+pub async fn resolve(String) -> Resolution
+
+// Errors
+
+// Types and methods
+pub struct Client {
+  // private fields
+}
+pub fn Client::new(endpoint~ : String, host~ : String, origin~ : String, prefix~ : String) -> Self?
+pub async fn Client::probe(Self) -> Int
+pub async fn Client::resolve(Self, String) -> Resolution
+
+type Config
+
+pub enum Resolution {
+  Disabled
+  SignedOut
+  Unavailable
+  Authenticated(Session)
+}
+
+pub struct Session {
+  // private fields
+}
+pub fn Session::context(Self) -> @account_system.AccountContext
+pub fn Session::is_platform_operator(Self) -> Bool
+pub fn Session::owns_subject(Self, String) -> Bool
+pub async fn Session::read_platform_nodes(Self, String, String) -> (Int, Json)
+pub async fn Session::read_self(Self, String, String) -> (Int, Json)
+
+// Type aliases
+
+// Traits

@@ -22,7 +22,8 @@ fn town_ui_icon(name : String) -> @rabbita.Html {
     "chart" => "M3 3v18h19M7 17v-5m5 5V7m5 10V3"
     "help" =>
       "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20M9 9a3 3 0 1 1 5 2c-2 1-2 2-2 3m0 3h.01"
-    "reset" => "M3 9a9 9 0 1 1 0 7M3 3v6h6"
+    "reset" | "refresh" => "M3 9a9 9 0 1 1 0 7M3 3v6h6"
+    "check" => "M4 12l5 5L20 6"
     "pin" =>
       "M12 22S4 14 4 9a8 8 0 1 1 16 0c0 5-8 13-8 13M12 6a3 3 0 1 0 0 6 3 3 0 0 0 0-6"
     "road" => "M8 2L3 22M16 2l5 20M12 3v3m0 4v4m0 4v3"

@@ -9,13 +9,19 @@ fn render_request_desk(
       if compact {
         @html.nothing
       } else {
-        div(class="request-desk-title", [
-          p(class="eyebrow", "Request Desk"),
-          h2("Requests"),
-        ])
+        div(class="request-desk-title", [h2("工作与成果")])
       },
-      render_request_shortcuts(dispatch, model),
     ]),
+    if compact {
+      @html.nothing
+    } else {
+      render_work_workspace_tabs(dispatch, model)
+    },
+    if model.request_composer is (ResultsComposer | AttentionComposer) {
+      @html.nothing
+    } else {
+      render_request_shortcuts(dispatch, model)
+    },
     render_request_desk_workspace(dispatch, model),
   ])
 }

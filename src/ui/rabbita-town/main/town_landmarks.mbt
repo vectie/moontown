@@ -47,8 +47,8 @@ fn town_landmark_create(
   half_width : Double,
   half_depth : Double,
   bridge : Bool,
-  north_setback? : Double = 0.0,
-  west_setback? : Double = 0.0,
+  north_setback~ : Double = 0.0,
+  west_setback~ : Double = 0.0,
 ) -> TownLandmark {
   let p = town_bearing_geo_to_ground(lon, lat)
   let e = town_bearing_geo_to_ground(
@@ -354,12 +354,12 @@ fn town_landmark_reserved(x : Double, y : Double, pad : Double) -> Bool {
 ///|
 extern "js" fn town_landmark_draw(
   context : @dom.CanvasRenderingContext2D,
-  depth : Int,
+  depth : Int32,
   camera_x : Double,
   camera_y : Double,
   zoom : Double,
-  width : Int,
-  height : Int,
+  width : Int32,
+  height : Int32,
 ) -> Unit =
   #| (ctx,depth,cx,cy,z,w,h)=>globalThis.__townLandmarkPainter?.draw(ctx,depth,cx,cy,z,w,h)
 
@@ -372,8 +372,8 @@ extern "js" fn town_landmark_draw_route(
   camera_x : Double,
   camera_y : Double,
   zoom : Double,
-  width : Int,
-  height : Int,
+  width : Int32,
+  height : Int32,
   draw_agent : (Double, Double) -> Unit,
 ) -> Unit =
   #| (ctx,points,position,progress,cx,cy,z,w,h,drawAgent)=>globalThis.__townLandmarkPainter?.drawRoute(ctx,JSON.parse(points),JSON.parse(position),progress,cx,cy,z,w,h,drawAgent)
@@ -381,8 +381,8 @@ extern "js" fn town_landmark_draw_route(
 ///|
 fn town_landmark_draw_walker(
   context : @dom.CanvasRenderingContext2D,
-  width : Int,
-  height : Int,
+  width : Int32,
+  height : Int32,
 ) -> Unit {
   if town_landmark_route_points.is_empty() {
     return

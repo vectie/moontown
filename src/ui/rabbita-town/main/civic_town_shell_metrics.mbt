@@ -15,7 +15,7 @@ fn town_shell_worker_label(worker : WorkerSim?) -> String {
 ///|
 priv struct TownShellSnapshot {
   worker_label : String
-  queue_pressure : Int
+  queue_pressure : Int32
   runtime_feed : String
   build_stage : String
 }
@@ -46,15 +46,15 @@ fn town_shell_copy_from_snapshot(snapshot : TownShellSnapshot) -> String {
 }
 
 ///|
-fn town_shell_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
+fn town_shell_queue_pressure(model : Model, worker : WorkerSim?) -> Int32 {
   town_shell_queue_pressure_from_inputs(model.pressure, worker)
 }
 
 ///|
 fn town_shell_queue_pressure_from_inputs(
-  pressure : Int,
+  pressure : Int32,
   worker : WorkerSim?,
-) -> Int {
+) -> Int32 {
   civic_queue_pressure_from_policy(
     town_shell_queue_pressure_policy(pressure),
     worker,
@@ -62,7 +62,9 @@ fn town_shell_queue_pressure_from_inputs(
 }
 
 ///|
-fn town_shell_queue_pressure_policy(pressure : Int) -> CivicQueuePressurePolicy {
+fn town_shell_queue_pressure_policy(
+  pressure : Int32,
+) -> CivicQueuePressurePolicy {
   {
     worker_base: pressure,
     worker_bonus: 0,
@@ -99,7 +101,7 @@ fn town_shell_activity_label(
 fn town_shell_health(
   worker : WorkerSim?,
   execution : @core.TaskExecutionRecord?,
-) -> Int {
+) -> Int32 {
   civic_health_after_execution(
     town_shell_base_health(worker),
     execution,
@@ -118,7 +120,7 @@ fn town_shell_health_execution_policy() -> CivicHealthExecutionPolicy {
 }
 
 ///|
-fn town_shell_base_health(worker : WorkerSim?) -> Int {
+fn town_shell_base_health(worker : WorkerSim?) -> Int32 {
   let base = civic_worker_energy_health_base(
     worker,
     town_shell_worker_health_policy(),

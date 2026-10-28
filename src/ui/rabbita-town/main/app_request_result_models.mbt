@@ -4,7 +4,7 @@ fn operator_request_success_model(
   goal_id : String,
   request_id : String,
   status : String,
-  material_watch? : MaterialWatchSnapshot? = None,
+  material_watch~ : MaterialWatchSnapshot? = None,
 ) -> Model {
   // A background save must not replace the work the user navigated to.
   let follow_saved_watch = model.request_follow_result &&

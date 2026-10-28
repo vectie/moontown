@@ -14,7 +14,7 @@ fn render_watch_request_mode(
   if model.request_submitting {
     return p(
       class="request-status",
-      "Watch mode: \{watch_request_mode_label(model.request_watch_mode)}. Mode is locked while saving.",
+      "保存中… · \{watch_request_mode_label(model.request_watch_mode)}",
     )
   }
   div(
@@ -55,7 +55,7 @@ fn render_material_watch_request_fields(
   div(class="request-desk-stack", [
     p(
       class="request-status",
-      "每行填写一个已有资料路径（相对于目标知识册）。这里只比较文件，不上传资料。",
+      "每行一个已有 UTF-8 文本路径（相对目标知识册）；只比较文件，不上传资料。",
     ),
     render_request_textarea_field(
       "Existing source paths",
@@ -67,7 +67,7 @@ fn render_material_watch_request_fields(
     ),
     render_request_textarea_field(
       "Acceptance criteria",
-      "What must a reviewer verify before accepting a source-backed change?",
+      "资料变化后，审阅人需要核实什么？",
       model.request_material_acceptance,
       value => dispatch(SetRequestMaterialAcceptance(value)),
       compact=true,
@@ -75,16 +75,16 @@ fn render_material_watch_request_fields(
     ),
     render_request_textarea_field(
       "Next owner action",
-      "Who should decide or act after reviewing a change?",
+      "审阅后由谁决定，下一步做什么？",
       model.request_material_next_action,
       value => dispatch(SetRequestMaterialNextAction(value)),
       compact=true,
       disabled=model.request_submitting,
     ),
-    render_advanced_details("How checks work", [
+    render_advanced_details("检查规则", [
       p(
         class="request-status",
-        "The first check establishes a baseline. Unchanged sources stay quiet; changes enter review before being accepted.",
+        "首次检查建立基线；资料不变时保持安静，变化先进入审阅。",
       ),
     ]),
   ])

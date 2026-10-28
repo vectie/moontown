@@ -1,9 +1,35 @@
 ///|
+test "shared identity is a member, not a visitor subscription or platform administrator" {
+  let member = {
+    ..visitor_account_experience(),
+    user_id: "lunanexa:sha256:abc",
+    display_name: "Alice",
+    account_kind: "member",
+    visitor: false,
+    entitlements: [
+      "town.public.explore", "town.public.discover", "compute.own.view",
+    ],
+  }
+  assert_true(account_experience_valid(member))
+  assert_eq(member.kind(), MemberExperience)
+  assert_false(
+    account_experience_valid({ ..member, roles: ["platform-admin"], }),
+  )
+  let html = @rabbita.render_to_string(
+    @rabbita.static_cell(render_account_navigation(member)),
+  )
+  assert_true(html.contains("Alice"))
+  assert_true(html.contains(">算力<"))
+  assert_false(html.contains("Join MoonTown"))
+  assert_false(html.contains("Visitor"))
+}
+
+///|
 fn account_experience_test_value(
   plan : String,
-  roles? : Array[String] = ["member"],
+  roles~ : Array[String] = ["member"],
   active_tenant_name? : String,
-  home_surface? : String = "personal-town",
+  home_surface~ : String = "personal-town",
 ) -> AccountExperience {
   {
     contract_id: "moontown.account-context.v1",
@@ -118,9 +144,9 @@ test "account navigation exposes plan tenant and accessible label" {
     ),
   )
   assert_true(html.contains("aria-label=\"Account navigation\""))
-  assert_true(html.contains("Enterprise"))
+  assert_true(html.contains(">团队<"))
   assert_true(html.contains("Energy Labs"))
-  assert_true(html.contains("Shared Agents"))
+  assert_true(html.contains("团队 Agent"))
   assert_true(html.contains("account-global-avatar"))
 }
 

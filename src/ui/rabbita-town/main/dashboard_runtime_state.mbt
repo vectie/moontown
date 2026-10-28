@@ -28,7 +28,7 @@ fn runtime_is_unavailable(model : Model) -> Bool {
 }
 
 ///|
-fn town_worker_chip_label(model : Model, online : Int) -> String {
+fn town_worker_chip_label(model : Model, online : Int32) -> String {
   match runtime_availability(model) {
     DemoRuntime => "Demo \{online}"
     ConnectingRuntime => "Connecting"

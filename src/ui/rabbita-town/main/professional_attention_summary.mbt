@@ -1,7 +1,7 @@
 ///|
 priv struct ProfessionalAttentionSummary {
-  failed_count : Int
-  review_count : Int
+  failed_count : Int32
+  review_count : Int32
 }
 
 ///|

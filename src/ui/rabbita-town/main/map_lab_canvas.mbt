@@ -139,8 +139,8 @@ fn map_lab_polygon_center(
 fn map_lab_draw_path(
   context : @dom.CanvasRenderingContext2D,
   points : ReadOnlyArray[@energy_valley_contract.WorldPoint],
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
   color : String,
   width : Double,
   closed : Bool,
@@ -179,8 +179,8 @@ fn map_lab_draw_path(
 fn map_lab_draw_polygon(
   context : @dom.CanvasRenderingContext2D,
   polygon : @energy_valley_contract.Polygon,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
   color : String,
   width : Double,
   fill : String?,
@@ -201,8 +201,8 @@ fn map_lab_draw_polygon(
 fn map_lab_draw_marker(
   context : @dom.CanvasRenderingContext2D,
   point : @energy_valley_contract.WorldPoint,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
   color : String,
   radius : Double,
   ring : Bool,
@@ -298,8 +298,8 @@ fn map_lab_provenance_color(
 fn map_lab_draw_source_evidence(
   context : @dom.CanvasRenderingContext2D,
   world : @energy_valley_contract.CompiledTownWorld,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   map_lab_canvas_line_dash(context, true)
   for region in world.terrain_regions {
@@ -352,8 +352,8 @@ fn map_lab_draw_source_evidence(
 fn map_lab_draw_terrain(
   context : @dom.CanvasRenderingContext2D,
   world : @energy_valley_contract.CompiledTownWorld,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   for region in world.terrain_regions {
     let (stroke, fill) = map_lab_terrain_colors(region.kind)
@@ -373,8 +373,8 @@ fn map_lab_draw_terrain(
 fn map_lab_draw_land_blocks(
   context : @dom.CanvasRenderingContext2D,
   world : @energy_valley_contract.CompiledTownWorld,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   for block in world.land_blocks {
     map_lab_draw_polygon(
@@ -393,8 +393,8 @@ fn map_lab_draw_land_blocks(
 fn map_lab_draw_parcels(
   context : @dom.CanvasRenderingContext2D,
   world : @energy_valley_contract.CompiledTownWorld,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   for parcel in world.parcels {
     let color = match world.parcel_program_for(parcel.id) {
@@ -417,8 +417,8 @@ fn map_lab_draw_parcels(
 fn map_lab_draw_roads(
   context : @dom.CanvasRenderingContext2D,
   world : @energy_valley_contract.CompiledTownWorld,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   for segment in world.road_network.segments {
     let width = if segment.road_class is Arterial {
@@ -458,8 +458,8 @@ fn map_lab_draw_roads(
 fn map_lab_draw_portals(
   context : @dom.CanvasRenderingContext2D,
   world : @energy_valley_contract.CompiledTownWorld,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   map_lab_canvas_line_dash(context, true)
   for place in world.places {
@@ -526,8 +526,8 @@ fn map_lab_slot_is_public_installation(
 fn map_lab_draw_public_realm(
   context : @dom.CanvasRenderingContext2D,
   world : @energy_valley_contract.CompiledTownWorld,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   for place in world.places {
     if map_lab_place_is_public_realm(place) {
@@ -653,8 +653,8 @@ fn map_lab_presence_anchor(
 fn map_lab_draw_activity(
   context : @dom.CanvasRenderingContext2D,
   snapshot : @energy_valley_contract.TownSnapshot,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   for relation in snapshot.world.place_relations {
     match
@@ -727,8 +727,8 @@ fn map_lab_draw_activity(
 fn map_lab_draw_provenance(
   context : @dom.CanvasRenderingContext2D,
   world : @energy_valley_contract.CompiledTownWorld,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   for region in world.terrain_regions {
     map_lab_draw_marker(
@@ -867,8 +867,8 @@ fn map_lab_entity_anchor(
 fn map_lab_draw_world_diagnostics(
   context : @dom.CanvasRenderingContext2D,
   world : @energy_valley_contract.CompiledTownWorld,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   for diagnostic in world.diagnostics {
     let anchor = match diagnostic.position {
@@ -908,8 +908,8 @@ fn map_lab_draw_validation(
   context : @dom.CanvasRenderingContext2D,
   snapshot : @energy_valley_contract.TownSnapshot,
   rejections : ReadOnlyArray[@energy_valley_contract.RejectedPlacement],
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   map_lab_draw_world_diagnostics(
     context,

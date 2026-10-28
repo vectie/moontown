@@ -76,8 +76,8 @@ fn golden_draw_selected_town_snapshot_relations(
   context : @dom.CanvasRenderingContext2D,
   snapshot : @energy_valley_contract.TownSnapshot,
   selected_place_id : @energy_valley_contract.StableId?,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   guard selected_place_id is Some(source_place_id) else { return }
   for relation in town_snapshot_canvas_relations_from(snapshot, source_place_id) {

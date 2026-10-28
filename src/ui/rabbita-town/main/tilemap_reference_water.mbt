@@ -1,10 +1,10 @@
 ///|
-fn river_center_x_at(grid_y : Int) -> Int {
+fn river_center_x_at(grid_y : Int32) -> Int32 {
   74 + grid_y / 3 + (if grid_y % 18 < 9 { -2 } else { 2 })
 }
 
 ///|
-fn reference_river_at(grid_x : Int, grid_y : Int) -> Bool {
+fn reference_river_at(grid_x : Int32, grid_y : Int32) -> Bool {
   let center = river_center_x_at(grid_y)
   (grid_y >= 7 && abs_int(grid_x - center) <= (if grid_y > 50 { 4 } else { 2 })) ||
   (
@@ -21,7 +21,7 @@ fn reference_river_at(grid_x : Int, grid_y : Int) -> Bool {
 }
 
 ///|
-fn reference_lake_at(grid_x : Int, grid_y : Int) -> Bool {
+fn reference_lake_at(grid_x : Int32, grid_y : Int32) -> Bool {
   in_ellipse(grid_x, grid_y, 44, 42, 8, 5) ||
   in_ellipse(grid_x, grid_y, 52, 44, 6, 4) ||
   in_ellipse(grid_x, grid_y, 80, 38, 6, 4) ||
@@ -31,12 +31,12 @@ fn reference_lake_at(grid_x : Int, grid_y : Int) -> Bool {
 }
 
 ///|
-fn reference_water_at(grid_x : Int, grid_y : Int) -> Bool {
+fn reference_water_at(grid_x : Int32, grid_y : Int32) -> Bool {
   reference_river_at(grid_x, grid_y) || reference_lake_at(grid_x, grid_y)
 }
 
 ///|
-fn reference_bridge_at(grid_x : Int, grid_y : Int) -> Bool {
+fn reference_bridge_at(grid_x : Int32, grid_y : Int32) -> Bool {
   (
     grid_y >= 33 &&
     grid_y <= 36 &&
@@ -53,7 +53,7 @@ fn reference_bridge_at(grid_x : Int, grid_y : Int) -> Bool {
 }
 
 ///|
-fn reference_wetland_at(grid_x : Int, grid_y : Int) -> Bool {
+fn reference_wetland_at(grid_x : Int32, grid_y : Int32) -> Bool {
   let river_center = river_center_x_at(grid_y)
   (grid_y >= 7 && abs_int(grid_x - river_center) <= 5) ||
   in_ellipse(grid_x, grid_y, 47, 43, 13, 8) ||

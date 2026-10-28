@@ -241,7 +241,7 @@ fn ecosystem_contract_place_kind(
 }
 
 ///|
-fn ecosystem_contract_building_floors(place : EcosystemPlace) -> Int {
+fn ecosystem_contract_building_floors(place : EcosystemPlace) -> Int32 {
   for item in place.traits {
     if item.key == "floors" {
       let mut parsed = 0
@@ -371,7 +371,7 @@ fn ecosystem_contract_runtime_binding(
 }
 
 ///|
-fn ecosystem_contract_place_attention_base(place : EcosystemPlace) -> Int {
+fn ecosystem_contract_place_attention_base(place : EcosystemPlace) -> Int32 {
   let kind_base = match place.kind {
     EcosystemCivicBuilding => 64
     EcosystemAmbientBuilding => 34
@@ -404,7 +404,7 @@ fn ecosystem_contract_frontage_for_entrance(
 ///|
 fn ecosystem_contract_spur_node_id(
   spur : EcosystemPedestrianSpur,
-  index : Int,
+  index : Int32,
 ) -> @energy_valley_contract.StableId {
   ecosystem_contract_scoped_id("pedestrian-node", "\{spur.id}-\{index}")
 }
@@ -702,7 +702,7 @@ fn ecosystem_contract_blueprint_digest(
 ///|
 fn ecosystem_contract_world_from_snapshot(
   snapshot : EcosystemWorldSnapshot,
-  seed : Int,
+  seed : Int32,
 ) -> @energy_valley_contract.CompiledTownWorld {
   let road_lookup : Map[String, EcosystemRoadCell] = Map([])
   // Entrance discovery already consumed this exact base graph. Reuse its
@@ -1136,7 +1136,7 @@ fn ecosystem_contract_publish_world_cache(
 ///|
 fn ecosystem_contract_safe_empty_world(
   snapshot : EcosystemWorldSnapshot,
-  seed : Int,
+  seed : Int32,
 ) -> @energy_valley_contract.CompiledTownWorld {
   @energy_valley_contract.compiled_town_world(
     "moontown.energy-valley.compiled.v2",
@@ -1162,7 +1162,7 @@ fn ecosystem_contract_safe_empty_world(
 ///|
 fn ecosystem_contract_world_delta_diagnostics(
   model : Model,
-  seed : Int,
+  seed : Int32,
 ) -> Array[@energy_valley_contract.WorldDiagnostic] {
   let diagnostics : Array[@energy_valley_contract.WorldDiagnostic] = []
   let projection = town_life_world_projection_for_states(
@@ -1201,7 +1201,7 @@ fn ecosystem_contract_world_delta_diagnostics(
 ///|
 fn ecosystem_contract_world_for_model(
   model : Model,
-  seed : Int,
+  seed : Int32,
 ) -> @energy_valley_contract.CompiledTownWorld {
   let key = ecosystem_contract_world_cache_key(model, seed)
   match ecosystem_contract_world_cache.get(key) {
@@ -1287,7 +1287,7 @@ fn ecosystem_contract_world_for_model(
 ///|
 fn ecosystem_contract_world_validation_failed(
   model : Model,
-  seed : Int,
+  seed : Int32,
 ) -> Bool {
   let key = ecosystem_contract_world_cache_key(model, seed)
   let _ = ecosystem_contract_world_for_model(model, seed)
@@ -1358,7 +1358,7 @@ fn ecosystem_contract_exchange_kind(
 fn ecosystem_contract_slot_for_activity(
   place : @energy_valley_contract.Place,
   behavior : EcosystemBehavior,
-  occupancy : Map[@energy_valley_contract.StableId, Int],
+  occupancy : Map[@energy_valley_contract.StableId, Int32],
 ) -> @energy_valley_contract.StableId? {
   for slot in place.interaction_slots {
     let compatible = match behavior {
@@ -1462,7 +1462,7 @@ fn ecosystem_contract_validated_snapshot(
 /// rather than allowed to dangle or fabricate an owner.
 fn ecosystem_contract_town_snapshot(
   model : Model,
-  seed : Int,
+  seed : Int32,
 ) -> @energy_valley_contract.TownSnapshot {
   let world = ecosystem_contract_world_for_model(model, seed)
   let signals : Array[@energy_valley_contract.AttentionSignal] = []
@@ -1534,7 +1534,7 @@ fn ecosystem_contract_town_snapshot(
   let exchanges : Array[@energy_valley_contract.PlaceExchange] = []
   let presence_actor_ids : Map[@energy_valley_contract.StableId, Bool] = Map([])
   let exchange_ids : Map[@energy_valley_contract.StableId, Bool] = Map([])
-  let slot_occupancy : Map[@energy_valley_contract.StableId, Int] = Map([])
+  let slot_occupancy : Map[@energy_valley_contract.StableId, Int32] = Map([])
   for activity in ecosystem_resident_activities(model, seed) {
     let place_id = ecosystem_contract_place_id_from_profile(activity.place_id)
     match world.find_place(place_id) {
@@ -1717,7 +1717,7 @@ fn ecosystem_contract_town_snapshot(
 ///|
 fn ecosystem_contract_snapshot_validation_failed(
   model : Model,
-  seed : Int,
+  seed : Int32,
 ) -> Bool {
   ecosystem_contract_snapshot_validation_failed_cache
   .get(ecosystem_snapshot_cache_key(model, seed))
@@ -1725,7 +1725,7 @@ fn ecosystem_contract_snapshot_validation_failed(
 }
 
 ///|
-fn ecosystem_contract_validation_summary(model : Model, seed : Int) -> String {
+fn ecosystem_contract_validation_summary(model : Model, seed : Int32) -> String {
   let world_key = ecosystem_contract_world_cache_key(model, seed)
   let snapshot_key = ecosystem_snapshot_cache_key(model, seed)
   let summaries : Array[String] = []

@@ -462,8 +462,8 @@ test "spring building image cache refuses a forty-ninth frame-protected path" {
 ///|
 fn scan_spring_building_asset_world_fixture(
   context : @dom.CanvasRenderingContext2D,
-  pan : Int,
-) -> (Int, Int) {
+  pan : Int32,
+) -> (Int32, Int32) {
   let styles = ["lowrise", "row", "block", "tower", "courtyard", "campus"]
   let mut admitted = 0
   let mut drawn = 0

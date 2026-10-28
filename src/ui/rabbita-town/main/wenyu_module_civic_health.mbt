@@ -124,7 +124,7 @@ fn civic_status_summary(model : Model) -> String {
 
 ///|
 fn civic_status_summary_from_portfolio(
-  version : Int,
+  version : Int32,
   status : CivicServicePortfolioSnapshot,
 ) -> String {
   let protocol_counts = civic_protocol_summary_counts(status.services)
@@ -136,8 +136,8 @@ fn civic_status_summary_from_portfolio(
 
 ///|
 priv struct CivicProtocolSummaryCounts {
-  ready_count : Int
-  review_count : Int
+  ready_count : Int32
+  review_count : Int32
 }
 
 ///|
@@ -157,7 +157,7 @@ fn civic_protocol_summary_counts(
 
 ///|
 fn civic_status_operability_summary(
-  version : Int,
+  version : Int32,
   status : CivicServicePortfolioSnapshot,
   protocol_counts : CivicProtocolSummaryCounts,
 ) -> String {

@@ -50,6 +50,7 @@ const BROWSER_FILES = [
   'pack_vocabulary.js',
   'pack_vocabulary_explorer.js',
   'account_demo_fixtures.js',
+  'account_identity.js',
   'account_management.js',
   'runtime_snapshot_fetch.js',
   'runtime_snapshot_manifest.js',

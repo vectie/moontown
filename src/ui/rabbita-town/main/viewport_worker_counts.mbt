@@ -1,11 +1,11 @@
 ///|
 priv struct WorkerCountSummary {
-  total : Int
-  idle : Int
-  running : Int
-  waiting : Int
-  blocked : Int
-  offline : Int
+  total : Int32
+  idle : Int32
+  running : Int32
+  waiting : Int32
+  blocked : Int32
+  offline : Int32
 }
 
 ///|
@@ -37,6 +37,6 @@ fn WorkerCountSummary::add(
 }
 
 ///|
-fn WorkerCountSummary::online(self : WorkerCountSummary) -> Int {
+fn WorkerCountSummary::online(self : WorkerCountSummary) -> Int32 {
   self.total - self.offline
 }

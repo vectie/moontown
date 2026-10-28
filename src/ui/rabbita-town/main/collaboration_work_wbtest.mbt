@@ -54,13 +54,14 @@ test "oneoff rendered form exposes explicit run retained contributions independe
   )
   for
     expected in [
-      "Resume / reconcile same work", "Exact retained contribution", "&lt;unsafe&gt;",
-      "Alex Reviewer", "Sam Reviewer", "Record my named-owner decision", "Send retained outcome to chosen Book",
-      "Read Book disposition and reopen exact outcome", "Reopen previous source and its decisions",
-      "Historical local observation", "information gap severity",
+      "Exact retained contribution", "&lt;unsafe&gt;", "Alex Reviewer", "Sam Reviewer",
+      "提交我的决定", "提交到知识册", "刷新知识册状态", "查看上一来源版本",
+      "这是上次读取的状态", "collaboration-work_information_severity",
     ] {
     assert_true(html.contains(expected), msg=expected)
   }
+  assert_false(html.contains("开始执行"))
+  assert_false(html.contains("恢复原任务"))
   let payload = collaboration_work_payload(
     state.edit("work_book_id", "water").edit("work_rationale", "Exact review"),
   )
@@ -84,9 +85,9 @@ test "oneoff unconfigured authority renders an ordinary blocker and cannot prete
   let html = @rabbita.render_to_string(
     @rabbita.static_cell(render_collaboration_work(dispatch, state)),
   )
-  assert_true(html.contains("Run participants once"))
-  assert_true(html.contains("No schedules"))
-  assert_false(html.contains("Send retained outcome to chosen Book"))
+  assert_false(html.contains("开始执行"))
+  assert_true(html.contains("保存草稿或准备任务不会启动执行"))
+  assert_false(html.contains("提交到知识册"))
   let result = {
     ..@collaboration.empty_work(state.draft.draft_id, "r-fixture"),
     status: "partial",
@@ -97,6 +98,6 @@ test "oneoff unconfigured authority renders an ordinary blocker and cannot prete
       render_collaboration_work(dispatch, { ..state, work: Some(result), }),
     ),
   )
-  assert_true(pending.contains("Named-human authority is unavailable"))
-  assert_false(pending.contains("Send retained outcome to chosen Book"))
+  assert_true(pending.contains("请以指定审阅人登录后审核"))
+  assert_false(pending.contains("提交到知识册"))
 }

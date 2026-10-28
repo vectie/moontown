@@ -3,11 +3,11 @@
 /// Presentation only: no installation identities, coordinates or species claims
 /// in the semantic world are changed by this illustrated planting mix.
 fn town_botanical_tree_kind(
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
   seed : Double,
   waterside : Bool,
-) -> Int {
+) -> Int32 {
   let local = (seed * 1000.0).floor().to_int().abs() % 10
   if waterside && local < 6 {
     return 3
@@ -30,7 +30,7 @@ fn town_botanical_tree_scale(seed : Double) -> Double {
 let town_botanical_water_cache : Map[String, Bool] = Map([])
 
 ///|
-fn town_botanical_waterside(x : Int, y : Int) -> Bool {
+fn town_botanical_waterside(x : Int32, y : Int32) -> Bool {
   if !reference_tile_snapshot_ready() {
     return false
   }
@@ -55,7 +55,7 @@ fn town_botanical_waterside(x : Int, y : Int) -> Bool {
 ///|
 /// Sparse, coherent flower drifts rather than a checkerboard of single blooms.
 /// -1 means no patch; 0 daisy, 1 buttercup, 2 violet spikes, 3 pink cosmos.
-fn town_botanical_flower_kind(x : Int, y : Int) -> Int {
+fn town_botanical_flower_kind(x : Int32, y : Int32) -> Int32 {
   let grove = energy_valley_mod(x / 7 * 11 + y / 6 * 17, 13)
   if grove > 3 || energy_valley_mod(x * 19 + y * 23, 7) > 1 {
     return -1
@@ -71,7 +71,7 @@ extern "js" fn town_botanical_draw_tree(
   sx : Double,
   sy : Double,
   zoom : Double,
-  kind : Int,
+  kind : Int32,
   size : Double,
   seed : Double,
 ) -> Unit =
@@ -127,7 +127,7 @@ extern "js" fn town_botanical_draw_flowers(
   sx : Double,
   sy : Double,
   zoom : Double,
-  kind : Int,
+  kind : Int32,
 ) -> Unit =
   #| (c,sx,sy,z,kind)=>{
   #|   if(kind<0)return;

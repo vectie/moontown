@@ -1,7 +1,7 @@
 ///|
 /// Deterministic planning arithmetic, deliberately separate from observations.
 /// Input is a workload scenario percentage, not measured CPU utilization.
-pub fn data_center_report(load_percent : Int) -> Json {
+pub fn data_center_report(load_percent : Int32) -> Json {
   let load = load_percent.clamp(min=0, max=100)
   let server_w = 180.0 + 420.0 * load.to_double() / 100.0
   let rack_kw = (server_w * 12.0 + 120.0) / 1000.0
@@ -45,11 +45,11 @@ priv struct DcMachine {
   label : String
   state : String
   architecture : String
-  accelerator_count : Int
-  memory_total_mib : Int
-  memory_free_mib : Int
+  accelerator_count : Int32
+  memory_total_mib : Int32
+  memory_free_mib : Int32
   healthy : Bool
-  running_workloads : Int
+  running_workloads : Int32
   observed_at_unix_ms : String
 } derive(FromJson, ToJson)
 
@@ -62,7 +62,7 @@ priv struct DcCluster {
 ///|
 priv struct DcGateway {
   state : String
-  model_count : Int
+  model_count : Int32
 } derive(FromJson)
 
 ///|

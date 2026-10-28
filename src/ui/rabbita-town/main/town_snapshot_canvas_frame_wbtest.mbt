@@ -353,7 +353,7 @@ extern "js" fn canvas_frame_test_flush_next_animation_frame() -> Bool =
   #| }
 
 ///|
-extern "js" fn canvas_frame_test_pending_animation_frames() -> Int =
+extern "js" fn canvas_frame_test_pending_animation_frames() -> Int32 =
   #| () => globalThis.__moontownCanvasFrameTimingTest?.callbacks.size ?? 0
 
 ///|
@@ -443,14 +443,14 @@ extern "js" fn canvas_frame_test_player_walk_keys_installed() -> Bool =
   #| () => globalThis.__moontownPlayerWalkKeys === true
 
 ///|
-extern "js" fn canvas_frame_test_released_backing_pixels() -> Int =
+extern "js" fn canvas_frame_test_released_backing_pixels() -> Int32 =
   #| () => {
   #|   const canvas = globalThis.__moontownCanvasFrameTimingTest?.lastCanvas;
   #|   return (canvas?.width ?? 0) * (canvas?.height ?? 0);
   #| }
 
 ///|
-extern "js" fn canvas_frame_test_owned_canvas_listener_count() -> Int =
+extern "js" fn canvas_frame_test_owned_canvas_listener_count() -> Int32 =
   #| () => {
   #|   const canvas = globalThis.__moontownCanvasFrameTimingTest?.lastCanvas;
   #|   if (!canvas) return 0;
@@ -460,7 +460,7 @@ extern "js" fn canvas_frame_test_owned_canvas_listener_count() -> Int =
   #| }
 
 ///|
-extern "js" fn canvas_frame_test_motion_listener_count() -> Int =
+extern "js" fn canvas_frame_test_motion_listener_count() -> Int32 =
   #| () => globalThis.__moontownCanvasFrameTimingTest?.motion.listeners.size ?? 0
 
 ///|
@@ -481,7 +481,7 @@ extern "js" fn canvas_frame_test_remove_harness() -> Unit =
 
 ///|
 fn canvas_frame_test_snapshot(
-  tick : Int,
+  tick : Int32,
 ) -> @energy_valley_contract.TownSnapshot {
   let world = @energy_valley_contract.compiled_town_world(
     "moontown.test.canvas-frame.v1",
@@ -503,7 +503,7 @@ fn canvas_frame_test_snapshot(
 }
 
 ///|
-fn canvas_frame_test_view(tick : Int) -> TownCanvasViewState {
+fn canvas_frame_test_view(tick : Int32) -> TownCanvasViewState {
   {
     tick,
     weather: Sunny,

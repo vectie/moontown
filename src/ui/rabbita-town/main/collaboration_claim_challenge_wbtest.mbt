@@ -48,8 +48,7 @@ test "claim challenge actual report renders selected group quotes values digests
     expected in [
       "Selected: wait", "week A", "Wait: 12", "Wait: 18", "Imported Water", "export/water.txt",
       "Exact labelled value: 18", "sha256:", "Mapped Book: water", "raw/nested/source.bin",
-      "Verify mapped sources and save challenge draft", "Cancel claim challenge",
-      "Prepare one-off handoff",
+      "保存并编辑研究", "取消继续研究", "准备任务",
     ] {
     assert_true(html.contains(expected), msg=expected)
   }

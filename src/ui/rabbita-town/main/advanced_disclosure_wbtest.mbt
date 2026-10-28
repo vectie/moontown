@@ -148,7 +148,7 @@ test "work dialog omits repeated headings without hiding the active task form" {
     }),
   )
   assert_false(html.contains("Request Desk"))
-  assert_true(html.contains("发起工作"))
+  assert_true(html.contains("id=\"energy-request-title\">工作"))
   assert_true(html.contains("watch-request"))
   assert_true(html.contains("保存关注"))
 }

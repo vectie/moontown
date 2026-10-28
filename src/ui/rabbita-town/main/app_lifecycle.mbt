@@ -72,7 +72,7 @@ fn update_non_form_message(
   // browser download completion, without deleting an already saved draft.
   if model.collaboration.busy() &&
     (
-      next.request_composer != CollaborationComposer ||
+      next.request_composer != model.request_composer ||
       (model.energy_request_open && !next.energy_request_open)
     ) &&
     next.collaboration.generation == model.collaboration.generation {
@@ -93,6 +93,9 @@ fn update_non_form_message_before_imported_surface_fence(
   model : Model,
 ) -> (Cmd, Model) {
   match msg {
+    NeighborhoodEvent(event) => update_neighborhood(dispatch, model, event)
+    NeighborhoodManageEvent(event) =>
+      update_neighborhood_manage(dispatch, model, event)
     CollaborationEdit(field, value) =>
       collaboration_replace(model, model.collaboration.edit(field, value))
     CollaborationParticipantEdit(id, field, value) =>
@@ -124,11 +127,10 @@ fn update_non_form_message_before_imported_surface_fence(
       )
     CollaborationOpen(id, revision) =>
       collaboration_action(dispatch, model, "load", id, revision)
+    CollaborationReviewOpen(id, revision) =>
+      collaboration_review_open(dispatch, model, id, revision)
     CollaborationReply(generation, action, raw) =>
-      collaboration_replace(
-        model,
-        model.collaboration.settle(generation, action, raw),
-      )
+      collaboration_settle_reply(model, generation, action, raw)
     CollaborationDownload(path) => collaboration_download(dispatch, model, path)
     CollaborationOutcomeOpen(key) =>
       collaboration_action(
@@ -163,7 +165,24 @@ fn update_non_form_message_before_imported_surface_fence(
     SelectNode(node_key) =>
       model_only_update({ ..model, selection: Node(node_key), })
     SelectOverview => model_only_update({ ..model, selection: Overview, })
+    SpatialSceneEvent(raw) =>
+      if raw == "open-compute" {
+        update(dispatch, OpenSecretComputeRoom, model)
+      } else if raw == "open-center" {
+        update(dispatch, OpenReferenceInterior, model)
+      } else {
+        model_only_update(spatial_scene_select(model, raw))
+      }
+    OpenReferenceInterior =>
+      model_only_update(
+        set_town_spatial_layer_model(
+          close_town_transient_surfaces(model),
+          ReferenceInterior,
+        ),
+      )
     OpenSecretComputeRoom => {
+      replace_browser_query_param("request", "")
+      replace_browser_query_param("view", "town")
       let return_building = match model.town_spatial_layer {
         Indoor(building) => Some(building)
         _ => None
@@ -171,20 +190,31 @@ fn update_non_form_message_before_imported_surface_fence(
       let closed = close_town_transient_surfaces(model)
       model_only_update(
         set_town_spatial_layer_model(
-          { ..closed, secret_compute_room_selected_id: "moongate", },
+          {
+            ..closed,
+            spatial_compute_return_reference: model.town_spatial_layer
+            is ReferenceInterior,
+          },
           TownSpatialLayer::Underground(return_building),
         ),
       )
     }
     CloseSecretComputeRoom => {
-      let destination = match model.town_spatial_layer {
-        Underground(Some(building)) => TownSpatialLayer::Indoor(building)
-        _ => TownSpatialLayer::Outdoor
+      let destination = if model.spatial_compute_return_reference {
+        ReferenceInterior
+      } else {
+        match model.town_spatial_layer {
+          Underground(Some(building)) => TownSpatialLayer::Indoor(building)
+          _ => TownSpatialLayer::Outdoor
+        }
       }
       model_only_update(set_town_spatial_layer_model(model, destination))
     }
     SelectIndoorSlot(slot_id) =>
-      model_only_update({ ..model, indoor_selected_slot_id: slot_id, })
+      model_only_update({
+        ..spatial_scene_clear_design(model),
+        indoor_selected_slot_id: slot_id,
+      })
     SelectSpatialWork(work_id) => {
       replace_browser_query_param("work", work_id)
       model_only_update({
@@ -197,7 +227,7 @@ fn update_non_form_message_before_imported_surface_fence(
     ReviewSpatialWork => town_life_commit(spatial_review_work_model(model))
     SelectSecretComputeEndpoint(endpoint_id) =>
       model_only_update({
-        ..model,
+        ..spatial_scene_clear_design(model),
         secret_compute_room_selected_id: endpoint_id,
       })
     EnterEnergyBuilding(building_id) =>
@@ -294,6 +324,19 @@ fn update_non_form_message_before_imported_surface_fence(
         selection: Overview,
         request_composer: StandingWatchComposer,
       })
+    OpenWorkWorkspace(focus) => open_work_workspace(dispatch, model, focus)
+    OpenTownWorkspace => {
+      replace_browser_query_param("community", "0")
+      replace_browser_query_param("request", "")
+      replace_browser_query_param("area", "")
+      replace_browser_query_param("view", "town")
+      model_only_update(
+        set_town_spatial_layer_model(
+          { ..close_town_transient_surfaces(model), dashboard_section: None, },
+          Outdoor,
+        ),
+      )
+    }
     OpenEnergyRequestForAgent(contact_id) => {
       if model.request_submitting {
         return model_only_update(reopen_pending_operator_request_model(model))
@@ -327,11 +370,13 @@ fn update_non_form_message_before_imported_surface_fence(
           })
       }
     }
-    CloseEnergyRequest =>
+    CloseEnergyRequest => {
+      replace_browser_query_param("request", "")
       collaboration_replace(
         { ..model, energy_request_open: false, request_follow_result: false, },
         model.collaboration.dismiss(),
       )
+    }
     ToggleResidentExplorer => {
       let opening = !model.resident_explorer_open
       if opening {
@@ -401,8 +446,20 @@ fn update_non_form_message_before_imported_surface_fence(
       model_only_update(set_dashboard_section_model(model, section))
     SetRequestComposer(focus) => {
       let next = set_request_composer_model(model, focus)
-      if focus == CollaborationComposer {
-        if model.collaboration.busy() {
+      let next = if model.collaboration.busy() &&
+        model.request_composer != focus {
+        { ..next, collaboration: model.collaboration.dismiss(), }
+      } else {
+        next
+      }
+      if focus == ResultsComposer || focus == AttentionComposer {
+        if public_platform_enabled() {
+          model_only_update(next)
+        } else {
+          collaboration_action(dispatch, next, "outcome-list", "", "")
+        }
+      } else if focus == CollaborationComposer && !public_platform_enabled() {
+        if next.collaboration.busy() {
           model_only_update(next)
         } else {
           collaboration_action(

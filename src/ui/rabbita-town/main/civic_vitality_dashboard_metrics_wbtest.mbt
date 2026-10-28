@@ -11,15 +11,9 @@ test "vitality dashboard copy renders explicit metric snapshot" {
     return_signal: 82,
     build_stage: "verified",
   })
-  assert_true(copy.contains("Pulse Keeper / Running"))
-  assert_true(copy.contains("6 joins"))
-  assert_true(copy.contains("4 active quests"))
-  assert_true(copy.contains("3 events"))
-  assert_true(copy.contains("2 achievement broadcasts"))
-  assert_true(copy.contains("service response is 5 minutes"))
-  assert_true(copy.contains("agent actions total 19"))
-  assert_true(copy.contains("return signal is 82%"))
-  assert_true(copy.contains("current patch stage is verified"))
+  assert_true(copy.contains("统计未接入"))
+  assert_false(copy.contains("%"))
+  assert_false(copy.contains("live"))
 }
 
 ///|

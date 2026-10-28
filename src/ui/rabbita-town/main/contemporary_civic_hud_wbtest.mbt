@@ -19,7 +19,7 @@ test "MoonTown topbar keeps its identity and discloses town state" {
   assert_true(html.contains(">运行看板<"))
   assert_true(html.contains("town-topbar-metric-label"))
   assert_true(html.contains(">居民<"))
-  assert_true(html.contains(">能源<"))
+  assert_true(html.contains(">模拟能源<"))
 }
 
 ///|

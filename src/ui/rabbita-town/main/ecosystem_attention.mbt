@@ -40,9 +40,9 @@ priv struct EcosystemPlaceCharacter {
   interaction_label : String
   glyph : String
   accent : String
-  focus_bias : Int
-  social_bias : Int
-  discovery_bias : Int
+  focus_bias : Int32
+  social_bias : Int32
+  discovery_bias : Int32
 }
 
 ///|
@@ -57,19 +57,19 @@ priv struct EcosystemPlaceProfile {
   interaction_label : String
   glyph : String
   accent : String
-  focus_bias : Int
-  social_bias : Int
-  discovery_bias : Int
-  x : Int
-  y : Int
-  entrance_x : Int
-  entrance_y : Int
+  focus_bias : Int32
+  social_bias : Int32
+  discovery_bias : Int32
+  x : Int32
+  y : Int32
+  entrance_x : Int32
+  entrance_y : Int32
   provenance : EcosystemProvenance
 } derive(Debug)
 
 ///|
 priv struct EcosystemScheduleBeat {
-  duration_ticks : Int
+  duration_ticks : Int32
   place_id : String
   behavior : EcosystemBehavior
   short_intention : String
@@ -82,13 +82,13 @@ priv struct EcosystemPreviewResidentProfile {
   id : String
   name : String
   role : String
-  sprite_index : Int
+  sprite_index : Int32
   characteristic : String
   interest : String
-  sociability : Int
-  curiosity : Int
-  focus : Int
-  phase_offset : Int
+  sociability : Int32
+  curiosity : Int32
+  focus : Int32
+  phase_offset : Int32
   schedule : Array[EcosystemScheduleBeat]
 } derive(Debug)
 
@@ -101,7 +101,7 @@ priv struct EcosystemIntention {
   short_label : String
   detail : String
   interaction_label : String
-  started_tick : Int
+  started_tick : Int32
   provenance : EcosystemProvenance
 } derive(Debug)
 
@@ -115,29 +115,29 @@ priv struct EcosystemAttentionSignal {
   detail : String
   interaction_label : String
   interaction_target : String
-  urgency : Int
-  novelty : Int
-  proximity : Int
-  affinity : Int
-  happened_tick : Int
-  decay_per_tick : Int
-  expires_after_ticks : Int
+  urgency : Int32
+  novelty : Int32
+  proximity : Int32
+  affinity : Int32
+  happened_tick : Int32
+  decay_per_tick : Int32
+  expires_after_ticks : Int32
   cooldown_key : String
-  cooldown_ticks : Int
+  cooldown_ticks : Int32
   provenance : EcosystemProvenance
 } derive(Debug)
 
 ///|
 priv struct EcosystemAttentionReceipt {
   cooldown_key : String
-  last_shown_tick : Int
-  show_count : Int
+  last_shown_tick : Int32
+  show_count : Int32
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 priv struct EcosystemRankedAttention {
   signal : EcosystemAttentionSignal
-  score : Int
+  score : Int32
 } derive(Debug)
 
 ///|
@@ -150,7 +150,7 @@ priv struct EcosystemDisclosure {
 } derive(Debug, Eq)
 
 ///|
-fn ecosystem_positive_mod(value : Int, modulus : Int) -> Int {
+fn ecosystem_positive_mod(value : Int32, modulus : Int32) -> Int32 {
   if modulus <= 0 {
     return 0
   }
@@ -163,7 +163,7 @@ fn ecosystem_positive_mod(value : Int, modulus : Int) -> Int {
 }
 
 ///|
-fn ecosystem_stable_hash(text : String) -> Int {
+fn ecosystem_stable_hash(text : String) -> Int32 {
   let mut hash = 17
   for character in text {
     hash = (hash * 131 + character.to_int()) % 2147483629
@@ -172,7 +172,7 @@ fn ecosystem_stable_hash(text : String) -> Int {
 }
 
 ///|
-fn ecosystem_compact_text(text : String, max_chars : Int) -> String {
+fn ecosystem_compact_text(text : String, max_chars : Int32) -> String {
   if max_chars <= 0 {
     return ""
   }
@@ -636,7 +636,7 @@ fn ecosystem_place_profile_for_building(
 ///|
 fn ecosystem_place_profiles(
   model : Model,
-  seed : Int,
+  seed : Int32,
 ) -> Array[EcosystemPlaceProfile] {
   let result = golden_valley_buildings(seed).map(
     ecosystem_place_profile_for_building,
@@ -649,7 +649,7 @@ fn ecosystem_place_profiles(
 
 ///|
 fn ecosystem_schedule_beat(
-  duration_ticks : Int,
+  duration_ticks : Int32,
   place_id : String,
   behavior : EcosystemBehavior,
   short_intention : String,
@@ -1227,7 +1227,7 @@ fn ecosystem_preview_resident_profiles() -> Array[
 }
 
 ///|
-fn ecosystem_schedule_total(profile : EcosystemPreviewResidentProfile) -> Int {
+fn ecosystem_schedule_total(profile : EcosystemPreviewResidentProfile) -> Int32 {
   profile.schedule.fold(init=0, (total, beat) => {
     total + beat.duration_ticks.max(1)
   })
@@ -1236,8 +1236,8 @@ fn ecosystem_schedule_total(profile : EcosystemPreviewResidentProfile) -> Int {
 ///|
 fn ecosystem_schedule_beat_at(
   profile : EcosystemPreviewResidentProfile,
-  tick : Int,
-) -> (EcosystemScheduleBeat, Int) {
+  tick : Int32,
+) -> (EcosystemScheduleBeat, Int32) {
   let total = ecosystem_schedule_total(profile)
   let phase = ecosystem_positive_mod(tick + profile.phase_offset, total)
   let mut cursor = 0
@@ -1254,9 +1254,9 @@ fn ecosystem_schedule_beat_at(
 ///|
 fn ecosystem_preview_resident_intention(
   profile : EcosystemPreviewResidentProfile,
-  tick : Int,
+  tick : Int32,
   weather : String,
-  nearby_count : Int,
+  nearby_count : Int32,
   live_work_places : Array[String],
 ) -> EcosystemIntention {
   let (beat, started_tick) = ecosystem_schedule_beat_at(profile, tick)
@@ -1299,8 +1299,8 @@ fn ecosystem_preview_resident_intention(
 ///|
 fn ecosystem_attention_age(
   signal : EcosystemAttentionSignal,
-  now_tick : Int,
-) -> Int {
+  now_tick : Int32,
+) -> Int32 {
   (now_tick - signal.happened_tick).max(0)
 }
 
@@ -1321,8 +1321,8 @@ fn ecosystem_attention_receipt_for(
 fn ecosystem_attention_cooldown_penalty(
   signal : EcosystemAttentionSignal,
   history : Array[EcosystemAttentionReceipt],
-  now_tick : Int,
-) -> Int {
+  now_tick : Int32,
+) -> Int32 {
   match ecosystem_attention_receipt_for(history, signal.cooldown_key) {
     None => 0
     Some(receipt) => {
@@ -1340,8 +1340,8 @@ fn ecosystem_attention_cooldown_penalty(
 fn ecosystem_attention_score(
   signal : EcosystemAttentionSignal,
   history : Array[EcosystemAttentionReceipt],
-  now_tick : Int,
-) -> Int {
+  now_tick : Int32,
+) -> Int32 {
   let age = ecosystem_attention_age(signal, now_tick)
   if signal.expires_after_ticks >= 0 && age > signal.expires_after_ticks {
     return -10000
@@ -1369,8 +1369,8 @@ fn ecosystem_attention_score(
 fn ecosystem_rank_attention(
   signals : Array[EcosystemAttentionSignal],
   history : Array[EcosystemAttentionReceipt],
-  now_tick : Int,
-  limit : Int,
+  now_tick : Int32,
+  limit : Int32,
 ) -> Array[EcosystemRankedAttention] {
   let ranked : Array[EcosystemRankedAttention] = []
   for signal in signals {
@@ -1397,8 +1397,8 @@ fn ecosystem_rank_attention(
 fn ecosystem_record_attention(
   history : Array[EcosystemAttentionReceipt],
   signal : EcosystemAttentionSignal,
-  now_tick : Int,
-  capacity : Int,
+  now_tick : Int32,
+  capacity : Int32,
 ) -> Array[EcosystemAttentionReceipt] {
   let next = history.copy()
   let mut found = false
@@ -1464,7 +1464,7 @@ fn ecosystem_attention_label(
 
 ///|
 fn ecosystem_preview_resident_profile(
-  index : Int,
+  index : Int32,
 ) -> EcosystemPreviewResidentProfile {
   let profiles = ecosystem_preview_resident_profiles()
   profiles[ecosystem_positive_mod(index, profiles.length())]
@@ -1518,7 +1518,7 @@ fn ecosystem_runtime_status_is_active(status : String) -> Bool {
 ///|
 fn ecosystem_preview_canvas_intention(
   model : Model,
-  index : Int,
+  index : Int32,
 ) -> EcosystemIntention {
   let profile = ecosystem_preview_resident_profile(index)
   let nearby_count = ecosystem_positive_mod(
@@ -1537,7 +1537,7 @@ fn ecosystem_preview_canvas_intention(
 ///|
 fn ecosystem_place_profile_by_id(
   model : Model,
-  seed : Int,
+  seed : Int32,
   place_id : String,
 ) -> EcosystemPlaceProfile? {
   for profile in ecosystem_place_profiles(model, seed) {
@@ -1549,7 +1549,7 @@ fn ecosystem_place_profile_by_id(
 }
 
 ///|
-fn ecosystem_runtime_status_urgency(status : String) -> Int {
+fn ecosystem_runtime_status_urgency(status : String) -> Int32 {
   match status.to_lower() {
     "blocked" => 100
     "failed" => 94
@@ -1816,7 +1816,7 @@ fn ecosystem_place_signal_behavior(
 ///|
 fn ecosystem_place_attention_signals(
   model : Model,
-  seed : Int,
+  seed : Int32,
   focused_place_id : String,
 ) -> Array[EcosystemAttentionSignal] {
   let result : Array[EcosystemAttentionSignal] = []
@@ -1861,7 +1861,7 @@ fn ecosystem_place_attention_signals(
 ///|
 fn ecosystem_attention_candidates(
   model : Model,
-  seed : Int,
+  seed : Int32,
   focused_place_id : String,
 ) -> Array[EcosystemAttentionSignal] {
   ecosystem_runtime_attention_signals(model, focused_place_id) +
@@ -1872,10 +1872,10 @@ fn ecosystem_attention_candidates(
 ///|
 fn ecosystem_attention_feed(
   model : Model,
-  seed : Int,
+  seed : Int32,
   focused_place_id : String,
   history : Array[EcosystemAttentionReceipt],
-  limit : Int,
+  limit : Int32,
 ) -> Array[EcosystemRankedAttention] {
   let ranked = ecosystem_rank_attention(
     ecosystem_attention_candidates(model, seed, focused_place_id),

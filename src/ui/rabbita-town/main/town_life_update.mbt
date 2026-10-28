@@ -103,7 +103,7 @@ fn avatar_open_editor_update(model : Model) -> (Cmd, Model) {
 }
 
 ///|
-fn player_step_to_update(model : Model, tx : Int, ty : Int) -> (Cmd, Model) {
+fn player_step_to_update(model : Model, tx : Int32, ty : Int32) -> (Cmd, Model) {
   match player_begin_walk(model, tx, ty) {
     Some(next) => {
       let next = track_event(next, "walk_step", "\{tx}:\{ty}")
@@ -121,8 +121,8 @@ fn player_step_to_update(model : Model, tx : Int, ty : Int) -> (Cmd, Model) {
 ///|
 fn player_step_direction_update(
   model : Model,
-  dx : Int,
-  dy : Int,
+  dx : Int32,
+  dy : Int32,
 ) -> (Cmd, Model) {
   let events_before = model.analytics.length()
   let next = player_step_direction_model(model, dx, dy)
@@ -262,8 +262,8 @@ fn daily_checkin_update(model : Model) -> (Cmd, Model) {
 /// topic prompt chained onto successful placements.
 fn energy_canvas_click_routed(
   model : Model,
-  screen_x : Int,
-  screen_y : Int,
+  screen_x : Int32,
+  screen_y : Int32,
 ) -> (Cmd, Model) {
   let current = town_life_refresh_model_from_storage(model)
   if current.walk_mode && current.player is Some(_) {

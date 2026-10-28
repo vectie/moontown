@@ -246,7 +246,7 @@ fn resident_activity_copy(
 }
 
 ///|
-fn resident_collaboration_count(task : EnergyValleyRuntimeWorkItem?) -> Int {
+fn resident_collaboration_count(task : EnergyValleyRuntimeWorkItem?) -> Int32 {
   match task {
     Some(work) =>
       match work.collaboration {
@@ -258,7 +258,7 @@ fn resident_collaboration_count(task : EnergyValleyRuntimeWorkItem?) -> Int {
 }
 
 ///|
-fn resident_evidence_count(task : EnergyValleyRuntimeWorkItem?) -> Int {
+fn resident_evidence_count(task : EnergyValleyRuntimeWorkItem?) -> Int32 {
   match task {
     None => 0
     Some(work) =>

@@ -34,6 +34,38 @@
 .pack-bridge-panel[hidden],
 .pack-bridge-launch[hidden] { display: none; }
 
+/* Keep the existing light town palette and make disclosure visibility win
+   over section grid layouts. These rules are scoped to the Pack component. */
+.pack-bridge-panel [hidden],
+.pack-candidate-dialog [hidden] { display: none !important; }
+.pack-bridge-panel .town-advanced,
+.pack-candidate-dialog .town-advanced {
+  color: var(--town-ui-ink, #334155);
+  border-color: var(--town-ui-line, #cbd5e1);
+  margin-block: 12px;
+}
+.pack-bridge-panel .town-advanced > summary:hover,
+.pack-candidate-dialog .town-advanced > summary:hover { color: var(--town-ui-ink, #1e293b); }
+.pack-bridge-panel .town-advanced > summary:focus-visible,
+.pack-candidate-dialog .town-advanced > summary:focus-visible { outline-color: var(--town-ui-focus, #047857); }
+.pack-bridge-panel .town-advanced > :not(summary),
+.pack-candidate-dialog .town-advanced > :not(summary) { margin-block: 8px; }
+.pack-bridge-panel [data-pack-discovery-mode] {
+  box-sizing: border-box;
+  min-height: 44px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--town-ui-line, #cbd5e1);
+  border-radius: 10px;
+  background: var(--town-ui-paper, #fff);
+  color: var(--town-ui-ink, #334155);
+}
+.pack-bridge-panel .pack-bridge-close,
+.pack-bridge-panel .pack-candidate-open,
+.pack-bridge-panel .pack-layer-action,
+.pack-candidate-dialog .pack-dialog-close,
+.pack-candidate-dialog .pack-candidate-submit { min-height: 44px; }
+
 .pack-bridge-header,
 .pack-layer-subject-head,
 .pack-candidates-heading,

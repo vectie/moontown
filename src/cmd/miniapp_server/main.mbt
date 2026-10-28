@@ -190,7 +190,7 @@ fn system_settings_update_is_revision_conflict(detail : String) -> Bool {
 ///|
 async fn send_text(
   conn : @http.ServerConnection,
-  code : Int,
+  code : Int32,
   body : String,
 ) -> Unit {
   let encoded = @utf8.encode(body)
@@ -206,7 +206,7 @@ async fn send_text(
 ///|
 async fn send_json(
   conn : @http.ServerConnection,
-  code : Int,
+  code : Int32,
   value : Json,
 ) -> Unit {
   send_text(conn, code, value.stringify(indent=2))
@@ -217,6 +217,22 @@ async fn require_account_context(
   request : @http.Request,
   conn : @http.ServerConnection,
 ) -> @account_system.AccountContext? {
+  if @account_identity.enabled() {
+    if request.meth != Get &&
+      request_header(request, "origin") !=
+      "https://" + request_header(request, "host") &&
+      request_header(request, "origin") !=
+      "http://" + request_header(request, "host") {
+      send_json(conn, 403, { "error": "same_origin_required" })
+      return None
+    }
+    match @account_identity.resolve(request_header(request, "cookie")) {
+      Authenticated(session) => return Some(session.context())
+      Unavailable => send_json(conn, 503, { "error": "identity_unavailable" })
+      _ => send_json(conn, 401, { "error": "unified_sign_in_required" })
+    }
+    return None
+  }
   let supplied = request_header(request, "x-miniapp-session")
   match account_application().resolve(supplied, now_ms=@env.now()) {
     Some(context) => Some(context)
@@ -246,6 +262,15 @@ async fn require_account_entitlement(
     "plan": @account_system.account_plan_name(context.plan),
   })
   false
+}
+
+///| Legacy account operations re-resolve a local token internally. They must
+
+///|
+/// not combine that second identity with a verified SSO caller.
+fn requires_federated_account_adapter(path : String) -> Bool {
+  path.has_prefix("/miniapp/account/") ||
+  path == @town_contract.miniapp_account_logout_path()
 }
 
 ///|
@@ -445,7 +470,7 @@ fn marketplace_application() -> @town_marketplace.MarketplaceApplication raise {
 }
 
 ///|
-fn query_hex_nibble(value : Byte) -> Int? {
+fn query_hex_nibble(value : Byte) -> Int32? {
   if value >= b'0' && value <= b'9' {
     Some(value.to_int() - b'0'.to_int())
   } else if value >= b'a' && value <= b'f' {
@@ -858,7 +883,15 @@ async fn handle_request(
       return
     }
   }
+  if @account_identity.enabled() && requires_federated_account_adapter(path) {
+    send_json(conn, 403, { "error": "federated_account_grant_required" })
+    return
+  }
   if path == @town_contract.miniapp_visitor_session_path() {
+    if @account_identity.enabled() {
+      send_json(conn, 409, { "error": "use_unified_account" })
+      return
+    }
     if !require_json_write(request, conn) {
       return
     }

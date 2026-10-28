@@ -233,7 +233,7 @@ fn ecosystem_contract_actor_route_position(
   world : @energy_valley_contract.CompiledTownWorld,
   path : Array[(Double, Double)],
   position : (Double, Double),
-  progress_per_mille : Int,
+  progress_per_mille : Int32,
 ) -> @energy_valley_contract.ActorRoutePosition {
   match ecosystem_contract_route_leg_at(world, path, position) {
     Some(leg) =>
@@ -281,7 +281,7 @@ fn ecosystem_contract_ambient_actor_profile(
 fn ecosystem_contract_runtime_actor_profile(
   agent : EnergyValleyRuntimeAgent,
   work : EnergyValleyRuntimeWorkItem,
-  avatar_variant : Int,
+  avatar_variant : Int32,
 ) -> @energy_valley_contract.ActorProfile {
   @energy_valley_contract.actor_profile(
     ecosystem_contract_scoped_id("runtime-agent", agent.id),
@@ -336,7 +336,7 @@ fn ecosystem_contract_nearest_player_place(
 ///|
 fn ecosystem_contract_player_route(
   model : Model,
-) -> (Array[(Double, Double)], Int) {
+) -> (Array[(Double, Double)], Int32) {
   match model.player_motion {
     Some(motion) if player_moving(model) => {
       let total = player_path_length(motion.path)

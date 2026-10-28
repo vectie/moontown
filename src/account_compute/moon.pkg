@@ -1,0 +1,9 @@
+import {
+  "vectie/moontown/account_identity",
+  "vectie/moontown/account_system",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/x/time",
+}
+
+supported_targets = "native"

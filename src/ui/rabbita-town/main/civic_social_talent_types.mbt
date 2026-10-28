@@ -29,7 +29,6 @@ priv struct SocialMatchSim {
   right : String
   reason : String
   next_step : String
-  confidence : Int
 }
 
 ///|
@@ -41,16 +40,16 @@ priv struct TalentSignalSim {
   recent_achievement : String
   evidence_status : String
   reception_note : String
-  activity : Int
+  activity : Int32
 }
 
 ///|
 priv struct TalentRouteStopSim {
-  order : Int
+  order : Int32
   stop_title : String
   signal_name : String
   talking_point : String
   operator_note : String
   evidence_status : String
-  readiness : Int
+  readiness : Int32
 }

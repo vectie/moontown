@@ -72,7 +72,7 @@ fn town_snapshot_runtime_state_color(
 }
 
 ///|
-fn town_snapshot_player_palette(variant : Int) -> String {
+fn town_snapshot_player_palette(variant : Int32) -> String {
   let colors = [
     "#f2c94c", "#34d399", "#38bdf8", "#f472b6", "#a78bfa", "#fb923c",
   ]

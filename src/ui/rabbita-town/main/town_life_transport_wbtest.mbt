@@ -6,7 +6,7 @@ fn town_life_transport_test_entry(key : String, raw : String) -> String {
 ///|
 fn town_life_transport_test_envelope(
   writer_id : String,
-  sequence : Int,
+  sequence : Int32,
   payload : String,
 ) -> String {
   ToJson::to_json(TownLifeTransportEnvelope::{
@@ -96,11 +96,11 @@ extern "js" fn town_life_transport_test_delayed_lock_raw(
   #| key => globalThis.__moontownTownLifeDelayedLockTest?.rows.get(key) ?? ""
 
 ///|
-extern "js" fn town_life_transport_test_delayed_lock_requests() -> Int =
+extern "js" fn town_life_transport_test_delayed_lock_requests() -> Int32 =
   #| () => globalThis.__moontownTownLifeDelayedLockTest?.lockRequests ?? 0
 
 ///|
-extern "js" fn town_life_transport_test_delayed_lock_broadcasts() -> Int =
+extern "js" fn town_life_transport_test_delayed_lock_broadcasts() -> Int32 =
   #| () => globalThis.__moontownTownLifeDelayedLockTest?.broadcasts ?? 0
 
 ///|
@@ -112,11 +112,11 @@ extern "js" fn town_life_transport_test_disable_locks() -> Unit =
   #| }
 
 ///|
-extern "js" fn town_life_transport_test_delayed_lock_row_count() -> Int =
+extern "js" fn town_life_transport_test_delayed_lock_row_count() -> Int32 =
   #| () => globalThis.__moontownTownLifeDelayedLockTest?.rows.size ?? 0
 
 ///|
-extern "js" fn town_life_transport_test_delayed_lock_pending_callbacks() -> Int =
+extern "js" fn town_life_transport_test_delayed_lock_pending_callbacks() -> Int32 =
   #| () => globalThis.__moontownTownLifeDelayedLockTest?.lockCallbacks.length ?? 0
 
 ///|
@@ -144,7 +144,7 @@ extern "js" fn town_life_transport_test_delayed_lock_observe_shards() -> Unit =
   #| }
 
 ///|
-extern "js" fn town_life_transport_test_delayed_lock_observation_id() -> Int =
+extern "js" fn town_life_transport_test_delayed_lock_observation_id() -> Int32 =
   #| () => globalThis.__moontownTownLifeV3Observed?.testId ?? 0
 
 ///|
@@ -297,7 +297,7 @@ extern "js" fn town_life_transport_test_writer_lease_fire(
 ///|
 extern "js" fn town_life_transport_test_writer_lease_fire_at(
   event_name : String,
-  listener_index : Int,
+  listener_index : Int32,
   persisted : Bool,
 ) -> Unit =
   #| (eventName, listenerIndex, persisted) => {
@@ -309,7 +309,7 @@ extern "js" fn town_life_transport_test_writer_lease_fire_at(
   #| }
 
 ///|
-extern "js" fn town_life_transport_test_writer_lease_count() -> Int =
+extern "js" fn town_life_transport_test_writer_lease_count() -> Int32 =
   #| () => {
   #|   const harness = globalThis.__moontownTownLifeWriterLeaseChurnTest;
   #|   const prefix = "moontown-town-life-v3-lease:";
@@ -483,7 +483,7 @@ extern "js" fn town_life_transport_test_storage_bridge_flush() -> Unit =
 extern "js" fn town_life_transport_test_storage_bridge_listener_count(
   target : String,
   event_name : String,
-) -> Int =
+) -> Int32 =
   #| (target, eventName) => {
   #|   const harness = globalThis.__moontownTownLifeStorageBridgeTest;
   #|   const table = target === "document"
@@ -492,7 +492,7 @@ extern "js" fn town_life_transport_test_storage_bridge_listener_count(
   #| }
 
 ///|
-extern "js" fn town_life_transport_test_storage_bridge_row_count() -> Int =
+extern "js" fn town_life_transport_test_storage_bridge_row_count() -> Int32 =
   #| () => globalThis.__moontownTownLifeStorageBridgeTest?.rows.size ?? 0
 
 ///|

@@ -9,8 +9,8 @@ fn latest_operator_request(model : Model) -> OperatorRequestSnapshot? {
 
 ///|
 priv struct WatcherDecisionSummary {
-  review_count : Int
-  failed_count : Int
+  review_count : Int32
+  failed_count : Int32
 }
 
 ///|

@@ -4,7 +4,7 @@ fn work_field(
   state : @collaboration.Client,
   name : String,
   label : String,
-  multiline? : Bool = false,
+  multiline~ : Bool = false,
 ) -> @rabbita.Html {
   collaboration_form_field(
     dispatch,
@@ -17,6 +17,34 @@ fn work_field(
 }
 
 ///|
+fn collaboration_book_assessment_needs_attention(
+  state : @collaboration.Client,
+) -> Bool {
+  let mut has_gap = false
+  for name in ["information", "recognition", "decisiveness"] {
+    let severity = @string.parse_int(
+      state.work_fields.get("work_" + name + "_severity").unwrap_or("").trim(),
+    ) catch {
+      _ => return true
+    }
+    if severity < 0 ||
+      severity > 5 ||
+      state.work_fields
+      .get("work_" + name + "_summary")
+      .unwrap_or("")
+      .trim()
+      .is_empty() {
+      return true
+    }
+    has_gap = has_gap || severity > 0
+  }
+  has_gap &&
+  ["capability_id", "capability_version", "capability_summary"].any(name => {
+    state.work_fields.get("work_" + name).unwrap_or("").trim().is_empty()
+  })
+}
+
+///|
 fn render_collaboration_work(
   dispatch : Dispatch[Msg],
   state : @collaboration.Client,
@@ -26,54 +54,59 @@ fn render_collaboration_work(
     @collaboration.empty_work(state.draft.draft_id, state.revision),
   )
   div(class="request-desk-stack", [
-    h3("One-off participant work"),
-    p(
-      "Run the exact saved assignments once using isolated copies of the captured inputs. Saving, preparing and downloading the composer package do not run work. No schedules or participant Book writers are installed by Town. Configured runtime tools retain their existing role, workspace scope and approval policies.",
-    ),
+    h3("任务进度"),
+    p(collaboration_status_label(work.status)),
     div(class="request-actions", [
+      if work.status == "not_started" && state.prepared is Some(_) {
+        button(
+          class="request-submit",
+          attrs=@html.Attrs::build().disabled(disabled),
+          on_click=dispatch(CollaborationAction("oneoff-start")),
+          "开始执行",
+        )
+      } else {
+        @html.nothing
+      },
       button(
-        attrs=@html.Attrs::build().disabled(disabled || state.prepared is None),
-        on_click=dispatch(CollaborationAction("oneoff-start")),
-        if work.status == "not_started" {
-          "Run participants once"
-        } else {
-          "Resume / reconcile same work"
-        },
-      ),
-      button(
+        class="control-button",
         attrs=@html.Attrs::build().disabled(disabled),
         on_click=dispatch(CollaborationAction("oneoff-read")),
-        "Collect / reconcile work status",
+        if state.work is None {
+          "读取任务进度"
+        } else {
+          "刷新进度"
+        },
       ),
-      if state.previous_revision.is_empty() {
-        span("")
-      } else {
-        button(
-          attrs=@html.Attrs::build().disabled(disabled),
-          on_click=dispatch(
-            CollaborationOpen(state.draft.draft_id, state.previous_revision),
-          ),
-          "Reopen previous source and its decisions",
-        )
-      },
     ]),
-    p("Work status: " + work.status),
-    p(work.detail),
+    if ["completed", "partial"].contains(work.status) {
+      p(
+        "结果已保留，请审核后再送入知识册。失败项不会被当作成功，也不会重新运行。",
+      )
+    } else if work.status == "running" {
+      p(
+        "正在等待原任务。刷新可收集结果；不会另开一次执行。",
+      )
+    } else {
+      p(
+        "读取进度可能保存已完成的结果；保存草稿或准备任务不会启动执行。",
+      )
+    },
     div(
       work.participants.map(participant => {
         div(class="request-desk-stack", [
-          h3(participant.book_id + " · " + participant.status),
-          p(
-            "Private one-off store · Proposal: " +
-            participant.proposal_id +
-            " · Run: " +
-            participant.run_id,
+          h3(
+            participant.book_id +
+            " · " +
+            collaboration_status_label(participant.status),
           ),
-          p(participant.detail),
-          p(participant.output_digest),
+          if participant.status == "failed" {
+            p(participant.detail)
+          } else {
+            @html.nothing
+          },
           if state.work_fields.get("work_salon_mode") == Some("compare") &&
             participant.status == "completed" {
-            p("Compare this contribution in the idea salon below.")
+            p("可在下方比较这份贡献。")
           } else {
             @html.pre(
               class="collaboration-retained-output",
@@ -89,37 +122,31 @@ fn render_collaboration_work(
       span("")
     } else {
       div(class="request-desk-stack", [
-        h3("Review this exact collected result"),
+        h3(id="collaboration-review", "审核结果"),
+        p(collaboration_status_label(work.review_status)),
+        if collaboration_my_pending_reviews(work) > 0 {
+          p(
+            "待我审核 · \{collaboration_my_pending_reviews(work)} 项决定",
+          )
+        } else {
+          @html.nothing
+        },
         p(
-          work.result_digest +
-          " · review " +
-          work.review_version.to_string() +
-          " · " +
-          work.review_status,
-        ),
-        p(
-          "The result preserves each actual contribution, failure and authored objection. It does not invent agreement. Earlier decisions stay retained when a reviewer changes their decision or a new source revision is saved.",
+          "审核确认这份结果记录是否准确，不代表所有任务成功或知识册已接受。",
         ),
         if work.operator_id.is_empty() {
           p(
-            "Named-human authority is unavailable. Use the existing operator sign-in as the assigned reviewer. A name typed into the draft cannot approve the work.",
+            "请以指定审阅人登录后审核。填写姓名不能获得审核权限。",
           )
         } else {
-          p("Current operator account: " + work.operator_id)
+          @html.nothing
         },
         div(
           work.decisions.map(decision => {
             div(class="request-desk-stack", [
+              p(decision.reviewer_name + " · " + decision.prompt),
               p(
-                decision.reviewer_name +
-                " (" +
-                decision.reviewer_id +
-                ") · " +
-                decision.prompt,
-              ),
-              p(
-                "Recorded decision: " +
-                decision.decision +
+                collaboration_status_label(decision.decision) +
                 " · " +
                 decision.rationale,
               ),
@@ -130,15 +157,12 @@ fn render_collaboration_work(
                 on_click=dispatch(
                   CollaborationEdit("work_decision_id", decision.decision_id),
                 ),
-                "Select " + decision.decision_id,
+                "处理这项决定",
               ),
             ])
           }),
         ),
-        p(
-          "Selected decision: " +
-          state.work_fields.get("work_decision_id").unwrap_or("none"),
-        ),
+        p("选择上方属于你的决定，再提交结论和理由。"),
         div(
           class="request-actions",
           ["approve", "reject", "defer"].map(choice => {
@@ -147,32 +171,27 @@ fn render_collaboration_work(
                 disabled || work.operator_id.is_empty(),
               ),
               on_click=dispatch(CollaborationEdit("work_decision", choice)),
-              choice,
+              match choice {
+                "approve" => "批准记录"
+                "reject" => "拒绝"
+                _ => "暂缓"
+              },
             )
           }),
         ),
         p(
-          "Chosen outcome: " +
-          state.work_fields.get("work_decision").unwrap_or("none"),
+          "所选结论：" +
+          collaboration_status_label(
+            state.work_fields.get("work_decision").unwrap_or(""),
+          ),
         ),
-        work_field(
-          dispatch,
-          state,
-          "rationale",
-          "Why approve, reject or defer this exact result?",
-          multiline=true,
-        ),
-        h3("Retained decision history"),
-        @html.pre(
-          class="collaboration-retained-output",
-          work.review_history_text,
-        ),
+        work_field(dispatch, state, "rationale", "决定理由", multiline=true),
         button(
           attrs=@html.Attrs::build().disabled(
             disabled || work.operator_id.is_empty(),
           ),
           on_click=dispatch(CollaborationAction("oneoff-decide")),
-          "Record my named-owner decision",
+          "提交我的决定",
         ),
       ])
     },
@@ -181,83 +200,95 @@ fn render_collaboration_work(
       span("")
     } else {
       div(class="request-desk-stack", [
-        h3("Submit this reviewed terminal outcome to Book"),
+        h3("送入知识册"),
         p(
           work.participants
           .filter(p => p.status == "completed")
           .length()
           .to_string() +
-          " participant(s) succeeded · " +
+          " 项成功 · " +
           work.participants
           .filter(p => p.status == "failed")
           .length()
           .to_string() +
-          " failed. Review approves the accurate account, not a claim that all participants succeeded.",
+          " 项失败。提交后仍由知识册独立审核。",
         ),
-        p(
-          "Choose an existing destination and describe what the work establishes and what remains uncertain. Book independently reviews the deliverable and Three-Gap assessment.",
-        ),
+        p("选择目标知识册，说明成果与局限。"),
         div(
           class="request-actions",
           state.books.map(book => {
             button(
               attrs=@html.Attrs::build().disabled(disabled),
               on_click=dispatch(CollaborationEdit("work_book_id", book.book_id)),
-              "Choose " + book.title,
+              book.title,
             )
           }),
         ),
         p(
-          "Destination: " +
-          state.work_fields.get("work_book_id").unwrap_or("none"),
+          "目标知识册：" +
+          state.work_fields.get("work_book_id").unwrap_or("未选择"),
         ),
         work_field(
           dispatch,
           state,
           "outcome_summary",
-          "Outcome interpretation and limits",
+          "成果说明与局限",
           multiline=true,
         ),
-        div(
-          ["information", "recognition", "decisiveness"].map(name => {
-            div([
-              work_field(
-                dispatch,
-                state,
-                name + "_severity",
-                name + " gap severity (0 absent, 1–5 present)",
-              ),
-              work_field(
-                dispatch,
-                state,
-                name + "_summary",
-                name + " gap explanation, including why it is absent if 0",
-                multiline=true,
-              ),
-            ])
-          }),
-        ),
-        p(
-          "If any gap is present, name the proposed capability change. This is a proposal only; no activation is granted.",
-        ),
-        work_field(dispatch, state, "capability_id", "Proposed capability ID"),
-        work_field(
-          dispatch, state, "capability_version", "Proposed capability version",
-        ),
-        work_field(
-          dispatch,
-          state,
-          "capability_summary",
-          "Proposed capability change",
-          multiline=true,
+        render_advanced_details(
+          "知识册要求的缺口评估与能力提案",
+          compact_label="专业评估",
+          needs_attention=collaboration_book_assessment_needs_attention(state),
+          [
+            div(
+              ["information", "recognition", "decisiveness"].map(name => {
+                let label = match name {
+                  "information" => "信息"
+                  "recognition" => "认知"
+                  _ => "决策"
+                }
+                div([
+                  work_field(
+                    dispatch,
+                    state,
+                    name + "_severity",
+                    label + "缺口（0 无，1–5 有）",
+                  ),
+                  work_field(
+                    dispatch,
+                    state,
+                    name + "_summary",
+                    label + "缺口说明（无缺口也需说明依据）",
+                    multiline=true,
+                  ),
+                ])
+              }),
+            ),
+            p(
+              "请如实填写知识册要求的缺口评估；不能省略为零。若有缺口，填写建议能力变更；这不会激活能力。",
+            ),
+            work_field(
+              dispatch, state, "capability_id", "建议能力标识（有缺口时填写）",
+            ),
+            work_field(
+              dispatch, state, "capability_version", "建议能力版本",
+            ),
+            work_field(
+              dispatch,
+              state,
+              "capability_summary",
+              "建议能力变更",
+              multiline=true,
+            ),
+          ],
         ),
         button(
           attrs=@html.Attrs::build().disabled(disabled),
           on_click=dispatch(CollaborationAction("oneoff-book")),
           if state.work_fields.get("work_salon_mode") == Some("compare") {
-            "Send selected salon outcome to chosen Book"
+            "送入知识册 · 所选方案"
           } else {
-            "Send retained outcome to chosen Book"
+            "提交到知识册"
           },
         ),
       ])
@@ -266,18 +297,60 @@ fn render_collaboration_work(
       span("")
     } else {
       div([
-        h3("Book disposition for this exact collaboration"),
-        p(work.package_digest),
-        p(work.book_status),
+        h3("知识册处理状态"),
+        p(collaboration_status_label(work.book_status)),
         p(
-          "Historical local observation. Refresh reads Book's current disposition without accepting, continuing its review gates, activating a capability or rerunning participants.",
+          "这是上次读取的状态。刷新不会接受知识、激活能力或重跑任务。",
         ),
         button(
           attrs=@html.Attrs::build().disabled(disabled),
           on_click=dispatch(CollaborationAction("oneoff-read-book")),
-          "Read Book disposition and reopen exact outcome",
+          "刷新知识册状态",
         ),
       ])
     },
+    render_advanced_details("执行证据、历史版本与恢复", [
+      p(work.detail),
+      p("当前账户：" + work.operator_id),
+      p(work.result_digest),
+      p(work.package_digest),
+      div(
+        work.participants.map(participant => {
+          p(
+            participant.book_id +
+            " · Proposal: " +
+            participant.proposal_id +
+            " · Run: " +
+            participant.run_id +
+            " · " +
+            participant.output_digest,
+          )
+        }),
+      ),
+      h3("完整审核历史"),
+      @html.pre(class="collaboration-retained-output", work.review_history_text),
+      if work.status == "running" {
+        button(
+          attrs=@html.Attrs::build().disabled(
+            disabled || state.prepared is None,
+          ),
+          on_click=dispatch(CollaborationAction("oneoff-start")),
+          "恢复原任务 · 不创建新执行",
+        )
+      } else {
+        @html.nothing
+      },
+      if state.previous_revision.is_empty() {
+        @html.nothing
+      } else {
+        button(
+          attrs=@html.Attrs::build().disabled(disabled),
+          on_click=dispatch(
+            CollaborationOpen(state.draft.draft_id, state.previous_revision),
+          ),
+          "查看上一来源版本",
+        )
+      },
+    ]),
   ])
 }

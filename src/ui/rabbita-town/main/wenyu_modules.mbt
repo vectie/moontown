@@ -10,7 +10,7 @@ fn wenyu_modules() -> Array[WenyuTownModule] {
 }
 
 ///|
-fn wenyu_module_count() -> Int {
+fn wenyu_module_count() -> Int32 {
   wenyu_modules().length()
 }
 

@@ -28,7 +28,7 @@ fn push_optional_feed_item(feed : Array[FeedItem], item : FeedItem?) -> Bool {
 }
 
 ///|
-fn push_feed_items(feed : Array[FeedItem], items : Array[FeedItem]) -> Int {
+fn push_feed_items(feed : Array[FeedItem], items : Array[FeedItem]) -> Int32 {
   let mut pushed = 0
   for item in items {
     feed.push(item)

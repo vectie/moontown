@@ -152,7 +152,7 @@ test('mounted discovery → explicit group review → editable candidate → nat
 
 test('cancel, filter, refresh and reopen preserve the explicit include/exclude choices and unsent hypothesis', async () => {
   await mounted(async (d, state, posts) => {
-    await openReview(d); await chooseTwo(d); await d.find(n => n.textContent === 'Cancel review').fire('click')
+    await openReview(d); await chooseTwo(d); await d.find(n => n.textContent === '取消').fire('click')
     const filter = d.find(n => n.type === 'checkbox' && !n.dataset.materialSource && !n.dataset.sourceSubject)
     filter.checked = false; await filter.fire('change'); filter.checked = true; await filter.fire('change')
     await d.find(n => n.dataset.packBridgePanel === 'launch').fire('click')
@@ -166,13 +166,13 @@ test('cancel, filter, refresh and reopen preserve the explicit include/exclude c
 
 test('changed group requires explicit re-review after refresh, retains old choices, and excludes new observations', async () => {
   await mounted(async (d, state, posts) => {
-    await openReview(d); await chooseTwo(d); await d.find(n => n.textContent === 'Cancel review').fire('click')
+    await openReview(d); await chooseTwo(d); await d.find(n => n.textContent === '取消').fire('click')
     state.projections[0].subjects[2].summary = 'Changed excluded observation'
     state.projections[0].subjects.push({ ...state.projections[0].subjects[2], subject_ref: 'subjects/new.json', title: 'New observation' })
     await d.find(n => n.dataset.packBridgePanel === 'launch').fire('click'); await openReview(d)
-    assert.equal(d.find(n => n.textContent === 'Continue to proposal').disabled, true)
+    assert.equal(d.find(n => n.dataset.materialContinue).disabled, true)
     await continueReview(d); assert.equal(d.all().filter(n => n.dataset.sourceConnection).length, 0)
-    await d.find(n => n.textContent === 'Review current group').fire('click')
+    await d.find(n => n.textContent === '重新核对资料').fire('click')
     assert.equal(d.all().filter(n => n.dataset.materialSource).length, 4)
     assert.equal(d.all().filter(n => n.dataset.materialSource && n.checked).length, 2)
     assert.equal(d.find(n => n.dataset.materialSource?.includes('subjects/new.json')).checked, false)
@@ -295,7 +295,7 @@ test('an unavailable refresh keeps a retained review blocked until the current g
     await openReview(d); await chooseTwo(d)
     fail = true; await d.find(n => n.dataset.packBridgePanel === 'launch').fire('click')
     await continueReview(d)
-    assert.equal(d.find(n => n.textContent === 'Continue to proposal').disabled, true)
+    assert.equal(d.find(n => n.dataset.materialContinue).disabled, true)
     assert.equal(posts.length, 0)
     assert.equal(d.all().filter(n => n.dataset.materialSource && n.checked).length, 2)
     fail = false; await d.find(n => n.dataset.packBridgePanel === 'launch').fire('click')

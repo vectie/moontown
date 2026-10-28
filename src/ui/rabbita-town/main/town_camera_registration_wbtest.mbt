@@ -12,7 +12,7 @@ extern "js" fn calibration_test_context() -> @dom.CanvasRenderingContext2D =
 ///|
 extern "js" fn calibration_test_matrix(
   context : @dom.CanvasRenderingContext2D,
-  index : Int,
+  index : Int32,
 ) -> Double =
   #| (context, index) => context.matrix[index] ?? NaN
 

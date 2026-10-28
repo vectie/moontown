@@ -98,14 +98,8 @@ fn contest_express_stage_fallback(model : Model) -> String {
 
 ///|
 fn contest_express_countdown_label(model : Model) -> String {
-  if model_projection_snapshot_ready(model) {
-    "Projection-controlled"
-  } else if model_projection_snapshot_waiting(model) {
-    "Bridge waiting"
-  } else {
-    let days_left = 9 - model.tick % 5
-    "T-\{days_left} days"
-  }
+  ignore(model)
+  "查看赛事日程"
 }
 
 ///|
@@ -113,33 +107,9 @@ fn contest_express_readiness_label(
   model : Model,
   execution : @core.TaskExecutionRecord?,
 ) -> String {
-  let score = civic_execution_score(
-    execution,
-    contest_express_readiness_policy(),
-    fallback=contest_express_readiness_fallback(model),
-  )
-  "\{score}% ready"
-}
-
-///|
-fn contest_express_readiness_policy() -> CivicExecutionScorePolicy {
-  {
-    packet: 67,
-    running: 74,
-    persisting: 88,
-    review: 58,
-    completed: 96,
-    recovery: 34,
-  }
-}
-
-///|
-fn contest_express_readiness_fallback(model : Model) -> Int {
-  if model.state_source == StateSourceKind::SnapshotFile {
-    46
-  } else {
-    79
-  }
+  ignore(model)
+  ignore(execution)
+  "以赛事工作台为准"
 }
 
 ///|

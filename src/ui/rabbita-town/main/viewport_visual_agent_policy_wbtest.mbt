@@ -1,11 +1,11 @@
 ///|
 fn visual_policy_test_agent(
-  status? : String = "",
-  phase? : String = "idle",
-  book_id? : String = "unknown-book",
-  grid_x? : Int = 12,
-  grid_y? : Int = 18,
-  z? : Int = 0,
+  status~ : String = "",
+  phase~ : String = "idle",
+  book_id~ : String = "unknown-book",
+  grid_x~ : Int32 = 12,
+  grid_y~ : Int32 = 18,
+  z~ : Int32 = 0,
 ) -> VisualAgentSnapshot {
   {
     worker_id: "worker",

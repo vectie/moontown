@@ -44,6 +44,16 @@ async fn main {
     "--external:/tilemap/*",
     "--outfile=" + root + "/styles.css",
   ]).run()
+  // The bundled sheet lives at the product root, including /moontown/ and
+  // /moontown/workspace/. Keep sprite URLs relative to that sheet.
+  let css_path = root + "/styles.css"
+  @fs.write_string_to_file(
+    css_path,
+    @fs.read_file_to_string(css_path).replace(
+      old="url(/tilemap/",
+      new="url(./tilemap/",
+    ),
+  )
   let hash = @crypto.SHA256::new()
   for
     path in [

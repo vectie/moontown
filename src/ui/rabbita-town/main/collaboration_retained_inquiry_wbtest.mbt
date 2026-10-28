@@ -41,15 +41,15 @@ test "retained inquiry native fixture renders historical evidence editable field
   let state = retained_inquiry_ui_fixture()
   let dispatch : Dispatch[Msg] = _ => @rabbita.none
   let html = @rabbita.render_to_string(
-    @rabbita.static_cell(render_collaboration_composer(dispatch, state)),
+    @rabbita.static_cell(render_collaboration_outcomes(dispatch, state)),
   )
   for
     expected in [
-      "New inquiry from this historical dossier", "New scoped research question",
-      "Selected: water", "Selected: forest", "Select: energy", "mobility", "Attributed fixture failure",
-      "Exact retained excerpt from water", "Independent challenge for forest", "New inquiry human reviewer",
-      "Objection decision owner", "Save new inquiry and open in composer", "Prepare one-off handoff",
-      "Cancel new inquiry", "sha256:", "&lt;script&gt;",
+      "继续研究 · 从此成果", "要研究的新问题", "Selected: water",
+      "Selected: forest", "Select: energy", "mobility", "Attributed fixture failure",
+      "Exact retained excerpt from water", "Independent challenge for forest", "审阅人姓名",
+      "异议审阅人", "保存并编辑研究", "取消继续研究", "sha256:",
+      "&lt;script&gt;",
     ] {
     assert_true(html.contains(expected), msg=expected)
   }
@@ -153,10 +153,6 @@ test "retained inquiry native saved reply opens ordinary editing and Prepare whi
       render_collaboration_outcomes(dispatch, state.edit("inquiry_mode", "off")),
     ),
   )
-  assert_true(
-    closed.contains(
-      "Use retained contributions in a new research-salon inquiry",
-    ),
-  )
-  assert_false(closed.contains("New scoped research question"))
+  assert_true(closed.contains("继续研究 · 从此成果"))
+  assert_false(closed.contains("要研究的新问题"))
 }

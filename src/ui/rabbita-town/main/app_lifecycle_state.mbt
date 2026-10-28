@@ -8,11 +8,13 @@ fn set_town_spatial_layer_model(
   model : Model,
   layer : TownSpatialLayer,
 ) -> Model {
+  replace_browser_query_param("community", "0")
   replace_browser_query_param(
     "layer",
     match layer {
       Outdoor => ""
       Indoor(_) => "indoor"
+      ReferenceInterior => "indoor"
       Underground(_) => "compute"
     },
   )
@@ -20,7 +22,10 @@ fn set_town_spatial_layer_model(
     "building",
     match layer {
       Indoor(building) => golden_valley_building_civic_id(building)
+      ReferenceInterior => "future-center-g3"
       Underground(Some(building)) => golden_valley_building_civic_id(building)
+      Underground(None) if model.spatial_compute_return_reference =>
+        "future-center-g3"
       _ => ""
     },
   )
@@ -37,6 +42,7 @@ fn set_dashboard_section_model(
   model : Model,
   dashboard_section : DashboardSection,
 ) -> Model {
+  replace_browser_query_param("community", "0")
   let next = match model.dashboard_section {
     Some(active) =>
       if active == dashboard_section {
@@ -78,6 +84,8 @@ fn set_request_composer_model(
       StandingWatchComposer => "watch"
       EvidenceBookComposer => "book"
       CollaborationComposer => "collaboration"
+      ResultsComposer => "outcomes"
+      AttentionComposer => "review"
     },
   )
   { ..model, request_composer, }

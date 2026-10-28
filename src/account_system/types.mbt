@@ -15,6 +15,7 @@ pub(all) enum AccountPlan {
 /// other while still providing four independently routed experiences.
 pub(all) enum AccountKind {
   VisitorAccount
+  SignedInAccount
   PaidUserAccount
   EnterpriseAccount
   AdminAccount
@@ -41,6 +42,7 @@ pub(all) enum AccountHomeSurface {
 pub(all) enum AccountEntitlement {
   ExplorePublicTown
   DiscoverPublicServices
+  ViewOwnCompute
   UsePersonalAgent
   ManagePersonalWorkspace
   UseMarketplaceActions
@@ -70,7 +72,7 @@ pub(all) struct AccountTenantAccess {
   plan : AccountPlan
   roles : Array[AccountRole]
   active : Bool
-  version : Int
+  version : Int32
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
@@ -81,7 +83,7 @@ pub(all) struct AccountPrincipal {
   platform_roles : Array[AccountRole]
   tenant_access : Array[AccountTenantAccess]
   active : Bool
-  version : Int
+  version : Int32
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
@@ -92,7 +94,7 @@ pub(all) struct AccountSession {
   active_tenant_id : String?
   expires_at_ms : UInt64
   revoked : Bool
-  version : Int
+  version : Int32
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
@@ -101,7 +103,7 @@ pub(all) struct AccountSubscription {
   plan : AccountPlan
   status : String
   changed_at_ms : UInt64
-  version : Int
+  version : Int32
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
@@ -112,7 +114,7 @@ pub(all) struct AccountAuditEvent {
   target_id : String
   detail : String
   occurred_at_ms : UInt64
-  version : Int
+  version : Int32
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
@@ -122,7 +124,7 @@ pub(all) struct AccountState {
   sessions : Array[AccountSession]
   subscriptions : Array[AccountSubscription]
   audit_events : Array[AccountAuditEvent]
-  version : Int
+  version : Int32
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|

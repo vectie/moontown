@@ -11,8 +11,8 @@ priv struct GoldenArchitectureMass {
   roof : String
   left : String
   right : String
-  window_columns : Int
-  window_rows : Int
+  window_columns : Int32
+  window_rows : Int32
 }
 
 ///|
@@ -21,27 +21,27 @@ priv struct GoldenArchitectureMass {
 /// each archetype an identity without covering the authored roads and terrain.
 priv struct GoldenArchitecturePlan {
   masses : Array[GoldenArchitectureMass]
-  feature_index : Int
+  feature_index : Int32
   roof_feature : String
   accent : String
-  variant : Int
+  variant : Int32
 }
 
 ///|
 fn golden_architecture_variant(
-  grid_x : Int,
-  grid_y : Int,
-  width : Int,
-  depth : Int,
-  floors : Int,
-) -> Int {
+  grid_x : Int32,
+  grid_y : Int32,
+  width : Int32,
+  depth : Int32,
+  floors : Int32,
+) -> Int32 {
   (grid_x * 17 + grid_y * 31 + width * 7 + depth * 11 + floors * 13) % 3
 }
 
 ///|
 fn golden_architecture_palette(
   structure : String,
-  variant : Int,
+  variant : Int32,
 ) -> (String, String, String, String) {
   match structure {
     "tower" =>
@@ -121,8 +121,8 @@ fn golden_architecture_mass(
   roof : String,
   left : String,
   right : String,
-  window_columns : Int,
-  window_rows : Int,
+  window_columns : Int32,
+  window_rows : Int32,
 ) -> GoldenArchitectureMass {
   {
     x_offset,
@@ -141,11 +141,11 @@ fn golden_architecture_mass(
 ///|
 fn golden_architecture_plan(
   structure : String,
-  grid_x : Int,
-  grid_y : Int,
-  footprint_width : Int,
-  footprint_depth : Int,
-  floors : Int,
+  grid_x : Int32,
+  grid_y : Int32,
+  footprint_width : Int32,
+  footprint_depth : Int32,
+  floors : Int32,
 ) -> GoldenArchitecturePlan {
   let width = footprint_width.to_double()
   let depth = footprint_depth.to_double()
@@ -487,10 +487,10 @@ extern "js" fn golden_draw_architecture_roof_feature(
   width : Double,
   depth : Double,
   height : Double,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
   accent : String,
-  variant : Int,
+  variant : Int32,
 ) -> Unit =
   #| (context, feature, tx, ty, width, depth, height0, vw, vh, accent, variant) => {
   #|   const camera = globalThis.__moontownGoldenValleyCamera ??
@@ -603,8 +603,8 @@ fn golden_draw_architecture_plan(
   plan : GoldenArchitecturePlan,
   world_x : Double,
   world_y : Double,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
   hour : Double,
 ) -> Unit {
   let zoom = golden_valley_camera_zoom()

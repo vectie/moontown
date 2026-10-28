@@ -5,9 +5,9 @@
 /// buildings, entrances or identities from the legacy tile generator.
 priv struct TownCanvasRoadCell {
   node_id : @energy_valley_contract.StableId
-  x : Int
-  y : Int
-  mask : Int
+  x : Int32
+  y : Int32
+  mask : Int32
   road_class : @energy_valley_contract.RoadClass
   bridge : Bool
   custom : Bool
@@ -16,7 +16,7 @@ priv struct TownCanvasRoadCell {
 ///|
 fn town_canvas_road_class_priority(
   road_class : @energy_valley_contract.RoadClass,
-) -> Int {
+) -> Int32 {
   match road_class {
     @energy_valley_contract.Bridge => 6
     @energy_valley_contract.Arterial => 5
@@ -30,7 +30,7 @@ fn town_canvas_road_class_priority(
 ///|
 fn town_snapshot_canvas_cols(
   snapshot : @energy_valley_contract.TownSnapshot,
-) -> Int {
+) -> Int32 {
   (snapshot.world.bounds.maximum.x - snapshot.world.bounds.minimum.x)
   .ceil()
   .to_int()
@@ -40,7 +40,7 @@ fn town_snapshot_canvas_cols(
 ///|
 fn town_snapshot_canvas_rows(
   snapshot : @energy_valley_contract.TownSnapshot,
-) -> Int {
+) -> Int32 {
   (snapshot.world.bounds.maximum.y - snapshot.world.bounds.minimum.y)
   .ceil()
   .to_int()
@@ -61,7 +61,7 @@ fn town_canvas_stronger_road_class(
 }
 
 ///|
-fn town_canvas_road_key(x : Int, y : Int) -> String {
+fn town_canvas_road_key(x : Int32, y : Int32) -> String {
   "\{x}:\{y}"
 }
 
@@ -77,7 +77,7 @@ fn town_snapshot_canvas_roads(
     @energy_valley_contract.StableId,
     @energy_valley_contract.RoadClass,
   ] = Map([])
-  let masks : Map[@energy_valley_contract.StableId, Int] = Map([])
+  let masks : Map[@energy_valley_contract.StableId, Int32] = Map([])
   for node in snapshot.world.road_network.nodes {
     if node.id.scope() == "road-node" {
       source_nodes[node.id] = node
@@ -146,8 +146,8 @@ fn town_snapshot_canvas_roads(
 ///|
 fn town_snapshot_canvas_road_at(
   roads : ArrayView[TownCanvasRoadCell],
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> TownCanvasRoadCell? {
   for road in roads {
     if road.x == x && road.y == y {
@@ -180,8 +180,8 @@ fn town_canvas_road_overlay_visible_with_transport(
 fn town_snapshot_canvas_terrain(
   snapshot : @energy_valley_contract.TownSnapshot,
   road : TownCanvasRoadCell?,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> String {
   match road {
     Some(value) => if value.bridge { "bridge" } else { "road" }
@@ -228,8 +228,8 @@ fn town_snapshot_canvas_transport_base_terrain(
   snapshot : @energy_valley_contract.TownSnapshot,
   roads : Map[String, TownCanvasRoadCell],
   road : TownCanvasRoadCell,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> String {
   if road.bridge ||
     (
@@ -282,8 +282,8 @@ fn town_snapshot_canvas_transport_terrain(
   snapshot : @energy_valley_contract.TownSnapshot,
   roads : Map[String, TownCanvasRoadCell],
   road : TownCanvasRoadCell?,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> String {
   match road {
     Some(value) if value.custom =>
@@ -297,8 +297,8 @@ fn town_snapshot_canvas_transport_terrain(
 ///|
 fn town_snapshot_canvas_variation(
   snapshot : @energy_valley_contract.TownSnapshot,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Double {
   (ecosystem_stable_hash("\{snapshot.world.blueprint_digest}:\{x}:\{y}").abs() %
   1000).to_double() /
@@ -310,14 +310,14 @@ priv struct TownCanvasBuilding {
   place_id : @energy_valley_contract.StableId
   name : String
   style : String
-  x : Int
-  y : Int
-  width : Int
-  depth : Int
-  entrance_x : Int?
-  entrance_y : Int?
-  floors : Int
-  interior_seed : Int
+  x : Int32
+  y : Int32
+  width : Int32
+  depth : Int32
+  entrance_x : Int32?
+  entrance_y : Int32?
+  floors : Int32
+  interior_seed : Int32
   module_key : String?
   authored_id : String?
 } derive(Debug, Eq)
@@ -325,7 +325,7 @@ priv struct TownCanvasBuilding {
 ///|
 fn town_canvas_place_bounds(
   place : @energy_valley_contract.Place,
-) -> (Int, Int, Int, Int)? {
+) -> (Int32, Int32, Int32, Int32)? {
   if place.footprint.vertices.is_empty() {
     return None
   }

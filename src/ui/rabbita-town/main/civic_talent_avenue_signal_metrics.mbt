@@ -1,17 +1,17 @@
 ///|
-fn talent_avenue_verified_card_bonus(verified_cards : Int) -> Int {
+fn talent_avenue_verified_card_bonus(verified_cards : Int32) -> Int32 {
   verified_cards * 8
 }
 
 ///|
-fn talent_avenue_activity_score(model : Model) -> Int {
+fn talent_avenue_activity_score(model : Model) -> Int32 {
   talent_avenue_activity_score_from_signals(talent_signals(model))
 }
 
 ///|
 fn talent_avenue_activity_score_from_signals(
   signals : Array[TalentSignalSim],
-) -> Int {
+) -> Int32 {
   if signals.is_empty() {
     return 0
   }
@@ -23,14 +23,14 @@ fn talent_avenue_activity_score_from_signals(
 }
 
 ///|
-fn talent_avenue_verified_card_count(model : Model) -> Int {
+fn talent_avenue_verified_card_count(model : Model) -> Int32 {
   talent_avenue_verified_card_count_from_signals(talent_signals(model))
 }
 
 ///|
 fn talent_avenue_verified_card_count_from_signals(
   signals : Array[TalentSignalSim],
-) -> Int {
+) -> Int32 {
   let mut count = 0
   for signal in signals {
     if signal.evidence_status == "Verified evidence" {

@@ -10,11 +10,40 @@ import { createVocabularyExplorer } from './pack_vocabulary_explorer.js'
 const SNAPSHOT_URL = '/api/pack-bridge'
 const CANDIDATE_URL = '/api/pack-bridge/candidates'
 
+// platform-base.js normally rewrites app-owned root requests. Resolve the same
+// trusted mount explicitly too, including embedded Pack apps. Already-prefixed
+// URLs are left alone by that transport wrapper, so they are never doubled.
+export function packProductPath(route) {
+  const base = String(globalThis.__MOONTOWN_BASE_PATH || '').replace(/\/$/, '')
+  const prefix = '/pack-apps/moontown'
+  const pathname = String(globalThis.location?.pathname || '/')
+  const mount = base || (pathname === prefix || pathname.startsWith(`${prefix}/`) ? prefix : '')
+  return `${mount}/${String(route).replace(/^\/+/, '')}`
+}
+
 function element(tag, className = '', text = '') {
   const node = document.createElement(tag)
   if (className) node.className = className
   if (text) node.textContent = text
   return node
+}
+
+function advanced(label, ...children) {
+  const details = element('details', 'town-advanced')
+  const summary = element('summary', '', `高级 · ${label}`)
+  details.append(summary, ...children)
+  return details
+}
+
+function hostedTown() {
+  return globalThis.__MOONTOWN_PUBLIC_PLATFORM === true ||
+    /^\/moontown(?:\/|$)/.test(globalThis.__MOONTOWN_BASE_PATH || '')
+}
+
+function bridgeAccessError(status) {
+  const error = new Error(`Pack Bridge unavailable (${status})`)
+  error.status = status
+  return error
 }
 
 function slug(value) {
@@ -37,9 +66,14 @@ function bridgeState(snapshot) {
 }
 
 async function fetchSnapshot() {
-  const response = await fetch(SNAPSHOT_URL, { cache: 'no-store' })
-  if (!response.ok) throw new Error(`Pack Bridge unavailable (${response.status})`)
-  return bridgeState(await response.json())
+  const response = await fetch(packProductPath(SNAPSHOT_URL), { cache: 'no-store', credentials: 'same-origin' })
+  if (!response.ok) throw bridgeAccessError(response.status)
+  const snapshot = await response.json()
+  // A login HTML fallback or unrelated API response must not activate empty
+  // authoring forms. Native routing remains the authorization authority.
+  if (!Array.isArray(snapshot?.capabilities) || !Array.isArray(snapshot?.lifecycles) ||
+      !Array.isArray(snapshot?.projections?.projections)) throw bridgeAccessError('invalid-response')
+  return bridgeState(snapshot)
 }
 
 function lifecycleFor(state, packId) {
@@ -86,14 +120,14 @@ function subjectCard(pack, subject, status, selected, onSelect) {
   )
   heading.append(identity, attention)
   card.append(heading)
-  card.append(element('p', 'pack-layer-summary', subject.summary || 'No summary.'))
+  card.append(element('p', 'pack-layer-summary', subject.summary || '暂无摘要。'))
   const choose = element('input')
   choose.type = 'checkbox'
   choose.checked = selected
   choose.dataset.sourceSubject = subjectKey(pack.pack_id, subject.subject_ref)
   choose.addEventListener('change', () => onSelect(choose))
   const sourceLabel = element('label', 'pack-layer-filter')
-  sourceLabel.append(choose, element('span', '', 'Use as proposal source'))
+  sourceLabel.append(choose, element('span', '', '选作资料'))
   card.append(sourceLabel)
   const meta = element('div', 'pack-layer-meta')
   meta.append(
@@ -101,7 +135,8 @@ function subjectCard(pack, subject, status, selected, onSelect) {
     element('span', '', subject.lifecycle_state || 'unknown'),
     element('span', '', `${subject.evidence_refs?.length || 0} evidence`),
   )
-  card.append(meta)
+  const provenance = advanced('来源详情', meta)
+  card.append(provenance)
   if (Array.isArray(subject.operation_ids) && subject.operation_ids.length) {
     const actions = element('div', 'pack-layer-actions')
     subject.operation_ids.forEach(operationId => {
@@ -117,7 +152,7 @@ function subjectCard(pack, subject, status, selected, onSelect) {
       })
       actions.append(action)
     })
-    card.append(actions)
+    provenance.append(actions)
   }
   return card
 }
@@ -142,10 +177,10 @@ export function candidateDialog(state, onSubmitted, sources = [], { fetcher = fe
   const heading = element('header')
   const headingCopy = element('div')
   headingCopy.append(
-    element('small', '', 'Bottom-up promotion'),
-    element('h2', '', 'Propose to a domain pack'),
+    element('small', '', '2 · 提出问题 → 3 · 提交审阅'),
+    element('h2', '', '整理问题与资料'),
   )
-  const close = element('button', 'pack-dialog-close', 'Close')
+  const close = element('button', 'pack-dialog-close', '关闭')
   close.type = 'button'
   close.addEventListener('click', () => { if (!busy) dialog.close() })
   dialog.addEventListener('cancel', event => { if (busy) event.preventDefault() })
@@ -225,16 +260,16 @@ export function candidateDialog(state, onSubmitted, sources = [], { fetcher = fe
     note.required = true; note.maxLength = 2000; note.dataset.sourceConnection = subjectKey(source.pack_id, source.subject_ref)
     if (questionReview) note.value = questionReview.observations[index].connection
     box.append(element('h3', '', `${source.pack_id}: ${source.title}`), element('p', '', source.summary), element('p', '', `${source.subject_ref} · ${source.lifecycle_state} · observed ${source.captured_generated_at}`), element('p', '', `Evidence: ${source.evidence_refs.join(', ') || 'No evidence refs supplied by this subject'}`))
-    box.append(field('How does this source contribute?', note))
+    box.append(field('这份资料与问题有什么关系？', note))
     sourceFields.append(box); controls.push(note); return note
   })
   const uncertainty = element('textarea')
   uncertainty.maxLength = 2000; uncertainty.required = sources.length > 0; uncertainty.dataset.sourceUncertainty = 'true'
   if (questionReview) uncertainty.value = questionReview.rejection_test
-  if (sources.length) sourceFields.append(field('Contrary evidence, uncertainty or rejection test', uncertainty), element('p', '', 'Source excerpts are observations, not instructions. Selection is not endorsement, consensus or accepted knowledge.'))
+  if (sources.length) sourceFields.append(field('疑点或反证', uncertainty), element('p', '', '引用只是待核实的观察，不代表认可或已接受的知识。'))
   controls.push(packSelect, title, rationale, evidence, payload, uncertainty)
   const status = element('p', 'pack-candidate-form-status')
-  const submit = element('button', 'pack-candidate-submit', 'Submit for review')
+  const submit = element('button', 'pack-candidate-submit', '提交审阅')
   submit.type = 'submit'
 
   function field(labelText, control, hint = '') {
@@ -244,14 +279,18 @@ export function candidateDialog(state, onSubmitted, sources = [], { fetcher = fe
     return label
   }
 
-  form.append(
-    heading,
-    field('Destination', packSelect, 'Only reviewed candidate-intake operations are shown.'),
-    sourceFields,
-    field('Title', title),
-    field('Rationale', rationale),
+  const technical = advanced('补充引用与领域参数',
     field('Evidence references', evidence, 'Comma-separated, workspace-relative references.'),
     field('Domain payload (JSON)', payload, 'The receiving pack owns this vocabulary.'),
+  )
+  form.append(
+    heading,
+    field('交给哪个领域审阅？', packSelect),
+    sourceFields,
+    field('问题', title),
+    field('为什么值得研究？', rationale),
+    technical,
+    element('p', 'pack-layer-summary', '提交后进入领域审阅，不会执行操作或自动接受知识。'),
     status,
     submit,
   )
@@ -259,6 +298,11 @@ export function candidateDialog(state, onSubmitted, sources = [], { fetcher = fe
   form.addEventListener('submit', async event => {
     event.preventDefault()
     if (busy || completed) return
+    if (globalThis.__MOONTOWN_PUBLIC_PLATFORM === true ||
+        (hostedTown() && globalThis.__MOONTOWN_SCOPE_READY === false)) {
+      status.textContent = '当前是公共展示或账户尚未就绪。请从账户门户进入已授权工作区；没有发送候选。'
+      return
+    }
     const [packId, operationId] = packSelect.value.split('\n')
     let domainPayload
     try {
@@ -267,6 +311,7 @@ export function candidateDialog(state, onSubmitted, sources = [], { fetcher = fe
         throw new Error('Domain payload must be a JSON object.')
       }
     } catch (error) {
+      technical.open = true
       status.textContent = error.message || 'Invalid domain payload.'
       return
     }
@@ -300,10 +345,10 @@ export function candidateDialog(state, onSubmitted, sources = [], { fetcher = fe
     dialog.dataset.candidateBusy = 'true'
     controls.forEach(control => { control.disabled = true })
     submit.disabled = true
-    status.textContent = 'Routing candidate…'
+    status.textContent = '正在提交审阅…'
     try {
       if (!pending && sources.length) {
-        const check = await fetcher(SNAPSHOT_URL, { cache: 'no-store' })
+        const check = await fetcher(packProductPath(SNAPSHOT_URL), { cache: 'no-store', credentials: 'same-origin' })
         if (!check.ok) throw Error('Could not recheck the selected sources. No candidate was sent.')
         const current = bridgeState(await check.json())
         assertCurrentSources(sources, current)
@@ -312,8 +357,9 @@ export function candidateDialog(state, onSubmitted, sources = [], { fetcher = fe
       }
       pending = candidate
       dialog.dataset.candidatePending = 'true'
-      const response = await fetcher(CANDIDATE_URL, {
+      const response = await fetcher(packProductPath(CANDIDATE_URL), {
         method: 'POST',
+        credentials: 'same-origin',
         headers: { 'content-type': 'application/json' },
         body: serializeCandidate(candidate),
       })
@@ -336,8 +382,8 @@ export function candidateDialog(state, onSubmitted, sources = [], { fetcher = fe
       busy = false
       dialog.dataset.candidateBusy = 'false'
       submit.disabled = completed
-      submit.textContent = completed ? 'Candidate routed' : pending ? 'Retry same candidate' : 'Submit for review'
-      controls.forEach(control => { control.disabled = Boolean(pending) })
+      submit.textContent = completed ? '已提交审阅' : pending ? '核对并重试' : '提交审阅'
+      controls.forEach(control => { control.disabled = Boolean(pending) || completed })
     }
   })
   dialog.append(form)
@@ -358,20 +404,42 @@ export function installPackBridgePanel() {
   panel.hidden = true
   const header = element('header', 'pack-bridge-header')
   const headerCopy = element('div')
-  headerCopy.append(element('small', '', 'Pack Bridge'), element('h2', '', 'Domain layers'))
-  const close = element('button', 'pack-bridge-close', 'Close')
+  headerCopy.append(element('small', '', '研究资料'), element('h2', '', '领域资料'))
+  const close = element('button', 'pack-bridge-close', '关闭')
   close.type = 'button'
   header.append(headerCopy, close)
-  const status = element('p', 'pack-bridge-status', 'Open to load active pack projections.')
+  const status = element('p', 'pack-bridge-status', '打开后检查当前工作区的资料连接。')
+  status.setAttribute('role', 'status')
+  status.setAttribute('aria-live', 'polite')
+  const empty = element('section', 'pack-layer-empty')
+  empty.dataset.packBridgeEmpty = 'true'
+  const workspace = element('div')
+  workspace.dataset.packBridgeWorkspace = 'true'
+  workspace.hidden = true
   const filters = element('div', 'pack-layer-filters')
   const subjects = element('section', 'pack-layer-subjects')
   const candidatesHeading = element('header', 'pack-candidates-heading')
-  candidatesHeading.append(element('h3', '', 'Candidate flow'))
-  const propose = element('button', 'pack-candidate-open', 'Propose to pack')
+  candidatesHeading.append(element('h3', '', '最近提交'))
+  const propose = element('button', 'pack-candidate-open', '整理问题')
   propose.type = 'button'
-  candidatesHeading.append(propose)
   const candidates = element('ul', 'pack-candidate-list')
-  panel.append(header, status, filters, subjects, candidatesHeading, candidates)
+  const manual = element('div')
+  manual.append(element('p', 'pack-layer-summary', '选择要引用的资料，再整理问题。提交只进入审阅，不自动执行。'), subjects, propose)
+  const modeLabel = element('label', 'pack-candidate-field')
+  const mode = element('select')
+  mode.dataset.packDiscoveryMode = 'true'
+  mode.setAttribute('aria-label', '选择资料方式')
+  for (const [value, label] of [['browse', '浏览资料'], ['vocabulary', '相关词'], ['changes', '查看变化'], ['shared', '相同来源'], ['question', '跨领域问题']]) {
+    const option = element('option', '', label); option.value = value; mode.append(option)
+  }
+  mode.value = 'browse'
+  modeLabel.append(element('span', '', '1 · 选择资料'), mode)
+  const modeContent = element('div')
+  const submitted = advanced('提交记录', candidatesHeading, candidates)
+  const noIntake = element('p', 'pack-layer-summary')
+  noIntake.hidden = true
+  workspace.append(modeLabel, advanced('资料范围', filters), noIntake, modeContent, submitted)
+  panel.append(header, status, empty, workspace)
   document.body.append(launch, panel)
 
   let state = bridgeState(null)
@@ -380,6 +448,9 @@ export function installPackBridgePanel() {
   let selectionInitialized = false
   let dialog = null
   let refreshGeneration = 0
+  let ready = false
+  let explorers = null
+  const modes = new Map()
 
   function resumePending() {
     if (dialog?.dataset.candidatePending === 'true' || dialog?.dataset.candidateBusy === 'true') {
@@ -391,31 +462,82 @@ export function installPackBridgePanel() {
 
   function openCandidate(sources, options = {}) {
     if (resumePending()) return
+    if (!ready || globalThis.__MOONTOWN_PUBLIC_PLATFORM === true) return
+    if (!state.capabilities.some(item => item.intake_operation_ids?.length)) {
+      status.textContent = '资料可浏览，但当前工作区尚无可接收建议的审阅入口。'
+      return
+    }
     dialog?.remove()
     dialog = candidateDialog(state, refresh, sources, options)
     dialog.showModal()
   }
 
-  const discovery = createMaterialDiscovery({
-    resumePending,
-    onPropose: ({ sources, review }) => openCandidate(sources, { materialReview: review }),
-  })
-  const questionComposer = createCrossPackQuestion({
-    resumePending,
-    getSelected: () => [...proposalSources.values()],
-    onPropose: ({ sources, review }) => openCandidate(sources, { questionReview: review }),
-  })
-  const changes = createObservationChanges({
-    resumePending,
-    onPropose: ({ sources, review }) => openCandidate(sources, { changeReview: review }),
-  })
-  const vocabulary = createVocabularyExplorer({
-    resumePending,
-    onPropose: ({ sources, review }) => openCandidate(sources, { vocabularyReview: review }),
-  })
-  panel.replaceChildren(header, status, filters, vocabulary.section, changes.section, questionComposer.section, discovery.section, subjects, candidatesHeading, candidates)
+  function ensureExplorers() {
+    if (explorers) return
+    const discovery = createMaterialDiscovery({ resumePending, onPropose: ({ sources, review }) => openCandidate(sources, { materialReview: review }) })
+    const questionComposer = createCrossPackQuestion({ resumePending, getSelected: () => [...proposalSources.values()], onPropose: ({ sources, review }) => openCandidate(sources, { questionReview: review }) })
+    const changes = createObservationChanges({ resumePending, onPropose: ({ sources, review }) => openCandidate(sources, { changeReview: review }) })
+    const vocabulary = createVocabularyExplorer({ resumePending, onPropose: ({ sources, review }) => openCandidate(sources, { vocabularyReview: review }) })
+    explorers = { discovery, questionComposer, changes, vocabulary }
+    // Unstyled wrappers own visibility so grid rules on the existing sections
+    // cannot override the hidden attribute. Keep drafts mounted across modes.
+    for (const [key, section] of [['browse', manual], ['vocabulary', vocabulary.section], ['changes', changes.section], ['shared', discovery.section], ['question', questionComposer.section]]) {
+      const wrapper = element('div'); wrapper.dataset.packDiscoveryPane = key
+      wrapper.append(section); modes.set(key, wrapper); modeContent.append(wrapper)
+    }
+    selectMode()
+  }
+
+  function selectMode() {
+    for (const [key, wrapper] of modes) wrapper.hidden = key !== mode.value
+  }
+  mode.addEventListener('change', selectMode)
+
+  function refreshExplorers() {
+    if (!explorers) return
+    explorers.discovery.refresh(state, selected)
+    explorers.questionComposer.refresh(state)
+    explorers.changes.refresh(state, selected)
+    explorers.vocabulary.refresh(state, selected)
+  }
+
+  function unavailable(kind, detail = '') {
+    ready = false
+    workspace.hidden = true
+    empty.hidden = false
+    state = bridgeState(null)
+    proposalSources.clear()
+    // Retained drafts must observe the outage too; no stale open dialog can
+    // treat its last successful projection as current after a failed refresh.
+    refreshExplorers()
+    const copy = {
+      public: ['公共小镇仅供浏览', '领域资料与提问需要在已授权的个人工作区中使用。登录账户不代表工作区已连接。'],
+      auth: ['请先确认工作区访问权限', '登录已过期或当前账户无权读取这里的领域资料。登录后仍需进入已授权工作区。'],
+      scope: ['账户连接尚未就绪', '请重新载入页面，或从账户门户进入已授权工作区。'],
+      missing: ['当前工作区尚未连接领域资料', '资料服务未启用。请进入已配置的工作区；此处没有可提交的操作。'],
+      empty: ['还没有已连接的领域资料', '当前工作区没有可用的领域模块。连接完成后可在这里选择资料、提出问题。'],
+      offline: ['暂时无法读取领域资料', '已有草稿仍保留在本页。连接恢复后重试，不会自动发送。'],
+    }[kind]
+    status.textContent = copy[0]
+    empty.replaceChildren(element('p', 'pack-layer-summary', copy[1]))
+    if (hostedTown()) {
+      // /user/ is the deployed same-origin account portal, not a promise that
+      // login provisions or authorizes a private workspace.
+      const account = element('a', 'pack-layer-action', '打开账户门户')
+      account.href = '/user/'; account.dataset.packAccountLink = 'true'
+      empty.append(account)
+    }
+    if (kind !== 'public') {
+      const retry = element('button', 'pack-candidate-open', kind === 'scope' ? '重新载入' : '重试连接')
+      retry.type = 'button'; retry.dataset.packBridgeRetry = 'true'
+      retry.addEventListener('click', () => kind === 'scope' ? globalThis.location?.reload() : refresh())
+      empty.append(retry)
+    }
+    if (detail) empty.append(advanced('连接详情', element('p', '', detail)))
+  }
 
   function render() {
+    ensureExplorers()
     filters.replaceChildren()
     if (!selectionInitialized) {
       state.capabilities.forEach(capability => selected.add(capability.pack_id))
@@ -428,10 +550,7 @@ export function installPackBridgePanel() {
         render()
       }))
     })
-    discovery.refresh(state, selected)
-    questionComposer.refresh(state)
-    changes.refresh(state, selected)
-    vocabulary.refresh(state, selected)
+    refreshExplorers()
     subjects.replaceChildren()
     let count = 0
     state.capabilities.forEach(capability => {
@@ -442,40 +561,45 @@ export function installPackBridgePanel() {
           const key = subjectKey(capability.pack_id, subject.subject_ref)
           if (!choose.checked) proposalSources.delete(key)
           else { try { if (proposalSources.size >= 12) throw Error('Choose at most twelve subjects.'); proposalSources.set(key, captureSubject(projection, subject)) } catch (error) { choose.checked = false; status.textContent = error.message; return } }
-          propose.textContent = proposalSources.size ? `Propose from ${proposalSources.size} source(s)` : 'Propose to pack'
+          propose.textContent = proposalSources.size ? `整理问题 · ${proposalSources.size} 份资料` : '整理问题'
         }))
         count += 1
       })
     })
     if (!count) {
-      subjects.append(element('p', 'pack-layer-empty', 'No projected subjects from the selected active packs.'))
+      subjects.append(element('p', 'pack-layer-empty', '所选领域还没有可浏览的资料。'))
     }
     candidates.replaceChildren(...state.candidates.slice(-8).reverse().map(candidateRow))
     const projecting = state.lifecycles.filter(item => item.stage === 'projecting').length
-    status.textContent = `${state.capabilities.length} bridge-ready pack(s) · ${count} visible subject(s) · ${projecting} projecting`
-    propose.textContent = proposalSources.size ? `Propose from ${proposalSources.size} source(s)` : 'Propose to pack'
+    status.textContent = `${state.capabilities.length} 个领域 · ${count} 条资料 · ${projecting} 个已连接`
+    propose.textContent = proposalSources.size ? `整理问题 · ${proposalSources.size} 份资料` : '整理问题'
     propose.disabled = !state.capabilities.some(item => item.intake_operation_ids?.length)
+    noIntake.hidden = !propose.disabled
+    noIntake.textContent = '当前领域仅提供资料浏览，尚无可接收建议的审阅入口。'
+    ready = true
+    empty.hidden = true
+    workspace.hidden = false
+    selectMode()
   }
 
   async function refresh() {
     const generation = ++refreshGeneration
-    status.textContent = 'Refreshing pack lifecycle…'
+    if (globalThis.__MOONTOWN_PUBLIC_PLATFORM === true) { unavailable('public'); return }
+    if (hostedTown() && globalThis.__MOONTOWN_SCOPE_READY === false) { unavailable('scope'); return }
+    status.textContent = '正在检查资料连接…'
+    ready = false
+    workspace.hidden = true
+    empty.hidden = true
     try {
       const snapshot = await fetchSnapshot()
       if (generation !== refreshGeneration) return
       state = snapshot
       proposalSources.clear()
+      if (!state.capabilities.length) { unavailable('empty'); return }
       render()
     } catch (error) {
       if (generation !== refreshGeneration) return
-      state = bridgeState(null)
-      discovery.refresh(state, selected)
-      questionComposer.refresh(state)
-      changes.refresh(state, selected)
-      vocabulary.refresh(state, selected)
-      propose.disabled = true
-      status.textContent = error.message || String(error)
-      subjects.replaceChildren(element('p', 'pack-layer-empty', 'Pack Bridge is not available in this runtime.'))
+      unavailable(error.status === 401 || error.status === 403 ? 'auth' : error.status === 404 ? 'missing' : 'offline', error.message || String(error))
     }
   }
 
@@ -488,7 +612,7 @@ export function installPackBridgePanel() {
   close.addEventListener('click', () => {
     panel.hidden = true
     launch.hidden = false
-    const origin = document.querySelector('#town-pack-tools-open') || launch
+    const origin = document.querySelector('#account-pack-tools-open') || document.querySelector('#town-pack-tools-open') || launch
     origin.focus?.()
   })
   propose.addEventListener('click', () => {

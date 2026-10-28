@@ -6,6 +6,10 @@
   min-height: 100dvh;
   background: #111a16;
   color: #17241b;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .account-experience-paid {
@@ -29,6 +33,7 @@
 }
 
 .account-global-nav {
+  flex: 0 0 auto;
   position: relative;
   z-index: 1200;
   min-height: 64px;
@@ -59,6 +64,12 @@
 
 .account-global-links::-webkit-scrollbar { display: none; }
 .account-global-link { flex: 0 0 auto; }
+.account-navigation-more { position: relative; flex: 0 0 auto; }
+.account-navigation-more > summary { cursor: pointer; list-style: none; }
+.account-navigation-more > summary::-webkit-details-marker { display: none; }
+.account-navigation-menu { position: absolute; z-index: 1300; right: 0; top: calc(100% + 8px); display: grid; min-width: 180px; max-height: min(70dvh, 480px); overflow: auto; padding: 8px; border: 1px solid var(--account-nav-border); border-radius: 14px; background: var(--account-nav-bg); box-shadow: 0 12px 32px rgb(32 47 35 / 18%); }
+.account-navigation-menu .account-global-link { white-space: nowrap; }
+.account-global-nav :is(a, button, summary):focus-visible { outline: 2px solid var(--account-accent-strong); outline-offset: -2px; }
 
 .account-global-identity {
   min-width: 0;
@@ -128,6 +139,10 @@
   font-size: 12px;
   font-weight: 680;
   text-decoration: none;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
 }
 
 .account-global-link:hover,
@@ -174,9 +189,12 @@
 
 .account-product-surface {
   position: relative;
-  height: calc(100dvh - 64px);
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
+
+.account-product-surface:has(> .town-shell) { overflow-y: auto; }
 
 .account-product-surface > .energy-valley-golden {
   width: 100%;
@@ -760,7 +778,7 @@
   }
 
   .account-product-surface {
-    height: calc(100dvh - 108px);
+    height: auto;
   }
 
   .account-management-summary,
@@ -812,8 +830,12 @@
   }
 
   .account-product-surface {
-    height: calc(100dvh - 102px);
+    height: auto;
   }
+
+  .account-global-links { justify-content: space-between; }
+  .account-global-links > .account-global-link { flex: 1; padding-inline: 6px; }
+  .account-global-links > .account-global-link > .town-ui-label { flex-direction: column; gap: 2px; font-size: 11px; }
 
   .account-management {
     padding: 18px 12px 84px;

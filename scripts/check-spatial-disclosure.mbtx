@@ -1,0 +1,42 @@
+///|
+import {
+  "moonbitlang/x@0.5.5/fs",
+}
+
+///|
+// Source-contract regression for the thin Three.js/DOM boundary. Interaction
+// state and semantic selection are covered by spatial_controls_wbtest.mbt;
+// rendering and browser downloads still require product browser verification.
+fn main raise {
+  let root = "src/ui/landmark-studio/web/"
+  let space = @fs.read_file_to_string(root + "town-space.js")
+  let report = @fs.read_file_to_string(root + "town-space-report.js")
+  assert_true(space.contains("this.advanced = disclosure('高级')"))
+  assert_true(space.contains("options.append(this.report,"))
+  assert_false(space.contains("true), this.report)"))
+  assert_true(
+    space.contains("this.advanced.append(options, this.flowPanel, review)"),
+  )
+  assert_true(space.contains("'完整模型审阅 ↗'"))
+  assert_true(space.contains("'datacenter.html' : 'interior.html'"))
+  assert_true(space.contains("this.family = 'none'; this.playing = false"))
+  assert_true(
+    space.contains(
+      "路径与流动为原理示意，不是实时任务或传感器数据。",
+    ),
+  )
+  assert_true(report.contains("'高级 · 报告记录与导出'"))
+  assert_true(report.contains("detail.append(exportButton)"))
+  assert_true(report.contains("'高级 · 规划估算'"))
+  assert_true(report.contains("物理位置未绑定"))
+  assert_true(
+    report.contains("功耗、温度、吞吐率：暂无实测数据。"),
+  )
+  assert_true(report.contains("context.selection?.scope === 'runtime'"))
+  assert_true(report.contains("selected.workloads ?? '未上报'"))
+  assert_true(report.contains("dialog.showModal(); close.focus()"))
+  assert_true(report.contains("opener?.isConnected"))
+  println(
+    "spatial disclosure: report, design tools and full reviewers remain behind contextual Advanced; missing measurements remain explicit",
+  )
+}

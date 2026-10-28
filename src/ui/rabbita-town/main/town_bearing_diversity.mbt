@@ -6,7 +6,7 @@ let town_bearing_families : Array[String] = [
 ///|
 /// Synthetic display identities carry their explicit variant. Existing source
 /// identities keep a stable hash choice and are never renamed or retyped.
-fn town_bearing_variant(id : String) -> Int {
+fn town_bearing_variant(id : String) -> Int32 {
   for variant in 0..<3 {
     if id.has_prefix("procedural-grid-diversity-\{variant}-") {
       return variant
@@ -18,7 +18,7 @@ fn town_bearing_variant(id : String) -> Int {
 ///|
 fn town_bearing_find_diversity_lot(
   style : String,
-  variant : Int,
+  variant : Int32,
   occupied : Array[IntersectionRoadPreviewBuilding],
 ) -> IntersectionRoadPreviewBuilding? {
   let seed = energy_valley_mod(
@@ -78,7 +78,7 @@ fn town_bearing_find_diversity_lot(
 /// buildable pockets cannot silently eliminate every civic/market/workshop.
 /// Only new decorative infill is added. All existing lots/identities survive.
 fn town_bearing_complete_mix(
-  buildings : Map[Int, Array[IntersectionRoadPreviewBuilding]],
+  buildings : Map[Int32, Array[IntersectionRoadPreviewBuilding]],
 ) -> Unit {
   if wenyu_scene_prefix.length() != 257 * 145 ||
     wenyu_scene_road_prefix.length() != 257 * 145 {

@@ -17,9 +17,8 @@ fn social_square_worker_label(worker : WorkerSim?) -> String {
 ///|
 priv struct SocialSquareSnapshot {
   worker_label : String
-  match_count : Int
-  queue_pressure : Int
-  lead_confidence : Int
+  match_count : Int32
+  queue_pressure : Int32
   stage : String
 }
 
@@ -38,7 +37,6 @@ fn social_square_snapshot(
       match_count,
       worker,
     ),
-    lead_confidence: social_square_lead_match(model).confidence,
     stage: social_square_stage(model, execution),
   }
 }
@@ -46,16 +44,13 @@ fn social_square_snapshot(
 ///|
 fn social_square_copy_from_snapshot(snapshot : SocialSquareSnapshot) -> String {
   [
-    "Social Square now reads like a live district instead of a static networking tile.",
-    "\{snapshot.worker_label} is holding \{snapshot.match_count} reasoned introductions,",
-    "queue pressure sits at \{snapshot.queue_pressure}%,",
-    "strongest current confidence is \{snapshot.lead_confidence}%,",
-    "and the active social step is \{snapshot.stage}.",
+    "示例合作方向 \{snapshot.match_count} 组；未发送邀请。",
+    "真实介绍需要双方同意，不提供未经验证的匹配概率。",
   ].join(" ")
 }
 
 ///|
-fn social_square_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
+fn social_square_queue_pressure(model : Model, worker : WorkerSim?) -> Int32 {
   social_square_queue_pressure_from_inputs(
     model.pressure,
     social_square_match_count(),
@@ -65,10 +60,10 @@ fn social_square_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
 
 ///|
 fn social_square_queue_pressure_from_inputs(
-  pressure : Int,
-  match_count : Int,
+  pressure : Int32,
+  match_count : Int32,
   worker : WorkerSim?,
-) -> Int {
+) -> Int32 {
   civic_queue_pressure_from_policy(
     social_square_queue_pressure_policy(pressure, match_count),
     worker,
@@ -77,8 +72,8 @@ fn social_square_queue_pressure_from_inputs(
 
 ///|
 fn social_square_queue_pressure_policy(
-  pressure : Int,
-  match_count : Int,
+  pressure : Int32,
+  match_count : Int32,
 ) -> CivicQueuePressurePolicy {
   {
     worker_base: pressure,
@@ -94,7 +89,7 @@ fn social_square_queue_pressure_policy(
 fn social_square_health(
   worker : WorkerSim?,
   execution : @core.TaskExecutionRecord?,
-) -> Int {
+) -> Int32 {
   civic_health_after_execution(
     social_square_base_health(worker),
     execution,
@@ -113,7 +108,7 @@ fn social_square_health_execution_policy() -> CivicHealthExecutionPolicy {
 }
 
 ///|
-fn social_square_base_health(worker : WorkerSim?) -> Int {
+fn social_square_base_health(worker : WorkerSim?) -> Int32 {
   let base = civic_worker_energy_health_base(
     worker,
     social_square_worker_health_policy(),

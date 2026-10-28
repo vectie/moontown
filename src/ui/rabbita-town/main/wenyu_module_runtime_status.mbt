@@ -39,7 +39,7 @@ fn module_runtime_status_label(kind : ModuleRuntimeStatusKind) -> String {
 fn module_runtime_status_count(
   kind : ModuleRuntimeStatusKind,
   expected : ModuleRuntimeStatusKind,
-) -> Int {
+) -> Int32 {
   match (kind, expected) {
     (Alert, Alert)
     | (Review, Review)
@@ -122,20 +122,20 @@ fn module_projection_source_label(source : String) -> String {
 
 ///|
 priv struct ModuleRuntimeCounts {
-  running : Int
-  waiting : Int
-  review : Int
-  blocked : Int
-  completed : Int
+  running : Int32
+  waiting : Int32
+  review : Int32
+  blocked : Int32
+  completed : Int32
 }
 
 ///|
 fn module_runtime_counts(
-  running? : Int = 0,
-  waiting? : Int = 0,
-  review? : Int = 0,
-  blocked? : Int = 0,
-  completed? : Int = 0,
+  running~ : Int32 = 0,
+  waiting~ : Int32 = 0,
+  review~ : Int32 = 0,
+  blocked~ : Int32 = 0,
+  completed~ : Int32 = 0,
 ) -> ModuleRuntimeCounts {
   { running, waiting, review, blocked, completed, }
 }

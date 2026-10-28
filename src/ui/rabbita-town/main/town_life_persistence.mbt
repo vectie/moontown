@@ -1,10 +1,10 @@
 ///|
-let town_life_phone_capacity : Int = frontend_setting_int(
+let town_life_phone_capacity : Int32 = frontend_setting_int(
   "town_life_phone_capacity", 80,
 )
 
 ///|
-let town_life_report_capacity : Int = frontend_setting_int(
+let town_life_report_capacity : Int32 = frontend_setting_int(
   "town_life_report_capacity", 30,
 )
 
@@ -56,7 +56,7 @@ fn town_life_decode_save(text : String) -> TownLifeSave? {
 fn town_life_stamp_compare(
   left : TownLifeCausalStamp,
   right : TownLifeCausalStamp,
-) -> Int {
+) -> Int32 {
   if left.lamport < right.lamport {
     -1
   } else if left.lamport > right.lamport {
@@ -103,7 +103,7 @@ fn town_life_optional_stamp_equal(
 }
 
 ///|
-fn town_life_dot_compare(left : TownLifeDot, right : TownLifeDot) -> Int {
+fn town_life_dot_compare(left : TownLifeDot, right : TownLifeDot) -> Int32 {
   if left.sequence < right.sequence {
     -1
   } else if left.sequence > right.sequence {
@@ -121,7 +121,7 @@ fn town_life_event_order(
   right_stamp : TownLifeCausalStamp,
   right_dot : TownLifeDot,
   right_id : String,
-) -> Int {
+) -> Int32 {
   let by_stamp = town_life_stamp_compare(left_stamp, right_stamp)
   if by_stamp != 0 {
     by_stamp
@@ -136,7 +136,7 @@ fn town_life_event_order(
 }
 
 ///|
-fn town_life_stable_hash(text : String) -> Int {
+fn town_life_stable_hash(text : String) -> Int32 {
   let mut hash = 17
   for char in text {
     hash = (hash * 131 + char.to_int()) % 1000000007
@@ -145,14 +145,14 @@ fn town_life_stable_hash(text : String) -> Int {
 }
 
 ///|
-fn town_life_legacy_dot(stream : String, sequence : Int) -> TownLifeDot {
+fn town_life_legacy_dot(stream : String, sequence : Int32) -> TownLifeDot {
   { writer_id: "legacy-\{stream}", sequence: sequence.max(0), }
 }
 
 ///|
 fn town_life_legacy_stamp(
   stream : String,
-  lamport : Int,
+  lamport : Int32,
 ) -> TownLifeCausalStamp {
   { writer_id: "legacy-\{stream}", lamport: lamport.max(0), }
 }
@@ -161,7 +161,7 @@ fn town_life_legacy_stamp(
 fn town_life_watermark_for(
   watermarks : ArrayView[TownLifePruneWatermark],
   writer_id : String,
-) -> Int {
+) -> Int32 {
   let mut result = -1
   for watermark in watermarks {
     if watermark.writer_id == writer_id {
@@ -268,7 +268,7 @@ fn town_life_observe_dot(
 ///|
 fn town_life_max_observed_sequence(
   counters : ArrayView[TownLifeWriterCounter],
-) -> Int {
+) -> Int32 {
   let mut result = 0
   for counter in counters {
     result = result.max(counter.sequence)
@@ -277,7 +277,7 @@ fn town_life_max_observed_sequence(
 }
 
 ///|
-fn town_life_max_observed_lamport(model : Model) -> Int {
+fn town_life_max_observed_lamport(model : Model) -> Int32 {
   let mut result = town_life_max_observed_sequence(
     model.town_life_writer_counters,
   )
@@ -365,7 +365,7 @@ fn town_life_seed_text_events(
   stream : String,
 ) -> Array[TownLifeTextEvent] {
   let events : Array[TownLifeTextEvent] = []
-  let occurrences : Map[String, Int] = Map([])
+  let occurrences : Map[String, Int32] = Map([])
   for index, value in values {
     let occurrence = occurrences.get(value).unwrap_or(0) + 1
     occurrences[value] = occurrence
@@ -387,7 +387,7 @@ fn town_life_seed_phone_events(
   values : ArrayView[PhoneMessage],
 ) -> Array[TownLifePhoneEvent] {
   let events : Array[TownLifePhoneEvent] = []
-  let occurrences : Map[String, Int] = Map([])
+  let occurrences : Map[String, Int32] = Map([])
   for index, value in values {
     let encoded = ToJson::to_json(value).stringify()
     let occurrence = occurrences.get(encoded).unwrap_or(0) + 1
@@ -497,7 +497,7 @@ fn town_life_merge_text_event_state(
   left_watermarks : ArrayView[TownLifePruneWatermark],
   right_events : ArrayView[TownLifeTextEvent],
   right_watermarks : ArrayView[TownLifePruneWatermark],
-  capacity : Int,
+  capacity : Int32,
 ) -> (Array[TownLifeTextEvent], Array[TownLifePruneWatermark]) {
   let watermarks = town_life_merge_watermarks(left_watermarks, right_watermarks)
   let merged : Array[TownLifeTextEvent] = []
@@ -596,7 +596,7 @@ fn town_life_append_text_event(
   value : String,
   existing : ArrayView[TownLifeTextEvent],
   watermarks : ArrayView[TownLifePruneWatermark],
-  capacity : Int,
+  capacity : Int32,
 ) -> (Model, Array[TownLifeTextEvent], Array[TownLifePruneWatermark]) {
   let (dot, stamp, id, stamped) = town_life_next_event(model, stream)
   let event_id = semantic_id.unwrap_or(id)
@@ -843,7 +843,7 @@ fn town_life_attention_receipts(
 fn town_life_record_attention(
   model : Model,
   cooldown_key : String,
-  shown_tick : Int,
+  shown_tick : Int32,
 ) -> Model {
   let existing = if model.town_life_attention_counters.is_empty() &&
     !model.ecosystem_attention_receipts.is_empty() {
@@ -877,7 +877,7 @@ fn town_life_record_attention(
 }
 
 ///|
-fn town_life_awards_total(awards : ArrayView[TownLifeSparkAward]) -> Int {
+fn town_life_awards_total(awards : ArrayView[TownLifeSparkAward]) -> Int32 {
   let mut total = 0
   for award in awards {
     total += award.amount.max(0)
@@ -886,7 +886,7 @@ fn town_life_awards_total(awards : ArrayView[TownLifeSparkAward]) -> Int {
 }
 
 ///|
-fn town_life_effective_spark(save : TownLifeSave) -> Int {
+fn town_life_effective_spark(save : TownLifeSave) -> Int32 {
   save.spark_floor.unwrap_or(save.spark).max(0) +
   town_life_awards_total(save.spark_awards.unwrap_or([]))
 }
@@ -919,7 +919,11 @@ fn town_life_merge_spark_awards(
 }
 
 ///|
-fn town_life_add_spark_award(model : Model, id : String, amount : Int) -> Model {
+fn town_life_add_spark_award(
+  model : Model,
+  id : String,
+  amount : Int32,
+) -> Model {
   if model.town_life_spark_awards.any(award => award.id == id) {
     return model
   }
@@ -966,7 +970,7 @@ fn town_life_post_is_map_bound(post : KnowledgePost) -> Bool {
 }
 
 ///|
-fn town_life_legacy_reset_stamp(generation : Int) -> TownLifeCausalStamp? {
+fn town_life_legacy_reset_stamp(generation : Int32) -> TownLifeCausalStamp? {
   if generation <= 0 {
     None
   } else {

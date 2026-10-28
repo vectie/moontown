@@ -4,7 +4,7 @@ fn claim_challenge_field(
   state : @collaboration.Client,
   key : String,
   label : String,
-  multiline? : Bool = false,
+  multiline~ : Bool = false,
 ) -> @rabbita.Html {
   collaboration_field(
     "collaboration-claim-" + key,
@@ -25,11 +25,11 @@ fn render_claim_challenge(
     return button(
       attrs=@html.Attrs::build().disabled(state.busy()),
       on_click=dispatch(CollaborationEdit("claim_mode", "compose")),
-      "Challenge a source claim comparison",
+      "继续研究 · 质疑声明",
     )
   }
   let content : Array[@rabbita.Html] = [
-    h3("Source comparison → independent Book challenges"),
+    h3("继续研究 · 质疑声明"),
     p(
       "Paste JSON from claim_compare, then explicitly select one group and map each imported label/path to a registered Book and current relative source path. Imported labels are not catalog identities. Different exact values are candidate differences, not semantic contradictions.",
     ),
@@ -144,14 +144,11 @@ fn render_claim_challenge(
   }
   for
     (key, label) in [
-      ("id", "New ordinary draft ID"),
       ("title", "Challenge title"),
       ("question", "Question to investigate"),
       ("falsifier", "Observable result that would disprove the proposed answer"),
-      ("reviewer_id", "Human plan reviewer ID"),
       ("reviewer_name", "Human plan reviewer name"),
       ("objection", "Objection to preserve (optional)"),
-      ("objection_reviewer_id", "Objection decision owner ID"),
       ("objection_reviewer_name", "Objection decision owner name"),
     ] {
     content.push(
@@ -164,30 +161,59 @@ fn render_claim_challenge(
       ),
     )
   }
+  content.push(
+    render_advanced_details(
+      "保存标识与审阅人身份",
+      needs_attention=["id", "reviewer_id"].any(key => {
+        state.claim_fields.get("claim_" + key).unwrap_or("").is_empty()
+      }),
+      [
+        claim_challenge_field(dispatch, state, "id", "新草稿标识"),
+        claim_challenge_field(
+          dispatch, state, "reviewer_id", "审阅人账户标识",
+        ),
+        claim_challenge_field(
+          dispatch, state, "objection_reviewer_id", "异议审阅人账户标识",
+        ),
+        p(
+          "必须对应真实审阅账户；填写姓名不授予审核权限。",
+        ),
+      ],
+    ),
+  )
   let validation = match state.claim_challenge_input() {
     Ok(input) => @collaboration.claim_challenge_draft(input, state.books)
     Err(error) => Err(error)
+  }
+  if collaboration_has_unsaved_draft(state) {
+    content.push(
+      p("请先保存当前研究草稿，再保存这份新研究。"),
+    )
   }
   content.push(
     p(
       match validation {
         Ok(_) =>
-          "Ready to verify exact current bytes and save an ordinary draft. Reopen and Prepare remain available afterward; Start stays a separate explicit action."
+          "可以保存并编辑研究。准备与执行仍需分别确认。"
         Err(error) => error
       },
     ),
   )
   content.push(
     button(
-      attrs=@html.Attrs::build().disabled(state.busy() || validation is Err(_)),
+      attrs=@html.Attrs::build().disabled(
+        state.busy() ||
+        validation is Err(_) ||
+        collaboration_has_unsaved_draft(state),
+      ),
       on_click=dispatch(CollaborationAction("claim-challenge")),
-      "Verify mapped sources and save challenge draft",
+      "保存并编辑研究",
     ),
   )
   content.push(
     button(
       on_click=dispatch(CollaborationEdit("claim_mode", "off")),
-      "Cancel claim challenge",
+      "取消继续研究",
     ),
   )
   div(class="request-desk-stack", content)

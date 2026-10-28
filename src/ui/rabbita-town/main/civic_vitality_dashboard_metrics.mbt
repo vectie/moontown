@@ -17,13 +17,13 @@ fn vitality_dashboard_worker_label(worker : WorkerSim?) -> String {
 ///|
 priv struct VitalityDashboardSnapshot {
   worker_label : String
-  joins_today : Int
-  active_quests : Int
-  events_today : Int
-  achievement_broadcasts : Int
-  response_minutes : Int
-  agent_actions : Int
-  return_signal : Int
+  joins_today : Int32
+  active_quests : Int32
+  events_today : Int32
+  achievement_broadcasts : Int32
+  response_minutes : Int32
+  agent_actions : Int32
+  return_signal : Int32
   build_stage : String
 }
 
@@ -50,22 +50,15 @@ fn vitality_dashboard_snapshot(
 fn vitality_dashboard_copy_from_snapshot(
   snapshot : VitalityDashboardSnapshot,
 ) -> String {
-  [
-    "MoonTown now projects a real Vitality Dashboard lane:",
-    "\{snapshot.worker_label} is keeping the district pulse visible,",
-    "\{snapshot.joins_today} joins,",
-    "\{snapshot.active_quests} active quests,",
-    "and \{snapshot.events_today} events are on the board,",
-    "\{snapshot.achievement_broadcasts} achievement broadcasts are live,",
-    "service response is \{snapshot.response_minutes} minutes,",
-    "agent actions total \{snapshot.agent_actions},",
-    "return signal is \{snapshot.return_signal}%,",
-    "and the current patch stage is \{snapshot.build_stage}.",
-  ].join(" ")
+  ignore(snapshot)
+  "居民、积分、活动和服务响应统计未接入；任务记录不等于真实地区活力。"
 }
 
 ///|
-fn vitality_dashboard_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
+fn vitality_dashboard_queue_pressure(
+  model : Model,
+  worker : WorkerSim?,
+) -> Int32 {
   vitality_dashboard_queue_pressure_from_inputs(
     model.pressure,
     active_quest_count(model),
@@ -75,10 +68,10 @@ fn vitality_dashboard_queue_pressure(model : Model, worker : WorkerSim?) -> Int 
 
 ///|
 fn vitality_dashboard_queue_pressure_from_inputs(
-  pressure : Int,
-  active_quests : Int,
+  pressure : Int32,
+  active_quests : Int32,
   worker : WorkerSim?,
-) -> Int {
+) -> Int32 {
   let quest_load = active_quests * 5
   civic_queue_pressure_from_policy(
     vitality_dashboard_queue_pressure_policy(pressure, quest_load),
@@ -88,8 +81,8 @@ fn vitality_dashboard_queue_pressure_from_inputs(
 
 ///|
 fn vitality_dashboard_queue_pressure_policy(
-  pressure : Int,
-  quest_load : Int,
+  pressure : Int32,
+  quest_load : Int32,
 ) -> CivicQueuePressurePolicy {
   {
     worker_base: pressure,
@@ -106,7 +99,7 @@ fn vitality_dashboard_health(
   model : Model,
   worker : WorkerSim?,
   execution : @core.TaskExecutionRecord?,
-) -> Int {
+) -> Int32 {
   civic_health_after_execution(
     vitality_dashboard_base_health(model, worker),
     execution,
@@ -125,7 +118,7 @@ fn vitality_dashboard_health_execution_policy() -> CivicHealthExecutionPolicy {
 }
 
 ///|
-fn vitality_dashboard_base_health(model : Model, worker : WorkerSim?) -> Int {
+fn vitality_dashboard_base_health(model : Model, worker : WorkerSim?) -> Int32 {
   vitality_dashboard_base_health_from_inputs(
     model.energy,
     model.stability,
@@ -136,11 +129,11 @@ fn vitality_dashboard_base_health(model : Model, worker : WorkerSim?) -> Int {
 
 ///|
 fn vitality_dashboard_base_health_from_inputs(
-  energy : Int,
-  stability : Int,
-  return_signal : Int,
+  energy : Int32,
+  stability : Int32,
+  return_signal : Int32,
   worker : WorkerSim?,
-) -> Int {
+) -> Int32 {
   let base = match worker {
     Some(worker) =>
       clamp_metric((worker.energy + stability + return_signal) / 3)

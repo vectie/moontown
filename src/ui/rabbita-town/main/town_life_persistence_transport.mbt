@@ -3,9 +3,9 @@
 /// semantics stay in `town_life_persistence.mbt`; V3 transport shards are
 /// immutable facts identified by `(writer_id, sequence)`.
 priv struct TownLifeTransportEnvelope {
-  transport_version : Int
+  transport_version : Int32
   writer_id : String
-  sequence : Int
+  sequence : Int32
   written_at_ms : Double
   payload : String
 } derive(Debug, Eq, ToJson, FromJson)
@@ -21,7 +21,7 @@ priv struct TownLifeTransportEntry {
 ///|
 priv struct TownLifeTransportWriterStamp {
   writer_id : String
-  sequence : Int
+  sequence : Int32
 } derive(Debug, Eq, FromJson)
 
 ///|
@@ -42,7 +42,7 @@ priv struct TownLifeTransportLease {
 priv struct TownLifeTransportSelectedSave {
   key : String
   writer_id : String
-  sequence : Int
+  sequence : Int32
   payload : String
 }
 
@@ -170,7 +170,7 @@ fn town_life_transport_latest_valid_v3_saves(
 
 ///|
 /// Pure key derivation mirrors the browser transport and is kept testable.
-fn town_life_v3_shard_key(writer_id : String, sequence : Int) -> String {
+fn town_life_v3_shard_key(writer_id : String, sequence : Int32) -> String {
   let sequence_text = sequence.max(1).to_string()
   let padding = String::make(16 - sequence_text.length().min(16), '0')
   "\{town_life_v3_shard_prefix}\{writer_id}:\{padding}\{sequence_text}"
@@ -541,7 +541,7 @@ fn browser_town_life_v3_writer_id() -> String {
 }
 
 ///|
-fn browser_town_life_v3_next_writer_sequence() -> Int {
+fn browser_town_life_v3_next_writer_sequence() -> Int32 {
   town_life_transport_writer_stamp(true).sequence
 }
 
@@ -556,7 +556,7 @@ fn browser_town_life_v3_next_writer_sequence() -> Int {
 /// failure or with a stale observation manifest, deletion is disabled.
 extern "js" fn browser_write_town_life_v3_writer_shard(
   text : String,
-  sequence : Int,
+  sequence : Int32,
 ) -> Bool =
   #| (text, sequence) => {
   #|   const shardPrefix = "moontown-town-life-v3-shard:";

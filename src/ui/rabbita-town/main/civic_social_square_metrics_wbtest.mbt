@@ -4,14 +4,12 @@ test "social square copy renders explicit snapshot fields" {
     worker_label: "Cafe Matchmaker / Running",
     match_count: 5,
     queue_pressure: 72,
-    lead_confidence: 88,
     stage: "RSVP plan in flight",
   })
-  assert_true(copy.contains("Cafe Matchmaker / Running"))
-  assert_true(copy.contains("5 reasoned introductions"))
-  assert_true(copy.contains("queue pressure sits at 72%"))
-  assert_true(copy.contains("strongest current confidence is 88%"))
-  assert_true(copy.contains("active social step is RSVP plan in flight"))
+  assert_true(copy.contains("示例合作方向 5 组"))
+  assert_true(copy.contains("未发送邀请"))
+  assert_false(copy.contains("%"))
+  assert_false(copy.contains("live district"))
 }
 
 ///|

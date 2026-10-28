@@ -23,7 +23,7 @@ fn energy_valley_runtime_loading_state() -> EnergyValleyRuntimeState {
 
 ///|
 fn energy_valley_runtime_error_state(
-  version : Int,
+  version : Int32,
   message : String,
 ) -> EnergyValleyRuntimeState {
   {
@@ -179,7 +179,7 @@ fn energy_valley_runtime_result_link_is_valid(
 }
 
 ///|
-fn energy_valley_runtime_optional_count_is_valid(value : Int?) -> Bool {
+fn energy_valley_runtime_optional_count_is_valid(value : Int32?) -> Bool {
   match value {
     Some(count) => count >= 0
     None => true
@@ -376,7 +376,7 @@ fn energy_valley_runtime_journey_key(
 fn energy_valley_runtime_presence_clocks(
   projection : EnergyValleyRuntimeProjection,
   previous : Array[EnergyValleyRuntimePresenceClock],
-  town_tick : Int,
+  town_tick : Int32,
   now_ms : Double,
 ) -> Array[EnergyValleyRuntimePresenceClock] {
   let result : Array[EnergyValleyRuntimePresenceClock] = []
@@ -418,9 +418,9 @@ fn energy_valley_runtime_presence_clock_for_agent(
 ///|
 fn energy_valley_runtime_state_from_text(
   text : String,
-  version : Int,
+  version : Int32,
   now_ms : Double,
-  town_tick? : Int = 0,
+  town_tick~ : Int32 = 0,
 ) -> EnergyValleyRuntimeState {
   if text.trim().is_empty() {
     if version == 0 {
@@ -506,10 +506,10 @@ fn initial_energy_valley_runtime_state() -> EnergyValleyRuntimeState {
 
 ///|
 fn refresh_energy_valley_runtime_state(
-  version : Int,
+  version : Int32,
   previous : EnergyValleyRuntimeState,
   now_ms : Double,
-  town_tick? : Int = 0,
+  town_tick~ : Int32 = 0,
 ) -> EnergyValleyRuntimeState {
   if version == previous.version {
     return energy_valley_runtime_state_at(previous, now_ms)

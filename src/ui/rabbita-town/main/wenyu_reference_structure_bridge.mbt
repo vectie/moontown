@@ -27,9 +27,9 @@ priv enum EnergyValleyStructureKind {
 ///|
 priv struct WenyuReferenceBuildingCell {
   source_kind : WenyuReferenceBuildingKind
-  component_index : Int
-  anchor_x : Int
-  anchor_y : Int
+  component_index : Int32
+  anchor_x : Int32
+  anchor_y : Int32
 }
 
 ///|
@@ -37,28 +37,31 @@ extern "js" fn reference_building_snapshot_ready() -> Bool =
   #| () => ["moontown.wenyu_reference_buildings.v4", "moontown.wenyu_reference_building_anchors.v1"].includes(globalThis.__wenyuReferenceBuildings?.schema) && globalThis.__wenyuReferenceBuildings?.tileGrid?.width === 256 && globalThis.__wenyuReferenceBuildings?.tileGrid?.height === 144
 
 ///|
-extern "js" fn reference_building_code_at(grid_x : Int, grid_y : Int) -> String =
+extern "js" fn reference_building_code_at(
+  grid_x : Int32,
+  grid_y : Int32,
+) -> String =
   #| (gridX, gridY) => globalThis.__wenyuReferenceBuildings?.labelRows?.[gridY]?.[gridX] || ""
 
 ///|
 extern "js" fn reference_building_component_index_at(
-  grid_x : Int,
-  grid_y : Int,
-) -> Int =
+  grid_x : Int32,
+  grid_y : Int32,
+) -> Int32 =
   #| (gridX, gridY) => globalThis.__wenyuReferenceBuildingComponentRows?.[gridY]?.[gridX]?.index ?? -1
 
 ///|
 extern "js" fn reference_building_component_anchor_x_at(
-  grid_x : Int,
-  grid_y : Int,
-) -> Int =
+  grid_x : Int32,
+  grid_y : Int32,
+) -> Int32 =
   #| (gridX, gridY) => globalThis.__wenyuReferenceBuildingComponentRows?.[gridY]?.[gridX]?.anchorX ?? gridX
 
 ///|
 extern "js" fn reference_building_component_anchor_y_at(
-  grid_x : Int,
-  grid_y : Int,
-) -> Int =
+  grid_x : Int32,
+  grid_y : Int32,
+) -> Int32 =
   #| (gridX, gridY) => globalThis.__wenyuReferenceBuildingComponentRows?.[gridY]?.[gridX]?.anchorY ?? gridY
 
 ///|
@@ -113,7 +116,7 @@ fn EnergyValleyStructureKind::runtime_name(
 ///|
 fn EnergyValleyStructureKind::floor_profile(
   self : EnergyValleyStructureKind,
-) -> (Int, Int) {
+) -> (Int32, Int32) {
   match self {
     StructureLowrise => (1, 2)
     StructureRow => (2, 2)
@@ -128,8 +131,8 @@ fn EnergyValleyStructureKind::floor_profile(
 
 ///|
 fn wenyu_reference_building_cell_at(
-  grid_x : Int,
-  grid_y : Int,
+  grid_x : Int32,
+  grid_y : Int32,
 ) -> WenyuReferenceBuildingCell? {
   match
     wenyu_reference_building_kind_from_code(
@@ -148,10 +151,10 @@ fn wenyu_reference_building_cell_at(
 
 ///|
 fn wenyu_reference_structure_for_cell(
-  seed : Int,
+  seed : Int32,
   terrain_kind : String,
   cell : WenyuReferenceBuildingCell,
-) -> (String, Int)? {
+) -> (String, Int32)? {
   if terrain_kind != "urban-dense" &&
     terrain_kind != "urban" &&
     terrain_kind != "campus" {
@@ -184,11 +187,11 @@ fn wenyu_reference_structure_for_cell(
 
 ///|
 fn wenyu_reference_structure_at(
-  seed : Int,
-  grid_x : Int,
-  grid_y : Int,
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
   terrain_kind : String,
-) -> (String, Int)? {
+) -> (String, Int32)? {
   match wenyu_reference_building_cell_at(grid_x, grid_y) {
     None => None
     Some(cell) => wenyu_reference_structure_for_cell(seed, terrain_kind, cell)
@@ -201,13 +204,13 @@ fn wenyu_reference_structure_at(
 /// weighted vote is more stable than promoting every source cell to a runtime
 /// building.
 fn wenyu_reference_structure_for_parcel(
-  seed : Int,
-  grid_x : Int,
-  grid_y : Int,
-  width : Int,
-  depth : Int,
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
+  width : Int32,
+  depth : Int32,
   terrain_kind : String,
-) -> (String, Int)? {
+) -> (String, Int32)? {
   if terrain_kind != "urban-dense" &&
     terrain_kind != "urban" &&
     terrain_kind != "campus" {

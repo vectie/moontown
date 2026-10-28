@@ -1,71 +1,55 @@
 ///|
 fn civic_quests(model : Model) -> Array[CivicQuestSim] {
-  let policy_context = policy_hall_runtime_context(model)
-  let policy_execution = policy_context.execution
-  let policy_task = policy_context.task
-  let ai_garden_context = ai_garden_runtime_context(model)
-  let ai_garden_task = ai_garden_context.task
-  let ai_garden_execution = ai_garden_context.execution
   [
     {
-      title: "Rental subsidy walkthrough",
+      title: "昌平政策梳理",
       area: "Policy Hall",
-      stage: policy_hall_quest_stage(model, policy_execution),
-      reward: "80 Valley XP + application packet",
-      status: policy_hall_signal(model, policy_execution),
-      status_class: policy_hall_signal_class(model, policy_execution),
-      detail: "Confidence \{policy_hall_confidence(model, policy_execution)}% · \{policy_hall_checklist_label(model, policy_execution)} · \{policy_hall_evidence_label(model, policy_execution)}",
-      next_action: policy_hall_next_action(model, policy_task, policy_execution),
+      stage: "从问题与来源开始",
+      reward: "",
+      status: civic_surface_status(model, "policy-hall"),
+      status_class: "module-signal-neutral",
+      detail: civic_surface_evidence(model, "policy-hall"),
+      next_action: "进入政策大厅提问；申请条件仍需向主管部门核实。",
     },
     {
-      title: "OPC roadshow preparation",
+      title: "赛事与提交",
       area: "Contest Express",
-      stage: if model.tick % 5 < 3 {
-        "Mock judge scoring"
-      } else {
-        "Deck gap review"
-      },
-      reward: "Priority roadshow slot",
-      status_class: "module-signal-book",
-      status: "Nurturing",
-      detail: "Checklist shaping in contest workspace with reviewable deck gaps.",
-      next_action: "Keep the next mock judge round and reminder schedule visible.",
+      stage: "赛事工作台",
+      reward: "",
+      status: "查看赛事",
+      status_class: "module-signal-neutral",
+      detail: "报名、截止时间、提交回执和排名以赛事工作台为准。",
+      next_action: "选择赛事，查看你能参与的下一步。",
     },
     {
-      title: "Cafe collaboration intro",
+      title: "合作介绍示例",
       area: "Social Square",
-      stage: "Agent-mediated weak-tie match",
-      reward: "Trial collaboration room",
-      status_class: "module-signal-live",
-      status: "Matching",
-      detail: "Reasoned introduction stays lightweight until both sides accept.",
-      next_action: "Project the latest follow-up into the resident-safe summary.",
+      stage: "示例方案",
+      reward: "",
+      status: "示例",
+      status_class: "module-signal-neutral",
+      detail: "尚未发送邀请或安排见面。",
+      next_action: "真实介绍需要双方同意。",
     },
     {
-      title: "Resident AI adoption sprint",
+      title: "AI 学习任务示例",
       area: "AI Garden",
-      stage: ai_garden_stage(model, ai_garden_execution),
-      reward: "Scenario template + before/after proof",
-      status: ai_garden_signal(model, ai_garden_execution),
-      status_class: ai_garden_signal_class(model, ai_garden_execution),
-      detail: "Scenario lanes \{ai_garden_scenario_count(model)} · \{ai_garden_tool_trial_label(model, ai_garden_execution)} · \{ai_garden_comparison_label(model, ai_garden_execution)}",
-      next_action: ai_garden_next_action(
-        model, ai_garden_task, ai_garden_execution,
-      ),
+      stage: "示例方案",
+      reward: "",
+      status: "示例",
+      status_class: "module-signal-neutral",
+      detail: "展示学习任务思路，不代表工具已执行或学习测评已完成。",
+      next_action: "选择学习问题，准备可核对的材料。",
     },
     {
-      title: "Physical bridge sync",
+      title: "线下服务交接",
       area: "Physical Bridge",
-      stage: if model.tick % 3 == 0 {
-        "Robot confirmation"
-      } else {
-        "Room and telemetry sync"
-      },
-      reward: "Room hold + district signal",
-      status_class: "module-signal-live",
-      status: "Bridge live",
-      detail: "Venue, robot, and telemetry handoffs stay visible in town view.",
-      next_action: "Confirm the next offline sync before the district route changes.",
+      stage: "服务未接入",
+      reward: "",
+      status: "未接入",
+      status_class: "module-signal-neutral",
+      detail: "尚未接通真实场地、机器人或遥测。",
+      next_action: "执行前需服务方确认与授权。",
     },
   ]
 }
@@ -75,33 +59,25 @@ fn render_quest_card(quest : CivicQuestSim) -> @rabbita.Html {
   article(class="quest-card", [
     p(class="scene-node-key", quest.area),
     h3(quest.title),
-    p("Stage: \{quest.stage}"),
-    p("Reward: \{quest.reward}"),
+    span(class="module-signal \{quest.status_class}", quest.status),
     p(class="quest-detail", quest.detail),
-    p(class="quest-next", "Next: \{quest.next_action}"),
+    p(class="quest-next", quest.next_action),
     if quest.area == "Contest Express" {
       a(
         href="./hackathon.html",
         class="quest-next",
-        "Open hackathon workbench ↗",
+        "打开赛事工作台 ↗",
       )
     } else {
-      span("")
+      @html.nothing
     },
-    span(class="module-signal \{quest.status_class}", quest.status),
   ])
 }
 
 ///|
 fn render_civic_quests(model : Model) -> @rabbita.Html {
   section(class="quest-panel", [
-    div(class="runtime-copy", [
-      p(class="eyebrow", "Civic Quests"),
-      h2("Civic Quests"),
-    ]),
-    div(
-      class="quest-grid",
-      civic_quests(model).map(quest => render_quest_card(quest)),
-    ),
+    div(class="runtime-copy", [h2("服务与任务")]),
+    div(class="quest-grid", civic_quests(model).map(render_quest_card)),
   ])
 }

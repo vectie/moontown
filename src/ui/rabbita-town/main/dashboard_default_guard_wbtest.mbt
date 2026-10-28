@@ -93,13 +93,16 @@ test "default dashboard keeps professional operating actions visible" {
   assert_true(html.contains("town-operations-deck"))
   assert_true(html.contains("town-ecosystem-preview"))
   assert_true(html.contains("tilemap/wenyu_reference_tilemap_iso.png"))
-  assert_true(html.contains("Save"))
-  assert_true(html.contains("Queue"))
-  assert_true(html.contains("Request Desk"))
-  assert_true(html.contains("Requests"))
+  assert_true(html.contains("工作与成果"))
+  assert_true(html.contains("aria-label=\"工作与成果\""))
+  assert_true(html.contains("work-workspace-tabs"))
+  assert_true(!html.contains("id=\"watch-title\""))
+  assert_true(!html.contains("id=\"book-request-title\""))
   assert_true(html.contains("request-action-dock"))
-  assert_true(html.contains("Standing watch"))
-  assert_true(html.contains("Evidence book"))
+  assert_true(html.contains("持续关注变化"))
+  assert_true(html.contains(">关注<"))
+  assert_true(html.contains("创建资料研究"))
+  assert_true(html.contains(">研究<"))
   assert_true(html.contains("Attention"))
   assert_true(html.contains("Review work"))
   assert_true(html.contains("attention-dock"))
@@ -140,17 +143,31 @@ test "dashboard ecosystem sections render only the selected detail surface" {
   assert_true(districts.contains("aria-pressed=\"true\""))
   assert_true(districts.contains("civic-module-card-visual"))
   assert_true(districts.contains("tilemap/districts/town_shell.png"))
-  assert_true(!districts.contains("Resident Agents"))
+  assert_true(!districts.contains("居民示例"))
   assert_true(!districts.contains("Points flow"))
   assert_true(!districts.contains("Robot calls"))
   let residents = render_default_dashboard_test_html({
     ..init_model(),
     dashboard_section: Some(DashboardSection::ResidentAgentsSection),
   })
-  assert_true(residents.contains("Resident Agents"))
+  assert_true(residents.contains("居民示例"))
+  assert_true(residents.contains("示例人物 · 非真实账户"))
   assert_true(residents.contains("resident-avatar"))
   assert_true(residents.contains("tilemap/actors/roster/resident_0.png"))
-  assert_true(residents.contains("Current signal"))
+  assert_true(
+    residents.contains("aria-label=\"Advanced · 示例人物设定\""),
+  )
+  let resident = resident_sims(init_model())[0]
+  let card = @rabbita.render_to_string(
+    @rabbita.static_cell(render_resident_card(resident)),
+  )
+  let disclosure = card.split("<details class=\"town-advanced\"").to_array()
+  assert_eq(disclosure.length(), 2)
+  assert_true(!disclosure[0].contains(resident.recent_action))
+  assert_true(disclosure[1].contains(resident.recent_action))
+  assert_true(disclosure[1].contains(resident.plan))
+  assert_true(!card.contains("<details class=\"town-advanced\" open"))
+  assert_true(!residents.contains("Current signal"))
   assert_true(!residents.contains("District Systems"))
   assert_true(!residents.contains(">Memory<"))
   assert_true(!residents.contains(">Reflection<"))
@@ -162,7 +179,7 @@ test "dashboard ecosystem sections render only the selected detail surface" {
 test "dashboard ecosystem sections stay closed by default" {
   let html = render_default_dashboard_test_html(init_model())
   assert_true(!html.contains("District Systems"))
-  assert_true(!html.contains("Resident Agents"))
+  assert_true(!html.contains("居民示例"))
   assert_true(!html.contains("Civic Quests"))
   assert_true(!html.contains("Social Capital"))
   assert_true(!html.contains("Town shell plus live civic systems"))
@@ -200,19 +217,26 @@ test "dashboard request launcher renders one selected composer at a time" {
   let watch = render_default_dashboard_test_html({
     ..init_model(),
     request_composer: RequestComposerFocus::StandingWatchComposer,
+    request_status: "保存失败，请检查关注目标。",
   })
-  assert_true(watch.contains(">Title<"))
+  assert_true(watch.contains("关注什么？"))
+  assert_true(watch.contains("id=\"watch-title\""))
   assert_true(watch.contains("aria-expanded=\"true\""))
   assert_true(watch.contains("aria-live=\"polite\""))
-  assert_true(watch.contains(">Target book<"))
-  assert_true(!watch.contains(">Book title<"))
-  assert_true(!watch.contains(">Websites<"))
+  assert_true(watch.contains("保存失败，请检查关注目标。"))
+  assert_true(watch.contains("id=\"watch-target-book\""))
+  assert_true(watch.contains("保存关注"))
+  assert_true(!watch.contains("id=\"book-request-title\""))
+  assert_true(!watch.contains("id=\"book-request-websites\""))
   let book = render_default_dashboard_test_html({
     ..init_model(),
     request_composer: RequestComposerFocus::EvidenceBookComposer,
   })
-  assert_true(book.contains(">Book title<"))
-  assert_true(book.contains(">Websites<"))
-  assert_true(!book.contains(">Target book<"))
-  assert_true(!book.contains(">Quality threshold<"))
+  assert_true(book.contains("研究什么？"))
+  assert_true(book.contains("id=\"book-request-title\""))
+  assert_true(book.contains("id=\"book-request-websites\""))
+  assert_true(book.contains("创建研究"))
+  assert_true(!book.contains("id=\"watch-title\""))
+  assert_true(!book.contains("id=\"watch-target-book\""))
+  assert_true(!book.contains("id=\"watch-quality-threshold\""))
 }

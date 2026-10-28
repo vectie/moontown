@@ -9,6 +9,13 @@ async fn handle_portable_transfer_request(
   if !@town_portable_http.is_transfer_path(request.path) {
     return false
   }
+  // Legacy package transfer tokens are not a second login in federated mode.
+  // Transfer grants require an explicit federation-aware entitlement adapter.
+  if @account_identity.enabled() {
+    send_json(conn, 403, { "error": "federated_transfer_grant_required" })
+    conn.close()
+    return true
+  }
   let limits = @town_portable_transfer.default_limits()
   let service : @town_portable_http.TransferService = {
     accounts: account_application(),

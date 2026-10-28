@@ -26,8 +26,8 @@ fn snapshot_worker_sims(model : Model) -> Array[WorkerSim] {
 
 ///|
 priv struct SnapshotWorkerProfile {
-  load : Int
-  energy : Int
+  load : Int32
+  energy : Int32
 }
 
 ///|

@@ -29,8 +29,8 @@ priv struct TownLifeWorldEpoch {
   id : String
   dot : TownLifeDot
   stamp : TownLifeCausalStamp
-  base_budget : Int
-  base_next_authored_sequence : Int
+  base_budget : Int32
+  base_next_authored_sequence : Int32
 } derive(ToJson, FromJson)
 
 ///|
@@ -43,7 +43,7 @@ priv struct TownLifeWorldEvent {
   entity_id : String
   incarnation_id : String
   action : TownLifeWorldAction
-  budget_delta : Int
+  budget_delta : Int32
 } derive(ToJson, FromJson)
 
 ///|
@@ -85,7 +85,7 @@ priv struct TownLifeWorldProjection {
   ledger : EnergyValleyWorldDeltaLedger
   rejected : Array[TownLifeWorldRejectedEvent]
   active : Array[TownLifeWorldResolvedIncarnation]
-  validation_passes : Int
+  validation_passes : Int32
 }
 
 ///|
@@ -119,7 +119,7 @@ fn town_life_world_event_identity(event : TownLifeWorldEvent) -> String {
 fn town_life_world_event_compare(
   left : TownLifeWorldEvent,
   right : TownLifeWorldEvent,
-) -> Int {
+) -> Int32 {
   town_life_event_order(
     left.stamp,
     left.dot,
@@ -134,7 +134,7 @@ fn town_life_world_event_compare(
 fn town_life_world_epoch_compare(
   left : TownLifeWorldEpoch,
   right : TownLifeWorldEpoch,
-) -> Int {
+) -> Int32 {
   let by_stamp = town_life_stamp_compare(left.stamp, right.stamp)
   if by_stamp != 0 {
     by_stamp
@@ -408,7 +408,7 @@ fn town_life_world_genesis_epoch(
 }
 
 ///|
-fn town_life_world_empty_state_for_seed(seed : Int) -> TownLifeWorldState {
+fn town_life_world_empty_state_for_seed(seed : Int32) -> TownLifeWorldState {
   let digest = energy_valley_base_blueprint_digest_for_seed(seed)
   {
     blueprint_id: town_life_world_blueprint_id(),
@@ -421,7 +421,7 @@ fn town_life_world_empty_state_for_seed(seed : Int) -> TownLifeWorldState {
 ///|
 fn town_life_world_has_state_for_seed(
   states : ArrayView[TownLifeWorldState],
-  seed : Int,
+  seed : Int32,
 ) -> Bool {
   let blueprint_id = town_life_world_blueprint_id()
   let digest = energy_valley_base_blueprint_digest_for_seed(seed)
@@ -433,7 +433,7 @@ fn town_life_world_has_state_for_seed(
 ///|
 fn town_life_world_import_legacy_ledger(
   ledger : EnergyValleyWorldDeltaLedger,
-  seed : Int,
+  seed : Int32,
 ) -> TownLifeWorldState {
   let digest = energy_valley_base_blueprint_digest_for_seed(seed)
   let writer = "0-world-import-\{ecosystem_stable_hash(digest)}"
@@ -511,7 +511,7 @@ fn town_life_world_import_legacy_ledger(
 ///|
 fn town_life_world_migrate_initial_save(
   raw : TownLifeSave,
-  seed : Int,
+  seed : Int32,
 ) -> TownLifeSave {
   let save = town_life_normalize_save(raw)
   // The fallback grammar has a different blueprint digest. Consuming the
@@ -575,7 +575,7 @@ fn town_life_world_migrate_initial_save(
 ///|
 fn town_life_world_state_for_seed(
   states : ArrayView[TownLifeWorldState],
-  seed : Int,
+  seed : Int32,
 ) -> TownLifeWorldState {
   let blueprint_id = town_life_world_blueprint_id()
   let digest = energy_valley_base_blueprint_digest_for_seed(seed)
@@ -896,7 +896,7 @@ fn town_life_world_operations_for_active(
 }
 
 ///|
-fn town_life_world_revision(state : TownLifeWorldState) -> Int {
+fn town_life_world_revision(state : TownLifeWorldState) -> Int32 {
   let mut revision = state.epoch.stamp.lamport.max(1)
   for event in state.events {
     revision = revision.max(event.stamp.lamport)
@@ -908,7 +908,7 @@ fn town_life_world_revision(state : TownLifeWorldState) -> Int {
 fn town_life_world_ledger(
   state : TownLifeWorldState,
   active : ArrayView[TownLifeWorldResolvedIncarnation],
-  budget : Int,
+  budget : Int32,
 ) -> EnergyValleyWorldDeltaLedger {
   let operations = town_life_world_operations_for_active(active)
   let mut next_sequence = state.epoch.base_next_authored_sequence.max(1)
@@ -1023,8 +1023,8 @@ fn town_life_world_base_road_cells(
 fn town_life_world_road_point_allowed(
   world : @energy_valley_contract.CompiledTownWorld,
   base_roads : Map[String, Bool],
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Bool {
   let footprint = golden_valley_contract_tile_footprint(x, y)
   if !golden_valley_contract_polygon_in_bounds(world, footprint) {
@@ -1102,7 +1102,7 @@ fn town_life_world_reachable_custom_road_subset(
 fn town_life_world_custom_road_distances(
   world : @energy_valley_contract.CompiledTownWorld,
   encoded_roads : ArrayView[String],
-) -> Map[String, Int] {
+) -> Map[String, Int32] {
   let base_roads = town_life_world_base_road_cells(world)
   let points : Map[String, SavedWorldDeltaGridPoint] = Map([])
   for encoded in encoded_roads {
@@ -1113,7 +1113,7 @@ fn town_life_world_custom_road_distances(
       _ => ()
     }
   }
-  let distances : Map[String, Int] = Map([])
+  let distances : Map[String, Int32] = Map([])
   let queue : Array[SavedWorldDeltaGridPoint] = []
   for entry in points.to_array() {
     let (key, point) = entry
@@ -1274,7 +1274,7 @@ fn town_life_world_payload_base_valid(
 /// anchor-connected road component when an unrelated component is detached.
 fn town_life_world_filter_base_truth(
   candidates : ArrayView[TownLifeWorldResolvedIncarnation],
-  seed : Int,
+  seed : Int32,
 ) -> (
   Array[TownLifeWorldResolvedIncarnation],
   Array[TownLifeWorldRejectedEvent],
@@ -1417,7 +1417,7 @@ fn town_life_world_road_path_to_anchor(
 fn town_life_world_restore_required_road_deletions(
   raw_active : ArrayView[TownLifeWorldResolvedIncarnation],
   deleted : Map[String, TownLifeWorldResolvedIncarnation],
-  seed : Int,
+  seed : Int32,
 ) -> (
   Array[TownLifeWorldResolvedIncarnation],
   Array[TownLifeWorldRejectedEvent],
@@ -1586,7 +1586,7 @@ fn town_life_world_restore_required_road_deletions(
 /// second 256x144 compilation here made every click block for seconds.
 fn town_life_world_ledger_valid(
   ledger : EnergyValleyWorldDeltaLedger,
-  seed : Int,
+  seed : Int32,
 ) -> Bool {
   if !energy_valley_world_delta_targets_seed(ledger, seed) ||
     !energy_valley_world_delta_valid_for_seed(ledger, seed) {
@@ -1771,7 +1771,7 @@ fn town_life_world_filter_budget(
   eligible_active : ArrayView[TownLifeWorldResolvedIncarnation],
 ) -> (
   Array[TownLifeWorldResolvedIncarnation],
-  Int,
+  Int32,
   Array[TownLifeWorldRejectedEvent],
 ) {
   let active_keys : Map[String, Bool] = Map([])
@@ -1847,7 +1847,7 @@ fn town_life_world_filter_budget(
 /// outer temporal replay. This core never recursively projects event prefixes.
 fn town_life_world_projection_core(
   state_raw : TownLifeWorldState,
-  seed : Int,
+  seed : Int32,
   historically_accepted : Map[String, Bool],
 ) -> TownLifeWorldProjection {
   let state = town_life_world_normalize_state(state_raw)
@@ -2175,7 +2175,7 @@ fn town_life_world_projection_core(
 /// pairs need one each. The replay is iterative and never recursive.
 fn town_life_world_projection(
   state_raw : TownLifeWorldState,
-  seed : Int,
+  seed : Int32,
 ) -> TownLifeWorldProjection {
   let state = town_life_world_normalize_state(state_raw)
   let events = state.events.copy()
@@ -2232,7 +2232,7 @@ fn town_life_world_projection(
 /// validation passes. Full TownSnapshot compilation is outside CRDT projection.
 fn town_life_world_fast_path_validation_pass_bound(
   state : TownLifeWorldState,
-) -> Int {
+) -> Int32 {
   ignore(state)
   2
 }
@@ -2240,7 +2240,7 @@ fn town_life_world_fast_path_validation_pass_bound(
 ///|
 fn town_life_world_projection_for_states(
   states : ArrayView[TownLifeWorldState],
-  seed : Int,
+  seed : Int32,
 ) -> TownLifeWorldProjection {
   town_life_world_projection(town_life_world_state_for_seed(states, seed), seed)
 }
@@ -2278,7 +2278,7 @@ fn town_life_world_apply_projection(
 }
 
 ///|
-fn town_life_world_reproject_model(model : Model, seed : Int) -> Model {
+fn town_life_world_reproject_model(model : Model, seed : Int32) -> Model {
   town_life_world_apply_projection(
     model,
     town_life_world_projection_for_states(model.town_life_world_states, seed),
@@ -2290,7 +2290,7 @@ fn town_life_world_reproject_model(model : Model, seed : Int) -> Model {
 /// event. Projection can derive this state lazily, but Lamport allocation must
 /// observe its stamp so the first Add/Move/Delete/Reset is strictly later than
 /// the epoch even when authoritative reference loading deferred persistence.
-fn town_life_world_ensure_seed_state(model : Model, seed : Int) -> Model {
+fn town_life_world_ensure_seed_state(model : Model, seed : Int32) -> Model {
   if town_life_world_has_state_for_seed(model.town_life_world_states, seed) {
     model
   } else {
@@ -2308,7 +2308,7 @@ fn town_life_world_ensure_seed_state(model : Model, seed : Int) -> Model {
 fn town_life_world_store_event(
   model : Model,
   event : TownLifeWorldEvent,
-  seed : Int,
+  seed : Int32,
 ) -> Model {
   let state = town_life_world_state_for_seed(model.town_life_world_states, seed)
   let states = town_life_world_replace_state(model.town_life_world_states, {
@@ -2330,7 +2330,7 @@ fn town_life_world_building_id(dot : TownLifeDot) -> String {
 fn town_life_world_add_building(
   model : Model,
   raw : GoldenValleyBuilding,
-  budget_delta : Int,
+  budget_delta : Int32,
 ) -> (Model, GoldenValleyBuilding) {
   let seed = active_energy_valley_seed()
   let current = town_life_world_ensure_seed_state(
@@ -2364,7 +2364,7 @@ fn town_life_world_add_building(
 fn town_life_world_add_road_cell(
   model : Model,
   point : SavedWorldDeltaGridPoint,
-  budget_delta : Int,
+  budget_delta : Int32,
 ) -> Model {
   let seed = active_energy_valley_seed()
   let current = town_life_world_ensure_seed_state(
@@ -2399,9 +2399,9 @@ fn town_life_world_add_road_cell(
 ///|
 fn town_life_world_add_park(
   model : Model,
-  x : Int,
-  y : Int,
-  budget_delta : Int,
+  x : Int32,
+  y : Int32,
+  budget_delta : Int32,
 ) -> Model {
   let seed = active_energy_valley_seed()
   let current = town_life_world_ensure_seed_state(
@@ -2456,7 +2456,7 @@ fn town_life_world_delete_entity(
   model : Model,
   kind : TownLifeWorldKind,
   entity_id : String,
-  budget_delta : Int,
+  budget_delta : Int32,
 ) -> Model {
   let seed = active_energy_valley_seed()
   let current = town_life_world_ensure_seed_state(

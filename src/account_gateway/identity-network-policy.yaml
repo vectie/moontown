@@ -1,0 +1,40 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: moontown-account-identity
+  namespace: aigc-acceptance-20260915
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values: [moontown-webide-gateway, moontown-account-probe]
+  policyTypes: [Egress]
+  egress:
+    # Exact private Service VIP for engines evaluating egress before DNAT.
+    # Keep in sync with platform-browser-identity-tls.spec.clusterIP.
+    - to:
+        - ipBlock: {cidr: 10.43.243.148/32}
+      ports:
+        - {protocol: TCP, port: 8443}
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - {protocol: UDP, port: 53}
+        - {protocol: TCP, port: 53}
+    # Only the existing ingress serves the platform cookie-bound identity API.
+    # The private TLS Service preserves :8443, SNI, Host and public Origin.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - {protocol: TCP, port: 8443}

@@ -3,7 +3,7 @@ fn office_chair(
   p : Array[Part],
   x : Double,
   z : Double,
-  facing? : Double = 1,
+  facing~ : Double = 1,
 ) -> Unit {
   primitive(
     p,
@@ -85,7 +85,12 @@ fn workdesk(p : Array[Part], u : Double, v : Double) -> Unit {
 }
 
 ///|
-fn meeting_table(p : Array[Part], u : Double, v : Double, seats : Int) -> Unit {
+fn meeting_table(
+  p : Array[Part],
+  u : Double,
+  v : Double,
+  seats : Int32,
+) -> Unit {
   let x = plan_x(u)
   let z = plan_z(v)
   let length = seats.to_double() * 0.58
@@ -165,7 +170,7 @@ fn interior_plant(p : Array[Part], u : Double, v : Double) -> Unit {
 }
 
 ///|
-fn sofa(p : Array[Part], u : Double, v : Double, facing? : Double = 1) -> Unit {
+fn sofa(p : Array[Part], u : Double, v : Double, facing~ : Double = 1) -> Unit {
   let x = plan_x(u)
   let z = plan_z(v)
   box(p, "fabric", x, 0.38, z, 2.25, 0.58, 0.86, layer="furniture")

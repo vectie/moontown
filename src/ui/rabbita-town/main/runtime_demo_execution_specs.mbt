@@ -27,7 +27,7 @@ fn execution_spec(
   model : Model,
   task_id : String,
   book_id : String,
-  offset : Int,
+  offset : Int32,
 ) -> @core.TaskExecutionRecord {
   let status = execution_status_for(model, offset)
   @core.TaskExecutionRecord::new(
@@ -56,7 +56,7 @@ fn execution_spec(
 ///|
 fn execution_status_for(
   model : Model,
-  offset : Int,
+  offset : Int32,
 ) -> @core.TaskExecutionStatus {
   if mayor_recovery_active(model) && offset == 4 {
     RunConfirmed

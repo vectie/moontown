@@ -47,7 +47,7 @@ priv struct ResearchHandoffInspectionReply {
   contract_version : String
   ok : Bool
   requested_url : String
-  upstream_status : Int
+  upstream_status : Int32
   handoff : Json?
   error : String
 } derive(FromJson)
@@ -62,7 +62,7 @@ priv struct ResearchHandoffExecutionReply {
   execution_status : String
   review_status : String
   callback_status : String
-  callback_http_status : Int
+  callback_http_status : Int32
   package : Json?
   error : String
 } derive(FromJson)

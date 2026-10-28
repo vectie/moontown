@@ -1,6 +1,6 @@
 ///|
 fn ecosystem_cache_rejected_park_model(
-  seed : Int,
+  seed : Int32,
   writer : String,
   entity_id : String,
 ) -> (Model, String) {

@@ -148,7 +148,7 @@ fn plan_box(
   v2 : Double,
   y : Double,
   h : Double,
-  layer? : String = "floor",
+  layer~ : String = "floor",
 ) -> Unit {
   box(
     p,
@@ -170,7 +170,7 @@ fn plan_wall(
   v1 : Double,
   u2 : Double,
   v2 : Double,
-  glass? : Bool = false,
+  glass~ : Bool = false,
 ) -> Unit {
   let x1 = plan_x(u1)
   let z1 = plan_z(v1)

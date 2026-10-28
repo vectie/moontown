@@ -1,11 +1,11 @@
 ///|
 /// Wenyu reference-grid geometry remains compiler input even though the old
 /// DOM/raster renderer has been retired.
-fn tilemap_grid_width() -> Int {
+fn tilemap_grid_width() -> Int32 {
   256
 }
 
 ///|
-fn tilemap_grid_height() -> Int {
+fn tilemap_grid_height() -> Int32 {
   144
 }

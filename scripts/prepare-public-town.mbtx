@@ -1,0 +1,364 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, kube, previous, output, gateway_image, ui_image] else {
+    fail(
+      "Usage: prepare-public-town.mbtx KUBECONFIG ACCOUNT_BACKUP NEW_DIRECTORY GATEWAY_DIGEST UI_DIGEST",
+    )
+  }
+  let registry = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/"
+  guard gateway_image.has_prefix(registry + "moontown-account-gateway@sha256:") &&
+    ui_image.has_prefix(registry + "moontown-account-ui@sha256:") else {
+    fail("Pinned private images required")
+  }
+  let ns = "aigc-acceptance-20260915"
+  let name = "moontown-platform"
+  let read = async fn(resource : String) {
+    let result = @shell.Cmd("kubectl", [
+      "--kubeconfig", kube, "-n", ns, "get", resource, "-o", "json",
+    ]).output()
+    result.check()
+    @json.parse(result.stdout())
+  }
+  let ingress = read("ingressroute/moontown-public")
+  guard ingress is { "spec": { "routes": Array(old_routes), .. }, .. } &&
+    old_routes.length() == 2 else {
+    fail("Review ingress drift")
+  }
+  let before = read("deployment/moontown-webide-gateway")
+  let saved = @json.parse(
+    @fs.read_file(previous + "/gateway-before.json").text(),
+  )
+  guard before is { "spec": { "template": { "spec": live_spec, .. }, .. }, .. } &&
+    saved is { "spec": { "template": { "spec": saved_spec, .. }, .. }, .. } &&
+    live_spec == saved_spec else {
+    fail("Gateway changed since reviewed backup")
+  }
+  @fs.mkdir(output, permission=0o700)
+  let write = async fn(name : String, value : Json) {
+    @fs.write_file(
+      output + "/" + name + ".json",
+      value.stringify(indent=2),
+      permission=0o600,
+      create_mode=CreateNew,
+    )
+  }
+  write("ingress-before", ingress)
+  write("gateway-before", before)
+  write("profile-before", read("configmap/moontown-webide-runtime"))
+  let metadata = { "name": name, "namespace": ns }
+  let selector : Json = { "app": name }
+  let identity_env : Array[Json] = [
+    { "name": "LUNANEXA_WEBIDE_CLIENT_ID", "value": "moontown" },
+    {
+      "name": "LUNANEXA_WEBIDE_PUBLIC_ORIGIN",
+      "value": "https://suanli.kechuangfuwu.com:8443",
+    },
+    { "name": "LUNANEXA_WEBIDE_BIND", "value": "0.0.0.0:8082" },
+    { "name": "MOONTOWN_ACCOUNT_PROVIDER", "value": "lunanexa" },
+    {
+      "name": "MOONTOWN_IDENTITY_ENDPOINT",
+      "value": "https://suanli.kechuangfuwu.com:8443",
+    },
+    {
+      "name": "MOONTOWN_IDENTITY_HOST",
+      "value": "suanli.kechuangfuwu.com:8443",
+    },
+    {
+      "name": "MOONTOWN_IDENTITY_ORIGIN",
+      "value": "https://suanli.kechuangfuwu.com:8443",
+    },
+    { "name": "MOONTOWN_IDENTITY_PREFIX", "value": "/user" },
+    {
+      "name": "MOONTOWN_IDENTITY_CA_FILE",
+      "value": "/run/identity-trust/ca-bundle.crt",
+    },
+    { "name": "MOONTOWN_GATEWAY_MODE", "value": "public" },
+    { "name": "MOONTOWN_PUBLIC_ASSETS", "value": "/public" },
+    {
+      "name": "MOONTOWN_NEIGHBORHOOD_STATE_FILE",
+      "value": "/var/lib/moontown-neighborhood/state.json",
+    },
+    {
+      "name": "MOONTOWN_COMPUTE_CONTROLLER_ENDPOINT",
+      "value": "https://controller.aigc-acceptance-20260915.svc.cluster.local:5888",
+    },
+    {
+      "name": "MOONTOWN_COMPUTE_CONTROLLER_CA_FILE",
+      "value": "/run/controller-trust/ca-bundle.crt",
+    },
+  ]
+  let security : Json = {
+    "allowPrivilegeEscalation": false,
+    "readOnlyRootFilesystem": true,
+    "capabilities": { "drop": ["ALL"] },
+  }
+  let deployment : Json = {
+    "apiVersion": "apps/v1",
+    "kind": "Deployment",
+    "metadata": metadata,
+    "spec": {
+      "replicas": 1,
+      // A single shared store has one writer; do not overlap old/new pods.
+      "strategy": { "type": "Recreate" },
+      "selector": { "matchLabels": selector },
+      "template": {
+        "metadata": { "labels": selector },
+        "spec": {
+          "automountServiceAccountToken": false,
+          "nodeSelector": { "kubernetes.io/hostname": "ubuntu" },
+          "securityContext": {
+            "runAsUser": 1000,
+            "runAsGroup": 1000,
+            "fsGroup": 1000,
+            "runAsNonRoot": true,
+            "seccompProfile": { "type": "RuntimeDefault" },
+          },
+          "hostAliases": [
+            { "ip": "10.43.243.148", "hostnames": ["suanli.kechuangfuwu.com"] },
+          ],
+          "initContainers": [
+            {
+              "name": "public-assets",
+              "image": ui_image,
+              "command": ["/bin/cp", "-R", "/opt/moontown/ui/.", "/public/"],
+              "securityContext": security,
+              "volumeMounts": [{ "name": "assets", "mountPath": "/public" }],
+            },
+          ],
+          "containers": [
+            {
+              "name": "platform",
+              "image": gateway_image,
+              "env": identity_env,
+              "securityContext": security,
+              "ports": [{ "containerPort": 8082 }],
+              "resources": {
+                "requests": { "cpu": "100m", "memory": "128Mi" },
+                "limits": { "cpu": "1", "memory": "512Mi" },
+              },
+              "readinessProbe": {
+                "httpGet": { "path": "/health", "port": 8082 },
+                "periodSeconds": 5,
+              },
+              "volumeMounts": [
+                { "name": "assets", "mountPath": "/public", "readOnly": true },
+                {
+                  "name": "neighborhood-state",
+                  "mountPath": "/var/lib/moontown-neighborhood",
+                },
+                {
+                  "name": "identity-trust",
+                  "mountPath": "/run/identity-trust",
+                  "readOnly": true,
+                },
+                {
+                  "name": "identity-trust",
+                  "mountPath": "/etc/nsswitch.conf",
+                  "subPath": "nsswitch.conf",
+                  "readOnly": true,
+                },
+                {
+                  "name": "controller-trust",
+                  "mountPath": "/run/controller-trust",
+                  "readOnly": true,
+                },
+              ],
+            },
+          ],
+          "volumes": [
+            { "name": "assets", "emptyDir": { "sizeLimit": "200Mi" } },
+            {
+              "name": "neighborhood-state",
+              "persistentVolumeClaim": {
+                "claimName": "moontown-neighborhood-state",
+              },
+            },
+            {
+              "name": "identity-trust",
+              "configMap": {
+                "name": "moontown-browser-identity-ca",
+                "defaultMode": 292,
+              },
+            },
+            {
+              "name": "controller-trust",
+              "configMap": { "name": "internal-gateway-ca", "defaultMode": 292 },
+            },
+          ],
+        },
+      },
+    },
+  }
+  let system_ns : Json = {
+    "matchLabels": { "kubernetes.io/metadata.name": "kube-system" },
+  }
+  let traefik : Json = {
+    "namespaceSelector": system_ns,
+    "podSelector": { "matchLabels": { "app.kubernetes.io/name": "traefik" } },
+  }
+  let controller : Json = {
+    "podSelector": {
+      "matchLabels": { "acceptance-component": "internal-gateway" },
+    },
+  }
+  let resources : Json = {
+    "apiVersion": "v1",
+    "kind": "List",
+    "items": [
+      {
+        "apiVersion": "v1",
+        "kind": "PersistentVolumeClaim",
+        "metadata": {
+          "name": "moontown-neighborhood-state",
+          "namespace": ns,
+          "labels": {
+            "app": name,
+            "moontown.storage-purpose": "public-neighborhood",
+          },
+        },
+        "spec": {
+          "accessModes": ["ReadWriteOnce"],
+          "resources": { "requests": { "storage": "1Gi" } },
+        },
+      },
+      deployment,
+      {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": metadata,
+        "spec": {
+          "selector": selector,
+          "ports": [{ "port": 8082, "targetPort": 8082 }],
+        },
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": metadata,
+        "spec": {
+          "podSelector": { "matchLabels": selector },
+          "policyTypes": ["Ingress", "Egress"],
+          "ingress": [
+            {
+              "from": [traefik],
+              "ports": [{ "protocol": "TCP", "port": 8082 }],
+            },
+          ],
+          "egress": [
+            {
+              "to": [traefik, { "ipBlock": { "cidr": "10.43.243.148/32" } }],
+              "ports": [{ "protocol": "TCP", "port": 8443 }],
+            },
+            {
+              "to": [controller, { "ipBlock": { "cidr": "10.43.43.152/32" } }],
+              "ports": [{ "protocol": "TCP", "port": 5888 }],
+            },
+            {
+              "to": [
+                {
+                  "namespaceSelector": system_ns,
+                  "podSelector": { "matchLabels": { "k8s-app": "kube-dns" } },
+                },
+              ],
+              "ports": [
+                { "protocol": "TCP", "port": 53 },
+                { "protocol": "UDP", "port": 53 },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": { "name": "moontown-platform-controller", "namespace": ns },
+        "spec": {
+          "podSelector": {
+            "matchLabels": { "acceptance-component": "internal-gateway" },
+          },
+          "policyTypes": ["Ingress"],
+          "ingress": [
+            {
+              "from": [{ "podSelector": { "matchLabels": selector } }],
+              "ports": [{ "protocol": "TCP", "port": 5888 }],
+            },
+          ],
+        },
+      },
+      {
+        "apiVersion": "traefik.io/v1alpha1",
+        "kind": "Middleware",
+        "metadata": { "name": "moontown-workspace-strip", "namespace": ns },
+        "spec": { "stripPrefix": { "prefixes": ["/moontown/workspace"] } },
+      },
+    ],
+  }
+  write("public-resources", resources)
+  guard @json.parse(@fs.read_file(previous + "/gateway-patch.json").text())
+    is Array(gateway_patch) else {
+    fail("Missing reviewed patch")
+  }
+  for entry in gateway_patch {
+    if entry is Object(fields) &&
+      entry is { "op": String("replace"), "path": String(path), .. } {
+      if path == "/spec/template/spec/containers/0/image" {
+        fields["value"] = gateway_image.to_json()
+      }
+      if path == "/spec/template/spec/containers/0/env" &&
+        fields["value"] is Array(vars) {
+        vars.push({
+          "name": "MOONTOWN_WORKSPACE_BASE",
+          "value": "/moontown/workspace",
+        })
+      }
+    }
+  }
+  write("gateway-patch", gateway_patch.to_json())
+  guard @json.parse(@fs.read_file(previous + "/profile-patch.json").text())
+    is Array(profile_patch) else {
+    fail("Missing reviewed profile")
+  }
+  for entry in profile_patch {
+    if entry is Object(fields) &&
+      entry is { "op": String("replace"), "value": String(text), .. } &&
+      @json.parse(text) is Object(container) {
+      container["image"] = ui_image.to_json()
+      fields["value"] = Json::object(container).stringify().to_json()
+    }
+  }
+  write("profile-patch", profile_patch.to_json())
+  write("ingress-patch", [
+    { "op": "test", "path": "/spec/routes", "value": old_routes },
+    {
+      "op": "replace",
+      "path": "/spec/routes",
+      "value": [
+        {
+          "kind": "Rule",
+          "match": "Host(`suanli.kechuangfuwu.com`) && (Path(`/moontown`) || PathPrefix(`/moontown/`))",
+          "priority": 120,
+          "services": [{ "name": name, "port": 8082 }],
+        },
+        {
+          "kind": "Rule",
+          "match": "Host(`suanli.kechuangfuwu.com`) && PathPrefix(`/moontown/workspace/`)",
+          "priority": 150,
+          "middlewares": [{ "name": "moontown-workspace-strip" }],
+          "services": [{ "name": "moontown-webide-gateway", "port": 8082 }],
+        },
+      ],
+    },
+  ])
+  println(
+    "Prepared public shell, isolated neighborhood PVC and execution route. No deployment applied. Retain the neighborhood PVC during rollback.",
+  )
+}

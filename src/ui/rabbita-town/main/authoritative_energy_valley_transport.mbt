@@ -15,7 +15,7 @@ extern "js" fn authoritative_energy_valley_transport_digest() -> String =
 ///|
 extern "js" fn authoritative_energy_valley_transport_record_count(
   bridge : Bool,
-) -> Int =
+) -> Int32 =
   #| bridge => {
   #|   const transport = globalThis.__moontownEnergyValleyTransport;
   #|   if (transport?.schema !== "moontown.energy-valley.transport.v1") return 0;
@@ -25,9 +25,9 @@ extern "js" fn authoritative_energy_valley_transport_record_count(
 ///|
 extern "js" fn authoritative_energy_valley_transport_record_bound(
   bridge : Bool,
-  index : Int,
-  bound_index : Int,
-) -> Int =
+  index : Int32,
+  bound_index : Int32,
+) -> Int32 =
   #| (bridge, index, boundIndex) => {
   #|   const transport = globalThis.__moontownEnergyValleyTransport;
   #|   if (transport?.schema !== "moontown.energy-valley.transport.v1") return -1;
@@ -36,28 +36,28 @@ extern "js" fn authoritative_energy_valley_transport_record_bound(
   #| }
 
 ///|
-extern "js" fn authoritative_energy_valley_metro_path_count() -> Int =
+extern "js" fn authoritative_energy_valley_metro_path_count() -> Int32 =
   #| () => globalThis.__moontownEnergyValleyTransport?.schema ===
   #|   "moontown.energy-valley.transport.v1"
   #|     ? globalThis.__moontownEnergyValleyTransport.metro?.path?.length ?? 0
   #|     : 0
 
 ///|
-extern "js" fn authoritative_energy_valley_metro_path_x(index : Int) -> Int =
+extern "js" fn authoritative_energy_valley_metro_path_x(index : Int32) -> Int32 =
   #| index => globalThis.__moontownEnergyValleyTransport?.schema ===
   #|   "moontown.energy-valley.transport.v1"
   #|     ? globalThis.__moontownEnergyValleyTransport.metro?.path?.[index]?.[0] ?? 0
   #|     : 0
 
 ///|
-extern "js" fn authoritative_energy_valley_metro_path_y(index : Int) -> Int =
+extern "js" fn authoritative_energy_valley_metro_path_y(index : Int32) -> Int32 =
   #| index => globalThis.__moontownEnergyValleyTransport?.schema ===
   #|   "moontown.energy-valley.transport.v1"
   #|     ? globalThis.__moontownEnergyValleyTransport.metro?.path?.[index]?.[1] ?? 0
   #|     : 0
 
 ///|
-extern "js" fn authoritative_energy_valley_metro_station_count() -> Int =
+extern "js" fn authoritative_energy_valley_metro_station_count() -> Int32 =
   #| () => globalThis.__moontownEnergyValleyTransport?.schema ===
   #|   "moontown.energy-valley.transport.v1"
   #|     ? globalThis.__moontownEnergyValleyTransport.metro?.stations?.length ?? 0
@@ -65,7 +65,7 @@ extern "js" fn authoritative_energy_valley_metro_station_count() -> Int =
 
 ///|
 extern "js" fn authoritative_energy_valley_metro_station_name(
-  index : Int,
+  index : Int32,
 ) -> String =
   #| index => globalThis.__moontownEnergyValleyTransport?.schema ===
   #|   "moontown.energy-valley.transport.v1"
@@ -73,14 +73,18 @@ extern "js" fn authoritative_energy_valley_metro_station_name(
   #|     : ""
 
 ///|
-extern "js" fn authoritative_energy_valley_metro_station_x(index : Int) -> Int =
+extern "js" fn authoritative_energy_valley_metro_station_x(
+  index : Int32,
+) -> Int32 =
   #| index => globalThis.__moontownEnergyValleyTransport?.schema ===
   #|   "moontown.energy-valley.transport.v1"
   #|     ? globalThis.__moontownEnergyValleyTransport.metro?.stations?.[index]?.xMillis ?? 0
   #|     : 0
 
 ///|
-extern "js" fn authoritative_energy_valley_metro_station_y(index : Int) -> Int =
+extern "js" fn authoritative_energy_valley_metro_station_y(
+  index : Int32,
+) -> Int32 =
   #| index => globalThis.__moontownEnergyValleyTransport?.schema ===
   #|   "moontown.energy-valley.transport.v1"
   #|     ? globalThis.__moontownEnergyValleyTransport.metro?.stations?.[index]?.yMillis ?? 0
@@ -88,8 +92,8 @@ extern "js" fn authoritative_energy_valley_metro_station_y(index : Int) -> Int =
 
 ///|
 extern "js" fn authoritative_energy_valley_metro_exit_count(
-  station_index : Int,
-) -> Int =
+  station_index : Int32,
+) -> Int32 =
   #| stationIndex => globalThis.__moontownEnergyValleyTransport?.schema ===
   #|   "moontown.energy-valley.transport.v1"
   #|     ? globalThis.__moontownEnergyValleyTransport.metro?.stations?.[stationIndex]?.exits?.length ?? 0
@@ -97,8 +101,8 @@ extern "js" fn authoritative_energy_valley_metro_exit_count(
 
 ///|
 extern "js" fn authoritative_energy_valley_metro_exit_label(
-  station_index : Int,
-  exit_index : Int,
+  station_index : Int32,
+  exit_index : Int32,
 ) -> String =
   #| (stationIndex, exitIndex) => globalThis.__moontownEnergyValleyTransport?.schema ===
   #|   "moontown.energy-valley.transport.v1"
@@ -107,8 +111,8 @@ extern "js" fn authoritative_energy_valley_metro_exit_label(
 
 ///|
 extern "js" fn authoritative_energy_valley_metro_exit_destination(
-  station_index : Int,
-  exit_index : Int,
+  station_index : Int32,
+  exit_index : Int32,
 ) -> String =
   #| (stationIndex, exitIndex) => globalThis.__moontownEnergyValleyTransport?.schema ===
   #|   "moontown.energy-valley.transport.v1"
@@ -117,9 +121,9 @@ extern "js" fn authoritative_energy_valley_metro_exit_destination(
 
 ///|
 extern "js" fn authoritative_energy_valley_metro_exit_x(
-  station_index : Int,
-  exit_index : Int,
-) -> Int =
+  station_index : Int32,
+  exit_index : Int32,
+) -> Int32 =
   #| (stationIndex, exitIndex) => globalThis.__moontownEnergyValleyTransport?.schema ===
   #|   "moontown.energy-valley.transport.v1"
   #|     ? globalThis.__moontownEnergyValleyTransport.metro?.stations?.[stationIndex]?.exits?.[exitIndex]?.xMillis ?? 0
@@ -127,9 +131,9 @@ extern "js" fn authoritative_energy_valley_metro_exit_x(
 
 ///|
 extern "js" fn authoritative_energy_valley_metro_exit_y(
-  station_index : Int,
-  exit_index : Int,
-) -> Int =
+  station_index : Int32,
+  exit_index : Int32,
+) -> Int32 =
   #| (stationIndex, exitIndex) => globalThis.__moontownEnergyValleyTransport?.schema ===
   #|   "moontown.energy-valley.transport.v1"
   #|     ? globalThis.__moontownEnergyValleyTransport.metro?.stations?.[stationIndex]?.exits?.[exitIndex]?.yMillis ?? 0

@@ -22,11 +22,11 @@ priv struct EnergyValleyRuntimeCollaboration {
 
 ///|
 priv struct EnergyValleyRuntimeProgress {
-  checkedSources : Int?
-  newSources : Int?
-  acceptedFacts : Int?
-  rejectedFacts : Int?
-  pagesChanged : Int?
+  checkedSources : Int32?
+  newSources : Int32?
+  acceptedFacts : Int32?
+  rejectedFacts : Int32?
+  pagesChanged : Int32?
   bookChanged : Bool?
 } derive(FromJson)
 
@@ -80,7 +80,7 @@ priv struct EnergyValleyRuntimeProjection {
   mode : String
   observedAt : String
   knowledgeCatalogDigest : String?
-  tick : Int?
+  tick : Int32?
   tasks : Array[EnergyValleyRuntimeWorkItem]
   history : Array[EnergyValleyRuntimeWorkItem]?
   agents : Array[EnergyValleyRuntimeAgent]
@@ -102,7 +102,7 @@ priv enum EnergyValleyRuntimePhase {
 /// clock; a changed journey key receives a new tick and wall-clock origin.
 priv struct EnergyValleyRuntimePresenceClock {
   journey_key : String
-  started_at_tick : Int
+  started_at_tick : Int32
   started_at_ms : Double
 } derive(Debug, Eq)
 
@@ -110,9 +110,9 @@ priv struct EnergyValleyRuntimePresenceClock {
 priv struct EnergyValleyRuntimeState {
   phase : EnergyValleyRuntimePhase
   projection : EnergyValleyRuntimeProjection?
-  version : Int
+  version : Int32
   fresh_at_ms : Double
-  presence_started_at_tick : Int
+  presence_started_at_tick : Int32
   presence_clocks : Array[EnergyValleyRuntimePresenceClock]
   error : String
 }

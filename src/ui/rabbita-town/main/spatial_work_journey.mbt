@@ -75,9 +75,13 @@ fn spatial_review_work_model(model : Model) -> Model {
 fn render_spatial_work_journey(
   dispatch : Dispatch[Msg],
   model : Model,
+  show_start~ : Bool = true,
 ) -> @rabbita.Html {
+  if public_platform_enabled() {
+    return @html.nothing
+  }
   section(class="spatial-work-journey building-interior-panel", [
-    h2("工作"),
+    h2("当前工作"),
     match spatial_selected_work(model) {
       None =>
         div([
@@ -88,11 +92,15 @@ fn render_spatial_work_journey(
               "请求已提交，等待分配。无需重复提交。"
             },
           ),
-          button(
-            on_click=dispatch(StartIndoorWork),
-            title="提出本地议题",
-            town_ui_label("work", "新工作"),
-          ),
+          if show_start && model.spatial_request_id.is_empty() {
+            button(
+              on_click=dispatch(StartIndoorWork),
+              title="提出本地议题",
+              town_ui_label("work", "新工作"),
+            )
+          } else {
+            @html.nothing
+          },
         ])
       Some(task) => {
         let reviewed = model.town_life_spark_awards.any(award => {
@@ -117,6 +125,26 @@ fn render_spatial_work_journey(
             Some(summary) => p(resident_safe_task_summary(summary))
             None => @html.nothing
           },
+          p(class="spatial-work-warning", "执行资源尚未关联。"),
+          match model.town_spatial_layer {
+            Underground(_) => @html.nothing
+            _ =>
+              button(
+                on_click=dispatch(OpenSecretComputeRoom),
+                town_ui_label("server", "查看算力"),
+              )
+          },
+          render_resident_evidence(task),
+          if reviewed {
+            p(class="spatial-work-reviewed", "已阅读 · +10 星火")
+          } else if spatial_work_can_review(task) {
+            button(
+              on_click=dispatch(ReviewSpatialWork),
+              town_ui_label("book", "标记已读"),
+            )
+          } else {
+            p("等待结果就绪后阅读。")
+          },
           render_advanced_details("工作与执行记录", [
             p("工作：\{task.id}"),
             p("Run：\{task.runId.unwrap_or("尚未观测到")}"),
@@ -124,29 +152,10 @@ fn render_spatial_work_journey(
             p(
               "此运行时记录没有可验证的 Run → 机器/远程路由绑定。算力室的可用资源不代表本项工作的执行资源。",
             ),
-          ]),
-          match model.town_spatial_layer {
-            Underground(_) => @html.nothing
-            _ =>
-              button(
-                on_click=dispatch(OpenSecretComputeRoom),
-                "查看算力 ↓",
-              )
-          },
-          render_resident_evidence(task),
-          if reviewed {
             p(
-              class="spatial-work-reviewed",
-              "已记录你的阅读 · +10 星火",
-            )
-          } else if spatial_work_can_review(task) {
-            button(
-              on_click=dispatch(ReviewSpatialWork),
-              "我已阅读结果，记录审阅 +10 星火",
-            )
-          } else {
-            p("结果就绪后，可在这里阅读并记录审阅。")
-          },
+              "标记已读仅记录本机阅读并获得 10 星火，不接受或发布工作成果。",
+            ),
+          ]),
         ])
       }
     },

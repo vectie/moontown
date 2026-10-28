@@ -4,7 +4,7 @@ fn retained_inquiry_field(
   state : @collaboration.Client,
   key : String,
   label : String,
-  multiline? : Bool = false,
+  multiline~ : Bool = false,
 ) -> @rabbita.Html {
   collaboration_field(
     "collaboration-inquiry-" + key,
@@ -28,26 +28,28 @@ fn render_retained_inquiry(
         state.busy() || !@collaboration.salon_ready(outcome.work),
       ),
       on_click=dispatch(CollaborationEdit("inquiry_mode", "compose")),
-      "Use retained contributions in a new research-salon inquiry",
+      "继续研究 · 从此成果",
     )
   }
   let content : Array[@rabbita.Html] = [
-    h3("New inquiry from this historical dossier"),
+    h3("继续研究 · 从此成果"),
     p(
-      "Select at least two successful Books and copy exact passages from their retained outputs above. Write a new question and independent challenges. Failed Books remain named gaps. Historical decisions do not approve this inquiry.",
+      "选择至少两个成功贡献，引用原文，写下新问题与各自要验证的疑点。失败项保留，新研究不继承历史审核。",
     ),
+    render_advanced_details("所选成果的来源版本", [
+      p(
+        "Pinned origin: " +
+        outcome.key.draft_id +
+        " / " +
+        outcome.key.revision +
+        " / review " +
+        outcome.key.review_version.to_string() +
+        " / " +
+        outcome.key.review_digest,
+      ),
+    ]),
     p(
-      "Pinned origin: " +
-      outcome.key.draft_id +
-      " / " +
-      outcome.key.revision +
-      " / review " +
-      outcome.key.review_version.to_string() +
-      " / " +
-      outcome.key.review_digest,
-    ),
-    p(
-      "Saving captures current files at the original selected Book paths and opens the new saved draft in the ordinary composer. Save any existing composer edits first. You can then edit assignments and source paths before Prepare; no work runs here.",
+      "保存后进入统一研究编辑器，可调整任务和资料。会重新采集当前来源；这里不会启动执行。",
     ),
   ]
   for p in @collaboration.salon_candidates(outcome.work) {
@@ -96,16 +98,13 @@ fn render_retained_inquiry(
   }
   for
     (key, label) in [
-      ("id", "New inquiry draft ID"),
-      ("title", "New inquiry title"),
-      ("question", "New scoped research question"),
-      ("falsifier", "Observable result that would disprove the proposed answer"),
-      ("dissent", "Dissent to preserve"),
-      ("assumptions", "Unresolved assumptions"),
-      ("reviewer_id", "New inquiry human reviewer ID"),
-      ("reviewer_name", "New inquiry human reviewer name"),
-      ("objection_reviewer_id", "Objection decision owner ID"),
-      ("objection_reviewer_name", "Objection decision owner name"),
+      ("title", "研究标题"),
+      ("question", "要研究的新问题"),
+      ("falsifier", "什么观察结果会推翻假设？"),
+      ("dissent", "需要保留的异议"),
+      ("assumptions", "尚未验证的假设"),
+      ("reviewer_name", "审阅人姓名"),
+      ("objection_reviewer_name", "异议审阅人姓名"),
     ] {
     content.push(
       retained_inquiry_field(
@@ -119,27 +118,56 @@ fn render_retained_inquiry(
       ),
     )
   }
+  content.push(
+    render_advanced_details(
+      "保存标识与审阅人身份",
+      needs_attention=["id", "reviewer_id", "objection_reviewer_id"].any(key => {
+        state.inquiry_fields.get("inquiry_" + key).unwrap_or("").is_empty()
+      }),
+      [
+        retained_inquiry_field(dispatch, state, "id", "新草稿标识"),
+        retained_inquiry_field(
+          dispatch, state, "reviewer_id", "审阅人账户标识",
+        ),
+        retained_inquiry_field(
+          dispatch, state, "objection_reviewer_id", "异议审阅人账户标识",
+        ),
+        p(
+          "必须对应真实审阅账户；填写姓名不授予审核权限。",
+        ),
+      ],
+    ),
+  )
+  if collaboration_has_unsaved_draft(state) {
+    content.push(
+      p("请先保存当前研究草稿，再保存这份新研究。"),
+    )
+  }
   let validation = state.retained_inquiry_preview()
   content.push(
     p(
       match validation {
         Ok(_) =>
-          "Ready to verify retained evidence and save a new editable inquiry. Current Book sources must still exist."
+          "可以保存并编辑研究；当前来源文件仍需可读取。"
         Err(error) => error
       },
     ),
   )
   content.push(
     button(
-      attrs=@html.Attrs::build().disabled(state.busy() || validation is Err(_)),
+      attrs=@html.Attrs::build().disabled(
+        state.busy() ||
+        validation is Err(_) ||
+        collaboration_has_unsaved_draft(state),
+      ),
       on_click=dispatch(CollaborationAction("retained-inquiry")),
-      "Save new inquiry and open in composer",
+      "保存并编辑研究",
     ),
   )
   content.push(
     button(
       on_click=dispatch(CollaborationEdit("inquiry_mode", "off")),
-      "Cancel new inquiry",
+      "取消继续研究",
     ),
   )
   div(class="request-desk-stack", content)

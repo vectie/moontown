@@ -33,16 +33,16 @@ test "live autonomy latest change exposes doubled character amount" {
 
 ///|
 fn test_live_autonomy_snapshot(
-  status? : String = "working",
-  active_workers? : Int = 4,
-  pending_templates? : Int = 0,
-  failed_templates? : Int = 0,
-  open_plan_gaps? : Int = 0,
-  repair_active? : Int = 0,
-  standing_goals? : Int = 0,
-  enabled_goals? : Int = 0,
-  disabled_goals? : Int = 0,
-  next_actions? : Array[String] = [],
+  status~ : String = "working",
+  active_workers~ : Int32 = 4,
+  pending_templates~ : Int32 = 0,
+  failed_templates~ : Int32 = 0,
+  open_plan_gaps~ : Int32 = 0,
+  repair_active~ : Int32 = 0,
+  standing_goals~ : Int32 = 0,
+  enabled_goals~ : Int32 = 0,
+  disabled_goals~ : Int32 = 0,
+  next_actions~ : Array[String] = [],
 ) -> LiveAutonomySnapshot {
   {
     generated_at_ms: "test-time",

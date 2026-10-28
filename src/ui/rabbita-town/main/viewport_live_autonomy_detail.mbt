@@ -49,7 +49,7 @@ fn LiveAutonomyStatusView::detail_label(
 }
 
 ///|
-fn compact_single_line(summary : String, limit~ : Int) -> String {
+fn compact_single_line(summary : String, limit~ : Int32) -> String {
   let normalized = StringBuilder::new()
   for char in summary {
     if char == '\n' || char == '\r' || char == '\t' {

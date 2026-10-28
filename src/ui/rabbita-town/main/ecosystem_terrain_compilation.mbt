@@ -10,10 +10,10 @@ priv struct EcosystemTerrainCellClass {
 
 ///|
 priv struct EcosystemTerrainRectangle {
-  x : Int
-  y : Int
-  width : Int
-  depth : Int
+  x : Int32
+  y : Int32
+  width : Int32
+  depth : Int32
   cell_class : EcosystemTerrainCellClass
 }
 
@@ -40,8 +40,8 @@ fn ecosystem_terrain_cell_class(
   road_lookup : Map[String, EcosystemRoadCell],
   park_lookup : Map[String, Unit],
   custom_sites : Map[String, Bool],
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> EcosystemTerrainCellClass {
   let key = golden_valley_tile_key(x, y)
   match road_lookup.get(key) {
@@ -130,7 +130,7 @@ fn ecosystem_terrain_cell_class(
 ///|
 fn ecosystem_terrain_rectangles(
   snapshot : EcosystemWorldSnapshot,
-  seed : Int,
+  seed : Int32,
 ) -> Array[EcosystemTerrainRectangle] {
   let world = golden_valley_world(seed)
   let roads = ecosystem_parcel_road_lookup(snapshot)
@@ -202,7 +202,7 @@ fn ecosystem_terrain_rectangle_polygon(
 ///|
 fn ecosystem_contract_terrain_regions(
   snapshot : EcosystemWorldSnapshot,
-  seed : Int,
+  seed : Int32,
 ) -> Array[@energy_valley_contract.TerrainRegion] {
   let result : Array[@energy_valley_contract.TerrainRegion] = []
   for rectangle in ecosystem_terrain_rectangles(snapshot, seed) {
@@ -286,8 +286,8 @@ fn ecosystem_contract_prepare_terrain_lookup(
 ///|
 fn ecosystem_contract_terrain_kind_at(
   world : @energy_valley_contract.CompiledTownWorld,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> @energy_valley_contract.TerrainKind? {
   ecosystem_contract_prepare_terrain_lookup(world)
   ecosystem_contract_terrain_kind_lookup_cache[world.blueprint_digest].get(
@@ -298,8 +298,8 @@ fn ecosystem_contract_terrain_kind_at(
 ///|
 fn ecosystem_contract_terrain_walkable_at(
   world : @energy_valley_contract.CompiledTownWorld,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Bool? {
   ecosystem_contract_prepare_terrain_lookup(world)
   ecosystem_contract_terrain_walkable_lookup_cache[world.blueprint_digest].get(

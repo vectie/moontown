@@ -18,8 +18,8 @@ fn physical_bridge_worker_label(worker : WorkerSim?) -> String {
 priv struct PhysicalBridgeSnapshot {
   worker_label : String
   stage : String
-  robot_calls : Int
-  telemetry_signals : Int
+  robot_calls : Int32
+  telemetry_signals : Int32
 }
 
 ///|
@@ -40,16 +40,12 @@ fn physical_bridge_snapshot(
 fn physical_bridge_copy_from_snapshot(
   snapshot : PhysicalBridgeSnapshot,
 ) -> String {
-  [
-    "Physical Bridge turns Wenyu's offline promise into a reviewable district lane.",
-    "\{snapshot.worker_label} is carrying \{snapshot.stage},",
-    "\{snapshot.robot_calls} robot or venue calls are visible in this window,",
-    "and \{snapshot.telemetry_signals} live telemetry signals are ready for projection-safe town view.",
-  ].join(" ")
+  ignore(snapshot)
+  "线下服务交接方案：设备与遥测未接入，不代表场地已预订或机器人已执行。"
 }
 
 ///|
-fn physical_bridge_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
+fn physical_bridge_queue_pressure(model : Model, worker : WorkerSim?) -> Int32 {
   physical_bridge_queue_pressure_from_inputs(
     model.pressure,
     robot_service_count(model),
@@ -60,11 +56,11 @@ fn physical_bridge_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
 
 ///|
 fn physical_bridge_queue_pressure_from_inputs(
-  pressure : Int,
-  robot_calls : Int,
-  telemetry_signals : Int,
+  pressure : Int32,
+  robot_calls : Int32,
+  telemetry_signals : Int32,
   worker : WorkerSim?,
-) -> Int {
+) -> Int32 {
   let load_bonus = physical_bridge_load_bonus(robot_calls, telemetry_signals)
   civic_queue_pressure_from_policy(
     physical_bridge_queue_pressure_policy(pressure, load_bonus),
@@ -74,8 +70,8 @@ fn physical_bridge_queue_pressure_from_inputs(
 
 ///|
 fn physical_bridge_queue_pressure_policy(
-  pressure : Int,
-  load_bonus : Int,
+  pressure : Int32,
+  load_bonus : Int32,
 ) -> CivicQueuePressurePolicy {
   {
     worker_base: pressure,
@@ -92,7 +88,7 @@ fn physical_bridge_health(
   model : Model,
   worker : WorkerSim?,
   execution : @core.TaskExecutionRecord?,
-) -> Int {
+) -> Int32 {
   let robot_calls = robot_service_count(model)
   let telemetry_signals = physical_bridge_telemetry_signal_count(model)
   let base = physical_bridge_base_health_from_inputs(
@@ -120,11 +116,11 @@ fn physical_bridge_health_execution_policy() -> CivicHealthExecutionPolicy {
 
 ///|
 fn physical_bridge_base_health_from_inputs(
-  pressure : Int,
-  robot_calls : Int,
-  telemetry_signals : Int,
+  pressure : Int32,
+  robot_calls : Int32,
+  telemetry_signals : Int32,
   worker : WorkerSim?,
-) -> Int {
+) -> Int32 {
   let telemetry_bonus = physical_bridge_telemetry_bonus(telemetry_signals)
   let base = match worker {
     Some(worker) =>

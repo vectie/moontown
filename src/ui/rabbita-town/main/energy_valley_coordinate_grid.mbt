@@ -1,7 +1,7 @@
 ///|
 /// Keep the review grid readable at every camera scale without changing the
 /// underlying 256×144 world coordinate system.
-fn energy_valley_coordinate_grid_spacing(zoom : Double) -> Int {
+fn energy_valley_coordinate_grid_spacing(zoom : Double) -> Int32 {
   if zoom < 0.26 {
     32
   } else if zoom < 0.75 {
@@ -20,9 +20,9 @@ extern "js" fn golden_draw_energy_valley_coordinate_grid(
   camera_x : Double,
   camera_y : Double,
   zoom : Double,
-  viewport_width : Int,
-  viewport_height : Int,
-  spacing : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
+  spacing : Int32,
 ) -> Unit =
   #| (context, cameraX, cameraY, zoom, width, height, spacing) => {
   #|   const screen = (x, y) => [

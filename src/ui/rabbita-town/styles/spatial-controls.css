@@ -5,6 +5,8 @@
 .building-layer-breadcrumb { font-size:12px; line-height:1.5; letter-spacing:0; }
 .building-interior-grid,.compute-room-content { width:min(1540px,100%); margin:0 auto; display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:20px; align-items:start; }
 .building-interior-side,.compute-room-sidebar { display:grid; gap:16px; min-width:0; }
+.compute-account-organizations { display:flex; flex-wrap:wrap; gap:8px; }
+.compute-account-scope a { display:inline-flex; align-items:center; min-height:44px; margin-top:8px; text-decoration:none; }
 .building-interior-layer .building-interior-panel,.secret-compute-room .building-interior-panel,.secret-compute-room .compute-evidence-panel { background:var(--town-ui-paper); color:var(--town-ui-ink); border:1px solid var(--town-ui-line); border-radius:16px; box-shadow:var(--town-ui-shadow); padding:20px; backdrop-filter:none; }
 .building-interior-layer .building-interior-floor-shell:has(.indoor-world-scene) { padding:16px; background:var(--town-ui-paper); border:1px solid var(--town-ui-line); border-radius:16px; box-shadow:var(--town-ui-shadow); }
 .building-interior-layer .spatial-world-stage,.secret-compute-room .spatial-world-stage { box-shadow:none; border-color:var(--town-ui-line); }

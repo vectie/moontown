@@ -5,8 +5,8 @@ fn wenyu_module_runtime_state_from_counts(
   source_label : String,
   detail : String,
   counts : ModuleRuntimeCounts,
-  visible_agent_count : Int,
-  issue_count : Int,
+  visible_agent_count : Int32,
+  issue_count : Int32,
 ) -> WenyuModuleRuntimeState {
   {
     status_class,
@@ -26,7 +26,7 @@ fn wenyu_module_runtime_state_from_counts(
 ///|
 fn runtime_state_from_visual_module(
   module_status : VisualModuleSnapshot,
-  issue_count : Int,
+  issue_count : Int32,
 ) -> WenyuModuleRuntimeState {
   wenyu_module_runtime_state_from_counts(
     module_projection_status_class(module_status),
@@ -67,7 +67,7 @@ fn energy_valley_runtime_counts_for_module(
 fn runtime_state_from_energy_valley(
   state : EnergyValleyRuntimeState,
   civic : WenyuTownModule,
-  issue_count : Int,
+  issue_count : Int32,
 ) -> WenyuModuleRuntimeState {
   let counts = energy_valley_runtime_counts_for_module(state, civic)
   let active_agent_count = energy_valley_runtime_active_agents_for_module(
@@ -131,8 +131,8 @@ fn runtime_state_from_energy_valley(
 ///|
 fn runtime_state_from_visual_building(
   building : VisualBuildingSnapshot,
-  active_agent_count : Int,
-  issue_count : Int,
+  active_agent_count : Int32,
+  issue_count : Int32,
 ) -> WenyuModuleRuntimeState {
   let detail = "\{building.message} Projection building: \{building.title}; zone: \{building.zone_key}; effect: \{building.effect}."
   wenyu_module_runtime_state_from_counts(
@@ -149,8 +149,8 @@ fn runtime_state_from_visual_building(
 ///|
 fn runtime_state_from_execution(
   execution : @core.TaskExecutionRecord,
-  active_agent_count : Int,
-  issue_count : Int,
+  active_agent_count : Int32,
+  issue_count : Int32,
 ) -> WenyuModuleRuntimeState {
   let status_kind = module_execution_status_kind(execution.status)
   wenyu_module_runtime_state_from_counts(
@@ -167,8 +167,8 @@ fn runtime_state_from_execution(
 ///|
 fn runtime_state_from_civic_health(
   health : CivicServiceHealthSnapshot,
-  active_agent_count : Int,
-  issue_count : Int,
+  active_agent_count : Int32,
+  issue_count : Int32,
 ) -> WenyuModuleRuntimeState {
   let status_kind = civic_health_status_kind(health.status)
   wenyu_module_runtime_state_from_counts(
@@ -197,9 +197,9 @@ fn civic_health_runtime_counts(
 
 ///|
 fn civic_health_runtime_issue_count(
-  base_issue_count : Int,
+  base_issue_count : Int32,
   health : CivicServiceHealthSnapshot,
-) -> Int {
+) -> Int32 {
   base_issue_count + health.missing_required_paths.length()
 }
 
@@ -210,7 +210,9 @@ priv struct ModuleConfigRuntimeStatus {
 }
 
 ///|
-fn module_config_runtime_status(issue_count : Int) -> ModuleConfigRuntimeStatus {
+fn module_config_runtime_status(
+  issue_count : Int32,
+) -> ModuleConfigRuntimeStatus {
   if issue_count > 0 {
     { class: "module-status-unbound", label: "Needs config", }
   } else {
@@ -221,8 +223,8 @@ fn module_config_runtime_status(issue_count : Int) -> ModuleConfigRuntimeStatus 
 ///|
 fn runtime_state_from_config(
   civic : WenyuTownModule,
-  active_agent_count : Int,
-  issue_count : Int,
+  active_agent_count : Int32,
+  issue_count : Int32,
 ) -> WenyuModuleRuntimeState {
   let status = module_config_runtime_status(issue_count)
   wenyu_module_runtime_state_from_counts(

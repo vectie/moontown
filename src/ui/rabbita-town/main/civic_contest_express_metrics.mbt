@@ -16,15 +16,15 @@ fn contest_express_worker_label(worker : WorkerSim?) -> String {
 }
 
 ///|
-fn contest_express_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
+fn contest_express_queue_pressure(model : Model, worker : WorkerSim?) -> Int32 {
   contest_express_queue_pressure_from_inputs(model.pressure, worker)
 }
 
 ///|
 fn contest_express_queue_pressure_from_inputs(
-  pressure : Int,
+  pressure : Int32,
   worker : WorkerSim?,
-) -> Int {
+) -> Int32 {
   civic_queue_pressure_from_policy(
     contest_express_queue_pressure_policy(pressure),
     worker,
@@ -33,7 +33,7 @@ fn contest_express_queue_pressure_from_inputs(
 
 ///|
 fn contest_express_queue_pressure_policy(
-  pressure : Int,
+  pressure : Int32,
 ) -> CivicQueuePressurePolicy {
   {
     worker_base: 0,
@@ -49,7 +49,7 @@ fn contest_express_queue_pressure_policy(
 fn contest_express_health(
   worker : WorkerSim?,
   execution : @core.TaskExecutionRecord?,
-) -> Int {
+) -> Int32 {
   let base = civic_worker_energy_health_base(
     worker,
     contest_express_worker_health_policy(),

@@ -26,23 +26,23 @@ priv enum EcosystemAffordanceKind {
 
 ///|
 priv struct EcosystemGridPoint {
-  x : Int
-  y : Int
+  x : Int32
+  y : Int32
 } derive(Debug, Eq)
 
 ///|
 priv struct EcosystemFootprint {
-  x : Int
-  y : Int
-  width : Int
-  depth : Int
+  x : Int32
+  y : Int32
+  width : Int32
+  depth : Int32
 } derive(Debug, Eq)
 
 ///|
 priv struct EcosystemTrait {
   key : String
   value : String
-  salience : Int
+  salience : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -50,11 +50,11 @@ priv struct EcosystemTrait {
 /// activity feed can decide why a place matters instead of relying on one
 /// opaque popularity score. All values are clamped to 0..100.
 priv struct EcosystemAttentionProfile {
-  visual : Int
-  social : Int
-  activity : Int
-  urgency : Int
-  novelty : Int
+  visual : Int32
+  social : Int32
+  activity : Int32
+  urgency : Int32
+  novelty : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -105,8 +105,8 @@ priv struct EcosystemRoadFrontage {
   entrance_id : String
   road_cell_id : String
   road_class : String
-  road_mask : Int
-  distance : Int
+  road_mask : Int32
+  distance : Int32
   direct : Bool
 } derive(Debug, Eq)
 
@@ -121,7 +121,7 @@ priv struct EcosystemPedestrianSpur {
   entrance_id : String
   road_cell_id : String
   path : Array[EcosystemGridPoint]
-  distance : Int
+  distance : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -129,15 +129,15 @@ priv struct EcosystemPedestrianSpur {
 /// simulation code can converge on the same connectivity contract.
 priv struct EcosystemRoadCell {
   id : String
-  x : Int
-  y : Int
+  x : Int32
+  y : Int32
   road_class : String
-  road_mask : Int
+  road_mask : Int32
   bridge : Bool
   custom : Bool
   streetlight : Bool
   street_tree : Bool
-  boardwalk_mask : Int
+  boardwalk_mask : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -146,8 +146,8 @@ priv struct EcosystemWorldAffordance {
   kind : EcosystemAffordanceKind
   place_id : String?
   anchor : EcosystemGridPoint
-  capacity : Int
-  attention_weight : Int
+  capacity : Int32
+  attention_weight : Int32
   enabled : Bool
   evidence : String
 } derive(Debug, Eq)
@@ -158,9 +158,9 @@ priv struct EcosystemWorldAffordance {
 /// runtime refreshes cannot contaminate or invalidate the static world cache.
 priv struct EcosystemWorldSnapshot {
   schema : String
-  seed : UInt
-  cols : Int
-  rows : Int
+  seed : UInt32
+  cols : Int32
+  rows : Int32
   places : Array[EcosystemPlace]
   entrances : Array[EcosystemEntrance]
   road_frontages : Array[EcosystemRoadFrontage]
@@ -176,7 +176,7 @@ priv struct EcosystemFrontageCandidate {
   road : EcosystemGridPoint
   path : Array[EcosystemGridPoint]
   direction : String
-  distance : Int
+  distance : Int32
   direct : Bool
 } derive(Debug, Eq)
 
@@ -186,7 +186,7 @@ fn ecosystem_world_schema() -> String {
 }
 
 ///|
-fn ecosystem_int_abs(value : Int) -> Int {
+fn ecosystem_int_abs(value : Int32) -> Int32 {
   if value < 0 {
     -value
   } else {
@@ -195,7 +195,7 @@ fn ecosystem_int_abs(value : Int) -> Int {
 }
 
 ///|
-fn ecosystem_clamp_attention(value : Int) -> Int {
+fn ecosystem_clamp_attention(value : Int32) -> Int32 {
   if value < 0 {
     0
   } else if value > 100 {
@@ -206,7 +206,7 @@ fn ecosystem_clamp_attention(value : Int) -> Int {
 }
 
 ///|
-fn ecosystem_point(x : Int, y : Int) -> EcosystemGridPoint {
+fn ecosystem_point(x : Int32, y : Int32) -> EcosystemGridPoint {
   { x, y, }
 }
 
@@ -226,7 +226,7 @@ fn ecosystem_scoped_id(scope : String, durable_key : String) -> String {
 }
 
 ///|
-fn ecosystem_road_cell_id(x : Int, y : Int) -> String {
+fn ecosystem_road_cell_id(x : Int32, y : Int32) -> String {
   ecosystem_scoped_id("road-node", "\{x}-\{y}")
 }
 
@@ -239,7 +239,7 @@ fn ecosystem_custom_place_id(building : GoldenValleyBuilding) -> String {
 }
 
 ///|
-fn ecosystem_ambient_place_name(kind : String, x : Int, y : Int) -> String {
+fn ecosystem_ambient_place_name(kind : String, x : Int32, y : Int32) -> String {
   let label = match kind {
     "tower" => "研发塔楼"
     "block" => "城市街坊"
@@ -290,8 +290,8 @@ fn ecosystem_effective_terrain(
   custom_buildings : Array[GoldenValleyBuilding],
   custom_roads : Array[String],
   custom_parks : Array[String],
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> String {
   if x < 0 || x >= world.cols || y < 0 || y >= world.rows {
     return "void"
@@ -327,9 +327,9 @@ fn ecosystem_road_mask_at(
   custom_buildings : Array[GoldenValleyBuilding],
   custom_roads : Array[String],
   custom_parks : Array[String],
-  x : Int,
-  y : Int,
-) -> Int {
+  x : Int32,
+  y : Int32,
+) -> Int32 {
   let mut mask = 0
   let neighbors = [(x, y - 1), (x + 1, y), (x, y + 1), (x - 1, y)]
   for index, neighbor in neighbors {
@@ -353,8 +353,8 @@ fn ecosystem_road_mask_at(
 fn ecosystem_road_class_at(
   world : ExactEnergyValleyWorld,
   custom_roads : Array[String],
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> String {
   if custom_roads.contains(golden_valley_tile_key(x, y)) {
     "custom"
@@ -427,8 +427,8 @@ fn ecosystem_add_frontage_candidate(
 ///|
 fn ecosystem_footprint_contains(
   footprint : EcosystemFootprint,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Bool {
   x >= footprint.x &&
   x < footprint.x + footprint.width &&
@@ -452,8 +452,8 @@ fn ecosystem_road_network_node_lookup(
 ///|
 fn ecosystem_road_network_node_at(
   road_nodes : Map[String, @energy_valley_contract.RoadNode],
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> @energy_valley_contract.RoadNode? {
   road_nodes.get(golden_valley_tile_key(x, y))
 }
@@ -466,8 +466,8 @@ fn ecosystem_spur_cell_can_cross(
   custom_roads : Array[String],
   custom_parks : Array[String],
   footprint : EcosystemFootprint,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Bool {
   if x < 0 || x >= world.cols || y < 0 || y >= world.rows {
     return false
@@ -495,12 +495,12 @@ fn ecosystem_spur_cell_can_cross(
 
 ///|
 fn ecosystem_reconstruct_spur_path(
-  previous : Map[String, Int],
-  columns : Int,
-  start : Int,
-  reached : Int,
+  previous : Map[String, Int32],
+  columns : Int32,
+  start : Int32,
+  reached : Int32,
 ) -> Array[EcosystemGridPoint] {
-  let reversed : Array[Int] = []
+  let reversed : Array[Int32] = []
   let mut cursor = reached
   while cursor >= 0 {
     reversed.push(cursor)
@@ -546,9 +546,9 @@ fn ecosystem_shortest_spur_path(
   }
   let columns = world.cols
   let start = threshold.y * columns + threshold.x
-  let queue : Array[Int] = [start]
+  let queue : Array[Int32] = [start]
   let seen : Map[String, Bool] = Map([])
-  let previous : Map[String, Int] = Map([])
+  let previous : Map[String, Int32] = Map([])
   seen[golden_valley_tile_key(threshold.x, threshold.y)] = true
   let directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
   let mut head = 0
@@ -598,7 +598,7 @@ fn ecosystem_direct_frontage_candidates(
   footprint : EcosystemFootprint,
 ) -> Array[EcosystemFrontageCandidate] {
   let result : Array[EcosystemFrontageCandidate] = []
-  let sides : Array[(Int, Int, Int, String)] = []
+  let sides : Array[(Int32, Int32, Int32, String)] = []
   for x in footprint.x..<(footprint.x + footprint.width) {
     sides.push((x, footprint.y + footprint.depth, x, "south"))
   }
@@ -856,7 +856,7 @@ fn ecosystem_footprint_near_terrain(
   custom_parks : Array[String],
   footprint : EcosystemFootprint,
   terrain : String,
-  radius : Int,
+  radius : Int32,
 ) -> Bool {
   for y in (footprint.y - radius)..<(footprint.y + footprint.depth + radius) {
     for x in (footprint.x - radius)..<(footprint.x + footprint.width + radius) {
@@ -910,7 +910,7 @@ fn ecosystem_place_traits(
   district : String,
   style : String,
   source : String,
-  floors : Int,
+  floors : Int32,
   runtime_key : String?,
   footprint : EcosystemFootprint,
   access : Array[EcosystemRoadFrontage],
@@ -980,8 +980,8 @@ fn ecosystem_append_affordance(
   place_id : String?,
   identity : String,
   anchor : EcosystemGridPoint,
-  capacity : Int,
-  attention_weight : Int,
+  capacity : Int32,
+  attention_weight : Int32,
   enabled : Bool,
   evidence : String,
 ) -> Unit {
@@ -1166,7 +1166,7 @@ fn ecosystem_make_place(
   district : String,
   style : String,
   footprint : EcosystemFootprint,
-  floors : Int,
+  floors : Int32,
   runtime_key : String?,
   access : Array[EcosystemRoadFrontage],
 ) -> EcosystemPlace {
@@ -1214,7 +1214,7 @@ fn ecosystem_append_building_place(
   district : String,
   style : String,
   footprint : EcosystemFootprint,
-  floors : Int,
+  floors : Int32,
   runtime_key : String?,
   explicit_entrance : EcosystemGridPoint?,
 ) -> Unit {
@@ -1433,8 +1433,8 @@ fn ecosystem_public_realm_place(
   custom_buildings : Array[GoldenValleyBuilding],
   custom_roads : Array[String],
   custom_parks : Array[String],
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
   feature : String,
   name : String,
 ) -> EcosystemPlace {
@@ -1737,7 +1737,7 @@ fn ecosystem_world_snapshot(
 /// without knowing how localStorage overlays are represented.
 fn ecosystem_world_snapshot_for_model(
   model : Model,
-  seed : Int,
+  seed : Int32,
 ) -> EcosystemWorldSnapshot {
   let projected = energy_valley_validated_world_delta_projection(model, seed)
   ecosystem_world_snapshot(

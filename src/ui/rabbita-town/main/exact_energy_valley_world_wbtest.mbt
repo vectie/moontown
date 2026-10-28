@@ -2,7 +2,7 @@
 fn exact_energy_valley_count_terrain(
   world : ExactEnergyValleyWorld,
   terrain : String,
-) -> Int {
+) -> Int32 {
   let mut count = 0
   for row in world.tiles {
     for tile in row {
@@ -17,8 +17,8 @@ fn exact_energy_valley_count_terrain(
 ///|
 fn exact_energy_valley_is_water_or_bridge(
   world : ExactEnergyValleyWorld,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Bool {
   match world.terrain_at(x, y) {
     Some("water") | Some("bridge") => true
@@ -29,9 +29,9 @@ fn exact_energy_valley_is_water_or_bridge(
 ///|
 fn exact_energy_valley_has_water_near(
   world : ExactEnergyValleyWorld,
-  x : Int,
-  y : Int,
-  radius : Int,
+  x : Int32,
+  y : Int32,
+  radius : Int32,
 ) -> Bool {
   for yy in (y - radius)..<=(y + radius) {
     for xx in (x - radius)..<=(x + radius) {

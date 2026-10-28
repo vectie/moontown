@@ -25,20 +25,24 @@ export function createVocabularyExplorer({ onPropose, resumePending, download = 
   const mode = element('select'); mode.dataset.vocabularyMode = 'true'
   for (const [value, text] of [['any', 'ANY word (union)'], ['all', 'ALL words in the same observation']]) { const option = element('option', text); option.value = value; mode.append(option) }
   mode.value = 'any'
-  const useScope = button('Use selected layers for this lens', 'vocabularyScope')
+  const useScope = button('使用所选领域', 'vocabularyScope')
   const suggestions = element('div', '', 'pack-layer-actions'), scope = element('p'), summary = element('p'), rows = element('div', '', 'pack-vocabulary-rows')
-  const previous = button('Previous matches', 'vocabularyPrevious'), next = button('Next matches', 'vocabularyNext'), pageStatus = element('span')
+  const previous = button('上一页', 'vocabularyPrevious'), next = button('下一页', 'vocabularyNext'), pageStatus = element('span')
   const hypothesis = element('textarea'); hypothesis.maxLength = 2000; hypothesis.dataset.vocabularyHypothesis = 'true'
-  const proceed = button('Continue selected matches to intake', 'vocabularyContinue')
-  const save = button('Download editable lens', 'vocabularyExport'), reportButton = button('Download discovery results', 'vocabularyReport')
+  const proceed = button('整理相关资料', 'vocabularyContinue')
+  const save = button('导出检索条件', 'vocabularyExport'), reportButton = button('导出匹配结果', 'vocabularyReport')
   const upload = element('input'); upload.type = 'file'; upload.accept = '.json,application/json'; upload.dataset.vocabularyImport = 'true'
   const preview = element('div'), status = element('p', '', 'pack-candidate-form-status'); status.setAttribute('role', 'status')
-  section.append(element('h3', 'Discover words connecting different packs'), element('p', VOCABULARY_INTERPRETATION),
-    field('Lens name', label), scope, useScope, element('p', 'Suggested words occur in at least two scoped packs. English stop words, numeric-only and words shorter than three characters are omitted from suggestions, but can still be searched explicitly.'), suggestions,
-    field('Whole words, separated by commas', terms), field('Match', mode), field('Hide noisy suggestions (comma-separated words)', ignored),
+  const settings = element('details', '', 'town-advanced')
+  settings.append(element('summary', '高级 · 检索规则与文件'),
+    field('检索名称', label), scope, useScope, field('Match', mode), field('忽略词（用逗号分隔）', ignored),
+    element('p', VOCABULARY_INTERPRETATION),
     element('p', 'Matching uses Unicode normalization and lowercase whole words in titles and summaries. Punctuation separates words. No stemming, translation, accent folding or language-specific word segmentation is performed.'),
-    summary, rows, previous, pageStatus, next, field('What tentative connection deserves investigation?', hypothesis), proceed,
-    save, reportButton, field('Import an editable lens (local JSON; does not contain source excerpts)', upload), preview, status)
+    save, reportButton, field('载入检索条件（本地 JSON，不包含资料正文）', upload))
+  section.append(element('h3', '按相关词找资料'), element('p', '按标题和摘要中的相同词查找，不代表语义一致或独立佐证。'),
+    suggestions, field('关键词（用逗号分隔）', terms), settings, preview,
+    summary, rows, previous, pageStatus, next, field('这些资料有什么值得研究的关联？', hypothesis), proceed,
+    status)
 
   let state = null, selectedPacks = new Set(), scopeIds = [], initialized = false, report = null, page = 0, revision = 0, importGeneration = 0
   const selected = new Set()
@@ -49,7 +53,7 @@ export function createVocabularyExplorer({ onPropose, resumePending, download = 
   function invalidateImport() { importGeneration++; preview.replaceChildren(); upload.value = '' }
   function selectionChanged() {
     proceed.disabled = !report || selected.size < 2
-    proceed.textContent = selected.size ? `Continue ${selected.size} match(es) to intake` : 'Continue selected matches to intake'
+    proceed.textContent = selected.size ? `整理问题 · ${selected.size} 份资料` : '整理相关资料'
   }
   function render() {
     const rendered = ++revision
@@ -90,7 +94,7 @@ export function createVocabularyExplorer({ onPropose, resumePending, download = 
         else { choose.checked = false; status.textContent = 'Choose at most twelve observations.' }
         selectionChanged()
       })
-      card.append(field('Investigate this observation', choose)); rows.append(card)
+      card.append(field('选作资料', choose)); rows.append(card)
     }
     if (!report.rows.length && report.lens.terms.length) rows.append(element('p', 'No exact matches in available scoped observations. Try ANY, another whole word, or a wider scope. Unavailable packs above remain gaps.'))
     selectionChanged()
@@ -114,7 +118,7 @@ export function createVocabularyExplorer({ onPropose, resumePending, download = 
       if (file.size > VOCABULARY_LIMITS.lensBytes) throw Error('Choose lens JSON no larger than 64 KiB.')
       const value = parseVocabularyLens(await file.text())
       if (generation !== importGeneration) return
-      const accept = button('Use imported lens', 'vocabularyAcceptImport'), cancel = button('Cancel lens import', 'vocabularyCancelImport')
+      const accept = button('使用检索条件', 'vocabularyAcceptImport'), cancel = button('取消导入', 'vocabularyCancelImport')
       preview.append(element('p', `Imported settings: ${value.label} · ${value.mode.toUpperCase()} ${value.terms.join(', ') || '(no words yet)'} · packs: ${value.scope_pack_ids.join(', ')}. Applying replaces your local lens and selections; it searches current projections and does not restore historical excerpts or submit anything.`), accept, cancel)
       accept.addEventListener('click', () => {
         if (generation !== importGeneration) return

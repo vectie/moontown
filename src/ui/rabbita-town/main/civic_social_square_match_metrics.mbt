@@ -1,5 +1,5 @@
 ///|
-fn social_square_match_count() -> Int {
+fn social_square_match_count() -> Int32 {
   social_matches().length()
 }
 
@@ -10,7 +10,7 @@ fn social_square_lead_match(model : Model) -> SocialMatchSim {
 
 ///|
 fn social_square_lead_match_from_inputs(
-  tick : Int,
+  tick : Int32,
   matches : Array[SocialMatchSim],
 ) -> SocialMatchSim {
   matches[tick % matches.length()]

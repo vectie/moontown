@@ -16,7 +16,7 @@ priv struct TownStreetHit {
 let town_street_segments : Array[TownStreetSegment] = []
 
 ///|
-let town_street_bins : Map[Int, Array[Int]] = Map([])
+let town_street_bins : Map[Int32, Array[Int32]] = Map([])
 
 ///|
 let town_street_hit_cache : Map[String, TownStreetHit?] = Map([])
@@ -256,8 +256,8 @@ fn town_street_entry_geometry(
 fn town_street_draw_entry(
   context : @dom.CanvasRenderingContext2D,
   building : IntersectionRoadPreviewBuilding,
-  width : Int,
-  height : Int,
+  width : Int32,
+  height : Int32,
 ) -> Unit {
   let (x, y) = intersection_road_preview_building_center(building)
   guard town_street_nearest(x, y) is Some(hit) else { return }

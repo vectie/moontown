@@ -92,8 +92,8 @@ fn golden_spring_building_asset_visible(
   width : Double,
   depth : Double,
   zoom : Double,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Bool {
   if width <= 0.0 ||
     depth <= 0.0 ||
@@ -360,7 +360,7 @@ extern "js" fn golden_release_spring_civic_building_assets() -> Unit =
 
 ///|
 priv struct GoldenStatusPinCandidate {
-  index : Int
+  index : Int32
   status : String
   tie_break : String
 }
@@ -372,7 +372,7 @@ priv struct GoldenStatusPinCandidate {
 fn golden_status_pin_indices(
   statuses : ArrayView[String],
   tie_breaks : ArrayView[String],
-) -> Array[Int] {
+) -> Array[Int32] {
   let candidates : Array[GoldenStatusPinCandidate] = []
   for index, status in statuses {
     if !status.is_empty() {
@@ -399,7 +399,7 @@ fn golden_status_pin_indices(
     }
   })
   let shown = if candidates.length() < 3 { candidates.length() } else { 3 }
-  let result : Array[Int] = []
+  let result : Array[Int32] = []
   for index in 0..<shown {
     result.push(candidates[index].index)
   }

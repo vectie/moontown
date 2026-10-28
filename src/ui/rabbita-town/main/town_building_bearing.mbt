@@ -224,8 +224,8 @@ fn town_building_bearing(
 /// Buildings do not move and the road/terrain masks are not relaxed.
 fn town_bearing_span(
   b : TownBuildingBearing,
-  width : Int,
-  depth : Int,
+  width : Int32,
+  depth : Int32,
 ) -> Double {
   (width.to_double() / (b.east.x.abs() + b.north.x.abs())).min(
     depth.to_double() / (b.east.y.abs() + b.north.y.abs()),

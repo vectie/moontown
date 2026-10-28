@@ -37,24 +37,25 @@ export function createMaterialDiscovery({ onPropose, resumePending }) {
     const form = element('form', 'pack-candidate-form')
     const status = element('p', 'pack-candidate-form-status')
     status.setAttribute('role', 'status')
-    const heading = element('h2', '', 'Review a shared-material group')
+    const heading = element('h2', '', '核对共同来源')
     heading.id = 'pack-material-review-title'
     dialog.setAttribute('aria-labelledby', heading.id)
-    const close = element('button', 'pack-dialog-close', 'Cancel review')
+    const close = element('button', 'pack-dialog-close', '取消')
     close.type = 'button'
     const description = element('p', '', 'These observations reuse one pack-relative evidence reference. Read each excerpt and include two to twelve. Shared material is not independent corroboration.')
     const rows = element('section', 'pack-material-review-sources')
-    const label = element('label', 'pack-candidate-field', 'Your tentative pattern')
+    const label = element('label', 'pack-candidate-field', '你的初步观察')
     const hypothesis = element('textarea')
     hypothesis.maxLength = 2000
     hypothesis.value = draft.hypothesis
     hypothesis.dataset.materialHypothesis = 'true'
     hypothesis.addEventListener('input', () => { draft.hypothesis = hypothesis.value })
     label.append(hypothesis)
-    const update = element('button', 'pack-candidate-open', 'Review current group')
+    const update = element('button', 'pack-candidate-open', '重新核对资料')
     update.type = 'button'
-    const proceed = element('button', 'pack-candidate-submit', 'Continue to proposal')
+    const proceed = element('button', 'pack-candidate-submit', '整理问题')
     proceed.type = 'submit'
+    proceed.dataset.materialContinue = 'true'
     let busy = false, completed = false
 
     function stale() {
@@ -136,7 +137,7 @@ export function createMaterialDiscovery({ onPropose, resumePending }) {
 
   function refresh(nextState, visiblePacks) {
     state = nextState
-    section.replaceChildren(element('h3', '', 'Shared-material groups'),
+    section.replaceChildren(element('h3', '', '相同来源'),
       element('p', 'pack-layer-summary', 'Start with recurring local material. Each group contains observations from one pack citing the exact same evidence path.'))
     try {
       const result = discoverMaterialGroups(state, visiblePacks)
@@ -148,7 +149,7 @@ export function createMaterialDiscovery({ onPropose, resumePending }) {
         card.append(element('strong', '', `${group.sources.length} observations · ${group.pack_id}`),
           element('p', 'pack-material-ref', group.evidence_ref),
           element('p', 'pack-layer-summary', group.sources.slice(0, 3).map(source => source.title).join(' · ')))
-        const review = element('button', 'pack-candidate-open', 'Review shared material')
+        const review = element('button', 'pack-candidate-open', '查看共同来源')
         review.type = 'button'; review.dataset.materialGroup = group.key
         review.disabled = group.sources.length > MATERIAL_LIMITS.group
         review.addEventListener('click', () => { if (!review.disabled) openReview(group) })

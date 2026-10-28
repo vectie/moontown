@@ -2,7 +2,7 @@
 /// Actual native HTTP and the production download function; only browser file
 /// saving is observed with an in-memory DOM. No replacement fetch responses.
 extern "js" fn outcome_http_crossing(
-  download : (String, String, Int, String, String, Int) -> @js.Promise,
+  download : (String, String, Int32, String, String, Int32) -> @js.Promise,
 ) -> @js.Promise =
   #| async download => {
   #|   const endpoint = globalThis.process?.env?.MOONTOWN_OUTCOME_HTTP_URL;

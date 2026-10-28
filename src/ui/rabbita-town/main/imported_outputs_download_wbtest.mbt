@@ -171,7 +171,7 @@ test "imported download empty bytes retain a genuine current-save control" {
 extern "js" fn imported_download_mock_response(
   bytes : Bytes,
   headers_json : String,
-  status : Int,
+  status : Int32,
   null_body : Bool,
   endpoint : String,
   run : () -> @js.Promise,
@@ -193,8 +193,8 @@ async fn imported_download_assert_transport(
   headers : Map[String, String],
   expected : Bool,
   endpoint : String,
-  status? : Int = 200,
-  null_body? : Bool = false,
+  status~ : Int32 = 200,
+  null_body~ : Bool = false,
 ) -> Unit {
   let before = imported_download_pending_from_catalog(catalog_raw, selection)
   let result = wait_imported_output_download(

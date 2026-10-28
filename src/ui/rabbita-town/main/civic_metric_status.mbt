@@ -1,17 +1,17 @@
 ///|
 priv struct CivicHealthExecutionPolicy {
-  awaiting_delta : Int
-  review_delta : Int
-  failed_delta : Int
-  completed_delta : Int
+  awaiting_delta : Int32
+  review_delta : Int32
+  failed_delta : Int32
+  completed_delta : Int32
 }
 
 ///|
 fn civic_health_after_execution(
-  base : Int,
+  base : Int32,
   execution : @core.TaskExecutionRecord?,
   policy : CivicHealthExecutionPolicy,
-) -> Int {
+) -> Int32 {
   match execution {
     Some(execution) =>
       civic_health_after_execution_stage(
@@ -25,10 +25,10 @@ fn civic_health_after_execution(
 
 ///|
 fn civic_health_after_execution_stage(
-  base : Int,
+  base : Int32,
   stage : @ui.ExecutionViewStage,
   policy : CivicHealthExecutionPolicy,
-) -> Int {
+) -> Int32 {
   match stage {
     @ui.Persisting => clamp_metric(base + policy.awaiting_delta)
     @ui.Review => clamp_metric(base + policy.review_delta)
@@ -51,16 +51,16 @@ fn civic_worker_status_label(
 
 ///|
 priv struct CivicWorkerEnergyHealthPolicy {
-  fallback : Int
-  load_divisor : Int
-  energy_bonus : Int
+  fallback : Int32
+  load_divisor : Int32
+  energy_bonus : Int32
 }
 
 ///|
 fn civic_worker_energy_health_base(
   worker : WorkerSim?,
   policy : CivicWorkerEnergyHealthPolicy,
-) -> Int {
+) -> Int32 {
   match worker {
     Some(worker) =>
       clamp_metric(
@@ -74,19 +74,19 @@ fn civic_worker_energy_health_base(
 
 ///|
 priv struct CivicQueuePressurePolicy {
-  worker_base : Int
-  worker_bonus : Int
-  worker_divisor : Int
-  fallback_base : Int
-  fallback_bonus : Int
-  fallback_divisor : Int
+  worker_base : Int32
+  worker_bonus : Int32
+  worker_divisor : Int32
+  fallback_base : Int32
+  fallback_bonus : Int32
+  fallback_divisor : Int32
 }
 
 ///|
 fn civic_queue_pressure_from_policy(
   policy : CivicQueuePressurePolicy,
   worker : WorkerSim?,
-) -> Int {
+) -> Int32 {
   match worker {
     Some(worker) => civic_worker_queue_pressure(policy, worker)
     None => civic_fallback_queue_pressure(policy)
@@ -97,7 +97,7 @@ fn civic_queue_pressure_from_policy(
 fn civic_worker_queue_pressure(
   policy : CivicQueuePressurePolicy,
   worker : WorkerSim,
-) -> Int {
+) -> Int32 {
   clamp_metric(
     (worker.load + policy.worker_base + policy.worker_bonus) /
     civic_metric_divisor(policy.worker_divisor),
@@ -105,7 +105,7 @@ fn civic_worker_queue_pressure(
 }
 
 ///|
-fn civic_fallback_queue_pressure(policy : CivicQueuePressurePolicy) -> Int {
+fn civic_fallback_queue_pressure(policy : CivicQueuePressurePolicy) -> Int32 {
   clamp_metric(
     (policy.fallback_base + policy.fallback_bonus) /
     civic_metric_divisor(policy.fallback_divisor),
@@ -113,7 +113,7 @@ fn civic_fallback_queue_pressure(policy : CivicQueuePressurePolicy) -> Int {
 }
 
 ///|
-fn civic_metric_divisor(value : Int) -> Int {
+fn civic_metric_divisor(value : Int32) -> Int32 {
   if value <= 0 {
     1
   } else {

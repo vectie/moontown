@@ -53,7 +53,7 @@ test "diversity completion does not invent buildable land without scene evidence
   let existing = intersection_road_preview_fixed_building(
     "preserved", "campus", 1, 10, 10,
   )
-  let buildings : Map[Int, Array[IntersectionRoadPreviewBuilding]] = Map([
+  let buildings : Map[Int32, Array[IntersectionRoadPreviewBuilding]] = Map([
     (existing.depth_key, [existing]),
   ])
   town_bearing_complete_mix(buildings)

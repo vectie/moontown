@@ -19,7 +19,7 @@ priv struct TownBearingBlock {
   v : Double
   width : Double
   depth : Double
-  floors : Int
+  floors : Int32
 }
 
 ///|
@@ -120,7 +120,7 @@ fn town_bearing_facade(
   bearing : TownBuildingBearing,
   span : Double,
   block : TownBearingBlock,
-  side : Int,
+  side : Int32,
 ) -> Unit {
   let south = side == 0
   let along : WenyuScenePoint = if south { bearing.east } else { bearing.north }
@@ -185,7 +185,7 @@ fn town_bearing_facade(
 ///|
 fn town_bearing_blocks(
   style : String,
-  variant : Int,
+  variant : Int32,
 ) -> Array[TownBearingBlock] {
   town_bearing_archetype(style, variant).blocks
 }
@@ -195,7 +195,7 @@ fn town_bearing_make_mesh(
   b : TownBuildingBearing,
   span : Double,
   style : String,
-  variant : Int,
+  variant : Int32,
 ) -> TownBearingMesh {
   let mesh : TownBearingMesh = { points: [], colors: [], }
   let archetype = town_bearing_archetype(style, variant)
@@ -442,8 +442,8 @@ extern "js" fn town_bearing_paint_mesh(
 fn town_bearing_draw_building(
   context : @dom.CanvasRenderingContext2D,
   building : IntersectionRoadPreviewBuilding,
-  width : Int,
-  height : Int,
+  width : Int32,
+  height : Int32,
 ) -> Unit {
   let (x, y) = intersection_road_preview_building_center(building)
   let mesh = town_bearing_mesh(building)
@@ -461,8 +461,8 @@ fn town_bearing_draw_building(
 fn town_bearing_draw_lot(
   context : @dom.CanvasRenderingContext2D,
   building : IntersectionRoadPreviewBuilding,
-  width : Int,
-  height : Int,
+  width : Int32,
+  height : Int32,
 ) -> Unit {
   let (x, y) = intersection_road_preview_building_center(building)
   let b = town_building_bearing(building)

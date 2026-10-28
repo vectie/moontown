@@ -3,7 +3,7 @@ extern "js" fn real_time_label() -> String =
   #| () => new Date().toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" })
 
 ///|
-extern "js" fn real_local_hour() -> Int =
+extern "js" fn real_local_hour() -> Int32 =
   #| () => new Date().getHours()
 
 ///|
@@ -13,6 +13,10 @@ extern "js" fn browser_location_available() -> Bool =
 ///|
 extern "js" fn current_browser_pathname() -> String =
   #| () => globalThis.location?.pathname || ""
+
+///|
+extern "js" fn current_browser_origin() -> String =
+  #| () => globalThis.location?.origin || ""
 
 ///|
 extern "js" fn current_browser_query_param(name : String) -> String =

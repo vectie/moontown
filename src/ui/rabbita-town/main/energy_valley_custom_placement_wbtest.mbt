@@ -6,9 +6,9 @@ fn custom_placement_test_model() -> Model {
 ///|
 fn custom_placement_test_terrain(
   model : Model,
-  seed : Int,
-  x : Int,
-  y : Int,
+  seed : Int32,
+  x : Int32,
+  y : Int32,
 ) -> String {
   let world = ecosystem_contract_world_for_model(model, seed)
   match golden_valley_semantic_road_node_at(world, x, y) {
@@ -37,8 +37,8 @@ fn custom_placement_test_terrain(
 
 ///|
 fn first_custom_placement_test_tile(
-  predicate : (Int, Int) -> Bool,
-) -> (Int, Int)? {
+  predicate : (Int32, Int32) -> Bool,
+) -> (Int32, Int32)? {
   for y in 1..<(golden_valley_rows() - 1) {
     for x in 1..<(golden_valley_cols() - 1) {
       if predicate(x, y) {
@@ -52,7 +52,7 @@ fn first_custom_placement_test_tile(
 ///|
 fn first_resolved_custom_placement(
   model : Model,
-) -> (Int, Int, GoldenValleyBuilding)? {
+) -> (Int32, Int32, GoldenValleyBuilding)? {
   let scale = energy_valley_semantic_cells_per_planning_cell()
   for y in 1..<(golden_valley_rows() - 1) {
     for x in 1..<(golden_valley_cols() - 1) {

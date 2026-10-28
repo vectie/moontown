@@ -17,14 +17,14 @@ extern "js" fn town_design_registration_input() -> String =
 
 ///|
 extern "js" fn town_design_registration_publish(
-  project : (Double, Double, Int) -> Double,
+  project : (Double, Double, Int32) -> Double,
   segment : (Double, Double, Double, Double) -> String,
   before : Double,
   after : Double,
   area : Double,
   displacement : Double,
-  conflicts_before : Int,
-  conflicts_after : Int,
+  conflicts_before : Int32,
+  conflicts_after : Int32,
 ) -> Unit =
   #| (project, segment, before, after, area, displacement, conflictsBefore, conflictsAfter) => {
   #|   globalThis.__moontownDesignRegistrationRevision = (globalThis.__moontownDesignRegistrationRevision || 0) + 1;
@@ -49,7 +49,7 @@ extern "js" fn town_design_registration_publish(
   #| }
 
 ///|
-extern "js" fn town_design_registration_revision() -> Int =
+extern "js" fn town_design_registration_revision() -> Int32 =
   #| () => globalThis.__moontownDesignRegistration?.revision || 0
 
 ///|

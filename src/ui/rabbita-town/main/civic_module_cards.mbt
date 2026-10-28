@@ -9,8 +9,8 @@ fn render_module_metric(label : String, value : String) -> @rabbita.Html {
 ///|
 fn render_module_metric_grid(
   worker_label : String,
-  queue_pressure : Int,
-  health : Int,
+  queue_pressure : Int32,
+  health : Int32,
 ) -> @rabbita.Html {
   div(class="module-metric-grid", [
     render_module_metric("Worker", worker_label),

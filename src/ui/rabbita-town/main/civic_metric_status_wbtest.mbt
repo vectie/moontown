@@ -15,9 +15,9 @@ fn civic_metric_test_execution(
 
 ///|
 fn civic_metric_test_worker(
-  energy~ : Int,
-  load~ : Int,
-  status? : @core.WorkerStatus = Running,
+  energy~ : Int32,
+  load~ : Int32,
+  status~ : @core.WorkerStatus = Running,
 ) -> WorkerSim {
   {
     id: "worker",

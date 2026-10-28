@@ -12,6 +12,8 @@ pub fn interior_study() -> Json
 
 pub fn studies() -> Json
 
+pub fn town_interior_study(String) -> Json
+
 // Errors
 
 // Types and methods

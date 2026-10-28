@@ -29,10 +29,10 @@ fn ecosystem_parcel_park_lookup(
 
 ///|
 fn ecosystem_parcel_segment_id(
-  x : Int,
-  y : Int,
-  neighbor_x : Int,
-  neighbor_y : Int,
+  x : Int32,
+  y : Int32,
+  neighbor_x : Int32,
+  neighbor_y : Int32,
 ) -> @energy_valley_contract.StableId {
   if neighbor_x < x || neighbor_y < y {
     ecosystem_contract_scoped_id(
@@ -53,8 +53,8 @@ fn ecosystem_parcel_append_incident_segments(
   seen : Map[@energy_valley_contract.StableId, Unit],
   road_lookup : Map[String, EcosystemRoadCell],
   road_network : @energy_valley_contract.RoadNetwork,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Unit {
   if !road_lookup.contains(golden_valley_tile_key(x, y)) {
     return
@@ -129,7 +129,7 @@ fn ecosystem_parcel_program_catalog() -> Array[
     label : String,
     land_use : @energy_valley_contract.LandUse,
     frontage : Bool,
-    weight : Int,
+    weight : Int32,
   ) -> Unit {
     result.push(
       @energy_valley_contract.parcel_program(
@@ -277,7 +277,7 @@ fn ecosystem_parcel_program_catalog() -> Array[
 fn ecosystem_parcel_block_seeds(
   snapshot : EcosystemWorldSnapshot,
   road_network : @energy_valley_contract.RoadNetwork,
-  seed : Int,
+  seed : Int32,
 ) -> Array[@energy_valley_contract.LandBlockSeed] {
   let result : Array[@energy_valley_contract.LandBlockSeed] = []
   let source = @energy_valley_contract.provenance(
@@ -343,7 +343,7 @@ fn ecosystem_parcel_block_seeds(
 fn ecosystem_contract_parcel_plan(
   snapshot : EcosystemWorldSnapshot,
   road_network : @energy_valley_contract.RoadNetwork,
-  seed : Int,
+  seed : Int32,
 ) -> @energy_valley_contract.ParcelPlan {
   match
     @energy_valley_contract.compile_parcel_plan(

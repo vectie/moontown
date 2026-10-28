@@ -15,7 +15,7 @@ fn town_bearing_volume(
   v : Double,
   width : Double,
   depth : Double,
-  floors : Int,
+  floors : Int32,
 ) -> TownBearingBlock {
   { u, v, width, depth, floors, }
 }
@@ -23,7 +23,7 @@ fn town_bearing_volume(
 ///|
 fn town_bearing_archetype(
   style : String,
-  variant : Int,
+  variant : Int32,
 ) -> TownBearingArchetype {
   let v = energy_valley_mod(variant, 3)
   let box = town_bearing_volume

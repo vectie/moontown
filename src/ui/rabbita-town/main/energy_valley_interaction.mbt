@@ -1,5 +1,5 @@
 ///|
-fn golden_valley_tile_key(x : Int, y : Int) -> String {
+fn golden_valley_tile_key(x : Int32, y : Int32) -> String {
   "\{x}:\{y}"
 }
 
@@ -18,8 +18,8 @@ priv enum GoldenValleyPlacementBlock {
 ///|
 fn golden_valley_building_contains(
   building : GoldenValleyBuilding,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Bool {
   x >= building.x &&
   x < building.x + building.width &&
@@ -29,8 +29,8 @@ fn golden_valley_building_contains(
 
 ///|
 fn golden_valley_contract_tile_footprint(
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> @energy_valley_contract.Polygon {
   @energy_valley_contract.polygon([
     @energy_valley_contract.world_point(x.to_double(), y.to_double()),
@@ -78,8 +78,8 @@ fn golden_valley_contract_polygon_inside(
 ///|
 fn golden_valley_contract_place_at(
   world : @energy_valley_contract.CompiledTownWorld,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> @energy_valley_contract.Place? {
   let point = @energy_valley_contract.world_point(
     x.to_double() + 0.5,
@@ -96,8 +96,8 @@ fn golden_valley_contract_place_at(
 ///|
 fn golden_valley_contract_building_place_at(
   world : @energy_valley_contract.CompiledTownWorld,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> @energy_valley_contract.Place? {
   let point = @energy_valley_contract.world_point(
     x.to_double() + 0.5,
@@ -159,8 +159,8 @@ fn golden_valley_custom_building_for_place(
 ///|
 fn golden_valley_custom_building_at_model(
   model : Model,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> GoldenValleyBuilding? {
   let world = ecosystem_contract_world_for_model(
     model,
@@ -183,7 +183,10 @@ fn golden_valley_custom_building_at_model(
 }
 
 ///|
-fn golden_valley_screen_to_tile(screen_x : Int, screen_y : Int) -> (Int, Int) {
+fn golden_valley_screen_to_tile(
+  screen_x : Int32,
+  screen_y : Int32,
+) -> (Int32, Int32) {
   let width = golden_valley_canvas_width("energy-valley-canvas")
   let height = golden_valley_canvas_height("energy-valley-canvas")
   let zoom = golden_valley_camera_zoom()
@@ -197,7 +200,7 @@ fn golden_valley_screen_to_tile(screen_x : Int, screen_y : Int) -> (Int, Int) {
 }
 
 ///|
-fn golden_valley_tool_cost(tool : EnergyTool) -> Int {
+fn golden_valley_tool_cost(tool : EnergyTool) -> Int32 {
   match tool {
     RoadTool => 30
     ParkTool => 20
@@ -212,9 +215,9 @@ fn golden_valley_tool_cost(tool : EnergyTool) -> Int {
 ///|
 fn golden_valley_custom_building(
   tool : EnergyTool,
-  x : Int,
-  y : Int,
-  sequence : Int,
+  x : Int32,
+  y : Int32,
+  sequence : Int32,
 ) -> GoldenValleyBuilding? {
   let scale = energy_valley_semantic_cells_per_planning_cell()
   let snapped_x = x / scale * scale
@@ -326,8 +329,8 @@ fn golden_valley_contract_node_is_street(
 ///|
 fn golden_valley_contract_road_node_at(
   world : @energy_valley_contract.CompiledTownWorld,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> @energy_valley_contract.RoadNode? {
   for node in world.road_network.nodes {
     if node.grid.column == x &&
@@ -342,8 +345,8 @@ fn golden_valley_contract_road_node_at(
 ///|
 fn golden_valley_contract_road_candidate_connected(
   world : @energy_valley_contract.CompiledTownWorld,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Bool {
   for delta in [(0, -1), (1, 0), (0, 1), (-1, 0)] {
     match golden_valley_contract_road_node_at(world, x + delta.0, y + delta.1) {
@@ -360,8 +363,8 @@ fn golden_valley_contract_road_candidate_connected(
 ///|
 fn golden_valley_contract_user_park_at(
   world : @energy_valley_contract.CompiledTownWorld,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Bool {
   let id = ecosystem_contract_id(
     ecosystem_scoped_id("place", "public-park-\{x}-\{y}"),
@@ -382,8 +385,8 @@ fn golden_valley_contract_user_park_at(
 ///|
 fn golden_valley_tile_placement_block_in_world(
   world : @energy_valley_contract.CompiledTownWorld,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> GoldenValleyPlacementBlock? {
   let footprint = golden_valley_contract_tile_footprint(x, y)
   if !golden_valley_contract_polygon_in_bounds(world, footprint) {
@@ -416,8 +419,8 @@ fn golden_valley_tile_placement_block_in_world(
 ///|
 fn golden_valley_tile_placement_block(
   model : Model,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> GoldenValleyPlacementBlock? {
   let world = ecosystem_contract_world_for_model(
     model,
@@ -517,8 +520,8 @@ fn golden_valley_custom_placement_clear(
 ///|
 fn golden_valley_reposition_custom_building(
   building : GoldenValleyBuilding,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> GoldenValleyBuilding {
   { ..building, x, y, }
 }
@@ -598,7 +601,11 @@ fn golden_valley_canonical_building_active(
 }
 
 ///|
-fn golden_valley_canonical_road_active(model : Model, x : Int, y : Int) -> Bool {
+fn golden_valley_canonical_road_active(
+  model : Model,
+  x : Int32,
+  y : Int32,
+) -> Bool {
   town_life_world_current_incarnation(
     model,
     WorldRoadCell,
@@ -608,7 +615,11 @@ fn golden_valley_canonical_road_active(model : Model, x : Int, y : Int) -> Bool 
 }
 
 ///|
-fn golden_valley_canonical_park_active(model : Model, x : Int, y : Int) -> Bool {
+fn golden_valley_canonical_park_active(
+  model : Model,
+  x : Int32,
+  y : Int32,
+) -> Bool {
   town_life_world_current_incarnation(
     model,
     WorldPark,
@@ -620,8 +631,8 @@ fn golden_valley_canonical_park_active(model : Model, x : Int, y : Int) -> Bool 
 ///|
 fn golden_valley_place_custom_building_model(
   model : Model,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Model {
   let sequence = golden_valley_next_free_authored_sequence(
     energy_valley_model_buildings(model),
@@ -690,7 +701,7 @@ fn golden_valley_place_custom_building_model(
 }
 
 ///|
-fn golden_valley_place_road_model(model : Model, x : Int, y : Int) -> Model {
+fn golden_valley_place_road_model(model : Model, x : Int32, y : Int32) -> Model {
   let world = ecosystem_contract_world_for_model(
     model,
     active_energy_valley_seed(),
@@ -766,7 +777,7 @@ fn golden_valley_place_road_model(model : Model, x : Int, y : Int) -> Model {
 }
 
 ///|
-fn golden_valley_place_park_model(model : Model, x : Int, y : Int) -> Model {
+fn golden_valley_place_park_model(model : Model, x : Int32, y : Int32) -> Model {
   let world = ecosystem_contract_world_for_model(
     model,
     active_energy_valley_seed(),
@@ -811,7 +822,7 @@ fn golden_valley_place_park_model(model : Model, x : Int, y : Int) -> Model {
 }
 
 ///|
-fn golden_valley_building_refund(building : GoldenValleyBuilding) -> Int {
+fn golden_valley_building_refund(building : GoldenValleyBuilding) -> Int32 {
   let tool = match building.style {
     "tower" | "custom-tower" => ResearchTowerTool
     "lab" | "custom-lab" => LaboratoryTool
@@ -822,7 +833,11 @@ fn golden_valley_building_refund(building : GoldenValleyBuilding) -> Int {
 }
 
 ///|
-fn golden_valley_demolish_at_model(model : Model, x : Int, y : Int) -> Model {
+fn golden_valley_demolish_at_model(
+  model : Model,
+  x : Int32,
+  y : Int32,
+) -> Model {
   let world = ecosystem_contract_world_for_model(
     model,
     active_energy_valley_seed(),
@@ -913,8 +928,8 @@ fn golden_valley_demolish_at_model(model : Model, x : Int, y : Int) -> Model {
 ///|
 fn energy_valley_canvas_click_model(
   model : Model,
-  screen_x : Int,
-  screen_y : Int,
+  screen_x : Int32,
+  screen_y : Int32,
 ) -> Model {
   let (x, y) = golden_valley_screen_to_tile(screen_x, screen_y)
   match model.energy_tool {

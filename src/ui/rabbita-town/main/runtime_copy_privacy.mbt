@@ -44,7 +44,7 @@ fn energy_valley_runtime_copy_contains_local_path(value : String) -> Bool {
 fn energy_valley_safe_runtime_copy(
   value : String,
   hidden_copy : String,
-  limit : Int,
+  limit : Int32,
 ) -> String {
   if energy_valley_runtime_copy_contains_local_path(value) ||
     value.length() > limit {

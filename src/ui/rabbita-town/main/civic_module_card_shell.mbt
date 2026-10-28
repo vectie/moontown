@@ -1,20 +1,16 @@
 ///|
 priv struct CivicModuleCardSpec {
-  zone : String
   title : String
   copy : String
-  worker_label : String
-  queue_pressure : Int
-  health : Int
   next_action : String
-  signal_class : String
   signal : String
   details : Array[@rabbita.Html]
+  diagnostics : Array[@rabbita.Html]
   card_class : String
 }
 
 ///|
-fn civic_module_card_class(extra? : String = "") -> String {
+fn civic_module_card_class(extra~ : String = "") -> String {
   let base = "civic-module-card civic-module-card-featured"
   if extra == "" {
     base
@@ -24,51 +20,19 @@ fn civic_module_card_class(extra? : String = "") -> String {
 }
 
 ///|
-fn civic_module_card_spec(
-  zone : String,
-  title : String,
-  copy : String,
-  worker_label : String,
-  queue_pressure : Int,
-  health : Int,
-  next_action : String,
-  signal_class : String,
-  signal : String,
-  details? : Array[@rabbita.Html] = [],
-  card_class? : String = civic_module_card_class(),
-) -> CivicModuleCardSpec {
-  {
-    zone,
-    title,
-    copy,
-    worker_label,
-    queue_pressure,
-    health,
-    next_action,
-    signal_class,
-    signal,
-    details,
-    card_class,
-  }
-}
-
-///|
 fn render_civic_module_card_shell(spec : CivicModuleCardSpec) -> @rabbita.Html {
   let content : Array[@rabbita.Html] = [
-    p(class="scene-node-key", spec.zone),
     h3(spec.title),
+    render_module_signal("module-signal-neutral", spec.signal),
     p(spec.copy),
-    render_module_metric_grid(
-      spec.worker_label,
-      spec.queue_pressure,
-      spec.health,
-    ),
   ]
-  if spec.details.length() > 0 {
+  if !spec.details.is_empty() {
     content.push(render_module_detail_grid(spec.details))
   }
-  content.push(render_module_next_action(spec.next_action))
-  content.push(render_module_signal(spec.signal_class, spec.signal))
+  content.push(p(class="module-next-action", spec.next_action))
+  if !spec.diagnostics.is_empty() {
+    content.push(render_advanced_details("业务记录", spec.diagnostics))
+  }
   article(class=spec.card_class, [
     render_civic_module_card_visual(spec.title),
     div(class="civic-module-card-content", content),

@@ -1,0 +1,32 @@
+///|
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/shell",
+}
+
+///|
+// Product regression checks. Models/semantics are MoonBit; JS is the renderer
+// boundary only. Run browser interaction QA against the assembled product too.
+async fn main {
+  for
+    name in ["town-space", "town-space-loader", "town-space-report", "town-map"] {
+    @shell.Cmd("node", ["--check", "src/ui/landmark-studio/web/" + name + ".js"]).run()
+  }
+  @shell.Cmd("moon", ["-C", "src/ui/landmark-studio", "test", "--target", "js"]).run()
+  for
+    name in [
+      "spatial_scene", "spatial_controls", "secret_compute_room", "spatial_layer_journey",
+      "spatial_interaction_regression", "advanced_disclosure", "drawer_accessibility",
+      "town_ui_icons",
+    ] {
+    @shell.Cmd("moon", [
+      "-C",
+      "src/ui/rabbita-town",
+      "test",
+      "main/" + name + "_wbtest.mbt",
+      "--target",
+      "js",
+    ]).run()
+  }
+  @shell.Cmd("moon", ["run", "scripts/check-viewer-ui.mbtx"]).run()
+}

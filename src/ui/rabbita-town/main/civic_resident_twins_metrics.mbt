@@ -18,8 +18,8 @@ fn resident_twins_worker_label(worker : WorkerSim?) -> String {
 priv struct ResidentTwinsSnapshot {
   worker_label : String
   active_twin_label : String
-  private_scope_count : Int
-  review_queue_count : Int
+  private_scope_count : Int32
+  review_queue_count : Int32
   build_stage : String
 }
 
@@ -42,18 +42,12 @@ fn resident_twins_snapshot(
 fn resident_twins_copy_from_snapshot(
   snapshot : ResidentTwinsSnapshot,
 ) -> String {
-  [
-    "Resident Twins now runs as a supervised district lane.",
-    "\{snapshot.worker_label} is carrying the memory-reflection-plan loop,",
-    "\{snapshot.active_twin_label} is the active twin in view,",
-    "\{snapshot.private_scope_count} private scopes stay hidden from town view,",
-    "\{snapshot.review_queue_count} records need keeper attention,",
-    "and the current stage is \{snapshot.build_stage}.",
-  ].join(" ")
+  ignore(snapshot)
+  "居民需求与计划示例；未接入真实个人资料或私人记忆。"
 }
 
 ///|
-fn resident_twins_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
+fn resident_twins_queue_pressure(model : Model, worker : WorkerSim?) -> Int32 {
   resident_twins_queue_pressure_from_inputs(
     model.pressure,
     resident_review_queue_count(model),
@@ -63,10 +57,10 @@ fn resident_twins_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
 
 ///|
 fn resident_twins_queue_pressure_from_inputs(
-  pressure : Int,
-  review_queue_count : Int,
+  pressure : Int32,
+  review_queue_count : Int32,
   worker : WorkerSim?,
-) -> Int {
+) -> Int32 {
   let review_weight = review_queue_count * 16
   civic_queue_pressure_from_policy(
     resident_twins_queue_pressure_policy(pressure, review_weight),
@@ -76,8 +70,8 @@ fn resident_twins_queue_pressure_from_inputs(
 
 ///|
 fn resident_twins_queue_pressure_policy(
-  pressure : Int,
-  review_weight : Int,
+  pressure : Int32,
+  review_weight : Int32,
 ) -> CivicQueuePressurePolicy {
   {
     worker_base: pressure,
@@ -93,7 +87,7 @@ fn resident_twins_queue_pressure_policy(
 fn resident_twins_health(
   worker : WorkerSim?,
   execution : @core.TaskExecutionRecord?,
-) -> Int {
+) -> Int32 {
   civic_health_after_execution(
     resident_twins_base_health(worker),
     execution,
@@ -112,7 +106,7 @@ fn resident_twins_health_execution_policy() -> CivicHealthExecutionPolicy {
 }
 
 ///|
-fn resident_twins_base_health(worker : WorkerSim?) -> Int {
+fn resident_twins_base_health(worker : WorkerSim?) -> Int32 {
   let base = civic_worker_energy_health_base(
     worker,
     resident_twins_worker_health_policy(),

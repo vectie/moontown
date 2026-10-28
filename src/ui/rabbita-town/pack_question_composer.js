@@ -28,15 +28,17 @@ export function downloadQuestionPacket(body) {
 export function createCrossPackQuestion({ onPropose, resumePending, getSelected, download = downloadQuestionPacket }) {
   const section = element('section', 'pack-question-section')
   section.dataset.crossPackQuestion = 'true'
-  const launch = element('button', 'pack-candidate-open', 'Compose cross-pack question')
+  const launch = element('button', 'pack-candidate-open', '整理跨领域问题')
   launch.type = 'button'; launch.dataset.questionLaunch = 'true'
-  const hint = element('p', 'pack-layer-summary', 'Select observations below from distinct packs, then combine them into a scoped question for a reviewed intake.')
+  const hint = element('p', 'pack-layer-summary', '先在“浏览资料”中选择至少两个领域的资料，再整理一个待审阅的问题。')
   const status = element('p', 'pack-candidate-form-status')
   status.setAttribute('role', 'status')
   const upload = element('input')
   upload.type = 'file'; upload.accept = '.json,application/json'; upload.dataset.questionImport = 'true'
   const pendingImport = element('div')
-  section.append(element('h3', '', 'Cross-pack questions'), hint, launch, field('Resume a downloaded question packet', upload), pendingImport, status)
+  const portable = element('details', 'town-advanced')
+  portable.append(element('summary', '', '高级 · 恢复问题草稿'), field('载入已下载的草稿', upload))
+  section.append(element('h3', '', '跨领域问题'), hint, launch, portable, pendingImport, status)
   let draft = newQuestionDraft(), state = null, dialog = null, updateOpen = null, importGeneration = 0
 
   function invalidateImport() {
@@ -60,11 +62,11 @@ export function createCrossPackQuestion({ onPropose, resumePending, getSelected,
     question.dataset.questionText = 'true'; scope.dataset.questionScope = 'true'; rejection.dataset.questionRejection = 'true'
     const rows = element('section', 'pack-question-rows')
     const feedback = element('p', 'pack-candidate-form-status'); feedback.setAttribute('role', 'status')
-    const close = element('button', 'pack-dialog-close', 'Keep question and close')
+    const close = element('button', 'pack-dialog-close', '保留并关闭')
     close.type = 'button'
-    const save = element('button', 'pack-candidate-open', 'Download question packet')
+    const save = element('button', 'pack-candidate-open', '下载草稿')
     save.type = 'button'; save.dataset.questionExport = 'true'
-    const proceed = element('button', 'pack-candidate-submit', 'Continue question to intake')
+    const proceed = element('button', 'pack-candidate-submit', '整理为建议')
     proceed.type = 'submit'; proceed.dataset.questionContinue = 'true'
     let continued = false, active = true, rowsRevision = 0
     const live = () => active && dialog === currentDialog && currentDialog.open && !continued
@@ -95,7 +97,7 @@ export function createCrossPackQuestion({ onPropose, resumePending, getSelected,
         freshness.dataset.questionGap = gap ? String(index) : ''
         box.append(freshness)
         if (gap) {
-          const reread = element('button', 'pack-candidate-open', 'Read current snapshot and re-label')
+          const reread = element('button', 'pack-candidate-open', '核对最新资料')
           reread.type = 'button'; reread.dataset.questionRefreshSource = String(index)
           reread.addEventListener('click', () => {
             if (!liveRow()) return
@@ -117,14 +119,14 @@ export function createCrossPackQuestion({ onPropose, resumePending, getSelected,
         connection.dataset.questionConnection = String(index); conditions.dataset.questionConditions = String(index)
         connection.addEventListener('input', () => { if (liveRow()) row.connection = connection.value })
         conditions.addEventListener('input', () => { if (liveRow()) row.conditions = conditions.value })
-        const remove = element('button', 'pack-candidate-open', 'Remove this observation')
+        const remove = element('button', 'pack-candidate-open', '移除资料')
         remove.type = 'button'; remove.dataset.questionRemove = String(index)
         remove.addEventListener('click', () => {
           if (!liveRow()) return
           capture(); draft.rows.splice(index, 1); renderRows(); feedback.textContent = 'Observation explicitly removed from this question.'
         })
-        box.append(field('Relationship to your question', role), field('How does this observation contribute?', connection),
-          field('Date, population or conditions (write unknown when unknown)', conditions), remove)
+        box.append(field('与问题的关系', role), field('与问题有什么关系？', connection),
+          field('日期、人群或适用条件（不清楚则填未知）', conditions), remove)
         rows.append(box)
       })
       proceed.disabled = gaps.length > 0 || continued
@@ -154,8 +156,8 @@ export function createCrossPackQuestion({ onPropose, resumePending, getSelected,
       } catch (error) { feedback.textContent = error.message; if (!currentDialog.open) { status.textContent = error.message; open() } }
     })
     form.append(heading, close, element('p', 'pack-layer-summary', 'Supporting, challenging and contextual are your labels. Different dates or conditions may explain apparent differences. No consensus, contradiction or accepted Book knowledge is inferred.'),
-      field('What question emerges across these packs?', question), field('Scope and tentative rationale', scope), rows,
-      field('What observable result would reject the idea?', rejection), feedback, save, proceed)
+      field('你想研究什么问题？', question), field('范围与理由', scope), rows,
+      field('什么证据会推翻这个想法？', rejection), feedback, save, proceed)
     dialog.append(form); document.body.append(dialog); renderRows(); dialog.showModal()
   }
 
@@ -178,7 +180,7 @@ export function createCrossPackQuestion({ onPropose, resumePending, getSelected,
       const incoming = parseQuestionDraft(await file.text())
       if (generation !== importGeneration) return
       pendingImport.replaceChildren(element('p', 'pack-layer-summary', `Loaded ${incoming.rows.length} historical observation(s). Replacing affects only the unsent local question. Download that question first if you need it.`))
-      const replace = element('button', 'pack-candidate-open', 'Replace local question with imported packet')
+      const replace = element('button', 'pack-candidate-open', '替换本页草稿')
       replace.type = 'button'; replace.dataset.questionReplace = 'true'
       replace.addEventListener('click', () => {
         if (generation !== importGeneration || dialog?.open) return
@@ -187,7 +189,7 @@ export function createCrossPackQuestion({ onPropose, resumePending, getSelected,
         draft = incoming; dialog?.close(); open()
         status.textContent = 'Imported as an untrusted draft. Missing, incompatible or changed observations remain visible and block intake.'
       })
-      const cancel = element('button', 'pack-candidate-open', 'Discard imported packet')
+      const cancel = element('button', 'pack-candidate-open', '取消导入')
       cancel.type = 'button'; cancel.addEventListener('click', () => { if (generation === importGeneration) invalidateImport() })
       pendingImport.append(replace, cancel)
     } catch (error) { if (generation === importGeneration) { pendingImport.replaceChildren(); status.textContent = error.message } }

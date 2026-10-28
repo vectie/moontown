@@ -242,7 +242,7 @@ fn professional_book_queue_detail(model : Model) -> String {
 }
 
 ///|
-fn professional_book_queue_count(model : Model) -> Int {
+fn professional_book_queue_count(model : Model) -> Int32 {
   let mut count = 0
   for request in model.book_template_requests {
     if request.status == "pending" || request.status == "retry" {

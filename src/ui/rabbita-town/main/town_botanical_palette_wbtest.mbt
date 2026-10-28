@@ -1,6 +1,6 @@
 ///|
 test "botanical palette produces six stable tree forms with waterside willows" {
-  let kinds : Map[Int, Bool] = Map([])
+  let kinds : Map[Int32, Bool] = Map([])
   let mut willows = 0
   for i in 0..<100 {
     let seed = i.to_double() / 100.0
@@ -22,7 +22,7 @@ test "botanical palette produces six stable tree forms with waterside willows" {
 
 ///|
 test "flower drifts offer four types and leave most ground quiet" {
-  let kinds : Map[Int, Bool] = Map([])
+  let kinds : Map[Int32, Bool] = Map([])
   let mut planted = 0
   for y in 0..<144 {
     for x in 0..<256 {

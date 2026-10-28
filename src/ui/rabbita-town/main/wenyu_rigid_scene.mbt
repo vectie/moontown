@@ -16,10 +16,10 @@ priv struct WenyuScenePath {
 let wenyu_scene_paths : Array[WenyuScenePath] = []
 
 ///|
-let wenyu_scene_prefix : Array[Int] = []
+let wenyu_scene_prefix : Array[Int32] = []
 
 ///|
-let wenyu_scene_road_prefix : Array[Int] = []
+let wenyu_scene_road_prefix : Array[Int32] = []
 
 ///|
 let wenyu_scene_access_cache : Map[String, WenyuScenePoint?] = Map([])
@@ -130,11 +130,11 @@ fn wenyu_scene_prepare() -> Bool {
 
 ///|
 fn wenyu_scene_region_clear(
-  prefix : Array[Int],
-  x : Int,
-  y : Int,
-  width : Int,
-  depth : Int,
+  prefix : Array[Int32],
+  x : Int32,
+  y : Int32,
+  width : Int32,
+  depth : Int32,
 ) -> Bool {
   if prefix.length() != 257 * 145 ||
     width <= 0 ||
@@ -290,8 +290,8 @@ fn wenyu_scene_draw_access(
   context : @dom.CanvasRenderingContext2D,
   x : Double,
   y : Double,
-  width : Int,
-  height : Int,
+  width : Int32,
+  height : Int32,
 ) -> Unit {
   match wenyu_scene_nearest(x, y) {
     None => ()

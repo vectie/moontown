@@ -15,8 +15,8 @@ fn town_snapshot_installation_tag(
 fn town_snapshot_installation_tag_int(
   installation : @energy_valley_contract.Installation,
   prefix : String,
-  fallback : Int,
-) -> Int {
+  fallback : Int32,
+) -> Int32 {
   match town_snapshot_installation_tag(installation, prefix) {
     Some(value) => @string.parse_int(value) catch { _ => fallback }
     None => fallback
@@ -33,7 +33,7 @@ fn town_snapshot_installation_position(
 ///|
 fn town_snapshot_installation_depth(
   installation : @energy_valley_contract.Installation,
-) -> Int {
+) -> Int32 {
   if installation.kind is @energy_valley_contract.Boardwalk {
     let x = town_snapshot_installation_tag_int(installation, "tile-x:", 0)
     let y = town_snapshot_installation_tag_int(installation, "tile-y:", 0)
@@ -48,8 +48,8 @@ fn town_snapshot_installation_depth(
 ///|
 fn town_snapshot_installations_by_depth(
   snapshot : @energy_valley_contract.TownSnapshot,
-) -> Map[Int, Array[@energy_valley_contract.Installation]] {
-  let result : Map[Int, Array[@energy_valley_contract.Installation]] = Map([])
+) -> Map[Int32, Array[@energy_valley_contract.Installation]] {
+  let result : Map[Int32, Array[@energy_valley_contract.Installation]] = Map([])
   for installation in snapshot.world.installations {
     let depth = town_snapshot_installation_depth(installation)
     match result.get(depth) {
@@ -87,8 +87,8 @@ fn town_snapshot_installation_visible_with_transport(
 /// visible pixel or depth ordering.
 fn town_snapshot_installation_on_screen(
   installation : @energy_valley_contract.Installation,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Bool {
   let position = if installation.kind is @energy_valley_contract.Boardwalk {
     Some(
@@ -123,8 +123,8 @@ fn golden_draw_town_snapshot_installations(
   context : @dom.CanvasRenderingContext2D,
   installations : ArrayView[@energy_valley_contract.Installation],
   authoritative_transport : Bool,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
   hour : Double,
 ) -> Unit {
   for installation in installations {
@@ -242,8 +242,8 @@ fn golden_draw_town_snapshot_metro_underlay(
   context : @dom.CanvasRenderingContext2D,
   snapshot : @energy_valley_contract.TownSnapshot,
   visible : Bool,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   if !visible {
     return
@@ -306,8 +306,8 @@ fn golden_draw_town_snapshot_metro_landmarks(
   context : @dom.CanvasRenderingContext2D,
   snapshot : @energy_valley_contract.TownSnapshot,
   visible : Bool,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   if !visible {
     return

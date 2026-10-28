@@ -30,6 +30,7 @@ priv struct SecretComputeMachine {
   healthy : Bool
   running_workloads : Int32
   observed_at_unix_ms : String
+  metrics_reported : Bool?
 } derive(Debug, Eq, FromJson)
 
 ///|
@@ -56,6 +57,27 @@ priv struct SecretComputeRoomProjection {
   gateway : SecretComputeGateway
   local_cluster : SecretComputeLocalCluster
   remote_routes : Array[SecretComputeRemoteRoute]
+  scope : SecretComputeAccountScope?
+} derive(Debug, Eq, FromJson)
+
+///|
+priv struct SecretComputeOrganization {
+  id : String
+  label : String
+} derive(Debug, Eq, FromJson)
+
+///|
+priv struct SecretComputeAccountScope {
+  state : String
+  audience : String?
+  account : SecretComputeAccount?
+  organizations : Array[SecretComputeOrganization]
+} derive(Debug, Eq, FromJson)
+
+///|
+priv struct SecretComputeAccount {
+  user_id : String
+  display_name : String
 } derive(Debug, Eq, FromJson)
 
 ///|
@@ -64,39 +86,15 @@ fn secret_compute_room_fallback() -> SecretComputeRoomProjection {
     schema: "moontown.secret-compute-room.v1",
     mode: "unavailable",
     observed_at: "",
+    scope: None,
     authority: {
       agent_boundary: "MoonGate",
       local_control_plane: "LunaNexa",
       claim: "read-only redacted projection",
     },
-    gateway: { state: "unreachable", active_targets: [], model_count: 0, },
+    gateway: { state: "not-observed", active_targets: [], model_count: 0, },
     local_cluster: { configured: false, state: "not-configured", machines: [], },
-    remote_routes: [
-      {
-        id: "codex",
-        label: "Codex / OpenAI",
-        state: "not-observed",
-        evidence: "MoonGate has not reported this route.",
-      },
-      {
-        id: "deepseek",
-        label: "DeepSeek",
-        state: "not-observed",
-        evidence: "MoonGate has not reported this route.",
-      },
-      {
-        id: "glm",
-        label: "GLM",
-        state: "not-observed",
-        evidence: "MoonGate has not reported this route.",
-      },
-      {
-        id: "kimi",
-        label: "Kimi",
-        state: "not-observed",
-        evidence: "MoonGate has not reported this route.",
-      },
-    ],
+    remote_routes: [],
   }
 }
 
@@ -144,9 +142,80 @@ fn parse_secret_compute_room_projection_text(
 
 ///|
 fn parse_bootstrap_secret_compute_room_projection() -> SecretComputeRoomProjection {
-  parse_secret_compute_room_projection_text(
+  let projection = parse_secret_compute_room_projection_text(
     load_bootstrap_secret_compute_room_json(),
   )
+  // An older server's host-wide inventory is not account-owned compute.
+  if projection.scope is None {
+    secret_compute_room_fallback()
+  } else {
+    projection
+  }
+}
+
+///|
+fn render_compute_account_scope(
+  projection : SecretComputeRoomProjection,
+) -> @rabbita.Html {
+  let state = projection.scope.map(s => s.state).unwrap_or("not-configured")
+  let account = match projection.scope {
+    Some(scope) => scope.account
+    None => None
+  }
+  let audience = projection.scope
+    .map(s => s.audience.unwrap_or("personal"))
+    .unwrap_or("personal")
+  let title = match audience {
+    "public" => "公共小镇 · Trial"
+    "admin" => "全部算力"
+    _ =>
+      account
+      .map(a => a.display_name + " · 我的算力")
+      .unwrap_or("我的算力")
+  }
+  let message = match state {
+    "public-demo" =>
+      "2 台 Trial 机器 · 展示目录，非实时运行数据。"
+    "bound" =>
+      if projection.local_cluster.machines.is_empty() {
+        "账户已连接，暂无授权机器。"
+      } else if audience == "admin" {
+        "\{projection.local_cluster.machines.length()} 台平台机器"
+      } else {
+        "\{projection.local_cluster.machines.length()} 台授权机器"
+      }
+    "sign-in-required" =>
+      "登录后查看自己的算力，无需先启动模型。"
+    "select-organization" => "选择要查看的组织。"
+    "access-denied" => "当前账户没有此组织的机器访问权限。"
+    "not-configured" => "统一账户尚未接入。"
+    _ => "暂时无法同步账户算力，稍后自动重试。"
+  }
+  let choices = projection.scope.map(s => s.organizations).unwrap_or([])
+  section(class="building-interior-panel compute-account-scope", [
+    h2(title),
+    p(message),
+    render_shared_account_entry(state),
+    div(
+      class="compute-account-organizations",
+      choices.map(choice => {
+        a(
+          class="building-interior-exit",
+          href="./index.html?layer=compute&compute-organization=" + choice.id,
+          choice.label,
+        )
+      }),
+    ),
+    if current_browser_query_param("compute-organization") != "" {
+      a(
+        class="building-interior-exit",
+        href="./index.html?layer=compute",
+        "切换组织",
+      )
+    } else {
+      @html.nothing
+    },
+  ])
 }
 
 ///|
@@ -162,15 +231,25 @@ fn secret_compute_state_class(state : String) -> String {
 ///|
 fn secret_compute_state_label(state : String) -> String {
   match state.to_lower() {
+    "public-demo" => "公共展示"
     "reachable" => "可达"
     "observed" => "已观测"
     "active" => "活跃"
     "ready" => "就绪"
     "not-observed" => "未观测"
-    "not-configured" => "未配置"
+    "not-configured" => "待接入"
     "unreachable" => "不可达"
     "unavailable" => "不可用"
     "unhealthy" => "不健康"
+    "bound" => "已绑定"
+    "sign-in-required" => "请登录"
+    "identity-unavailable" => "账户暂不可用"
+    "select-organization" => "选择组织"
+    "access-denied" => "无算力授权"
+    "unknown" => "状态未上报"
+    "delayed" => "心跳延迟"
+    "provisioning" => "准备中"
+    "completed" | "cancelled" => "已结束"
     other => other
   }
 }
@@ -260,6 +339,15 @@ fn secret_compute_memory_label(machine : SecretComputeMachine) -> String {
     "显存未上报"
   } else {
     "\{machine.memory_free_mib / 1024} / \{machine.memory_total_mib / 1024} GiB 空闲"
+  }
+}
+
+///|
+fn secret_compute_workload_label(machine : SecretComputeMachine) -> String {
+  if machine.metrics_reported == Some(false) {
+    "工作负载未上报"
+  } else {
+    "已上报工作负载：\{machine.running_workloads}"
   }
 }
 
@@ -419,7 +507,8 @@ fn render_secret_compute_evidence(
   } else {
     match selected_machine {
       Some(machine) => machine.label
-      None => selected_route.map(route => route.label).unwrap_or("算力证据")
+      None =>
+        selected_route.map(route => route.label).unwrap_or("选择连接对象")
     }
   }
   let detail = if selected == "moongate" {
@@ -427,7 +516,11 @@ fn render_secret_compute_evidence(
   } else {
     match selected_machine {
       Some(machine) =>
-        "\{machine.architecture} · \{machine.accelerator_count} 个加速器"
+        if machine.metrics_reported == Some(false) {
+          machine.architecture
+        } else {
+          "\{machine.architecture} · \{machine.accelerator_count} 个加速器"
+        }
       None =>
         if selected_route is Some(_) {
           "远程模型路由"
@@ -454,12 +547,21 @@ fn render_secret_compute_evidence(
           },
         ),
         p(detail),
+        if selected_machine is Some(_) {
+          p(class="spatial-data-badge", "物理位置未绑定")
+        } else if selected_route is Some(_) {
+          p(class="spatial-data-badge", "外部服务 · 不对应本地机柜")
+        } else {
+          @html.nothing
+        },
         match selected_machine {
           Some(machine) =>
             div(class="compute-key-facts", [
               p("显存：\{secret_compute_memory_label(machine)}"),
-              p("已上报工作负载：\{machine.running_workloads}"),
-              if !machine.healthy {
+              p(secret_compute_workload_label(machine)),
+              if machine.metrics_reported == Some(false) {
+                p("健康状态未上报")
+              } else if !machine.healthy {
                 p(class="spatial-work-warning", "健康检查异常")
               } else {
                 @html.nothing
@@ -472,7 +574,7 @@ fn render_secret_compute_evidence(
           if projection.observed_at.is_empty() {
             "尚无观测快照"
           } else {
-            "观测时间：\{projection.observed_at}"
+            "快照时间：\{projection.observed_at}"
           },
         ),
       ]),
@@ -516,21 +618,40 @@ fn render_secret_compute_room(
   model : Model,
 ) -> @rabbita.Html {
   let projection = parse_bootstrap_secret_compute_room_projection()
-  let return_label = match model.town_spatial_layer {
-    Underground(Some(building)) => "↑ 返回 \{building.name}"
-    _ => "↑ 返回小镇"
+  let return_label = if model.spatial_compute_return_reference {
+    "↑ 返回未来中心"
+  } else {
+    match model.town_spatial_layer {
+      Underground(Some(building)) => "↑ 返回 \{building.name}"
+      _ => "↑ 返回小镇"
+    }
   }
   @html.main_(class="secret-compute-room", [
     div(class="compute-room-ambient ambient-a", ""),
     div(class="compute-room-ambient ambient-b", ""),
     header(class="compute-room-header", [
       div(class="compute-room-title", [
-        p(class="compute-kicker", "地下 · 只读"),
-        h1("秘密算力室"),
-        p("选择机器或终端，查看连接与容量。"),
+        p(class="compute-kicker", "小镇 / 地下"),
+        h1("算力中心"),
+        p(
+          match
+            projection.scope
+            .map(s => s.audience.unwrap_or("personal"))
+            .unwrap_or("personal") {
+            "public" => "Trial 展示 · 登录后查看自己的算力"
+            "admin" => "平台四台机器 · 管理员只读视图"
+            _ => "当前账户的算力目录"
+          },
+        ),
+        p(
+          class="spatial-data-badge",
+          "只读查看 · 不分配或启动机器",
+        ),
       ]),
       div(class="compute-room-header-actions", [
-        render_secret_compute_status(projection.mode),
+        render_secret_compute_status(
+          projection.scope.map(s => s.state).unwrap_or("not-configured"),
+        ),
         button(
           class="compute-room-exit",
           title=return_label,
@@ -541,12 +662,17 @@ fn render_secret_compute_room(
       ]),
     ]),
     div(class="compute-room-content", [
-      render_secret_compute_graphical_scene(dispatch, model, projection),
+      render_compute_spatial_stage(model, projection),
       div(class="compute-room-sidebar", [
-        render_secret_compute_evidence(
-          projection,
-          model.secret_compute_room_selected_id,
-        ),
+        render_compute_account_scope(projection),
+        if spatial_scene_selected(model) is Some({ scope: "design", .. }) {
+          render_spatial_design_inspector(model)
+        } else {
+          render_secret_compute_evidence(
+            projection,
+            model.secret_compute_room_selected_id,
+          )
+        },
         render_spatial_work_journey(dispatch, model),
         render_advanced_details(
           "基础设施权限说明",
@@ -555,7 +681,7 @@ fn render_secret_compute_room(
             div(class="compute-room-boundary-note", [
               @html.strong("机密边界"),
               span(
-                "这是受控本地环境中的脱敏投影；它不提供远程 Shell、凭据查看或直接调度。",
+                "仅展示统一账户获授权的资源；机器归属由 LunaNexa 校验。尚无账户级 MoonGate 路由接口时不展示宿主机模型。物理机柜位置与未提供的监控指标保持未绑定。",
               ),
             ]),
           ],

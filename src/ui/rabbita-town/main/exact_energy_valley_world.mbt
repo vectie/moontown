@@ -3,17 +3,17 @@
 /// map. Terrain comes from the authored reference labels plus the procedural
 /// Energy Valley grammar; civic buildings use the same collision-aware
 /// placement process as the original large-map renderer.
-pub fn exact_energy_valley_cols() -> Int {
+pub fn exact_energy_valley_cols() -> Int32 {
   tilemap_grid_width()
 }
 
 ///|
-pub fn exact_energy_valley_rows() -> Int {
+pub fn exact_energy_valley_rows() -> Int32 {
   tilemap_grid_height()
 }
 
 ///|
-pub fn exact_energy_valley_default_seed() -> UInt {
+pub fn exact_energy_valley_default_seed() -> UInt32 {
   default_energy_valley_seed.reinterpret_as_uint()
 }
 
@@ -26,11 +26,11 @@ pub(all) struct ExactEnergyValleyTile {
   variation : Double
   mut building_id : String?
   mut river_flow : Double?
-  mut road_mask : Int?
+  mut road_mask : Int32?
   mut structure : String?
-  mut structure_floors : Int?
-  mut structure_width : Int?
-  mut structure_depth : Int?
+  mut structure_floors : Int32?
+  mut structure_width : Int32?
+  mut structure_depth : Int32?
 } derive(Debug)
 
 ///|
@@ -41,31 +41,31 @@ pub(all) struct ExactEnergyValleyBuilding {
   name : String
   glyph : String
   style : String
-  x : Int
-  y : Int
-  width : Int
-  depth : Int
-  entrance_x : Int
-  entrance_y : Int
-  floors : Int
+  x : Int32
+  y : Int32
+  width : Int32
+  depth : Int32
+  entrance_x : Int32
+  entrance_y : Int32
+  floors : Int32
   vitality : Double
 } derive(Debug)
 
 ///|
 pub(all) struct ExactEnergyValleyLandmarks {
-  civic_core_x : Int
-  civic_core_y : Int
-  river_crossing_y : Int
-  feeder_head_x : Int
-  bridge_columns : Array[Int]
-  south_arterial_y : Int
+  civic_core_x : Int32
+  civic_core_y : Int32
+  river_crossing_y : Int32
+  feeder_head_x : Int32
+  bridge_columns : Array[Int32]
+  south_arterial_y : Int32
 } derive(Debug)
 
 ///|
 pub(all) struct ExactEnergyValleyWorld {
-  seed : UInt
-  cols : Int
-  rows : Int
+  seed : UInt32
+  cols : Int32
+  rows : Int32
   tiles : Array[Array[ExactEnergyValleyTile]]
   buildings : Array[ExactEnergyValleyBuilding]
   landmarks : ExactEnergyValleyLandmarks
@@ -74,8 +74,8 @@ pub(all) struct ExactEnergyValleyWorld {
 ///|
 pub fn ExactEnergyValleyWorld::tile_at(
   self : ExactEnergyValleyWorld,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> ExactEnergyValleyTile? {
   if x < 0 || x >= self.cols || y < 0 || y >= self.rows {
     None
@@ -87,8 +87,8 @@ pub fn ExactEnergyValleyWorld::tile_at(
 ///|
 pub fn ExactEnergyValleyWorld::terrain_at(
   self : ExactEnergyValleyWorld,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> String? {
   match self.tile_at(x, y) {
     Some(tile) => Some(tile.terrain)
@@ -99,8 +99,8 @@ pub fn ExactEnergyValleyWorld::terrain_at(
 ///|
 pub fn ExactEnergyValleyWorld::variation_at(
   self : ExactEnergyValleyWorld,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Double? {
   match self.tile_at(x, y) {
     Some(tile) => Some(tile.variation)
@@ -111,9 +111,9 @@ pub fn ExactEnergyValleyWorld::variation_at(
 ///|
 pub fn ExactEnergyValleyWorld::structure_at(
   self : ExactEnergyValleyWorld,
-  x : Int,
-  y : Int,
-) -> (String, Int)? {
+  x : Int32,
+  y : Int32,
+) -> (String, Int32)? {
   match self.tile_at(x, y) {
     Some(tile) =>
       match (tile.structure, tile.structure_floors) {
@@ -127,9 +127,9 @@ pub fn ExactEnergyValleyWorld::structure_at(
 ///|
 fn ExactEnergyValleyWorld::structure_footprint_at(
   self : ExactEnergyValleyWorld,
-  x : Int,
-  y : Int,
-) -> (String, Int, Int, Int)? {
+  x : Int32,
+  y : Int32,
+) -> (String, Int32, Int32, Int32)? {
   match self.tile_at(x, y) {
     Some(tile) =>
       match
@@ -166,10 +166,10 @@ fn exact_energy_valley_template(
   title : String,
   district : String,
   building_kind : String,
-  grid_x : Int,
-  grid_y : Int,
-  footprint_w : Int,
-  footprint_h : Int,
+  grid_x : Int32,
+  grid_y : Int32,
+  footprint_w : Int32,
+  footprint_h : Int32,
 ) -> WenyuTownModule {
   {
     id,
@@ -289,11 +289,11 @@ fn exact_energy_valley_canvas_terrain(kind : String) -> String {
 
 ///|
 fn exact_energy_valley_procedural_structure(
-  seed : Int,
-  x : Int,
-  y : Int,
+  seed : Int32,
+  x : Int32,
+  y : Int32,
   kind : String,
-) -> (String, Int)? {
+) -> (String, Int32)? {
   if kind != "urban-dense" && kind != "urban" && kind != "campus" {
     return None
   }
@@ -348,7 +348,7 @@ fn exact_energy_valley_procedural_structure(
 ///|
 fn exact_energy_valley_grow_urban_fabric(
   tiles : Array[Array[ExactEnergyValleyTile]],
-  seed : Int,
+  seed : Int32,
   layout : EnergyValleyRoadBlockLayout,
 ) -> Unit {
   energy_valley_grow_parcel_structures(tiles, seed, layout)
@@ -369,7 +369,7 @@ fn exact_energy_valley_building_style(module_key : String) -> String {
 }
 
 ///|
-fn exact_energy_valley_building_floors(module_key : String) -> Int {
+fn exact_energy_valley_building_floors(module_key : String) -> Int32 {
   match module_key {
     "vitality-dashboard" => 7
     "broadcast-tower" => 5
@@ -408,7 +408,7 @@ fn exact_energy_valley_building_name(
 
 ///|
 fn exact_energy_valley_buildings(
-  seed : Int,
+  seed : Int32,
   road_network : @energy_valley_contract.RoadNetwork,
 ) -> Array[ExactEnergyValleyBuilding] {
   procedural_energy_valley_modules_with_road_network(
@@ -441,9 +441,9 @@ fn exact_energy_valley_buildings(
 
 ///|
 fn exact_energy_valley_tile(
-  seed : Int,
-  x : Int,
-  y : Int,
+  seed : Int32,
+  x : Int32,
+  y : Int32,
 ) -> ExactEnergyValleyTile {
   let kind = energy_valley_tile_kind_at(seed, x, y)
   let variation = energy_valley_variation(seed, x, y, 397, 1000).to_double() /
@@ -471,9 +471,9 @@ fn exact_energy_valley_tile(
 ///|
 fn exact_energy_valley_road_mask(
   tiles : Array[Array[ExactEnergyValleyTile]],
-  x : Int,
-  y : Int,
-) -> Int {
+  x : Int32,
+  y : Int32,
+) -> Int32 {
   let mut mask = 0
   let neighbors = [(x, y - 1), (x + 1, y), (x, y + 1), (x - 1, y)]
   for index in 0..<neighbors.length() {
@@ -554,7 +554,7 @@ fn exact_energy_valley_reserve_civic_parcel(
 }
 
 ///|
-pub fn exact_energy_valley_generate(seed : UInt) -> ExactEnergyValleyWorld {
+pub fn exact_energy_valley_generate(seed : UInt32) -> ExactEnergyValleyWorld {
   let normalized_seed = normalized_energy_valley_seed(
     if seed == 0U {
       default_energy_valley_seed
@@ -591,7 +591,7 @@ pub fn exact_energy_valley_generate(seed : UInt) -> ExactEnergyValleyWorld {
     }
   }
   let grammar = energy_valley_grammar(normalized_seed)
-  let bridge_columns : Array[Int] = []
+  let bridge_columns : Array[Int32] = []
   for x in 0..<exact_energy_valley_cols() {
     if energy_valley_bridge_at(normalized_seed, x, grammar.civic_road_y) {
       bridge_columns.push(x)
@@ -620,7 +620,7 @@ pub fn exact_energy_valley_generate_default() -> ExactEnergyValleyWorld {
 }
 
 ///|
-pub fn exact_energy_valley_generate_int(seed : Int) -> ExactEnergyValleyWorld {
+pub fn exact_energy_valley_generate_int(seed : Int32) -> ExactEnergyValleyWorld {
   exact_energy_valley_generate(
     if seed < 0 {
       (-seed).reinterpret_as_uint()

@@ -7,15 +7,20 @@ fn render_resident_card(resident : ResidentSim) -> @rabbita.Html {
     ]),
     p(resident.venture),
     div(class="resident-chip-row", [
-      span(class="resident-chip resident-chip-privacy", resident.privacy_scope),
-      span(class="resident-chip resident-chip-action", "Recent action"),
+      span(
+        class="resident-chip resident-chip-privacy",
+        "示例人物 · 非真实账户",
+      ),
     ]),
     div(class="resident-state-grid", [
       render_resident_state("Need", resident.need),
       render_resident_state("Mood", resident.mood),
       render_resident_state("Goal", resident.agent_goal),
     ]),
-    render_memory_strip("Current signal", resident.recent_action),
+    render_advanced_details("示例人物设定", [
+      p(resident.recent_action),
+      p(resident.plan),
+    ]),
   ])
 }
 
@@ -51,33 +56,16 @@ fn render_resident_state(label : String, value : String) -> @rabbita.Html {
 fn render_resident_agents(model : Model) -> @rabbita.Html {
   section(class="resident-panel", [
     div(class="runtime-copy", [
-      p(class="eyebrow", "Resident Agents"),
-      h2("Resident Agents"),
+      h2("居民示例"),
+      p(
+        "展示三种典型需求，不代表真实账户、私人记忆或已经发生的行动。",
+      ),
     ]),
     div(class="resident-summary-grid", [
       runtime_stat_chip(
-        "Visible twins",
-        resident_count(model),
-        "runtime-running",
-      ),
-      runtime_stat_chip(
-        "Private scopes",
-        resident_private_scope_count(model),
+        "示例人物",
+        resident_sims(model).length(),
         "runtime-review",
-      ),
-      runtime_stat_chip(
-        "Review queued",
-        resident_review_queue_count(model),
-        "runtime-persisting",
-      ),
-      runtime_stat_chip(
-        "Projection mode",
-        if model.state_source == StateSourceKind::SnapshotFile {
-          1
-        } else {
-          0
-        },
-        "runtime-imported",
       ),
     ]),
     div(

@@ -4,7 +4,7 @@
 /// lifecycle ownership remain renderer concerns.
 priv struct GoldenSpringAmbientBuildingAssetCandidate {
   asset_path : String
-  variant : Int
+  variant : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -28,7 +28,7 @@ fn golden_spring_ambient_style_supported(style : String) -> Bool {
 /// path from untrusted or unbounded world data.
 fn golden_spring_ambient_asset_path_for_variant(
   style : String,
-  variant : Int,
+  variant : Int32,
 ) -> String? {
   if !golden_spring_ambient_style_supported(style) ||
     variant < 0 ||
@@ -45,7 +45,7 @@ fn golden_spring_ambient_asset_path_for_variant(
 /// Promote exactly two of every ten stable hash residues into the new variant
 /// slots. The remaining eighty percent retain their previous modulo-eight
 /// assignment, avoiding a full visual reroll when the pack grows.
-fn golden_spring_ambient_building_variant_from_hash(hash : Int) -> Int {
+fn golden_spring_ambient_building_variant_from_hash(hash : Int32) -> Int32 {
   let promotion = energy_valley_mod(hash, 10)
   if promotion >= 8 {
     promotion
@@ -61,8 +61,8 @@ fn golden_spring_ambient_building_variant_from_hash(hash : Int) -> Int {
 fn golden_spring_ambient_building_variant(
   style : String,
   place_id : @energy_valley_contract.StableId,
-  interior_seed : Int,
-) -> Int {
+  interior_seed : Int32,
+) -> Int32 {
   golden_spring_ambient_building_variant_from_hash(
     ecosystem_stable_hash(
       "moontown-spring-ambient-v1:\{style}:\{place_id.to_string()}:\{interior_seed}",

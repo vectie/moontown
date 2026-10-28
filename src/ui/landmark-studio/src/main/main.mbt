@@ -6,6 +6,7 @@ extern "js" fn publish(data : String) =
 fn main {
   publish(@models.studies().stringify())
   publish_interior(@models.interior_study().stringify())
+  publish_town_interior(text => @models.town_interior_study(text).stringify())
   publish_datacenter(
     @models.data_center_study().stringify(),
     load => @models.data_center_report(load).stringify(),
@@ -18,9 +19,13 @@ extern "js" fn publish_interior(data : String) =
   #| (data) => { globalThis.wenyuInteriorStudy = JSON.parse(data); }
 
 ///|
+extern "js" fn publish_town_interior(build : (String) -> String) =
+  #| build => { globalThis.moonTownInteriorStudy = input => JSON.parse(build(JSON.stringify(input))); }
+
+///|
 extern "js" fn publish_datacenter(
   data : String,
-  report : (Int) -> String,
+  report : (Int32) -> String,
   observation : (String) -> String,
 ) =
   #| (data, report, observation) => { globalThis.moonDataCenter = JSON.parse(data); globalThis.moonDataCenterReport = n => JSON.parse(report(n)); globalThis.moonDataCenterObservation = s => JSON.parse(observation(s)); }

@@ -9,8 +9,8 @@ extern "js" fn town_scene_draw_lot_access(
   camera_x : Double,
   camera_y : Double,
   zoom : Double,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit =
   #| (context, x, y, cameraX, cameraY, zoom, width, height) => {
   #|   const graph = globalThis.__moontownEnergyValleyCartoonRoadGraph;

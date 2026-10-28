@@ -1,5 +1,5 @@
 ///|
-fn worker_status_for(model : Model, offset : Int) -> @core.WorkerStatus {
+fn worker_status_for(model : Model, offset : Int32) -> @core.WorkerStatus {
   let cycle = (model.tick + offset) % 9
   if mayor_recovery_active(model) {
     worker_operating_cycle_status(cycle)
@@ -13,7 +13,7 @@ fn worker_status_for(model : Model, offset : Int) -> @core.WorkerStatus {
 }
 
 ///|
-fn worker_operating_cycle_status(cycle : Int) -> @core.WorkerStatus {
+fn worker_operating_cycle_status(cycle : Int32) -> @core.WorkerStatus {
   match cycle {
     0 | 3 | 6 => Running
     1 | 4 | 7 => Waiting
@@ -33,7 +33,11 @@ fn worker_zone_key(book_id : String, status : @core.WorkerStatus) -> String {
 }
 
 ///|
-fn worker_load(model : Model, offset : Int, status : @core.WorkerStatus) -> Int {
+fn worker_load(
+  model : Model,
+  offset : Int32,
+  status : @core.WorkerStatus,
+) -> Int32 {
   let baseline = model.pressure + offset * 6
   match status {
     Running => clamp_metric(baseline + 16)
@@ -45,7 +49,7 @@ fn worker_load(model : Model, offset : Int, status : @core.WorkerStatus) -> Int 
 }
 
 ///|
-fn worker_summary(status : @core.WorkerStatus, load : Int) -> String {
+fn worker_summary(status : @core.WorkerStatus, load : Int32) -> String {
   match status {
     Running => "Serving residents and town quests at load \{load}%."
     Waiting => "Waiting in the plaza for the mayor's next supervised handoff."

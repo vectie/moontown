@@ -18,17 +18,17 @@ priv enum ImportedOutputsTextState {
 ///|
 priv struct ImportedOutputsState {
   open : Bool
-  generation : Int
+  generation : Int32
   catalog : ImportedOutputsCatalogState
   book_handle : String
   artifact_id : String
   selection : @imported_output_contract.Selection?
-  download_generation : Int
+  download_generation : Int32
   download : ImportedOutputsDownloadState
   text : ImportedOutputsTextState
   table : Result[@imported_output_contract.DataTable, String]?
   table_query : String
-  table_page : Int
+  table_page : Int32
   table_show : Bool
   table_view : TableViewState
   agenda : AgendaState
@@ -46,7 +46,7 @@ priv enum ImportedOutputsMsg {
   ChooseImportedFile(String)
   DownloadImportedFile
   SearchImportedTable(String)
-  PageImportedTable(Int)
+  PageImportedTable(Int32)
   ShowImportedTable(Bool)
   DownloadFilteredTable
   TableViewEvent(TableViewMsg)
@@ -54,21 +54,21 @@ priv enum ImportedOutputsMsg {
   GeoEvent(GeoMsg)
   PlacesEvent(PlacesMsg)
   ImportedDownloadStatus(
-    Int,
-    Int,
+    Int32,
+    Int32,
     @imported_output_contract.Selection,
     Bool,
     String
   )
-  ImportedCatalogLoaded(Int, String)
-  ImportedTextLoaded(Int, @imported_output_contract.Selection, String)
+  ImportedCatalogLoaded(Int32, String)
+  ImportedTextLoaded(Int32, @imported_output_contract.Selection, String)
 }
 
 ///|
 priv enum ImportedOutputsRequest {
-  FetchImportedCatalog(Int)
-  FetchImportedDownload(Int, Int, @imported_output_contract.Selection)
-  FetchImportedText(Int, @imported_output_contract.Selection)
+  FetchImportedCatalog(Int32)
+  FetchImportedDownload(Int32, Int32, @imported_output_contract.Selection)
+  FetchImportedText(Int32, @imported_output_contract.Selection)
   SaveFilteredTable(String, String)
 } derive(Debug, Eq)
 

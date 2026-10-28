@@ -76,7 +76,7 @@ fn live_autonomy_template_request_feed_item(
 let live_autonomy_next_action_feed_limit = 2
 
 ///|
-fn live_autonomy_next_action_limit_reached(pushed : Int) -> Bool {
+fn live_autonomy_next_action_limit_reached(pushed : Int32) -> Bool {
   pushed >= live_autonomy_next_action_feed_limit
 }
 

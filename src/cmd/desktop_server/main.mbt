@@ -102,10 +102,10 @@ fn content_type(path : String) -> String {
 ///|
 async fn send_text(
   conn : @http.ServerConnection,
-  code : Int,
+  code : Int32,
   reason : String,
   body : String,
-  kind? : String = "text/plain; charset=utf-8",
+  kind~ : String = "text/plain; charset=utf-8",
 ) -> Unit {
   let encoded = @utf8.encode(body)
   conn.send_response(code, reason, extra_headers={
@@ -120,7 +120,7 @@ async fn send_text(
 ///|
 async fn send_json(
   conn : @http.ServerConnection,
-  code : Int,
+  code : Int32,
   value : Json,
 ) -> Unit {
   send_text(
@@ -314,12 +314,12 @@ async fn serve_book_output(
 }
 
 ///|
-fn operator_request_projection_limit() -> Int {
+fn operator_request_projection_limit() -> Int32 {
   @system_settings.current_system_settings().operator_request_projection_limit
 }
 
 ///|
-fn watcher_record_projection_limit() -> Int {
+fn watcher_record_projection_limit() -> Int32 {
   @system_settings.current_system_settings().watcher_record_projection_limit
 }
 
@@ -327,7 +327,7 @@ fn watcher_record_projection_limit() -> Int {
 fn push_json_projection_tail(
   rows : Array[Json],
   value : Json,
-  capacity : Int,
+  capacity : Int32,
 ) -> Unit {
   rows.push(value)
   while rows.length() > capacity.max(1) {
@@ -336,7 +336,7 @@ fn push_json_projection_tail(
 }
 
 ///|
-fn watcher_record_projection_compare(left : Json, right : Json) -> Int {
+fn watcher_record_projection_compare(left : Json, right : Json) -> Int32 {
   let left_tick = match left {
     Object(fields) => json_int_field(fields, "tick", 0, 0, 2147483647)
     _ => 0
@@ -497,10 +497,10 @@ fn json_string_field(fields : Map[String, Json], key : String) -> String {
 fn json_int_field(
   fields : Map[String, Json],
   key : String,
-  fallback : Int,
-  minimum : Int,
-  maximum : Int,
-) -> Int {
+  fallback : Int32,
+  minimum : Int32,
+  maximum : Int32,
+) -> Int32 {
   let value = match fields.get(key) {
     Some(Number(value, ..)) => value.trunc().to_int()
     _ => fallback
@@ -538,6 +538,14 @@ async fn handle_request(
   let path = request_path(request)
   if request.meth is Get && path == "/health" {
     send_json(conn, 200, { "ok": true, "service": "moontown-desktop" })
+    return
+  }
+  // Narrow read-only customer routes resolve their own verified account. Do
+  // not broaden the operator gate over the remainder of the desktop service.
+  if handle_account_read(request, conn) {
+    return
+  }
+  if handle_neighborhood_request(request, body, conn) {
     return
   }
   if public_access_gate(request, body, conn) {
@@ -744,14 +752,6 @@ async fn handle_request(
       return
     }
     send_json(conn, 200, energy_valley_runtime_projection())
-    return
-  }
-  if path == "/secret-compute-room.json" {
-    if !(request.meth is Get) {
-      send_json(conn, 405, { "ok": false, "error": "GET required" })
-      return
-    }
-    send_json(conn, 200, secret_compute_room_projection())
     return
   }
   if path == "/knowledge-domain-catalog.json" {

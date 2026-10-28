@@ -1,11 +1,11 @@
 ///|
-let town_bearing_density_target : Int = 176
+let town_bearing_density_target : Int32 = 176
 
 ///|
 /// Scan every integer anchor, including the odd-coordinate pockets skipped by
 /// the legacy two-tile lattice. Interleave districts before filling a second
 /// slot in each district, so a bounded quota cannot crowd only one map edge.
-fn town_bearing_density_site(index : Int) -> (Int, Int) {
+fn town_bearing_density_site(index : Int32) -> (Int32, Int32) {
   let district = index % 144 * 53 % 144
   let offset = index / 144
   (district % 16 * 16 + offset % 16, district / 16 * 16 + offset / 16)
@@ -15,8 +15,8 @@ fn town_bearing_density_site(index : Int) -> (Int, Int) {
 /// Add compact, individually reserved decorative lots. Existing lots stay
 /// untouched; a density target never overrides water, woodland or road masks.
 fn town_bearing_fill_density(
-  buildings : Map[Int, Array[IntersectionRoadPreviewBuilding]],
-  target : Int,
+  buildings : Map[Int32, Array[IntersectionRoadPreviewBuilding]],
+  target : Int32,
 ) -> Unit {
   if wenyu_scene_prefix.length() != 257 * 145 ||
     wenyu_scene_road_prefix.length() != 257 * 145 {
@@ -83,9 +83,9 @@ fn town_bearing_fill_density(
     anchors[y * 256 + x] = candidates.length()
     candidates.push(candidate)
   }
-  let neighbors : Array[Array[Int]] = []
+  let neighbors : Array[Array[Int32]] = []
   for candidate in candidates {
-    let adjacent : Array[Int] = []
+    let adjacent : Array[Int32] = []
     // Three-unit homes retain a shared one-unit landscaped gap.
     for y in (candidate.y - 3).max(0)..<=(candidate.y + 3).min(143) {
       for x in (candidate.x - 3).max(0)..<=(candidate.x + 3).min(255) {

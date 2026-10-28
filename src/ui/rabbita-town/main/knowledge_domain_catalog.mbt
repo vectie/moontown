@@ -217,7 +217,7 @@ fn knowledge_domain_primary_tier(domain : KnowledgeDomain) -> String {
 fn knowledge_domain_real_book_count(
   model : Model,
   domain : KnowledgeDomain,
-) -> Int {
+) -> Int32 {
   let mut count = 0
   for book in domain.books {
     if find_exact_book_projection(model, book.book_id) is Some(_) {
@@ -231,7 +231,7 @@ fn knowledge_domain_real_book_count(
 fn knowledge_domain_review_book_count(
   model : Model,
   domain : KnowledgeDomain,
-) -> Int {
+) -> Int32 {
   let mut count = 0
   for book in domain.books {
     if knowledge_book_display_state(model, book).key == "review" {
@@ -245,7 +245,7 @@ fn knowledge_domain_review_book_count(
 fn knowledge_domain_accepted_book_count(
   model : Model,
   domain : KnowledgeDomain,
-) -> Int {
+) -> Int32 {
   let mut count = 0
   for book in domain.books {
     if knowledge_book_display_state(model, book).key == "accepted" {

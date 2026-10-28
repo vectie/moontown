@@ -81,16 +81,15 @@ test "retained outcome rendered library has distinct plan dossier history and fa
   )
   for
     expected in [
-      "Retained outcome library", "Load / reload retained outcomes", "Cancel pending inspection or download",
-      "Filter outcome", "Filter review", "Inspect review 0", "Inspect review 2",
-      "partial", "deferred", "Attributed retained failure", "水 café &lt;unsafe&gt;",
-      "Download exact retained dossier (.tar)", "sha256:archive", "Different periods",
-      "download never submits to Book",
+      "collaboration-results", "刷新成果", "导入成果", "筛选成果", "审核记录",
+      "查看审核版本 0", "查看审核版本 2", "部分完成", "已暂缓",
+      "Attributed retained failure", "水 café &lt;unsafe&gt;", "下载成果包",
+      "sha256:archive", "Different periods", "下载不提交知识册",
     ] {
     assert_true(html.contains(expected), msg=expected)
   }
-  assert_false(html.contains("Run participants once"))
-  assert_false(html.contains("Send retained outcome to chosen Book"))
+  assert_false(html.contains("开始执行"))
+  assert_false(html.contains("提交到知识册"))
   let payload = @json.parse(
     collaboration_payload(state, "outcome-export", "historic", "r-first", ""),
   )

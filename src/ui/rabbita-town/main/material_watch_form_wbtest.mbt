@@ -158,11 +158,11 @@ test "material watch form explains real source selection and pending fields are 
   let rendered = @rabbita.render_to_string(
     @rabbita.static_cell(render_request_composer(dispatch, complete)),
   )
-  assert_true(rendered.contains("Local material changes"))
+  assert_true(rendered.contains("本地资料"))
   assert_true(
-    rendered.contains("existing UTF-8 file paths relative to the target Book"),
+    rendered.contains("UTF-8 文本路径（相对目标知识册）"),
   )
-  assert_true(rendered.contains("one per line"))
+  assert_true(rendered.contains("每行一个"))
   assert_true(rendered.contains("watch-material-sources"))
   assert_true(rendered.contains("watch-material-acceptance"))
   assert_true(rendered.contains("watch-material-next-action"))
@@ -175,5 +175,5 @@ test "material watch form explains real source selection and pending fields are 
     ),
   )
   assert_eq(pending.split(" disabled").to_array().length(), 10)
-  assert_true(pending.contains("Mode is locked while saving"))
+  assert_true(pending.contains("保存中… · 本地资料"))
 }

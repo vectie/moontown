@@ -1,0 +1,9 @@
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/core/json",
+  "vectie/moontown/storage",
+  "vectie/moontown/support",
+}
+
+supported_targets = "native"

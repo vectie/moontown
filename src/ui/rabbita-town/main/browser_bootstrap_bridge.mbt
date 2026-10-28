@@ -7,7 +7,7 @@ extern "js" fn load_bootstrap_account_context_json() -> String =
   #| () => globalThis.__moontownAccountContextJson || ""
 
 ///|
-extern "js" fn town_snapshot_version() -> Int =
+extern "js" fn town_snapshot_version() -> Int32 =
   #| () => globalThis.__moontownTownSnapshotVersion || 0
 
 ///|
@@ -15,7 +15,7 @@ extern "js" fn load_bootstrap_energy_valley_runtime_json() -> String =
   #| () => globalThis.__moontownEnergyValleyRuntimeJson || ""
 
 ///|
-extern "js" fn energy_valley_runtime_version() -> Int =
+extern "js" fn energy_valley_runtime_version() -> Int32 =
   #| () => globalThis.__moontownEnergyValleyRuntimeVersion || 0
 
 ///|
@@ -38,7 +38,7 @@ extern "js" fn load_bootstrap_visual_projection_json() -> String =
   #| () => globalThis.__moontownVisualProjectionJson || ""
 
 ///|
-extern "js" fn visual_projection_version() -> Int =
+extern "js" fn visual_projection_version() -> Int32 =
   #| () => globalThis.__moontownVisualProjectionVersion || 0
 
 ///|
@@ -46,7 +46,7 @@ extern "js" fn load_bootstrap_module_projections_json() -> String =
   #| () => globalThis.__moontownModuleProjectionsJson || "{\"projections\":[]}"
 
 ///|
-extern "js" fn module_projections_version() -> Int =
+extern "js" fn module_projections_version() -> Int32 =
   #| () => globalThis.__moontownModuleProjectionsVersion || 0
 
 ///|
@@ -54,7 +54,7 @@ extern "js" fn load_bootstrap_civic_status_json() -> String =
   #| () => globalThis.__moontownCivicStatusJson || "{\"services\":[]}"
 
 ///|
-extern "js" fn civic_status_version() -> Int =
+extern "js" fn civic_status_version() -> Int32 =
   #| () => globalThis.__moontownCivicStatusVersion || 0
 
 ///|
@@ -62,7 +62,7 @@ extern "js" fn load_bootstrap_moondesk_handoff_json() -> String =
   #| () => globalThis.__moontownMoondeskHandoffJson || "{\"artifacts\":[]}"
 
 ///|
-extern "js" fn moondesk_handoff_version() -> Int =
+extern "js" fn moondesk_handoff_version() -> Int32 =
   #| () => globalThis.__moontownMoondeskHandoffVersion || 0
 
 ///|
@@ -70,7 +70,7 @@ extern "js" fn load_bootstrap_moondesk_bridge_json() -> String =
   #| () => globalThis.__moontownMoondeskBridgeJson || "{\"records\":[]}"
 
 ///|
-extern "js" fn moondesk_bridge_version() -> Int =
+extern "js" fn moondesk_bridge_version() -> Int32 =
   #| () => globalThis.__moontownMoondeskBridgeVersion || 0
 
 ///|
@@ -78,7 +78,7 @@ extern "js" fn load_bootstrap_daemon_snapshot_json() -> String =
   #| () => globalThis.__moontownDaemonSnapshotJson || ""
 
 ///|
-extern "js" fn daemon_snapshot_version() -> Int =
+extern "js" fn daemon_snapshot_version() -> Int32 =
   #| () => globalThis.__moontownDaemonSnapshotVersion || 0
 
 ///|
@@ -86,7 +86,7 @@ extern "js" fn load_bootstrap_live_autonomy_json() -> String =
   #| () => globalThis.__moontownLiveAutonomyJson || ""
 
 ///|
-extern "js" fn live_autonomy_version() -> Int =
+extern "js" fn live_autonomy_version() -> Int32 =
   #| () => globalThis.__moontownLiveAutonomyVersion || 0
 
 ///|
@@ -94,7 +94,7 @@ extern "js" fn load_bootstrap_editor_pipeline_json() -> String =
   #| () => globalThis.__moontownEditorPipelineJson || ""
 
 ///|
-extern "js" fn editor_pipeline_version() -> Int =
+extern "js" fn editor_pipeline_version() -> Int32 =
   #| () => globalThis.__moontownEditorPipelineVersion || 0
 
 ///|
@@ -102,7 +102,7 @@ extern "js" fn load_bootstrap_standing_goals_json() -> String =
   #| () => globalThis.__moontownStandingGoalsJson || "[]"
 
 ///|
-extern "js" fn standing_goals_version() -> Int =
+extern "js" fn standing_goals_version() -> Int32 =
   #| () => globalThis.__moontownStandingGoalsVersion || 0
 
 ///|
@@ -110,7 +110,7 @@ extern "js" fn load_bootstrap_watcher_records_json() -> String =
   #| () => globalThis.__moontownWatcherRecordsJson || "[]"
 
 ///|
-extern "js" fn watcher_records_version() -> Int =
+extern "js" fn watcher_records_version() -> Int32 =
   #| () => globalThis.__moontownWatcherRecordsVersion || 0
 
 ///|
@@ -118,7 +118,7 @@ extern "js" fn load_bootstrap_operator_requests_json() -> String =
   #| () => globalThis.__moontownOperatorRequestsJson || "[]"
 
 ///|
-extern "js" fn operator_requests_version() -> Int =
+extern "js" fn operator_requests_version() -> Int32 =
   #| () => globalThis.__moontownOperatorRequestsVersion || 0
 
 ///|
@@ -126,7 +126,7 @@ extern "js" fn load_bootstrap_book_template_requests_json() -> String =
   #| () => globalThis.__moontownBookTemplateRequestsJson || "{\"requests\":[]}"
 
 ///|
-extern "js" fn book_template_requests_version() -> Int =
+extern "js" fn book_template_requests_version() -> Int32 =
   #| () => globalThis.__moontownBookTemplateRequestsVersion || 0
 
 ///|
@@ -134,7 +134,7 @@ extern "js" fn load_bootstrap_wenyu_modules_json() -> String =
   #| () => globalThis.__wenyuTownModulesJson || "{\"modules\":[]}"
 
 ///|
-extern "js" fn wenyu_modules_version() -> Int =
+extern "js" fn wenyu_modules_version() -> Int32 =
   #| () => globalThis.__wenyuTownModulesVersion || 0
 
 ///|
@@ -142,7 +142,7 @@ extern "js" fn load_bootstrap_knowledge_domain_catalog_json() -> String =
   #| () => globalThis.__moontownKnowledgeDomainCatalogJson || ""
 
 ///|
-extern "js" fn knowledge_domain_catalog_version() -> Int =
+extern "js" fn knowledge_domain_catalog_version() -> Int32 =
   #| () => globalThis.__moontownKnowledgeDomainCatalogVersion || 0
 
 ///|

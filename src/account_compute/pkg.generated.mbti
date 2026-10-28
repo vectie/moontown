@@ -1,0 +1,23 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/account_compute"
+
+import {
+  "vectie/moontown/account_identity",
+}
+
+// Values
+pub async fn for_session(@account_identity.Session, String) -> Json
+
+pub async fn platform_for_session(@account_identity.Session, String, String) -> Json
+
+pub fn public_demo() -> Json
+
+pub async fn read(String, String) -> Json
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

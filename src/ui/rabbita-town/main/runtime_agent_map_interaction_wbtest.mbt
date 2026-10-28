@@ -1,8 +1,8 @@
 ///|
 fn runtime_agent_test_map_positions(
   model : Model,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Array[RuntimeAgentMapPosition] {
   if !energy_valley_runtime_can_claim_active_work(model.energy_valley_runtime) {
     return []
@@ -18,10 +18,10 @@ fn runtime_agent_test_map_positions(
 ///|
 fn runtime_agent_test_hit(
   model : Model,
-  viewport_width : Int,
-  viewport_height : Int,
-  pointer_x : Int,
-  pointer_y : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
+  pointer_x : Int32,
+  pointer_y : Int32,
 ) -> String? {
   if !energy_valley_runtime_can_claim_active_work(model.energy_valley_runtime) {
     return None
@@ -203,8 +203,8 @@ fn runtime_map_routing_live_model() -> Model {
 fn runtime_map_routing_test_building(
   name : String,
   module_key : String,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> GoldenValleyBuilding {
   {
     authored_id: None,
@@ -225,7 +225,7 @@ fn runtime_map_routing_test_building(
 fn runtime_map_routing_overlap_candidate(
   model : Model,
   position : RuntimeAgentMapPosition,
-) -> (GoldenValleyBuilding, Int, Int)? {
+) -> (GoldenValleyBuilding, Int32, Int32)? {
   let center_x = position.screen_x.floor().to_int()
   let center_y = position.screen_y.floor().to_int()
   let seen_tiles : Map[String, Bool] = Map([])
@@ -445,7 +445,7 @@ test "runtime presence evidence tick is stable across animation ticks" {
 }
 
 ///|
-fn runtime_map_routing_agent_click_fixture() -> (Model, Int, Int) raise {
+fn runtime_map_routing_agent_click_fixture() -> (Model, Int32, Int32) raise {
   let base = runtime_map_routing_live_model()
   let projection = base.energy_valley_runtime.projection.unwrap()
   let route = golden_valley_runtime_agent_semantic_path(
@@ -494,7 +494,7 @@ fn runtime_map_routing_agent_click_fixture() -> (Model, Int, Int) raise {
 }
 
 ///|
-fn runtime_map_routing_building_fallback_fixture() -> (Model, Int, Int) raise {
+fn runtime_map_routing_building_fallback_fixture() -> (Model, Int32, Int32) raise {
   let base = runtime_map_routing_live_model()
   let agent = base.energy_valley_runtime.projection.unwrap().agents[0]
   let route = golden_valley_runtime_agent_semantic_path(

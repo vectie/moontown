@@ -93,6 +93,7 @@ pub fn AccountContext::has_entitlement(Self, AccountEntitlement) -> Bool
 pub(all) enum AccountEntitlement {
   ExplorePublicTown
   DiscoverPublicServices
+  ViewOwnCompute
   UsePersonalAgent
   ManagePersonalWorkspace
   UseMarketplaceActions
@@ -124,6 +125,7 @@ pub(all) enum AccountHomeSurface {
 
 pub(all) enum AccountKind {
   VisitorAccount
+  SignedInAccount
   PaidUserAccount
   EnterpriseAccount
   AdminAccount

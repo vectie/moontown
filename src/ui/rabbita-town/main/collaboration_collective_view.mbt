@@ -6,15 +6,13 @@ fn render_collective_experiment(
 ) -> @rabbita.Html {
   let disabled = state.busy() || state.dirty || state.revision.is_empty()
   if !@collaboration.salon_ready(work) {
-    return p(
-      "Cross-Book experiments need two completed contributions and a settled result.",
-    )
+    return @html.nothing
   }
   if state.work_fields.get("work_collective_mode") != Some("compose") {
     return button(
       attrs=@html.Attrs::build().disabled(disabled),
       on_click=dispatch(CollaborationEdit("work_collective_mode", "compose")),
-      "Combine contributions into a new experiment",
+      "继续研究 · 验证新假设",
     )
   }
   let saved : @collaboration.SavedDraft = {
@@ -31,12 +29,17 @@ fn render_collective_experiment(
     collaboration_work_payload(state),
   )
   div(class="request-desk-stack", [
-    h3("Compose a cross-Book experiment"),
+    h3("继续研究 · 验证新假设"),
     p(
-      "Connect evidence from every completed Book into one testable hypothesis, then ask those Books to challenge it independently. These are operator-authored proposals; participation does not mean agreement or verified emergence.",
+      "连接已有证据，提出可验证的新假设，并请各知识册独立质疑。这里只创建研究草稿，不执行实验。",
     ),
-    work_field(
-      dispatch, state, "collective_new_id", "New peer-challenge draft ID",
+    render_advanced_details(
+      "新研究的保存标识",
+      needs_attention=state.work_fields
+        .get("work_collective_new_id")
+        .unwrap_or("")
+        .is_empty(),
+      [work_field(dispatch, state, "collective_new_id", "新草稿标识")],
     ),
     work_field(
       dispatch, state, "collective_title", "Experiment title (up to 200 characters)",
@@ -52,12 +55,14 @@ fn render_collective_experiment(
       @collaboration.salon_candidates(work).map(candidate => {
         div(class="request-desk-stack", [
           h3("Connect " + candidate.book_id),
-          p(
-            "Retained run " +
-            candidate.run_id +
-            " · " +
-            candidate.output_digest,
-          ),
+          render_advanced_details("执行来源", [
+            p(
+              "Retained run " +
+              candidate.run_id +
+              " · " +
+              candidate.output_digest,
+            ),
+          ]),
           @html.pre(
             class="collaboration-retained-output",
             candidate.output_text,
@@ -116,24 +121,24 @@ fn render_collective_experiment(
       multiline=true,
     ),
     p(
-      "Failed Books remain attributed in the proposal and are not assigned successful evidence. The new round keeps exact prior excerpts and captures current files from the original selected paths. It gets fresh work and review state; no approval is inherited. Saving does not run agents or execute the experiment.",
+      "保留失败项与原始引文，重新采集当前来源。新研究不继承审核；保存不会运行 Agent 或实验。",
     ),
     p(
       match validation {
         Ok(_) =>
-          "Ready to save a new peer-challenge round. Prepare and run remain separate explicit actions."
+          "可以保存并进入研究编辑。准备与执行仍需分别确认。"
         Err(error) => error
       },
     ),
     button(
       attrs=@html.Attrs::build().disabled(disabled || validation is Err(_)),
       on_click=dispatch(CollaborationAction("oneoff-followup")),
-      "Save experiment as a new peer-challenge round",
+      "保存并编辑研究",
     ),
     button(
       attrs=@html.Attrs::build().disabled(disabled),
       on_click=dispatch(CollaborationEdit("work_collective_mode", "off")),
-      "Discard experiment notes",
+      "取消继续研究",
     ),
   ])
 }

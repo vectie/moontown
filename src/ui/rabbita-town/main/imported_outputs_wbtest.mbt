@@ -5,7 +5,7 @@ fn imported_fixture_digest(mark : String) -> String {
 
 ///|
 fn imported_fixture_catalog(
-  size_bytes? : Int = 42,
+  size_bytes~ : Int32 = 42,
 ) -> @imported_output_contract.Catalog {
   let files : Array[@imported_output_contract.OutputFile] = [
     {
@@ -73,7 +73,7 @@ fn imported_fixture_catalog(
 }
 
 ///|
-fn imported_fixture_ready(size_bytes? : Int = 42) -> ImportedOutputsState {
+fn imported_fixture_ready(size_bytes~ : Int32 = 42) -> ImportedOutputsState {
   let (loading, _) = imported_outputs_transition(
     initial_imported_outputs_state(),
     OpenImportedOutputs,

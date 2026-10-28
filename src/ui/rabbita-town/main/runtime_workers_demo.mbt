@@ -75,7 +75,7 @@ fn build_worker_sim(
   title~ : String,
   role~ : String,
   book_id~ : String,
-  offset~ : Int,
+  offset~ : Int32,
 ) -> WorkerSim {
   let status = worker_status_for(model, offset)
   let zone_key = worker_zone_key(book_id, status)

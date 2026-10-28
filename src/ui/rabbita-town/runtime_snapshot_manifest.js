@@ -22,7 +22,7 @@ export const RUNTIME_TEXT_SNAPSHOTS = [
     jsonGlobal: '__moontownSecretComputeRoomJson',
     versionGlobal: '__moontownSecretComputeRoomVersion',
     fallback:
-      '{"schema":"moontown.secret-compute-room.v1","mode":"unavailable","observed_at":"","authority":{"agent_boundary":"MoonGate","local_control_plane":"LunaNexa","claim":"read-only redacted projection"},"gateway":{"state":"unreachable","active_targets":[],"model_count":0},"local_cluster":{"configured":false,"state":"not-configured","machines":[]},"remote_routes":[{"id":"codex","label":"Codex / OpenAI","state":"not-observed","evidence":"MoonGate is not reachable from this MoonTown service."},{"id":"deepseek","label":"DeepSeek","state":"not-observed","evidence":"MoonGate is not reachable from this MoonTown service."},{"id":"glm","label":"GLM","state":"not-observed","evidence":"MoonGate is not reachable from this MoonTown service."},{"id":"kimi","label":"Kimi","state":"not-observed","evidence":"MoonGate is not reachable from this MoonTown service."}]}',
+      '{"schema":"moontown.secret-compute-room.v1","mode":"unavailable","observed_at":"","authority":{"agent_boundary":"MoonGate","local_control_plane":"LunaNexa","claim":"account-scoped data unavailable"},"gateway":{"state":"not-observed","active_targets":[],"model_count":0},"local_cluster":{"configured":false,"state":"unavailable","machines":[]},"remote_routes":[],"scope":{"state":"unavailable","organizations":[]}}',
   },
   {
     url: './town.json',

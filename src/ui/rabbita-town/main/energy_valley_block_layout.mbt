@@ -2,14 +2,14 @@
 /// One road-enclosed Wenyu block. Cells are encoded as `y * cols + x` so the
 /// layout stays compact while every placement caller shares the same identity.
 priv struct EnergyValleyRoadBlock {
-  ordinal : Int
-  anchor_x : Int
-  anchor_y : Int
-  min_x : Int
-  min_y : Int
-  max_x : Int
-  max_y : Int
-  cells : Array[Int]
+  ordinal : Int32
+  anchor_x : Int32
+  anchor_y : Int32
+  min_x : Int32
+  min_y : Int32
+  max_x : Int32
+  max_y : Int32
+  cells : Array[Int32]
 }
 
 ///|
@@ -17,15 +17,15 @@ priv struct EnergyValleyRoadBlock {
 /// split a legal road enclosure into several placement regions without
 /// changing the parent block identity.
 priv struct EnergyValleyRoadBlockRegion {
-  ordinal : Int
-  block_ordinal : Int
-  anchor_x : Int
-  anchor_y : Int
-  min_x : Int
-  min_y : Int
-  max_x : Int
-  max_y : Int
-  cells : Array[Int]
+  ordinal : Int32
+  block_ordinal : Int32
+  anchor_x : Int32
+  anchor_y : Int32
+  min_x : Int32
+  min_y : Int32
+  max_x : Int32
+  max_y : Int32
+  cells : Array[Int32]
 }
 
 ///|
@@ -35,12 +35,12 @@ priv struct EnergyValleyRoadBlockRegion {
 priv struct EnergyValleyRoadBlockLayout {
   blocks : Array[EnergyValleyRoadBlock]
   regions : Array[EnergyValleyRoadBlockRegion]
-  block_by_tile : Array[Array[Int]]
-  region_by_tile : Array[Array[Int]]
+  block_by_tile : Array[Array[Int32]]
+  region_by_tile : Array[Array[Int32]]
 }
 
 ///|
-fn energy_valley_int_grid(value : Int) -> Array[Array[Int]] {
+fn energy_valley_int_grid(value : Int32) -> Array[Array[Int32]] {
   Array::makei(exact_energy_valley_rows(), _ => {
     Array::make(exact_energy_valley_cols(), value)
   })
@@ -54,7 +54,7 @@ fn energy_valley_bool_grid(value : Bool) -> Array[Array[Bool]] {
 }
 
 ///|
-fn energy_valley_layout_cell_in_bounds(x : Int, y : Int) -> Bool {
+fn energy_valley_layout_cell_in_bounds(x : Int32, y : Int32) -> Bool {
   x >= 0 &&
   x < exact_energy_valley_cols() &&
   y >= 0 &&
@@ -62,16 +62,16 @@ fn energy_valley_layout_cell_in_bounds(x : Int, y : Int) -> Bool {
 }
 
 ///|
-fn energy_valley_layout_cell_is_dry(seed : Int, x : Int, y : Int) -> Bool {
+fn energy_valley_layout_cell_is_dry(seed : Int32, x : Int32, y : Int32) -> Bool {
   !energy_valley_water_at(seed, x, y) && !energy_valley_wetland_at(seed, x, y)
 }
 
 ///|
 fn energy_valley_layout_cell_is_road(
-  seed : Int,
+  seed : Int32,
   road_nodes : Map[String, @energy_valley_contract.RoadNode],
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Bool {
   if reference_road_graph_snapshot_ready() {
     let code = energy_valley_compiled_road_code_at(seed, x, y)
@@ -83,7 +83,7 @@ fn energy_valley_layout_cell_is_road(
 
 ///|
 fn energy_valley_road_block_layout(
-  seed : Int,
+  seed : Int32,
   road_network : @energy_valley_contract.RoadNetwork,
 ) -> EnergyValleyRoadBlockLayout {
   let cols = exact_energy_valley_cols()
@@ -98,8 +98,8 @@ fn energy_valley_road_block_layout(
         energy_valley_layout_cell_is_road(seed, road_nodes, start_x, start_y) {
         continue
       }
-      let queue : Array[Int] = [start_y * cols + start_x]
-      let cells : Array[Int] = []
+      let queue : Array[Int32] = [start_y * cols + start_x]
+      let cells : Array[Int32] = []
       visited[start_y][start_x] = true
       let mut head = 0
       let mut touches_boundary = false
@@ -161,8 +161,8 @@ fn energy_valley_road_block_layout(
         continue
       }
       let ordinal = regions.length() + 1
-      let queue : Array[Int] = [start]
-      let cells : Array[Int] = []
+      let queue : Array[Int32] = [start]
+      let cells : Array[Int32] = []
       region_by_tile[start_y][start_x] = ordinal
       let mut head = 0
       let mut min_x = start_x
@@ -210,9 +210,9 @@ fn energy_valley_road_block_layout(
 ///|
 fn energy_valley_road_block_layout_at(
   layout : EnergyValleyRoadBlockLayout,
-  x : Int,
-  y : Int,
-) -> (Int, Int)? {
+  x : Int32,
+  y : Int32,
+) -> (Int32, Int32)? {
   if !energy_valley_layout_cell_in_bounds(x, y) {
     return None
   }
@@ -228,11 +228,11 @@ fn energy_valley_road_block_layout_at(
 ///|
 fn energy_valley_road_block_layout_for_footprint(
   layout : EnergyValleyRoadBlockLayout,
-  x : Int,
-  y : Int,
-  width : Int,
-  depth : Int,
-) -> (Int, Int)? {
+  x : Int32,
+  y : Int32,
+  width : Int32,
+  depth : Int32,
+) -> (Int32, Int32)? {
   let identity = match energy_valley_road_block_layout_at(layout, x, y) {
     Some(value) => value
     None => return None

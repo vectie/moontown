@@ -75,8 +75,8 @@ test "UI deltas target and validate against the exact base blueprint" {
 
 ///|
 fn energy_valley_world_delta_test_valid_labs(
-  seed : Int,
-  count : Int,
+  seed : Int32,
+  count : Int32,
 ) -> Array[GoldenValleyBuilding] {
   let world = energy_valley_base_contract_world_for_seed(seed)
   let scale = energy_valley_semantic_cells_per_planning_cell()

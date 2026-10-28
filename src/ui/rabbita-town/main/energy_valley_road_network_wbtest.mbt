@@ -1,5 +1,5 @@
 ///|
-fn energy_valley_test_road_count(mask : Array[Array[Bool]]) -> Int {
+fn energy_valley_test_road_count(mask : Array[Array[Bool]]) -> Int32 {
   let mut count = 0
   for row in mask {
     for cell in row {
@@ -14,11 +14,11 @@ fn energy_valley_test_road_count(mask : Array[Array[Bool]]) -> Int {
 ///|
 fn energy_valley_test_cardinal_component_size(
   mask : Array[Array[Bool]],
-  start_x : Int,
-  start_y : Int,
-) -> Int {
+  start_x : Int32,
+  start_y : Int32,
+) -> Int32 {
   let visited = energy_valley_road_bool_grid(false)
-  let queue : Array[Int] = [start_y * exact_energy_valley_cols() + start_x]
+  let queue : Array[Int32] = [start_y * exact_energy_valley_cols() + start_x]
   visited[start_y][start_x] = true
   let mut head = 0
   while head < queue.length() {

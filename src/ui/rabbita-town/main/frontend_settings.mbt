@@ -4,7 +4,7 @@
 
 ///|
 /// fallback when no runtime snapshot exists.
-extern "js" fn frontend_setting_int(key : String, fallback : Int) -> Int =
+extern "js" fn frontend_setting_int(key : String, fallback : Int32) -> Int32 =
   #| (key, fallback) => {
   #|   try {
   #|     const parsed = JSON.parse(globalThis.__moontownSystemSettingsJson || "{}");

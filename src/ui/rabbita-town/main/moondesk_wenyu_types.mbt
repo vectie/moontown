@@ -13,7 +13,7 @@ priv struct MoondeskHandoffArtifact {
 
 ///|
 priv struct MoondeskHandoffIndex {
-  version : Int
+  version : Int32
   description : String
   artifacts : Array[MoondeskHandoffArtifact]
 } derive(FromJson)
@@ -39,7 +39,7 @@ priv struct MoondeskBridgeIndex {
 
 ///|
 priv struct WenyuTownModuleConfig {
-  version : Int
+  version : Int32
   description : String
   modules : Array[WenyuTownModule]
 } derive(FromJson)
@@ -52,14 +52,14 @@ priv struct WenyuTownModule {
   book_id : String
   district : String
   building_kind : String
-  grid_x : Int
-  grid_y : Int
-  footprint_w : Int
-  footprint_h : Int
-  display_w : Int
-  display_h : Int
-  entrance_x : Int
-  entrance_y : Int
+  grid_x : Int32
+  grid_y : Int32
+  footprint_w : Int32
+  footprint_h : Int32
+  display_w : Int32
+  display_h : Int32
+  entrance_x : Int32
+  entrance_y : Int32
   interior_kind : String
   style_family : String
   asset_base : String
@@ -75,11 +75,11 @@ priv struct WenyuModuleRuntimeState {
   status_label : String
   source_label : String
   detail : String
-  running_count : Int
-  waiting_count : Int
-  review_count : Int
-  blocked_count : Int
-  completed_count : Int
-  visible_agent_count : Int
-  issue_count : Int
+  running_count : Int32
+  waiting_count : Int32
+  review_count : Int32
+  blocked_count : Int32
+  completed_count : Int32
+  visible_agent_count : Int32
+  issue_count : Int32
 }

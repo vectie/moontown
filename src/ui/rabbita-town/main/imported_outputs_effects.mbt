@@ -3,7 +3,7 @@
 /// rendering remain MoonBit; no body is cached in browser storage.
 extern "js" fn fetch_imported_outputs_json(
   endpoint : String,
-  max_bytes : Int,
+  max_bytes : Int32,
 ) -> @js.Promise =
   #| async (endpoint, maxBytes) => {
   #|   try {
@@ -165,7 +165,7 @@ fn imported_outputs_reconcile_primary_surface(model : Model) -> Model {
 ///|
 extern "js" fn fetch_imported_output_download(
   endpoint : String,
-  expected_bytes : Int,
+  expected_bytes : Int32,
   expected_digest : String,
 ) -> @js.Promise =
   #| async (endpoint, expectedBytes, expectedDigest) => {
@@ -249,8 +249,8 @@ extern "js" fn save_imported_output_download(
 ///|
 fn imported_outputs_download_update(
   model : Model,
-  generation : Int,
-  download_generation : Int,
+  generation : Int32,
+  download_generation : Int32,
   selection : @imported_output_contract.Selection,
   result : ImportedOutputDownload,
 ) -> (Cmd, Model) {

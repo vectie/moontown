@@ -223,7 +223,7 @@ test('import requires explicit replacement; cancel, late reads and obsolete butt
     const newer = capture(); newer.label = 'Newer baseline'
     upload.files = [{ size: 10, text: async () => serializeObservationBaseline(newer) }]
     await upload.fire('change'); const obsolete = d.find(n => n.dataset.observationAcceptImport)
-    await d.find(n => n.textContent === 'Cancel baseline import').fire('click')
+    await d.find(n => n.textContent === '取消导入').fire('click')
     await obsolete.fire('click')
     release(serializeObservationBaseline(newer)); await pending
     assert.equal(d.all().filter(n => n.dataset.observationAcceptImport).length, 0)
@@ -266,7 +266,7 @@ test('search, change types and pagination retain selection without silently trun
     filter.value = 'changes'; await filter.fire('change')
     const search = d.find(n => n.dataset.observationSearch); search.value = 'copy/paste'; await search.fire('input')
     assert.equal(d.all().filter(n => n.dataset.observationRow).length, 1)
-    assert.match(d.find(n => n.dataset.observationContinue).textContent, /1 change/)
+    assert.match(d.find(n => n.dataset.observationContinue).textContent, /1 项变化/)
   } finally { delete globalThis.document }
 })
 

@@ -1,0 +1,26 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/neighborhood"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn default_neighborhood_path() -> String
+
+pub async fn execute(String, Json, UInt64, String?, path? : String, can_host? : Bool) -> Json
+
+// Errors
+pub(all) suberror NeighborhoodError {
+  Unauthenticated
+  Forbidden
+  NotFound
+  InvalidRequest(String)
+  Conflict(String)
+} derive(Eq, @debug.Debug)
+
+// Types and methods
+
+// Type aliases
+
+// Traits

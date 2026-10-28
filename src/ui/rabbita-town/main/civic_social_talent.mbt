@@ -2,9 +2,12 @@
 fn render_match_card(match_item : SocialMatchSim) -> @rabbita.Html {
   article(class="match-card", [
     h3("\{match_item.left} x \{match_item.right}"),
+    span(
+      class="module-signal module-signal-neutral",
+      "示例 · 未发送邀请",
+    ),
     p(match_item.reason),
-    p("Next: \{match_item.next_step}"),
-    span(class="module-signal", "Confidence \{match_item.confidence}%"),
+    p(match_item.next_step),
   ])
 }
 
@@ -16,20 +19,12 @@ fn render_talent_card(signal : TalentSignalSim) -> @rabbita.Html {
       span(class="module-signal talent-card-signal", signal.evidence_status),
     ]),
     p(signal.domain),
-    p("Project: \{signal.project}"),
-    p("Skills: \{signal.skills}"),
-    render_memory_strip(
-      "Recent win",
-      signal.recent_achievement,
-      strip_class="memory-strip talent-card-strip",
-    ),
-    render_memory_strip(
-      "Reception note",
-      signal.reception_note,
-      strip_class="memory-strip talent-card-strip",
-    ),
-    render_metric_track(signal.activity),
-    p("Activity brightness: \{signal.activity}%"),
+    p("项目：\{signal.project}"),
+    p("技能方向：\{signal.skills}"),
+    render_advanced_details("示例资料", [
+      p(signal.recent_achievement),
+      p(signal.reception_note),
+    ]),
   ])
 }
 
@@ -42,13 +37,7 @@ fn render_route_stop_card(stop : TalentRouteStopSim) -> @rabbita.Html {
       span(class="module-signal talent-card-signal", stop.evidence_status),
     ]),
     p(stop.talking_point),
-    render_memory_strip(
-      "Operator note",
-      stop.operator_note,
-      strip_class="memory-strip route-stop-strip",
-    ),
-    render_metric_track(stop.readiness),
-    p("Route readiness: \{stop.readiness}%"),
+    render_advanced_details("示例接待备注", [p(stop.operator_note)]),
   ])
 }
 
@@ -57,26 +46,28 @@ fn render_social_talent(model : Model) -> @rabbita.Html {
   let route_stops = talent_route_stops(model)
   section(class="social-talent-panel", [
     div(class="runtime-copy", [
-      p(class="eyebrow", "Social Capital"),
-      h2("Social Capital"),
+      h2("发现与协作"),
+      p(
+        "以下为人物、合作方向和接待路线示例，不代表真实匹配、认证或邀约。",
+      ),
     ]),
     div(class="social-talent-grid", [
       div(class="subpanel", [
-        h3("Agent Matches"),
+        h3("合作示例"),
         div(
           class="feed-list",
           social_matches().map(item => render_match_card(item)),
         ),
       ]),
       div(class="subpanel", [
-        h3("Talent Star Avenue"),
+        h3("人才示例"),
         div(
           class="feed-list",
           talent_signals(model).map(signal => render_talent_card(signal)),
         ),
       ]),
       div(class="subpanel", [
-        h3("Reception Route"),
+        h3("接待路线示例"),
         div(
           class="route-stop-list",
           route_stops.map(stop => render_route_stop_card(stop)),

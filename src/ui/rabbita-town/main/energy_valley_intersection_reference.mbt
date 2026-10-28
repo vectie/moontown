@@ -58,8 +58,8 @@ extern "js" fn intersection_reference_draw_marker(
 /// map. The overlay has no hit targets and never participates in world state.
 fn intersection_reference_draw_points(
   context : @dom.CanvasRenderingContext2D,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   if !reference_intersection_snapshot_ready() {
     return

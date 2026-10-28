@@ -11,12 +11,13 @@ import {
 } from './runtime_snapshots.js'
 import './viewport_drag_pan.js'
 import { ACCOUNT_DEMO_FIXTURES } from './account_demo_fixtures.js'
+import { loadUnifiedAccount } from './account_identity.js'
 
 const app = document.getElementById('app')
 if (globalThis.location?.pathname?.startsWith('/moontown/') &&
     globalThis.__MOONTOWN_SCOPE_READY !== true) {
-  app.textContent = 'MoonTown 工作空间身份未就绪，请从企业门户重新打开。'
-  throw new Error('Hosted MoonTown workspace scope is unavailable')
+  app.textContent = '账户连接暂时不可用，请刷新重试。'
+  throw new Error('Hosted MoonTown account scope is unavailable')
 }
 const ACCOUNT_SESSION_KEY = 'moontown.account-session.v1'
 
@@ -92,9 +93,19 @@ async function prepareAccountContext() {
   }
   let account = null
   try {
-    account = await fetchAccountContext(storedAccountSession())
-    if (!account) account = await createVisitorAccount()
-  } catch {
+    const unified = await loadUnifiedAccount()
+    globalThis.__moontownUnifiedAccountActive = unified.authoritative
+    if (unified.authoritative) {
+      account = unified.account
+      // A local visitor token must not become a second identity after SSO.
+      globalThis.__moontownSessionToken = ''
+      try { globalThis.localStorage?.removeItem(ACCOUNT_SESSION_KEY) } catch {}
+    } else {
+      account = await fetchAccountContext(storedAccountSession())
+      if (!account) account = await createVisitorAccount()
+    }
+  } catch (error) {
+    if (globalThis.__MOONTOWN_PUBLIC_PLATFORM === true) throw error
     // Static builds remain browsable as visitor previews without an API host.
   }
   globalThis.__moontownAccountContextJson = JSON.stringify(
@@ -160,15 +171,17 @@ if (app) {
 }
 
 async function prepareRuntimeBridge() {
-  await Promise.allSettled([
+  await Promise.all([
     prepareAccountContext(),
-    loadEnergyValleyOsmBlockGraph(),
-    loadWenyuReferenceBuildings(),
-    loadWenyuReferenceIntersections(),
-    loadWenyuReferenceLabels(),
-    loadWenyuReferenceRoads(),
-    loadWenyuTownModules(),
-    loadKnowledgeDomainCatalog(),
+    Promise.allSettled([
+      loadEnergyValleyOsmBlockGraph(),
+      loadWenyuReferenceBuildings(),
+      loadWenyuReferenceIntersections(),
+      loadWenyuReferenceLabels(),
+      loadWenyuReferenceRoads(),
+      loadWenyuTownModules(),
+      loadKnowledgeDomainCatalog(),
+    ]),
   ])
 }
 

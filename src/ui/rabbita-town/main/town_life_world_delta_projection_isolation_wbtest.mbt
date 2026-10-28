@@ -2,7 +2,7 @@
 fn world_projection_isolation_add(
   epoch : TownLifeWorldEpoch,
   writer : String,
-  sequence : Int,
+  sequence : Int32,
   kind : TownLifeWorldKind,
   entity_id : String,
   payload : TownLifeWorldPayload,
@@ -25,7 +25,7 @@ fn world_projection_isolation_add(
 fn world_projection_isolation_delete_road(
   epoch : TownLifeWorldEpoch,
   writer : String,
-  sequence : Int,
+  sequence : Int32,
   added : TownLifeWorldEvent,
 ) -> TownLifeWorldEvent {
   {
@@ -45,7 +45,7 @@ fn world_projection_isolation_delete_road(
 fn world_projection_isolation_move_park(
   epoch : TownLifeWorldEpoch,
   writer : String,
-  sequence : Int,
+  sequence : Int32,
   added : TownLifeWorldEvent,
   target : SavedWorldDeltaGridPoint,
 ) -> TownLifeWorldEvent {

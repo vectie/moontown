@@ -1,8 +1,8 @@
 ///|
 fn golden_valley_semantic_road_node_at(
   world : @energy_valley_contract.CompiledTownWorld,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> @energy_valley_contract.RoadNode? {
   for node in world.road_network.nodes {
     // Pedestrian spur nodes may share a threshold coordinate with a road
@@ -20,7 +20,12 @@ fn golden_valley_semantic_road_node_at(
 /// Public walkability is no longer reconstructed from a rendered terrain
 /// string. The exact node set accepted into `CompiledTownWorld` is the only
 /// road occupancy truth used by placement, player movement and Agents.
-fn golden_valley_walkable(model : Model, seed : Int, x : Int, y : Int) -> Bool {
+fn golden_valley_walkable(
+  model : Model,
+  seed : Int32,
+  x : Int32,
+  y : Int32,
+) -> Bool {
   golden_valley_semantic_road_node_at(
     ecosystem_contract_world_for_model(model, seed),
     x,
@@ -32,7 +37,7 @@ fn golden_valley_walkable(model : Model, seed : Int, x : Int, y : Int) -> Bool {
 ///|
 fn golden_valley_semantic_node_for_building(
   model : Model,
-  seed : Int,
+  seed : Int32,
   building : GoldenValleyBuilding,
 ) -> @energy_valley_contract.RoadNode? {
   let world = ecosystem_contract_world_for_model(model, seed)
@@ -53,9 +58,9 @@ fn golden_valley_semantic_node_for_building(
 ///|
 fn golden_valley_nearest_road(
   model : Model,
-  seed : Int,
+  seed : Int32,
   building : GoldenValleyBuilding,
-) -> (Int, Int)? {
+) -> (Int32, Int32)? {
   golden_valley_semantic_node_for_building(model, seed, building).map(node => {
     (node.grid.column, node.grid.row)
   })
@@ -64,9 +69,9 @@ fn golden_valley_nearest_road(
 ///|
 fn golden_valley_road_path(
   model : Model,
-  seed : Int,
-  start : (Int, Int),
-  destination : (Int, Int),
+  seed : Int32,
+  start : (Int32, Int32),
+  destination : (Int32, Int32),
 ) -> Array[(Double, Double)]? {
   let world = ecosystem_contract_world_for_model(model, seed)
   match
@@ -95,7 +100,7 @@ fn golden_valley_road_path(
 ///|
 fn golden_valley_building_road_path(
   model : Model,
-  seed : Int,
+  seed : Int32,
   from : GoldenValleyBuilding,
   destination : GoldenValleyBuilding,
 ) -> Array[(Double, Double)]? {

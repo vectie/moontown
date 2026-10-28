@@ -30,8 +30,8 @@ test "collaboration composer renders authored question Books exact sources revie
   for
     text in [
       "协作研究", "Which observations should we compare?", "Water Book", "Mobility Book",
-      "Exact source paths in water", "Perspective for mobility", "Alex Reviewer",
-      "Sam Reviewer", "保存草稿", "准备交接", "Reuse saved question as a fresh draft",
+      "资料路径（每行一条）", "独立研究角度", "Alex Reviewer", "Sam Reviewer",
+      "保存草稿", "准备任务", "继续研究 · 复用此问题",
     ] {
     assert_true(html.contains(text), msg=text)
   }
@@ -72,7 +72,7 @@ test "collaboration prepare and export have no additional acknowledgment gate" {
   let html = @rabbita.render_to_string(
     @rabbita.static_cell(render_collaboration_composer(dispatch, state)),
   )
-  assert_true(html.contains("Download prepared plan package (.tar)"))
+  assert_true(html.contains("下载任务包"))
   assert_true(html.contains("Download handoff.json"))
   assert_true(html.contains("Download water.md"))
   assert_false(html.contains("I acknowledge"))

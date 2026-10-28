@@ -8,11 +8,11 @@ fn golden_public_realm_is_night(hour : Double) -> Bool {
 
 ///|
 fn golden_public_realm_streetlight_at(
-  seed : Int,
-  x : Int,
-  y : Int,
+  seed : Int32,
+  x : Int32,
+  y : Int32,
   terrain : String,
-  road_mask : Int,
+  road_mask : Int32,
   major : Bool,
 ) -> Bool {
   terrain == "road" &&
@@ -22,11 +22,11 @@ fn golden_public_realm_streetlight_at(
 
 ///|
 fn golden_public_realm_street_tree_at(
-  seed : Int,
-  x : Int,
-  y : Int,
+  seed : Int32,
+  x : Int32,
+  y : Int32,
   terrain : String,
-  road_mask : Int,
+  road_mask : Int32,
 ) -> Bool {
   terrain == "road" &&
   road_mask != 0 &&
@@ -36,12 +36,12 @@ fn golden_public_realm_street_tree_at(
 ///|
 /// Returns 0 for no plaza furniture, 1 for a bench, and 2 for a planter.
 fn golden_public_realm_plaza_feature(
-  seed : Int,
-  x : Int,
-  y : Int,
+  seed : Int32,
+  x : Int32,
+  y : Int32,
   terrain : String,
   occupied : Bool,
-) -> Int {
+) -> Int32 {
   if terrain != "plaza" || occupied {
     return 0
   }
@@ -75,7 +75,7 @@ fn golden_public_realm_boardwalk_mask(
   east : String,
   south : String,
   west : String,
-) -> Int {
+) -> Int32 {
   if terrain == "water" ||
     terrain == "road" ||
     terrain == "bridge" ||
@@ -100,7 +100,12 @@ fn golden_public_realm_boardwalk_mask(
 }
 
 ///|
-fn golden_public_realm_side(seed : Int, x : Int, y : Int, salt : Int) -> Int {
+fn golden_public_realm_side(
+  seed : Int32,
+  x : Int32,
+  y : Int32,
+  salt : Int32,
+) -> Int32 {
   if energy_valley_variation(seed, x, y, salt, 2) == 0 {
     -1
   } else {
@@ -114,8 +119,8 @@ extern "js" fn golden_draw_public_streetlight(
   sx : Double,
   sy : Double,
   zoom : Double,
-  road_mask : Int,
-  side : Int,
+  road_mask : Int32,
+  side : Int32,
   night : Bool,
 ) -> Unit =
   #| (context, sx, sy, zoom, mask, side, night) => {
@@ -165,8 +170,8 @@ extern "js" fn golden_draw_public_street_tree(
   sx : Double,
   sy : Double,
   zoom : Double,
-  road_mask : Int,
-  side : Int,
+  road_mask : Int32,
+  side : Int32,
 ) -> Unit =
   #| (context, sx, sy, zoom, mask, side) => {
   #|   const spacing = Math.max(3.5, 10 * zoom);
@@ -208,7 +213,7 @@ extern "js" fn golden_draw_public_bench(
   sx : Double,
   sy : Double,
   zoom : Double,
-  orientation : Int,
+  orientation : Int32,
 ) -> Unit =
   #| (context, sx, sy, zoom, orientation) => {
   #|   const width = Math.max(4.5, 13 * zoom);
@@ -303,7 +308,7 @@ extern "js" fn golden_draw_public_boardwalk_scaled(
   sx : Double,
   sy : Double,
   zoom : Double,
-  edge_mask : Int,
+  edge_mask : Int32,
   casing_width : Double,
   deck_width : Double,
   shadow_offset : Double,
@@ -360,7 +365,7 @@ fn golden_draw_public_boardwalk(
   sx : Double,
   sy : Double,
   zoom : Double,
-  edge_mask : Int,
+  edge_mask : Int32,
 ) -> Unit {
   golden_draw_public_boardwalk_scaled(
     context,

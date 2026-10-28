@@ -1,9 +1,9 @@
 ///|
 fn energy_valley_building_access_neighbor_count(
   world : ExactEnergyValleyWorld,
-  x : Int,
-  y : Int,
-) -> Int {
+  x : Int32,
+  y : Int32,
+) -> Int32 {
   let mut count = 0
   for direction in [(0, -1), (1, 0), (0, 1), (-1, 0)] {
     match world.terrain_at(x + direction.0, y + direction.1) {

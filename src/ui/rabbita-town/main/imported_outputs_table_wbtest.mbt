@@ -1,7 +1,7 @@
 ///|
 fn imported_table_fixture(
   content : String,
-  filename? : String = "data.csv",
+  filename~ : String = "data.csv",
 ) -> ImportedOutputsState raise {
   let selection : @imported_output_contract.Selection = {
     book_handle: "book-" + "1".repeat(64),

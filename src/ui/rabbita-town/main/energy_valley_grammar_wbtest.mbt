@@ -2,10 +2,10 @@
 fn energy_valley_test_module(
   id : String,
   district : String,
-  grid_x : Int,
-  grid_y : Int,
-  footprint_w : Int,
-  footprint_h : Int,
+  grid_x : Int32,
+  grid_y : Int32,
+  footprint_w : Int32,
+  footprint_h : Int32,
 ) -> WenyuTownModule {
   {
     id,
@@ -57,7 +57,7 @@ fn energy_valley_test_modules() -> Array[WenyuTownModule] {
 }
 
 ///|
-fn energy_valley_terrain_signature(seed : Int) -> String {
+fn energy_valley_terrain_signature(seed : Int32) -> String {
   let mut signature = ""
   for grid_y in 0..<tilemap_grid_height() {
     for grid_x in 0..<tilemap_grid_width() {

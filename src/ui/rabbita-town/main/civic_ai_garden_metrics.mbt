@@ -16,10 +16,10 @@ fn ai_garden_worker_label(worker : WorkerSim?) -> String {
 priv struct AiGardenSnapshot {
   worker_label : String
   stage : String
-  scenario_count : Int
+  scenario_count : Int32
   tool_trial : String
   workshop : String
-  queue_pressure : Int
+  queue_pressure : Int32
 }
 
 ///|
@@ -45,18 +45,12 @@ fn ai_garden_snapshot(
 
 ///|
 fn ai_garden_copy_from_snapshot(snapshot : AiGardenSnapshot) -> String {
-  [
-    "AI Garden now reads as a live learning district:",
-    "\{snapshot.worker_label} is carrying \{snapshot.stage},",
-    "\{snapshot.scenario_count} scenario lanes are visible in town view,",
-    "\{snapshot.tool_trial} is on deck,",
-    "\{snapshot.workshop} is active,",
-    "and queue pressure sits at \{snapshot.queue_pressure}%.",
-  ].join(" ")
+  ignore(snapshot)
+  "AI 学习任务示例；真实工具试用和学习测评未接入。"
 }
 
 ///|
-fn ai_garden_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
+fn ai_garden_queue_pressure(model : Model, worker : WorkerSim?) -> Int32 {
   ai_garden_queue_pressure_from_inputs(
     model.pressure,
     ai_garden_scenario_count(model),
@@ -66,10 +60,10 @@ fn ai_garden_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
 
 ///|
 fn ai_garden_queue_pressure_from_inputs(
-  pressure : Int,
-  scenario_count : Int,
+  pressure : Int32,
+  scenario_count : Int32,
   worker : WorkerSim?,
-) -> Int {
+) -> Int32 {
   civic_queue_pressure_from_policy(
     ai_garden_queue_pressure_policy(pressure, scenario_count),
     worker,
@@ -78,8 +72,8 @@ fn ai_garden_queue_pressure_from_inputs(
 
 ///|
 fn ai_garden_queue_pressure_policy(
-  pressure : Int,
-  scenario_count : Int,
+  pressure : Int32,
+  scenario_count : Int32,
 ) -> CivicQueuePressurePolicy {
   {
     worker_base: pressure,
@@ -96,7 +90,7 @@ fn ai_garden_health(
   model : Model,
   worker : WorkerSim?,
   execution : @core.TaskExecutionRecord?,
-) -> Int {
+) -> Int32 {
   let scenario_count = ai_garden_scenario_count(model)
   let base = ai_garden_base_health_from_inputs(
     model.pressure,
@@ -122,10 +116,10 @@ fn ai_garden_health_execution_policy() -> CivicHealthExecutionPolicy {
 
 ///|
 fn ai_garden_base_health_from_inputs(
-  pressure : Int,
-  scenario_count : Int,
+  pressure : Int32,
+  scenario_count : Int32,
   worker : WorkerSim?,
-) -> Int {
+) -> Int32 {
   let scenario_bonus = ai_garden_scenario_bonus(scenario_count)
   let base = match worker {
     Some(worker) =>

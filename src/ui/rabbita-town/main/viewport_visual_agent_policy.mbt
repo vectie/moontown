@@ -20,7 +20,7 @@ fn visual_agent_status_class(agent : VisualAgentSnapshot) -> String {
 }
 
 ///|
-fn visual_agent_grid_x(agent : VisualAgentSnapshot) -> Int {
+fn visual_agent_grid_x(agent : VisualAgentSnapshot) -> Int32 {
   match visual_agent_target_module(agent) {
     Some(civic) =>
       if visual_agent_should_route_to_module(agent) {
@@ -33,7 +33,7 @@ fn visual_agent_grid_x(agent : VisualAgentSnapshot) -> Int {
 }
 
 ///|
-fn visual_agent_grid_y(agent : VisualAgentSnapshot) -> Int {
+fn visual_agent_grid_y(agent : VisualAgentSnapshot) -> Int32 {
   match visual_agent_target_module(agent) {
     Some(civic) =>
       if visual_agent_should_route_to_module(agent) {
@@ -77,7 +77,7 @@ fn viewport_visual_phase_is_active_for_module(phase : String) -> Bool {
 }
 
 ///|
-fn clamp_visual_grid_x(value : Int) -> Int {
+fn clamp_visual_grid_x(value : Int32) -> Int32 {
   if value < 0 {
     0
   } else if value > 255 {
@@ -88,7 +88,7 @@ fn clamp_visual_grid_x(value : Int) -> Int {
 }
 
 ///|
-fn clamp_visual_grid_y(value : Int) -> Int {
+fn clamp_visual_grid_y(value : Int32) -> Int32 {
   if value < 0 {
     0
   } else if value > 143 {

@@ -1,5 +1,5 @@
 ///|
-fn reference_major_road_at(grid_x : Int, grid_y : Int) -> Bool {
+fn reference_major_road_at(grid_x : Int32, grid_y : Int32) -> Bool {
   abs_int(grid_y * 3 + grid_x * 2 - 142) <= 2 ||
   abs_int(grid_y * 2 - grid_x + 24) <= 1 ||
   (abs_int(grid_y - 35) <= 1 && grid_x < 100) ||
@@ -9,7 +9,7 @@ fn reference_major_road_at(grid_x : Int, grid_y : Int) -> Bool {
 }
 
 ///|
-fn reference_local_road_at(grid_x : Int, grid_y : Int) -> Bool {
+fn reference_local_road_at(grid_x : Int32, grid_y : Int32) -> Bool {
   (
     in_rect(grid_x, grid_y, 7, 18, 38, 34) &&
     (grid_x % 7 == 0 || grid_y % 5 == 0)
@@ -37,7 +37,7 @@ fn reference_local_road_at(grid_x : Int, grid_y : Int) -> Bool {
 }
 
 ///|
-fn reference_road_at(grid_x : Int, grid_y : Int) -> Bool {
+fn reference_road_at(grid_x : Int32, grid_y : Int32) -> Bool {
   reference_major_road_at(grid_x, grid_y) ||
   reference_local_road_at(grid_x, grid_y)
 }

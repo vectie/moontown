@@ -3,12 +3,12 @@
 /// global compass angle over a projectively calibrated map.
 fn town_bearing_review(
   context : @dom.CanvasRenderingContext2D,
-  width : Int,
-  buildings : Map[Int, Array[IntersectionRoadPreviewBuilding]],
+  width : Int32,
+  buildings : Map[Int32, Array[IntersectionRoadPreviewBuilding]],
 ) -> Unit {
-  let histogram : Map[String, Int] = Map([])
-  let archetypes : Map[String, Int] = Map([])
-  let origins : Map[String, Int] = Map([])
+  let histogram : Map[String, Int32] = Map([])
+  let archetypes : Map[String, Int32] = Map([])
+  let origins : Map[String, Int32] = Map([])
   let mut count = 0
   let mut infill_count = 0
   let mut infill_min_width = 256
@@ -64,9 +64,9 @@ fn town_bearing_review(
 
 ///|
 extern "js" fn town_street_record_review(
-  segments : Int,
-  count : Int,
-  width : Int,
+  segments : Int32,
+  count : Int32,
+  width : Int32,
   gap : Double,
 ) -> Unit =
   #| (s,n,w,g)=>{const d=document.documentElement.dataset;d.townStreetFrontageSegments=String(s);d.townStreetInfillCount=String(n);d.townStreetMinInfillWidth=String(w);d.townStreetMaxInfillGap=String(g);}
@@ -82,8 +82,8 @@ extern "js" fn town_bearing_record_mix(
 ///|
 extern "js" fn town_bearing_review_paint(
   c : @dom.CanvasRenderingContext2D,
-  width : Int,
-  count : Int,
+  width : Int32,
+  count : Int32,
   nx : Double,
   ny : Double,
 ) -> Unit =

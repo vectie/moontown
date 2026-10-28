@@ -7,6 +7,7 @@ fn render_energy_valley_page(
 ) -> @rabbita.Html {
   match model.town_spatial_layer {
     Underground(_) => return render_secret_compute_room(dispatch, model)
+    ReferenceInterior => return render_reference_interior(dispatch, model)
     _ => ()
   }
   // Page orchestration compiles one immutable semantic frame. Both canvases,
@@ -135,7 +136,9 @@ fn render_energy_valley_page_with_snapshot(
   // runtime metrics, square, or operations center behind the modal.
   let onboarding = current_quest(model) is Some(_)
   let stage = quest_progress_count(model)
-  let life_class = if model.player is None {
+  let life_class = if public_platform_enabled() && model.player is None {
+    " town-graduated"
+  } else if model.player is None {
     " town-life-unsettled town-onboarding town-onboarding-stage-0"
   } else if onboarding {
     " town-onboarding town-onboarding-stage-\{stage}"
@@ -266,7 +269,9 @@ fn render_energy_valley_page_with_snapshot(
       } else {
         @html.nothing
       },
-      if model.player is None && !model.energy_intro_open {
+      if model.player is None &&
+        !model.energy_intro_open &&
+        !public_platform_enabled() {
         div(class="quest-tracker pointer-events-auto", [
           div(class="quest-tracker-head", [
             span(class="quest-tracker-badge", "入住"),
@@ -314,6 +319,7 @@ fn render_energy_valley_page_with_snapshot(
     render_energy_valley_handoff_layer(dispatch, model),
     render_knowledge_dialog(dispatch, model),
     render_ops_center(dispatch, model),
+    render_neighborhood_panel(dispatch, model),
     render_energy_valley_toast_stack(dispatch, model),
     if onboarding || intersection_preview {
       @html.nothing
@@ -385,11 +391,35 @@ fn render_town_action_rail(
     actions.push(
       button(
         class="town-action town-action-primary",
-        on_click=dispatch(OpenEnergyRequest),
-        attrs=@html.Attrs::build().aria_label("创建工作请求"),
-        town_ui_label("work", "发起工作"),
+        on_click=dispatch(NeighborhoodEvent(Open)),
+        attrs=@html.Attrs::build().aria_label("街区活动与故事"),
+        town_ui_label("building", "街区"),
       ),
     )
+    if !public_platform_enabled() {
+      actions.push(
+        button(
+          class="town-action town-action-primary",
+          on_click=dispatch(OpenWorkWorkspace(StandingWatchComposer)),
+          attrs=@html.Attrs::build().aria_label("创建工作请求"),
+          town_ui_label("work", "发起工作"),
+        ),
+      )
+      actions.push(
+        button(
+          class="town-action town-action-primary",
+          on_click=dispatch(OpenWorkWorkspace(ResultsComposer)),
+          town_ui_label("book", "成果"),
+        ),
+      )
+      actions.push(
+        button(
+          class="town-action town-action-primary",
+          on_click=dispatch(OpenWorkWorkspace(AttentionComposer)),
+          town_ui_label("clock", "待我处理"),
+        ),
+      )
+    }
     actions.push(
       button(
         class="town-action town-action-secondary",
@@ -470,7 +500,7 @@ fn render_town_action_rail(
         town_ui_label("clock", "今日"),
       ),
     )
-    actions.push(
+    advanced.push(
       button(
         class=if model.imported_outputs.open {
           "town-action town-action-secondary town-action-active"
@@ -497,7 +527,7 @@ fn render_town_action_rail(
               "false"
             },
           ),
-        town_ui_label("download", "成果"),
+        town_ui_label("download", "导入成果"),
       ),
     )
     advanced.push(

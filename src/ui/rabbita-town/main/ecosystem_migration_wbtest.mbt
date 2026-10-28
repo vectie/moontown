@@ -1,6 +1,6 @@
 ///|
 fn ecosystem_migration_cache_road_point(
-  seed : Int,
+  seed : Int32,
 ) -> SavedWorldDeltaGridPoint? {
   let world = energy_valley_base_contract_world_for_seed(seed)
   let base_roads = town_life_world_base_road_cells(world)

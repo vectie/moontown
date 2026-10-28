@@ -12,6 +12,7 @@ priv enum Selection {
 priv enum TownSpatialLayer {
   Outdoor
   Indoor(GoldenValleyBuilding)
+  ReferenceInterior
   Underground(GoldenValleyBuilding?)
 }
 
@@ -71,6 +72,8 @@ priv enum RequestComposerFocus {
   StandingWatchComposer
   EvidenceBookComposer
   CollaborationComposer
+  ResultsComposer
+  AttentionComposer
 } derive(Eq)
 
 ///|
@@ -89,7 +92,7 @@ priv struct PhoneMessage {
   contact : String
   from_me : Bool
   text : String
-  tick : Int
+  tick : Int32
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
@@ -97,8 +100,8 @@ priv struct PhoneMessage {
 priv struct PlayerAvatar {
   name : String
   persona : String
-  color : Int
-  sprite_index : Int
+  color : Int32
+  sprite_index : Int32
   title : String
 } derive(ToJson, FromJson)
 
@@ -127,28 +130,28 @@ priv struct PlayerPosition {
 /// Stable event identity allocated monotonically by one writer.
 priv struct TownLifeDot {
   writer_id : String
-  sequence : Int
+  sequence : Int32
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 /// Lamport timestamp used for causal ordering. writer_id deterministically
 /// breaks ties between concurrent updates that observed the same logical time.
 priv struct TownLifeCausalStamp {
-  lamport : Int
+  lamport : Int32
   writer_id : String
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 priv struct TownLifeWriterCounter {
   writer_id : String
-  sequence : Int
+  sequence : Int32
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
 /// Events at or below this per-writer sequence were deliberately pruned.
 priv struct TownLifePruneWatermark {
   writer_id : String
-  through_sequence : Int
+  through_sequence : Int32
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
@@ -175,8 +178,8 @@ priv struct TownLifeTextEvent {
 priv struct TownLifeAttentionCounter {
   writer_id : String
   cooldown_key : String
-  count : Int
-  last_shown_tick : Int
+  count : Int32
+  last_shown_tick : Int32
   dot : TownLifeDot
   stamp : TownLifeCausalStamp
 } derive(Debug, Eq, ToJson, FromJson)
@@ -193,7 +196,7 @@ priv struct KnowledgePost {
   building_name : String
   topic : String
   author : String
-  spark : Int
+  spark : Int32
   published : Bool
   collected : Bool
   mine : Bool
@@ -205,7 +208,7 @@ priv struct KnowledgePost {
 /// without either losing distinct rewards or counting one reward twice.
 priv struct TownLifeSparkAward {
   id : String
-  amount : Int
+  amount : Int32
 } derive(Debug, Eq, ToJson, FromJson)
 
 ///|
@@ -228,8 +231,8 @@ priv struct TownLifeSave {
   player_stamp : TownLifeCausalStamp?
   player_position_stamp : TownLifeCausalStamp?
   writer_counters : Array[TownLifeWriterCounter]?
-  spark : Int
-  spark_floor : Int?
+  spark : Int32
+  spark_floor : Int32?
   spark_awards : Array[TownLifeSparkAward]?
   quest_done : Array[String]
   phone_log : Array[PhoneMessage]
@@ -249,61 +252,65 @@ priv struct TownLifeSave {
   ops_reports : Array[String]?
   ops_report_events : Array[TownLifeTextEvent]?
   ops_report_prune_watermarks : Array[TownLifePruneWatermark]?
-  last_report_tick : Int
-  checkin_day : Int
+  last_report_tick : Int32
+  checkin_day : Int32
   /// Per-blueprint spatial CRDT authority. Optional so TownLife V3 shards
   /// written before the unified world migration remain decodable.
   world_states : Array[TownLifeWorldState]?
   /// Deprecated migration-window fields. New saves use a reset stamp and
   /// per-incarnation tombstones, so rebuilding never reuses deletion identity.
-  post_generation : Int?
+  post_generation : Int32?
   deleted_post_ids : Array[String]?
 } derive(ToJson, FromJson)
 
 ///|
 priv struct Model {
-  tick : Int
+  tick : Int32
   paused : Bool
   selection : Selection
   state_source : StateSourceKind
   dashboard_section : DashboardSection?
   request_composer : RequestComposerFocus
   collaboration : @collaboration.Client
+  neighborhood : NeighborhoodState
+  neighborhood_manage : NeighborhoodManageState
   projection_snapshot : ProjectionSnapshot?
-  snapshot_version : Int
+  snapshot_version : Int32
   energy_valley_runtime : EnergyValleyRuntimeState
   energy_first_agent_open : Bool
   town_spatial_layer : TownSpatialLayer
   secret_compute_room_selected_id : String
   indoor_selected_slot_id : String
+  spatial_scene_selections : Map[String, SpatialSceneSelection]
+  spatial_compute_return_reference : Bool
   spatial_selected_work_id : String
   spatial_request_id : String
   visual_projection : VisualProjectionSnapshot?
-  visual_projection_version : Int
+  visual_projection_version : Int32
   module_projections : Array[BookProjectionFragment]
-  module_projections_version : Int
+  module_projections_version : Int32
   knowledge_domain_catalog : KnowledgeDomainCatalog?
-  knowledge_domain_catalog_version : Int
+  knowledge_domain_catalog_version : Int32
   civic_status : CivicServicePortfolioSnapshot?
-  civic_status_version : Int
+  civic_status_version : Int32
   moondesk_handoff_artifacts : Array[MoondeskHandoffArtifact]
-  moondesk_handoff_version : Int
+  moondesk_handoff_version : Int32
   moondesk_bridge : MoondeskBridgeIndex?
-  moondesk_bridge_version : Int
+  moondesk_bridge_version : Int32
   daemon_snapshot : DaemonSnapshot?
-  daemon_snapshot_version : Int
+  daemon_snapshot_version : Int32
   live_autonomy : LiveAutonomySnapshot?
-  live_autonomy_version : Int
+  live_autonomy_version : Int32
   editor_pipeline : EditorPipelineSnapshot?
-  editor_pipeline_version : Int
+  editor_pipeline_version : Int32
   standing_goals : Array[StandingGoalSnapshot]
-  standing_goals_version : Int
+  standing_goals_version : Int32
   watcher_records : Array[WatcherRunRecordSnapshot]
-  watcher_records_version : Int
+  watcher_records_version : Int32
   operator_requests : Array[OperatorRequestSnapshot]
-  operator_requests_version : Int
+  operator_requests_version : Int32
   book_template_requests : Array[BookTemplateRequestSnapshot]
-  book_template_requests_version : Int
+  book_template_requests_version : Int32
   imported_outputs : ImportedOutputsState
   research_handoff : ResearchHandoffState
   moonflow_receiver : MoonFlowReceiverState
@@ -318,7 +325,7 @@ priv struct Model {
   request_material_next_action : String
   request_material_receipt : (String, String, String, MaterialWatchSnapshot)?
   request_submitting : Bool
-  request_submission_id : Int
+  request_submission_id : Int32
   request_follow_result : Bool
   request_status : String
   book_request_title : String
@@ -329,13 +336,13 @@ priv struct Model {
   book_request_analysis_method : String
   book_request_submitting : Bool
   book_request_status : String
-  budget : Int
-  energy : Int
-  pressure : Int
-  stability : Int
+  budget : Int32
+  energy : Int32
+  pressure : Int32
+  stability : Int32
   energy_weather : EnergyWeather
   energy_weather_auto : Bool
-  energy_time_scale : Int
+  energy_time_scale : Int32
   energy_tool : EnergyTool
   energy_board_open : Bool
   energy_status_open : Bool
@@ -358,27 +365,27 @@ priv struct Model {
   player_motion : PlayerMotion?
   player_follow : Bool
   walk_mode : Bool
-  avatar_wizard_step : Int
+  avatar_wizard_step : Int32
   avatar_draft_name : String
   avatar_draft_persona : String
-  avatar_draft_color : Int
+  avatar_draft_color : Int32
   phone_open : Bool
   phone_contact : String
   phone_draft : String
   phone_log : Array[PhoneMessage]
   town_life_phone_events : Array[TownLifePhoneEvent]
   town_life_phone_prune_watermarks : Array[TownLifePruneWatermark]
-  phone_unread : Int
+  phone_unread : Int32
   moonclaw_guide_pending : Bool
   moonclaw_guide_error : String
   town_life_writer_id : String
   town_life_writer_counters : Array[TownLifeWriterCounter]
-  spark : Int
-  town_life_spark_floor : Int
+  spark : Int32
+  town_life_spark_floor : Int32
   town_life_spark_awards : Array[TownLifeSparkAward]
   quest_done : Array[String]
   life_toast : String
-  life_toast_tick : Int
+  life_toast_tick : Int32
   knowledge_dialog_open : Bool
   knowledge_draft_topic : String
   knowledge_target_building : String
@@ -388,11 +395,11 @@ priv struct Model {
   town_life_post_tombstones : Array[TownLifePostTombstone]
   square_open : Bool
   ops_open : Bool
-  ops_tab : Int
+  ops_tab : Int32
   ops_reports : Array[String]
   town_life_ops_report_events : Array[TownLifeTextEvent]
   town_life_ops_report_prune_watermarks : Array[TownLifePruneWatermark]
-  last_report_tick : Int
+  last_report_tick : Int32
   analytics : Array[String]
   town_life_analytics_events : Array[TownLifeTextEvent]
   town_life_analytics_prune_watermarks : Array[TownLifePruneWatermark]
@@ -403,7 +410,7 @@ priv struct Model {
   /// the compiler-facing canonical projection of this authority.
   town_life_world_states : Array[TownLifeWorldState]
   metro_visible : Bool
-  checkin_day : Int
+  checkin_day : Int32
   map_lab_open : Bool
   map_lab_layers : Array[MapLabLayer]
   map_lab_selected_id : String
@@ -412,10 +419,12 @@ priv struct Model {
 
 ///|
 priv enum Msg {
+  NeighborhoodEvent(NeighborhoodMsg)
+  NeighborhoodManageEvent(NeighborhoodManageMsg)
   ImportedOutputsEvent(ImportedOutputsMsg)
   ImportedDownloadReceived(
-    Int,
-    Int,
+    Int32,
+    Int32,
     @imported_output_contract.Selection,
     ImportedOutputDownload
   )
@@ -428,6 +437,8 @@ priv enum Msg {
   SelectNode(String)
   SelectOverview
   OpenSecretComputeRoom
+  SpatialSceneEvent(String)
+  OpenReferenceInterior
   CloseSecretComputeRoom
   SelectSecretComputeEndpoint(String)
   SelectIndoorSlot(String)
@@ -438,7 +449,7 @@ priv enum Msg {
   ExitEnergyBuilding
   SetEnergyWeather(EnergyWeather)
   ToggleEnergyWeatherAuto
-  SetEnergyTimeScale(Int)
+  SetEnergyTimeScale(Int32)
   SetEnergyTool(EnergyTool)
   ToggleEnergyBoard
   ToggleEnergyStatus
@@ -455,12 +466,14 @@ priv enum Msg {
   ToggleTownChronicle
   EnergyResetCurrent
   EnergyGenerateNew
-  EnergyCanvasClick(Int, Int)
+  EnergyCanvasClick(Int32, Int32)
   OpenEnergyBuilding(String)
   OpenEcosystemAttention(String, String)
   CloseEnergyInspector
   SetDashboardSection(DashboardSection)
   SetRequestComposer(RequestComposerFocus)
+  OpenWorkWorkspace(RequestComposerFocus)
+  OpenTownWorkspace
   CollaborationEdit(String, String)
   CollaborationParticipantEdit(String, String, String)
   CollaborationToggleBook(String)
@@ -469,12 +482,13 @@ priv enum Msg {
   CollaborationReset
   CollaborationAction(String)
   CollaborationOpen(String, String)
-  CollaborationReply(Int, String, String)
+  CollaborationReviewOpen(String, String)
+  CollaborationReply(Int32, String, String)
   CollaborationDownload(String)
   CollaborationOutcomeOpen(@collaboration.OutcomeKey)
   CollaborationOutcomeDownload
   CollaborationCancel
-  CollaborationDownloaded(Int, String)
+  CollaborationDownloaded(Int32, String)
   SetRequestTitle(String)
   SetRequestPrompt(String)
   SetRequestBookId(String)
@@ -485,7 +499,7 @@ priv enum Msg {
   SetRequestMaterialAcceptance(String)
   SetRequestMaterialNextAction(String)
   SubmitOperatorRequest
-  OperatorRequestSubmitted(Int, String)
+  OperatorRequestSubmitted(Int32, String)
   SetBookRequestTitle(String)
   SetBookRequestBookId(String)
   SetBookRequestPurpose(String)
@@ -504,15 +518,15 @@ priv enum Msg {
   MoonFlowReceiverSettled(String)
   AvatarDraftName(String)
   AvatarDraftPersona(String)
-  AvatarDraftColor(Int)
+  AvatarDraftColor(Int32)
   AvatarWizardNext
   AvatarWizardBack
   AvatarCreate
   AvatarOpenEditor
   ToggleWalkMode
   TogglePlayerFollow
-  PlayerStepDirection(Int, Int)
-  PlayerStepTo(Int, Int)
+  PlayerStepDirection(Int32, Int32)
+  PlayerStepTo(Int32, Int32)
   TogglePhone
   OpenMoonclawGuide
   PhoneSelectContact(String)
@@ -528,7 +542,7 @@ priv enum Msg {
   PublishBuilding(String)
   CollectBuilding(String)
   ToggleOps
-  SetOpsTab(Int)
+  SetOpsTab(Int32)
   OpsGenerateReport
   ToggleMetro
   DailyCheckin

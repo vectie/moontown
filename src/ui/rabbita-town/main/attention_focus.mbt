@@ -156,7 +156,7 @@ fn attention_focus_review_opening(
 
 ///|
 fn attention_focus_count_fragment(
-  count : Int,
+  count : Int32,
   singular : String,
   plural : String,
 ) -> String {

@@ -106,7 +106,7 @@ fn read_tick_refresh_versions() -> TickRefreshVersions {
 
 ///|
 fn refresh_module_projections(
-  version : Int,
+  version : Int32,
   model : Model,
 ) -> Array[BookProjectionFragment] {
   refresh_array_snapshot(
@@ -119,7 +119,7 @@ fn refresh_module_projections(
 
 ///|
 fn refresh_moondesk_handoff_artifacts(
-  version : Int,
+  version : Int32,
   model : Model,
 ) -> Array[MoondeskHandoffArtifact] {
   refresh_array_snapshot(
@@ -132,7 +132,7 @@ fn refresh_moondesk_handoff_artifacts(
 
 ///|
 fn refresh_standing_goals(
-  version : Int,
+  version : Int32,
   model : Model,
 ) -> Array[StandingGoalSnapshot] {
   refresh_array_snapshot(
@@ -145,7 +145,7 @@ fn refresh_standing_goals(
 
 ///|
 fn refresh_watcher_records(
-  version : Int,
+  version : Int32,
   model : Model,
 ) -> Array[WatcherRunRecordSnapshot] {
   refresh_array_snapshot(
@@ -158,7 +158,7 @@ fn refresh_watcher_records(
 
 ///|
 fn refresh_operator_requests(
-  version : Int,
+  version : Int32,
   model : Model,
 ) -> Array[OperatorRequestSnapshot] {
   refresh_array_snapshot(
@@ -171,7 +171,7 @@ fn refresh_operator_requests(
 
 ///|
 fn refresh_book_template_requests(
-  version : Int,
+  version : Int32,
   model : Model,
 ) -> Array[BookTemplateRequestSnapshot] {
   refresh_array_snapshot(

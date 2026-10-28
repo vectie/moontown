@@ -20,7 +20,7 @@ fn moondesk_root_status_label(model : Model) -> String {
 }
 
 ///|
-fn moondesk_record_count(model : Model) -> Int {
+fn moondesk_record_count(model : Model) -> Int32 {
   moondesk_bridge_records(model).length()
 }
 

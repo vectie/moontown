@@ -26,10 +26,17 @@ fn initial_dashboard_section() -> DashboardSection? {
 
 ///|
 fn initial_request_composer() -> RequestComposerFocus {
-  match current_browser_query_param("request") {
+  request_composer_for_route(current_browser_query_param("request"))
+}
+
+///|
+fn request_composer_for_route(request : String) -> RequestComposerFocus {
+  match request {
     "watch" => RequestComposerFocus::StandingWatchComposer
     "book" => RequestComposerFocus::EvidenceBookComposer
     "collaboration" => RequestComposerFocus::CollaborationComposer
+    "outcomes" => RequestComposerFocus::ResultsComposer
+    "review" => RequestComposerFocus::AttentionComposer
     _ => RequestComposerFocus::RequestShortcuts
   }
 }
@@ -55,6 +62,7 @@ fn town_spatial_layer_for_route(
           building_id,
         ),
       )
+    "indoor" if building_id == "future-center-g3" => ReferenceInterior
     "indoor" =>
       match
         golden_valley_building_for_identity(
@@ -112,6 +120,8 @@ fn init_model() -> Model {
     dashboard_section: initial_dashboard_section(),
     request_composer: initial_request_composer(),
     collaboration: @collaboration.Client::new(),
+    neighborhood: initial_neighborhood_state(),
+    neighborhood_manage: initial_neighborhood_manage_state(),
     projection_snapshot,
     snapshot_version: town_snapshot_version(),
     energy_valley_runtime,
@@ -119,6 +129,10 @@ fn init_model() -> Model {
     town_spatial_layer: initial_town_spatial_layer(),
     secret_compute_room_selected_id: "moongate",
     indoor_selected_slot_id: "",
+    spatial_scene_selections: Map([]),
+    spatial_compute_return_reference: current_browser_query_param("layer") ==
+    "compute" &&
+    current_browser_query_param("building") == "future-center-g3",
     spatial_selected_work_id: current_browser_query_param("work"),
     spatial_request_id: current_browser_query_param("work-request"),
     visual_projection,
@@ -187,11 +201,14 @@ fn init_model() -> Model {
     energy_guide_open: false,
     energy_reset_open: false,
     energy_status_open: false,
-    energy_intro_open: town_life.player is None &&
+    energy_intro_open: !initial_neighborhood_requested() &&
+    !public_platform_enabled() &&
+    current_browser_query_param("request").is_empty() &&
+    town_life.player is None &&
     !browser_energy_valley_intro_seen() &&
     current_browser_query_param("area").is_empty() &&
     current_browser_query_param("layer").is_empty(),
-    energy_request_open: false,
+    energy_request_open: initial_request_composer() != RequestShortcuts,
     resident_explorer_open: false,
     resident_query: "",
     town_chronicle_open: false,

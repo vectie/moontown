@@ -97,7 +97,7 @@ fn browser_energy_valley_authoritative_reference_ready() -> Bool {
 ///|
 fn decode_legacy_energy_valley_v2(
   text : String,
-  seed : Int,
+  seed : Int32,
 ) -> EnergyValleyWorldDeltaLedger? {
   let parsed = @json.parse(text) catch { _ => return None }
   let decoded : EnergyValleySave = @json.from_json(parsed) catch {
@@ -115,7 +115,7 @@ fn decode_legacy_energy_valley_v2(
 
 ///|
 fn legacy_energy_valley_world_delta_for_migration(
-  seed : Int,
+  seed : Int32,
 ) -> EnergyValleyWorldDeltaLedger? {
   let text = browser_energy_valley_legacy_migration_save_text()
   if text.is_empty() {

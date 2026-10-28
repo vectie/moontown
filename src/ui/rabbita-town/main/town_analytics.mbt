@@ -89,7 +89,7 @@ fn analytics_event_label(event : String) -> String {
 }
 
 ///|
-let analytics_ring_capacity : Int = frontend_setting_int(
+let analytics_ring_capacity : Int32 = frontend_setting_int(
   "analytics_ring_capacity", 160,
 )
 
@@ -119,7 +119,7 @@ fn analytics_line_matches_event(line : String, event : String) -> Bool {
 ///|
 /// Count occurrences of one event on a given simulation day within the local
 /// ring buffer. This is an event count, never a user count.
-fn analytics_count_on(model : Model, day : Int, event : String) -> Int {
+fn analytics_count_on(model : Model, day : Int32, event : String) -> Int32 {
   let prefix = "\{day}|"
   let mut count = 0
   for line in model.analytics {
@@ -131,7 +131,7 @@ fn analytics_count_on(model : Model, day : Int, event : String) -> Int {
 }
 
 ///|
-fn analytics_wrap_index(day_index : Int, length : Int) -> Int {
+fn analytics_wrap_index(day_index : Int32, length : Int32) -> Int32 {
   let raw = day_index % length
   if raw < 0 {
     raw + length
@@ -141,7 +141,7 @@ fn analytics_wrap_index(day_index : Int, length : Int) -> Int {
 }
 
 ///|
-fn analytics_event_count_on(model : Model, day : Int) -> Int {
+fn analytics_event_count_on(model : Model, day : Int32) -> Int32 {
   let prefix = "\{day}|"
   let mut count = 0
   for line in model.analytics {
@@ -153,36 +153,36 @@ fn analytics_event_count_on(model : Model, day : Int) -> Int {
 }
 
 ///|
-fn analytics_today_activity(model : Model) -> Int {
+fn analytics_today_activity(model : Model) -> Int32 {
   analytics_event_count_on(model, energy_valley_sim_day(model))
 }
 
 ///|
-fn analytics_today_builds(model : Model) -> Int {
+fn analytics_today_builds(model : Model) -> Int32 {
   analytics_count_on(model, energy_valley_sim_day(model), "build_place")
 }
 
 ///|
-fn analytics_today_chat_sent(model : Model) -> Int {
+fn analytics_today_chat_sent(model : Model) -> Int32 {
   analytics_count_on(model, energy_valley_sim_day(model), "phone_send")
 }
 
 ///|
-fn analytics_today_chat_replies(model : Model) -> Int {
+fn analytics_today_chat_replies(model : Model) -> Int32 {
   analytics_count_on(model, energy_valley_sim_day(model), "phone_receive")
 }
 
 ///|
-fn analytics_today_chats(model : Model) -> Int {
+fn analytics_today_chats(model : Model) -> Int32 {
   analytics_today_chat_sent(model) + analytics_today_chat_replies(model)
 }
 
 ///|
 /// Exact local activity totals for the latest simulation days. Zeroes remain
 /// zeroes; no demo baseline is mixed into this series.
-fn analytics_activity_series(model : Model, days : Int) -> Array[Int] {
+fn analytics_activity_series(model : Model, days : Int32) -> Array[Int32] {
   let today = energy_valley_sim_day(model)
-  let result : Array[Int] = []
+  let result : Array[Int32] = []
   for offset in 0..<days {
     result.push(analytics_event_count_on(model, today - days + 1 + offset))
   }
@@ -190,14 +190,14 @@ fn analytics_activity_series(model : Model, days : Int) -> Array[Int] {
 }
 
 ///|
-fn analytics_active_recorded_days(model : Model, days : Int) -> Int {
+fn analytics_active_recorded_days(model : Model, days : Int32) -> Int32 {
   analytics_activity_series(model, days).filter(value => value > 0).length()
 }
 
 ///|
 /// Today's exact local event-category counts. These measure interactions from
 /// this browser profile, not residents or unique people.
-fn analytics_today_categories(model : Model) -> Array[(String, Int)] {
+fn analytics_today_categories(model : Model) -> Array[(String, Int32)] {
   let categories = [
     ("引导", "onboarding"),
     ("探索", "explore"),
@@ -207,7 +207,7 @@ fn analytics_today_categories(model : Model) -> Array[(String, Int)] {
     ("系统", "system"),
   ]
   let today = energy_valley_sim_day(model)
-  let result : Array[(String, Int)] = []
+  let result : Array[(String, Int32)] = []
   for item in categories {
     let (label, category) = item
     let mut count = 0
@@ -224,7 +224,7 @@ fn analytics_today_categories(model : Model) -> Array[(String, Int)] {
 ///|
 /// Current local profile journey. Values are binary completion states rather
 /// than invented cohort/user counts.
-fn analytics_funnel(model : Model) -> Array[(String, Int)] {
+fn analytics_funnel(model : Model) -> Array[(String, Int32)] {
   [
     (
       "创建角色",
@@ -272,12 +272,12 @@ fn analytics_funnel(model : Model) -> Array[(String, Int)] {
 }
 
 ///|
-fn analytics_funnel_completed(model : Model) -> Int {
+fn analytics_funnel_completed(model : Model) -> Int32 {
   analytics_funnel(model).filter(stage => stage.1 == 1).length()
 }
 
 ///|
-fn analytics_local_knowledge_counts(model : Model) -> Array[(String, Int)] {
+fn analytics_local_knowledge_counts(model : Model) -> Array[(String, Int32)] {
   [
     ("我的条目", model.posts.filter(post => post.mine).length()),
     (

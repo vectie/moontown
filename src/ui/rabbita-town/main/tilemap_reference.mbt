@@ -22,7 +22,7 @@ fn tile_kind_for_reference_code(code : String) -> String {
 }
 
 ///|
-fn reference_tile_kind_at(grid_x : Int, grid_y : Int) -> String? {
+fn reference_tile_kind_at(grid_x : Int32, grid_y : Int32) -> String? {
   let kind = tile_kind_for_reference_code(
     reference_tile_code_at(grid_x, grid_y),
   )
@@ -34,6 +34,6 @@ fn reference_tile_kind_at(grid_x : Int, grid_y : Int) -> String? {
 }
 
 ///|
-fn tile_kind_at(grid_x : Int, grid_y : Int) -> String {
+fn tile_kind_at(grid_x : Int32, grid_y : Int32) -> String {
   energy_valley_tile_kind_at(active_energy_valley_seed(), grid_x, grid_y)
 }

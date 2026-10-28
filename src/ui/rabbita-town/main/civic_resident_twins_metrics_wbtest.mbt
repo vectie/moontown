@@ -7,12 +7,9 @@ test "resident twins copy renders explicit snapshot fields" {
     review_queue_count: 3,
     build_stage: "Reflection loop running",
   })
-  assert_true(copy.contains("Twin Keeper / Running"))
-  assert_true(copy.contains("memory-reflection-plan loop"))
-  assert_true(copy.contains("Li / Founder Studio is the active twin"))
-  assert_true(copy.contains("2 private scopes"))
-  assert_true(copy.contains("3 records need keeper attention"))
-  assert_true(copy.contains("current stage is Reflection loop running"))
+  assert_true(copy.contains("居民需求与计划示例"))
+  assert_true(copy.contains("未接入真实个人资料"))
+  assert_false(copy.contains("runs as a supervised"))
 }
 
 ///|

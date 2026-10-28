@@ -4,12 +4,12 @@
 /// representation opaque. Loading always canonicalizes them again before the
 /// delta is validated or compiled.
 priv struct EnergyValleySave {
-  budget : Int
+  budget : Int32
   buildings : Array[GoldenValleyBuilding]
   roads : Array[String]
   parks : Array[String]
   /// Optional for saves written before custom buildings had durable IDs.
-  next_authored_building_sequence : Int?
+  next_authored_building_sequence : Int32?
 } derive(ToJson, FromJson)
 
 ///|
@@ -21,12 +21,12 @@ priv struct SavedWorldDeltaBuilding {
 ///|
 priv struct SavedWorldDeltaBuildingMovement {
   id : String
-  x : Int
-  y : Int
-  width : Int
-  depth : Int
-  entrance_x : Int?
-  entrance_y : Int?
+  x : Int32
+  y : Int32
+  width : Int32
+  depth : Int32
+  entrance_x : Int32?
+  entrance_y : Int32?
 } derive(ToJson, FromJson)
 
 ///|
@@ -36,8 +36,8 @@ priv struct SavedWorldDeltaDeletion {
 
 ///|
 priv struct SavedWorldDeltaGridPoint {
-  x : Int
-  y : Int
+  x : Int32
+  y : Int32
 } derive(ToJson, FromJson, Debug, Eq)
 
 ///|
@@ -49,8 +49,8 @@ priv struct SavedWorldDeltaRoad {
 ///|
 priv struct SavedWorldDeltaPark {
   id : String
-  x : Int
-  y : Int
+  x : Int32
+  y : Int32
 } derive(ToJson, FromJson)
 
 ///|
@@ -71,13 +71,13 @@ priv struct EnergyValleyWorldDeltaLedger {
   schema_version : String
   base_blueprint_id : String
   base_blueprint_digest : String
-  revision : Int
-  budget : Int
+  revision : Int32
+  budget : Int32
   operations : Array[SavedWorldDeltaOperation]
   /// Cached deterministic hash of the serialized typed operation payload.
   /// Optional so already-published v3 ledgers remain decodable.
-  content_digest : Int?
-  next_authored_building_sequence : Int
+  content_digest : Int32?
+  next_authored_building_sequence : Int32
 } derive(ToJson, FromJson)
 
 ///|
@@ -88,7 +88,7 @@ fn energy_valley_world_delta_schema() -> String {
 ///|
 fn energy_valley_saved_operations_digest(
   operations : Array[SavedWorldDeltaOperation],
-) -> Int {
+) -> Int32 {
   ecosystem_stable_hash(ToJson::to_json(operations).stringify())
 }
 
@@ -98,12 +98,12 @@ fn energy_valley_saved_road_id(point : SavedWorldDeltaGridPoint) -> String {
 }
 
 ///|
-fn energy_valley_saved_park_id(x : Int, y : Int) -> String {
+fn energy_valley_saved_park_id(x : Int32, y : Int32) -> String {
   "authored-park-\{x}-\{y}"
 }
 
 ///|
-fn energy_valley_parse_saved_tile(value : String) -> (Int, Int)? {
+fn energy_valley_parse_saved_tile(value : String) -> (Int32, Int32)? {
   match value.split_once(":") {
     Some((x, y)) => {
       let column = @string.parse_int(x.to_owned()) catch { _ => return None }
@@ -187,7 +187,7 @@ fn energy_valley_saved_road_components(
 ///|
 fn energy_valley_world_delta_from_projection(
   save : EnergyValleySave,
-  revision : Int,
+  revision : Int32,
   base_blueprint_digest : String,
 ) -> EnergyValleyWorldDeltaLedger {
   let operations : Array[SavedWorldDeltaOperation] = []
@@ -267,13 +267,13 @@ fn decode_energy_valley_world_delta_save(
 
 ///|
 let energy_valley_base_contract_world_cache : Map[
-  Int,
+  Int32,
   @energy_valley_contract.CompiledTownWorld,
 ] = Map([])
 
 ///|
 fn energy_valley_base_contract_world_for_seed(
-  seed : Int,
+  seed : Int32,
 ) -> @energy_valley_contract.CompiledTownWorld {
   match energy_valley_base_contract_world_cache.get(seed) {
     Some(world) => return world
@@ -291,7 +291,7 @@ fn energy_valley_base_contract_world_for_seed(
 }
 
 ///|
-fn energy_valley_base_blueprint_digest_for_seed(seed : Int) -> String {
+fn energy_valley_base_blueprint_digest_for_seed(seed : Int32) -> String {
   energy_valley_base_contract_world_for_seed(seed).blueprint_digest
 }
 
@@ -312,10 +312,10 @@ fn energy_valley_world_delta_provenance() -> @energy_valley_contract.Provenance 
 
 ///|
 fn energy_valley_world_delta_polygon(
-  x : Int,
-  y : Int,
-  width : Int,
-  depth : Int,
+  x : Int32,
+  y : Int32,
+  width : Int32,
+  depth : Int32,
 ) -> @energy_valley_contract.Polygon {
   @energy_valley_contract.polygon([
     @energy_valley_contract.world_point(x.to_double(), y.to_double()),
@@ -350,8 +350,8 @@ fn energy_valley_world_delta_roof(
 
 ///|
 fn energy_valley_saved_entrance(
-  x : Int?,
-  y : Int?,
+  x : Int32?,
+  y : Int32?,
 ) -> @energy_valley_contract.GridPosition? {
   match (x, y) {
     (Some(column), Some(row)) =>
@@ -520,7 +520,7 @@ fn energy_valley_contract_world_delta(
 ///|
 fn energy_valley_contract_world_delta_for_model(
   model : Model,
-  _seed : Int,
+  _seed : Int32,
 ) -> @energy_valley_contract.WorldDelta {
   energy_valley_contract_world_delta(model.energy_world_delta)
 }
@@ -535,7 +535,7 @@ priv struct EnergyValleyWorldDeltaProjection {
 ///|
 fn energy_valley_world_delta_polygon_size(
   polygon : @energy_valley_contract.Polygon,
-) -> (Int, Int) {
+) -> (Int32, Int32) {
   if polygon.vertices.is_empty() {
     return (1, 1)
   }
@@ -693,7 +693,7 @@ fn energy_valley_project_contract_world_delta(
 
 ///|
 fn energy_valley_empty_world_delta_for_seed(
-  seed : Int,
+  seed : Int32,
 ) -> EnergyValleyWorldDeltaLedger {
   {
     schema_version: energy_valley_world_delta_schema(),
@@ -710,7 +710,7 @@ fn energy_valley_empty_world_delta_for_seed(
 ///|
 fn energy_valley_world_delta_targets_seed(
   ledger : EnergyValleyWorldDeltaLedger,
-  seed : Int,
+  seed : Int32,
 ) -> Bool {
   ledger.base_blueprint_id == "blueprint/wenyu-energy-valley" &&
   ledger.base_blueprint_digest ==
@@ -720,7 +720,7 @@ fn energy_valley_world_delta_targets_seed(
 ///|
 fn energy_valley_world_delta_valid_for_seed(
   ledger : EnergyValleyWorldDeltaLedger,
-  seed : Int,
+  seed : Int32,
 ) -> Bool {
   let base = energy_valley_base_contract_world_for_seed(seed)
   let delta = energy_valley_contract_world_delta(ledger)
@@ -755,12 +755,12 @@ fn energy_valley_model_parks(model : Model) -> Array[String] {
 }
 
 ///|
-fn energy_valley_model_budget(model : Model) -> Int {
+fn energy_valley_model_budget(model : Model) -> Int32 {
   model.energy_world_delta.budget.max(0)
 }
 
 ///|
-fn energy_valley_model_next_authored_building_sequence(model : Model) -> Int {
+fn energy_valley_model_next_authored_building_sequence(model : Model) -> Int32 {
   model.energy_world_delta.next_authored_building_sequence.max(1)
 }
 
@@ -768,8 +768,8 @@ fn energy_valley_model_next_authored_building_sequence(model : Model) -> Int {
 fn energy_valley_model_append_delta_operations(
   model : Model,
   operations : Array[SavedWorldDeltaOperation],
-  budget : Int,
-  next_authored_building_sequence : Int,
+  budget : Int32,
+  next_authored_building_sequence : Int32,
 ) -> Model {
   ignore(next_authored_building_sequence)
   let mut next = model
@@ -866,8 +866,8 @@ fn energy_valley_model_append_delta_operations(
 fn energy_valley_model_add_building_delta(
   model : Model,
   building : GoldenValleyBuilding,
-  budget : Int,
-  next_authored_building_sequence : Int,
+  budget : Int32,
+  next_authored_building_sequence : Int32,
 ) -> Model {
   energy_valley_model_add_building_delta_with_identity(
     model, building, budget, next_authored_building_sequence,
@@ -878,8 +878,8 @@ fn energy_valley_model_add_building_delta(
 fn energy_valley_model_add_building_delta_with_identity(
   model : Model,
   building : GoldenValleyBuilding,
-  budget : Int,
-  next_authored_building_sequence : Int,
+  budget : Int32,
+  next_authored_building_sequence : Int32,
 ) -> (Model, GoldenValleyBuilding) {
   ignore(next_authored_building_sequence)
   town_life_world_add_building(
@@ -893,7 +893,7 @@ fn energy_valley_model_add_building_delta_with_identity(
 fn energy_valley_model_delete_building_delta(
   model : Model,
   building : GoldenValleyBuilding,
-  budget : Int,
+  budget : Int32,
 ) -> Model {
   match golden_valley_nonempty_authored_id(building) {
     Some(id) =>
@@ -910,9 +910,9 @@ fn energy_valley_model_delete_building_delta(
 ///|
 fn energy_valley_model_add_park_delta(
   model : Model,
-  x : Int,
-  y : Int,
-  budget : Int,
+  x : Int32,
+  y : Int32,
+  budget : Int32,
 ) -> Model {
   town_life_world_add_park(
     model,
@@ -925,9 +925,9 @@ fn energy_valley_model_add_park_delta(
 ///|
 fn energy_valley_model_delete_park_delta(
   model : Model,
-  x : Int,
-  y : Int,
-  budget : Int,
+  x : Int32,
+  y : Int32,
+  budget : Int32,
 ) -> Model {
   ignore(budget)
   town_life_world_delete_entity(
@@ -963,7 +963,7 @@ fn energy_valley_active_saved_roads(
 fn energy_valley_model_replace_roads_delta(
   model : Model,
   encoded_roads : Array[String],
-  budget : Int,
+  budget : Int32,
 ) -> Model {
   let current = energy_valley_model_roads(model)
   let mut next = model
@@ -1001,7 +1001,7 @@ fn energy_valley_model_replace_roads_delta(
 ///|
 fn energy_valley_validated_world_delta_projection(
   model : Model,
-  seed : Int,
+  seed : Int32,
 ) -> EnergyValleyWorldDeltaProjection {
   let base = energy_valley_base_contract_world_for_seed(seed)
   let delta = energy_valley_contract_world_delta_for_model(model, seed)

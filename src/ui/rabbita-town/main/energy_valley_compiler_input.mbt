@@ -9,21 +9,21 @@ priv struct GoldenValleyBuilding {
   module_key : String?
   name : String
   style : String
-  x : Int
-  y : Int
-  width : Int
-  depth : Int
-  entrance_x : Int?
-  entrance_y : Int?
-  floors : Int
+  x : Int32
+  y : Int32
+  width : Int32
+  depth : Int32
+  entrance_x : Int32?
+  entrance_y : Int32?
+  floors : Int32
 } derive(ToJson, FromJson)
 
 ///|
-let golden_valley_world_cache : Map[Int, ExactEnergyValleyWorld] = Map([])
+let golden_valley_world_cache : Map[Int32, ExactEnergyValleyWorld] = Map([])
 
 ///|
 /// Typed Wenyu generation is a compiler input, not a renderer-owned world.
-fn golden_valley_world(seed : Int) -> ExactEnergyValleyWorld {
+fn golden_valley_world(seed : Int32) -> ExactEnergyValleyWorld {
   match golden_valley_world_cache.get(seed) {
     Some(world) => world
     None => {
@@ -38,17 +38,17 @@ fn golden_valley_world(seed : Int) -> ExactEnergyValleyWorld {
 }
 
 ///|
-fn golden_valley_cols() -> Int {
+fn golden_valley_cols() -> Int32 {
   exact_energy_valley_cols()
 }
 
 ///|
-fn golden_valley_rows() -> Int {
+fn golden_valley_rows() -> Int32 {
   exact_energy_valley_rows()
 }
 
 ///|
-fn golden_valley_buildings(seed : Int) -> Array[GoldenValleyBuilding] {
+fn golden_valley_buildings(seed : Int32) -> Array[GoldenValleyBuilding] {
   golden_valley_world(seed).buildings.map(building => {
     authored_id: None,
     module_key: Some(building.module_key),

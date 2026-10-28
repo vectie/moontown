@@ -33,11 +33,11 @@ extern "js" fn install_simulation_tick_lifecycle_harness() -> Unit =
   #| }
 
 ///|
-extern "js" fn simulation_tick_harness_active_count() -> Int =
+extern "js" fn simulation_tick_harness_active_count() -> Int32 =
   #| () => globalThis.__moontownSimulationTickLifecycleHarness?.active.size ?? 0
 
 ///|
-extern "js" fn simulation_tick_harness_cancelled_count() -> Int =
+extern "js" fn simulation_tick_harness_cancelled_count() -> Int32 =
   #| () => globalThis.__moontownSimulationTickLifecycleHarness?.cancelled.length ?? 0
 
 ///|
@@ -150,7 +150,7 @@ extern "js" fn install_map_lab_canvas_lifecycle_harness() -> Unit =
   #| }
 
 ///|
-extern "js" fn map_lab_canvas_harness_active_count() -> Int =
+extern "js" fn map_lab_canvas_harness_active_count() -> Int32 =
   #| () => globalThis.__moontownMapLabCanvasLifecycleHarness?.active.size ?? 0
 
 ///|
@@ -172,7 +172,7 @@ extern "js" fn map_lab_canvas_harness_has_lifecycle() -> Bool =
   #| () => Boolean(globalThis.__moontownMapLabCanvasLifecycle)
 
 ///|
-extern "js" fn map_lab_canvas_harness_backing_pixels() -> Int =
+extern "js" fn map_lab_canvas_harness_backing_pixels() -> Int32 =
   #| () => {
   #|   const canvas = globalThis.__moontownMapLabCanvasLifecycleHarness?.canvas;
   #|   return (canvas?.width ?? 0) * (canvas?.height ?? 0);

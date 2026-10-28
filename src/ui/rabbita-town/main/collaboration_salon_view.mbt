@@ -6,22 +6,20 @@ fn render_idea_salon(
 ) -> @rabbita.Html {
   let disabled = state.busy() || state.dirty || state.revision.is_empty()
   if !@collaboration.salon_ready(work) {
-    return p(
-      "Idea salon: collect at least two completed contributions to compare. Missing or failed Books remain visible above; they never count as consensus.",
-    )
+    return @html.nothing
   }
   if state.work_fields.get("work_salon_mode") != Some("compare") {
     return button(
       attrs=@html.Attrs::build().disabled(disabled),
       on_click=dispatch(CollaborationEdit("work_salon_mode", "compare")),
-      "Compare ideas from these Books",
+      "比较方案",
     )
   }
   div(class="request-desk-stack", [
-    h3("Run an idea salon: compare and choose"),
-    p("Question: " + state.draft.question),
+    h3("比较方案"),
+    p(state.draft.question),
     p(
-      "Compare the returned outputs against the same criterion, then choose one proposal for Book review. These are your assessments, not generated agent votes. Fixture outputs remain fixture rehearsals; this worksheet does not establish genuine autonomous emergence.",
+      "按同一标准比较贡献，再选择送审方案。这是你的判断，不代表 Agent 投票；演示结果仍是演示。",
     ),
     work_field(
       dispatch,
@@ -34,7 +32,9 @@ fn render_idea_salon(
       @collaboration.salon_candidates(work).map(candidate => {
         div(class="request-desk-stack", [
           h3(candidate.book_id),
-          p("Run " + candidate.run_id + " · " + candidate.output_digest),
+          render_advanced_details("执行来源", [
+            p("Run " + candidate.run_id + " · " + candidate.output_digest),
+          ]),
           @html.pre(
             class="collaboration-retained-output",
             candidate.output_text,
@@ -98,7 +98,7 @@ fn render_idea_salon(
     button(
       attrs=@html.Attrs::build().disabled(disabled),
       on_click=dispatch(CollaborationEdit("work_salon_mode", "off")),
-      "Discard comparison notes",
+      "取消比较",
     ),
   ])
 }

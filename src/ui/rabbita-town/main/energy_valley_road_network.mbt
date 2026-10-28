@@ -32,7 +32,11 @@ fn energy_valley_raw_road_source(
 }
 
 ///|
-fn energy_valley_compiled_road_code_at(seed : Int, x : Int, y : Int) -> String {
+fn energy_valley_compiled_road_code_at(
+  seed : Int32,
+  x : Int32,
+  y : Int32,
+) -> String {
   reference_road_graph_code_at(
     x - energy_valley_road_pattern_shift_x(seed),
     y - energy_valley_road_pattern_shift_y(seed),
@@ -42,7 +46,7 @@ fn energy_valley_compiled_road_code_at(seed : Int, x : Int, y : Int) -> String {
 ///|
 fn energy_valley_reference_road_source(
   tiles : Array[Array[ExactEnergyValleyTile]],
-  seed : Int,
+  seed : Int32,
 ) -> Array[Array[Bool]] {
   if !reference_road_graph_snapshot_ready() {
     return energy_valley_raw_road_source(tiles)
@@ -60,7 +64,7 @@ fn energy_valley_reference_road_source(
 ///|
 fn energy_valley_dilate_road_source(
   source : Array[Array[Bool]],
-  radius : Int,
+  radius : Int32,
 ) -> Array[Array[Bool]] {
   let result = energy_valley_road_bool_grid(false)
   for y in 0..<exact_energy_valley_rows() {
@@ -80,8 +84,8 @@ fn energy_valley_dilate_road_source(
 ///|
 fn energy_valley_road_neighbor_values(
   mask : Array[Array[Bool]],
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Array[Bool] {
   [
     mask[y - 1][x],
@@ -96,7 +100,7 @@ fn energy_valley_road_neighbor_values(
 }
 
 ///|
-fn energy_valley_road_transition_count(neighbors : Array[Bool]) -> Int {
+fn energy_valley_road_transition_count(neighbors : Array[Bool]) -> Int32 {
   let mut transitions = 0
   for index in 0..<neighbors.length() {
     if !neighbors[index] && neighbors[(index + 1) % neighbors.length()] {
@@ -107,7 +111,7 @@ fn energy_valley_road_transition_count(neighbors : Array[Bool]) -> Int {
 }
 
 ///|
-fn energy_valley_road_true_count(neighbors : Array[Bool]) -> Int {
+fn energy_valley_road_true_count(neighbors : Array[Bool]) -> Int32 {
   let mut count = 0
   for neighbor in neighbors {
     if neighbor {
@@ -122,7 +126,7 @@ fn energy_valley_thin_road_pass(
   mask : Array[Array[Bool]],
   second_pass : Bool,
 ) -> Bool {
-  let removals : Array[(Int, Int)] = []
+  let removals : Array[(Int32, Int32)] = []
   for y in 1..<(exact_energy_valley_rows() - 1) {
     for x in 1..<(exact_energy_valley_cols() - 1) {
       if !mask[y][x] {
@@ -195,8 +199,8 @@ fn energy_valley_remove_tiny_road_fragments(mask : Array[Array[Bool]]) -> Unit {
       if !mask[y][x] || visited[y][x] {
         continue
       }
-      let component : Array[Int] = []
-      let queue : Array[Int] = [y * exact_energy_valley_cols() + x]
+      let component : Array[Int32] = []
+      let queue : Array[Int32] = [y * exact_energy_valley_cols() + x]
       visited[y][x] = true
       let mut head = 0
       while head < queue.length() {
@@ -229,9 +233,9 @@ fn energy_valley_remove_tiny_road_fragments(mask : Array[Array[Bool]]) -> Unit {
 ///|
 fn energy_valley_source_road_score(
   source : Array[Array[Bool]],
-  x : Int,
-  y : Int,
-) -> Int {
+  x : Int32,
+  y : Int32,
+) -> Int32 {
   let mut score = 0
   for yy in (y - 1)..<=(y + 1) {
     for xx in (x - 1)..<=(x + 1) {
@@ -247,7 +251,7 @@ fn energy_valley_source_road_score(
 fn energy_valley_orthogonalize_road_network(
   network : Array[Array[Bool]],
   source : Array[Array[Bool]],
-  seed : Int,
+  seed : Int32,
 ) -> Unit {
   for y in 0..<(exact_energy_valley_rows() - 1) {
     for x in 0..<(exact_energy_valley_cols() - 1) {
@@ -294,8 +298,8 @@ fn energy_valley_orthogonalize_road_network(
 ///|
 fn energy_valley_road_fill_kind(
   tiles : Array[Array[ExactEnergyValleyTile]],
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> String {
   let mut dense = 0
   let mut urban = 0
@@ -352,8 +356,8 @@ fn energy_valley_road_fill_kind(
 ///|
 fn energy_valley_major_road_source_near(
   tiles : Array[Array[ExactEnergyValleyTile]],
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Bool {
   for yy in (y - 2)..<=(y + 2) {
     for xx in (x - 2)..<=(x + 2) {
@@ -369,7 +373,7 @@ fn energy_valley_major_road_source_near(
 ///|
 fn energy_valley_compile_reference_road_network(
   tiles : Array[Array[ExactEnergyValleyTile]],
-  seed : Int,
+  seed : Int32,
 ) -> Unit {
   if !reference_tile_snapshot_ready() {
     return
@@ -476,7 +480,7 @@ fn energy_valley_authoritative_road_network_from_tiles(
 /// Compatibility entry points that need procedural module placement outside
 /// full world generation still compile the exact same road pipeline first.
 fn energy_valley_authoritative_road_network(
-  seed : Int,
+  seed : Int32,
 ) -> @energy_valley_contract.RoadNetwork {
   let tiles : Array[Array[ExactEnergyValleyTile]] = []
   for y in 0..<exact_energy_valley_rows() {

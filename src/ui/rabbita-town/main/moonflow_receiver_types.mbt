@@ -25,7 +25,7 @@ priv struct MoonFlowReceiverRun {
   declaration_id : String
   product_id : String
   operation : String
-  issued_projection_sequence : Int
+  issued_projection_sequence : Int32
   issued_work_item_status : String
   issued_run_outcome : String
 } derive(ToJson, FromJson)
@@ -101,7 +101,7 @@ priv struct MoonFlowReceiverStatus {
   stage : String
   work_item_status : String
   run_outcome : String
-  projection_sequence : Int
+  projection_sequence : Int32
   receipt_ref : String
   receipt_digest : String
   receipt_recorded_at : String

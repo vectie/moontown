@@ -1,7 +1,7 @@
 ///|
 test "density sampler visits every tile once and interleaves districts" {
-  let seen : Map[Int, Bool] = Map([])
-  let districts : Map[Int, Bool] = Map([])
+  let seen : Map[Int32, Bool] = Map([])
+  let districts : Map[Int32, Bool] = Map([])
   for i in 0..<(256 * 144) {
     let (x, y) = town_bearing_density_site(i)
     assert_true(x >= 0 && x < 256 && y >= 0 && y < 144)
@@ -18,7 +18,7 @@ test "density sampler visits every tile once and interleaves districts" {
 
 ///|
 test "density target never invents land before scene evidence is ready" {
-  let buildings : Map[Int, Array[IntersectionRoadPreviewBuilding]] = Map([])
+  let buildings : Map[Int32, Array[IntersectionRoadPreviewBuilding]] = Map([])
   town_bearing_fill_density(buildings, town_bearing_density_target)
   assert_eq(buildings.length(), 0)
 }
@@ -120,7 +120,7 @@ test "density admission respects the actual unshifted Wenyu road and terrain mas
     wenyu_scene_road_prefix.push(n)
   }
   town_street_index(streets)
-  let buildings : Map[Int, Array[IntersectionRoadPreviewBuilding]] = Map([])
+  let buildings : Map[Int32, Array[IntersectionRoadPreviewBuilding]] = Map([])
   town_bearing_fill_density(buildings, town_bearing_density_target)
   let all : Array[IntersectionRoadPreviewBuilding] = []
   let mut valid = true
@@ -185,7 +185,7 @@ test "density fills 176 distinct cleared lots without moving existing buildings"
     apron: 1,
     depth_key: 10,
   }
-  let buildings : Map[Int, Array[IntersectionRoadPreviewBuilding]] = Map([
+  let buildings : Map[Int32, Array[IntersectionRoadPreviewBuilding]] = Map([
     (10, [existing]),
   ])
   town_bearing_fill_density(buildings, town_bearing_density_target)

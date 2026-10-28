@@ -18,8 +18,8 @@ fn talent_avenue_worker_label(worker : WorkerSim?) -> String {
 priv struct TalentAvenueSnapshot {
   worker_label : String
   stage : String
-  graph_entities : Int
-  verified_cards : Int
+  graph_entities : Int32
+  verified_cards : Int32
 }
 
 ///|
@@ -40,15 +40,13 @@ fn talent_avenue_snapshot(
 ///|
 fn talent_avenue_copy_from_snapshot(snapshot : TalentAvenueSnapshot) -> String {
   [
-    "Talent Avenue keeps the district legible for visitors and operators:",
-    "\{snapshot.worker_label} is carrying \{snapshot.stage},",
-    "\{snapshot.graph_entities} public-safe cards are live,",
-    "and \{snapshot.verified_cards} cards already carry reviewable evidence status.",
+    "人才展示示例 \{snapshot.graph_entities} 张。",
+    "示例不是认证、实际成就或接待记录。",
   ].join(" ")
 }
 
 ///|
-fn talent_avenue_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
+fn talent_avenue_queue_pressure(model : Model, worker : WorkerSim?) -> Int32 {
   talent_avenue_queue_pressure_from_inputs(
     model.pressure,
     talent_avenue_activity_score(model),
@@ -58,10 +56,10 @@ fn talent_avenue_queue_pressure(model : Model, worker : WorkerSim?) -> Int {
 
 ///|
 fn talent_avenue_queue_pressure_from_inputs(
-  pressure : Int,
-  activity_score : Int,
+  pressure : Int32,
+  activity_score : Int32,
   worker : WorkerSim?,
-) -> Int {
+) -> Int32 {
   civic_queue_pressure_from_policy(
     talent_avenue_queue_pressure_policy(pressure, activity_score),
     worker,
@@ -70,8 +68,8 @@ fn talent_avenue_queue_pressure_from_inputs(
 
 ///|
 fn talent_avenue_queue_pressure_policy(
-  pressure : Int,
-  activity_score : Int,
+  pressure : Int32,
+  activity_score : Int32,
 ) -> CivicQueuePressurePolicy {
   {
     worker_base: 0,
@@ -88,7 +86,7 @@ fn talent_avenue_health(
   model : Model,
   worker : WorkerSim?,
   execution : @core.TaskExecutionRecord?,
-) -> Int {
+) -> Int32 {
   let base = talent_avenue_base_health_from_inputs(
     model.pressure,
     talent_avenue_activity_score(model),
@@ -114,11 +112,11 @@ fn talent_avenue_health_execution_policy() -> CivicHealthExecutionPolicy {
 
 ///|
 fn talent_avenue_base_health_from_inputs(
-  pressure : Int,
-  activity_score : Int,
-  verified_cards : Int,
+  pressure : Int32,
+  activity_score : Int32,
+  verified_cards : Int32,
   worker : WorkerSim?,
-) -> Int {
+) -> Int32 {
   match worker {
     Some(worker) =>
       clamp_metric(

@@ -11,8 +11,8 @@ priv struct TownChronicleEntry {
   observed_at : String
   agent_id : String?
   building_id : String
-  evidence_count : Int
-  participant_count : Int
+  evidence_count : Int32
+  participant_count : Int32
   task : EnergyValleyRuntimeWorkItem
 }
 
@@ -222,7 +222,7 @@ fn town_chronicle_task_title(
 ///|
 fn town_chronicle_task_participant_count(
   task : EnergyValleyRuntimeWorkItem,
-) -> Int {
+) -> Int32 {
   match task.collaboration {
     Some(collaboration) => collaboration.participants.length()
     None => 0
@@ -232,7 +232,7 @@ fn town_chronicle_task_participant_count(
 ///|
 fn town_chronicle_task_evidence_count(
   task : EnergyValleyRuntimeWorkItem,
-) -> Int {
+) -> Int32 {
   task.resultLinks
   .unwrap_or([])
   .filter(energy_valley_runtime_result_link_is_valid)
@@ -304,7 +304,7 @@ fn town_chronicle_entry_for_task(
 }
 
 ///|
-let town_chronicle_runtime_limit : Int = frontend_setting_int(
+let town_chronicle_runtime_limit : Int32 = frontend_setting_int(
   "town_chronicle_runtime_limit", 6,
 )
 
@@ -373,14 +373,14 @@ fn town_chronicle_history_groups(
 ///|
 fn town_chronicle_history_count(
   groups : Array[TownChronicleHistoryGroup],
-) -> Int {
+) -> Int32 {
   groups.fold(init=0, (count, group) => count + group.tasks.length())
 }
 
 ///|
 fn town_chronicle_runtime_evidence_count(
   state : EnergyValleyRuntimeState,
-) -> Int {
+) -> Int32 {
   match state.projection {
     None => 0
     Some(projection) =>
@@ -450,7 +450,7 @@ fn town_chronicle_local_entry_from_line(
 ///|
 fn town_chronicle_recent_local_entries(
   model : Model,
-  limit : Int,
+  limit : Int32,
 ) -> Array[TownChronicleLocalEntry] {
   let result : Array[TownChronicleLocalEntry] = []
   if limit <= 0 {
@@ -472,7 +472,7 @@ fn town_chronicle_recent_local_entries(
 }
 
 ///|
-fn town_chronicle_local_published_count(model : Model) -> Int {
+fn town_chronicle_local_published_count(model : Model) -> Int32 {
   model.posts.filter(post => post.mine && post.published).length()
 }
 

@@ -12,7 +12,7 @@ fn golden_valley_nonempty_authored_id(
 }
 
 ///|
-fn golden_valley_authored_id_sequence(value : String) -> Int? {
+fn golden_valley_authored_id_sequence(value : String) -> Int32? {
   let suffix = match
     value.strip_prefix(golden_valley_authored_building_prefix) {
     Some(value) if !value.is_empty() => value
@@ -33,7 +33,7 @@ fn golden_valley_authored_id_sequence(value : String) -> Int? {
 }
 
 ///|
-fn golden_valley_authored_id_for_sequence(sequence : Int) -> String {
+fn golden_valley_authored_id_for_sequence(sequence : Int32) -> String {
   "\{golden_valley_authored_building_prefix}\{sequence}"
 }
 
@@ -50,8 +50,8 @@ fn golden_valley_authored_id_in_use(
 ///|
 fn golden_valley_next_free_authored_sequence(
   buildings : Array[GoldenValleyBuilding],
-  requested : Int,
-) -> Int {
+  requested : Int32,
+) -> Int32 {
   let mut sequence = requested.max(1)
   while golden_valley_authored_id_in_use(
           buildings,
@@ -66,8 +66,8 @@ fn golden_valley_next_free_authored_sequence(
 fn golden_valley_next_free_authored_sequence_avoiding(
   buildings : Array[GoldenValleyBuilding],
   reserved_ids : Array[String],
-  requested : Int,
-) -> Int {
+  requested : Int32,
+) -> Int32 {
   let mut sequence = requested.max(1)
   while golden_valley_authored_id_in_use(
           buildings,
@@ -82,9 +82,9 @@ fn golden_valley_next_free_authored_sequence_avoiding(
 ///|
 fn golden_valley_assign_authored_building_id(
   existing : Array[GoldenValleyBuilding],
-  next_sequence : Int,
+  next_sequence : Int32,
   building : GoldenValleyBuilding,
-) -> (GoldenValleyBuilding, Int) {
+) -> (GoldenValleyBuilding, Int32) {
   match golden_valley_nonempty_authored_id(building) {
     Some(authored_id) if !golden_valley_authored_id_in_use(
         existing, authored_id,
@@ -113,8 +113,8 @@ fn golden_valley_assign_authored_building_id(
 ///|
 fn golden_valley_migrate_authored_buildings(
   buildings : Array[GoldenValleyBuilding],
-  stored_next_sequence : Int?,
-) -> (Array[GoldenValleyBuilding], Int) {
+  stored_next_sequence : Int32?,
+) -> (Array[GoldenValleyBuilding], Int32) {
   // Reserve every explicit legacy ID before filling gaps. Otherwise an older
   // ID-less row appearing first in the save could accidentally steal the
   // durable identity of a later row.

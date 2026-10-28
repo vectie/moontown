@@ -133,9 +133,9 @@ test "real work dialog exposes the existing live request composers" {
       render_energy_valley_request_dialog(dashboard_test_dispatch(), model),
     ),
   )
-  assert_true(html.contains("创建真实工作请求"))
-  assert_true(html.contains("Ask the town to keep watching"))
-  assert_true(html.contains("Save Watch"))
+  assert_true(html.contains("aria-label=\"工作与成果\""))
+  assert_true(html.contains("id=\"watch-request\""))
+  assert_true(html.contains("保存关注"))
 }
 
 ///|

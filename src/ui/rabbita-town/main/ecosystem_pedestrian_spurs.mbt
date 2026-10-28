@@ -54,8 +54,8 @@ extern "js" fn golden_draw_ecosystem_spur_segment(
 fn golden_draw_ecosystem_pedestrian_spurs(
   context : @dom.CanvasRenderingContext2D,
   snapshot : @energy_valley_contract.TownSnapshot,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   let zoom = golden_valley_camera_zoom()
   if zoom < 0.13 {

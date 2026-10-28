@@ -11,6 +11,7 @@ pub fn account_plan_name(plan : AccountPlan) -> String {
 pub fn account_kind_name(kind : AccountKind) -> String {
   match kind {
     VisitorAccount => "visitor"
+    SignedInAccount => "member"
     PaidUserAccount => "paid-user"
     EnterpriseAccount => "enterprise"
     AdminAccount => "admin"
@@ -43,6 +44,7 @@ pub fn account_entitlement_name(entitlement : AccountEntitlement) -> String {
   match entitlement {
     ExplorePublicTown => "town.public.explore"
     DiscoverPublicServices => "town.public.discover"
+    ViewOwnCompute => "compute.own.view"
     UsePersonalAgent => "agent.personal.use"
     ManagePersonalWorkspace => "workspace.personal.manage"
     UseMarketplaceActions => "marketplace.action.use"

@@ -3,11 +3,11 @@
 /// from a stale snapshot, but the phase label always makes that explicit.
 priv struct OpsRuntimeMetrics {
   phase : String
-  agents : Int
-  tasks : Int
-  active : Int
-  completed : Int
-  blocked : Int
+  agents : Int32
+  tasks : Int32
+  active : Int32
+  completed : Int32
+  blocked : Int32
 }
 
 ///|
@@ -20,7 +20,7 @@ fn svg_escape_text(text : String) -> String {
 }
 
 ///|
-fn chart_max(values : Array[Int]) -> Int {
+fn chart_max(values : Array[Int32]) -> Int32 {
   let mut max = 1
   for value in values {
     if value > max {
@@ -31,7 +31,7 @@ fn chart_max(values : Array[Int]) -> Int {
 }
 
 ///|
-fn chart_sum(values : Array[Int]) -> Int {
+fn chart_sum(values : Array[Int32]) -> Int32 {
   let mut total = 0
   for value in values {
     total += value
@@ -47,7 +47,7 @@ fn svg_accessibility(title : String, description : String) -> String {
 
 ///|
 fn svg_trend_chart(
-  values : Array[Int],
+  values : Array[Int32],
   color : String,
   title : String,
   description : String,
@@ -81,7 +81,7 @@ fn svg_trend_chart(
 
 ///|
 fn svg_bar_chart(
-  values : Array[Int],
+  values : Array[Int32],
   labels : Array[String],
   color : String,
   title : String,
@@ -113,7 +113,7 @@ fn svg_bar_chart(
 }
 
 ///|
-fn svg_journey_chart(stages : Array[(String, Int)]) -> String {
+fn svg_journey_chart(stages : Array[(String, Int32)]) -> String {
   let mut rows = ""
   for index, stage in stages {
     let (label, value) = stage
@@ -190,7 +190,7 @@ fn ops_runtime_report_fragment(model : Model) -> String {
 }
 
 ///|
-fn ops_report_line_for_day(model : Model, day : Int) -> String {
+fn ops_report_line_for_day(model : Model, day : Int32) -> String {
   let activity = analytics_event_count_on(model, day)
   let builds = analytics_count_on(model, day, "build_place")
   let sent = analytics_count_on(model, day, "phone_send")
@@ -567,7 +567,7 @@ fn render_ops_center(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
   if !model.ops_open {
     return @html.nothing
   }
-  let tab_button = fn(index : Int, label : String) -> @rabbita.Html {
+  let tab_button = fn(index : Int32, label : String) -> @rabbita.Html {
     button(
       class=if model.ops_tab == index {
         "ops-tab ops-tab-active"

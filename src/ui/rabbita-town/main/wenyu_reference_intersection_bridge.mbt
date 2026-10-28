@@ -74,7 +74,7 @@ extern "js" fn reference_intersection_preview_graph_ready() -> Bool =
   #| }
 
 ///|
-extern "js" fn reference_intersection_count() -> Int =
+extern "js" fn reference_intersection_count() -> Int32 =
   #| () => {
   #|   if (globalThis.__moontownEnergyValleyOsmBlockGraphValidated === true) {
   #|     return globalThis.__moontownEnergyValleyCartoonRoadGraph?.junctions
@@ -89,7 +89,7 @@ extern "js" fn reference_intersection_count() -> Int =
   #| }
 
 ///|
-extern "js" fn reference_intersection_x_millis(index : Int) -> Int =
+extern "js" fn reference_intersection_x_millis(index : Int32) -> Int32 =
   #| index => {
   #|   if (globalThis.__moontownEnergyValleyOsmBlockGraphValidated === true) {
   #|     return Math.round(globalThis.__moontownEnergyValleyCartoonRoadGraph
@@ -107,7 +107,7 @@ extern "js" fn reference_intersection_x_millis(index : Int) -> Int =
   #| }
 
 ///|
-extern "js" fn reference_intersection_y_millis(index : Int) -> Int =
+extern "js" fn reference_intersection_y_millis(index : Int32) -> Int32 =
   #| index => {
   #|   if (globalThis.__moontownEnergyValleyOsmBlockGraphValidated === true) {
   #|     return Math.round(globalThis.__moontownEnergyValleyCartoonRoadGraph
@@ -125,7 +125,7 @@ extern "js" fn reference_intersection_y_millis(index : Int) -> Int =
   #| }
 
 ///|
-extern "js" fn reference_intersection_kind(index : Int) -> String =
+extern "js" fn reference_intersection_kind(index : Int32) -> String =
   #| index => {
   #|   if (globalThis.__moontownEnergyValleyOsmBlockGraphValidated === true) {
   #|     const degree = globalThis.__moontownEnergyValleyCartoonRoadGraph
@@ -155,7 +155,7 @@ extern "js" fn reference_intersection_kind(index : Int) -> String =
   #| }
 
 ///|
-extern "js" fn reference_intersection_confidence(index : Int) -> String =
+extern "js" fn reference_intersection_confidence(index : Int32) -> String =
   #| index => {
   #|   if (globalThis.__moontownEnergyValleyOsmBlockGraphValidated === true) {
   #|     return globalThis.__moontownEnergyValleyCartoonRoadGraph
@@ -172,7 +172,7 @@ extern "js" fn reference_intersection_confidence(index : Int) -> String =
   #| }
 
 ///|
-extern "js" fn reference_intersection_high_count() -> Int =
+extern "js" fn reference_intersection_high_count() -> Int32 =
   #| () => globalThis.__moontownEnergyValleyOsmBlockGraphValidated === true
   #|   ? globalThis.__moontownEnergyValleyOsmBlockGraph?.metrics?.confidence
   #|       ?.high ?? 0
@@ -180,7 +180,7 @@ extern "js" fn reference_intersection_high_count() -> Int =
   #|       ?.semanticConfidence?.high ?? 0
 
 ///|
-extern "js" fn reference_intersection_medium_count() -> Int =
+extern "js" fn reference_intersection_medium_count() -> Int32 =
   #| () => globalThis.__moontownEnergyValleyOsmBlockGraphValidated === true
   #|   ? globalThis.__moontownEnergyValleyOsmBlockGraph?.metrics?.confidence
   #|       ?.medium ?? 0
@@ -188,7 +188,7 @@ extern "js" fn reference_intersection_medium_count() -> Int =
   #|       ?.semanticConfidence?.medium ?? 0
 
 ///|
-extern "js" fn reference_intersection_review_count() -> Int =
+extern "js" fn reference_intersection_review_count() -> Int32 =
   #| () => {
   #|   if (globalThis.__moontownEnergyValleyOsmBlockGraphValidated === true) {
   #|     return globalThis.__moontownEnergyValleyOsmBlockGraph?.metrics
@@ -203,7 +203,7 @@ extern "js" fn reference_intersection_review_count() -> Int =
   #| }
 
 ///|
-extern "js" fn reference_intersection_source_branch_count() -> Int =
+extern "js" fn reference_intersection_source_branch_count() -> Int32 =
   #| () => globalThis.__moontownEnergyValleyOsmBlockGraphValidated === true
   #|   ? globalThis.__moontownEnergyValleyOsmBlockGraph?.metrics?.routingNodes ?? 0
   #|   : globalThis.__wenyuReferenceIntersectionPreviewGraphValidated
@@ -212,21 +212,21 @@ extern "js" fn reference_intersection_source_branch_count() -> Int =
   #|     : 0
 
 ///|
-extern "js" fn reference_intersection_preview_node_count() -> Int =
+extern "js" fn reference_intersection_preview_node_count() -> Int32 =
   #| () => globalThis.__moontownEnergyValleyOsmBlockGraphValidated === true
   #|   ? globalThis.__moontownEnergyValleyCartoonRoadGraph?.metrics?.junctions ?? 0
   #|   : globalThis.__wenyuReferenceIntersections?.previewGraph?.metrics
   #|       ?.totalGraphNodes ?? 0
 
 ///|
-extern "js" fn reference_intersection_preview_edge_count() -> Int =
+extern "js" fn reference_intersection_preview_edge_count() -> Int32 =
   #| () => globalThis.__moontownEnergyValleyOsmBlockGraphValidated === true
   #|   ? globalThis.__moontownEnergyValleyCartoonRoadGraph?.metrics?.edges ?? 0
   #|   : globalThis.__wenyuReferenceIntersections?.previewGraph?.metrics
   #|       ?.edges ?? 0
 
 ///|
-extern "js" fn reference_intersection_preview_bridge_count() -> Int =
+extern "js" fn reference_intersection_preview_bridge_count() -> Int32 =
   #| () => globalThis.__moontownEnergyValleyOsmBlockGraphValidated === true
   #|   ? globalThis.__moontownEnergyValleyCartoonRoadGraph?.metrics?.bridges ?? 0
   #|   : globalThis.__wenyuReferenceIntersections?.previewGraph?.metrics
@@ -237,8 +237,8 @@ extern "js" fn reference_intersection_preview_bridge_count() -> Int =
 /// The checked-in graph remains immutable; this cached set only answers
 /// whether a candidate footprint or one-tile apron touches its reviewed path.
 extern "js" fn reference_intersection_preview_graph_cell_at(
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Bool =
   #| (x, y) => {
   #|   const osmReady =

@@ -59,7 +59,7 @@ fn energy_valley_block_test_clear_compiler_caches() -> Unit {
 
 ///|
 fn energy_valley_block_test_tiles(
-  seed : Int,
+  seed : Int32,
 ) -> Array[Array[ExactEnergyValleyTile]] {
   let tiles : Array[Array[ExactEnergyValleyTile]] = []
   for y in 0..<exact_energy_valley_rows() {
@@ -74,7 +74,7 @@ fn energy_valley_block_test_tiles(
 }
 
 ///|
-fn energy_valley_block_test_layout(seed : Int) -> EnergyValleyRoadBlockLayout {
+fn energy_valley_block_test_layout(seed : Int32) -> EnergyValleyRoadBlockLayout {
   let tiles = energy_valley_block_test_tiles(seed)
   energy_valley_road_block_layout(
     seed,
@@ -98,7 +98,7 @@ test "Wenyu buildings occupy one dry road block with shared spacing" {
 
   let baseline_tiles = energy_valley_block_test_tiles(seed)
   let world = exact_energy_valley_generate_default()
-  let ambient_blocks : Map[Int, Bool] = Map([])
+  let ambient_blocks : Map[Int32, Bool] = Map([])
   let placed_footprints : Array[EnergyValleyFootprint] = []
   let mut ambient_count = 0
   for y in 0..<world.rows {

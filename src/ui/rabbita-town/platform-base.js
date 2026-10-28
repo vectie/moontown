@@ -12,8 +12,10 @@
   // MoonTown's synchronous storage API to the authenticated workspace before
   // any account token, avatar or town event is read by the application.
   const scope = globalThis.__MOONTOWN_ACCOUNT_SCOPE
-  if (base === '/moontown') {
-    if (typeof scope !== 'string' || !/^webide-[a-f0-9]{64}$/.test(scope)) {
+  if (base === '/moontown' || base === '/moontown/workspace') {
+    const publicScope = globalThis.__MOONTOWN_PUBLIC_PLATFORM === true &&
+      (scope === 'public' || /^account-[a-f0-9]{64}$/.test(scope))
+    if (typeof scope !== 'string' || (!publicScope && !/^webide-[a-f0-9]{64}$/.test(scope))) {
       globalThis.__MOONTOWN_SCOPE_READY = false
       return
     }
@@ -54,6 +56,13 @@
   }
 
   const otherProducts = ['/mana', '/user', '/docs', '/moondesk', '/comfyui', '/moonrobo']
+  // Neighborhood publications and participation share one service even when
+  // opened from a personal workspace. All other workspace traffic stays scoped.
+  const sharedNeighborhoodPaths = new Set([
+    '/moontown/api/neighborhood/public',
+    '/moontown/api/neighborhood/mine',
+    '/moontown/api/neighborhood/actions',
+  ])
   const rewrite = input => {
     const url = new URL(input, location.href)
     const sameOrigin = url.host === location.host && (
@@ -62,6 +71,7 @@
       (location.protocol === 'http:' && url.protocol === 'ws:')
     )
     if (!sameOrigin || !url.pathname.startsWith('/')) return input
+    if (sharedNeighborhoodPaths.has(url.pathname)) return input
     if (url.pathname === base || url.pathname.startsWith(`${base}/`)) return input
     if (otherProducts.some(prefix => url.pathname === prefix || url.pathname.startsWith(`${prefix}/`))) return input
     url.pathname = `${base}${url.pathname}`

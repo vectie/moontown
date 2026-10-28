@@ -45,8 +45,8 @@ fn ecosystem_compiler_append_rejection(
 ///|
 fn ecosystem_compiler_footprint_inside_bounds(
   footprint : EcosystemFootprint,
-  cols : Int,
-  rows : Int,
+  cols : Int32,
+  rows : Int32,
 ) -> Bool {
   footprint.x >= 0 &&
   footprint.y >= 0 &&
@@ -68,7 +68,7 @@ fn ecosystem_compiler_place_provenance(place : EcosystemPlace) -> String {
 ///|
 fn ecosystem_compiler_rejected_placements(
   model : Model,
-  seed : Int,
+  seed : Int32,
 ) -> Array[EcosystemPlacementRejection] {
   let snapshot = ecosystem_cached_world_snapshot(model, seed)
   let exact_world = golden_valley_world(seed)

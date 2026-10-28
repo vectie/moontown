@@ -65,8 +65,8 @@ fn golden_valley_accepted_canvas_frame() -> GoldenValleyAcceptedCanvasFrame? {
 ///|
 fn town_snapshot_canvas_building_at_tile(
   snapshot : @energy_valley_contract.TownSnapshot,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> TownCanvasBuilding? {
   let point = @energy_valley_contract.world_point(
     x.to_double() + 0.5,
@@ -84,8 +84,8 @@ fn town_snapshot_canvas_building_at_tile(
 
 ///|
 fn golden_valley_canvas_frame_building_at_tile(
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> TownCanvasBuilding? {
   match golden_valley_canvas_frame() {
     Some(snapshot) => town_snapshot_canvas_building_at_tile(snapshot, x, y)

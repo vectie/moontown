@@ -12,7 +12,7 @@ fn material_watch_snapshot_fixture() -> MaterialWatchSnapshot {
 
 ///|
 fn material_watch_record_fixture(
-  tick : Int,
+  tick : Int32,
   decision : String,
   detail : String,
 ) -> WatcherRunRecordSnapshot {

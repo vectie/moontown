@@ -352,7 +352,7 @@ test('the single map view replaces stale presentation after graph validation', a
   assert.match(page, /render_intersection_reference_legend\(\)/)
   assert.match(
     page,
-    /if model\.energy_intro_open \|\| intersection_preview \{\s+@html\.nothing\s+\} else \{\s+render_policy_hall_map_entry/,
+    /if onboarding && !model\.energy_intro_open \{\s+render_policy_hall_map_entry\(dispatch, model\)\s+\} else \{\s+@html\.nothing/,
   )
 
   assert.ok(previewBranch >= 0 && previewBranch < normalLayers)

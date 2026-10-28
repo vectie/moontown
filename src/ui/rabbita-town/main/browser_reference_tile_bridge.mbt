@@ -1,5 +1,5 @@
 ///|
-extern "js" fn reference_tile_code_at(grid_x : Int, grid_y : Int) -> String =
+extern "js" fn reference_tile_code_at(grid_x : Int32, grid_y : Int32) -> String =
   #| (gridX, gridY) => globalThis.__wenyuReferenceLabels?.rows?.[gridY]?.[gridX] || ""
 
 ///|
@@ -8,8 +8,8 @@ extern "js" fn reference_tile_snapshot_ready() -> Bool =
 
 ///|
 extern "js" fn reference_road_graph_code_at(
-  grid_x : Int,
-  grid_y : Int,
+  grid_x : Int32,
+  grid_y : Int32,
 ) -> String =
   #| (gridX, gridY) => globalThis.__wenyuReferenceRoadGraph?.rows?.[gridY]?.[gridX] || ""
 
@@ -38,8 +38,8 @@ extern "js" fn reference_road_presentation_snapshot_ready() -> Bool =
 
 ///|
 extern "js" fn reference_road_presentation_code_at(
-  grid_x : Int,
-  grid_y : Int,
+  grid_x : Int32,
+  grid_y : Int32,
 ) -> String =
   #| (gridX, gridY) => globalThis.__wenyuReferenceRoadGraph
   #|   ?.presentationRows?.[gridY]?.[gridX] || ""
@@ -74,69 +74,69 @@ extern "js" fn reference_line17_snapshot_ready() -> Bool =
   #| }
 
 ///|
-extern "js" fn reference_line17_path_count() -> Int =
+extern "js" fn reference_line17_path_count() -> Int32 =
   #| () => globalThis.__wenyuReferenceRoadGraph?.line17?.path?.length ?? 0
 
 ///|
-extern "js" fn reference_line17_path_x_millis(index : Int) -> Int =
+extern "js" fn reference_line17_path_x_millis(index : Int32) -> Int32 =
   #| index => globalThis.__wenyuReferenceRoadGraph?.line17?.path?.[index]?.[0] ?? 0
 
 ///|
-extern "js" fn reference_line17_path_y_millis(index : Int) -> Int =
+extern "js" fn reference_line17_path_y_millis(index : Int32) -> Int32 =
   #| index => globalThis.__wenyuReferenceRoadGraph?.line17?.path?.[index]?.[1] ?? 0
 
 ///|
-extern "js" fn reference_line17_station_count() -> Int =
+extern "js" fn reference_line17_station_count() -> Int32 =
   #| () => globalThis.__wenyuReferenceRoadGraph?.line17?.stations?.length ?? 0
 
 ///|
-extern "js" fn reference_line17_station_name(index : Int) -> String =
+extern "js" fn reference_line17_station_name(index : Int32) -> String =
   #| index => globalThis.__wenyuReferenceRoadGraph?.line17?.stations?.[index]
   #|   ?.name || ""
 
 ///|
-extern "js" fn reference_line17_station_x_millis(index : Int) -> Int =
+extern "js" fn reference_line17_station_x_millis(index : Int32) -> Int32 =
   #| index => globalThis.__wenyuReferenceRoadGraph?.line17?.stations?.[index]
   #|   ?.xMillis ?? 0
 
 ///|
-extern "js" fn reference_line17_station_y_millis(index : Int) -> Int =
+extern "js" fn reference_line17_station_y_millis(index : Int32) -> Int32 =
   #| index => globalThis.__wenyuReferenceRoadGraph?.line17?.stations?.[index]
   #|   ?.yMillis ?? 0
 
 ///|
-extern "js" fn reference_line17_exit_count(station_index : Int) -> Int =
+extern "js" fn reference_line17_exit_count(station_index : Int32) -> Int32 =
   #| stationIndex => globalThis.__wenyuReferenceRoadGraph?.line17
   #|   ?.stations?.[stationIndex]?.exits?.length ?? 0
 
 ///|
 extern "js" fn reference_line17_exit_label(
-  station_index : Int,
-  exit_index : Int,
+  station_index : Int32,
+  exit_index : Int32,
 ) -> String =
   #| (stationIndex, exitIndex) => globalThis.__wenyuReferenceRoadGraph?.line17
   #|   ?.stations?.[stationIndex]?.exits?.[exitIndex]?.label || ""
 
 ///|
 extern "js" fn reference_line17_exit_destination(
-  station_index : Int,
-  exit_index : Int,
+  station_index : Int32,
+  exit_index : Int32,
 ) -> String =
   #| (stationIndex, exitIndex) => globalThis.__wenyuReferenceRoadGraph?.line17
   #|   ?.stations?.[stationIndex]?.exits?.[exitIndex]?.destination || ""
 
 ///|
 extern "js" fn reference_line17_exit_x_millis(
-  station_index : Int,
-  exit_index : Int,
-) -> Int =
+  station_index : Int32,
+  exit_index : Int32,
+) -> Int32 =
   #| (stationIndex, exitIndex) => globalThis.__wenyuReferenceRoadGraph?.line17
   #|   ?.stations?.[stationIndex]?.exits?.[exitIndex]?.xMillis ?? 0
 
 ///|
 extern "js" fn reference_line17_exit_y_millis(
-  station_index : Int,
-  exit_index : Int,
-) -> Int =
+  station_index : Int32,
+  exit_index : Int32,
+) -> Int32 =
   #| (stationIndex, exitIndex) => globalThis.__wenyuReferenceRoadGraph?.line17
   #|   ?.stations?.[stationIndex]?.exits?.[exitIndex]?.yMillis ?? 0

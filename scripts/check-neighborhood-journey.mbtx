@@ -1,0 +1,1281 @@
+///|
+/// Isolated, synthetic HTTP acceptance. Never points at a deployed server.
+/// Builds the real adapters, starts loopback children with no inherited env,
+/// and leaves its temporary evidence directory for inspection after exit.
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/async/http",
+  "moonbitlang/async/io",
+  "moonbitlang/async/process",
+  "moonbitlang/async/shell",
+  "moonbitlang/async/socket",
+  "moonbitlang/core/env",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/json",
+}
+
+///|
+struct Audit {
+  count : Ref[Int32]
+}
+
+///|
+fn Audit::check(self : Audit, name : String, condition : Bool) -> Unit raise {
+  guard condition else { fail("FAIL: " + name) }
+  self.count.val += 1
+  println("PASS \{self.count.val}: " + name)
+}
+
+///|
+fn field(value : Json, key : String) -> Json {
+  match value {
+    Object(fields) => fields.get(key).unwrap_or(Json::null())
+    _ => Json::null()
+  }
+}
+
+///|
+fn rows(value : Json, key : String) -> Array[Json] {
+  match field(value, key) {
+    Array(items) => items
+    _ => []
+  }
+}
+
+///|
+fn text(value : Json, key : String) -> String {
+  match field(value, key) {
+    String(value) => value
+    _ => ""
+  }
+}
+
+///|
+fn item(value : Json, key : String, id : String) -> Json {
+  rows(value, key)
+  .iter()
+  .find_first(row => text(row, "id") == id)
+  .unwrap_or(Json::null())
+}
+
+///|
+fn mine(value : Json) -> Json {
+  field(field(value, "payload"), "mine")
+}
+
+///|
+fn registration(value : Json, event_id : String) -> Json {
+  rows(mine(value), "registrations")
+  .iter()
+  .find_first(row => {
+    text(row, "event_id") == event_id && text(row, "state") != "cancelled"
+  })
+  .unwrap_or(Json::null())
+}
+
+///|
+async fn fixture_reply(
+  conn : @http.ServerConnection,
+  code : Int32,
+  value : Json,
+) -> Unit {
+  conn.send_response(code, if code == 200 { "OK" } else { "Unauthorized" }, extra_headers={
+    "Content-Type": "application/json",
+    "Cache-Control": "no-store",
+  })
+  conn.write_string(value.stringify())
+  conn.end_response()
+}
+
+///|
+async fn identity_fixture(
+  request : @http.Request,
+  body : &@io.Reader,
+  conn : @http.ServerConnection,
+  expired : Ref[Bool],
+  gateway_origin : Ref[String],
+) -> Unit {
+  if request.path.has_prefix("/moontown/") && !gateway_origin.val.is_empty() {
+    // An isolated ingress: /user and /moontown share the configured origin,
+    // exactly as the deployed path router does. Only the actual child gateway
+    // handles business data; this fixture does not implement its authorization.
+    let client = @http.Client(gateway_origin.val)
+    defer client.close()
+    let headers : @http.Headers = { "Connection": "close" }
+    for key in ["Cookie", "Origin", "Content-Type", "Sec-Fetch-Site"] {
+      if request.headers.get(@http.CaseInsensitiveString(key)) is Some(value) {
+        headers[@http.CaseInsensitiveString(key)] = value
+      }
+    }
+    let response = if request.meth is Post {
+      client.post(request.path, body.read_all(), extra_headers=headers)
+    } else {
+      client.get(request.path, extra_headers=headers)
+    }
+    conn.send_response(
+      response.code,
+      "Fixture ingress",
+      extra_headers=response.headers,
+    )
+    conn.write(client.read_all())
+    conn.end_response()
+    return
+  }
+  let accounts = ["a", "b", "organizer", "other-organizer"]
+  if request.path.has_prefix("/login/") || request.path == "/logout" {
+    let name = request.path
+      .strip_prefix("/login/")
+      .map(StringView::to_owned)
+      .unwrap_or("")
+    guard name.is_empty() || accounts.contains(name) else {
+      return fixture_reply(conn, 401, {})
+    }
+    conn.send_response(
+      303,
+      "See Other",
+      cookies=[
+        @http.Cookie(
+          "lunanexa_http_enterprise_oidc_8443",
+          if name.is_empty() {
+            ""
+          } else {
+            "fixture-" + name
+          },
+          path="/",
+          http_only=true,
+          extensions=["SameSite=Lax"],
+        ),
+      ],
+      extra_headers={
+        "Location": "http://127.0.0.1:17868/?community=1&view=town",
+        "Cache-Control": "no-store",
+      },
+    )
+    conn.end_response()
+    return
+  }
+  let cookie = request.headers.get("cookie").unwrap_or("")
+  let mut name = ""
+  for part in cookie.split(";") {
+    if part.trim().strip_prefix("lunanexa_http_enterprise_oidc_8443=fixture-")
+      is Some(value) {
+      name = value.to_owned()
+    }
+  }
+  if !accounts.contains(name) || (name == "a" && expired.val) {
+    return fixture_reply(conn, 401, { "error": "synthetic session required" })
+  }
+  match request.path {
+    "/user/auth/session" =>
+      fixture_reply(conn, 200, {
+        "session_token": "lnxs_neighborhood_fixture_" + name,
+      })
+    "/user/v1/auth/self" => {
+      if request.headers.get("authorization") !=
+        Some("Bearer lnxs_neighborhood_fixture_" + name) {
+        return fixture_reply(conn, 401, {})
+      }
+      fixture_reply(conn, 200, {
+        "account_id": name,
+        "subject_ref": "synthetic:" + name,
+        "identity_issuer": "neighborhood-loopback-acceptance",
+        "display_name": "Synthetic " + name,
+        "state": "Active",
+        "roles": if name == "organizer" || name == "other-organizer" {
+          ["PlatformOperator"]
+        } else {
+          ["EnterpriseUser"]
+        },
+      })
+    }
+    "/user/v1/machine-access/self" => {
+      if request.headers.get("authorization") !=
+        Some("Bearer lnxs_neighborhood_fixture_" + name) {
+        return fixture_reply(conn, 401, {})
+      }
+      // Authenticated with no assigned machines, not an expired account. This
+      // keeps the real runtime identity fence coherent during browser startup.
+      fixture_reply(conn, 200, Json::array([]))
+    }
+    "/user/v1/portal/self/organizations" => {
+      if request.headers.get("authorization") !=
+        Some("Bearer lnxs_neighborhood_fixture_" + name) {
+        return fixture_reply(conn, 401, {})
+      }
+      fixture_reply(conn, 200, { "organizations": [] })
+    }
+    _ => fixture_reply(conn, 401, { "error": "fixture route not allowed" })
+  }
+}
+
+///|
+struct Api {
+  origin : String
+  prefix : String
+  audit : Audit
+  actors : Map[String, String]
+  content_revisions : Map[String, Json]
+}
+
+///|
+async fn Api::request(
+  self : Api,
+  name : String,
+  actor : String,
+  route : String,
+  expected : Int32,
+  data? : Json,
+  origin? : String,
+  content_type~ : String = "application/json",
+  cross_site~ : Bool = false,
+) -> Json {
+  let client = @http.Client(self.origin)
+  defer client.close()
+  let headers : @http.Headers = { "Connection": "close" }
+  if !actor.is_empty() {
+    headers["Cookie"] = "lunanexa_http_enterprise_oidc_8443=fixture-" + actor
+  }
+  if cross_site {
+    headers["Sec-Fetch-Site"] = "cross-site"
+  }
+  let response = if data is Some(data) {
+    headers["Content-Type"] = content_type
+    let encoded = @utf8.encode(data.stringify())
+    headers["Content-Length"] = encoded.length().to_string()
+    let write_origin = origin.unwrap_or(self.origin)
+    if !write_origin.is_empty() {
+      headers["Origin"] = write_origin
+    }
+    client.post(
+      self.prefix + "/api/neighborhood/" + route,
+      encoded,
+      extra_headers=headers,
+    )
+  } else {
+    client.get(
+      self.prefix + "/api/neighborhood/" + route,
+      extra_headers=headers,
+    )
+  }
+  let body = client.read_all().text()
+  if response.code != expected {
+    eprintln("Unexpected synthetic response \{response.code}: " + body)
+  }
+  self.audit.check(name + " [HTTP \{expected}]", response.code == expected)
+  self.audit.check(
+    name + " is not cacheable",
+    response.headers.get("cache-control") == Some("no-store"),
+  )
+  let parsed = @json.parse(body)
+  if expected == 200 {
+    self.audit.check(
+      name + " has canonical envelope",
+      parsed
+      is {
+        "ok": True,
+        "payload": { "schema": "moontown.neighborhood.v1", .. },
+        ..
+      },
+    )
+    let actor_id = text(mine(parsed), "actor_id")
+    if !actor.is_empty() && !actor_id.is_empty() {
+      self.actors[actor] = actor_id
+    }
+    for kind in ["stories", "events"] {
+      for row in rows(mine(parsed), kind) {
+        self.content_revisions[text(row, "id")] = field(row, "content_revision")
+      }
+    }
+  }
+  parsed
+}
+
+///|
+async fn Api::action(
+  self : Api,
+  name : String,
+  actor : String,
+  action : String,
+  payload : Json,
+  expected~ : Int32 = 200,
+) -> Json {
+  if !actor.is_empty() && !self.actors.contains(actor) {
+    ignore(
+      self.request(
+        "resolve synthetic " + actor + " identity",
+        actor,
+        "mine",
+        200,
+      ),
+    )
+  }
+  if (action == "publish-story" || action == "publish-event") &&
+    payload is Object(fields) &&
+    !fields.contains("expected_content_revision") {
+    let id = text(
+      payload,
+      if action == "publish-story" {
+        "story_id"
+      } else {
+        "event_id"
+      },
+    )
+    fields["expected_content_revision"] = self.content_revisions
+      .get(id)
+      .unwrap_or(Json::null())
+  }
+  self.request(name, actor, "actions", expected, data={
+    "action": action,
+    "payload": payload,
+    "expected_actor_id": self.actors.get(actor).unwrap_or(""),
+  })
+}
+
+///|
+async fn available_address() -> String {
+  let reservation = @http.Server(@socket.Addr::parse("127.0.0.1:0"))
+  let address = reservation.addr.to_string()
+  reservation.close()
+  address
+}
+
+///|
+async fn ready(api : Api) -> Unit {
+  for _attempt in 0..<100 {
+    let ok = @async.with_timeout(500, () => {
+      let (response, _) = @http.get(
+        api.origin + api.prefix + "/api/neighborhood/public",
+      )
+      response.code == 200
+    }) catch {
+      _ => false
+    }
+    if ok {
+      return
+    }
+    @async.sleep(100)
+  }
+  fail("isolated child did not become ready at " + api.origin)
+}
+
+///|
+/// No sample is sent outside the temporary local service. Labels deliberately
+/// contain sentinel text so the public projection can be checked for leaks.
+async fn journey(api : Api, expired : Ref[Bool]) -> Unit {
+  let audit = api.audit
+  let empty = api.request("anonymous empty public", "", "public", 200)
+  audit.check(
+    "no seeded stories or events",
+    rows(field(empty, "payload"), "stories").is_empty() &&
+    rows(field(empty, "payload"), "events").is_empty(),
+  )
+  audit.check(
+    "anonymous has no private projection",
+    field(field(empty, "payload"), "mine") is Null,
+  )
+  ignore(api.request("anonymous mine denied", "", "mine", 401))
+  ignore(
+    api.action(
+      "anonymous write denied",
+      "",
+      "save-story",
+      { "title": "no", "body": "no" },
+      expected=401,
+    ),
+  )
+  let first_a = api.request("account A private view", "a", "mine", 200)
+  let first_b = api.request("account B private view", "b", "mine", 200)
+  audit.check(
+    "A and B resolve distinct server identities",
+    !text(mine(first_a), "actor_id").is_empty() &&
+    text(mine(first_a), "actor_id") != text(mine(first_b), "actor_id"),
+  )
+  audit.check(
+    "ordinary user cannot host",
+    field(mine(first_a), "can_host") is False,
+  )
+  let cookie = "lunanexa_http_enterprise_oidc_8443=fixture-a"
+  let (account_response, account_body) = @http.get(
+    api.origin + api.prefix + "/account/self.json",
+    headers={ "Cookie": cookie },
+  )
+  let (compute_response, compute_body) = @http.get(
+    api.origin + api.prefix + "/secret-compute-room.json",
+    headers={ "Cookie": cookie },
+  )
+  let account = field(@json.parse(account_body.text()), "account")
+  let compute_scope = field(@json.parse(compute_body.text()), "scope")
+  audit.check(
+    "account and compute reads succeed",
+    account_response.code == 200 && compute_response.code == 200,
+  )
+  audit.check(
+    "empty compute inventory preserves verified browser identity",
+    text(compute_scope, "state") == "bound" &&
+    text(field(compute_scope, "account"), "user_id") == text(account, "user_id") &&
+    text(account, "user_id") == text(mine(first_a), "actor_id"),
+  )
+  let host = api.request("organizer private view", "organizer", "mine", 200)
+  audit.check(
+    "platform operator can host",
+    field(mine(host), "can_host") is True,
+  )
+  ignore(
+    api.request("missing actor fence denied", "a", "actions", 409, data={
+      "action": "save-story",
+      "payload": { "title": "no fence", "body": "no fence" },
+    }),
+  )
+  ignore(
+    api.request(
+      "stale A tab cannot write using B cookie",
+      "b",
+      "actions",
+      409,
+      data={
+        "action": "save-story",
+        "payload": { "title": "STALE_TAB_LEAK", "body": "STALE_TAB_LEAK" },
+        "expected_actor_id": text(mine(first_a), "actor_id"),
+      },
+    ),
+  )
+  let b_after_switch = api.request(
+    "B stays clean after stale A write", "b", "mine", 200,
+  )
+  audit.check(
+    "account switch fence writes no B story",
+    rows(mine(b_after_switch), "stories").is_empty(),
+  )
+  let attack : Json = {
+    "action": "save-story",
+    "payload": { "title": "unsafe", "body": "unsafe" },
+  }
+  ignore(
+    api.request(
+      "cross-origin write denied",
+      "a",
+      "actions",
+      403,
+      data=attack,
+      origin="https://not-this-origin.invalid",
+    ),
+  )
+  ignore(
+    api.request(
+      "missing Origin denied",
+      "a",
+      "actions",
+      403,
+      data=attack,
+      origin="",
+    ),
+  )
+  ignore(
+    api.request(
+      "cross-site private read denied",
+      "a",
+      "mine",
+      403,
+      cross_site=true,
+    ),
+  )
+  ignore(
+    api.request(
+      "non-JSON write denied",
+      "a",
+      "actions",
+      415,
+      data=attack,
+      content_type="text/plain",
+    ),
+  )
+  ignore(api.request("action GET denied", "a", "actions", 405))
+  ignore(
+    api.action("unknown action denied", "a", "run-machine", {}, expected=400),
+  )
+
+  let draft = api.action("A saves private story", "a", "save-story", {
+    "id": "acceptance-story",
+    "title": "Synthetic story",
+    "body": "STORY_DRAFT_ONLY",
+    "actor_id": "forged-owner",
+    "can_host": true,
+  })
+  audit.check(
+    "body actor fields do not change ownership",
+    rows(mine(draft), "stories").length() == 1 &&
+    text(mine(draft), "actor_id") == text(mine(first_a), "actor_id"),
+  )
+  let public_draft = api.request("draft not public", "", "public", 200)
+  let b_draft = api.request("B cannot read A draft", "b", "mine", 200)
+  audit.check(
+    "private story not leaked",
+    !public_draft.stringify().contains("STORY_DRAFT_ONLY") &&
+    !b_draft.stringify().contains("STORY_DRAFT_ONLY"),
+  )
+  ignore(
+    api.action(
+      "B cannot edit A story",
+      "b",
+      "save-story",
+      { "id": "acceptance-story", "title": "attack", "body": "attack" },
+      expected=403,
+    ),
+  )
+  ignore(
+    api.action(
+      "B cannot publish A story",
+      "b",
+      "publish-story",
+      { "story_id": "acceptance-story", "consent": true },
+      expected=403,
+    ),
+  )
+  ignore(
+    api.action(
+      "nonowner organizer cannot publish A story",
+      "other-organizer",
+      "publish-story",
+      { "story_id": "acceptance-story", "consent": true },
+      expected=403,
+    ),
+  )
+  ignore(
+    api.action(
+      "publish requires consent",
+      "a",
+      "publish-story",
+      { "story_id": "acceptance-story" },
+      expected=400,
+    ),
+  )
+  let old_story_revision = field(
+    item(mine(draft), "stories", "acceptance-story"),
+    "content_revision",
+  )
+  ignore(
+    api.action("same author edits story in another tab", "a", "save-story", {
+      "id": "acceptance-story",
+      "title": "Revised synthetic story",
+      "body": "STORY_DRAFT_ONLY",
+    }),
+  )
+  ignore(
+    api.action(
+      "stale story approval cannot publish revised content",
+      "a",
+      "publish-story",
+      {
+        "story_id": "acceptance-story",
+        "consent": true,
+        "expected_content_revision": old_story_revision,
+      },
+      expected=409,
+    ),
+  )
+  let stale_story = api.request(
+    "stale story approval leaves public empty", "", "public", 200,
+  )
+  audit.check(
+    "stale confirmation publishes no story",
+    rows(field(stale_story, "payload"), "stories").is_empty(),
+  )
+  ignore(
+    api.action("A publishes own story", "a", "publish-story", {
+      "story_id": "acceptance-story",
+      "consent": true,
+    }),
+  )
+  let published = api.request(
+    "anonymous sees published story", "", "public", 200,
+  )
+  audit.check(
+    "story publication is visible",
+    text(
+      item(field(published, "payload"), "stories", "acceptance-story"),
+      "body",
+    ) ==
+    "STORY_DRAFT_ONLY",
+  )
+  ignore(
+    api.action(
+      "B cannot withdraw A story",
+      "b",
+      "withdraw-story",
+      { "story_id": "acceptance-story" },
+      expected=403,
+    ),
+  )
+  ignore(
+    api.action("A withdraws story", "a", "withdraw-story", {
+      "story_id": "acceptance-story",
+    }),
+  )
+  let withdrawn = api.request("withdrawn story not public", "", "public", 200)
+  audit.check(
+    "withdrawal removes public story",
+    rows(field(withdrawn, "payload"), "stories").is_empty(),
+  )
+
+  let starts = @async.now() + 10000L
+  let event : Json = {
+    "id": "acceptance-event",
+    "title": "Synthetic event",
+    "description": "Temporary local acceptance only",
+    "location": "LOOPBACK ONLY",
+    "starts_ms": Json(starts.to_double()),
+    "ends_ms": Json((starts + 60000L).to_double()),
+    "capacity": 1,
+    "can_host": true,
+    "actor_id": "organizer",
+  }
+  ignore(
+    api.action(
+      "ordinary A cannot forge host role",
+      "a",
+      "save-event",
+      event,
+      expected=403,
+    ),
+  )
+  let saved_event = api.action(
+    "organizer saves event", "organizer", "save-event", event,
+  )
+  let old_event_revision = field(
+    item(mine(saved_event), "events", "acceptance-event"),
+    "content_revision",
+  )
+  ignore(
+    api.action(
+      "organizer revises event in another tab", "organizer", "save-event", event,
+    ),
+  )
+  ignore(
+    api.action(
+      "stale event approval cannot publish revised arrangement",
+      "organizer",
+      "publish-event",
+      {
+        "event_id": "acceptance-event",
+        "consent": true,
+        "expected_content_revision": old_event_revision,
+      },
+      expected=409,
+    ),
+  )
+  let stale_event = api.request(
+    "stale event approval leaves public empty", "", "public", 200,
+  )
+  audit.check(
+    "stale confirmation publishes no event",
+    rows(field(stale_event, "payload"), "events").is_empty(),
+  )
+  ignore(
+    api.action(
+      "nonowner organizer cannot publish event",
+      "other-organizer",
+      "publish-event",
+      { "event_id": "acceptance-event", "consent": true },
+      expected=403,
+    ),
+  )
+  ignore(
+    api.action(
+      "event publish requires consent",
+      "organizer",
+      "publish-event",
+      { "event_id": "acceptance-event" },
+      expected=400,
+    ),
+  )
+  ignore(
+    api.action("organizer publishes event", "organizer", "publish-event", {
+      "event_id": "acceptance-event",
+      "consent": true,
+    }),
+  )
+  let a_signup = api.action("A registers own identity", "a", "register", {
+    "event_id": "acceptance-event",
+    "display_name": "PRIVATE_A_NAME",
+    "contact": "PRIVATE_A_CONTACT",
+    "participant_id": "forged-other",
+  })
+  let a_id = text(registration(a_signup, "acceptance-event"), "id")
+  audit.check(
+    "A receives confirmed seat under server identity",
+    text(registration(a_signup, "acceptance-event"), "state") == "confirmed" &&
+    text(registration(a_signup, "acceptance-event"), "participant_id") ==
+    text(mine(first_a), "actor_id"),
+  )
+  ignore(
+    api.action(
+      "duplicate registration conflicts",
+      "a",
+      "register",
+      { "event_id": "acceptance-event", "display_name": "duplicate" },
+      expected=409,
+    ),
+  )
+  let b_signup = api.action("B joins capacity waitlist", "b", "register", {
+    "event_id": "acceptance-event",
+    "display_name": "PRIVATE_B_NAME",
+    "contact": "PRIVATE_B_CONTACT",
+  })
+  let b_id = text(registration(b_signup, "acceptance-event"), "id")
+  audit.check(
+    "B receives waitlisted seat",
+    text(registration(b_signup, "acceptance-event"), "state") == "waitlisted",
+  )
+  ignore(
+    api.action(
+      "B cannot cancel A registration",
+      "b",
+      "cancel-registration",
+      { "registration_id": a_id },
+      expected=403,
+    ),
+  )
+  ignore(
+    api.action(
+      "participant cannot self-check-in",
+      "a",
+      "check-in",
+      { "registration_id": a_id },
+      expected=403,
+    ),
+  )
+  ignore(
+    api.action(
+      "other organizer cannot check-in",
+      "other-organizer",
+      "check-in",
+      { "registration_id": a_id },
+      expected=403,
+    ),
+  )
+  ignore(
+    api.action(
+      "owner cannot check-in before start",
+      "organizer",
+      "check-in",
+      { "registration_id": a_id },
+      expected=409,
+    ),
+  )
+  ignore(
+    api.action(
+      "owner cannot end before start",
+      "organizer",
+      "end-event",
+      { "event_id": "acceptance-event" },
+      expected=409,
+    ),
+  )
+  ignore(
+    api.action("A releases own seat", "a", "cancel-registration", {
+      "registration_id": a_id,
+    }),
+  )
+  let promoted = api.request("B refresh sees promotion", "b", "mine", 200)
+  audit.check(
+    "FIFO waitlist promotion persisted",
+    text(registration(promoted, "acceptance-event"), "state") == "confirmed",
+  )
+  let outsider = api.request(
+    "nonowner organizer has no roster", "other-organizer", "mine", 200,
+  )
+  audit.check(
+    "other organizer cannot read participant PII",
+    !outsider.stringify().contains("PRIVATE_A_") &&
+    !outsider.stringify().contains("PRIVATE_B_"),
+  )
+  audit.check(
+    "B cannot read A participant PII",
+    !promoted.stringify().contains("PRIVATE_A_"),
+  )
+  let roster = api.request(
+    "owner can read event roster", "organizer", "mine", 200,
+  )
+  audit.check(
+    "only owner sees both registrations",
+    rows(item(mine(roster), "events", "acceptance-event"), "registrations").length() ==
+    2,
+  )
+  let public_roster = api.request(
+    "public counts without roster", "", "public", 200,
+  )
+  audit.check(
+    "anonymous cannot read participant names/contact/ids",
+    !public_roster.stringify().contains("PRIVATE_") &&
+    !public_roster.stringify().contains("participant_id") &&
+    !public_roster.stringify().contains("owner_id"),
+  )
+  while @async.now() < starts {
+    @async.sleep(100)
+  }
+  ignore(
+    api.action("owner checks in B during event", "organizer", "check-in", {
+      "registration_id": b_id,
+    }),
+  )
+  ignore(
+    api.action(
+      "duplicate check-in conflicts without duplication",
+      "organizer",
+      "check-in",
+      { "registration_id": b_id },
+      expected=409,
+    ),
+  )
+  let checked = api.request("B refresh sees check-in", "b", "mine", 200)
+  audit.check(
+    "server records check-in time",
+    text(registration(checked, "acceptance-event"), "state") == "checked_in" &&
+    !(field(registration(checked, "acceptance-event"), "checked_in_ms") is Null),
+  )
+  ignore(
+    api.action(
+      "follow-up cannot begin before event ends",
+      "b",
+      "request-follow-up",
+      { "event_id": "acceptance-event", "message": "not yet", "consent": true },
+      expected=409,
+    ),
+  )
+  ignore(
+    api.action(
+      "nonowner cannot end event",
+      "other-organizer",
+      "end-event",
+      { "event_id": "acceptance-event" },
+      expected=403,
+    ),
+  )
+  ignore(
+    api.action("owner ends event", "organizer", "end-event", {
+      "event_id": "acceptance-event",
+    }),
+  )
+  ignore(
+    api.action(
+      "registration closed after end",
+      "a",
+      "register",
+      { "event_id": "acceptance-event", "display_name": "late" },
+      expected=409,
+    ),
+  )
+  ignore(
+    api.action(
+      "cancelled participant cannot request follow-up",
+      "a",
+      "request-follow-up",
+      { "event_id": "acceptance-event", "message": "no seat", "consent": true },
+      expected=403,
+    ),
+  )
+  ignore(
+    api.action(
+      "follow-up requires consent",
+      "b",
+      "request-follow-up",
+      { "event_id": "acceptance-event", "message": "missing consent" },
+      expected=400,
+    ),
+  )
+  let follow = api.action(
+    "B requests private follow-up",
+    "b",
+    "request-follow-up",
+    {
+      "event_id": "acceptance-event",
+      "message": "PRIVATE_FOLLOWUP",
+      "contact": "PRIVATE_FOLLOWUP_CONTACT",
+      "consent": true,
+    },
+  )
+  let follow_id = text(rows(mine(follow), "followups")[0], "id")
+  ignore(
+    api.action(
+      "duplicate follow-up conflicts",
+      "b",
+      "request-follow-up",
+      {
+        "event_id": "acceptance-event",
+        "message": "duplicate",
+        "consent": true,
+      },
+      expected=409,
+    ),
+  )
+  ignore(
+    api.action(
+      "nonowner cannot resolve follow-up",
+      "other-organizer",
+      "resolve-follow-up",
+      { "followup_id": follow_id, "next_step": "forged" },
+      expected=403,
+    ),
+  )
+  ignore(
+    api.action(
+      "participant cannot self-resolve follow-up",
+      "b",
+      "resolve-follow-up",
+      { "followup_id": follow_id, "next_step": "forged" },
+      expected=403,
+    ),
+  )
+  ignore(
+    api.action(
+      "owner records follow-up next step",
+      "organizer",
+      "resolve-follow-up",
+      {
+        "followup_id": follow_id,
+        "next_step": "PRIVATE_NEXT_STEP",
+        "outcome": "PRIVATE_OUTCOME",
+      },
+    ),
+  )
+  let resolution = api.request(
+    "B refresh sees owner response", "b", "mine", 200,
+  )
+  audit.check(
+    "follow-up resolved with next step",
+    text(rows(mine(resolution), "followups")[0], "state") == "resolved" &&
+    text(rows(mine(resolution), "followups")[0], "next_step") ==
+    "PRIVATE_NEXT_STEP",
+  )
+  let a_final = api.request("A cannot read B follow-up", "a", "mine", 200)
+  let public_final = api.request(
+    "public cannot read follow-up", "", "public", 200,
+  )
+  audit.check(
+    "follow-up PII stays scoped",
+    !a_final.stringify().contains("PRIVATE_FOLLOWUP") &&
+    !a_final.stringify().contains("PRIVATE_NEXT_STEP") &&
+    !public_final.stringify().contains("PRIVATE_"),
+  )
+  @async.with_task_group(group => {
+    for actor in ["a", "b"] {
+      group.spawn_bg(() => {
+        ignore(
+          api.action("concurrent draft by " + actor, actor, "save-story", {
+            "id": "concurrent-" + actor,
+            "title": "CONCURRENT_PRIVATE_" + actor,
+            "body": "Only synthetic owner " + actor,
+          }),
+        )
+      })
+    }
+  })
+  let concurrent_a = api.request(
+    "A refresh after concurrent writes", "a", "mine", 200,
+  )
+  let concurrent_b = api.request(
+    "B refresh after concurrent writes", "b", "mine", 200,
+  )
+  audit.check(
+    "concurrent writes preserved without cross-account drafts",
+    text(item(mine(concurrent_a), "stories", "concurrent-a"), "title") ==
+    "CONCURRENT_PRIVATE_a" &&
+    text(item(mine(concurrent_b), "stories", "concurrent-b"), "title") ==
+    "CONCURRENT_PRIVATE_b" &&
+    !concurrent_a.stringify().contains("CONCURRENT_PRIVATE_b") &&
+    !concurrent_b.stringify().contains("CONCURRENT_PRIVATE_a"),
+  )
+  expired.val = true
+  ignore(
+    api.request("expired A session cannot read private data", "a", "mine", 401),
+  )
+  ignore(
+    api.action(
+      "expired A cannot write",
+      "a",
+      "save-story",
+      { "title": "expired", "body": "expired" },
+      expected=401,
+    ),
+  )
+  expired.val = false
+}
+
+///|
+async fn run_adapter(
+  name : String,
+  binary : String,
+  directory : String,
+  identity_address : String,
+  expired : Ref[Bool],
+  gateway_origin : Ref[String],
+  audit : Audit,
+  gateway : Bool,
+) -> Unit {
+  let address = available_address()
+  let origin = "http://" + address
+  let identity_origin = "http://" + identity_address
+  let state_path = directory + "/" + name + "/state.json"
+  let workspace = directory + "/" + name + "/workspace"
+  @fs.mkdir(workspace, recursive=true)
+  let environment : Map[String, String] = {
+    "MOONSUITE_ROOT": workspace,
+    "MOONTOWN_SUITE_ROOT": workspace,
+    "MOONTOWN_NEIGHBORHOOD_STATE_FILE": state_path,
+    "MOONTOWN_ACCOUNT_PROVIDER": "lunanexa",
+    "MOONTOWN_IDENTITY_ENDPOINT": identity_origin,
+    "MOONTOWN_IDENTITY_HOST": identity_address,
+    "MOONTOWN_IDENTITY_ORIGIN": identity_origin,
+    "MOONTOWN_IDENTITY_PREFIX": "/user",
+    "MOONTOWN_DESKTOP_BIND": address,
+    "MOONTOWN_DESKTOP_STATIC_ROOT": directory + "/assets",
+    "MOONTOWN_DESKTOP_SCHEDULES": "0",
+    "MOONTOWN_GATEWAY_MODE": "public",
+    "MOONTOWN_PUBLIC_ASSETS": directory + "/assets",
+    "MOONTOWN_COMPUTE_CONTROLLER_ENDPOINT": identity_origin,
+    "MOONTOWN_COMPUTE_CONTROLLER_CA_FILE": directory + "/unused-fixture-ca",
+    "LUNANEXA_WEBIDE_CLIENT_ID": "moontown",
+    "LUNANEXA_WEBIDE_PUBLIC_ORIGIN": identity_origin,
+    "LUNANEXA_WEBIDE_BIND": address,
+  }
+  if gateway {
+    gateway_origin.val = origin
+  }
+  defer (if gateway { gateway_origin.val = "" })
+  let api : Api = {
+    origin: if gateway {
+      identity_origin
+    } else {
+      origin
+    },
+    prefix: if gateway {
+      "/moontown"
+    } else {
+      ""
+    },
+    audit,
+    actors: {},
+    content_revisions: {},
+  }
+  let log = @process.redirect_to_file(directory + "/" + name + ".log")
+  println(
+    "Testing real " + name + " adapter at " + origin + "; synthetic state only",
+  )
+  @async.with_task_group(group => {
+    let child = @process.spawn(
+      group,
+      binary,
+      [],
+      cwd=workspace,
+      extra_env=environment,
+      inherit_env=false,
+      stdout=log,
+      stderr=log,
+      no_wait=true,
+    )
+    defer child.cancel()
+    ready(api)
+    journey(api, expired)
+  })
+  audit.check(
+    name + " persisted state to its isolated file",
+    @fs.exists(state_path),
+  )
+  @async.with_task_group(group => {
+    let child = @process.spawn(
+      group,
+      binary,
+      [],
+      cwd=workspace,
+      extra_env=environment,
+      inherit_env=false,
+      stdout=log,
+      stderr=log,
+      no_wait=true,
+    )
+    defer child.cancel()
+    ready(api)
+    let restored = api.request(
+      name + " restart restores B private state",
+      "b",
+      "mine",
+      200,
+    )
+    audit.check(
+      name + " check-in survives process restart",
+      text(registration(restored, "acceptance-event"), "state") == "checked_in",
+    )
+    audit.check(
+      name + " follow-up survives process restart",
+      rows(mine(restored), "followups").length() == 1 &&
+      text(rows(mine(restored), "followups")[0], "next_step") ==
+      "PRIVATE_NEXT_STEP",
+    )
+    let public_restored = api.request(
+      name + " restart public projection",
+      "",
+      "public",
+      200,
+    )
+    audit.check(
+      name + " restart does not expose withdrawn story or PII",
+      rows(field(public_restored, "payload"), "stories").is_empty() &&
+      !public_restored.stringify().contains("PRIVATE_"),
+    )
+  })
+}
+
+///|
+async fn main {
+  let args = @env.args()
+  guard args[1:]
+    .iter()
+    .all(arg => {
+      arg == "--desktop-only" || arg == "--serve" || arg == "--serve-only"
+    }) else {
+    fail(
+      "usage: moon run scripts/check-neighborhood-journey.mbtx [--desktop-only] [--serve]; remote URLs are never accepted",
+    )
+  }
+  let serve_only = args.contains("--serve-only")
+  let desktop_only = args.contains("--desktop-only") || serve_only
+  let serve = args.contains("--serve") || serve_only
+  @shell.Cmd("moon", [
+    "build", "src/cmd/desktop_server", "--target", "native", "--release", "--warn-list",
+    "-a", "-j", "2",
+  ]).run()
+  if !desktop_only {
+    @shell.Cmd("moon", [
+      "-C", "src/account_gateway", "build", "src/main", "--target", "native", "--release",
+      "--warn-list", "-a", "-j", "2",
+    ]).run()
+  }
+  let desktop = @fs.realpath(
+    "_build/native/release/build/vectie/moontown/cmd/desktop_server/desktop_server.exe",
+  )
+  let gateway = if desktop_only {
+    ""
+  } else {
+    @fs.realpath(
+      "src/account_gateway/_build/native/release/build/vectie/moontown-account-gateway/main/main.exe",
+    )
+  }
+  let directory = @fs.tmpdir(prefix="moontown-neighborhood-acceptance-")
+  @fs.mkdir(directory + "/assets")
+  println("Evidence directory retained: " + directory)
+  let audit : Audit = { count: Ref(0), }
+  let expired = Ref(false)
+  let gateway_origin = Ref("")
+  let identity = @http.Server(
+    @socket.Addr::parse(if serve { "127.0.0.1:17869" } else { "127.0.0.1:0" }),
+    reuse_addr=true,
+  )
+  defer identity.close()
+  @async.with_task_group(group => {
+    group.spawn_bg(no_wait=true, allow_failure=true, () => {
+      identity.run_forever(
+        (request, body, conn) => {
+          identity_fixture(request, body, conn, expired, gateway_origin)
+        },
+        max_connections=16,
+      )
+    })
+    if !serve_only {
+      run_adapter(
+        "desktop",
+        desktop,
+        directory,
+        identity.addr.to_string(),
+        expired,
+        gateway_origin,
+        audit,
+        false,
+      )
+    }
+    if !desktop_only {
+      run_adapter(
+        "public-gateway",
+        gateway,
+        directory,
+        identity.addr.to_string(),
+        expired,
+        gateway_origin,
+        audit,
+        true,
+      )
+    }
+    if !serve_only {
+      println(
+        "NEIGHBORHOOD HTTP ACCEPTANCE: \{audit.count.val} checks passed. Synthetic loopback only; not browser or production acceptance.",
+      )
+    }
+    if serve {
+      serve_browser(desktop, directory, identity.addr.to_string(), audit)
+    }
+  })
+}
+
+///|
+/// The development fixture issues only synthetic cookies, on loopback. It is
+/// not compiled into either product adapter and cannot authenticate production.
+async fn serve_browser(
+  binary : String,
+  directory : String,
+  identity_address : String,
+  audit : Audit,
+) -> Unit {
+  let workspace = directory + "/browser/workspace"
+  @fs.mkdir(workspace, recursive=true)
+  let assets = @fs.realpath("src/ui/rabbita-town/dist")
+  let identity_origin = "http://" + identity_address
+  let origin = "http://127.0.0.1:17868"
+  let environment : Map[String, String] = {
+    "MOONSUITE_ROOT": workspace,
+    "MOONTOWN_SUITE_ROOT": workspace,
+    "MOONTOWN_NEIGHBORHOOD_STATE_FILE": directory + "/browser/state.json",
+    "MOONTOWN_ACCOUNT_PROVIDER": "lunanexa",
+    "MOONTOWN_IDENTITY_ENDPOINT": identity_origin,
+    "MOONTOWN_IDENTITY_HOST": identity_address,
+    "MOONTOWN_IDENTITY_ORIGIN": identity_origin,
+    "MOONTOWN_IDENTITY_PREFIX": "/user",
+    "MOONTOWN_DESKTOP_BIND": "127.0.0.1:17868",
+    "MOONTOWN_DESKTOP_STATIC_ROOT": assets,
+    "MOONTOWN_DESKTOP_SCHEDULES": "0",
+  }
+  let log = @process.redirect_to_file(directory + "/browser.log")
+  @async.with_task_group(group => {
+    let child = @process.spawn(
+      group,
+      binary,
+      [],
+      cwd=workspace,
+      extra_env=environment,
+      inherit_env=false,
+      stdout=log,
+      stderr=log,
+      no_wait=true,
+    )
+    defer child.cancel()
+    ready({ origin, prefix: "", audit, actors: {}, content_revisions: {}, })
+    println("BROWSER FIXTURE READY: " + origin + "/ (fresh synthetic state)")
+    println(
+      "Login: " +
+      identity_origin +
+      "/login/a | /login/b | /login/organizer | /login/other-organizer; /logout",
+    )
+    println(
+      "State: " +
+      directory +
+      "/browser/state.json; logs: " +
+      directory +
+      "/browser.log",
+    )
+    println(
+      "Only this disposable loopback child stays running. Interrupt the script to stop it; no production session or model is touched.",
+    )
+    while true {
+      @async.sleep(1000)
+    }
+  })
+}

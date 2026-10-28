@@ -12,7 +12,7 @@ fn ecosystem_presence_test_provenance(
 
 ///|
 fn ecosystem_presence_test_snapshot(
-  tick : Int,
+  tick : Int32,
   presences : Array[@energy_valley_contract.ActorPresence],
 ) -> @energy_valley_contract.TownSnapshot {
   @energy_valley_contract.town_snapshot(

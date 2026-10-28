@@ -5,10 +5,10 @@
 /// land use into the parcel compiler.
 priv struct EcosystemPlanningFragment {
   id_key : String
-  x : Int
-  y : Int
-  width : Int
-  depth : Int
+  x : Int32
+  y : Int32
+  width : Int32
+  depth : Int32
   land_use : @energy_valley_contract.LandUse
   custom : Bool
 }
@@ -18,14 +18,14 @@ priv struct EcosystemPlanningFragment {
 /// authoritative Wenyu road rows. Its ordinal and canonical anchor never
 /// change when water, parks, roads, or buildings are added as local deltas.
 priv struct EcosystemPlanningBlock {
-  ordinal : Int
+  ordinal : Int32
   canonical_anchor : EcosystemGridPoint
   cells : Array[EcosystemGridPoint]
   boundary : @energy_valley_contract.Polygon
   land_regions : Array[EcosystemPlanningLandRegion]
   fragments : Array[EcosystemPlanningFragment]
   land_use : @energy_valley_contract.LandUse
-  target_parcels : Int
+  target_parcels : Int32
 }
 
 ///|
@@ -56,10 +56,10 @@ priv struct EcosystemEligibleParcelTile {
 
 ///|
 priv struct EcosystemBoundaryEdge {
-  from_x : Int
-  from_y : Int
-  to_x : Int
-  to_y : Int
+  from_x : Int32
+  from_y : Int32
+  to_x : Int32
+  to_y : Int32
   mut used : Bool
 }
 
@@ -71,7 +71,7 @@ fn ecosystem_wenyu_reference_road_code_is_road(code : String) -> Bool {
 ///|
 fn ecosystem_wenyu_reference_road_mask(
   snapshot : EcosystemWorldSnapshot,
-  seed : Int,
+  seed : Int32,
 ) -> Array[Array[Bool]] {
   let result = Array::makei(snapshot.rows, _ => {
     Array::make(snapshot.cols, false)
@@ -125,7 +125,7 @@ fn ecosystem_wenyu_component_anchor(
 ///|
 fn ecosystem_wenyu_reference_components(
   snapshot : EcosystemWorldSnapshot,
-  seed : Int,
+  seed : Int32,
 ) -> Array[EcosystemReferenceComponent] {
   let roads = ecosystem_wenyu_reference_road_mask(snapshot, seed)
   let visited = Array::makei(snapshot.rows, _ => {
@@ -137,7 +137,7 @@ fn ecosystem_wenyu_reference_components(
       if roads[start_y][start_x] || visited[start_y][start_x] {
         continue
       }
-      let queue : Array[Int] = [start_y * snapshot.cols + start_x]
+      let queue : Array[Int32] = [start_y * snapshot.cols + start_x]
       let cells : Array[EcosystemGridPoint] = []
       visited[start_y][start_x] = true
       let mut head = 0
@@ -187,9 +187,9 @@ fn ecosystem_wenyu_reference_components(
 ///|
 fn ecosystem_wenyu_shifted_component_cells(
   component : EcosystemReferenceComponent,
-  seed : Int,
-  cols : Int,
-  rows : Int,
+  seed : Int32,
+  cols : Int32,
+  rows : Int32,
 ) -> Array[EcosystemGridPoint] {
   let shift_x = energy_valley_road_pattern_shift_x(seed)
   let shift_y = energy_valley_road_pattern_shift_y(seed)
@@ -279,10 +279,10 @@ fn ecosystem_wenyu_water_separated_land_regions(
 ///|
 fn ecosystem_wenyu_append_boundary_edge(
   result : Array[EcosystemBoundaryEdge],
-  from_x : Int,
-  from_y : Int,
-  to_x : Int,
-  to_y : Int,
+  from_x : Int32,
+  from_y : Int32,
+  to_x : Int32,
+  to_y : Int32,
 ) -> Unit {
   result.push({ from_x, from_y, to_x, to_y, used: false, })
 }
@@ -341,7 +341,7 @@ fn ecosystem_wenyu_boundary_polygon(
   if edges.is_empty() {
     return @energy_valley_contract.polygon([])
   }
-  let outgoing : Map[String, Array[Int]] = Map([])
+  let outgoing : Map[String, Array[Int32]] = Map([])
   for index, edge in edges {
     let key = golden_valley_tile_key(edge.from_x, edge.from_y)
     match outgoing.get(key) {
@@ -430,8 +430,8 @@ fn ecosystem_wenyu_boundary_polygon(
 fn ecosystem_wenyu_tile_land_use(
   world : ExactEnergyValleyWorld,
   park_lookup : Map[String, Unit],
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> @energy_valley_contract.LandUse {
   if park_lookup.contains(golden_valley_tile_key(x, y)) {
     return @energy_valley_contract.Park
@@ -495,7 +495,7 @@ fn ecosystem_wenyu_planning_fragments(
   local_delta : Map[String, Bool],
 ) -> Array[EcosystemPlanningFragment] {
   let eligible : Map[String, EcosystemEligibleParcelTile] = Map([])
-  let region_ordinals : Map[String, Int] = Map([])
+  let region_ordinals : Map[String, Int32] = Map([])
   let sorted_cells : Array[EcosystemGridPoint] = []
   for ordinal, region in land_regions {
     for cell in region.cells {
@@ -646,7 +646,7 @@ fn ecosystem_wenyu_planning_fragments(
 ///|
 fn ecosystem_wenyu_land_use_index(
   land_use : @energy_valley_contract.LandUse,
-) -> Int {
+) -> Int32 {
   match land_use {
     @energy_valley_contract.Civic => 0
     @energy_valley_contract.MixedUse => 1
@@ -662,7 +662,7 @@ fn ecosystem_wenyu_land_use_index(
 
 ///|
 fn ecosystem_wenyu_land_use_for_index(
-  index : Int,
+  index : Int32,
 ) -> @energy_valley_contract.LandUse {
   match index {
     0 => @energy_valley_contract.Civic
@@ -698,7 +698,7 @@ fn ecosystem_wenyu_dominant_land_use(
 ///|
 fn ecosystem_parcel_planning_blocks(
   snapshot : EcosystemWorldSnapshot,
-  seed : Int,
+  seed : Int32,
 ) -> Array[EcosystemPlanningBlock] {
   let world = golden_valley_world(seed)
   let components = ecosystem_wenyu_reference_components(snapshot, seed)

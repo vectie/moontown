@@ -1,0 +1,17 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown-account-gateway/main"
+
+// Values
+
+// Errors
+
+// Types and methods
+type BrowserIdentity
+
+type IdentityFlight
+
+type PublicPlatform
+
+// Type aliases
+
+// Traits

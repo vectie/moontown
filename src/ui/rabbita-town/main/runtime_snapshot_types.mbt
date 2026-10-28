@@ -1,7 +1,7 @@
 ///|
 priv struct ProjectionSnapshot {
   town : @core.TownState
-  event_count : Int
+  event_count : Int32
 } derive(FromJson)
 
 ///|
@@ -24,9 +24,9 @@ priv struct VisualAgentSnapshot {
   effect : String
   visible_on_overworld : Bool
   message : String
-  grid_x : Int
-  grid_y : Int
-  z : Int
+  grid_x : Int32
+  grid_y : Int32
+  z : Int32
 } derive(FromJson)
 
 ///|
@@ -34,11 +34,11 @@ priv struct VisualBuildingSnapshot {
   book_id : String
   title : String
   zone_key : String
-  running_count : Int
-  waiting_count : Int
-  review_count : Int
-  blocked_count : Int
-  completed_count : Int
+  running_count : Int32
+  waiting_count : Int32
+  review_count : Int32
+  blocked_count : Int32
+  completed_count : Int32
   effect : String
   message : String
 } derive(FromJson)
@@ -49,18 +49,18 @@ priv struct VisualModuleSnapshot {
   book_id : String
   status : String
   source : String
-  running_count : Int
-  waiting_count : Int
-  review_count : Int
-  blocked_count : Int
-  completed_count : Int
-  active_agent_count : Int
+  running_count : Int32
+  waiting_count : Int32
+  review_count : Int32
+  blocked_count : Int32
+  completed_count : Int32
+  active_agent_count : Int32
   message : String
 } derive(FromJson)
 
 ///|
 priv struct VisualProjectionSnapshot {
-  tick : Int
+  tick : Int32
   agents : Array[VisualAgentSnapshot]
   buildings : Array[VisualBuildingSnapshot]
   modules : Array[VisualModuleSnapshot]?
@@ -71,15 +71,15 @@ priv struct VisualProjectionSnapshot {
 priv struct DaemonJobSnapshot {
   id : String
   kind : String
-  interval_seconds : Int
+  interval_seconds : Int32
 } derive(FromJson)
 
 ///|
 priv struct DaemonSnapshot {
   daemon_id : String
   lease_owner : String
-  tick_sequence : Int
-  last_heartbeat_event_count : Int
+  tick_sequence : Int32
+  last_heartbeat_event_count : Int32
   active_goal_ids : Array[String]
   jobs : Array[DaemonJobSnapshot]
 } derive(FromJson)
@@ -87,24 +87,24 @@ priv struct DaemonSnapshot {
 ///|
 priv struct LiveAutonomySnapshot {
   generated_at_ms : String
-  tick : Int
+  tick : Int32
   status : String
   summary : String
-  active_worker_count : Int
-  review_count : Int
-  blocked_count : Int
-  accepted_update_count : Int
-  no_change_count : Int
-  failed_count : Int
-  due_goal_count : Int
-  standing_goal_count : Int
-  enabled_standing_goal_count : Int
-  disabled_standing_goal_count : Int
-  planbook_open_count : Int
-  planbook_repair_active_count : Int
-  book_template_request_count : Int
-  pending_book_template_request_count : Int
-  failed_book_template_request_count : Int
+  active_worker_count : Int32
+  review_count : Int32
+  blocked_count : Int32
+  accepted_update_count : Int32
+  no_change_count : Int32
+  failed_count : Int32
+  due_goal_count : Int32
+  standing_goal_count : Int32
+  enabled_standing_goal_count : Int32
+  disabled_standing_goal_count : Int32
+  planbook_open_count : Int32
+  planbook_repair_active_count : Int32
+  book_template_request_count : Int32
+  pending_book_template_request_count : Int32
+  failed_book_template_request_count : Int32
   book_template_request_summary : String
   book_template_latest_event_summary : String
   latest_watcher_summary : String
@@ -123,32 +123,32 @@ priv struct StandingGoalSnapshot {
   title : String
   prompt : String
   target_book_id : String?
-  cadence_ticks : Int
-  next_due_tick : Int
-  last_run_tick : Int?
+  cadence_ticks : Int32
+  next_due_tick : Int32
+  last_run_tick : Int32?
   enabled : Bool
   source_policy : String
-  quality_threshold : Int
+  quality_threshold : Int32
 } derive(FromJson)
 
 ///|
 priv struct WatcherRunRecordSnapshot {
   goal_id : String
-  tick : Int
+  tick : Int32
   target_book_id : String
   decision : String
-  delta_score : Int
-  new_source_count : Int
-  checked_sources_count : Int?
-  new_sources_found : Int?
-  accepted_facts_count : Int?
-  rejected_facts_count : Int?
-  wiki_pages_changed_count : Int?
+  delta_score : Int32
+  new_source_count : Int32
+  checked_sources_count : Int32?
+  new_sources_found : Int32?
+  accepted_facts_count : Int32?
+  rejected_facts_count : Int32?
+  wiki_pages_changed_count : Int32?
   book_changed : String?
   detail : String
   task_id : String?
   run_id : String?
-  next_due_tick : Int
+  next_due_tick : Int32
 } derive(FromJson)
 
 ///|
@@ -159,9 +159,9 @@ priv struct OperatorRequestSnapshot {
   title : String
   prompt : String
   target_book_id : String
-  cadence_ticks : Int
+  cadence_ticks : Int32
   source_policy : String
-  quality_threshold : Int
+  quality_threshold : Int32
   standing_goal_id : String
   material_watch : MaterialWatchSnapshot?
 } derive(FromJson)

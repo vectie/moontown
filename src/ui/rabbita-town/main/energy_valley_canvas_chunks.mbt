@@ -2,10 +2,10 @@
 /// A presentation chunk groups tile traversal only. The semantic world keeps
 /// one independently editable cell for every road, tree, and building tile.
 priv struct GoldenCanvasTileChunk {
-  min_x : Int
-  max_x : Int
-  min_y : Int
-  max_y : Int
+  min_x : Int32
+  max_x : Int32
+  min_y : Int32
+  max_y : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -18,8 +18,8 @@ let golden_canvas_cull_margin = 160.0
 fn golden_canvas_world_at_screen(
   screen_x : Double,
   screen_y : Double,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
   camera_x : Double,
   camera_y : Double,
   zoom : Double,
@@ -38,10 +38,10 @@ fn golden_canvas_world_at_screen(
 
 ///|
 fn golden_canvas_visible_tile_chunks(
-  cols : Int,
-  rows : Int,
-  viewport_width : Int,
-  viewport_height : Int,
+  cols : Int32,
+  rows : Int32,
+  viewport_width : Int32,
+  viewport_height : Int32,
   camera_x : Double,
   camera_y : Double,
   zoom : Double,
@@ -125,7 +125,9 @@ fn golden_canvas_visible_tile_chunks(
 }
 
 ///|
-fn golden_canvas_chunk_tile_count(chunks : Array[GoldenCanvasTileChunk]) -> Int {
+fn golden_canvas_chunk_tile_count(
+  chunks : Array[GoldenCanvasTileChunk],
+) -> Int32 {
   let mut count = 0
   for chunk in chunks {
     count += (chunk.max_x - chunk.min_x) * (chunk.max_y - chunk.min_y)

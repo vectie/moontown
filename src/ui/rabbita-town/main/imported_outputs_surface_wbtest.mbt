@@ -1,6 +1,6 @@
 ///|
 struct ImportedSurfaceScheduler {
-  mut effects : Int
+  mut effects : Int32
 }
 
 ///|
@@ -52,7 +52,7 @@ fn imported_surface_pending_model() -> Model {
 }
 
 ///|
-fn imported_surface_save_effects(before : Model, after : Model) -> Int {
+fn imported_surface_save_effects(before : Model, after : Model) -> Int32 {
   let dispatch : Dispatch[Msg] = _ => @rabbita.none
   let (command, _) = update_non_form_message(
     dispatch,

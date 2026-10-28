@@ -5,7 +5,7 @@
 priv struct EcosystemPresenceProvenanceGroup {
   label : String
   tone : String
-  count : Int
+  count : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -20,9 +20,9 @@ priv struct EcosystemPlacePresenceView {
   departing_names : Array[String]
   activity_label : String
   activity_glyph : String
-  attention_boost : Int
-  runtime_inside_count : Int
-  runtime_arriving_count : Int
+  attention_boost : Int32
+  runtime_inside_count : Int32
+  runtime_arriving_count : Int32
   provenance_groups : Array[EcosystemPresenceProvenanceGroup]
 } derive(Debug, Eq)
 
@@ -66,7 +66,7 @@ fn ecosystem_presence_actor_name(
 ///|
 fn ecosystem_presence_phase_rank(
   phase : @energy_valley_contract.PresencePhase,
-) -> Int {
+) -> Int32 {
   match phase {
     @energy_valley_contract.Inside => 40
     @energy_valley_contract.AtEntrance => 30
@@ -79,7 +79,7 @@ fn ecosystem_presence_phase_rank(
 ///|
 fn ecosystem_presence_provenance_rank(
   kind : @energy_valley_contract.ProvenanceKind,
-) -> Int {
+) -> Int32 {
   match kind {
     @energy_valley_contract.RuntimeProjection => 5
     @energy_valley_contract.UserDelta => 4
@@ -104,11 +104,11 @@ fn ecosystem_presence_activity_glyph(
 
 ///|
 fn ecosystem_presence_provenance_groups(
-  runtime_count : Int,
-  ambient_count : Int,
-  local_count : Int,
-  wenyu_count : Int,
-  procedural_count : Int,
+  runtime_count : Int32,
+  ambient_count : Int32,
+  local_count : Int32,
+  wenyu_count : Int32,
+  procedural_count : Int32,
 ) -> Array[EcosystemPresenceProvenanceGroup] {
   let groups : Array[EcosystemPresenceProvenanceGroup] = []
   if runtime_count > 0 {

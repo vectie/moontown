@@ -1,13 +1,13 @@
 ///|
 priv struct PlacesState {
-  columns : Array[Int]
+  columns : Array[Int32]
   show : Bool
   error : String
 } derive(Debug, Eq)
 
 ///|
 priv enum PlacesMsg {
-  Column(Int, String)
+  Column(Int32, String)
   Explore
 }
 

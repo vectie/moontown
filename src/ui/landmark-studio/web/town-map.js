@@ -63,6 +63,20 @@ function focus(p) {
 }
 
 function openStudy(kind) {
+  if (kind === 'indoor' || kind === 'compute') {
+    const deliver = globalThis.__moonTownSpaceDeliver;
+    if (deliver) {
+      // The same town route owns the task, selection and return path.
+      deliver('open-center');
+      if (kind === 'compute') deliver('open-compute');
+    } else {
+      const route = new URL(location.href);
+      route.searchParams.set('layer', kind === 'compute' ? 'compute' : 'indoor');
+      route.searchParams.set('building', 'future-center-g3');
+      location.assign(route);
+    }
+    return;
+  }
   globalThis.__moontownStudioOpen=true;
   const url = kind==='indoor' ? 'interior.html' : kind==='compute' ? 'datacenter.html' : `index.html#${selected.id}`;
   viewer=document.createElement('dialog');viewer.className='town-studio-dialog';

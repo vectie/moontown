@@ -316,34 +316,34 @@ extern "js" fn reference_osm_cartoon_road_graph_prepare_with_widths(
   #| }
 
 ///|
-extern "js" fn reference_osm_cartoon_road_junction_count() -> Int =
+extern "js" fn reference_osm_cartoon_road_junction_count() -> Int32 =
   #| () => globalThis.__moontownEnergyValleyCartoonRoadGraph?.junctions?.length ?? 0
 
 ///|
-extern "js" fn reference_osm_cartoon_road_node_count() -> Int =
+extern "js" fn reference_osm_cartoon_road_node_count() -> Int32 =
   #| () => globalThis.__moontownEnergyValleyCartoonRoadGraph?.nodes?.length ?? 0
 
 ///|
-extern "js" fn reference_osm_cartoon_road_edge_count() -> Int =
+extern "js" fn reference_osm_cartoon_road_edge_count() -> Int32 =
   #| () => globalThis.__moontownEnergyValleyCartoonRoadGraph?.edges?.length ?? 0
 
 ///|
-extern "js" fn reference_osm_cartoon_road_cycle_count() -> Int =
+extern "js" fn reference_osm_cartoon_road_cycle_count() -> Int32 =
   #| () => globalThis.__moontownEnergyValleyCartoonRoadGraph?.metrics?.cycleRank ?? 0
 
 ///|
-extern "js" fn reference_osm_cartoon_road_bridge_count() -> Int =
+extern "js" fn reference_osm_cartoon_road_bridge_count() -> Int32 =
   #| () => globalThis.__moontownEnergyValleyCartoonRoadGraph?.metrics?.bridges ?? 0
 
 ///|
 /// Validate the displayed-road portion of one complete building lot in a
 /// single graph query. Land, water, and inter-building checks stay in MoonBit.
 extern "js" fn reference_osm_cartoon_road_lot_valid(
-  x : Int,
-  y : Int,
-  width : Int,
-  depth : Int,
-  apron : Int,
+  x : Int32,
+  y : Int32,
+  width : Int32,
+  depth : Int32,
+  apron : Int32,
 ) -> Bool =
   #| (x, y, width, depth, apron) => {
   #|   const cartoon = globalThis.__moontownEnergyValleyCartoonRoadGraph;
@@ -374,8 +374,8 @@ extern "js" fn reference_osm_cartoon_road_lot_valid(
 
 ///|
 extern "js" fn reference_osm_cartoon_road_corridor_cell_at(
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Bool =
   #| (x, y) => globalThis.__moontownEnergyValleyCartoonRoadGraph?.corridorCells?.has(`${x},${y}`) === true
 

@@ -39,14 +39,14 @@ fn town_life_persistence_test_post(
 
 ///|
 fn town_life_persistence_test_save(
-  spark : Int,
+  spark : Int32,
   quest_done : Array[String],
   phone_log : Array[PhoneMessage],
   posts : Array[KnowledgePost],
   analytics : Array[String],
   receipts : Array[EcosystemAttentionReceipt],
   reports : Array[String],
-  post_generation : Int,
+  post_generation : Int32,
 ) -> TownLifeSave {
   {
     player: Some({
@@ -91,7 +91,7 @@ fn town_life_persistence_test_save(
 fn town_life_test_text_event(
   id : String,
   writer_id : String,
-  sequence : Int,
+  sequence : Int32,
   value : String,
 ) -> TownLifeTextEvent {
   let dot : TownLifeDot = { writer_id, sequence, }

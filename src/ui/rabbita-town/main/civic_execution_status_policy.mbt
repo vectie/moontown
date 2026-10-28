@@ -76,12 +76,12 @@ type CivicExecutionSignalPhrases = CivicExecutionStagePhrases
 
 ///|
 fn civic_signal_phrases(
-  packet? : String = "Dispatching",
+  packet~ : String = "Dispatching",
   running~ : String,
   persisting~ : String,
   review~ : String,
   completed~ : String,
-  recovery? : String = "Needs recovery",
+  recovery~ : String = "Needs recovery",
 ) -> CivicExecutionSignalPhrases {
   { packet, running, persisting, review, completed, recovery, }
 }
@@ -139,20 +139,20 @@ fn civic_task_prompt_or_projected_fallback(
 
 ///|
 priv struct CivicExecutionScorePolicy {
-  packet : Int
-  running : Int
-  persisting : Int
-  review : Int
-  completed : Int
-  recovery : Int
+  packet : Int32
+  running : Int32
+  persisting : Int32
+  review : Int32
+  completed : Int32
+  recovery : Int32
 }
 
 ///|
 fn civic_execution_score(
   execution : @core.TaskExecutionRecord?,
   policy : CivicExecutionScorePolicy,
-  fallback~ : Int,
-) -> Int {
+  fallback~ : Int32,
+) -> Int32 {
   match execution {
     Some(execution) =>
       civic_execution_score_for_status(execution.status, policy)
@@ -164,7 +164,7 @@ fn civic_execution_score(
 fn civic_execution_score_for_status(
   status : @core.TaskExecutionStatus,
   policy : CivicExecutionScorePolicy,
-) -> Int {
+) -> Int32 {
   match civic_execution_stage(status) {
     @ui.Packet => policy.packet
     @ui.Running => policy.running

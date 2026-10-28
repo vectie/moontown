@@ -13,6 +13,8 @@
 }
 .town-ui-icon, .town-ui-svg { display: inline-flex; width: 20px; height: 20px; flex: 0 0 20px; vertical-align: middle; }
 .town-ui-icon svg { display: block; }
+.town-platform-account { display: flex; align-items: center; gap: 6px; }
+.town-platform-account .town-topbar-chip { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; white-space: nowrap; text-decoration: none; }
 .town-ui-label { display: inline-flex; align-items: center; justify-content: center; gap: 8px; line-height: 1.4; }
 .town-ui-icon-button { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 10px; border: 1px solid transparent; border-radius: 12px; background: transparent; color: var(--town-ui-muted); cursor: pointer; }
 .town-ui-icon-button:hover { background: var(--town-ui-wash); color: var(--town-ui-ink); }
@@ -55,11 +57,15 @@
 .town-ui-sheet-header h2 { margin: 0; font-size: 20px; font-weight: 650; color: var(--town-ui-ink); }
 .energy-request-dialog .request-desk { padding: 0; border: 0; border-radius: 0; box-shadow: none; background: transparent; color: var(--town-ui-ink); gap: 20px; }
 .energy-request-dialog .request-desk-head { display: block; }
-.energy-request-dialog .request-desk-head .request-action-dock { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border: 1px solid var(--town-ui-line); border-radius: 12px; background: var(--town-ui-wash); }
+.work-workspace-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; background: var(--town-ui-wash); border: 1px solid var(--town-ui-line); border-radius: 12px; }
+.work-workspace-tab { display: inline-flex; justify-content: center; align-items: center; min-height: 44px; padding: 8px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: var(--town-ui-muted); font: inherit; font-size: 13px; cursor: pointer; }
+.work-workspace-tab.is-active { background: var(--town-ui-card); color: var(--town-ui-ink); border-color: var(--town-ui-line); }
+.work-workspace-tabs + .request-desk { margin-top: 12px; }
+.energy-request-dialog .request-action-dock { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border: 1px solid var(--town-ui-line); border-radius: 12px; background: var(--town-ui-wash); }
 .energy-request-dialog .request-action-button { display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 10px; border: 1px solid transparent; background: transparent; box-shadow: none; color: var(--town-ui-muted); font-size: 13px; font-weight: 550; transition: background 120ms, color 120ms; transform: none; }
 .energy-request-dialog .request-action-button:hover { background: var(--town-ui-card); }
 .energy-request-dialog .request-action-button.is-active { border-color: var(--town-ui-line); background: var(--town-ui-card); color: var(--town-ui-ink); }
-.energy-request-dialog .request-desk-head .request-action-button.is-active { background: var(--town-ui-accent); border-color: var(--town-ui-accent); color: var(--town-ui-paper); }
+.energy-request-dialog .request-action-dock:not(.request-mode-dock) .request-action-button.is-active { background: var(--town-ui-accent); border-color: var(--town-ui-accent); color: var(--town-ui-paper); }
 .energy-request-dialog .request-composer { padding: 0; gap: 16px; border: 0; box-shadow: none; background: transparent; }
 .energy-request-dialog .request-composer h3 { font-size: 16px; font-weight: 600; color: var(--town-ui-ink); }
 .energy-request-dialog .request-mode-dock { width: fit-content; display: flex; flex-wrap: wrap; gap: 8px; }
@@ -132,3 +138,6 @@
 .secret-compute-room .town-advanced > summary:hover { color: var(--town-ui-ink); }
 .pack-bridge-launch { width: 44px; min-height: 44px; padding: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--town-ui-line); border-radius: 12px; background: var(--town-ui-paper); color: var(--town-ui-ink); box-shadow: var(--town-ui-shadow); }
 .pack-bridge-launch:focus-visible { outline: 2px solid var(--town-ui-focus); outline-offset: 2px; }
+/* The host owns navigation. Keep a floating fallback only without host chrome. */
+body:has(.account-global-nav) .pack-bridge-launch,
+body:has(#town-pack-tools-open) .pack-bridge-launch { display: none; }

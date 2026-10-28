@@ -1,0 +1,247 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn kubectl(k : String, args : Array[String]) -> String {
+  let result = @shell.Cmd("kubectl", ["--kubeconfig", k, ..args]).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+/// Read-only against Kubernetes. Saves private rollback evidence and renders
+/// drift-checked patches; activation is a separate, explicitly verified step.
+async fn main {
+  guard @env.args() is [_, k, root] else {
+    fail("Usage: prepare-account-rollout.mbtx KUBECONFIG NEW_PRIVATE_DIRECTORY")
+  }
+  let ns = "aigc-acceptance-20260915"
+  let registry = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/"
+  let gateway_image = registry +
+    "moon/moontown-account-gateway@sha256:7722c02728971de758a586d7d91dc40d7b8bbfa0c5f599b501ce0a89a730146a"
+  let ui_image = registry +
+    "moon/moontown-account-ui@sha256:3833fcd58534cdf4cd7127fba933cd2f3b4dee345d1177386bc1ca112ae8fbae"
+  let deployment = kubectl(k, [
+    "-n", ns, "get", "deployment", "moontown-webide-gateway", "-o", "json",
+  ])
+  let profile = kubectl(k, [
+    "-n", ns, "get", "configmap", "moontown-webide-runtime", "-o", "json",
+  ])
+  let pods = kubectl(k, [
+    "-n", ns, "get", "pod", "-l", "app=moontown-webide-gateway", "-o", "json",
+  ])
+  let vip = kubectl(k, [
+      "-n", "kube-system", "get", "service", "platform-browser-identity-tls", "-o",
+      "jsonpath={.spec.clusterIP}",
+    ])
+    .trim()
+    .to_owned()
+  guard vip == "10.43.243.148" else {
+    fail(
+      "Identity Service IP drift; re-render and re-test its policy and mapping",
+    )
+  }
+  guard @json.parse(deployment)
+    is {
+      "spec": { "template": { "spec": Object(original_pod_spec), .. }, .. },
+      ..
+    } &&
+    original_pod_spec.get("hostAliases") is None else {
+    fail("Existing host mappings need an explicit merge review")
+  }
+  guard @json.parse(deployment)
+    is {
+      "spec": {
+        "template": {
+          "spec": {
+            "containers": [
+              {
+                "name": "gateway",
+                "image": String(old_image),
+                "env": Array(old_env),
+                "volumeMounts": Array(old_mounts),
+                ..
+              },
+            ],
+            "volumes": Array(old_volumes),
+            ..
+          },
+          ..
+        },
+        ..
+      },
+      ..
+    } else {
+    fail("Gateway deployment shape changed")
+  }
+  guard @json.parse(profile)
+    is { "data": { "container.json": String(old_profile), .. }, .. } &&
+    @json.parse(old_profile) is Object(container) &&
+    container.get("image") ==
+    Some(
+      Json::string(
+        registry +
+        "moon/hosted-apps@sha256:ae5b5ed4abf0976fafefcf0f2312fe9a77f9b09ab483d3fc46ba444e60a94052",
+      ),
+    ) else {
+    fail("Workspace base changed; rebuild the paired UI from the new base")
+  }
+  @fs.mkdir(root, permission=0o700)
+  for
+    (name, value) in [
+      ("gateway-before.json", deployment),
+      ("profile-before.json", profile),
+      ("gateway-pods-before.json", pods),
+    ] {
+    @fs.write_file(
+      root + "/" + name,
+      value,
+      permission=0o600,
+      create_mode=CreateNew,
+    )
+  }
+  let account_env : Array[Json] = [
+    { "name": "MOONTOWN_ACCOUNT_PROVIDER", "value": "lunanexa" },
+    {
+      "name": "MOONTOWN_IDENTITY_ENDPOINT",
+      "value": "https://suanli.kechuangfuwu.com:8443",
+    },
+    {
+      "name": "MOONTOWN_IDENTITY_HOST",
+      "value": "suanli.kechuangfuwu.com:8443",
+    },
+    {
+      "name": "MOONTOWN_IDENTITY_ORIGIN",
+      "value": "https://suanli.kechuangfuwu.com:8443",
+    },
+    { "name": "MOONTOWN_IDENTITY_PREFIX", "value": "/user" },
+    {
+      "name": "MOONTOWN_IDENTITY_CA_FILE",
+      "value": "/run/identity-trust/ca-bundle.crt",
+    },
+  ]
+  let patch : Json = [
+    {
+      "op": "test",
+      "path": "/spec/template/spec",
+      "value": Json::object(original_pod_spec),
+    },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/containers/0/name",
+      "value": "gateway",
+    },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/containers/0/image",
+      "value": old_image,
+    },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/containers/0/env",
+      "value": old_env,
+    },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/volumes",
+      "value": old_volumes,
+    },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/containers/0/volumeMounts",
+      "value": old_mounts,
+    },
+    {
+      "op": "replace",
+      "path": "/spec/template/spec/containers/0/image",
+      "value": gateway_image,
+    },
+    {
+      "op": "replace",
+      "path": "/spec/template/spec/containers/0/readinessProbe",
+      "value": {
+        "exec": {
+          "command": [
+            "/usr/local/bin/lunanexa-webide-gateway", "--check-identity",
+          ],
+        },
+        "initialDelaySeconds": 5,
+        // DNS plus five bounded TLS attempts must fit the exec budget.
+        "periodSeconds": 45,
+        "timeoutSeconds": 40,
+        "failureThreshold": 3,
+        "successThreshold": 1,
+      },
+    },
+    {
+      "op": "replace",
+      "path": "/spec/template/spec/containers/0/env",
+      "value": [..old_env, ..account_env],
+    },
+    {
+      "op": "add",
+      "path": "/spec/template/spec/hostAliases",
+      "value": [{ "ip": vip, "hostnames": ["suanli.kechuangfuwu.com"] }],
+    },
+    {
+      "op": "add",
+      "path": "/spec/template/spec/volumes/-",
+      "value": {
+        "name": "identity-trust",
+        "configMap": {
+          "name": "moontown-browser-identity-ca",
+          "defaultMode": 292,
+        },
+      },
+    },
+    {
+      "op": "add",
+      "path": "/spec/template/spec/containers/0/volumeMounts/-",
+      "value": {
+        "name": "identity-trust",
+        "mountPath": "/run/identity-trust",
+        "readOnly": true,
+      },
+    },
+    {
+      "op": "add",
+      "path": "/spec/template/spec/containers/0/volumeMounts/-",
+      "value": {
+        "name": "identity-trust",
+        "mountPath": "/etc/nsswitch.conf",
+        "subPath": "nsswitch.conf",
+        "readOnly": true,
+      },
+    },
+  ]
+  container["image"] = Json::string(ui_image)
+  let profile_patch : Json = [
+    { "op": "test", "path": "/data/container.json", "value": old_profile },
+    {
+      "op": "replace",
+      "path": "/data/container.json",
+      "value": Json::object(container).stringify(),
+    },
+  ]
+  @fs.write_file(
+    root + "/gateway-patch.json",
+    patch.stringify(indent=2),
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  @fs.write_file(
+    root + "/profile-patch.json",
+    profile_patch.stringify(indent=2),
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  println(
+    "Private backup and drift-checked release patches prepared. No production traffic changed.",
+  )
+}

@@ -5,15 +5,15 @@
 let ecosystem_world_snapshot_cache : Map[String, EcosystemWorldSnapshot] = Map([])
 
 ///|
-fn ecosystem_snapshot_digest_step(hash : Int, value : Int) -> Int {
+fn ecosystem_snapshot_digest_step(hash : Int32, value : Int32) -> Int32 {
   (hash * 131 + value.abs() % 1000003) % 2147483629
 }
 
 ///|
 fn ecosystem_contract_rejection_fingerprint(
   model : Model,
-  seed : Int,
-) -> (Int, Int) {
+  seed : Int32,
+) -> (Int32, Int32) {
   let rejected = town_life_world_projection_for_states(
       model.town_life_world_states,
       seed,
@@ -41,7 +41,7 @@ fn ecosystem_contract_rejection_fingerprint(
 }
 
 ///|
-fn ecosystem_snapshot_cache_key(model : Model, seed : Int) -> String {
+fn ecosystem_snapshot_cache_key(model : Model, seed : Int32) -> String {
   let ledger = model.energy_world_delta
   let digest = ecosystem_snapshot_digest_step(
     ecosystem_snapshot_digest_step(17, seed),
@@ -54,7 +54,7 @@ fn ecosystem_snapshot_cache_key(model : Model, seed : Int) -> String {
 }
 
 ///|
-fn ecosystem_contract_world_cache_key(model : Model, seed : Int) -> String {
+fn ecosystem_contract_world_cache_key(model : Model, seed : Int32) -> String {
   // Rejected CRDT events are renderer-neutral Map Lab diagnostics attached to
   // CompiledTownWorld, but do not alter the geometry snapshot. Concurrent
   // rejected histories can have identical accepted operations and the same
@@ -73,7 +73,7 @@ fn ecosystem_contract_world_cache_key(model : Model, seed : Int) -> String {
 /// observations are projected separately through `TownSnapshot`.
 fn ecosystem_cached_world_snapshot(
   model : Model,
-  seed : Int,
+  seed : Int32,
 ) -> EcosystemWorldSnapshot {
   let key = ecosystem_snapshot_cache_key(model, seed)
   match ecosystem_world_snapshot_cache.get(key) {

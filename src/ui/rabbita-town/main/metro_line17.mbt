@@ -145,7 +145,7 @@ fn metro_line17_stations() -> Array[MetroStation] {
 }
 
 ///|
-fn metro_line17_station_exit_count() -> Int {
+fn metro_line17_station_exit_count() -> Int32 {
   metro_line17_stations().fold(init=0, fn(total, station) {
     total + station.exits.length()
   })

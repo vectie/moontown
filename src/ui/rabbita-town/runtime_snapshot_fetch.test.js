@@ -78,3 +78,53 @@ test('snapshot deadline remains active while a response body stalls', async t =>
     assert.equal(globalThis[snapshot.jsonGlobal], snapshot.fallback)
   } finally {clearSnapshot(snapshot)}
 })
+
+test('compute organization is a server-validated selector and stale identity is cleared', async t => {
+  const snapshot = {...snapshotFixture('scope'), url:'./secret-compute-room.json'}
+  let reloads = 0
+  const priorLocation = globalThis.location
+  globalThis.location = {search:'?compute-organization=org-b',reload:()=>{reloads++}}
+  globalThis.__moontownUnifiedAccountActive = true
+  globalThis.__moontownAccountContextJson = JSON.stringify({user_id:'a',account_kind:'member'})
+  t.mock.method(globalThis, 'fetch', async (_url, options) => {
+    assert.equal(options.credentials,'same-origin')
+    assert.deepEqual(options.headers, {'X-LunaNexa-Organization':'org-b'})
+    return Response.json({scope:{state:'bound',account:{user_id:'b'}}})
+  })
+  try {
+    setSnapshotValue(snapshot, 'old-user-data')
+    await refreshTextSnapshot(snapshot)
+    assert.equal(globalThis[snapshot.jsonGlobal], snapshot.fallback)
+    assert.equal(reloads,1)
+  } finally {
+    globalThis.location = priorLocation
+    delete globalThis.__moontownUnifiedAccountActive
+    delete globalThis.__moontownAccountContextJson
+    clearSnapshot(snapshot)
+  }
+})
+
+test('revoked hosted gateway clears the previous account before reloading', async t => {
+  const snapshot = {...snapshotFixture('revoked'), url:'./secret-compute-room.json'}
+  const previousLocation = globalThis.location
+  let reloads = 0
+  globalThis.location = {reload:()=>{reloads++}}
+  globalThis.__moontownUnifiedAccountActive = true
+  globalThis.__moontownAccountContextJson = '{"user_id":"a"}'
+  globalThis.__moontownSessionToken = 'legacy-token'
+  t.mock.method(globalThis, 'fetch', async () => new Response('Reopen from portal', {status:401}))
+  try {
+    setSnapshotValue(snapshot, 'private old resources')
+    await refreshTextSnapshot(snapshot)
+    assert.equal(globalThis[snapshot.jsonGlobal], snapshot.fallback)
+    assert.equal(globalThis.__moontownAccountContextJson, '{}')
+    assert.equal(globalThis.__moontownSessionToken, '')
+    assert.equal(reloads, 1)
+  } finally {
+    globalThis.location = previousLocation
+    delete globalThis.__moontownUnifiedAccountActive
+    delete globalThis.__moontownAccountContextJson
+    delete globalThis.__moontownSessionToken
+    clearSnapshot(snapshot)
+  }
+})

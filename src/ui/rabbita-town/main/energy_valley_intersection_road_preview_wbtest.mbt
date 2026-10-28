@@ -17,11 +17,11 @@ fn intersection_preview_test_installation(
 
 ///|
 fn intersection_preview_test_building(
-  x : Int,
-  y : Int,
-  width : Int,
-  depth : Int,
-  depth_key : Int,
+  x : Int32,
+  y : Int32,
+  width : Int32,
+  depth : Int32,
+  depth_key : Int32,
 ) -> IntersectionRoadPreviewBuilding {
   {
     id: "preview-building-test",
@@ -115,7 +115,7 @@ test "intersection road preview curates thirty stable apron lots" {
 ///|
 test "intersection road preview paints the complete rectangular lot" {
   let building = intersection_preview_test_building(40, 50, 5, 5, 100)
-  let by_depth : Map[Int, Array[IntersectionRoadPreviewBuilding]] = {
+  let by_depth : Map[Int32, Array[IntersectionRoadPreviewBuilding]] = {
     100: [building],
   }
   let cells = intersection_road_preview_building_land_cells(
@@ -180,7 +180,7 @@ test "intersection road preview keeps image and vector building pools distinct" 
     asset_path: "",
   }
   assert_true(intersection_road_preview_building_geometry_valid(vector))
-  let by_depth : Map[Int, Array[IntersectionRoadPreviewBuilding]] = {
+  let by_depth : Map[Int32, Array[IntersectionRoadPreviewBuilding]] = {
     100: [image, vector],
   }
   assert_eq(intersection_road_preview_building_counts(by_depth), (1, 1))

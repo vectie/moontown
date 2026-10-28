@@ -1,7 +1,7 @@
 ///|
 fn world_projection_benchmark_points(
-  seed : Int,
-  count : Int,
+  seed : Int32,
+  count : Int32,
 ) -> Array[SavedWorldDeltaGridPoint] {
   if count <= 0 {
     return []
@@ -65,8 +65,8 @@ fn world_projection_benchmark_points(
 
 ///|
 fn world_projection_benchmark_state(
-  seed : Int,
-  count : Int,
+  seed : Int32,
+  count : Int32,
 ) -> TownLifeWorldState {
   let base = town_life_world_empty_state_for_seed(seed)
   let points = world_projection_benchmark_points(seed, count)
@@ -91,8 +91,8 @@ fn world_projection_benchmark_state(
 
 ///|
 fn world_projection_paid_deleted_chain_state(
-  seed : Int,
-  count : Int,
+  seed : Int32,
+  count : Int32,
 ) -> TownLifeWorldState {
   let base = town_life_world_empty_state_for_seed(seed)
   let points = world_projection_benchmark_points(seed, count)

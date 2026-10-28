@@ -1,5 +1,5 @@
 ///|
-extern "js" fn collaboration_generation(value : Int) -> Unit =
+extern "js" fn collaboration_generation(value : Int32) -> Unit =
   #| value => { globalThis.__townCollaborationGeneration = value; }
 
 ///|
@@ -8,20 +8,26 @@ extern "js" fn collaboration_fetch(
   request : String,
 ) -> @js.Promise =
   #| async (endpoint, request) => {
+  #|   const requested = JSON.parse(request);
+  #|   const unavailable = message => JSON.stringify({contract_version: "moontown.collaboration.reply.v1", request_id: requested.request_id, action: requested.action, ok: false, error: message, books: [], drafts: [], saved: null, prepared: null, work: null, outcomes: [], outcome: null, source_listing: null});
   #|   try {
   #|     const response = await fetch(endpoint, {method: "POST", headers: {"Content-Type":"application/json"}, body: request});
-  #|     return await response.text();
-  #|   } catch (_) { return ""; }
+  #|     const raw = await response.text();
+  #|     let reply;
+  #|     try { reply = JSON.parse(raw); } catch (_) { return unavailable(`HTTP ${response.status}: collaboration endpoint did not return a valid reply. Check the workspace connection and retry.`); }
+  #|     if (reply?.contract_version !== "moontown.collaboration.reply.v1") return unavailable(`HTTP ${response.status}: collaboration endpoint is unavailable. Check the workspace connection and retry.`);
+  #|     return raw;
+  #|   } catch (_) { return unavailable("Network request interrupted. Check the workspace connection and retry."); }
   #| }
 
 ///|
 extern "js" fn collaboration_fetch_download(
   endpoint : String,
   request : String,
-  generation : Int,
+  generation : Int32,
   filename : String,
   expected_digest : String,
-  expected_size : Int,
+  expected_size : Int32,
 ) -> @js.Promise =
   #| async (endpoint, request, generation, filename, expectedDigest, expectedSize) => {
   #|   try {
@@ -177,6 +183,75 @@ fn collaboration_work_payload(state : @collaboration.Client) -> Json {
 }
 
 ///|
+/// Opening a task for review reads the saved revision only. Collecting runtime
+/// state remains an explicit action because the collector may retain results.
+fn collaboration_review_open(
+  dispatch : Dispatch[Msg],
+  model : Model,
+  id : String,
+  revision : String,
+) -> (Cmd, Model) {
+  if collaboration_has_unsaved_draft(model.collaboration) {
+    return collaboration_replace(model, {
+      ..model.collaboration,
+      notice: "请先保存当前研究草稿，再打开另一项任务。",
+    })
+  }
+  collaboration_action(
+    dispatch,
+    set_request_composer_model(
+      { ..model, energy_request_open: true, },
+      AttentionComposer,
+    ),
+    "load",
+    id,
+    revision,
+  )
+}
+
+///|
+/// All source-based follow-ups return to the same editor after a verified save.
+/// Stale/failed replies keep their original surface and never trigger execution.
+fn collaboration_settle_reply(
+  model : Model,
+  generation : Int32,
+  action : String,
+  raw : String,
+) -> (Cmd, Model) {
+  let state = model.collaboration.settle(generation, action, raw)
+  let saved_followup = if generation == model.collaboration.generation &&
+    model.collaboration.pending_action == action &&
+    ["retained-inquiry", "claim-challenge", "oneoff-followup", "reuse"].contains(
+      action,
+    ) {
+    let reply : @collaboration.Reply? = Some(@json.from_json(@json.parse(raw))) catch {
+      _ => None
+    }
+    match reply {
+      Some(reply) if reply.ok =>
+        match reply.saved {
+          Some(saved) =>
+            !state.dirty &&
+            state.draft == saved.draft &&
+            state.revision == saved.revision
+          None => false
+        }
+      _ => false
+    }
+  } else {
+    false
+  }
+  collaboration_replace(
+    if saved_followup {
+      set_request_composer_model(model, CollaborationComposer)
+    } else {
+      model
+    },
+    state,
+  )
+}
+
+///|
 fn collaboration_action(
   dispatch : Dispatch[Msg],
   model : Model,
@@ -184,6 +259,15 @@ fn collaboration_action(
   id : String,
   revision : String,
 ) -> (Cmd, Model) {
+  if ["load", "reuse", "retained-inquiry", "claim-challenge", "oneoff-followup"].contains(
+      action,
+    ) &&
+    collaboration_has_unsaved_draft(model.collaboration) {
+    return collaboration_replace(model, {
+      ..model.collaboration,
+      notice: "请先保存当前研究草稿，再保存这份新研究。",
+    })
+  }
   let (id, revision) = if action == "retained-inquiry" {
     (model.collaboration.inquiry_fields.get("inquiry_id").unwrap_or(""), "")
   } else if action == "claim-challenge" {

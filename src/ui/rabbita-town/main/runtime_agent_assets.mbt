@@ -1,5 +1,5 @@
 ///|
-fn worker_roster_asset(index : Int) -> String {
+fn worker_roster_asset(index : Int32) -> String {
   "tilemap/actors/roster/resident_\{index % 64}_walk_strip.png"
 }
 
@@ -8,7 +8,7 @@ fn worker_roster_asset(index : Int) -> String {
 /// those symbols to bundled assets; never evaluate a remote profile URL.
 fn energy_valley_runtime_agent_sprite_asset(
   agent : EnergyValleyRuntimeAgent,
-  index : Int,
+  index : Int32,
 ) -> String {
   match agent.avatarRef {
     Some("avatar://otter-steward") => "tilemap/actors/keeper_walk_strip.png"

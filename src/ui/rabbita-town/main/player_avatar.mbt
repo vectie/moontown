@@ -176,7 +176,7 @@ fn player_home_position(model : Model) -> (Double, Double) {
 }
 
 ///|
-fn player_current_tile(model : Model) -> (Int, Int) {
+fn player_current_tile(model : Model) -> (Int32, Int32) {
   match player_current_position(model) {
     Some((px, py)) => (px.floor().to_int(), py.floor().to_int())
     None => (96, 72)
@@ -187,7 +187,12 @@ fn player_current_tile(model : Model) -> (Int, Int) {
 /// A tile the player may stand on: in-bounds, not water/void, and not inside
 /// a building footprint. Grass, forest edges, plazas and roads are all fine
 /// for a walking resident.
-fn player_tile_enterable(model : Model, seed : Int, x : Int, y : Int) -> Bool {
+fn player_tile_enterable(
+  model : Model,
+  seed : Int32,
+  x : Int32,
+  y : Int32,
+) -> Bool {
   let world = ecosystem_contract_world_for_model(model, seed)
   let point = @energy_valley_contract.world_point(
     x.to_double() + 0.5,
@@ -222,10 +227,10 @@ fn player_tile_enterable(model : Model, seed : Int, x : Int, y : Int) -> Bool {
 ///|
 fn nearest_road_tile(
   model : Model,
-  seed : Int,
-  x : Int,
-  y : Int,
-) -> (Int, Int)? {
+  seed : Int32,
+  x : Int32,
+  y : Int32,
+) -> (Int32, Int32)? {
   for radius in 0..<14 {
     for dy in -radius..<=radius {
       for dx in -radius..<=radius {
@@ -249,7 +254,7 @@ fn nearest_road_tile(
 /// route. This keeps the embodied player on the same authored Wenyu network
 /// used by runtime agents; disconnected road islands never degrade into a
 /// misleading cross-lot straight line.
-fn player_begin_walk(model : Model, tx : Int, ty : Int) -> Model? {
+fn player_begin_walk(model : Model, tx : Int32, ty : Int32) -> Model? {
   let seed = active_energy_valley_seed()
   if !player_tile_enterable(model, seed, tx, ty) {
     return None
@@ -300,7 +305,7 @@ fn player_begin_walk(model : Model, tx : Int, ty : Int) -> Model? {
 }
 
 ///|
-fn player_step_direction_model(model : Model, dx : Int, dy : Int) -> Model {
+fn player_step_direction_model(model : Model, dx : Int32, dy : Int32) -> Model {
   if model.player is None {
     return model
   }

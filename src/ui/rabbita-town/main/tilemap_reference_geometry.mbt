@@ -1,5 +1,5 @@
 ///|
-fn abs_int(value : Int) -> Int {
+fn abs_int(value : Int32) -> Int32 {
   if value < 0 {
     -value
   } else {
@@ -9,24 +9,24 @@ fn abs_int(value : Int) -> Int {
 
 ///|
 fn in_rect(
-  grid_x : Int,
-  grid_y : Int,
-  min_x : Int,
-  min_y : Int,
-  max_x : Int,
-  max_y : Int,
+  grid_x : Int32,
+  grid_y : Int32,
+  min_x : Int32,
+  min_y : Int32,
+  max_x : Int32,
+  max_y : Int32,
 ) -> Bool {
   grid_x >= min_x && grid_x <= max_x && grid_y >= min_y && grid_y <= max_y
 }
 
 ///|
 fn in_ellipse(
-  grid_x : Int,
-  grid_y : Int,
-  center_x : Int,
-  center_y : Int,
-  radius_x : Int,
-  radius_y : Int,
+  grid_x : Int32,
+  grid_y : Int32,
+  center_x : Int32,
+  center_y : Int32,
+  radius_x : Int32,
+  radius_y : Int32,
 ) -> Bool {
   let dx = grid_x - center_x
   let dy = grid_y - center_y

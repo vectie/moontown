@@ -1,7 +1,7 @@
 ///|
 fn test_visual_projection_snapshot(
-  tick? : Int = 7,
-  messages? : Array[String] = [],
+  tick~ : Int32 = 7,
+  messages~ : Array[String] = [],
 ) -> VisualProjectionSnapshot {
   { tick, agents: [], buildings: [], modules: None, messages, }
 }

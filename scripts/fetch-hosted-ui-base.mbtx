@@ -1,0 +1,116 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn sha256(path : String) -> String {
+  let result = @shell.Cmd("sha256sum", [path]).output()
+  result.check()
+  result.stdout().split(" ").next().unwrap().to_owned()
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, root, digest, ca] &&
+    digest.has_prefix("sha256:") &&
+    digest.length() == 71 &&
+    digest[7:].iter().all(c => (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')) else {
+    fail(
+      "Usage: fetch-hosted-ui-base.mbtx NEW_DIRECTORY VERIFIED_LIVE_DIGEST CA_FILE",
+    )
+  }
+  @fs.mkdir(root, permission=0o700)
+  @fs.mkdir(root + "/blobs/sha256", recursive=true)
+  let base = "https://lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/v2/moon/hosted-apps"
+  let manifest_path = root + "/blobs/sha256/" + digest[7:].to_owned()
+  @shell.Cmd("curl", [
+    "--noproxy",
+    "*",
+    "--cacert",
+    ca,
+    "--fail",
+    "--silent",
+    "--show-error",
+    "--header",
+    "Accept: application/vnd.oci.image.manifest.v1+json",
+    "--output",
+    manifest_path,
+    base + "/manifests/" + digest,
+  ]).run()
+  guard "sha256:" + sha256(manifest_path) == digest else {
+    fail("Base manifest digest mismatch")
+  }
+  guard @json.parse(@fs.read_file(manifest_path).text())
+    is {
+      "config": { "digest": String(configuration), .. },
+      "layers": Array(layers),
+      ..
+    } else {
+    fail("Invalid base image manifest")
+  }
+  let blobs = [configuration]
+  for layer in layers {
+    guard layer is { "digest": String(hash), .. } else { fail("Invalid layer") }
+    blobs.push(hash)
+  }
+  for hash in blobs {
+    guard hash.has_prefix("sha256:") &&
+      hash.length() == 71 &&
+      hash[7:].iter().all(c => (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')) else {
+      fail("Invalid digest")
+    }
+    let path = root + "/blobs/sha256/" + hash[7:].to_owned()
+    @shell.Cmd("curl", [
+      "--noproxy",
+      "*",
+      "--cacert",
+      ca,
+      "--fail",
+      "--silent",
+      "--show-error",
+      "--output",
+      path,
+      base + "/blobs/" + hash,
+    ]).run()
+    guard "sha256:" + sha256(path) == hash else {
+      fail("Base blob digest mismatch")
+    }
+  }
+  let manifest_bytes = @fs.read_file(manifest_path).text().length()
+  @fs.write_file(
+    root + "/index.json",
+    (
+      {
+        "schemaVersion": 2,
+        "manifests": [
+          {
+            "mediaType": "application/vnd.oci.image.manifest.v1+json",
+            "digest": digest,
+            "size": manifest_bytes,
+            "platform": { "architecture": "amd64", "os": "linux" },
+          },
+        ],
+      } : Json).stringify(),
+    create_mode=CreateNew,
+  )
+  @fs.write_file(
+    root + "/oci-layout",
+    "{\"imageLayoutVersion\":\"1.0.0\"}",
+    create_mode=CreateNew,
+  )
+  @shell.Cmd("tar", [
+    "-C",
+    root,
+    "-cf",
+    root + ".oci.tar",
+    "oci-layout",
+    "index.json",
+    "blobs",
+  ]).run()
+  println("Verified existing workspace base " + digest)
+}

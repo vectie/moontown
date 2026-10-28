@@ -29,7 +29,7 @@ test('migration readiness remains owned by the three Wenyu references', async ()
   assert.doesNotMatch(readiness, /transport/i)
 })
 
-test('metro entrance installations use navigable town portals', async () => {
+test('metro entrance installations retain calibrated exits and navigable portal fallback', async () => {
   const installations = await source(
     './main/ecosystem_installation_compilation.mbt',
   )
@@ -39,10 +39,13 @@ test('metro entrance installations use navigable town portals', async () => {
 
   assert.match(
     metroEntrances,
-    /installation_point\(portal\.position\)/,
+    /None => portal\.position/,
   )
-  assert.doesNotMatch(
+  assert.match(
     metroEntrances,
     /metro_line17_station_exit_position/,
   )
+  assert.match(metroEntrances, /installation_point\(position\)/)
+  assert.match(metroEntrances, /owner_place_id=Some\(place\.id\)/)
+  assert.match(metroEntrances, /portal:\\?\{portal\.id\.to_string\(\)\}/)
 })

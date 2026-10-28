@@ -16,12 +16,12 @@ priv struct IntersectionRoadPreviewBuilding {
   id : String
   style : String
   asset_path : String
-  x : Int
-  y : Int
-  width : Int
-  depth : Int
-  apron : Int
-  depth_key : Int
+  x : Int32
+  y : Int32
+  width : Int32
+  depth : Int32
+  apron : Int32
+  depth_key : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -42,7 +42,7 @@ let intersection_road_preview_fixed_cache : Map[
 ///|
 let intersection_road_preview_depth_cache : Map[
   String,
-  Map[Int, Array[IntersectionRoadPreviewBuilding]],
+  Map[Int32, Array[IntersectionRoadPreviewBuilding]],
 ] = Map([])
 
 ///|
@@ -58,13 +58,13 @@ let intersection_road_preview_stale_ground_cache : Map[
 ///|
 let intersection_road_preview_installation_cache : Map[
   String,
-  Map[Int, Array[@energy_valley_contract.Installation]],
+  Map[Int32, Array[@energy_valley_contract.Installation]],
 ] = Map([])
 
 ///|
 let intersection_road_preview_water_cache : Map[
   String,
-  Array[(Int, Int, String)],
+  Array[(Int32, Int32, String)],
 ] = Map([])
 
 ///| Keep a derived-frame cache strictly bounded to its active key. Camera
@@ -141,7 +141,7 @@ fn intersection_road_preview_cache_key(
 /// civic module identity or introduce an arbitrary URL.
 fn intersection_road_preview_building_asset_path(
   style : String,
-  variant : Int,
+  variant : Int32,
 ) -> String? {
   golden_spring_ambient_asset_path_for_variant(style, variant)
 }
@@ -213,9 +213,9 @@ fn intersection_road_preview_sort_equal_depth(
 fn intersection_road_preview_fixed_building(
   id : String,
   style : String,
-  variant : Int,
-  x : Int,
-  y : Int,
+  variant : Int32,
+  x : Int32,
+  y : Int32,
 ) -> IntersectionRoadPreviewBuilding {
   {
     id,
@@ -331,7 +331,10 @@ fn intersection_road_preview_procedural_style_allowed(style : String) -> Bool {
 }
 
 ///|
-fn intersection_road_preview_reference_cell_buildable(x : Int, y : Int) -> Bool {
+fn intersection_road_preview_reference_cell_buildable(
+  x : Int32,
+  y : Int32,
+) -> Bool {
   match reference_tile_kind_at(x, y) {
     Some("river" | "lake" | "water" | "wetland" | "forest" | "bridge") => false
     Some(_) => true
@@ -444,7 +447,7 @@ fn intersection_road_preview_relocate_fixed_buildings(
     for radius in 0..<=24 {
       for dy in -radius..<=radius {
         let remaining = radius - dy.abs()
-        let horizontal_offsets : Array[Int] = if remaining == 0 {
+        let horizontal_offsets : Array[Int32] = if remaining == 0 {
           [0]
         } else {
           [-remaining, remaining]
@@ -504,7 +507,7 @@ fn intersection_road_preview_relocate_procedural_buildings(
     for radius in 0..<=12 {
       for dy in -radius..<=radius {
         let remaining = radius - dy.abs()
-        let horizontal_offsets : Array[Int] = if remaining == 0 {
+        let horizontal_offsets : Array[Int32] = if remaining == 0 {
           [0]
         } else {
           [-remaining, remaining]
@@ -698,14 +701,14 @@ fn intersection_road_preview_procedural_buildings(
 ///|
 fn intersection_road_preview_buildings_by_depth(
   snapshot : @energy_valley_contract.TownSnapshot,
-) -> Map[Int, Array[IntersectionRoadPreviewBuilding]] {
+) -> Map[Int32, Array[IntersectionRoadPreviewBuilding]] {
   let cache_key = intersection_road_preview_cache_key(snapshot)
   intersection_road_preview_retain_semantic_cache_key(cache_key)
   match intersection_road_preview_depth_cache.get(cache_key) {
     Some(cached) => return cached
     None => ()
   }
-  let result : Map[Int, Array[IntersectionRoadPreviewBuilding]] = Map([])
+  let result : Map[Int32, Array[IntersectionRoadPreviewBuilding]] = Map([])
   let fixed = intersection_road_preview_curated_buildings()
   for building in fixed {
     if intersection_road_preview_building_geometry_valid(building) {
@@ -758,8 +761,8 @@ fn intersection_road_preview_user_buildings(
 
 ///|
 fn intersection_road_preview_building_counts(
-  buildings : Map[Int, Array[IntersectionRoadPreviewBuilding]],
-) -> (Int, Int) {
+  buildings : Map[Int32, Array[IntersectionRoadPreviewBuilding]],
+) -> (Int32, Int32) {
   let mut image_count = 0
   let mut vector_count = 0
   for _, items in buildings {
@@ -777,8 +780,8 @@ fn intersection_road_preview_building_counts(
 
 ///|
 fn intersection_road_preview_building_contract_errors(
-  buildings : Map[Int, Array[IntersectionRoadPreviewBuilding]],
-) -> (Int, Int) {
+  buildings : Map[Int32, Array[IntersectionRoadPreviewBuilding]],
+) -> (Int32, Int32) {
   let flattened : Array[IntersectionRoadPreviewBuilding] = []
   for _, items in buildings {
     for building in items {
@@ -805,8 +808,8 @@ fn intersection_road_preview_building_contract_errors(
 
 ///|
 extern "js" fn intersection_road_preview_record_building_counts(
-  image_count : Int,
-  vector_count : Int,
+  image_count : Int32,
+  vector_count : Int32,
 ) -> Unit =
   #| (imageCount, vectorCount) => {
   #|   globalThis.__moontownIntersectionRoadPreviewBuildingCounts = {
@@ -824,8 +827,8 @@ extern "js" fn intersection_road_preview_record_building_counts(
 
 ///|
 extern "js" fn intersection_road_preview_record_building_contract(
-  invalid_lots : Int,
-  overlapping_pairs : Int,
+  invalid_lots : Int32,
+  overlapping_pairs : Int32,
 ) -> Unit =
   #| (invalidLots, overlappingPairs) => {
   #|   const root = globalThis.document?.documentElement;
@@ -967,8 +970,8 @@ extern "js" fn golden_draw_intersection_road_preview_building_lot(
 fn intersection_road_preview_draw_procedural_fallback(
   context : @dom.CanvasRenderingContext2D,
   building : IntersectionRoadPreviewBuilding,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   // Reuse the established MoonTown procedural geometry only when the matching
   // image cutout is unavailable. The synthetic record is presentation-only:
@@ -1006,8 +1009,8 @@ fn intersection_road_preview_draw_procedural_fallback(
 fn golden_draw_intersection_road_preview_building(
   context : @dom.CanvasRenderingContext2D,
   building : IntersectionRoadPreviewBuilding,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   let (center_x, center_y) = intersection_road_preview_building_center(building)
   let sx = golden_screen_x(center_x, center_y, viewport_width)
@@ -1088,14 +1091,14 @@ fn intersection_road_preview_installation_visible(
 ///|
 fn intersection_road_preview_installations_by_depth(
   snapshot : @energy_valley_contract.TownSnapshot,
-) -> Map[Int, Array[@energy_valley_contract.Installation]] {
+) -> Map[Int32, Array[@energy_valley_contract.Installation]] {
   let cache_key = intersection_road_preview_cache_key(snapshot)
   intersection_road_preview_retain_semantic_cache_key(cache_key)
   match intersection_road_preview_installation_cache.get(cache_key) {
     Some(cached) => return cached
     None => ()
   }
-  let result : Map[Int, Array[@energy_valley_contract.Installation]] = Map([])
+  let result : Map[Int32, Array[@energy_valley_contract.Installation]] = Map([])
   for depth, items in town_snapshot_installations_by_depth(snapshot) {
     for installation in items {
       let position = town_snapshot_installation_position(installation)
@@ -1150,8 +1153,8 @@ extern "js" fn golden_draw_intersection_road_preview_graph(
   camera_x : Double,
   camera_y : Double,
   zoom : Double,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
   primary_width : Double,
   secondary_width : Double,
   local_width : Double,
@@ -1332,9 +1335,9 @@ extern "js" fn golden_draw_intersection_road_preview_graph(
 /// distance along the polyline, so diagonal/curved source steps do not create
 /// the old tile-to-tile teleporting.
 extern "js" fn reference_intersection_preview_graph_walker_coordinate(
-  walker_index : Int,
+  walker_index : Int32,
   elapsed_seconds : Double,
-  axis : Int,
+  axis : Int32,
   reduced_motion : Bool,
 ) -> Double =
   #| (walkerIndex, elapsedSeconds, axis, reducedMotion) => {
@@ -1473,7 +1476,7 @@ fn intersection_road_view_stale_ground_cells(
 /// Recover the original reference surface below a removed generated lot.
 /// Campus/urban labels are deliberately returned as grass here: those labels
 /// describe the old generated pad, not a surviving plaza in this one view.
-fn intersection_road_view_stale_ground_terrain(x : Int, y : Int) -> String {
+fn intersection_road_view_stale_ground_terrain(x : Int32, y : Int32) -> String {
   if !reference_tile_snapshot_ready() {
     return "grass"
   }
@@ -1496,8 +1499,8 @@ extern "js" fn intersection_road_view_benchmark_now() -> Double =
 ///|
 extern "js" fn intersection_road_view_static_cache_key(
   base_key : String,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
   hour : Double,
 ) -> String =
   #| (baseKey, width, height, hour) => {
@@ -1581,10 +1584,10 @@ extern "js" fn intersection_road_view_commit_static_cache(
 
 ///|
 fn intersection_road_view_tile_on_screen(
-  x : Int,
-  y : Int,
-  viewport_width : Int,
-  viewport_height : Int,
+  x : Int32,
+  y : Int32,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Bool {
   let sx = golden_screen_x(
     x.to_double() + 0.5,
@@ -1659,7 +1662,7 @@ fn intersection_road_preview_building_land_type(style : String) -> String {
 /// cells are left to the road painter so a frontage road always remains
 /// visible; all other cells receive the building's explicit urban/plaza skin.
 fn intersection_road_preview_building_land_cells(
-  buildings : Map[Int, Array[IntersectionRoadPreviewBuilding]],
+  buildings : Map[Int32, Array[IntersectionRoadPreviewBuilding]],
   cache_key : String,
 ) -> Map[String, String] {
   intersection_road_preview_retain_semantic_cache_key(cache_key)
@@ -1704,8 +1707,8 @@ fn draw_intersection_road_preview_frame(
   context : @dom.CanvasRenderingContext2D,
   snapshot : @energy_valley_contract.TownSnapshot,
   view : TownCanvasViewState,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Bool {
   let benchmark_start = intersection_road_view_benchmark_now()
   if wenyu_gentle_ground_trial_requested() || wenyu_scene_default_requested() {
@@ -1780,7 +1783,7 @@ fn draw_intersection_road_preview_frame(
       viewport_height,
       view.hour,
     )
-    let animated_water : Array[(Int, Int, String)] = []
+    let animated_water : Array[(Int32, Int32, String)] = []
     for chunk in visible_chunks {
       for y in chunk.min_y..<chunk.max_y {
         for x in chunk.min_x..<chunk.max_x {

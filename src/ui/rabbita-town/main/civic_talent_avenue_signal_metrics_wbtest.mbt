@@ -13,7 +13,7 @@ test "talent avenue signal aggregations are reusable without model" {
 
 ///|
 fn talent_signal_fixture(
-  activity~ : Int,
+  activity~ : Int32,
   evidence_status~ : String,
 ) -> TalentSignalSim {
   {

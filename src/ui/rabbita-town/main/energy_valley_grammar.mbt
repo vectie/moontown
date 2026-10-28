@@ -1,20 +1,20 @@
 ///|
 priv struct EnergyValleyGrammar {
-  seed : Int
-  river_shift : Int
-  north_road_y : Int
-  civic_road_y : Int
-  lake_road_y : Int
-  south_road_y : Int
-  market_road_y : Int
-  west_road_x : Int
-  civic_road_x : Int
-  research_road_x : Int
-  east_road_x : Int
+  seed : Int32
+  river_shift : Int32
+  north_road_y : Int32
+  civic_road_y : Int32
+  lake_road_y : Int32
+  south_road_y : Int32
+  market_road_y : Int32
+  west_road_x : Int32
+  civic_road_x : Int32
+  research_road_x : Int32
+  east_road_x : Int32
 }
 
 ///|
-fn energy_valley_grammar(seed : Int) -> EnergyValleyGrammar {
+fn energy_valley_grammar(seed : Int32) -> EnergyValleyGrammar {
   let normalized = normalized_energy_valley_seed(seed)
   {
     seed: normalized,
@@ -33,7 +33,7 @@ fn energy_valley_grammar(seed : Int) -> EnergyValleyGrammar {
 }
 
 ///|
-fn energy_valley_road_pattern_shift_x(seed : Int) -> Int {
+fn energy_valley_road_pattern_shift_x(seed : Int32) -> Int32 {
   let normalized = normalized_energy_valley_seed(seed)
   if normalized == default_energy_valley_seed {
     0
@@ -43,7 +43,7 @@ fn energy_valley_road_pattern_shift_x(seed : Int) -> Int {
 }
 
 ///|
-fn energy_valley_road_pattern_shift_y(seed : Int) -> Int {
+fn energy_valley_road_pattern_shift_y(seed : Int32) -> Int32 {
   let normalized = normalized_energy_valley_seed(seed)
   if normalized == default_energy_valley_seed {
     0
@@ -54,9 +54,9 @@ fn energy_valley_road_pattern_shift_y(seed : Int) -> Int {
 
 ///|
 fn energy_valley_reference_road_kind_at(
-  seed : Int,
-  grid_x : Int,
-  grid_y : Int,
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
 ) -> String? {
   reference_tile_kind_at(
     grid_x - energy_valley_road_pattern_shift_x(seed),
@@ -66,9 +66,9 @@ fn energy_valley_reference_road_kind_at(
 
 ///|
 fn energy_valley_reference_road_like_at(
-  seed : Int,
-  grid_x : Int,
-  grid_y : Int,
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
 ) -> Bool {
   match energy_valley_reference_road_kind_at(seed, grid_x, grid_y) {
     Some("road-major") | Some("road") | Some("bridge") => true
@@ -78,9 +78,9 @@ fn energy_valley_reference_road_like_at(
 
 ///|
 fn energy_valley_reference_road_gap_at(
-  seed : Int,
-  grid_x : Int,
-  grid_y : Int,
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
 ) -> Bool {
   // The semantic JSON is a down-sampled image graph. A one-cell hole between
   // opposite road samples is a sampling seam, not a new street. Repair only
@@ -121,9 +121,9 @@ fn energy_valley_road_gap_from_neighbors(
 
 ///|
 fn energy_valley_preserved_reference_kind(
-  seed : Int,
-  grid_x : Int,
-  grid_y : Int,
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
 ) -> String? {
   match reference_tile_kind_at(grid_x, grid_y) {
     None => None
@@ -143,7 +143,7 @@ fn energy_valley_preserved_reference_kind(
 }
 
 ///|
-fn energy_valley_main_river_center_x(seed : Int, grid_y : Int) -> Int {
+fn energy_valley_main_river_center_x(seed : Int32, grid_y : Int32) -> Int32 {
   let grammar = energy_valley_grammar(seed)
   let segment = grid_y / 9
   river_center_x_at(grid_y) +
@@ -152,7 +152,10 @@ fn energy_valley_main_river_center_x(seed : Int, grid_y : Int) -> Int {
 }
 
 ///|
-fn energy_valley_reference_water_core_at(grid_x : Int, grid_y : Int) -> Bool {
+fn energy_valley_reference_water_core_at(
+  grid_x : Int32,
+  grid_y : Int32,
+) -> Bool {
   reference_water_at(grid_x, grid_y) &&
   reference_water_at(grid_x - 1, grid_y) &&
   reference_water_at(grid_x + 1, grid_y) &&
@@ -161,7 +164,11 @@ fn energy_valley_reference_water_core_at(grid_x : Int, grid_y : Int) -> Bool {
 }
 
 ///|
-fn energy_valley_main_river_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+fn energy_valley_main_river_at(
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
+) -> Bool {
   if grid_y < 7 || grid_y >= tilemap_grid_height() {
     return false
   }
@@ -171,7 +178,11 @@ fn energy_valley_main_river_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
 }
 
 ///|
-fn energy_valley_tributary_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+fn energy_valley_tributary_at(
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
+) -> Bool {
   let normalized = normalized_energy_valley_seed(seed)
   let north_shift = energy_valley_signed_variation(normalized, 1, 1, 59, 2)
   let west_shift = energy_valley_signed_variation(normalized, 2, 1, 61, 2)
@@ -185,7 +196,7 @@ fn energy_valley_tributary_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
 }
 
 ///|
-fn energy_valley_lake_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+fn energy_valley_lake_at(seed : Int32, grid_x : Int32, grid_y : Int32) -> Bool {
   match energy_valley_preserved_reference_kind(seed, grid_x, grid_y) {
     Some(kind) => return kind == "lake"
     None => ()
@@ -207,7 +218,7 @@ fn energy_valley_lake_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
 }
 
 ///|
-fn energy_valley_water_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+fn energy_valley_water_at(seed : Int32, grid_x : Int32, grid_y : Int32) -> Bool {
   match energy_valley_preserved_reference_kind(seed, grid_x, grid_y) {
     Some(kind) => return kind == "river" || kind == "lake"
     None => ()
@@ -220,10 +231,10 @@ fn energy_valley_water_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
 
 ///|
 fn energy_valley_near_water(
-  seed : Int,
-  grid_x : Int,
-  grid_y : Int,
-  radius : Int,
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
+  radius : Int32,
 ) -> Bool {
   for y_offset in 0..<(radius * 2 + 1) {
     for x_offset in 0..<(radius * 2 + 1) {
@@ -240,7 +251,11 @@ fn energy_valley_near_water(
 }
 
 ///|
-fn energy_valley_wetland_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+fn energy_valley_wetland_at(
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
+) -> Bool {
   match energy_valley_preserved_reference_kind(seed, grid_x, grid_y) {
     Some(kind) => return kind == "wetland"
     None => ()
@@ -257,9 +272,9 @@ fn energy_valley_wetland_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
 
 ///|
 fn energy_valley_fallback_major_road_at(
-  seed : Int,
-  grid_x : Int,
-  grid_y : Int,
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
 ) -> Bool {
   let grammar = energy_valley_grammar(seed)
   (abs_int(grid_y - grammar.north_road_y) <= 1 && grid_x >= 78 && grid_x <= 190) ||
@@ -287,9 +302,9 @@ fn energy_valley_fallback_major_road_at(
 
 ///|
 fn energy_valley_fallback_local_road_at(
-  seed : Int,
-  grid_x : Int,
-  grid_y : Int,
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
 ) -> Bool {
   let north_lane = grid_x >= 96 &&
     grid_x <= 162 &&
@@ -314,9 +329,9 @@ fn energy_valley_fallback_local_road_at(
 
 ///|
 fn energy_valley_framework_major_road_at(
-  seed : Int,
-  grid_x : Int,
-  grid_y : Int,
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
 ) -> Bool {
   if !reference_tile_snapshot_ready() {
     return energy_valley_fallback_major_road_at(seed, grid_x, grid_y)
@@ -343,9 +358,9 @@ fn energy_valley_framework_major_road_at(
 
 ///|
 fn energy_valley_framework_local_road_at(
-  seed : Int,
-  grid_x : Int,
-  grid_y : Int,
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
 ) -> Bool {
   if !reference_tile_snapshot_ready() {
     return energy_valley_fallback_local_road_at(seed, grid_x, grid_y)
@@ -360,31 +375,43 @@ fn energy_valley_framework_local_road_at(
 
 ///|
 fn energy_valley_framework_road_at(
-  seed : Int,
-  grid_x : Int,
-  grid_y : Int,
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
 ) -> Bool {
   energy_valley_framework_major_road_at(seed, grid_x, grid_y) ||
   energy_valley_framework_local_road_at(seed, grid_x, grid_y)
 }
 
 ///|
-fn energy_valley_major_road_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+fn energy_valley_major_road_at(
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
+) -> Bool {
   energy_valley_framework_major_road_at(seed, grid_x, grid_y)
 }
 
 ///|
-fn energy_valley_local_road_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+fn energy_valley_local_road_at(
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
+) -> Bool {
   energy_valley_framework_local_road_at(seed, grid_x, grid_y)
 }
 
 ///|
-fn energy_valley_road_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+fn energy_valley_road_at(seed : Int32, grid_x : Int32, grid_y : Int32) -> Bool {
   energy_valley_framework_road_at(seed, grid_x, grid_y)
 }
 
 ///|
-fn energy_valley_bridge_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+fn energy_valley_bridge_at(
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
+) -> Bool {
   match energy_valley_reference_road_kind_at(seed, grid_x, grid_y) {
     Some("bridge") => return true
     None => ()
@@ -398,7 +425,11 @@ fn energy_valley_bridge_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
 }
 
 ///|
-fn energy_valley_district_at(seed : Int, grid_x : Int, grid_y : Int) -> String {
+fn energy_valley_district_at(
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
+) -> String {
   let river_x = energy_valley_main_river_center_x(seed, grid_y)
   if grid_y < 62 {
     if grid_x < 132 {
@@ -428,7 +459,11 @@ fn energy_valley_district_at(seed : Int, grid_x : Int, grid_y : Int) -> String {
 }
 
 ///|
-fn energy_valley_forest_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+fn energy_valley_forest_at(
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
+) -> Bool {
   match energy_valley_preserved_reference_kind(seed, grid_x, grid_y) {
     Some(kind) => return kind == "forest"
     None => ()
@@ -438,7 +473,7 @@ fn energy_valley_forest_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
 }
 
 ///|
-fn energy_valley_farm_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+fn energy_valley_farm_at(seed : Int32, grid_x : Int32, grid_y : Int32) -> Bool {
   match energy_valley_preserved_reference_kind(seed, grid_x, grid_y) {
     Some(kind) => return kind == "farm" || kind == "field"
     None => ()
@@ -452,7 +487,11 @@ fn energy_valley_farm_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
 }
 
 ///|
-fn energy_valley_tile_kind_at(seed : Int, grid_x : Int, grid_y : Int) -> String {
+fn energy_valley_tile_kind_at(
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
+) -> String {
   if energy_valley_bridge_at(seed, grid_x, grid_y) {
     "bridge"
   } else if energy_valley_framework_road_at(seed, grid_x, grid_y) {
@@ -518,7 +557,11 @@ fn energy_valley_tile_kind_at(seed : Int, grid_x : Int, grid_y : Int) -> String 
 }
 
 ///|
-fn energy_valley_buildable_at(seed : Int, grid_x : Int, grid_y : Int) -> Bool {
+fn energy_valley_buildable_at(
+  seed : Int32,
+  grid_x : Int32,
+  grid_y : Int32,
+) -> Bool {
   !energy_valley_water_at(seed, grid_x, grid_y) &&
   !energy_valley_wetland_at(seed, grid_x, grid_y) &&
   !energy_valley_road_at(seed, grid_x, grid_y)

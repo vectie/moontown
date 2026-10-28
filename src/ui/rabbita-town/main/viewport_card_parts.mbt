@@ -2,15 +2,15 @@
 fn render_memory_strip(
   label : String,
   detail : String,
-  strip_class? : String = "memory-strip",
+  strip_class~ : String = "memory-strip",
 ) -> @rabbita.Html {
   div(class=strip_class, [span(label), p(detail)])
 }
 
 ///|
 fn render_metric_track(
-  fill : Int,
-  tone? : String = "tone-energy",
+  fill : Int32,
+  tone~ : String = "tone-energy",
 ) -> @rabbita.Html {
   let fill_style = ["width: \{fill}%"]
   div(class="metric-track", [

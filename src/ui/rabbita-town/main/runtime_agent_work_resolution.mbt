@@ -2,7 +2,7 @@
 /// Rank work states only for the final legacy fallback where a projection has
 /// neither an explicit workItemId nor an exact Run ID match. Active/review
 /// records outrank terminal history; timestamps and ids make ties stable.
-fn energy_valley_runtime_task_resolution_rank(status : String) -> Int {
+fn energy_valley_runtime_task_resolution_rank(status : String) -> Int32 {
   match status {
     "running" | "assigned" | "waiting_review" | "reviewing" => 3
     "queued" | "waiting" => 2

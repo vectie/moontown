@@ -66,7 +66,7 @@ extern "js" fn world_migration_test_set_checkpoint_replacement(
   #| }
 
 ///|
-extern "js" fn world_migration_test_checkpoint_count() -> Int =
+extern "js" fn world_migration_test_checkpoint_count() -> Int32 =
   #| () => {
   #|   const rows = globalThis.__moontownWorldMigrationDurabilityTest?.rows;
   #|   if (!rows) return 0;
@@ -141,7 +141,7 @@ fn world_migration_test_clear_caches() -> Unit {
 }
 
 ///|
-fn world_migration_test_install_ready_world() -> Int {
+fn world_migration_test_install_ready_world() -> Int32 {
   world_migration_test_install_reference_assets()
   world_migration_test_clear_caches()
   active_energy_valley_seed()

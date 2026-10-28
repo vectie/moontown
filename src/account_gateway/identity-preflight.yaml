@@ -1,0 +1,58 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: moontown-account-preflight-20261023-r9
+  namespace: aigc-acceptance-20260915
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 60
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels: {app: moontown-account-probe}
+    spec:
+      automountServiceAccountToken: false
+      # The probe performs bounded retries itself, preserving the failed Pod's
+      # diagnostic logs. Only verified TLS plus HTTP 401 count as success.
+      restartPolicy: Never
+      nodeSelector: {kubernetes.io/hostname: ubuntu}
+      # Re-read platform-browser-identity-tls.spec.clusterIP before applying
+      # in another cluster. TLS still validates the unchanged public hostname.
+      hostAliases:
+        - ip: 10.43.243.148
+          hostnames: [suanli.kechuangfuwu.com]
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: preflight
+          image: lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@sha256:7722c02728971de758a586d7d91dc40d7b8bbfa0c5f599b501ce0a89a730146a
+          args: [--check-identity]
+          env:
+            - {name: LUNANEXA_WEBIDE_CLIENT_ID, value: moontown}
+            - {name: MOONTOWN_ACCOUNT_PROVIDER, value: lunanexa}
+            - {name: LUNANEXA_WEBIDE_PUBLIC_ORIGIN, value: 'https://suanli.kechuangfuwu.com:8443'}
+            - {name: MOONTOWN_IDENTITY_ENDPOINT, value: 'https://suanli.kechuangfuwu.com:8443'}
+            - {name: MOONTOWN_IDENTITY_HOST, value: 'suanli.kechuangfuwu.com:8443'}
+            - {name: MOONTOWN_IDENTITY_ORIGIN, value: 'https://suanli.kechuangfuwu.com:8443'}
+            - {name: MOONTOWN_IDENTITY_PREFIX, value: /user}
+            - {name: MOONTOWN_IDENTITY_CA_FILE, value: /run/identity-trust/ca-bundle.crt}
+          volumeMounts:
+            - {name: identity-trust, mountPath: /run/identity-trust, readOnly: true}
+            # The base image's root-only nsswitch.conf otherwise ignores hosts
+            # mappings for this UID. This file contains only `hosts: files dns`.
+            - {name: identity-trust, mountPath: /etc/nsswitch.conf, subPath: nsswitch.conf, readOnly: true}
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {cpu: 500m, memory: 256Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+      volumes:
+        - name: identity-trust
+          configMap:
+            name: moontown-browser-identity-ca
+            defaultMode: 0444

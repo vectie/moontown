@@ -7,7 +7,7 @@ priv struct QuestDef {
   id : String
   title : String
   hint : String
-  spark_reward : Int
+  spark_reward : Int32
 }
 
 ///|
@@ -91,7 +91,7 @@ fn quest_unlocked(model : Model, id : String) -> Bool {
 }
 
 ///|
-fn quest_progress_count(model : Model) -> Int {
+fn quest_progress_count(model : Model) -> Int32 {
   let mut count = 0
   for quest in town_quest_chain() {
     if !quest_completed(model, quest.id) {
@@ -103,7 +103,7 @@ fn quest_progress_count(model : Model) -> Int {
 }
 
 ///|
-fn player_title_for(spark : Int) -> String {
+fn player_title_for(spark : Int32) -> String {
   if spark >= 400 {
     "能源谷合伙人"
   } else if spark >= 250 {

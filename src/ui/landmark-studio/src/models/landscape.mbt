@@ -4,8 +4,8 @@ fn tree(
   x : Double,
   y : Double,
   z : Double,
-  seed : Int,
-  size? : Double = 1.0,
+  seed : Int32,
+  size~ : Double = 1.0,
 ) -> Unit {
   let h = (5.5 + noise(seed) * 3) * size
   primitive(
@@ -73,7 +73,7 @@ fn planter(
   z : Double,
   w : Double,
   d : Double,
-  seed : Int,
+  seed : Int32,
 ) -> Unit {
   box(p, "stone", x, y + 0.3, z, w, 0.6, d, layer="context")
   box(p, "shrub", x, y + 0.7, z, w - 0.5, 0.6, d - 0.5, layer="context")
@@ -114,7 +114,7 @@ fn person(
   x : Double,
   y : Double,
   z : Double,
-  seed : Int,
+  seed : Int32,
 ) -> Unit {
   let mat = if seed % 2 == 0 { "coral" } else { "navy" }
   primitive(
@@ -143,7 +143,13 @@ fn lamp(p : Array[Part], x : Double, y : Double, z : Double) -> Unit {
 }
 
 ///|
-fn car(p : Array[Part], x : Double, y : Double, z : Double, seed : Int) -> Unit {
+fn car(
+  p : Array[Part],
+  x : Double,
+  y : Double,
+  z : Double,
+  seed : Int32,
+) -> Unit {
   let mat = if seed % 3 == 0 {
     "coral"
   } else if seed % 3 == 1 {
@@ -179,7 +185,7 @@ fn road(
   z : Double,
   length : Double,
   width : Double,
-  y? : Double = 2.25,
+  y~ : Double = 2.25,
 ) -> Unit {
   box(p, "asphalt", x, y, z, length, 0.12, width, layer="context")
   for i in 0..<(length / 10).to_int() {

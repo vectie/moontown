@@ -44,8 +44,8 @@ extern "js" fn spatial_world_canvas_draw_plate(
   context : @dom.CanvasRenderingContext2D,
   canvas_id : String,
   asset_path : String,
-  width : Int,
-  height : Int,
+  width : Int32,
+  height : Int32,
   fallback_color : String,
   xx : Double,
   yx : Double,
@@ -87,9 +87,9 @@ extern "js" fn spatial_world_canvas_draw_atlas_prop(
   context : @dom.CanvasRenderingContext2D,
   canvas_id : String,
   asset_path : String,
-  columns : Int,
-  rows : Int,
-  asset_index : Int,
+  columns : Int32,
+  rows : Int32,
+  asset_index : Int32,
   x : Double,
   y : Double,
   scale : Double,
@@ -390,14 +390,14 @@ extern "js" fn spatial_world_canvas_draw_compute_entity(
   #| }
 
 ///|
-fn spatial_scene_scale(width : Int) -> Double {
+fn spatial_scene_scale(width : Int32) -> Double {
   width.max(1).to_double() / 1400.0
 }
 
 ///|
 fn spatial_scene_anchor(
-  width : Int,
-  height : Int,
+  width : Int32,
+  height : Int32,
   normalized_x : Double,
   normalized_y : Double,
   underground : Bool,

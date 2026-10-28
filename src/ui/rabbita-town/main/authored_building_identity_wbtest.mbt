@@ -1,7 +1,7 @@
 ///|
 fn authored_building_test_value(
   name : String,
-  x : Int,
+  x : Int32,
   authored_id : String?,
 ) -> GoldenValleyBuilding {
   {

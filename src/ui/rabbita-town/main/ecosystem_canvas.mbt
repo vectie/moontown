@@ -106,7 +106,7 @@ fn ecosystem_canvas_behavior_color(behavior : EcosystemBehavior) -> String {
 ///|
 fn ecosystem_canvas_attention_total(
   attention : EcosystemAttentionProfile,
-) -> Int {
+) -> Int32 {
   (
     attention.urgency * 3 +
     attention.activity * 2 +
@@ -138,7 +138,7 @@ fn ecosystem_canvas_attention_tone(
 fn ecosystem_canvas_semantic_attention(
   snapshot : @energy_valley_contract.TownSnapshot,
   place : @energy_valley_contract.Place,
-) -> Int {
+) -> Int32 {
   let target_ids : Map[@energy_valley_contract.StableId, Bool] = Map([])
   let mut score = 0
   for target in snapshot.world.attention_targets {
@@ -206,16 +206,16 @@ extern "js" fn golden_draw_ecosystem_place_vignette(
   entrance_x : Double,
   entrance_y : Double,
   zoom : Double,
-  floors : Int,
+  floors : Int32,
   scene_kind : String,
   accent : String,
   glyph : String,
   label : String,
   tone : String,
-  attention : Int,
-  occupancy : Int,
-  arrivals : Int,
-  departures : Int,
+  attention : Int32,
+  occupancy : Int32,
+  arrivals : Int32,
+  departures : Int32,
   activity_glyph : String,
   activity_label : String,
   selected : Bool,
@@ -451,8 +451,8 @@ fn golden_draw_ecosystem_place_layer(
   town_snapshot : @energy_valley_contract.TownSnapshot,
   semantic_building : TownCanvasBuilding,
   selected : Bool,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   let building = semantic_building.visual()
   match town_snapshot.world.find_place(semantic_building.place_id) {
@@ -546,7 +546,7 @@ extern "js" fn golden_draw_ecosystem_exchange(
   to_x : Double,
   to_y : Double,
   accent : String,
-  progress_per_mille : Int,
+  progress_per_mille : Int32,
   reduced_motion : Bool,
   seconds : Double,
 ) -> Unit =
@@ -602,7 +602,7 @@ priv struct EcosystemExchangeCanvasSpec {
   source_position : (Double, Double)
   target_position : (Double, Double)
   accent : String
-  progress_per_mille : Int
+  progress_per_mille : Int32
 }
 
 ///|
@@ -704,9 +704,9 @@ fn ecosystem_canvas_exchange_accent(
 /// open-ended exchange uses its intensity as a stable visual phase instead of
 /// consulting resident animation state.
 fn ecosystem_canvas_exchange_progress(
-  tick : Int,
+  tick : Int32,
   exchange : @energy_valley_contract.PlaceExchange,
-) -> Int {
+) -> Int32 {
   match exchange.expires_tick {
     Some(expires_tick) if expires_tick > exchange.started_tick =>
       ((tick - exchange.started_tick).max(0) *
@@ -756,8 +756,8 @@ fn ecosystem_canvas_active_exchange_specs(
 fn golden_draw_active_ecosystem_exchanges(
   context : @dom.CanvasRenderingContext2D,
   snapshot : @energy_valley_contract.TownSnapshot,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   if golden_valley_camera_zoom() < 0.1 {
     return

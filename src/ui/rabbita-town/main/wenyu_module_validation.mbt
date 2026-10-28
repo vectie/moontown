@@ -93,7 +93,7 @@ fn module_validation_issues(civic : WenyuTownModule) -> Array[String] {
 }
 
 ///|
-fn wenyu_clean_module_count() -> Int {
+fn wenyu_clean_module_count() -> Int32 {
   let mut count = 0
   for civic in wenyu_modules() {
     if module_validation_issues(civic).is_empty() {

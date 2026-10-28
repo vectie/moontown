@@ -1,10 +1,10 @@
 ///|
-fn no_runtime_candidate_priority() -> Int {
+fn no_runtime_candidate_priority() -> Int32 {
   999
 }
 
 ///|
-fn priority_beats(candidate : Int, current : Int) -> Bool {
+fn priority_beats(candidate : Int32, current : Int32) -> Bool {
   candidate < current
 }
 

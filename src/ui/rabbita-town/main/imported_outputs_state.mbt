@@ -398,8 +398,8 @@ fn imported_outputs_transition(
 ///|
 fn imported_outputs_accepts_download(
   state : ImportedOutputsState,
-  generation : Int,
-  download_generation : Int,
+  generation : Int32,
+  download_generation : Int32,
   selection : @imported_output_contract.Selection,
 ) -> Bool {
   state.open &&

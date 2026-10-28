@@ -90,7 +90,11 @@ fn render_indoor_work(
         },
       )
     } else {
-      div(class="building-interior-work-list", rows)
+      render_advanced_details(
+        "楼内工作目录",
+        compact_label="选择工作",
+        [div(class="building-interior-work-list", rows)],
+      )
     },
   ])
 }
@@ -142,8 +146,8 @@ fn render_indoor_presence_summary(
 fn render_indoor_compute_lift(dispatch : Dispatch[Msg]) -> @rabbita.Html {
   section(class="building-interior-panel building-compute-lift", [
     div(class="building-lift-copy", [
-      h2("地下算力室"),
-      p("查看机器、容量和连接状态。"),
+      h2("算力中心"),
+      p("只读查看授权机器、容量和连接状态。"),
     ]),
     button(
       class="building-lift-button",
@@ -203,10 +207,7 @@ fn render_energy_valley_building_interior(
     div(class="building-interior-grid", [
       section(class="building-interior-floor-shell", [
         match place {
-          Some(value) =>
-            render_town_snapshot_graphical_interior_scene(
-              dispatch, model, snapshot, value,
-            )
+          Some(value) => render_indoor_spatial_stage(model, snapshot, value)
           None =>
             div(class="building-interior-unavailable", [
               h2("室内结构尚不可用"),
@@ -217,14 +218,18 @@ fn render_energy_valley_building_interior(
         },
       ]),
       div(class="building-interior-side", [
-        render_policy_hall_question_action(dispatch, building),
         match place {
           Some(value) =>
             render_indoor_slot_inspector(dispatch, model, snapshot, value)
           None => @html.nothing
         },
+        render_spatial_work_journey(
+          dispatch,
+          model,
+          show_start=model.indoor_selected_slot_id.is_empty(),
+        ),
+        render_policy_hall_question_action(dispatch, building),
         render_indoor_work(dispatch, model, building),
-        render_spatial_work_journey(dispatch, model),
         render_indoor_compute_lift(dispatch),
         render_advanced_details(
           "居民与建筑信息",

@@ -17,7 +17,7 @@ fn material_watch_latest_record(
 
 ///|
 fn material_watch_baseline_status(model : Model, goal_id : String) -> String {
-  let mut baseline_tick : Int? = None
+  let mut baseline_tick : Int32? = None
   let mut later_baseline_evidence = false
   for record in model.watcher_records {
     if record.goal_id != goal_id {
@@ -115,7 +115,7 @@ fn render_material_watch_saved_card(
   title : String,
   goal_id : String,
   saved : MaterialWatchSnapshot,
-  book_id? : String = "",
+  book_id~ : String = "",
 ) -> @rabbita.Html {
   article(class="request-composer material-watch-saved", [
     h3(title),

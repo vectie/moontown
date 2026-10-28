@@ -1,0 +1,31 @@
+///|
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/shell",
+}
+
+///|
+async fn main {
+  @shell.Cmd("moon", [
+    "-C", "src/account_gateway", "test", "src/main", "--target", "native", "--release",
+    "--warn-list", "-a", "-j", "2",
+  ]).run()
+  @shell.Cmd("moon", [
+    "test", "src/account_identity", "src/account_system", "src/account_compute",
+    "src/cmd/miniapp_server/federated_account_wbtest.mbt", "--target", "native",
+    "--release", "--warn-list", "-a", "-j", "2",
+  ]).run()
+  @shell.Cmd("moon", [
+    "check", "src/cmd/miniapp_server", "src/cmd/desktop_server", "--target", "native",
+    "--warn-list", "-a",
+  ]).run()
+  @shell.Cmd("moon", [
+    "-C", "src/ui/rabbita-town", "test", "main/account_compute_wbtest.mbt", "main/account_experience_wbtest.mbt",
+    "main/secret_compute_room_wbtest.mbt", "main/spatial_controls_wbtest.mbt", "main/spatial_scene_wbtest.mbt",
+    "--target", "js", "--release", "--warn-list", "-a",
+  ]).run()
+  @shell.Cmd("node", [
+    "--test", "src/ui/rabbita-town/account_identity.test.js", "src/ui/rabbita-town/runtime_snapshot_fetch.test.js",
+    "src/ui/rabbita-town/platform-base.test.js",
+  ]).run()
+}

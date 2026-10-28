@@ -1,10 +1,10 @@
 ///|
 priv struct TableViewState {
-  column : Int
+  column : Int32
   exact : Bool
-  sort_column : Int
+  sort_column : Int32
   descending : Bool
-  columns : Array[Int]?
+  columns : Array[Int32]?
 } derive(Debug, Eq)
 
 ///|
@@ -13,7 +13,7 @@ priv enum TableViewMsg {
   MatchMode(Bool)
   SortColumn(String)
   SortDescending(Bool)
-  ToggleColumn(Int)
+  ToggleColumn(Int32)
   Reset
 }
 
@@ -32,7 +32,7 @@ fn initial_table_view() -> TableViewState {
 fn imported_table_view_columns(
   state : ImportedOutputsState,
   table : @imported_output_contract.DataTable,
-) -> Array[Int] {
+) -> Array[Int32] {
   state.table_view.columns.unwrap_or_else(() => table.headers.mapi((i, _) => i))
 }
 
@@ -40,7 +40,7 @@ fn imported_table_view_columns(
 fn imported_table_view_rows(
   state : ImportedOutputsState,
   table : @imported_output_contract.DataTable,
-) -> Array[Int] {
+) -> Array[Int32] {
   let view = state.table_view
   table
   .view_rows(

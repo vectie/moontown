@@ -44,8 +44,8 @@ priv struct ProjectionAcceptanceReceipt {
   decision_id : String
   candidate_version : String
   reviewer : String
-  evidence_count : Int
-  issue_count : Int
+  evidence_count : Int32
+  issue_count : Int32
   requires_human_review : Bool
   source_contract : String
   source_projection : String

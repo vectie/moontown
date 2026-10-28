@@ -151,7 +151,7 @@ fn ecosystem_place_vitality(
   model : Model,
   building : GoldenValleyBuilding,
   semantic_world : @energy_valley_contract.CompiledTownWorld,
-) -> Int {
+) -> Int32 {
   let snapshot = ecosystem_cached_world_snapshot(
     model,
     active_energy_valley_seed(),
@@ -202,7 +202,7 @@ fn ecosystem_story_runtime_provenance(
 fn ecosystem_story_runtime_record_counts(
   model : Model,
   place : EcosystemPlace,
-) -> (Int, Int) {
+) -> (Int32, Int32) {
   match (place.runtime.runtime_key, model.energy_valley_runtime.projection) {
     (Some(runtime_key), Some(projection)) => {
       let task_count = projection.tasks

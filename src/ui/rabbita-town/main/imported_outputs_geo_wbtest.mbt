@@ -1,8 +1,8 @@
 ///|
 fn imported_geo_fixture(
   content : String,
-  filename? : String = "places.geojson",
-  mime? : String = "application/octet-stream",
+  filename~ : String = "places.geojson",
+  mime~ : String = "application/octet-stream",
 ) -> ImportedOutputsState raise {
   let selection : @imported_output_contract.Selection = {
     book_handle: "book-" + "1".repeat(64),

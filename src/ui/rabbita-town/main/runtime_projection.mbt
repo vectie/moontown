@@ -16,7 +16,7 @@ fn mayor_recovery_active(model : Model) -> Bool {
 }
 
 ///|
-fn clamp_metric(value : Int) -> Int {
+fn clamp_metric(value : Int32) -> Int32 {
   if value < 0 {
     0
   } else if value > 100 {

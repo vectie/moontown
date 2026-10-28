@@ -1,0 +1,78 @@
+/* A paper sheet inside the existing town, not another product shell. */
+.neighborhood-panel {
+  position: absolute;
+  top: 84px;
+  left: 20px;
+  width: min(580px, calc(100% - 40px));
+  max-height: calc(100% - 166px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 55;
+  border: 1px solid var(--town-ui-line, #c7cebc);
+  border-radius: 20px;
+  background: var(--town-ui-paper, #f7f4e9);
+  color: var(--town-ui-ink, #293b30);
+  box-shadow: var(--town-ui-shadow, 0 12px 32px rgb(32 47 35 / 18%));
+  font-size: 15px;
+  line-height: 1.6;
+}
+.neighborhood-panel [hidden] { display: none !important; }
+.neighborhood-panel :is(h2, h3, p) { margin: 0; color: inherit; }
+.neighborhood-panel h2 { font-size: 23px; line-height: 1.3; font-weight: 650; }
+.neighborhood-panel h3 { font-size: 17px; line-height: 1.5; font-weight: 650; }
+.neighborhood-panel .nh-detail-title { font-size: 23px; }
+.nh-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px 20px 16px; }
+.neighborhood-panel .nh-eyebrow { color: var(--town-ui-muted, #596859); font-size: 11px; letter-spacing: .12em; margin-bottom: 5px; }
+.nh-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; margin: 0 20px 12px; border: 1px solid var(--town-ui-line, #c7cebc); border-radius: 12px; background: var(--town-ui-wash, #e9eddf); }
+.nh-tab { min-height: 44px; padding: 8px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: var(--town-ui-muted, #596859); font: inherit; cursor: pointer; }
+.nh-tab.is-active { background: var(--town-ui-card, #fffdf5); color: var(--town-ui-ink, #293b30); border-color: var(--town-ui-line, #c7cebc); }
+.nh-body { overflow: auto; overscroll-behavior: contain; padding: 4px 20px 24px; scroll-padding-block: 20px; min-height: 0; }
+.nh-stack { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.nh-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.nh-card { border: 1px solid var(--town-ui-line, #c7cebc); border-radius: 14px; padding: 18px; background: var(--town-ui-card, #fffdf5); min-width: 0; }
+.nh-card-open { align-self: flex-start; }
+.nh-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.nh-header .nh-actions { flex-wrap: nowrap; gap: 2px; }
+.nh-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 44px; min-height: 44px; padding: 9px 16px; border: 1px solid var(--town-ui-line, #c7cebc); border-radius: 10px; background: var(--town-ui-card, #fffdf5); color: var(--town-ui-ink, #293b30); font: inherit; font-size: 14px; font-weight: 550; text-decoration: none; cursor: pointer; transition: background 120ms, color 120ms; }
+.nh-button-primary { background: var(--town-ui-accent, #3f614a); border-color: var(--town-ui-accent, #3f614a); color: var(--town-ui-paper, #f7f4e9); }
+.nh-button:hover:not(:disabled), .nh-tab:hover { background: var(--town-ui-wash, #e9eddf); color: var(--town-ui-ink, #293b30); }
+.nh-button-primary:hover:not(:disabled) { background: var(--town-ui-ink, #293b30); color: var(--town-ui-paper, #f7f4e9); }
+.neighborhood-panel :is(button, input, textarea, select, summary, a):focus-visible { outline: 2px solid var(--town-ui-focus, #956b24); outline-offset: 2px; }
+.neighborhood-panel button:disabled { opacity: .55; cursor: not-allowed; }
+.neighborhood-panel .nh-muted { color: var(--town-ui-muted, #596859); font-size: 14px; }
+.nh-card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; color: var(--town-ui-muted, #596859); font-size: 13px; }
+.nh-badge { display: inline-flex; width: fit-content; padding: 3px 8px; border-radius: 7px; background: var(--town-ui-wash, #e9eddf); color: var(--town-ui-ink, #293b30); font-size: 12px; }
+.nh-excerpt { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-wrap; overflow-wrap: anywhere; }
+.nh-prose { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; }
+.neighborhood-panel .nh-copy { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; line-height: 1.8; }
+.nh-status { border-left: 3px solid var(--town-ui-accent, #3f614a); padding: 8px 12px; background: var(--town-ui-wash, #e9eddf); border-radius: 0 8px 8px 0; overflow-wrap: anywhere; }
+.nh-error { border-left-color: var(--town-ui-focus, #956b24); }
+.nh-empty { padding: 32px 12px; display: flex; flex-direction: column; gap: 10px; text-align: center; }
+.nh-back { align-self: flex-start; }
+.nh-field { display: flex; flex-direction: column; gap: 7px; min-width: 0; font-size: 14px; }
+.nh-field :is(input, textarea, select) { width: 100%; min-width: 0; box-sizing: border-box; min-height: 44px; border: 1px solid var(--town-ui-line, #c7cebc); border-radius: 10px; padding: 10px 12px; color: var(--town-ui-ink, #293b30); background: var(--town-ui-card, #fffdf5); font: inherit; font-size: 16px; line-height: 1.6; }
+.nh-field textarea { resize: vertical; min-height: 110px; }
+.nh-consent { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; min-height: 44px; cursor: pointer; font-size: 14px; }
+.nh-consent input { appearance: auto; width: 20px; height: 20px; flex-shrink: 0; margin: 2px 0; accent-color: var(--town-ui-accent, #3f614a); }
+.nh-disclosure { border-top: 1px solid var(--town-ui-line, #c7cebc); padding-top: 8px; }
+.nh-disclosure > summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-size: 14px; }
+.nh-disclosure > .nh-stack { padding-block: 8px; }
+.neighborhood-panel .town-advanced { color: var(--town-ui-muted, #596859); border-color: var(--town-ui-line, #c7cebc); }
+@media (max-width: 640px) {
+  .neighborhood-panel { top: 76px; left: 8px; width: calc(100% - 16px); max-height: calc(100% - 148px); border-radius: 16px; font-size: 16px; }
+  .nh-header { padding: 16px 14px 12px; }
+  .neighborhood-panel h2 { font-size: 20px; }
+  .nh-tabs { margin-inline: 12px; }
+  .nh-body { padding-inline: 14px; padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+  .nh-card { padding: 14px; }
+  .nh-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-height: 520px) {
+  .neighborhood-panel { top: 12px; max-height: calc(100% - 24px); }
+  .nh-header { padding-block: 10px; }
+  .nh-tabs { margin-bottom: 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .neighborhood-panel *, .neighborhood-panel *::before, .neighborhood-panel *::after { transition: none !important; animation: none !important; }
+}

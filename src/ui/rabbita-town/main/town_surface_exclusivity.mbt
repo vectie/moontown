@@ -5,6 +5,7 @@
 fn close_town_transient_surfaces(model : Model) -> Model {
   {
     ..model,
+    neighborhood: { ..model.neighborhood, open: false, },
     imported_outputs: close_imported_outputs(model.imported_outputs),
     energy_board_open: false,
     energy_first_agent_open: false,

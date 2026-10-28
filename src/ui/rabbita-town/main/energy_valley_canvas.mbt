@@ -17,7 +17,7 @@ priv struct GoldenValleyCanvasAgent {
 /// generation, persistence ledger, or application Model crosses the Canvas
 /// boundary.
 priv struct TownCanvasViewState {
-  tick : Int
+  tick : Int32
   weather : EnergyWeather
   hour : Double
   metro_visible : Bool
@@ -724,11 +724,11 @@ extern "js" fn install_golden_valley_canvas_input(
   #| }
 
 ///|
-extern "js" fn golden_valley_action_x() -> Int =
+extern "js" fn golden_valley_action_x() -> Int32 =
   #| () => globalThis.__moontownGoldenValleyActionX ?? 0
 
 ///|
-extern "js" fn golden_valley_action_y() -> Int =
+extern "js" fn golden_valley_action_y() -> Int32 =
   #| () => globalThis.__moontownGoldenValleyActionY ?? 0
 
 ///|
@@ -794,9 +794,9 @@ extern "js" fn golden_canvas_benchmark_now() -> Double =
 ///|
 extern "js" fn golden_canvas_record_full_paint(
   duration_ms : Double,
-  chunk_count : Int,
-  visible_tile_visits : Int,
-  legacy_tile_visits : Int,
+  chunk_count : Int32,
+  visible_tile_visits : Int32,
+  legacy_tile_visits : Int32,
 ) -> Unit =
   #| (durationMs, chunkCount, visibleTileVisits, legacyTileVisits) => {
   #|   const metrics = globalThis.__moontownGoldenValleyRenderBenchmark ||= {
@@ -827,11 +827,11 @@ extern "js" fn golden_canvas_record_full_paint(
   #| }
 
 ///|
-extern "js" fn golden_valley_canvas_width(id : String) -> Int =
+extern "js" fn golden_valley_canvas_width(id : String) -> Int32 =
   #| (id) => globalThis.document?.getElementById(id)?.clientWidth || 1280
 
 ///|
-extern "js" fn golden_valley_canvas_height(id : String) -> Int =
+extern "js" fn golden_valley_canvas_height(id : String) -> Int32 =
   #| (id) => globalThis.document?.getElementById(id)?.clientHeight || 720
 
 ///|
@@ -926,7 +926,7 @@ extern "js" fn golden_draw_road_detail(
   sx : Double,
   sy : Double,
   zoom : Double,
-  mask : Int,
+  mask : Int32,
   major : Bool,
 ) -> Unit =
   #| (context, sx, sy, zoom, mask, major) => {
@@ -1000,7 +1000,7 @@ extern "js" fn golden_draw_bridge_detail(
   sx : Double,
   sy : Double,
   zoom : Double,
-  mask : Int,
+  mask : Int32,
 ) -> Unit =
   #| (context, sx, sy, zoom, mask) => {
   #|   const northSouth = Number(Boolean(mask & 1)) + Number(Boolean(mask & 4));
@@ -1053,7 +1053,7 @@ extern "js" fn golden_draw_ground_detail(
   sy : Double,
   zoom : Double,
   variation : Double,
-  phase : Int,
+  phase : Int32,
   civic_urban : Bool,
 ) -> Unit =
   #| (context, terrain, sx, sy, zoom, variation, phase, civicUrban) => {
@@ -1176,8 +1176,8 @@ extern "js" fn golden_draw_ground_detail(
 ///|
 extern "js" fn golden_draw_background(
   context : @dom.CanvasRenderingContext2D,
-  width : Int,
-  height : Int,
+  width : Int32,
+  height : Int32,
   hour : Double,
 ) -> Unit =
   #| (context, width, height, hour) => {
@@ -1204,8 +1204,8 @@ extern "js" fn golden_draw_background(
 ///|
 extern "js" fn golden_draw_day_night(
   context : @dom.CanvasRenderingContext2D,
-  width : Int,
-  height : Int,
+  width : Int32,
+  height : Int32,
   hour : Double,
 ) -> Unit =
   #| (context, width, height, hour) => {
@@ -1246,8 +1246,8 @@ extern "js" fn golden_draw_iso_windows(
   depth : Double,
   height : Double,
   zoom : Double,
-  columns : Int,
-  rows : Int,
+  columns : Int32,
+  rows : Int32,
   lit_fraction : Double,
 ) -> Unit =
   #| (
@@ -1399,8 +1399,8 @@ extern "js" fn golden_draw_reference_building_details(
   width : Double,
   depth : Double,
   height : Double,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
   time : Double,
   selected : Bool,
 ) -> Unit =
@@ -1706,7 +1706,7 @@ extern "js" fn golden_draw_reference_tree(
   #| }
 
 ///|
-fn golden_valley_agent_sprite_path(role : String, index : Int) -> String {
+fn golden_valley_agent_sprite_path(role : String, index : Int32) -> String {
   match role.to_lower() {
     "mayor" => "/tilemap/actors/mayor_walk_strip.png"
     "keeper" => "/tilemap/actors/keeper_walk_strip.png"
@@ -1861,7 +1861,7 @@ extern "js" fn golden_draw_sprite_agent(
 fn golden_screen_x(
   world_x : Double,
   world_y : Double,
-  viewport_width : Int,
+  viewport_width : Int32,
 ) -> Double {
   ((world_x - world_y) * 32.0 - golden_valley_camera_x()) *
   golden_valley_camera_zoom() +
@@ -1872,7 +1872,7 @@ fn golden_screen_x(
 fn golden_screen_y(
   world_x : Double,
   world_y : Double,
-  viewport_height : Int,
+  viewport_height : Int32,
 ) -> Double {
   ((world_x + world_y) * 16.0 - golden_valley_camera_y()) *
   golden_valley_camera_zoom() +
@@ -1941,7 +1941,7 @@ fn golden_native_road_visible_mask(
   road : TownCanvasRoadCell,
   presentation_ready : Bool,
   zoom : Double,
-) -> Int {
+) -> Int32 {
   let directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
   let mut visible_mask = 0
   for index in 0..<directions.length() {
@@ -2002,8 +2002,8 @@ fn golden_canonical_old_map_terrain(
   road : TownCanvasRoadCell?,
   road_visible : Bool,
   authoritative_transport : Bool,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> String {
   if authoritative_transport || !road_visible {
     town_snapshot_canvas_transport_terrain(snapshot, roads, road, x, y)
@@ -2021,8 +2021,8 @@ fn golden_draw_canonical_old_map_terrain(
   sx : Double,
   sy : Double,
   variation : Double,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Unit {
   golden_diamond(context, sx, sy)
   if terrain == "water" || terrain == "bridge" {
@@ -2068,10 +2068,10 @@ fn golden_draw_tile(
   presentation_ready : Bool,
   bridge_graphics_visible : Bool,
   terrain_override : String?,
-  x : Int,
-  y : Int,
-  viewport_width : Int,
-  viewport_height : Int,
+  x : Int32,
+  y : Int32,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   let sx = golden_screen_x(
     x.to_double() + 0.5,
@@ -2130,10 +2130,10 @@ fn golden_draw_road_overlay_tile(
   roads : Map[String, TownCanvasRoadCell],
   road : TownCanvasRoadCell?,
   presentation_ready : Bool,
-  x : Int,
-  y : Int,
-  viewport_width : Int,
-  viewport_height : Int,
+  x : Int32,
+  y : Int32,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   let semantic_road = match road {
     Some(value) if !value.bridge &&
@@ -2358,8 +2358,8 @@ fn golden_draw_building(
   building : TownCanvasBuilding,
   selected : Bool,
   work_status : String,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
   hour : Double,
 ) -> Unit {
   let center_x = building.x.to_double() + building.width.to_double() / 2.0
@@ -2713,9 +2713,9 @@ fn golden_draw_building(
 fn golden_draw_agents_at_depth(
   context : @dom.CanvasRenderingContext2D,
   agents : Array[GoldenValleyCanvasAgent],
-  depth : Int,
-  viewport_width : Int,
-  viewport_height : Int,
+  depth : Int32,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   for agent in agents {
     if (agent.x + agent.y + 0.45).floor().to_int() != depth {
@@ -2754,9 +2754,9 @@ fn golden_draw_agents_at_depth(
 fn golden_draw_weather(
   context : @dom.CanvasRenderingContext2D,
   weather : EnergyWeather,
-  tick : Int,
-  viewport_width : Int,
-  viewport_height : Int,
+  tick : Int32,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   match weather {
     Sunny => ()

@@ -6,10 +6,9 @@ test "talent avenue copy renders explicit snapshot fields" {
     graph_entities: 6,
     verified_cards: 4,
   })
-  assert_true(copy.contains("Talent Cartographer / Running"))
-  assert_true(copy.contains("Talent heatmap refresh"))
-  assert_true(copy.contains("6 public-safe cards"))
-  assert_true(copy.contains("4 cards already carry reviewable evidence"))
+  assert_true(copy.contains("示例 6 张"))
+  assert_true(copy.contains("示例不是认证"))
+  assert_false(copy.contains("cards are live"))
 }
 
 ///|

@@ -15,7 +15,7 @@ test "accepted custom Place outside every parcel remains a visible rejection" {
   }
   let snapshot : EcosystemWorldSnapshot = {
     schema: ecosystem_world_schema(),
-    seed: (20260727 : Int).reinterpret_as_uint(),
+    seed: (20260727 : Int32).reinterpret_as_uint(),
     cols: 256,
     rows: 144,
     places: [source],

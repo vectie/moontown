@@ -78,32 +78,31 @@ fn collaboration_participant_fields(
   let fields = [
     (
       "source_paths",
-      "Exact source paths in " + p.book_id + " (one per line)",
+      "资料路径（每行一条）",
       p.source_paths.join("\n"),
     ),
-    ("focus_area", "Focus for " + p.book_id, p.focus_area),
-    ("perspective", "Perspective for " + p.book_id, p.perspective),
-    ("contribution", "Contribution from " + p.book_id, p.contribution),
-    ("next_artifact", "Next artifact from " + p.book_id, p.next_artifact),
+    ("focus_area", "关注范围", p.focus_area),
+    ("perspective", "独立研究角度", p.perspective),
+    ("contribution", "需要回答什么", p.contribution),
+    ("next_artifact", "交付什么", p.next_artifact),
   ]
   div(class="request-desk-stack", [
     h3(p.book_id),
     button(
       attrs=@html.Attrs::build().disabled(state.busy()),
       on_click=dispatch(CollaborationBrowseSources(p.book_id)),
-      "Browse current sources in " + p.book_id,
+      "选择资料",
     ),
     if state.source_book == p.book_id {
       render_source_picker(dispatch, state, p)
     } else {
       span("")
     },
-    @html.p(
-      "Paths are relative to this Book, such as raw/notes.md. Saving captures exact bytes; each source is limited to 1 MiB.",
-    ),
     div(
       class="request-form-grid",
-      fields.map(field => {
+      fields
+      .filter(field => field.0 != "source_paths")
+      .map(field => {
         collaboration_field(
           "collaboration-" + p.book_id + "-" + field.0,
           field.1,
@@ -116,6 +115,28 @@ fn collaboration_participant_fields(
         )
       }),
     ),
+    render_advanced_details(
+      "资料路径与任务细节",
+      [
+        @html.p(
+          "也可填写知识册内的准确路径。保存时会记录所选资料，不会运行任务。",
+        ),
+        ..fields
+        .filter(field => field.0 == "source_paths")
+        .map(field => {
+          collaboration_field(
+            "collaboration-" + p.book_id + "-" + field.0,
+            field.1,
+            field.2,
+            state.busy(),
+            value => {
+              dispatch(CollaborationParticipantEdit(p.book_id, field.0, value))
+            },
+            multiline=true,
+          )
+        }),
+      ],
+    ),
   ])
 }
 
@@ -124,6 +145,31 @@ fn render_collaboration_composer(
   dispatch : Dispatch[Msg],
   state : @collaboration.Client,
 ) -> @rabbita.Html {
+  if state.books.is_empty() &&
+    state.drafts.is_empty() &&
+    state.revision.is_empty() &&
+    !state.busy() &&
+    !collaboration_has_unsaved_draft(state) &&
+    (
+      state.notice.contains("Directory is missing") ||
+      state.notice.contains("HTTP") ||
+      state.notice == "Saved drafts and existing Books loaded"
+    ) {
+    return div(id="collaboration-compose", class="request-composer", [
+      h3("连接研究资料"),
+      p(
+        "当前没有可参与协作的知识册。连接资料后重试，或先创建资料研究。",
+      ),
+      render_collaboration_notice(state),
+      div(class="request-actions", [
+        button(on_click=dispatch(CollaborationAction("list")), "重试连接"),
+        button(
+          on_click=dispatch(SetRequestComposer(EvidenceBookComposer)),
+          "创建资料研究",
+        ),
+      ]),
+    ])
+  }
   let disabled = state.busy()
   let fields = [
     collaboration_form_field(
@@ -193,9 +239,11 @@ fn render_collaboration_composer(
       state.draft.objection_reviewer_name,
     ),
   ]
-  div(class="request-composer", [
+  div(id="collaboration-compose", class="request-composer", [
     h3("协作研究"),
-    p("选择至少两个知识册，分配任务并指定审阅人。"),
+    p(
+      "选择资料和参与知识册，写下问题，再指定审阅人。保存草稿不会启动任务。",
+    ),
     div(class="request-actions", [
       button(
         class="control-button",
@@ -206,7 +254,7 @@ fn render_collaboration_composer(
       button(
         class="control-button",
         on_click=dispatch(CollaborationReset),
-        town_ui_label("plus", "新草稿"),
+        town_ui_label("plus", "新建研究"),
       ),
     ]),
     div(
@@ -234,7 +282,15 @@ fn render_collaboration_composer(
       compact_label="草稿选项",
       needs_attention=!@collaboration.safe_id(state.draft.draft_id) ||
         !state.draft.objection.is_empty(),
-      [fields[0], fields[6], fields[7], fields[8]],
+      [
+        p(
+          "审阅人标识必须对应实际登录账户；显示姓名本身不能授予审核权限。",
+        ),
+        fields[0],
+        fields[6],
+        fields[7],
+        fields[8],
+      ],
     ),
     @html.details(class="collaboration-book-picker", [
       @html.summary(
@@ -285,7 +341,7 @@ fn render_collaboration_composer(
           disabled || state.dirty || state.revision.is_empty(),
         ),
         on_click=dispatch(CollaborationAction("prepare")),
-        "准备交接",
+        "准备任务",
       ),
     ]),
     render_advanced_details(
@@ -314,7 +370,7 @@ fn render_collaboration_composer(
           dispatch,
           state,
           "new_draft_id",
-          "New ID for reuse",
+          "继续研究的新草稿标识",
           state.new_draft_id,
         ),
         button(
@@ -325,10 +381,10 @@ fn render_collaboration_composer(
             !@collaboration.safe_id(state.new_draft_id),
           ),
           on_click=dispatch(CollaborationAction("reuse")),
-          "Reuse saved question as a fresh draft",
+          "继续研究 · 复用此问题",
         ),
         p(
-          "Reuse copies this exact saved revision's assignments and recaptures the selected current files. Prior review decisions are not carried forward.",
+          "复用会重新记录当前资料，不会继承原来的审核决定。",
         ),
       ],
     ),
@@ -340,50 +396,45 @@ fn render_collaboration_composer(
             class="request-submit",
             attrs=@html.Attrs::build().disabled(disabled),
             on_click=dispatch(CollaborationDownload("")),
-            "Download prepared plan package (.tar)",
+            "下载任务包",
           ),
-          p(
-            "The package retains nested source paths, prior review history, and SHA-256 manifest. Individual files below are convenient copies; use the complete package for review.",
-          ),
-          div(
-            class="request-actions",
-            prepared.artifacts
-            .filter(a => {
-              a.path.has_prefix("revisions/" + state.revision + "/") &&
-              !a.path.contains("/sources/")
-            })
-            .map(artifact => {
-              button(
-                attrs=@html.Attrs::build().disabled(disabled),
-                on_click=dispatch(CollaborationDownload(artifact.path)),
-                "Download " +
-                artifact.path.split("/").last().unwrap_or("artifact").to_owned(),
-              )
-            }),
-          ),
+          render_advanced_details("任务包文件与来源", [
+            p(
+              "完整任务包保留资料路径、来源记录与历史审核；下方为单文件副本。",
+            ),
+            div(
+              class="request-actions",
+              prepared.artifacts
+              .filter(a => {
+                a.path.has_prefix("revisions/" + state.revision + "/") &&
+                !a.path.contains("/sources/")
+              })
+              .map(artifact => {
+                button(
+                  attrs=@html.Attrs::build().disabled(disabled),
+                  on_click=dispatch(CollaborationDownload(artifact.path)),
+                  "Download " +
+                  artifact.path
+                  .split("/")
+                  .last()
+                  .unwrap_or("artifact")
+                  .to_owned(),
+                )
+              }),
+            ),
+          ]),
         ])
     },
-    if state.notice ==
-      "Choose existing Books and exact source paths. Save incomplete drafts; prepare when assignments and reviewers are ready." {
-      @html.nothing
-    } else {
-      p(
-        attrs=@html.Attrs::build().role("status").aria_live("polite"),
-        state.notice,
-      )
-    },
+    render_collaboration_notice(state),
     if state.prepared is Some(_) || state.work is Some(_) {
       render_collaboration_work(dispatch, state)
     } else {
       @html.nothing
     },
     render_advanced_details(
-      "历史成果与声明复核",
-      compact_label="历史复核",
-      [
-        render_collaboration_outcomes(dispatch, state),
-        render_claim_challenge(dispatch, state),
-      ],
+      "从声明比较继续研究",
+      compact_label="导入比较",
+      [render_claim_challenge(dispatch, state)],
     ),
   ])
 }

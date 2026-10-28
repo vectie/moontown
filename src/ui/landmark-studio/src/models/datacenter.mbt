@@ -31,7 +31,7 @@ fn dc_entity(
   kind : String,
   position : Array[Double],
   detail : String,
-  visit? : String = "",
+  visit~ : String = "",
 ) -> ComputeEntity {
   { id, name, kind, position, detail, visit, }
 }

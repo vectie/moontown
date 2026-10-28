@@ -271,7 +271,7 @@ fn knowledge_runtime_task_topic(task : EnergyValleyRuntimeWorkItem) -> String {
 }
 
 ///|
-fn knowledge_runtime_task_spark(task : EnergyValleyRuntimeWorkItem) -> Int {
+fn knowledge_runtime_task_spark(task : EnergyValleyRuntimeWorkItem) -> Int32 {
   let evidence = match task.progress {
     Some(progress) =>
       progress.acceptedFacts.unwrap_or(0) * 3 +
@@ -932,7 +932,7 @@ fn knowledge_collected_building_style(post : KnowledgePost) -> String {
 }
 
 ///|
-fn knowledge_collected_building_floors(post : KnowledgePost) -> Int {
+fn knowledge_collected_building_floors(post : KnowledgePost) -> Int32 {
   match knowledge_collected_building_style(post) {
     "custom-tower" => 5
     _ => 2
@@ -942,8 +942,8 @@ fn knowledge_collected_building_floors(post : KnowledgePost) -> Int {
 ///|
 fn knowledge_collected_building_at(
   post : KnowledgePost,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> GoldenValleyBuilding {
   let scale = energy_valley_semantic_cells_per_planning_cell()
   {
@@ -1108,7 +1108,7 @@ fn knowledge_collect_model(model : Model, post_id : String) -> Model {
 }
 
 ///|
-fn collected_count(model : Model) -> Int {
+fn collected_count(model : Model) -> Int32 {
   model.posts.filter(post => post.collected).length()
 }
 

@@ -1,5 +1,5 @@
 ///|
-fn energy_valley_access_in_bounds(x : Int, y : Int) -> Bool {
+fn energy_valley_access_in_bounds(x : Int32, y : Int32) -> Bool {
   x >= 0 &&
   x < exact_energy_valley_cols() &&
   y >= 0 &&
@@ -7,15 +7,15 @@ fn energy_valley_access_in_bounds(x : Int, y : Int) -> Bool {
 }
 
 ///|
-fn energy_valley_access_key(x : Int, y : Int) -> String {
+fn energy_valley_access_key(x : Int32, y : Int32) -> String {
   "\{x}:\{y}"
 }
 
 ///|
 fn energy_valley_access_is_road(
   tiles : Array[Array[ExactEnergyValleyTile]],
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Bool {
   if !energy_valley_access_in_bounds(x, y) {
     return false
@@ -29,7 +29,7 @@ fn energy_valley_largest_road_component(
   tiles : Array[Array[ExactEnergyValleyTile]],
 ) -> Map[String, Bool] {
   let visited : Map[String, Bool] = Map([])
-  let mut largest : Array[Int] = []
+  let mut largest : Array[Int32] = []
   let directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
   for y in 0..<exact_energy_valley_rows() {
     for x in 0..<exact_energy_valley_cols() {
@@ -38,8 +38,8 @@ fn energy_valley_largest_road_component(
         !energy_valley_access_is_road(tiles, x, y) {
         continue
       }
-      let component : Array[Int] = []
-      let queue : Array[Int] = [y * exact_energy_valley_cols() + x]
+      let component : Array[Int32] = []
+      let queue : Array[Int32] = [y * exact_energy_valley_cols() + x]
       visited[origin_key] = true
       let mut head = 0
       while head < queue.length() {
@@ -78,8 +78,8 @@ fn energy_valley_largest_road_component(
 ///|
 fn energy_valley_access_can_cross(
   tiles : Array[Array[ExactEnergyValleyTile]],
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> Bool {
   if !energy_valley_access_in_bounds(x, y) {
     return false
@@ -92,18 +92,18 @@ fn energy_valley_access_can_cross(
 fn energy_valley_access_path_to_network(
   tiles : Array[Array[ExactEnergyValleyTile]],
   network : Map[String, Bool],
-  start_x : Int,
-  start_y : Int,
-) -> Array[Int]? {
+  start_x : Int32,
+  start_y : Int32,
+) -> Array[Int32]? {
   if !energy_valley_access_in_bounds(start_x, start_y) {
     return None
   }
   let columns = exact_energy_valley_cols()
   let start = start_y * columns + start_x
-  let queue : Array[Int] = [start]
+  let queue : Array[Int32] = [start]
   let seen : Map[String, Bool] = Map([])
   seen[energy_valley_access_key(start_x, start_y)] = true
-  let previous : Map[String, Int] = Map([])
+  let previous : Map[String, Int32] = Map([])
   // Cardinal BFS gives the shortest orthogonal spur into the shared road graph.
   let directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
   let mut head = 0
@@ -132,7 +132,7 @@ fn energy_valley_access_path_to_network(
   if reached < 0 {
     return None
   }
-  let reversed : Array[Int] = []
+  let reversed : Array[Int32] = []
   let mut cursor = reached
   while cursor >= 0 {
     reversed.push(cursor)
@@ -145,7 +145,7 @@ fn energy_valley_access_path_to_network(
       .get(energy_valley_access_key(cursor_x, cursor_y))
       .unwrap_or(-1)
   }
-  let result : Array[Int] = []
+  let result : Array[Int32] = []
   let mut index = reversed.length() - 1
   while index >= 0 {
     result.push(reversed[index])
@@ -158,7 +158,7 @@ fn energy_valley_access_path_to_network(
 fn energy_valley_paint_access_spur(
   tiles : Array[Array[ExactEnergyValleyTile]],
   network : Map[String, Bool],
-  path : Array[Int],
+  path : Array[Int32],
 ) -> Unit {
   let columns = exact_energy_valley_cols()
   for cell in path {

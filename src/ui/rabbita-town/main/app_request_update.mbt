@@ -2,7 +2,7 @@
 fn submit_operator_request_update(
   dispatch : Dispatch[Msg],
   model : Model,
-  submit? : (Dispatch[Msg], Model) -> Cmd = submit_operator_request_cmd,
+  submit~ : (Dispatch[Msg], Model) -> Cmd = submit_operator_request_cmd,
 ) -> (Cmd, Model) {
   if model.request_submitting {
     return model_only_update(model)
@@ -34,7 +34,7 @@ fn submit_book_template_request_update(
 
 ///|
 fn operator_request_result_update(
-  submission_id : Int,
+  submission_id : Int32,
   raw : String,
   model : Model,
 ) -> (Cmd, Model) {

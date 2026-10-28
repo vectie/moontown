@@ -1,14 +1,14 @@
 ///|
 priv struct LiveAutonomyOperatorView {
-  template_request_count : Int
-  pending_template_request_count : Int
-  failed_template_request_count : Int
+  template_request_count : Int32
+  pending_template_request_count : Int32
+  failed_template_request_count : Int32
 }
 
 ///|
 fn live_autonomy_operator_view(
   model : Model,
-  fallback_active_workers~ : Int,
+  fallback_active_workers~ : Int32,
 ) -> LiveAutonomyOperatorView {
   match model.live_autonomy {
     Some(spine) =>
@@ -20,7 +20,7 @@ fn live_autonomy_operator_view(
 ///|
 fn live_autonomy_connected_operator_view(
   spine : LiveAutonomySnapshot,
-  _fallback_active_workers : Int,
+  _fallback_active_workers : Int32,
 ) -> LiveAutonomyOperatorView {
   {
     template_request_count: spine.book_template_request_count,
@@ -31,7 +31,7 @@ fn live_autonomy_connected_operator_view(
 
 ///|
 fn live_autonomy_disconnected_operator_view(
-  fallback_active_workers : Int,
+  fallback_active_workers : Int32,
 ) -> LiveAutonomyOperatorView {
   ignore(fallback_active_workers)
   {

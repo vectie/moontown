@@ -1,33 +1,33 @@
 ///|
 priv struct TickMetricState {
-  budget : Int
-  energy : Int
-  pressure : Int
-  stability : Int
+  budget : Int32
+  energy : Int32
+  pressure : Int32
+  stability : Int32
 }
 
 ///|
-fn operating_budget_delta() -> Int {
+fn operating_budget_delta() -> Int32 {
   -2
 }
 
 ///|
-fn operating_energy_delta() -> Int {
+fn operating_energy_delta() -> Int32 {
   -1
 }
 
 ///|
-fn operating_pressure_delta() -> Int {
+fn operating_pressure_delta() -> Int32 {
   1
 }
 
 ///|
-fn operating_stability_delta() -> Int {
+fn operating_stability_delta() -> Int32 {
   0
 }
 
 ///|
-fn periodic_bonus(tick : Int, period : Int, amount : Int) -> Int {
+fn periodic_bonus(tick : Int32, period : Int32, amount : Int32) -> Int32 {
   if tick % period == 0 {
     amount
   } else {
@@ -36,7 +36,7 @@ fn periodic_bonus(tick : Int, period : Int, amount : Int) -> Int {
 }
 
 ///|
-fn recovery_boost(active : Bool, amount : Int) -> Int {
+fn recovery_boost(active : Bool, amount : Int32) -> Int32 {
   if active {
     amount
   } else {

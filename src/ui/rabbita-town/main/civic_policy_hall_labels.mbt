@@ -141,13 +141,8 @@ fn policy_hall_evidence_label(
   model : Model,
   execution : @core.TaskExecutionRecord?,
 ) -> String {
-  civic_projected_execution_stage_label(
-    model.state_source,
-    execution,
-    policy_hall_evidence_phrases(),
-    projection_fallback="Snapshot not wired yet",
-    fallback="Demo citations assumed",
-  )
+  ignore(execution)
+  civic_surface_evidence(model, "policy-hall")
 }
 
 ///|

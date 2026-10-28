@@ -204,7 +204,7 @@ fn energy_valley_runtime_known_agents_for_module(
 ///|
 fn energy_valley_runtime_exchange_title(
   state : EnergyValleyRuntimeState,
-  exchange_party_count : Int,
+  exchange_party_count : Int32,
 ) -> String {
   if exchange_party_count >= 2 {
     if state.phase is Live {
@@ -308,7 +308,7 @@ fn render_energy_valley_module_agent_exchange(
 fn energy_valley_runtime_task_count(
   state : EnergyValleyRuntimeState,
   status : String,
-) -> Int {
+) -> Int32 {
   let mut count = 0
   match state.projection {
     Some(projection) =>
@@ -325,7 +325,7 @@ fn energy_valley_runtime_task_count(
 ///|
 fn energy_valley_runtime_open_task_count(
   state : EnergyValleyRuntimeState,
-) -> Int {
+) -> Int32 {
   let mut count = 0
   match state.projection {
     Some(projection) =>

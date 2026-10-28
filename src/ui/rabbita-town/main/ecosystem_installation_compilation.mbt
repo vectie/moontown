@@ -30,9 +30,9 @@ fn ecosystem_installation_road_segments(
 
 ///|
 fn ecosystem_installation_boardwalk_edge(
-  x : Int,
-  y : Int,
-  bit : Int,
+  x : Int32,
+  y : Int32,
+  bit : Int32,
 ) -> Array[@energy_valley_contract.WorldPoint] {
   match bit {
     1 =>
@@ -67,8 +67,8 @@ fn ecosystem_installation_boardwalk_edge(
 ///|
 fn ecosystem_installation_authored_terrain_at(
   world : ExactEnergyValleyWorld,
-  x : Int,
-  y : Int,
+  x : Int32,
+  y : Int32,
 ) -> String {
   if x < 0 || x >= world.cols || y < 0 || y >= world.rows {
     "void"
@@ -82,7 +82,7 @@ fn ecosystem_contract_installations(
   snapshot : EcosystemWorldSnapshot,
   network : @energy_valley_contract.RoadNetwork,
   places : ArrayView[@energy_valley_contract.Place],
-  seed : Int,
+  seed : Int32,
 ) -> Array[@energy_valley_contract.Installation] {
   let result : Array[@energy_valley_contract.Installation] = []
   let reference = ecosystem_installation_source_provenance(false)

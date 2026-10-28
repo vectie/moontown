@@ -1,0 +1,68 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+}
+
+///|
+/// Run from the MoonTown root. Export only the gateway dependency closure;
+/// unrelated dirty LunaNexa source, runtime state and credentials are excluded.
+async fn main {
+  guard @env.args() is [_, destination] && destination.has_prefix("/") else {
+    fail(
+      "Usage: moon run scripts/stage-account-gateway.mbtx NEW_ABSOLUTE_DIRECTORY",
+    )
+  }
+  @fs.mkdir(destination, permission=0o700)
+  let town = destination + "/moontown"
+  @fs.mkdir(town + "/src", recursive=true)
+  @shell.Cmd("cp", ["moon.mod", "README.mbt.md", town]).run()
+  for
+    pkg in [
+      "account_identity", "account_system", "account_compute", "support", "core",
+      "system_settings", "integration",
+    ] {
+    @shell.Cmd("cp", ["-R", "src/" + pkg, town + "/src/" + pkg]).run()
+  }
+  let gateway = town + "/src/account_gateway"
+  @fs.mkdir(gateway)
+  @shell.Cmd("cp", [
+    "src/account_gateway/moon.mod", "src/account_gateway/moon.work", gateway,
+  ]).run()
+  @shell.Cmd("cp", ["-R", "src/account_gateway/src", gateway + "/src"]).run()
+  for module_name in ["moonchat", "moonleaf"] {
+    @fs.mkdir(destination + "/" + module_name)
+    @shell.Cmd("cp", [
+      "../" + module_name + "/moon.mod",
+      destination + "/" + module_name + "/moon.mod",
+    ]).run()
+  }
+  let provider = destination + "/lunanexa"
+  @fs.mkdir(provider)
+  let archive = destination + "/provider-baseline.tar"
+  @shell.Cmd("git", [
+    "-C",
+    "../lunanexa",
+    "archive",
+    "--format=tar",
+    "--output=" + archive,
+    "HEAD",
+    "moon.mod",
+    "workspace/webide",
+    "scripts/package-webide-gateway.mbtx",
+  ]).run()
+  @shell.Cmd("tar", ["-xf", archive, "-C", provider]).run()
+  for
+    file in [
+      "types.mbt", "policy.mbt", "bridge.mbt", "browser_binding.mbt", "browser_binding_wbtest.mbt",
+      "pkg.generated.mbti",
+    ] {
+    @shell.Cmd("cp", [
+      "../lunanexa/workspace/webide/" + file,
+      provider + "/workspace/webide/" + file,
+    ]).run()
+  }
+  println("Staged gateway sources without runtime state: " + destination)
+}

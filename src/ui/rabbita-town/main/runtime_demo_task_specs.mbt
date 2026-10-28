@@ -105,7 +105,7 @@ fn task_specs(model : Model) -> Array[@core.TownTask] {
 }
 
 ///|
-fn task_status_for(model : Model, offset : Int) -> @core.TownTaskStatus {
+fn task_status_for(model : Model, offset : Int32) -> @core.TownTaskStatus {
   let cycle = (model.tick + offset) % 8
   if mayor_recovery_active(model) {
     match cycle {

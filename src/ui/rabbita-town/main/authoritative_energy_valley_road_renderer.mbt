@@ -3,15 +3,15 @@
 /// polyline. Bounds use the transport envelope's fixed one-thousandth-tile
 /// units and are projected with the same isometric camera as the town canvas.
 fn authoritative_energy_valley_transport_record_visible(
-  minimum_x_millis : Int,
-  minimum_y_millis : Int,
-  maximum_x_millis : Int,
-  maximum_y_millis : Int,
+  minimum_x_millis : Int32,
+  minimum_y_millis : Int32,
+  maximum_x_millis : Int32,
+  maximum_y_millis : Int32,
   camera_x : Double,
   camera_y : Double,
   zoom : Double,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
   margin : Double,
 ) -> Bool {
   let minimum_x = minimum_x_millis.to_double() / 1000.0
@@ -38,8 +38,8 @@ fn authoritative_energy_valley_transport_visible_indices_json(
   camera_x : Double,
   camera_y : Double,
   zoom : Double,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> String {
   let visible : Array[String] = []
   for index in 0..<authoritative_energy_valley_transport_record_count(bridge) {
@@ -85,8 +85,8 @@ extern "js" fn golden_draw_authoritative_energy_valley_transport(
   camera_x : Double,
   camera_y : Double,
   zoom : Double,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit =
   #| (
   #|   context, roadIndicesJson, bridgeIndicesJson, buildingMasksJson,
@@ -239,8 +239,8 @@ extern "js" fn golden_draw_authoritative_energy_valley_transport(
 fn golden_draw_authoritative_energy_valley_transport_overlay(
   context : @dom.CanvasRenderingContext2D,
   buildings : Array[TownCanvasBuilding],
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Unit {
   if !authoritative_energy_valley_transport_ready() {
     return

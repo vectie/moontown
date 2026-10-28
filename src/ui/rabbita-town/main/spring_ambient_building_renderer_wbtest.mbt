@@ -2,7 +2,7 @@
 fn spring_ambient_test_building(
   style : String,
   place_key : String,
-  interior_seed : Int,
+  interior_seed : Int32,
 ) -> TownCanvasBuilding {
   {
     place_id: ecosystem_contract_scoped_id("place", place_key),
@@ -87,7 +87,7 @@ test "spring ambient variant is stable style-sensitive and promotion preserving"
 
 ///|
 test "spring ambient promotion map is balanced and preserves eighty percent" {
-  let counts : Array[Int] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  let counts : Array[Int32] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
   let mut preserved = 0
   for hash in 0..<40 {
     let promotion = energy_valley_mod(hash, 10)

@@ -6,8 +6,8 @@ priv struct WorkerSim {
   book_id : String
   status : @core.WorkerStatus
   zone_key : String
-  energy : Int
-  load : Int
+  energy : Int32
+  load : Int32
   summary : String
 }
 

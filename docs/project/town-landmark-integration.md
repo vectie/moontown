@@ -110,8 +110,58 @@ Build from repository root:
 ./scripts/build-rabbita-ui.sh
 ```
 
-The town opens preserved studios in a modal with an explicit return-to-town
-button. Closing restores the existing town camera; no reload or new tab is needed.
+Exterior architectural reviews open in a modal with an explicit return-to-town
+button. Indoor and compute product journeys now use the town-owned space route
+described below; they no longer open independent iframe applications.
+
+## Unified space integration — 2026-10-23
+
+One town route now owns navigation, entity inspection and work/request context.
+`main/spatial_scene.mbt` passes a small JSON presentation contract into a lazy
+Three.js viewport. The renderer emits inspection events; it cannot submit tasks,
+assign machines or manufacture runtime facts. Existing town inspectors/actions
+remain authoritative. Exterior geometry, G3 and all five compute scales survive;
+independent reviewers remain available under Advanced.
+
+- Policy hall and other semantic buildings use `town_interior_study`, a MoonBit
+  room layout reusing the original authored furniture. Each furniture group uses
+  the actual interaction-slot ID; list selection and mesh picking update the same
+  inspector. Resident sprites use accepted slot presences, not invented activity.
+- `?layer=indoor&building=future-center-g3` embeds the complete reference plan in
+  the same shell, with 14 selectable zones. It is a distinct design space, not a
+  renamed policy hall, and has no invented resident/task bindings.
+- Compute defaults to the hall. Design racks drill into servers and boards;
+  breadcrumbs retain rack/slot identity. Runtime machines are listed as logical
+  endpoints until physical placement is verified. Remote services remain external
+  MoonGate routes. A design rack click never assigns a real machine.
+- Reports carry current work/request and selection context. Observed endpoint
+  facts and unavailable measurements remain separate from Advanced planning
+  arithmetic. Report JSON includes this distinction.
+- Orthographic default framing, shared outline icons and paper/sage controls
+  follow the UI/UX skill's progressive-disclosure and state-preservation guidance.
+  Orbit, top view, cutaway and Advanced flows inspect the same model. No flow
+  animation starts automatically; reduced-motion settings disable playback.
+- Renderer state is kept per space in memory (up to 16 spaces), including camera
+  and compute depth. Returning through the lift restores it without a page reload.
+  This is session navigation state, not persistence across a full browser reload.
+  Native entity selection and work context stay in the MoonBit model.
+- Outdoor only loads a small route observer. Three.js/model data load on first
+  entry. Removed spaces release WebGL resources, textures, observers and frames;
+  idle scenes render on demand. A render failure retains the runtime list and
+  native work panel, with a retry action.
+
+Validation: `moon run scripts/check-town-spaces.mbtx` runs 19 model tests and 37
+targeted town regression tests plus viewer DOM-contract checks. Browser review
+covered mesh-to-inspector furniture selection, A4 → U5 → board → CPU reporting,
+return to policy hall and re-entry at the same compute depth, and G3 room picking.
+Live endpoint availability and physical rack mapping were not claimed: the local
+preview had no usable machine observation. The generated static artifact remains
+under the existing release budget (70.4 MiB in this pass).
+
+Before building, only the ignored native debug build directories in the root
+module and Rabbita UI module were removed, reclaiming approximately 2.4 GiB.
+Source models, references, runtime state, `output/` and release artifacts were not
+deleted. These debug caches can be regenerated with MoonBit.
 
 ## Map refinement — campus setbacks and bridge readability
 

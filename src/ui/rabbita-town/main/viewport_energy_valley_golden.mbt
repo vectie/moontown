@@ -103,7 +103,11 @@ fn render_energy_valley_topbar(
           div(class="town-topbar-title", "MoonTown · 能源谷"),
           div(
             class="town-topbar-sub",
-            "WENYU VALLEY · \{active_energy_valley_seed_label()}",
+            if public_platform_enabled() {
+              "公共街区 · 场景角色为演示"
+            } else {
+              "WENYU VALLEY · \{active_energy_valley_seed_label()}"
+            },
           ),
         ]),
       ]),
@@ -114,6 +118,17 @@ fn render_energy_valley_topbar(
       ]),
     ]),
     div(class="town-topbar-trailing pointer-events-auto", [
+      render_public_platform_account(),
+      if public_platform_enabled() {
+        @html.nothing
+      } else {
+        button(
+          class="town-topbar-chip",
+          on_click=dispatch(OpenWorkWorkspace(AttentionComposer)),
+          title="查看需要处理的任务与审核",
+          town_ui_label("clock", "待我处理"),
+        )
+      },
       @html.details(
         class="town-topbar-disclosure",
         attrs=@html.Attrs::build().name("moontown-hud-disclosure"),
@@ -131,9 +146,12 @@ fn render_energy_valley_topbar(
                   "居民",
                   energy_valley_known_resident_count(model).to_string(),
                 ),
-                render_energy_valley_metric("能源", model.energy.to_string()),
                 render_energy_valley_metric(
-                  "预算",
+                  "模拟能源",
+                  model.energy.to_string(),
+                ),
+                render_energy_valley_metric(
+                  "模拟预算",
                   energy_valley_model_budget(model).to_string(),
                 ),
                 render_energy_valley_metric(
@@ -1230,17 +1248,35 @@ fn render_energy_valley_request_dialog(
       .aria_labelledby("energy-request-title"),
     [
       div(class="town-ui-sheet-header", [
-        div([h2(id="energy-request-title", "发起工作")]),
+        div([
+          h2(
+            id="energy-request-title",
+            work_workspace_title(model.request_composer),
+          ),
+        ]),
         button(
           class="energy-request-dialog-close town-ui-icon-button",
           title="关闭",
           autofocus=true,
           on_click=dispatch(CloseEnergyRequest),
-          attrs=@html.Attrs::build().aria_label("关闭真实工作请求"),
+          attrs=@html.Attrs::build().aria_label("关闭工作面板"),
           town_ui_icon("close"),
         ),
       ]),
-      render_request_desk(dispatch, model, compact=true),
+      if public_platform_enabled() {
+        div(class="request-desk-stack", [
+          p(
+            "当前是公共展示。登录账户后，进入已授权工作区查看工作和成果。",
+          ),
+          render_shared_account_entry("public-demo"),
+        ])
+      } else {
+        div(class="request-desk-stack", [
+          render_work_workspace_tabs(dispatch, model),
+          render_neighborhood_work_context(dispatch, model),
+          render_request_desk(dispatch, model, compact=true),
+        ])
+      },
     ],
   )
 }

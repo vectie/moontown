@@ -1,0 +1,26 @@
+import {
+  "vectie/lunanexa/workspace/webide",
+  "vectie/lunanexa/workspace/webide/host",
+  "vectie/moontown/account_identity",
+  "vectie/moontown/account_system",
+  "vectie/moontown/account_compute",
+  "vectie/moontown/neighborhood",
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/async/http",
+  "moonbitlang/async/io",
+  "moonbitlang/async/socket",
+  "moonbitlang/core/env",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+  "moonbitlang/x/sys",
+}
+
+supported_targets = "native"
+
+pkgtype(kind: "executable")
+
+options(
+  link: { "native": { "cc-link-flags": "-pthread -ldl" } },
+)

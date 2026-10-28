@@ -2,14 +2,14 @@
 priv struct AgendaState {
   events : Result[Array[@imported_output_contract.CalendarEvent], String]?
   occurrences : Result[Array[@imported_output_contract.CalendarEvent], String]?
-  source_selected : Array[Int]
+  source_selected : Array[Int32]
   window_from : String
   window_until : String
   query : String
   from : String
   until : String
   location : String
-  selected : Array[Int]
+  selected : Array[Int32]
   raw : Bool
 } derive(Debug, Eq)
 
@@ -23,7 +23,7 @@ priv enum AgendaMsg {
   From(String)
   Until(String)
   Location(String)
-  Toggle(Int)
+  Toggle(Int32)
   SelectMatching
   Clear
   Raw
@@ -52,7 +52,7 @@ fn initial_agenda() -> AgendaState {
 fn agenda_matches(
   a : AgendaState,
   events : Array[@imported_output_contract.CalendarEvent],
-) -> Array[Int] {
+) -> Array[Int32] {
   @imported_output_contract.calendar_matches(
     events,
     a.query,

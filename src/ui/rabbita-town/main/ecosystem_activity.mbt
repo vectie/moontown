@@ -16,7 +16,7 @@ priv struct EcosystemResidentActivity {
   resident_name : String
   role : String
   role_label : String
-  sprite_index : Int
+  sprite_index : Int32
   source_place_id : String
   place_id : String
   behavior : EcosystemBehavior
@@ -24,19 +24,19 @@ priv struct EcosystemResidentActivity {
   detail : String
   interaction_label : String
   phase : EcosystemResidentPhase
-  progress_per_mille : Int
+  progress_per_mille : Int32
   route : Array[(Double, Double)]
   position : (Double, Double)?
   facing_left : Bool
-  started_tick : Int
-  transition_tick : Int
+  started_tick : Int32
+  transition_tick : Int32
 } derive(Debug)
 
 ///|
 fn ecosystem_schedule_position(
   profile : EcosystemPreviewResidentProfile,
-  tick : Int,
-) -> (Int, EcosystemScheduleBeat, Int) {
+  tick : Int32,
+) -> (Int32, EcosystemScheduleBeat, Int32) {
   let total = ecosystem_schedule_total(profile)
   let phase = ecosystem_positive_mod(tick + profile.phase_offset, total)
   let mut cursor = 0
@@ -51,7 +51,7 @@ fn ecosystem_schedule_position(
 }
 
 ///|
-fn ecosystem_activity_role(index : Int) -> String {
+fn ecosystem_activity_role(index : Int32) -> String {
   if index == 0 {
     "mayor"
   } else if index < 4 {
@@ -64,12 +64,12 @@ fn ecosystem_activity_role(index : Int) -> String {
 }
 
 ///|
-fn ecosystem_activity_travel_ticks(beat : EcosystemScheduleBeat) -> Int {
+fn ecosystem_activity_travel_ticks(beat : EcosystemScheduleBeat) -> Int32 {
   (beat.duration_ticks / 4).clamp(min=3, max=6)
 }
 
 ///|
-fn ecosystem_activity_progress(elapsed : Int, travel_ticks : Int) -> Int {
+fn ecosystem_activity_progress(elapsed : Int32, travel_ticks : Int32) -> Int32 {
   if travel_ticks <= 0 {
     1000
   } else {
@@ -80,7 +80,7 @@ fn ecosystem_activity_progress(elapsed : Int, travel_ticks : Int) -> Int {
 ///|
 fn ecosystem_activity_position(
   path : Array[(Double, Double)],
-  progress_per_mille : Int,
+  progress_per_mille : Int32,
 ) -> ((Double, Double), Bool)? {
   if path.is_empty() {
     return None
@@ -112,7 +112,7 @@ let ecosystem_activity_route_cache : Map[String, Array[(Double, Double)]] = Map(
 ///|
 fn ecosystem_activity_contract_path(
   model : Model,
-  seed : Int,
+  seed : Int32,
   source_profile_id : String,
   destination_profile_id : String,
 ) -> Array[(Double, Double)]? {
@@ -185,7 +185,7 @@ fn ecosystem_activity_contract_path(
 ///|
 fn ecosystem_activity_source_portal_position(
   model : Model,
-  seed : Int,
+  seed : Int32,
   source_profile_id : String,
 ) -> (Double, Double)? {
   match
@@ -209,7 +209,7 @@ let ecosystem_resident_activity_cache : Map[
 ///|
 fn ecosystem_resident_activities(
   model : Model,
-  seed : Int,
+  seed : Int32,
 ) -> Array[EcosystemResidentActivity] {
   let activity_cache_key = "\{ecosystem_snapshot_cache_key(model, seed)}|tick:\{model.tick}"
   match ecosystem_resident_activity_cache.get(activity_cache_key) {

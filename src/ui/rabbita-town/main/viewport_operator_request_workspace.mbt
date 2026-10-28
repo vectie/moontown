@@ -31,7 +31,8 @@ fn render_request_action_button(
       town_ui_label(
         match target {
           StandingWatchComposer => "clock"
-          EvidenceBookComposer => "book"
+          EvidenceBookComposer | ResultsComposer => "book"
+          AttentionComposer => "inspect"
           _ => "people"
         },
         label,
@@ -97,6 +98,14 @@ fn render_request_desk_workspace(
     CollaborationComposer =>
       div(id="request-composer-panel", class="request-desk-stack", [
         render_collaboration_composer(dispatch, model.collaboration),
+      ])
+    ResultsComposer =>
+      div(id="request-composer-panel", class="request-desk-stack", [
+        render_collaboration_outcomes(dispatch, model.collaboration),
+      ])
+    AttentionComposer =>
+      div(id="request-composer-panel", class="request-desk-stack", [
+        render_collaboration_attention(dispatch, model.collaboration),
       ])
   }
 }

@@ -1,0 +1,17 @@
+# Internal alias for the existing verified-TLS public ingress. No new public
+# listener, certificate, identity issuer, or authentication service is created.
+apiVersion: v1
+kind: Service
+metadata:
+  name: platform-browser-identity-tls
+  namespace: kube-system
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/instance: traefik-kube-system
+    app.kubernetes.io/name: traefik
+  ports:
+    - name: identity-https
+      protocol: TCP
+      port: 8443
+      targetPort: websecure

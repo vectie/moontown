@@ -162,7 +162,7 @@ fn ecosystem_parcel_test_reset_reference_assets() -> Unit {
 
 ///|
 fn ecosystem_parcel_test_fixture(
-  seed : Int,
+  seed : Int32,
 ) -> (
   EcosystemWorldSnapshot,
   @energy_valley_contract.CompiledTownWorld,
@@ -250,7 +250,7 @@ fn ecosystem_parcel_buildable_tile_lookup(
 ///|
 fn ecosystem_parcel_expected_buildable_tile_lookup(
   snapshot : EcosystemWorldSnapshot,
-  seed : Int,
+  seed : Int32,
 ) -> Map[String, Bool] {
   let result : Map[String, Bool] = Map([])
   let world = golden_valley_world(seed)
@@ -271,9 +271,9 @@ fn ecosystem_parcel_expected_buildable_tile_lookup(
 /// Measure authored JSON land before the compiler accepts road repairs.
 fn ecosystem_parcel_candidate_land_metrics(
   snapshot : EcosystemWorldSnapshot,
-  seed : Int,
+  seed : Int32,
   mode : String,
-) -> (Int, Int) {
+) -> (Int32, Int32) {
   let shift_x = energy_valley_road_pattern_shift_x(seed)
   let shift_y = energy_valley_road_pattern_shift_y(seed)
   let mut region_count = 0
@@ -340,7 +340,7 @@ fn ecosystem_parcel_block_ids(
 ///|
 fn ecosystem_parcel_first_nonpark_fragment(
   snapshot : EcosystemWorldSnapshot,
-  seed : Int,
+  seed : Int32,
 ) -> EcosystemPlanningFragment {
   for block in ecosystem_parcel_planning_blocks(snapshot, seed) {
     for fragment in block.fragments {

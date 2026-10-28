@@ -8,12 +8,10 @@ test "ai garden copy renders explicit snapshot fields" {
     workshop: "Creator workshop live",
     queue_pressure: 61,
   })
-  assert_true(copy.contains("AI Garden Tutor / Running"))
-  assert_true(copy.contains("Tutorial quest running"))
-  assert_true(copy.contains("4 scenario lanes"))
-  assert_true(copy.contains("Email draft comparison live is on deck"))
-  assert_true(copy.contains("Creator workshop live is active"))
-  assert_true(copy.contains("queue pressure sits at 61%"))
+  assert_true(copy.contains("学习任务示例"))
+  assert_true(copy.contains("真实工具试用和学习测评未接入"))
+  assert_false(copy.contains("%"))
+  assert_false(copy.contains("live"))
 }
 
 ///|

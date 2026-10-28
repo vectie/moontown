@@ -37,8 +37,8 @@ fn primitive(
   w : Double,
   h : Double,
   d : Double,
-  layer? : String = "landmark",
-  rotation? : Double = 0.0,
+  layer~ : String = "landmark",
+  rotation~ : Double = 0.0,
 ) -> Unit {
   p.push({
     kind,
@@ -62,8 +62,8 @@ fn box(
   w : Double,
   h : Double,
   d : Double,
-  layer? : String = "landmark",
-  rotation? : Double = 0.0,
+  layer~ : String = "landmark",
+  rotation~ : Double = 0.0,
 ) -> Unit {
   primitive(p, "box", mat, x, y, z, w, h, d, layer~, rotation~)
 }
@@ -75,7 +75,7 @@ fn beam(
   a : Array[Double],
   b : Array[Double],
   radius : Double,
-  layer? : String = "landmark",
+  layer~ : String = "landmark",
 ) -> Unit {
   p.push({
     kind: "beam",
@@ -120,7 +120,7 @@ fn profile(
   y : Double,
   z : Double,
   height : Double,
-  layer? : String = "landmark",
+  layer~ : String = "landmark",
 ) -> Unit {
   p.push({
     kind: "profile",
@@ -139,7 +139,7 @@ fn triangles(
   p : Array[Part],
   mat : String,
   pts : Array[Array[Double]],
-  layer? : String = "landmark",
+  layer~ : String = "landmark",
 ) -> Unit {
   p.push({
     kind: "triangles",
@@ -236,6 +236,6 @@ fn mix(a : Double, b : Double, t : Double) -> Double {
 }
 
 ///|
-fn noise(seed : Int) -> Double {
+fn noise(seed : Int32) -> Double {
   ((seed * 7919 + 104729) % 65521).to_double() / 65521.0
 }

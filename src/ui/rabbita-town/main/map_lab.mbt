@@ -25,32 +25,32 @@ priv struct MapLabEntityRow {
 ///|
 priv struct MapLabEntityPage {
   rows : Array[MapLabEntityRow]
-  scanned : Int
-  detail_materializations : Int
+  scanned : Int32
+  detail_materializations : Int32
 }
 
 ///|
 priv struct MapLabCounts {
-  terrain : Int
-  blocks : Int
-  parcels : Int
-  programs : Int
-  road_nodes : Int
-  road_segments : Int
-  places : Int
-  relations : Int
-  installations : Int
-  portals : Int
-  slots : Int
-  actor_profiles : Int
-  attention_signals : Int
-  attention_focuses : Int
-  presences : Int
-  exchanges : Int
-  diagnostics : Int
-  rejections : Int
-  warnings : Int
-  errors : Int
+  terrain : Int32
+  blocks : Int32
+  parcels : Int32
+  programs : Int32
+  road_nodes : Int32
+  road_segments : Int32
+  places : Int32
+  relations : Int32
+  installations : Int32
+  portals : Int32
+  slots : Int32
+  actor_profiles : Int32
+  attention_signals : Int32
+  attention_focuses : Int32
+  presences : Int32
+  exchanges : Int32
+  diagnostics : Int32
+  rejections : Int32
+  warnings : Int32
+  errors : Int32
 }
 
 ///|
@@ -759,7 +759,7 @@ fn map_lab_actor_profile_entity(
 ///|
 fn map_lab_attention_signal_entity(
   signal : @energy_valley_contract.AttentionSignal,
-  tick : Int,
+  tick : Int32,
 ) -> MapLabEntity {
   {
     id: signal.id.to_string(),
@@ -915,7 +915,7 @@ fn map_lab_candidate_matches(
 }
 
 ///|
-let map_lab_entity_result_limit : Int = frontend_setting_int(
+let map_lab_entity_result_limit : Int32 = frontend_setting_int(
   "map_lab_entity_result_limit", 40,
 )
 
@@ -928,7 +928,7 @@ fn map_lab_add_candidate_row(
   provenance : @energy_valley_contract.Provenance?,
   extra_terms : String,
   needle : String,
-  selection_key? : String = "",
+  selection_key~ : String = "",
 ) -> Bool {
   if map_lab_candidate_matches(
       id, category, label, provenance, extra_terms, needle,
@@ -951,7 +951,7 @@ fn map_lab_add_candidate_row(
 ///|
 fn map_lab_entity_page_result(
   rows : Array[MapLabEntityRow],
-  scanned : Int,
+  scanned : Int32,
 ) -> MapLabEntityPage {
   { rows, scanned, detail_materializations: 0, }
 }

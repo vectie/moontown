@@ -6,7 +6,7 @@ priv struct RuntimeAgentMapPosition {
   agent_id : String
   screen_x : Double
   screen_y : Double
-  depth : Int
+  depth : Int32
 }
 
 ///|
@@ -29,8 +29,8 @@ priv struct RuntimeAgentJourney {
   path : Array[(Double, Double)]
   position : (Double, Double)?
   facing_left : Bool
-  progress_per_mille : Int
-  since_tick : Int
+  progress_per_mille : Int32
+  since_tick : Int32
 } derive(Debug)
 
 ///|
@@ -71,7 +71,7 @@ let golden_valley_runtime_agent_route_cache : Map[
 /// falls back to the legacy visual tile path or an unchecked Manhattan line.
 fn golden_valley_runtime_agent_semantic_path(
   model : Model,
-  seed : Int,
+  seed : Int32,
   agent : EnergyValleyRuntimeAgent,
 ) -> Array[(Double, Double)]? {
   let buildings = golden_valley_buildings(seed)
@@ -168,7 +168,7 @@ fn golden_valley_runtime_agent_semantic_path(
 fn golden_valley_runtime_agent_presence_since_tick(
   model : Model,
   agent : EnergyValleyRuntimeAgent,
-) -> Int {
+) -> Int32 {
   match
     energy_valley_runtime_presence_clock_for_agent(
       model.energy_valley_runtime,
@@ -183,7 +183,7 @@ fn golden_valley_runtime_agent_presence_since_tick(
 fn golden_valley_runtime_agent_route_progress(
   route_distance : Double,
   travelled : Double,
-) -> Int {
+) -> Int32 {
   if route_distance <= 0.0 {
     1000
   } else {
@@ -200,7 +200,7 @@ fn golden_valley_runtime_agent_route_progress(
 /// the outdoor sprite disappears and the semantic presence becomes Inside.
 fn golden_valley_runtime_agent_journey_at(
   model : Model,
-  seed : Int,
+  seed : Int32,
   agent : EnergyValleyRuntimeAgent,
   elapsed_seconds : Double,
 ) -> RuntimeAgentJourney {
@@ -265,7 +265,7 @@ fn golden_valley_runtime_agent_journey_at(
 /// position and facing from the same record used by interaction hit testing.
 fn golden_valley_runtime_agent_journey(
   model : Model,
-  seed : Int,
+  seed : Int32,
   agent : EnergyValleyRuntimeAgent,
 ) -> RuntimeAgentJourney? {
   if !energy_valley_runtime_can_claim_active_work(model.energy_valley_runtime) {
@@ -290,7 +290,7 @@ fn golden_valley_runtime_agent_journey(
 /// verified without a browser clock.
 fn golden_valley_runtime_agent_world_position_at(
   model : Model,
-  seed : Int,
+  seed : Int32,
   agent : EnergyValleyRuntimeAgent,
   elapsed_seconds : Double,
 ) -> (Double, Double)? {
@@ -307,8 +307,8 @@ fn golden_valley_runtime_agent_world_position_at(
 fn golden_valley_runtime_agent_map_positions_from_snapshot(
   snapshot : @energy_valley_contract.TownSnapshot,
   selected_actor_id : @energy_valley_contract.StableId?,
-  viewport_width : Int,
-  viewport_height : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
 ) -> Array[RuntimeAgentMapPosition] {
   let positions : Array[RuntimeAgentMapPosition] = []
   for
@@ -380,10 +380,10 @@ fn golden_valley_runtime_agent_hit_score(
 fn golden_valley_runtime_agent_hit_test_from_snapshot(
   snapshot : @energy_valley_contract.TownSnapshot,
   selected_actor_id : @energy_valley_contract.StableId?,
-  viewport_width : Int,
-  viewport_height : Int,
-  pointer_x : Int,
-  pointer_y : Int,
+  viewport_width : Int32,
+  viewport_height : Int32,
+  pointer_x : Int32,
+  pointer_y : Int32,
   camera_zoom : Double,
 ) -> String? {
   let mut best_id : String? = None
@@ -426,8 +426,8 @@ fn golden_valley_runtime_agent_hit_test_from_snapshot(
 /// Convenience wrapper for the routed canvas click handler.
 fn golden_valley_runtime_agent_at_canvas_point(
   model : Model,
-  pointer_x : Int,
-  pointer_y : Int,
+  pointer_x : Int32,
+  pointer_y : Int32,
 ) -> String? {
   match golden_valley_accepted_canvas_frame() {
     None => None

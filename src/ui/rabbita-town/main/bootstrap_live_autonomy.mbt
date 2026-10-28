@@ -26,7 +26,7 @@ fn parse_bootstrap_live_autonomy() -> LiveAutonomySnapshot? {
 }
 
 ///|
-fn live_json_int(object : Map[String, Json], key : String) -> Int {
+fn live_json_int(object : Map[String, Json], key : String) -> Int32 {
   match object.get(key) {
     Some(Number(value, ..)) => value.to_int()
     _ => 0

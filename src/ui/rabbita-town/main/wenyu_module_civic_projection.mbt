@@ -9,81 +9,45 @@ fn render_module_civic_health(
         class="module-civic-health \{civic_health_status_class(health.status)}",
         [
           div(class="module-civic-health-head", [
-            span(class="module-book-chip projection-tone-info", "Civic Doctor"),
+            span(class="module-book-chip projection-tone-info", "业务记录"),
             span(
               class="module-civic-status",
-              civic_health_status_label(health.status),
+              civic_surface_status(model, health.service_id),
             ),
           ]),
-          p(class="module-book-summary", civic_health_detail(health)),
-          render_protocol_history_group(health),
-          div(class="module-book-metric-grid", [
-            render_projection_metric({
-              label: "Operable",
-              value: if health.operable {
-                "yes"
+          p(
+            class="module-book-summary",
+            civic_surface_evidence(model, health.service_id),
+          ),
+          if health.latest_review_items > 0 {
+            p(
+              "有待审核内容，请查看对应任务；协议完成不代表业务结论已通过。",
+            )
+          } else {
+            @html.nothing
+          },
+          render_advanced_details("业务协议与诊断", [
+            p(
+              if model.state_source == DemoSimulation {
+                "以下为示例协议记录，不代表真实服务。"
               } else {
-                "no"
+                "以下为已载入的记录，不是实时服务可用性证明。"
               },
-              note: "\{health.missing_required_paths.length()} missing paths",
-              tone: if health.operable {
-                "healthy"
-              } else {
-                "alert"
-              },
-            }),
-            render_projection_metric({
-              label: "Result Proof",
-              value: if health.proven_by_result {
-                "present"
-              } else {
-                "missing"
-              },
-              note: health.latest_decision,
-              tone: if health.proven_by_result {
-                "healthy"
-              } else {
-                "review"
-              },
-            }),
-            render_projection_metric({
-              label: "Mode",
-              value: health.module_mode,
-              note: health.skill_mode,
-              tone: "info",
-            }),
-            render_projection_metric({
-              label: "Protocol",
-              value: health.protocol_status,
-              note: "in \{health.protocol_inbox_count} / red \{health.protocol_reduction_count} / out \{health.protocol_outbox_count}",
-              tone: if health.protocol_ready {
-                "healthy"
-              } else {
-                "review"
-              },
-            }),
-            render_projection_metric({
-              label: "Review",
-              value: "\{health.latest_review_items}",
-              note: "items",
-              tone: if health.latest_review_items > 0 {
-                "review"
-              } else {
-                "info"
-              },
-            }),
+            ),
+            p(class="module-book-summary", civic_health_detail(health)),
+            render_protocol_history_group(health),
           ]),
         ],
       )
     None =>
       article(class="module-civic-health module-status-unbound", [
         div(class="module-civic-health-head", [
-          span(class="module-book-chip projection-tone-alert", "Civic Doctor"),
-          span(class="module-civic-status", "No status"),
+          span(class="module-book-chip projection-tone-info", "业务记录"),
+          span(class="module-civic-status", "未接入"),
         ]),
         p(
           class="module-book-summary",
-          "No civic status has been connected yet. Run the civic doctor before treating this service as operational.",
+          "尚未连接此业务的结果记录。",
         ),
       ])
   }

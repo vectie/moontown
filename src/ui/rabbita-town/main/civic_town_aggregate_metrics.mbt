@@ -1,22 +1,19 @@
 ///|
-fn resident_count(model : Model) -> Int {
-  52 + model.tick % 19
+/// Count displayed examples only, not real residents. Unconnected business
+/// metrics below retain neutral compatibility values for simulation helpers;
+/// they are never rendered as observed zeroes. Real task counts stay separate.
+fn resident_count(model : Model) -> Int32 {
+  resident_sims(model).length()
 }
 
 ///|
-fn resident_joins_today(model : Model) -> Int {
-  let operating_lift = 1
-  let recovery_drag = if mayor_recovery_active(model) { 2 } else { 0 }
-  let joins = 4 + model.tick % 6 + operating_lift - recovery_drag
-  if joins < 1 {
-    1
-  } else {
-    joins
-  }
+fn resident_joins_today(model : Model) -> Int32 {
+  ignore(model)
+  0
 }
 
 ///|
-fn active_quest_count(model : Model) -> Int {
+fn active_quest_count(model : Model) -> Int32 {
   let mut count = 0
   for task in tasks_for_model(model) {
     if task.status == Assigned || task.status == Running {
@@ -27,48 +24,49 @@ fn active_quest_count(model : Model) -> Int {
 }
 
 ///|
-fn events_today(model : Model) -> Int {
-  social_matches().length() + 1 + model.tick % 3
+fn events_today(model : Model) -> Int32 {
+  ignore(model)
+  0
 }
 
 ///|
-fn valley_points_issued(model : Model) -> Int {
-  valley_points_redeemed(model) +
-  resident_joins_today(model) +
-  events_today(model)
+fn valley_points_issued(model : Model) -> Int32 {
+  ignore(model)
+  0
 }
 
 ///|
-fn valley_points_redeemed(model : Model) -> Int {
-  12 + model.tick % 11
+fn valley_points_redeemed(model : Model) -> Int32 {
+  ignore(model)
+  0
 }
 
 ///|
-fn achievement_broadcast_count(model : Model) -> Int {
-  execution_count_summary(executions_for_model(model)).completed +
-  model.tick % 3
+fn achievement_broadcast_count(model : Model) -> Int32 {
+  ignore(model)
+  0
 }
 
 ///|
-fn service_response_minutes(model : Model) -> Int {
-  let recovery_delay = if mayor_recovery_active(model) { 2 } else { 0 }
-  4 + model.pressure / 12 + recovery_delay
+fn service_response_minutes(model : Model) -> Int32 {
+  ignore(model)
+  0
 }
 
 ///|
-fn agent_action_count(model : Model) -> Int {
-  let workers_summary = worker_count_summary(workers_for_model(model))
-  18 + workers_summary.running * 4 + model.tick % 9
+fn agent_action_count(model : Model) -> Int32 {
+  ignore(model)
+  0
 }
 
 ///|
-fn retention_signal(model : Model) -> Int {
-  clamp_metric(
-    (model.stability * 2 + model.energy + model.budget - model.pressure) / 3,
-  )
+fn retention_signal(model : Model) -> Int32 {
+  ignore(model)
+  0
 }
 
 ///|
-fn robot_service_count(model : Model) -> Int {
-  8 + model.tick % 7
+fn robot_service_count(model : Model) -> Int32 {
+  ignore(model)
+  0
 }

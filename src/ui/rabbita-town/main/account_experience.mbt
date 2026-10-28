@@ -1,6 +1,7 @@
 ///|
 priv enum AccountExperienceKind {
   VisitorExperience
+  MemberExperience
   PaidExperience
   EnterpriseExperience
   AdminExperience
@@ -98,6 +99,14 @@ fn account_experience_valid(account : AccountExperience) -> Bool {
     return false
   }
   match account.account_kind {
+    "member" =>
+      account.plan == "visitor" &&
+      !account.visitor &&
+      account.home_surface == "public-town" &&
+      account.active_tenant_id is None &&
+      account.roles == ["member"] &&
+      account.entitlements ==
+      ["town.public.explore", "town.public.discover", "compute.own.view"]
     "visitor" =>
       account.plan == "visitor" &&
       account.home_surface == "public-town" &&
@@ -159,6 +168,7 @@ fn AccountExperience::kind(self : AccountExperience) -> AccountExperienceKind {
     AdminExperience
   } else {
     match self.account_kind {
+      "member" => MemberExperience
       "paid-user" => PaidExperience
       "enterprise" => EnterpriseExperience
       _ =>
@@ -175,6 +185,7 @@ fn AccountExperience::kind(self : AccountExperience) -> AccountExperienceKind {
 fn account_experience_query_name(kind : AccountExperienceKind) -> String {
   match kind {
     VisitorExperience => "visitor"
+    MemberExperience => "member"
     PaidExperience => "paid"
     EnterpriseExperience => "enterprise"
     AdminExperience => "admin"
@@ -199,10 +210,11 @@ fn account_navigation_href(
 ///|
 fn account_experience_name(kind : AccountExperienceKind) -> String {
   match kind {
-    VisitorExperience => "Visitor"
-    PaidExperience => "Paid member"
-    EnterpriseExperience => "Enterprise"
-    AdminExperience => "Administrator"
+    VisitorExperience => "游客"
+    MemberExperience => "统一账户"
+    PaidExperience => "个人"
+    EnterpriseExperience => "团队"
+    AdminExperience => "管理员"
   }
 }
 
@@ -210,6 +222,7 @@ fn account_experience_name(kind : AccountExperienceKind) -> String {
 fn account_experience_class(kind : AccountExperienceKind) -> String {
   match kind {
     VisitorExperience => "account-experience-visitor"
+    MemberExperience => "account-experience-member"
     PaidExperience => "account-experience-paid"
     EnterpriseExperience => "account-experience-enterprise"
     AdminExperience => "account-experience-admin"
@@ -221,6 +234,15 @@ fn account_navigation_items(
   kind : AccountExperienceKind,
 ) -> Array[AccountNavItem] {
   match kind {
+    MemberExperience =>
+      [
+        { label: "小镇", href: "./index.html", primary: true, },
+        {
+          label: "我的算力",
+          href: "./index.html?layer=compute",
+          primary: false,
+        },
+      ]
     VisitorExperience =>
       [
         { label: "Explore town", href: "./index.html", primary: true, },
@@ -361,14 +383,120 @@ fn admin_navigation_item_active(label : String, surface : String) -> Bool {
 }
 
 ///|
-fn render_account_navigation(account : AccountExperience) -> @rabbita.Html {
+fn account_primary_navigation_items(
+  kind : AccountExperienceKind,
+) -> Array[AccountNavItem] {
+  let town = if kind == AdminExperience {
+    "./index.html?view=town"
+  } else {
+    "./index.html"
+  }
+  let separator = if town.contains("?") { "&" } else { "?" }
+  [
+    { label: "小镇", href: town, primary: true, },
+    {
+      label: "工作",
+      href: town + separator + "request=watch",
+      primary: false,
+    },
+    {
+      label: "成果",
+      href: town + separator + "request=outcomes",
+      primary: false,
+    },
+    {
+      label: "算力",
+      href: town + separator + "layer=compute",
+      primary: false,
+    },
+  ]
+}
+
+///|
+fn account_navigation_icon(label : String) -> String {
+  match label {
+    "工作" => "work"
+    "成果" => "book"
+    "算力" => "server"
+    _ => "building"
+  }
+}
+
+///|
+fn account_secondary_label(label : String) -> String {
+  match label {
+    "Policies" => "政策"
+    "Talent" => "人才 · 示例"
+    "Districts" | "Team spaces" => "街区"
+    "Join MoonTown" => "本地账户兼容"
+    "Workspace" => "任务空间"
+    "Marketplace" => "发现"
+    "Billing" => "方案与用量"
+    "Shared Agents" => "团队 Agent"
+    "Members" => "成员"
+    "Usage" => "用量"
+    "Compliance" => "访问记录"
+    "Overview" => "管理概览"
+    "Users" => "用户"
+    "Organizations" => "组织"
+    "Analytics" => "平台统计"
+    "Settings" => "设置"
+    "Audit" => "审计"
+    _ => label
+  }
+}
+
+///|
+fn account_secondary_navigation_items(
+  kind : AccountExperienceKind,
+) -> Array[AccountNavItem] {
+  account_navigation_items(kind).filter(item => {
+    // These old links select no user surface; their current destinations are
+    // the work panel and resident directory instead.
+    item.label != "My Agent" &&
+    item.label != "My town" &&
+    item.label != "Organization" &&
+    item.label != "Explore town" &&
+    item.label != "小镇" &&
+    item.label != "我的算力" &&
+    item.label != "View town"
+  })
+}
+
+///|
+fn account_primary_item_active(
+  label : String,
+  kind : AccountExperienceKind,
+) -> Bool {
+  if current_town_surface_route() is OperationsConsole ||
+    !current_browser_query_param("panel").is_empty() ||
+    (kind == AdminExperience && current_browser_query_param("view") != "town") {
+    return false
+  }
+  if current_browser_query_param("layer") == "compute" {
+    return label == "算力"
+  }
+  let request = current_browser_query_param("request")
+  match label {
+    "成果" => request == "outcomes"
+    "工作" => !request.is_empty() && request != "outcomes"
+    "算力" => current_browser_query_param("layer") == "compute"
+    _ => request.is_empty() && current_browser_query_param("layer") != "compute"
+  }
+}
+
+///|
+fn render_account_navigation(
+  account : AccountExperience,
+  dispatch? : Dispatch[Msg],
+) -> @rabbita.Html {
   let kind = account.kind()
   let admin_surface = current_browser_query_param("admin")
   let tenant_label = account.active_tenant_name.unwrap_or_else(() => {
     match kind {
-      PaidExperience => "Personal workspace"
-      AdminExperience => "Platform administration"
-      _ => "Public town"
+      PaidExperience => "个人工作区"
+      AdminExperience => "平台管理"
+      _ => "公共小镇"
     }
   })
   @html.nav(
@@ -382,24 +510,121 @@ fn render_account_navigation(account : AccountExperience) -> @rabbita.Html {
       ]),
       div(
         class="account-global-links",
-        account_navigation_items(kind).map(item => {
-          let highlighted = if kind == AdminExperience {
-            admin_navigation_item_active(item.label, admin_surface)
-          } else {
-            item.primary
-          }
-          a(
-            class=if highlighted {
+        [
+          ..account_primary_navigation_items(kind).map(item => {
+            let highlighted = account_primary_item_active(item.label, kind)
+            let class_ = if highlighted {
               "account-global-link is-primary"
             } else {
               "account-global-link"
+            }
+            let attrs = @html.Attrs::build().aria_current(
+              if highlighted {
+                "page"
+              } else {
+                "false"
+              },
+            )
+            let label = town_ui_label(
+              account_navigation_icon(item.label),
+              item.label,
+            )
+            match (dispatch, current_town_surface_route()) {
+              (Some(emit), CanonicalEnergyValley) if current_browser_query_param(
+                  "panel",
+                ).is_empty() =>
+                button(
+                  class=class_,
+                  attrs~,
+                  on_click=emit(
+                    match item.label {
+                      "工作" => OpenWorkWorkspace(StandingWatchComposer)
+                      "成果" => OpenWorkWorkspace(ResultsComposer)
+                      "算力" => OpenSecretComputeRoom
+                      _ => OpenTownWorkspace
+                    },
+                  ),
+                  label,
+                )
+              _ =>
+                a(
+                  class=class_,
+                  href=account_navigation_href(item.href, kind),
+                  attrs~,
+                  label,
+                )
+            }
+          }),
+          a(
+            class="account-global-link",
+            href=shared_account_portal_url(current_browser_origin()),
+            target=Blank,
+            rel="noopener noreferrer",
+            attrs=@html.Attrs::build().aria_label(
+              "统一账户（新标签页）",
+            ),
+            title=if account.visitor {
+              "登录统一账户"
+            } else {
+              "打开账户中心"
             },
-            href=account_navigation_href(item.href, kind),
-            item.label,
-          )
-        }),
+            town_ui_label(
+              "people",
+              if account.visitor {
+                "登录"
+              } else {
+                "账户"
+              },
+            ),
+          ),
+        ],
       ),
       div(class="account-global-user", [
+        if account_secondary_navigation_items(kind).is_empty() &&
+          public_platform_enabled() {
+          @html.nothing
+        } else {
+          @html.details(class="account-navigation-more", [
+            @html.summary(
+              class="account-global-link",
+              town_ui_label(
+                "sliders",
+                if kind == AdminExperience {
+                  "管理"
+                } else {
+                  "高级"
+                },
+              ),
+            ),
+            div(
+              class="account-navigation-menu",
+              [
+                button(
+                  id="account-pack-tools-open",
+                  class="account-global-link",
+                  attrs=@html.Attrs::build().aria_label("领域资料"),
+                  on_click=@cmd.custom_cmd(_ => open_advanced_pack_tools()),
+                  town_ui_label("book", "领域资料"),
+                ),
+                ..account_secondary_navigation_items(kind).map(item => {
+                  a(
+                    class=if kind == AdminExperience &&
+                      admin_navigation_item_active(item.label, admin_surface) {
+                      "account-global-link is-primary"
+                    } else {
+                      "account-global-link"
+                    },
+                    href=account_navigation_href(item.href, kind),
+                    attrs=@html.Attrs::build().aria_label(
+                      account_secondary_label(item.label),
+                    ),
+                    account_secondary_label(item.label),
+                  )
+                }),
+              ],
+            ),
+          ])
+        },
         div(id="account-tenant-switcher", class="account-tenant-switcher", ""),
         span(
           class="account-global-avatar",
@@ -530,6 +755,14 @@ fn render_account_surface_for_route(
   model : Model,
   account : AccountExperience,
 ) -> @rabbita.Html {
+  // The shared platform already has one compact identity/compute entry in the
+  // town HUD. Do not expose legacy Join/billing navigation as a second account.
+  if public_platform_enabled() {
+    return match route {
+      CanonicalEnergyValley => render_energy_valley_page(dispatch, model)
+      OperationsConsole => render_account_operations_denied()
+    }
+  }
   let plan = account_surface_render_plan(
     route,
     model,
@@ -541,7 +774,7 @@ fn render_account_surface_for_route(
     account.kind(),
   )
   div(class="account-experience " + account_experience_class(account.kind()), [
-    render_account_navigation(account),
+    render_account_navigation(account, dispatch~),
     div(class="account-product-surface", [
       match management_surface {
         Some(surface) => render_account_management_surface(surface)

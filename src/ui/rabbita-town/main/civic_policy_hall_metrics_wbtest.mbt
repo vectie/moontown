@@ -102,37 +102,23 @@ test "policy hall secondary labels use shared execution phrase groups" {
       model,
       Some(civic_metric_test_execution(Running)),
     ),
-    "Clause scan in flight",
+    "示例资料 · 不代表真实业务证据",
   )
   assert_eq(
     policy_hall_evidence_label(model, Some(civic_metric_test_execution(Failed))),
-    "Evidence needs recovery",
+    "示例资料 · 不代表真实业务证据",
   )
 }
 
 ///|
-test "policy hall confidence uses shared execution score policy" {
+test "policy hall never turns task completion into policy confidence" {
   let model = init_model()
-  assert_eq(
-    policy_hall_confidence(
-      model,
-      Some(civic_metric_test_execution(PacketReady)),
-    ),
-    69,
+  let copy = policy_hall_module_copy(
+    model,
+    None,
+    Some(civic_metric_test_execution(Completed)),
   )
-  assert_eq(
-    policy_hall_confidence(model, Some(civic_metric_test_execution(Completed))),
-    94,
-  )
-  assert_eq(
-    policy_hall_confidence(model, Some(civic_metric_test_execution(Failed))),
-    28,
-  )
-  assert_eq(
-    policy_hall_confidence(
-      { ..model, state_source: StateSourceKind::SnapshotFile, },
-      None,
-    ),
-    41,
-  )
+  assert_false(copy.contains("%"))
+  assert_false(copy.contains("Confidence"))
+  assert_true(copy.contains("不等于政策结论已核实"))
 }

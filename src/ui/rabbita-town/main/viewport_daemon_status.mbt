@@ -1,5 +1,5 @@
 ///|
-fn daemon_tick_count(model : Model) -> Int {
+fn daemon_tick_count(model : Model) -> Int32 {
   match model.daemon_snapshot {
     Some(snapshot) => snapshot.tick_sequence
     None => 0

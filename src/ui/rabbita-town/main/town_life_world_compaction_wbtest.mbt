@@ -27,7 +27,7 @@ fn world_compaction_fixture_move(
   state : TownLifeWorldState,
   add : TownLifeWorldEvent,
   building : GoldenValleyBuilding,
-  sequence : Int,
+  sequence : Int32,
 ) -> TownLifeWorldEvent {
   adversarial_world_event(
     state.epoch,

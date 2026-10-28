@@ -100,27 +100,27 @@ test "contest express champion label uses shared execution phrase groups" {
 }
 
 ///|
-test "contest express readiness label uses shared execution score policy" {
+test "contest express readiness defers to the competition ledger" {
   let model = init_model()
   assert_eq(
     contest_express_readiness_label(
       model,
       Some(civic_metric_test_execution(PacketReady)),
     ),
-    "67% ready",
+    "以赛事工作台为准",
   )
   assert_eq(
     contest_express_readiness_label(
       model,
       Some(civic_metric_test_execution(Completed)),
     ),
-    "96% ready",
+    "以赛事工作台为准",
   )
   assert_eq(
     contest_express_readiness_label(
       { ..model, state_source: StateSourceKind::SnapshotFile, },
       None,
     ),
-    "46% ready",
+    "以赛事工作台为准",
   )
 }

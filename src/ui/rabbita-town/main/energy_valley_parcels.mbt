@@ -2,17 +2,17 @@
 /// The Wenyu raster is a high-resolution semantic layer. Gameplay parcels use
 /// a coarser three-by-three planning cell so buildings remain legible when the
 /// complete 256 × 144 valley is visible.
-fn energy_valley_semantic_cells_per_planning_cell() -> Int {
+fn energy_valley_semantic_cells_per_planning_cell() -> Int32 {
   3
 }
 
 ///|
 priv struct EnergyValleyParcelPlacement {
-  x : Int
-  y : Int
-  width : Int
-  depth : Int
-  score : Int
+  x : Int32
+  y : Int32
+  width : Int32
+  depth : Int32
+  score : Int32
 }
 
 ///|
@@ -39,8 +39,8 @@ fn energy_valley_prepare_semantic_ground(
 ///|
 fn energy_valley_planning_kind(
   tiles : Array[Array[ExactEnergyValleyTile]],
-  planning_x : Int,
-  planning_y : Int,
+  planning_x : Int32,
+  planning_y : Int32,
 ) -> String? {
   let scale = energy_valley_semantic_cells_per_planning_cell()
   let start_x = planning_x * scale
@@ -84,12 +84,12 @@ fn energy_valley_structure_cell_blocked(tile : ExactEnergyValleyTile) -> Bool {
 ///|
 fn energy_valley_structure_candidate_score(
   tiles : Array[Array[ExactEnergyValleyTile]],
-  x : Int,
-  y : Int,
-  width : Int,
-  depth : Int,
+  x : Int32,
+  y : Int32,
+  width : Int32,
+  depth : Int32,
   parcel_kind : String,
-) -> Int? {
+) -> Int32? {
   if x < 1 ||
     y < 1 ||
     x + width >= exact_energy_valley_cols() - 1 ||
@@ -142,12 +142,12 @@ fn energy_valley_structure_candidate_score(
 ///|
 fn energy_valley_best_structure_placement(
   tiles : Array[Array[ExactEnergyValleyTile]],
-  parcel_x : Int,
-  parcel_y : Int,
-  parcel_width : Int,
-  parcel_depth : Int,
-  target_width : Int,
-  target_depth : Int,
+  parcel_x : Int32,
+  parcel_y : Int32,
+  parcel_width : Int32,
+  parcel_depth : Int32,
+  target_width : Int32,
+  target_depth : Int32,
   parcel_kind : String,
 ) -> EnergyValleyParcelPlacement? {
   let mut best : EnergyValleyParcelPlacement? = None
@@ -181,11 +181,11 @@ fn energy_valley_best_structure_placement(
 
 ///|
 fn energy_valley_parcel_target_footprint(
-  seed : Int,
-  planning_x : Int,
-  planning_y : Int,
+  seed : Int32,
+  planning_x : Int32,
+  planning_y : Int32,
   kind : String,
-) -> (Int, Int) {
+) -> (Int32, Int32) {
   if kind == "campus" {
     (
       6 + energy_valley_variation(seed, planning_x, planning_y, 571, 2),
@@ -201,10 +201,10 @@ fn energy_valley_parcel_target_footprint(
 ///|
 fn energy_valley_mark_parcel_ground(
   tiles : Array[Array[ExactEnergyValleyTile]],
-  parcel_x : Int,
-  parcel_y : Int,
-  parcel_width : Int,
-  parcel_depth : Int,
+  parcel_x : Int32,
+  parcel_y : Int32,
+  parcel_width : Int32,
+  parcel_depth : Int32,
   kind : String,
 ) -> Unit {
   let terrain = if kind == "campus" { "plaza" } else { "urban" }
@@ -224,7 +224,7 @@ fn energy_valley_mark_structure_footprint(
   tiles : Array[Array[ExactEnergyValleyTile]],
   placement : EnergyValleyParcelPlacement,
   kind : String,
-  floors : Int,
+  floors : Int32,
 ) -> Unit {
   let id = "ambient-\{placement.x}-\{placement.y}"
   let terrain = if kind == "campus" || kind == "civic" || kind == "industrial" {
@@ -258,7 +258,7 @@ fn energy_valley_mark_structure_footprint(
 ///|
 fn energy_valley_grow_legacy_parcel_structures(
   tiles : Array[Array[ExactEnergyValleyTile]],
-  seed : Int,
+  seed : Int32,
 ) -> Unit {
   let scale = energy_valley_semantic_cells_per_planning_cell()
   let planning_cols = (exact_energy_valley_cols() + scale - 1) / scale
@@ -323,23 +323,23 @@ fn energy_valley_grow_legacy_parcel_structures(
 /// Exact source-building evidence after the final road graph, civic footprints,
 /// and water have carved it into one legal block and dry region.
 priv struct EnergyValleyReferenceFragment {
-  block_ordinal : Int
-  region_ordinal : Int
+  block_ordinal : Int32
+  region_ordinal : Int32
   code : String
-  area : Int
-  sum_x : Int
-  sum_y : Int
-  min_x : Int
-  min_y : Int
-  max_x : Int
-  max_y : Int
+  area : Int32
+  sum_x : Int32
+  sum_y : Int32
+  min_x : Int32
+  min_y : Int32
+  max_x : Int32
+  max_y : Int32
 }
 
 ///|
 fn energy_valley_shifted_reference_building_code_at(
-  seed : Int,
-  x : Int,
-  y : Int,
+  seed : Int32,
+  x : Int32,
+  y : Int32,
 ) -> String {
   reference_building_code_at(
     x - energy_valley_road_pattern_shift_x(seed),
@@ -351,10 +351,10 @@ fn energy_valley_shifted_reference_building_code_at(
 fn energy_valley_reference_fragment_cell(
   tiles : Array[Array[ExactEnergyValleyTile]],
   layout : EnergyValleyRoadBlockLayout,
-  seed : Int,
-  x : Int,
-  y : Int,
-) -> ((Int, Int), String)? {
+  seed : Int32,
+  x : Int32,
+  y : Int32,
+) -> ((Int32, Int32), String)? {
   if !energy_valley_layout_cell_in_bounds(x, y) {
     return None
   }
@@ -378,7 +378,7 @@ fn energy_valley_reference_fragment_cell(
 fn energy_valley_reference_fragments(
   tiles : Array[Array[ExactEnergyValleyTile]],
   layout : EnergyValleyRoadBlockLayout,
-  seed : Int,
+  seed : Int32,
 ) -> Array[EnergyValleyReferenceFragment] {
   let visited = energy_valley_bool_grid(false)
   let fragments : Array[EnergyValleyReferenceFragment] = []
@@ -400,7 +400,7 @@ fn energy_valley_reference_fragments(
       }
       let identity = source.0
       let code = source.1
-      let queue : Array[Int] = [start_y * cols + start_x]
+      let queue : Array[Int32] = [start_y * cols + start_x]
       visited[start_y][start_x] = true
       let mut head = 0
       let mut area = 0
@@ -462,7 +462,7 @@ fn energy_valley_reference_fragments(
 ///|
 fn energy_valley_largest_reference_fragment_per_block(
   fragments : Array[EnergyValleyReferenceFragment],
-  block_count : Int,
+  block_count : Int32,
 ) -> Array[EnergyValleyReferenceFragment] {
   let best_by_block : Array[EnergyValleyReferenceFragment?] = Array::make(
     block_count + 1,
@@ -499,13 +499,13 @@ fn energy_valley_largest_reference_fragment_per_block(
 fn energy_valley_block_structure_candidate_score(
   tiles : Array[Array[ExactEnergyValleyTile]],
   layout : EnergyValleyRoadBlockLayout,
-  seed : Int,
+  seed : Int32,
   fragment : EnergyValleyReferenceFragment,
-  x : Int,
-  y : Int,
-  width : Int,
-  depth : Int,
-) -> Int? {
+  x : Int32,
+  y : Int32,
+  width : Int32,
+  depth : Int32,
+) -> Int32? {
   let identity = (fragment.block_ordinal, fragment.region_ordinal)
   if energy_valley_road_block_layout_for_footprint(layout, x, y, width, depth) !=
     Some(identity) {
@@ -590,7 +590,7 @@ fn energy_valley_block_structure_candidate_score(
 fn energy_valley_best_block_structure_placement(
   tiles : Array[Array[ExactEnergyValleyTile]],
   layout : EnergyValleyRoadBlockLayout,
-  seed : Int,
+  seed : Int32,
   fragment : EnergyValleyReferenceFragment,
 ) -> EnergyValleyParcelPlacement? {
   let sizes = [(5, 4), (4, 5), (3, 3)]
@@ -673,7 +673,7 @@ fn energy_valley_mark_block_structure_footprint(
   placement : EnergyValleyParcelPlacement,
   fragment : EnergyValleyReferenceFragment,
   kind : String,
-  floors : Int,
+  floors : Int32,
 ) -> Unit {
   let id = "ambient-wenyu-\{fragment.block_ordinal}-\{kind}"
   let terrain = if kind == "campus" || kind == "civic" || kind == "industrial" {
@@ -707,7 +707,7 @@ fn energy_valley_mark_block_structure_footprint(
 ///|
 fn energy_valley_grow_block_structures(
   tiles : Array[Array[ExactEnergyValleyTile]],
-  seed : Int,
+  seed : Int32,
   layout : EnergyValleyRoadBlockLayout,
 ) -> Unit {
   let fragments = energy_valley_largest_reference_fragment_per_block(
@@ -751,7 +751,7 @@ fn energy_valley_grow_block_structures(
 ///|
 fn energy_valley_grow_parcel_structures(
   tiles : Array[Array[ExactEnergyValleyTile]],
-  seed : Int,
+  seed : Int32,
   layout : EnergyValleyRoadBlockLayout,
 ) -> Unit {
   if reference_building_snapshot_ready() &&

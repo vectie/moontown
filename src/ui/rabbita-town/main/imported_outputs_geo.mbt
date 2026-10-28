@@ -3,9 +3,9 @@ priv struct GeoState {
   features : Result[Array[@imported_output_contract.GeoFeature], String]?
   query : String
   kind : String
-  zone : Int?
-  selected : Array[Int]
-  page : Int
+  zone : Int32?
+  selected : Array[Int32]
+  page : Int32
   raw : Bool
 } derive(Debug, Eq)
 
@@ -14,10 +14,10 @@ priv enum GeoMsg {
   Query(String)
   Kind(String)
   Zone(String)
-  Toggle(Int)
+  Toggle(Int32)
   SelectMatching
   Clear
-  Page(Int)
+  Page(Int32)
   Raw
   Export(Bool)
 }
@@ -39,7 +39,7 @@ fn initial_geo() -> GeoState {
 fn geo_matches(
   geo : GeoState,
   features : Array[@imported_output_contract.GeoFeature],
-) -> Array[Int] {
+) -> Array[Int32] {
   let matching = @imported_output_contract.geo_matches(
     features,
     geo.query,
@@ -83,7 +83,7 @@ fn geo_transition(
       if value.is_empty() {
         { ..geo, zone: None, kind: "", page: 0, }
       } else {
-        let zones : Array[Int] = []
+        let zones : Array[Int32] = []
         for i, f in features {
           if f.kind == "Polygon" && i.to_string() == value {
             zones.push(i)
@@ -150,7 +150,7 @@ fn geo_button(
   dispatch : Dispatch[Msg],
   message : GeoMsg,
   label : String,
-  disabled? : Bool = false,
+  disabled~ : Bool = false,
 ) -> @rabbita.Html {
   @html.button(
     class="square-action",
@@ -164,9 +164,9 @@ fn geo_button(
 /// Whole features only: a long line is omitted rather than partially drawn.
 fn geo_schematic_indices(
   features : Array[@imported_output_contract.GeoFeature],
-  matching : Array[Int],
-) -> Array[Int] {
-  let plotted : Array[Int] = []
+  matching : Array[Int32],
+) -> Array[Int32] {
+  let plotted : Array[Int32] = []
   let mut positions = 0
   for index in matching {
     if plotted.length() >= 100 {
@@ -183,9 +183,9 @@ fn geo_schematic_indices(
 ///|
 fn render_geo_schematic(
   features : Array[@imported_output_contract.GeoFeature],
-  matching : Array[Int],
-  selected : Array[Int],
-  zone? : Int,
+  matching : Array[Int32],
+  selected : Array[Int32],
+  zone? : Int32,
 ) -> @rabbita.Html {
   let candidates = match zone {
     Some(i) => [i] + matching.filter(j => j != i)

@@ -2,8 +2,8 @@
 fn ecosystem_test_signal(
   id : String,
   provenance : EcosystemProvenance,
-  urgency : Int,
-  happened_tick : Int,
+  urgency : Int32,
+  happened_tick : Int32,
 ) -> EcosystemAttentionSignal {
   {
     id,

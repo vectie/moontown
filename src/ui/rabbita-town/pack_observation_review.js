@@ -24,8 +24,8 @@ export function createObservationChanges({ onPropose, resumePending, download = 
   const section = element('section', 'pack-observation-section')
   section.dataset.observationChanges = 'true'
   const label = element('input'); label.maxLength = 140; label.value = 'My observation baseline'; label.dataset.observationLabel = 'true'
-  const capture = element('button', 'pack-candidate-open', 'Save selected layers as baseline'); capture.type = 'button'; capture.dataset.observationCapture = 'true'
-  const save = element('button', 'pack-candidate-open', 'Download retained baseline'); save.type = 'button'; save.dataset.observationExport = 'true'
+  const capture = element('button', 'pack-candidate-open', '保存当前对比点'); capture.type = 'button'; capture.dataset.observationCapture = 'true'
+  const save = element('button', 'pack-candidate-open', '下载对比点'); save.type = 'button'; save.dataset.observationExport = 'true'
   const upload = element('input'); upload.type = 'file'; upload.accept = '.json,application/json'; upload.dataset.observationImport = 'true'
   const preview = element('div'), summary = element('p', 'pack-layer-summary'), rows = element('div', 'pack-observation-rows')
   const search = element('input'); search.type = 'search'; search.dataset.observationSearch = 'true'
@@ -34,17 +34,20 @@ export function createObservationChanges({ onPropose, resumePending, download = 
     const option = element('option', '', name); option.value = value; filter.append(option)
   }
   filter.value = 'changes'
-  const previous = element('button', 'pack-candidate-open', 'Previous changes'), next = element('button', 'pack-candidate-open', 'Next changes')
+  const previous = element('button', 'pack-candidate-open', '上一页'), next = element('button', 'pack-candidate-open', '下一页')
   previous.type = next.type = 'button'; previous.dataset.observationPrevious = 'true'; next.dataset.observationNext = 'true'
   const pageStatus = element('span'), pages = element('div', 'pack-layer-actions')
   pages.append(previous, pageStatus, next)
-  const proceed = element('button', 'pack-candidate-submit', 'Continue selected changes to intake'); proceed.type = 'button'; proceed.dataset.observationContinue = 'true'
-  const report = element('button', 'pack-candidate-open', 'Download comparison'); report.type = 'button'; report.dataset.observationReport = 'true'
+  const proceed = element('button', 'pack-candidate-submit', '整理变化'); proceed.type = 'button'; proceed.dataset.observationContinue = 'true'
+  const report = element('button', 'pack-candidate-open', '导出对比'); report.type = 'button'; report.dataset.observationReport = 'true'
   const status = element('p', 'pack-candidate-form-status'); status.setAttribute('role', 'status')
-  section.append(element('h3', '', 'What changed since your last visit?'),
-    element('p', 'pack-layer-summary', 'Save a baseline of the selected pack layers, then compare later projections. Files stay local until you explicitly submit a candidate. A saved baseline keeps its original pack scope when layer filters change.'),
-    field('Baseline label', label), capture, save, field('Import an earlier baseline (untrusted local JSON)', upload), preview,
-    summary, field('Find an observation, pack or evidence reference', search), field('Show', filter), rows, pages, proceed, report, status)
+  const settings = element('details', 'town-advanced')
+  settings.append(element('summary', '', '高级 · 对比设置与导出'), field('对比点名称', label), save, report,
+    element('p', 'pack-layer-summary', 'A saved baseline keeps its original pack scope when layer filters change. Download the baseline to resume after leaving this page.'))
+  section.append(element('h3', '', '查看资料变化'),
+    element('p', 'pack-layer-summary', '保存当前资料作对比，或载入上次文件。这是手动对比，不会后台监测或自动发送。'),
+    capture, field('载入上次保存的对比文件', upload), settings, preview,
+    summary, field('搜索资料', search), field('Show', filter), rows, pages, proceed, status)
 
   let baseline = null, state = null, selectedPacks = new Set(), comparison = null, page = 0, revision = 0, importGeneration = 0
   const selected = new Set()
@@ -56,13 +59,13 @@ export function createObservationChanges({ onPropose, resumePending, download = 
   }
   function updateButton() {
     proceed.disabled = !selected.size || !comparison
-    proceed.textContent = selected.size ? `Continue ${selected.size} change(s) to intake` : 'Continue selected changes to intake'
+    proceed.textContent = selected.size ? `整理问题 · ${selected.size} 项变化` : '整理变化'
   }
   function render() {
     const rendered = ++revision
     rows.replaceChildren(); comparison = null
     save.disabled = !baseline; report.disabled = true
-    capture.textContent = baseline ? 'Replace baseline with selected layers' : 'Save selected layers as baseline'
+    capture.textContent = baseline ? '更新对比点' : '保存当前对比点'
     if (!baseline) {
       summary.textContent = 'No baseline retained yet. Save selected layers, or import a baseline from an earlier visit.'
       previous.disabled = next.disabled = true; pageStatus.textContent = ''; updateButton(); return
@@ -103,7 +106,7 @@ export function createObservationChanges({ onPropose, resumePending, download = 
           else { choose.checked = false; status.textContent = 'Choose at most twelve observations for one candidate.' }
           updateButton()
         })
-        card.append(field('Use this current observation and its change history', choose))
+        card.append(field('引用这份资料及变化', choose))
       }
       rows.append(card)
     }
@@ -137,8 +140,8 @@ export function createObservationChanges({ onPropose, resumePending, download = 
       if (file.size > BASELINE_LIMITS.bytes) throw Error('Choose a baseline JSON file no larger than 1 MiB.')
       const value = parseObservationBaseline(await file.text())
       if (generation !== importGeneration) return
-      const replace = element('button', 'pack-candidate-open', 'Use imported baseline'); replace.type = 'button'; replace.dataset.observationAcceptImport = 'true'
-      const cancel = element('button', 'pack-candidate-open', 'Cancel baseline import'); cancel.type = 'button'
+      const replace = element('button', 'pack-candidate-open', '使用此对比点'); replace.type = 'button'; replace.dataset.observationAcceptImport = 'true'
+      const cancel = element('button', 'pack-candidate-open', '取消导入'); cancel.type = 'button'
       preview.append(element('p', 'pack-question-gap', `Untrusted baseline: ${value.label} · saved ${value.saved_at} · ${value.packs.length} pack(s): ${value.packs.map(p => p.pack_id).join(', ')}. This replaces your local comparison baseline only.`), replace, cancel)
       replace.addEventListener('click', () => { if (generation !== importGeneration) return; adopt(value); status.textContent = 'Imported baseline loaded for comparison. Historical excerpts remain unverified operator-supplied data.' })
       cancel.addEventListener('click', () => { if (generation !== importGeneration) return; invalidateImport(); status.textContent = 'Import cancelled. The previous baseline is retained.' })

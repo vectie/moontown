@@ -1,22 +1,22 @@
 ///|
 fn runtime_counts_fixture(
-  running? : Int = 0,
-  waiting? : Int = 0,
-  review? : Int = 0,
-  blocked? : Int = 0,
-  completed? : Int = 0,
+  running~ : Int32 = 0,
+  waiting~ : Int32 = 0,
+  review~ : Int32 = 0,
+  blocked~ : Int32 = 0,
+  completed~ : Int32 = 0,
 ) -> ModuleRuntimeCounts {
   module_runtime_counts(running~, waiting~, review~, blocked~, completed~)
 }
 
 ///|
 fn visual_module_fixture(
-  status? : String = "",
-  running_count? : Int = 0,
-  waiting_count? : Int = 0,
-  review_count? : Int = 0,
-  blocked_count? : Int = 0,
-  completed_count? : Int = 0,
+  status~ : String = "",
+  running_count~ : Int32 = 0,
+  waiting_count~ : Int32 = 0,
+  review_count~ : Int32 = 0,
+  blocked_count~ : Int32 = 0,
+  completed_count~ : Int32 = 0,
 ) -> VisualModuleSnapshot {
   {
     module_id: "module",
@@ -35,11 +35,11 @@ fn visual_module_fixture(
 
 ///|
 fn visual_building_fixture(
-  running_count? : Int = 0,
-  waiting_count? : Int = 0,
-  review_count? : Int = 0,
-  blocked_count? : Int = 0,
-  completed_count? : Int = 0,
+  running_count~ : Int32 = 0,
+  waiting_count~ : Int32 = 0,
+  review_count~ : Int32 = 0,
+  blocked_count~ : Int32 = 0,
+  completed_count~ : Int32 = 0,
 ) -> VisualBuildingSnapshot {
   {
     book_id: "book",

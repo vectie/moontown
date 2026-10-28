@@ -2,7 +2,7 @@
 fn count_execution_status(
   executions : Array[@core.TaskExecutionRecord],
   status : @core.TaskExecutionStatus,
-) -> Int {
+) -> Int32 {
   let mut count = 0
   for execution in executions {
     if execution.status == status {
@@ -34,16 +34,16 @@ fn execution_status_requires_review(status : @core.TaskExecutionStatus) -> Bool 
 
 ///|
 priv struct ExecutionCountSummary {
-  packet_ready : Int
-  proposal_imported : Int
-  run_confirmed : Int
-  running : Int
-  awaiting_persistence : Int
-  review_queued : Int
-  awaiting_acceptance : Int
-  completed : Int
-  stale : Int
-  failed : Int
+  packet_ready : Int32
+  proposal_imported : Int32
+  run_confirmed : Int32
+  running : Int32
+  awaiting_persistence : Int32
+  review_queued : Int32
+  awaiting_acceptance : Int32
+  completed : Int32
+  stale : Int32
+  failed : Int32
 }
 
 ///|
@@ -68,14 +68,16 @@ fn execution_count_summary(
 }
 
 ///|
-fn ExecutionCountSummary::active_run_flow(self : ExecutionCountSummary) -> Int {
+fn ExecutionCountSummary::active_run_flow(
+  self : ExecutionCountSummary,
+) -> Int32 {
   self.running + self.run_confirmed
 }
 
 ///|
 fn ExecutionCountSummary::active_or_unresolved(
   self : ExecutionCountSummary,
-) -> Int {
+) -> Int32 {
   self.run_confirmed +
   self.running +
   self.awaiting_persistence +
@@ -85,6 +87,6 @@ fn ExecutionCountSummary::active_or_unresolved(
 }
 
 ///|
-fn ExecutionCountSummary::issue_count(self : ExecutionCountSummary) -> Int {
+fn ExecutionCountSummary::issue_count(self : ExecutionCountSummary) -> Int32 {
   self.stale + self.failed
 }

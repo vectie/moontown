@@ -6,11 +6,9 @@ test "physical bridge copy renders explicit snapshot fields" {
     robot_calls: 9,
     telemetry_signals: 4,
   })
-  assert_true(copy.contains("Physical Bridge Link / Running"))
-  assert_true(copy.contains("Room and robot sync running"))
-  assert_true(copy.contains("9 robot or venue calls"))
-  assert_true(copy.contains("4 live telemetry signals"))
-  assert_true(copy.contains("projection-safe town view"))
+  assert_true(copy.contains("设备与遥测未接入"))
+  assert_false(copy.contains("9"))
+  assert_false(copy.contains("live telemetry"))
 }
 
 ///|

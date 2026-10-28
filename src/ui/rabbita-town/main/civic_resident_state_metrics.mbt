@@ -1,5 +1,5 @@
 ///|
-fn resident_private_scope_count(model : Model) -> Int {
+fn resident_private_scope_count(model : Model) -> Int32 {
   let mut count = 0
   for resident in resident_sims(model) {
     if resident.privacy_scope == "Operator summary" {
@@ -10,7 +10,7 @@ fn resident_private_scope_count(model : Model) -> Int {
 }
 
 ///|
-fn resident_review_queue_count(model : Model) -> Int {
+fn resident_review_queue_count(model : Model) -> Int32 {
   let mut count = 0
   for execution in executions_for_model(model) {
     if execution.status == AwaitingPersistence ||

@@ -226,7 +226,7 @@ test('missing source retains excerpt and notes across refresh; explicit removal 
 test('cancel and layer filtering preserve question edits; repeated selections do not duplicate rows', async () => {
   await mounted(async (d, state, posts) => {
     await d.find(n => n.dataset.questionLaunch).fire('click'); await fillQuestion(d)
-    await d.find(n => n.textContent === 'Keep question and close').fire('click')
+    await d.find(n => n.textContent === '保留并关闭').fire('click')
     const filter = d.find(n => n.type === 'checkbox' && !n.dataset.sourceSubject)
     filter.checked = false; await filter.fire('change')
     await d.find(n => n.dataset.questionLaunch).fire('click')
@@ -266,7 +266,7 @@ test('unknown submission resumes the exact candidate from question/import contro
 test('invalid import cannot replace the current question and oversized files are not read', async () => {
   await mounted(async (d, state, posts) => {
     await d.find(n => n.dataset.questionLaunch).fire('click'); await fillQuestion(d)
-    await d.find(n => n.textContent === 'Keep question and close').fire('click')
+    await d.find(n => n.textContent === '保留并关闭').fire('click')
     const upload = d.find(n => n.dataset.questionImport); let read = false
     upload.files = [{ size: 131073, text: async () => { read = true; return '{}' } }]
     await upload.fire('change'); assert.equal(read, false)
@@ -300,7 +300,7 @@ test('discarded import replacement cannot overwrite newer local question edits',
     const body = serializeQuestionDraft(draft), upload = d.find(n => n.dataset.questionImport)
     upload.files = [{ size: body.length, text: async () => body }]; await upload.fire('change')
     const replace = d.find(n => n.dataset.questionReplace)
-    await d.find(n => n.textContent === 'Discard imported packet').fire('click')
+    await d.find(n => n.textContent === '取消导入').fire('click')
     await d.find(n => n.dataset.questionLaunch).fire('click'); await fillQuestion(d)
     await replace.fire('click')
     assert.equal(d.find(n => n.dataset.questionText).value, completeDraft().question)
@@ -311,7 +311,7 @@ test('a closed question form cannot open intake through a retained submit callba
   await mounted(async d => {
     await d.find(n => n.dataset.questionLaunch).fire('click'); await fillQuestion(d)
     const form = questionForm(d)
-    await d.find(n => n.textContent === 'Keep question and close').fire('click')
+    await d.find(n => n.textContent === '保留并关闭').fire('click')
     await form.fire('submit')
     assert.equal(d.all().filter(n => n.dataset.sourceUncertainty).length, 0)
   })
@@ -324,7 +324,7 @@ test('row input callbacks from an earlier render cannot change the currently dis
     await d.find(n => n.dataset.packBridgePanel === 'launch').fire('click')
     connection.value = 'Detached stale edit'; await connection.fire('input')
     role.value = 'context'; await role.fire('change')
-    await d.find(n => n.textContent === 'Keep question and close').fire('click')
+    await d.find(n => n.textContent === '保留并关闭').fire('click')
     await d.find(n => n.dataset.questionLaunch).fire('click')
     assert.equal(d.find(n => n.dataset.questionConnection === '0').value, completeDraft().rows[0].connection)
     assert.equal(d.find(n => n.dataset.questionRole === '0').value, 'supports')
@@ -334,13 +334,13 @@ test('row input callbacks from an earlier render cannot change the currently dis
 test('old dialog controls cannot close, export, overwrite or submit a newer editing session', async () => {
   await mounted(async d => {
     await d.find(n => n.dataset.questionLaunch).fire('click'); await fillQuestion(d)
-    const oldForm = questionForm(d), oldClose = d.find(n => n.textContent === 'Keep question and close'), oldSave = d.find(n => n.dataset.questionExport)
+    const oldForm = questionForm(d), oldClose = d.find(n => n.textContent === '保留并关闭'), oldSave = d.find(n => n.dataset.questionExport)
     await oldClose.fire('click'); await d.find(n => n.dataset.questionLaunch).fire('click')
     const current = d.find(n => n.tagName === 'dialog' && n.open)
     d.find(n => n.dataset.questionText).value = 'New session question'
     await oldClose.fire('click'); await oldSave.fire('click'); await oldForm.fire('submit')
     assert.equal(current.open, true); assert.equal(d.all().filter(n => n.dataset.sourceUncertainty).length, 0)
-    await d.find(n => n.textContent === 'Keep question and close').fire('click')
+    await d.find(n => n.textContent === '保留并关闭').fire('click')
     await d.find(n => n.dataset.questionLaunch).fire('click')
     assert.equal(d.find(n => n.dataset.questionText).value, 'New session question')
   })
@@ -352,7 +352,7 @@ test('replacement and discard controls from an old import cannot affect a newer 
     first.question = 'First import'; second.question = 'Second import'
     const firstBody = serializeQuestionDraft(first), secondBody = serializeQuestionDraft(second)
     upload.files = [{ size: firstBody.length, text: async () => firstBody }]; await upload.fire('change')
-    const replace = d.find(n => n.dataset.questionReplace), discard = d.find(n => n.textContent === 'Discard imported packet')
+    const replace = d.find(n => n.dataset.questionReplace), discard = d.find(n => n.textContent === '取消导入')
     upload.files = [{ size: secondBody.length, text: async () => secondBody }]; await upload.fire('change')
     await replace.fire('click'); await discard.fire('click')
     assert.equal(d.all().filter(n => n.tagName === 'dialog').length, 0)
