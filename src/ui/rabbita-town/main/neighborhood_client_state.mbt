@@ -23,6 +23,7 @@ struct NeighborhoodState {
 
 ///|
 enum NeighborhoodMsg {
+  Preview
   Open
   Close
   Refresh
@@ -38,6 +39,7 @@ enum NeighborhoodMsg {
 
 ///|
 enum NeighborhoodRequest {
+  PublicLoad(Int32)
   Load(Int32)
   Submit(Int32, String, String, Json)
 } derive(Debug)
@@ -298,6 +300,16 @@ fn neighborhood_transition(
   message : NeighborhoodMsg,
 ) -> (NeighborhoodState, NeighborhoodRequest?) {
   match message {
+    Preview => {
+      if state.loading || state.mine_loading || state.busy {
+        return (state, None)
+      }
+      let generation = state.generation + 1
+      (
+        { ..state, generation, loading: true, error: "", },
+        Some(PublicLoad(generation)),
+      )
+    }
     Open | Refresh => {
       if state.busy {
         return (

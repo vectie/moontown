@@ -45,6 +45,8 @@ fn initial_app_cmd(dispatch : Dispatch[Msg], model : Model) -> Cmd {
     commands.push(dispatch(NeighborhoodEvent(Open)))
   } else if model.energy_request_open {
     commands.push(dispatch(OpenWorkWorkspace(model.request_composer)))
+  } else if model.street_living_room {
+    commands.push(dispatch(NeighborhoodEvent(Preview)))
   }
   match model.research_handoff {
     LoadingResearchHandoff(request) =>

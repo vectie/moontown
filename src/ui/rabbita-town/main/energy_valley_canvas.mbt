@@ -665,6 +665,9 @@ extern "js" fn install_golden_valley_canvas_input(
   #|         }
   #|         return;
   #|       }
+  #|       // The arrival is a content page: Space activates focused buttons or
+  #|       // scrolls the page, instead of being swallowed by map shortcuts.
+  #|       if (camera.livingRoom) return;
   #|       const target = event.target;
   #|       if (target?.matches?.("input, textarea, select") ||
   #|           target?.isContentEditable) return;
@@ -3093,13 +3096,16 @@ fn render_golden_valley_canvas(
   dispatch : Dispatch[Msg],
   snapshot : @energy_valley_contract.TownSnapshot,
   view : TownCanvasViewState,
+  living_room~ : Bool = false,
 ) -> @rabbita.Html {
   schedule_golden_valley_canvas(() => {
+    prepare_street_living_room_camera(living_room)
     // Drawing first preserves the accepted-frame contract: input and the
     // continuous animator only adopt this snapshot after a successful paint.
     if draw_golden_valley_canvas(snapshot, view) {
       install_golden_valley_canvas_input(
         () => {
+          prepare_street_living_room_camera(living_room)
           if !draw_golden_valley_canvas(snapshot, view) {
             stop_golden_valley_canvas()
           }
@@ -3108,7 +3114,7 @@ fn render_golden_valley_canvas(
           golden_release_spring_civic_building_assets()
           golden_valley_clear_canvas_frame()
         },
-        wenyu_gentle_ground_trial_requested(),
+        living_room || wenyu_gentle_ground_trial_requested(),
       )
       if !view.intersection_preview {
         install_player_walk_keys()
@@ -3120,7 +3126,13 @@ fn render_golden_valley_canvas(
   let canvas_attrs = @html.Attrs::build()
     .aria_label(
       if view.intersection_preview {
-        "能源谷可交互路网地图"
+        if living_room {
+          "未来中心街区近景"
+        } else {
+          "能源谷可交互路网地图"
+        }
+      } else if living_room {
+        "未来中心街区近景"
       } else {
         "能源谷可交互等距地图"
       },

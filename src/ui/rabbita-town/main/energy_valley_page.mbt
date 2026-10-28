@@ -88,6 +88,12 @@ fn render_energy_valley_page_with_snapshot(
     layers: model.map_lab_layers.copy(),
     selected_id: model.map_lab_selected_id,
   }
+  if model.street_living_room && !model.map_lab_open {
+    return render_street_living_room(dispatch, model, snapshot, {
+      ..town_canvas_view,
+      follow_enabled: false,
+    })
+  }
   if wenyu_gentle_ground_trial_requested() {
     return div(
       class="energy-valley-golden relative h-screen w-screen overflow-hidden bg-slate-950 select-none",
@@ -147,6 +153,11 @@ fn render_energy_valley_page_with_snapshot(
   }
   let children : Array[@rabbita.Html] = [
     render_golden_valley_canvas(dispatch, snapshot, town_canvas_view),
+    button(
+      class="street-return",
+      on_click=dispatch(SetStreetLivingRoom(true)),
+      town_ui_label("back", "街区客厅"),
+    ),
     if (model.map_lab_open || town_design_registration_review_requested()) &&
       energy_valley_intersection_reference_requested() {
       render_intersection_reference_legend()

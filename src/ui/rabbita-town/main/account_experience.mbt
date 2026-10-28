@@ -387,7 +387,7 @@ fn account_primary_navigation_items(
   kind : AccountExperienceKind,
 ) -> Array[AccountNavItem] {
   let town = if kind == AdminExperience {
-    "./index.html?view=town"
+    "./index.html?view=living-room"
   } else {
     "./index.html"
   }
@@ -470,7 +470,10 @@ fn account_primary_item_active(
 ) -> Bool {
   if current_town_surface_route() is OperationsConsole ||
     !current_browser_query_param("panel").is_empty() ||
-    (kind == AdminExperience && current_browser_query_param("view") != "town") {
+    (
+      kind == AdminExperience &&
+      !["town", "living-room"].contains(current_browser_query_param("view"))
+    ) {
     return false
   }
   if current_browser_query_param("layer") == "compute" {
@@ -540,7 +543,7 @@ fn render_account_navigation(
                       "工作" => OpenWorkWorkspace(StandingWatchComposer)
                       "成果" => OpenWorkWorkspace(ResultsComposer)
                       "算力" => OpenSecretComputeRoom
-                      _ => OpenTownWorkspace
+                      _ => SetStreetLivingRoom(true)
                     },
                   ),
                   label,
@@ -759,7 +762,7 @@ fn render_account_surface_for_route(
     route,
     model,
     account,
-    current_browser_query_param("view") == "town",
+    ["town", "living-room"].contains(current_browser_query_param("view")),
   )
   let management_surface = requested_account_management_surface(
     route,

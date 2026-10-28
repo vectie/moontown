@@ -1,0 +1,63 @@
+/* The same registered world, seen from the neighborhood instead of orbit. */
+.street-living-room { position: relative; isolation: isolate; width: 100%; height: 100dvh; min-height: 560px; overflow: hidden; background: var(--town-ui-wash); color: var(--town-ui-ink); }
+.account-product-surface:has(> .street-living-room) { overflow-y: auto; }
+.street-scene { position: absolute; inset: 0; pointer-events: none; }
+body:has(.street-living-room) :is(.town-landmark-inspector, .town-landmark-pins) { display: none; }
+.street-atmosphere { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgb(247 244 233 / 96%), rgb(247 244 233 / 76%) 24%, transparent 49%), linear-gradient(0deg, rgb(247 244 233 / 94%), transparent 28%); }
+.street-header { position: absolute; z-index: 2; inset: 40px 40px auto; display: flex; justify-content: space-between; gap: 24px; pointer-events: none; }
+.street-title { padding-top: 12px; }
+.street-title p { margin: 0 0 12px; font-size: 15px; letter-spacing: .24em; font-weight: 600; }
+.street-title h1 { margin: 0; font-size: clamp(36px, 4.2vw, 60px); font-weight: 650; line-height: 1.15; letter-spacing: .04em; }
+.street-header-actions { display: flex; align-items: flex-start; gap: 12px; pointer-events: auto; }
+.street-button, .street-return { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 12px 18px; border: 1px solid var(--town-ui-line); border-radius: 14px; color: var(--town-ui-ink); background: var(--town-ui-paper); box-shadow: 0 4px 14px rgb(32 47 35 / 10%); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 160ms; }
+.street-button:hover, .street-return:hover { background: var(--town-ui-wash); }
+.street-living-room :is(button, a):focus-visible, .street-return:focus-visible { outline: 3px solid var(--town-ui-focus); outline-offset: 3px; }
+.street-door { position: absolute; left: 71%; top: 83%; transform: translateX(-50%); }
+.street-door-button { color: var(--town-ui-paper); background: var(--town-ui-accent); border-color: var(--town-ui-accent); box-shadow: var(--town-ui-shadow); }
+.street-door-button:hover { color: var(--town-ui-ink); }
+.street-noticeboard { position: absolute; z-index: 2; left: 40px; bottom: 52px; width: 300px; display: grid; gap: 16px; }
+.street-notice { border: 1px solid var(--town-ui-line); border-radius: 16px; background: var(--town-ui-card); box-shadow: 0 6px 18px rgb(32 47 35 / 8%); overflow: hidden; }
+.street-notice-heading { display: flex; align-items: center; justify-content: space-between; padding: 4px 10px 0 18px; }
+.street-notice-heading h2 { margin: 0; color: var(--town-ui-muted); font-size: 13px; font-weight: 550; }
+.street-notice-content { display: grid; gap: 10px; width: 100%; min-height: 74px; text-align: left; padding: 6px 18px 20px; border: 0; background: transparent; color: var(--town-ui-ink); font: inherit; cursor: pointer; }
+.street-notice-content:hover { background: var(--town-ui-wash); }
+.street-notice-content:focus-visible { outline-offset: -4px !important; }
+.street-notice-title { font-size: 18px; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.street-notice-meta { font-size: 12px; color: var(--town-ui-muted); line-height: 1.5; overflow-wrap: anywhere; }
+.street-retry { display: flex; align-items: center; min-height: 44px; width: fit-content; padding: 8px 12px; background: var(--town-ui-paper); border: 1px solid var(--town-ui-line); border-radius: 12px; color: var(--town-ui-ink); cursor: pointer; }
+.street-footer { position: absolute; bottom: max(16px, env(safe-area-inset-bottom)); left: 40px; right: 40px; display: flex; justify-content: space-between; gap: 16px; color: var(--town-ui-muted); font-size: 11px; }
+.street-footer a { text-decoration: none; }
+.street-return { position: absolute; z-index: 35; top: 80px; left: 16px; }
+.energy-valley-golden:has(.street-return) .town-quest-wrap { top: 144px; }
+@media (max-width: 900px) {
+  .street-header { inset: 24px 24px auto; }
+  .street-noticeboard { left: 24px; width: 265px; }
+  .street-footer { left: 24px; right: 24px; }
+}
+@media (max-width: 699px) {
+  .street-living-room { min-height: 700px; overflow: hidden; }
+  .street-scene { bottom: 200px; }
+  .street-atmosphere { background: linear-gradient(180deg, rgb(247 244 233 / 96%), transparent 32%, transparent 46%, var(--town-ui-paper) 74%); }
+  .street-header { inset: 20px 20px auto; gap: 12px; }
+  .street-title { padding-top: 0; }
+  .street-title p { margin-bottom: 8px; font-size: 13px; }
+  .street-title h1 { font-size: 34px; }
+  .street-header-actions { flex-wrap: wrap; justify-content: flex-end; max-width: 152px; gap: 8px; }
+  .street-overview { padding: 10px 14px; }
+  .street-door { left: 50%; top: 53%; }
+  .street-noticeboard { left: 20px; right: 20px; bottom: 44px; width: auto; grid-template-columns: 1fr; gap: 10px; }
+  .street-notice-heading { padding: 0 8px 0 14px; }
+  .street-notice-content { gap: 4px; padding: 0 14px 14px; min-height: 44px; }
+  .street-notice-title { font-size: 16px; -webkit-line-clamp: 1; }
+  .street-notice-meta { font-size: 12px; }
+  .street-footer { left: 20px; right: 20px; font-size: 10px; }
+}
+@media (max-height: 580px) and (min-width: 700px) {
+  .street-header { top: 20px; }
+  .street-title h1 { font-size: 36px; }
+  .street-noticeboard { bottom: 40px; gap: 8px; }
+  .street-notice-content { min-height: 44px; padding-bottom: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .street-button, .street-return { transition: none; }
+}

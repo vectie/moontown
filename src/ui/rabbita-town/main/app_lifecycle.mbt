@@ -93,6 +93,47 @@ fn update_non_form_message_before_imported_surface_fence(
   model : Model,
 ) -> (Cmd, Model) {
   match msg {
+    SetStreetLivingRoom(arriving) => {
+      replace_browser_query_param(
+        "view",
+        if arriving {
+          "living-room"
+        } else {
+          "town"
+        },
+      )
+      replace_browser_query_param("community", "0")
+      replace_browser_query_param("request", "")
+      replace_browser_query_param("layer", "")
+      replace_browser_query_param("building", "")
+      replace_browser_query_param("area", "")
+      let next = {
+        ..close_town_transient_surfaces(model),
+        street_living_room: arriving,
+        dashboard_section: None,
+        map_lab_open: false,
+        energy_intro_open: false,
+      }
+      if arriving && next.neighborhood.snapshot is None {
+        update_neighborhood(dispatch, next, Preview)
+      } else {
+        model_only_update(next)
+      }
+    }
+    OpenStreetContent(section, id) => {
+      let (command, opened) = update_neighborhood(dispatch, model, Open)
+      let (state, _) = neighborhood_transition(
+        opened.neighborhood,
+        if id.is_empty() {
+          SelectSection(section)
+        } else if section == "stories" {
+          SelectStory(id)
+        } else {
+          SelectEvent(id)
+        },
+      )
+      (command, { ..opened, neighborhood: state, })
+    }
     NeighborhoodEvent(event) => update_neighborhood(dispatch, model, event)
     NeighborhoodManageEvent(event) =>
       update_neighborhood_manage(dispatch, model, event)
@@ -182,7 +223,14 @@ fn update_non_form_message_before_imported_surface_fence(
       )
     OpenSecretComputeRoom => {
       replace_browser_query_param("request", "")
-      replace_browser_query_param("view", "town")
+      replace_browser_query_param(
+        "view",
+        if model.street_living_room {
+          "living-room"
+        } else {
+          "town"
+        },
+      )
       let return_building = match model.town_spatial_layer {
         Indoor(building) => Some(building)
         _ => None
@@ -325,18 +373,7 @@ fn update_non_form_message_before_imported_surface_fence(
         request_composer: StandingWatchComposer,
       })
     OpenWorkWorkspace(focus) => open_work_workspace(dispatch, model, focus)
-    OpenTownWorkspace => {
-      replace_browser_query_param("community", "0")
-      replace_browser_query_param("request", "")
-      replace_browser_query_param("area", "")
-      replace_browser_query_param("view", "town")
-      model_only_update(
-        set_town_spatial_layer_model(
-          { ..close_town_transient_surfaces(model), dashboard_section: None, },
-          Outdoor,
-        ),
-      )
-    }
+    OpenTownWorkspace => update(dispatch, SetStreetLivingRoom(true), model)
     OpenEnergyRequestForAgent(contact_id) => {
       if model.request_submitting {
         return model_only_update(reopen_pending_operator_request_model(model))

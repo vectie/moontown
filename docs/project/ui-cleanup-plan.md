@@ -862,3 +862,29 @@ Acceptance requires:
   context, compact need/mood/goal state, privacy scope, and one current signal,
   while stale resident memory/reflection sample fields have been removed from
   the UI data model.
+
+## 2026-10-28 · 未来中心街区客厅 prototype
+
+- Default town arrival frames the registered Future Center campus at close
+  range, with two compact public-content cards. `总览` opens the existing full
+  map; `街区客厅` returns. `?view=town` remains the overview deep link and
+  `?view=living-room` explicitly selects the arrival, including for admins.
+- Reuses the existing canvas, landmark projections, paper/green controls, and
+  actual public neighborhood API. No new terrain, road fit, fabricated feed,
+  visitor count, identity system, machine binding, or authority is introduced.
+- Homepage fetches only the public projection. Opening a story/event delegates
+  to the original detail/signup/follow-up sheet and its authenticated reads.
+  Drafts and private submissions are never arrival-card sources. Loading,
+  failure/retry, and empty states are distinct.
+- `进入室内` opens the full existing Future Center 3D; its lift still reaches
+  the existing compute model. Calibration review links bypass the new arrival.
+- Presentation prototype only: local preview/test fixture content is not live
+  activity publication. This change does not deploy the 8443 production site.
+- Verification: all 185 UI test files (24 batches), 177 browser-adapter/CSS tests,
+  and 19 landmark-model tests passed; production artifact verified (775 files,
+  70.6 MiB). Native cross-service tests that require external fixture URLs keep
+  their existing skips; no new production account-isolation claim is made.
+- Browser checked at 1280×720, 375×812, and 812×375: overview/return, story and
+  event details, existing follow-up, indoor→compute, keyboard Space/Enter,
+  horizontal overflow and 44px home controls. Narrow landscape scrolls instead
+  of overlapping. No console errors on checked desktop/mobile flows.

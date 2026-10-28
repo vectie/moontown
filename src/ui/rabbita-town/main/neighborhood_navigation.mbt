@@ -24,6 +24,12 @@ fn neighborhood_route_requested(
 
 ///|
 fn initial_neighborhood_requested() -> Bool {
+  // The public QR now arrives in the living room. Explicit content links still
+  // open the existing neighborhood sheet directly.
+  if initial_street_living_room() &&
+    current_browser_query_param("community") != "1" {
+    return false
+  }
   neighborhood_route_requested(
     public_platform_enabled(),
     current_browser_query_param("community"),

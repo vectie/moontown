@@ -65,6 +65,8 @@ fn neighborhood_cmd(
 ) -> Cmd {
   match request {
     None => @rabbita.none
+    Some(PublicLoad(generation)) =>
+      neighborhood_read_cmd(dispatch, generation, "public")
     Some(Load(generation)) =>
       @rabbita.batch([
         neighborhood_read_cmd(dispatch, generation, "public"),

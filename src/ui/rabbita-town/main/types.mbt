@@ -279,6 +279,7 @@ priv struct Model {
   energy_valley_runtime : EnergyValleyRuntimeState
   energy_first_agent_open : Bool
   town_spatial_layer : TownSpatialLayer
+  street_living_room : Bool
   secret_compute_room_selected_id : String
   indoor_selected_slot_id : String
   spatial_scene_selections : Map[String, SpatialSceneSelection]
@@ -419,6 +420,8 @@ priv struct Model {
 
 ///|
 priv enum Msg {
+  SetStreetLivingRoom(Bool)
+  OpenStreetContent(String, String)
   NeighborhoodEvent(NeighborhoodMsg)
   NeighborhoodManageEvent(NeighborhoodManageMsg)
   ImportedOutputsEvent(ImportedOutputsMsg)

@@ -27,6 +27,7 @@
 @import url("./styles/town-controls.css");
 @import url("./styles/spatial-controls.css");
 @import url("./styles/neighborhood.css");
+@import url("./styles/street-living-room.css");
 
 @media (max-width: 1220px) {
   .runtime-grid,

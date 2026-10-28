@@ -17,7 +17,14 @@ fn open_work_workspace(
   replace_browser_query_param("layer", "")
   replace_browser_query_param("building", "")
   if parse_bootstrap_account_experience().kind() == AdminExperience {
-    replace_browser_query_param("view", "town")
+    replace_browser_query_param(
+      "view",
+      if model.street_living_room {
+        "living-room"
+      } else {
+        "town"
+      },
+    )
   }
   let next = set_request_composer_model(
     {

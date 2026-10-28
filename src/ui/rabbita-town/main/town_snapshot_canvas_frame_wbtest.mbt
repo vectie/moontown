@@ -699,6 +699,7 @@ fn canvas_frame_page_test_player() -> PlayerAvatar {
 test "one page render threads the exact same TownSnapshot through its surfaces" {
   let base = {
     ..init_model(),
+    street_living_room: false,
     tick: 18,
     player: Some(canvas_frame_page_test_player()),
     quest_done: town_quest_chain().map(quest => quest.id),
