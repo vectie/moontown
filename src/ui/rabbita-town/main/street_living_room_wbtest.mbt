@@ -82,7 +82,8 @@ test "arrival cards never promote drafts or private stories and choose next even
   let html = disclosure_test_html(render_street_notice(dispatch, state, true))
   assert_true(html.contains("公开故事"))
   assert_false(html.contains("private draft"))
-  assert_true(html.contains("查看全部故事"))
+  assert_true(html.contains("邻里故事"))
+  assert_false(html.contains("street-notice-content"))
 }
 
 ///|

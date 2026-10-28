@@ -91,7 +91,9 @@ fn render_energy_valley_page_with_snapshot(
   if model.street_living_room && !model.map_lab_open {
     return render_street_living_room(dispatch, model, snapshot, {
       ..town_canvas_view,
-      follow_enabled: false,
+      follow_enabled: !model.street_overview,
+      player_idle_position: street_spawn(),
+      player_motion: model.street_motion,
     })
   }
   if wenyu_gentle_ground_trial_requested() {

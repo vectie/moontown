@@ -128,6 +128,8 @@ fn init_model() -> Model {
     energy_first_agent_open: false,
     town_spatial_layer: initial_town_spatial_layer(),
     street_living_room: initial_street_living_room(),
+    street_overview: false,
+    street_motion: None,
     secret_compute_room_selected_id: "moongate",
     indoor_selected_slot_id: "",
     spatial_scene_selections: Map([]),

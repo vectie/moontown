@@ -83,6 +83,7 @@ fn draw_wenyu_gentle_ground_trial(
   view : TownCanvasViewState,
   width : Int32,
   height : Int32,
+  street~ : Bool = false,
 ) -> Unit {
   wenyu_gentle_ground_trial_fit_camera(width, height)
   golden_valley_clear_canvas_frame()
@@ -256,6 +257,19 @@ fn draw_wenyu_gentle_ground_trial(
       golden_animation_seconds(),
       golden_prefers_reduced_motion(),
     )
+    let street_position = if street {
+      town_canvas_follow_position({ ..view, follow_enabled: true, })
+    } else {
+      None
+    }
+    let street_position = match street_position {
+      Some(_) => street_position
+      None if street => street_spawn()
+      _ => None
+    }
+    let street_depth = street_position
+      .map(p => (p.0 + p.1).floor().to_int())
+      .unwrap_or(-1)
     golden_begin_spring_civic_building_asset_frame()
     for depth in 0..<432 {
       town_landmark_draw(
@@ -288,6 +302,9 @@ fn draw_wenyu_gentle_ground_trial(
         None => ()
       }
       golden_draw_agents_at_depth(context, agents, depth, width, height)
+      if depth == street_depth {
+        street_draw_visitor(context, view, depth, width, height)
+      }
       match buildings.get(depth) {
         Some(items) =>
           for building in items {

@@ -438,6 +438,10 @@ extern "js" fn install_golden_valley_canvas_input(
   #|         cache.height !== canvas.clientHeight) return false;
   #|     const shiftX = (cache.cameraX - camera.x) * camera.z;
   #|     const shiftY = (cache.cameraY - camera.y) * camera.z;
+  #|     if (camera.livingRoom) {
+  #|       const signs = document.querySelector('.street-destinations');
+  #|       if (signs && signs.querySelector('[data-anchored="true"]')) signs.style.transform = `translate(${shiftX}px,${shiftY}px)`;
+  #|     }
   #|     // A periodic semantic refresh fills newly exposed edges while still
   #|     // replacing dozens of pointer-triggered full paints with composites.
   #|     if (Math.abs(shiftX) > dragSemanticRefreshPx ||
@@ -505,11 +509,12 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     scheduleInteractionFrame();
   #|   };
   #|   const onPointerDown = event => {
+  #|     if (camera.livingRoom) { delete camera.streetTransition; canvas.focus({preventScroll:true}); }
   #|     updateCoordinateReadout(event);
   #|     if (event.button === 0 && !lifecycle.cameraOnly) rememberAction(event);
   #|     if (event.button === 1 || event.button === 2 ||
   #|         (event.button === 0 &&
-  #|           (lifecycle.cameraOnly || inspectSelected()))) {
+  #|           (lifecycle.cameraOnly || camera.livingRoom || inspectSelected()))) {
   #|       cameraDragging = true;
   #|       lifecycle.cameraDragging = true;
   #|       moved = false;
@@ -532,6 +537,7 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     if (cameraDragging) {
   #|       if (Math.abs(event.clientX - lastX) > 2 ||
   #|           Math.abs(event.clientY - lastY) > 2) moved = true;
+  #|       if (moved && camera.livingRoom) camera.streetFollow = false;
   #|       camera.x -= (event.clientX - lastX) / camera.z;
   #|       camera.y -= (event.clientY - lastY) / camera.z;
   #|       lastX = event.clientX;
@@ -567,12 +573,13 @@ extern "js" fn install_golden_valley_canvas_input(
   #|   };
   #|   const onContextMenu = event => event.preventDefault();
   #|   const onWheel = event => {
+  #|     if (camera.livingRoom) delete camera.streetTransition;
   #|     event.preventDefault();
   #|     const rect = canvas.getBoundingClientRect();
   #|     const mx = event.clientX - rect.left - rect.width / 2;
   #|     const my = event.clientY - rect.top - rect.height / 2;
   #|     const previous = camera.z;
-  #|     camera.z = Math.min(1.8, Math.max(0.07, previous * (
+  #|     camera.z = Math.min(camera.livingRoom ? 3.6 : 1.8, Math.max(0.07, previous * (
   #|       event.deltaY < 0 ? 1.12 : 0.89
   #|     )));
   #|     camera.x += mx / previous - mx / camera.z;
@@ -665,8 +672,8 @@ extern "js" fn install_golden_valley_canvas_input(
   #|         }
   #|         return;
   #|       }
-  #|       // The arrival is a content page: Space activates focused buttons or
-  #|       // scrolls the page, instead of being swallowed by map shortcuts.
+  #|       // Street buttons keep native Space/Enter; its scoped walk handler
+  #|       // owns movement, never the authoring/simulation shortcuts.
   #|       if (camera.livingRoom) return;
   #|       const target = event.target;
   #|       if (target?.matches?.("input, textarea, select") ||
@@ -2857,6 +2864,7 @@ fn town_canvas_follow_position(view : TownCanvasViewState) -> (Double, Double)? 
 fn draw_golden_valley_canvas(
   snapshot : @energy_valley_contract.TownSnapshot,
   view : TownCanvasViewState,
+  street~ : Bool = false,
 ) -> Bool {
   let canvas_id = "energy-valley-canvas"
   match town_canvas_follow_position(view) {
@@ -2871,7 +2879,17 @@ fn draw_golden_valley_canvas(
     Some(context) => {
       if wenyu_scene_default_requested() ||
         wenyu_gentle_ground_trial_requested() {
-        draw_wenyu_gentle_ground_trial(context, snapshot, view, width, height)
+        draw_wenyu_gentle_ground_trial(
+          context,
+          snapshot,
+          view,
+          width,
+          height,
+          street~,
+        )
+        if street {
+          street_project_entries(width, height)
+        }
         return true
       }
       if view.intersection_preview &&
@@ -3097,16 +3115,20 @@ fn render_golden_valley_canvas(
   snapshot : @energy_valley_contract.TownSnapshot,
   view : TownCanvasViewState,
   living_room~ : Bool = false,
+  street_overview~ : Bool = false,
 ) -> @rabbita.Html {
   schedule_golden_valley_canvas(() => {
-    prepare_street_living_room_camera(living_room)
+    prepare_street_living_room_camera(living_room, overview=street_overview)
     // Drawing first preserves the accepted-frame contract: input and the
     // continuous animator only adopt this snapshot after a successful paint.
-    if draw_golden_valley_canvas(snapshot, view) {
+    if draw_golden_valley_canvas(snapshot, view, street=living_room) {
       install_golden_valley_canvas_input(
         () => {
-          prepare_street_living_room_camera(living_room)
-          if !draw_golden_valley_canvas(snapshot, view) {
+          prepare_street_living_room_camera(
+            living_room,
+            overview=street_overview,
+          )
+          if !draw_golden_valley_canvas(snapshot, view, street=living_room) {
             stop_golden_valley_canvas()
           }
         },
@@ -3114,9 +3136,11 @@ fn render_golden_valley_canvas(
           golden_release_spring_civic_building_assets()
           golden_valley_clear_canvas_frame()
         },
-        living_room || wenyu_gentle_ground_trial_requested(),
+        !living_room && wenyu_gentle_ground_trial_requested(),
       )
       if !view.intersection_preview {
+        install_player_walk_keys()
+      } else if living_room {
         install_player_walk_keys()
       }
     } else {
@@ -3127,16 +3151,17 @@ fn render_golden_valley_canvas(
     .aria_label(
       if view.intersection_preview {
         if living_room {
-          "未来中心街区近景"
+          "街区漫游，点击道路行走，拖动环顾"
         } else {
           "能源谷可交互路网地图"
         }
       } else if living_room {
-        "未来中心街区近景"
+        "街区漫游，点击道路行走，拖动环顾"
       } else {
         "能源谷可交互等距地图"
       },
     )
+    .tabindex(if living_room { 0 } else { -1 })
     .on_click(_ => {
       dispatch(
         EnergyCanvasClick(golden_valley_action_x(), golden_valley_action_y()),

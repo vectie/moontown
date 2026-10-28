@@ -888,3 +888,36 @@ Acceptance requires:
   event details, existing follow-up, indoor→compute, keyboard Space/Enter,
   horizontal overflow and 44px home controls. Narrow landscape scrolls instead
   of overlapping. No console errors on checked desktop/mobile flows.
+
+## 2026-10-28 · Playable street arrival (supersedes cover composition)
+
+- Removes the cover headline, opaque gradient, fixed content cards, and disabled
+  canvas. Arrival now shows a temporary visitor on the registered Future Center
+  roadside: click a road to walk, WASD/arrows or the optional direction pad to
+  step, drag to look around, and `找到我` to resume camera following.
+- Uses the existing landmark navigation graph and sprite renderer. Clicks
+  project onto real graph edges; both endpoints are inserted before routing.
+  Interrupted walks retain the incoming edge even at geometric crossings;
+  disconnected roads never fall back to a straight line. Bridge metadata,
+  road calibration, terrain, buildings and complete 3D sources are unchanged.
+- The visitor is transient local presentation state, not a new account, saved
+  resident, runtime worker, or simulated real user. No permission, account,
+  compute-binding, tenant, or public/private content contracts change.
+- `总览` now zooms out in the same mounted canvas and `回到街区` restores the
+  prior camera; panning/zooming interrupts the transition. Indoor return retains
+  the visit position. Reduced motion uses instant camera/validated destination
+  changes instead of ambient walking animation.
+- Story/activity/interior controls attach to campus-relative positions. When
+  they are offscreen or overlap on small screens, the same controls become a
+  three-button dock. Original content, signup and follow-up sheets are reused;
+  opening a sheet suppresses walk keys. Native Space/Enter remains available.
+- Scope: a playable 2.5D outdoor arrival with the existing full 3D interior and
+  compute portals, not a newly authored first-person 3D outdoor world. No live
+  production deployment or new account-isolation certification is implied.
+- Verification: all 186 UI test files passed in 24 batches; after final input
+  guards, the targeted street/navigation/surface tests passed, including exact
+  reduced-motion camera restoration. The existing
+  177 JS/CSS checks and 19 3D model tests passed. Browser checks covered click
+  walking, keyboard movement, drag, overview/return, story keyboard isolation,
+  indoor/return position, mobile 375×812 and landscape 812×375. Local fixture
+  content remains explicitly synthetic.

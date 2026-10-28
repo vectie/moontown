@@ -93,6 +93,13 @@ fn update_non_form_message_before_imported_surface_fence(
   model : Model,
 ) -> (Cmd, Model) {
   match msg {
+    StreetOverview =>
+      model_only_update({ ..model, street_overview: !model.street_overview, })
+    StreetRecenter => {
+      street_walk_follow(true)
+      model_only_update({ ..model, street_overview: false, })
+    }
+    StreetStep(dx, dy) => model_only_update(street_step(model, dx, dy))
     SetStreetLivingRoom(arriving) => {
       replace_browser_query_param(
         "view",
@@ -473,7 +480,11 @@ fn update_non_form_message_before_imported_surface_fence(
       )
     }
     EnergyCanvasClick(screen_x, screen_y) =>
-      energy_canvas_click_routed(model, screen_x, screen_y)
+      if model.street_living_room {
+        model_only_update(street_walk_screen(model, screen_x, screen_y))
+      } else {
+        energy_canvas_click_routed(model, screen_x, screen_y)
+      }
     OpenEnergyBuilding(building_id) => open_building_update(model, building_id)
     OpenEcosystemAttention(cooldown_key, interaction_target) =>
       ecosystem_open_attention_update(model, cooldown_key, interaction_target)

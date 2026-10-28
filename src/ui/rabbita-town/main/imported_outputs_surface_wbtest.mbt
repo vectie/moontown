@@ -308,6 +308,8 @@ test "imported outputs canvas agent and building inspection fence late downloads
       ..close_town_transient_surfaces(base),
       imported_outputs: pending,
       selection: Overview,
+      // This fixture exercises the authoring/inspection map, not street walking.
+      street_living_room: false,
       energy_intro_open: false,
       map_lab_open: false,
     }

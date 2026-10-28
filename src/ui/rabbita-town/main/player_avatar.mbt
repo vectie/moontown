@@ -22,6 +22,22 @@ extern "js" fn golden_follow_camera(world_x : Double, world_y : Double) -> Unit 
   #|     x: 1792, y: 3200, z: civicZoom,
   #|   };
   #|   const camera = globalThis.__moontownGoldenValleyCamera;
+  #|   if (camera.livingRoom) {
+  #|     if (!camera.streetFollow || camera.streetOverview || camera.streetTransition) return;
+  #|     const canvas = document.getElementById('energy-valley-canvas');
+  #|     if (!canvas) return;
+  #|     const w = canvas.clientWidth, h = canvas.clientHeight;
+  #|     const px = (worldX-worldY)*32, py = (worldX+worldY)*16;
+  #|     if (camera.streetRecenter) {
+  #|       camera.x = px; camera.y = py-h*.16/camera.z;
+  #|       camera.streetRecenter = false;
+  #|     } else {
+  #|       const sx=w/2+(px-camera.x)*camera.z, sy=h/2+(py-camera.y)*camera.z;
+  #|       camera.x += (sx-Math.max(w*.3,Math.min(w*.7,sx)))/camera.z;
+  #|       camera.y += (sy-Math.max(h*.35,Math.min(h*.78,sy)))/camera.z;
+  #|     }
+  #|     return;
+  #|   }
   #|   camera.x = (worldX - worldY) * 32;
   #|   camera.y = (worldX + worldY) * 16;
   #| }
@@ -35,6 +51,9 @@ extern "js" fn install_player_walk_keys() -> Unit =
   #|   globalThis.__moontownPlayerWalkKeys = true;
   #|   globalThis.addEventListener("keydown", event => {
   #|     const target = event.target;
+  #|     if (document.querySelector('[role="dialog"][aria-modal="true"],dialog[open],.neighborhood-panel') ||
+  #|         event.ctrlKey || event.metaKey || event.altKey ||
+  #|         target?.closest?.('button,a,summary')) return;
   #|     if (target?.matches?.("input, textarea, select") ||
   #|         target?.isContentEditable) return;
   #|     const labels = {

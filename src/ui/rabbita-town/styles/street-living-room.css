@@ -1,63 +1,53 @@
-/* The same registered world, seen from the neighborhood instead of orbit. */
-.street-living-room { position: relative; isolation: isolate; width: 100%; height: 100dvh; min-height: 560px; overflow: hidden; background: var(--town-ui-wash); color: var(--town-ui-ink); }
-.account-product-surface:has(> .street-living-room) { overflow-y: auto; }
-.street-scene { position: absolute; inset: 0; pointer-events: none; }
-body:has(.street-living-room) :is(.town-landmark-inspector, .town-landmark-pins) { display: none; }
-.street-atmosphere { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgb(247 244 233 / 96%), rgb(247 244 233 / 76%) 24%, transparent 49%), linear-gradient(0deg, rgb(247 244 233 / 94%), transparent 28%); }
-.street-header { position: absolute; z-index: 2; inset: 40px 40px auto; display: flex; justify-content: space-between; gap: 24px; pointer-events: none; }
-.street-title { padding-top: 12px; }
-.street-title p { margin: 0 0 12px; font-size: 15px; letter-spacing: .24em; font-weight: 600; }
-.street-title h1 { margin: 0; font-size: clamp(36px, 4.2vw, 60px); font-weight: 650; line-height: 1.15; letter-spacing: .04em; }
-.street-header-actions { display: flex; align-items: flex-start; gap: 12px; pointer-events: auto; }
-.street-button, .street-return { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 12px 18px; border: 1px solid var(--town-ui-line); border-radius: 14px; color: var(--town-ui-ink); background: var(--town-ui-paper); box-shadow: 0 4px 14px rgb(32 47 35 / 10%); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 160ms; }
-.street-button:hover, .street-return:hover { background: var(--town-ui-wash); }
-.street-living-room :is(button, a):focus-visible, .street-return:focus-visible { outline: 3px solid var(--town-ui-focus); outline-offset: 3px; }
-.street-door { position: absolute; left: 71%; top: 83%; transform: translateX(-50%); }
-.street-door-button { color: var(--town-ui-paper); background: var(--town-ui-accent); border-color: var(--town-ui-accent); box-shadow: var(--town-ui-shadow); }
-.street-door-button:hover { color: var(--town-ui-ink); }
-.street-noticeboard { position: absolute; z-index: 2; left: 40px; bottom: 52px; width: 300px; display: grid; gap: 16px; }
-.street-notice { border: 1px solid var(--town-ui-line); border-radius: 16px; background: var(--town-ui-card); box-shadow: 0 6px 18px rgb(32 47 35 / 8%); overflow: hidden; }
-.street-notice-heading { display: flex; align-items: center; justify-content: space-between; padding: 4px 10px 0 18px; }
-.street-notice-heading h2 { margin: 0; color: var(--town-ui-muted); font-size: 13px; font-weight: 550; }
-.street-notice-content { display: grid; gap: 10px; width: 100%; min-height: 74px; text-align: left; padding: 6px 18px 20px; border: 0; background: transparent; color: var(--town-ui-ink); font: inherit; cursor: pointer; }
-.street-notice-content:hover { background: var(--town-ui-wash); }
-.street-notice-content:focus-visible { outline-offset: -4px !important; }
-.street-notice-title { font-size: 18px; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.street-notice-meta { font-size: 12px; color: var(--town-ui-muted); line-height: 1.5; overflow-wrap: anywhere; }
-.street-retry { display: flex; align-items: center; min-height: 44px; width: fit-content; padding: 8px 12px; background: var(--town-ui-paper); border: 1px solid var(--town-ui-line); border-radius: 12px; color: var(--town-ui-ink); cursor: pointer; }
-.street-footer { position: absolute; bottom: max(16px, env(safe-area-inset-bottom)); left: 40px; right: 40px; display: flex; justify-content: space-between; gap: 16px; color: var(--town-ui-muted); font-size: 11px; }
-.street-footer a { text-decoration: none; }
-.street-return { position: absolute; z-index: 35; top: 80px; left: 16px; }
-.energy-valley-golden:has(.street-return) .town-quest-wrap { top: 144px; }
-@media (max-width: 900px) {
-  .street-header { inset: 24px 24px auto; }
-  .street-noticeboard { left: 24px; width: 265px; }
-  .street-footer { left: 24px; right: 24px; }
+/* One playable world. HUD and signs use the town's existing paper/green kit. */
+.street-living-room { position:relative; isolation:isolate; width:100%; height:100dvh; min-height:0; overflow:hidden; background:var(--town-ui-wash); color:var(--town-ui-ink); }
+.account-product-surface:has(> .street-living-room) { overflow:hidden; }
+.street-scene { position:absolute; inset:0; }
+.street-scene canvas { touch-action:none; }
+body:has(.street-living-room) :is(.town-landmark-inspector,.town-landmark-pins) { display:none; }
+.street-header { position:absolute; z-index:2; inset:20px 24px auto; display:flex; justify-content:space-between; align-items:flex-start; gap:12px; pointer-events:none; }
+.street-location { margin:0; padding:12px 16px; font-size:14px; font-weight:600; line-height:20px; background:var(--town-ui-paper); border:1px solid var(--town-ui-line); border-radius:24px; box-shadow:var(--town-ui-shadow); }
+.street-header-actions { display:flex; gap:8px; pointer-events:auto; }
+.street-button,.street-return,.street-world-entry { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:10px 16px; border:1px solid var(--town-ui-line); border-radius:14px; color:var(--town-ui-ink); background:var(--town-ui-paper); box-shadow:0 4px 14px rgb(32 47 35 / 12%); font:inherit; font-size:14px; font-weight:600; cursor:pointer; transition:background 140ms; }
+.street-living-room :is(button,summary,a):focus-visible,.street-return:focus-visible { outline:3px solid var(--town-ui-focus); outline-offset:3px; }
+.street-living-room canvas:focus-visible { outline:3px solid var(--town-ui-focus); outline-offset:-4px; }
+.street-button:hover,.street-return:hover,.street-world-entry:hover { background:var(--town-ui-wash); }
+.street-button:active,.street-world-entry:active { background:var(--town-ui-line); }
+.street-destinations { position:absolute; inset:0; pointer-events:none; }
+.street-world-entry { position:absolute; left:0; top:0; pointer-events:auto; white-space:nowrap; visibility:hidden; }
+.street-world-entry::after { content:""; position:absolute; top:100%; left:calc(50% - 1px); width:2px; height:12px; background:var(--town-ui-accent); pointer-events:none; }
+.street-world-entry[data-anchored="false"]::after { display:none; }
+.street-door-button { background:var(--town-ui-accent); color:var(--town-ui-paper); border-color:var(--town-ui-accent); }
+.street-door-button:hover { color:var(--town-ui-ink); }
+.street-walk-hud { position:absolute; z-index:3; left:24px; bottom:max(32px,env(safe-area-inset-bottom)); display:flex; align-items:center; gap:12px; }
+.street-recenter { width:44px; padding:10px; border-radius:50%; }
+#street-walk-status { min-width:104px; text-align:center; padding:6px 10px; border-radius:12px; background:var(--town-ui-paper); font-size:12px; }
+.street-controls { position:relative; }
+.street-controls summary { display:flex; align-items:center; justify-content:center; width:44px; height:44px; border:1px solid var(--town-ui-line); border-radius:50%; background:var(--town-ui-paper); cursor:pointer; list-style:none; }
+.street-controls summary::-webkit-details-marker { display:none; }
+.street-dpad { position:absolute; bottom:56px; left:-120px; width:208px; padding:12px; display:grid; grid-template-columns:repeat(3,1fr); gap:8px; border:1px solid var(--town-ui-line); border-radius:16px; background:var(--town-ui-paper); box-shadow:var(--town-ui-shadow); }
+.street-dpad button { min-height:44px; border:1px solid var(--town-ui-line); border-radius:10px; background:var(--town-ui-wash); color:var(--town-ui-ink); font-size:20px; cursor:pointer; }
+.street-dpad button:first-child { grid-column:2; }
+.street-dpad button:nth-child(2) { grid-column:1; }
+.street-dpad span { grid-column:1/-1; font-size:12px; text-align:center; line-height:1.5; }
+.street-footer { position:absolute; pointer-events:none; bottom:8px; left:24px; right:24px; display:flex; justify-content:space-between; color:#3d513e; font-size:10px; }
+.street-footer a { pointer-events:auto; text-decoration:none; }
+.street-return { position:absolute; z-index:35; top:80px; left:16px; }
+.energy-valley-golden:has(.street-return) .town-quest-wrap { top:144px; }
+@media(max-width:699px) {
+  .street-header { inset:12px 12px auto; gap:8px; }
+  .street-location { padding:12px; max-width:210px; font-size:12px; }
+  .street-header-actions { flex-wrap:wrap; justify-content:flex-end; max-width:120px; }
+  .street-button,.street-world-entry { padding:10px 12px; font-size:13px; }
+  .street-walk-hud { left:12px; bottom:max(32px,env(safe-area-inset-bottom)); gap:8px; }
+  .street-footer { left:12px; right:12px; }
 }
-@media (max-width: 699px) {
-  .street-living-room { min-height: 700px; overflow: hidden; }
-  .street-scene { bottom: 200px; }
-  .street-atmosphere { background: linear-gradient(180deg, rgb(247 244 233 / 96%), transparent 32%, transparent 46%, var(--town-ui-paper) 74%); }
-  .street-header { inset: 20px 20px auto; gap: 12px; }
-  .street-title { padding-top: 0; }
-  .street-title p { margin-bottom: 8px; font-size: 13px; }
-  .street-title h1 { font-size: 34px; }
-  .street-header-actions { flex-wrap: wrap; justify-content: flex-end; max-width: 152px; gap: 8px; }
-  .street-overview { padding: 10px 14px; }
-  .street-door { left: 50%; top: 53%; }
-  .street-noticeboard { left: 20px; right: 20px; bottom: 44px; width: auto; grid-template-columns: 1fr; gap: 10px; }
-  .street-notice-heading { padding: 0 8px 0 14px; }
-  .street-notice-content { gap: 4px; padding: 0 14px 14px; min-height: 44px; }
-  .street-notice-title { font-size: 16px; -webkit-line-clamp: 1; }
-  .street-notice-meta { font-size: 12px; }
-  .street-footer { left: 20px; right: 20px; font-size: 10px; }
+@media(prefers-reduced-motion:reduce) {
+  .street-button,.street-return,.street-world-entry { transition:none; }
 }
-@media (max-height: 580px) and (min-width: 700px) {
-  .street-header { top: 20px; }
-  .street-title h1 { font-size: 36px; }
-  .street-noticeboard { bottom: 40px; gap: 8px; }
-  .street-notice-content { min-height: 44px; padding-bottom: 12px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .street-button, .street-return { transition: none; }
+@media(max-height:580px) and (min-width:600px) {
+  .account-experience:has(.street-living-room) .account-global-nav { grid-template-columns:minmax(0,1fr) auto; min-height:56px; gap:8px; padding:4px 12px; }
+  .account-experience:has(.street-living-room) .account-global-identity { display:none; }
+  .account-experience:has(.street-living-room) .account-global-links { grid-column:1; grid-row:1; justify-content:flex-start; }
+  .account-experience:has(.street-living-room) .account-global-user { grid-column:2; grid-row:1; }
+  .street-header { top:12px; }
 }

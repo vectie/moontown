@@ -18,11 +18,19 @@ fn initial_street_living_room() -> Bool {
 
 ///|
 /// Frame the registered landmark, not an independently positioned illustration.
-fn prepare_street_living_room_camera(arriving : Bool) -> Unit {
+fn prepare_street_living_room_camera(
+  arriving : Bool,
+  overview~ : Bool = false,
+) -> Unit {
   town_landmarks_init()
   match town_landmark_find("center") {
     Some(center) =>
-      street_living_room_camera(arriving, center.origin.x, center.origin.y)
+      street_living_room_camera(
+        arriving,
+        overview,
+        center.origin.x,
+        center.origin.y,
+      )
     None => ()
   }
 }
@@ -32,10 +40,11 @@ fn prepare_street_living_room_camera(arriving : Bool) -> Unit {
 /// unchanged. The overview retains its original fit/pan/zoom behavior.
 extern "js" fn street_living_room_camera(
   arriving : Bool,
+  overview : Bool,
   world_x : Double,
   world_y : Double,
 ) -> Unit =
-  #| (arriving, worldX, worldY) => {
+  #| (arriving, overview, worldX, worldY) => {
   #|   const canvas = globalThis.document?.getElementById('energy-valley-canvas');
   #|   if (!canvas) return;
   #|   const camera = globalThis.__moontownGoldenValleyCamera ||= {x:1792, y:3200, z:0.42};
@@ -45,26 +54,50 @@ extern "js" fn street_living_room_camera(
   #|       camera.gentleTrialFramed = false;
   #|       camera.livingRoom = false;
   #|       delete camera.livingRoomSize;
+  #|       delete camera.streetTransition;
+  #|       delete camera.streetClose;
   #|     }
   #|     canvas.dataset.townView = 'overview';
   #|     return;
   #|   }
   #|   const w = canvas.clientWidth || 1280, h = canvas.clientHeight || 720;
   #|   const stamp = `${w}:${h}`;
-  #|   if (!camera.livingRoom || camera.livingRoomSize !== stamp) {
+  #|   if (!camera.livingRoom) {
   #|     const mobile = w < 700;
-  #|     camera.z = mobile ? 1.22 : Math.min(2.4, Math.max(1.5, w / 640));
-  #|     camera.x = (worldX-worldY)*32 - (mobile ? 0 : w*0.12)/camera.z;
-  #|     camera.y = (worldX+worldY)*16 - (mobile ? h*0.14 : h*0.15)/camera.z;
+  #|     camera.z = mobile ? 1.8 : Math.min(3.0, Math.max(2.2, w / 460));
+  #|     camera.x = (worldX-worldY)*32;
+  #|     camera.y = (worldX+worldY)*16 + h*0.04/camera.z;
   #|     camera.livingRoom = true;
-  #|     camera.livingRoomSize = stamp;
+  #|     camera.streetOverview = false;
   #|   }
+  #|   if (overview !== camera.streetOverview) {
+  #|     const from = {x:camera.x,y:camera.y,z:camera.z};
+  #|     let to;
+  #|     if (overview) {
+  #|       camera.streetClose = camera.streetTransition?.to || from;
+  #|       to = {x:1792,y:3200,z:Math.max(.03,Math.min((w-48)/12800,(h-160)/6400))};
+  #|     } else if (camera.streetClose) {
+  #|       to = camera.streetClose;
+  #|     }
+  #|     camera.streetOverview = overview;
+  #|     if (to) camera.streetTransition = {from,to,start:performance.now()};
+  #|   }
+  #|   if (camera.streetTransition) {
+  #|     const t=camera.streetTransition;
+  #|     const progress=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 1 : Math.min(1,(performance.now()-t.start)/320);
+  #|     const mix=1-Math.pow(1-progress,3);
+  #|     camera.x=t.from.x+(t.to.x-t.from.x)*mix;
+  #|     camera.y=t.from.y+(t.to.y-t.from.y)*mix;
+  #|     camera.z=Math.exp(Math.log(t.from.z)+(Math.log(t.to.z)-Math.log(t.from.z))*mix);
+  #|     if(progress===1) { Object.assign(camera,t.to); delete camera.streetTransition; }
+  #|   }
+  #|   camera.livingRoomSize = stamp;
   #|   camera.gentleTrialFramed = true;
-  #|   canvas.dataset.townView = 'living-room';
+  #|   canvas.dataset.townView = overview ? 'street-overview' : 'living-room';
   #| }
 
 ///|
-/// Public-only cards. Never use `mine`, drafts, attendee counts, or local demo
+/// Public-only notices. Never use `mine`, drafts, attendee counts, or local demo
 /// posts as public content. Prefer an upcoming/current event over the archive.
 fn street_featured_item(
   state : NeighborhoodState,
@@ -128,67 +161,30 @@ fn render_street_notice(
         "下一场，敬请期待"
       }
   }
-  article(
-    class="street-notice " + (if stories { "is-story" } else { "is-event" }),
+  button(
+    id=if stories { "street-stories" } else { "street-events" },
+    class="street-world-entry",
+    title~,
+    attrs=@html.Attrs::build().aria_label(
+      if stories {
+        "邻里故事"
+      } else {
+        "街区活动"
+      },
+    ),
+    on_click=dispatch(OpenStreetContent(section, "")),
     [
-      div(class="street-notice-heading", [
-        h2(
-          town_ui_label(
-            if stories {
-              "book"
-            } else {
-              "clock"
-            },
-            if stories {
-              "邻里故事"
-            } else {
-              "街区活动"
-            },
-          ),
-        ),
-        button(
-          class="town-ui-icon-button",
-          title="查看全部",
-          attrs=@html.Attrs::build().aria_label(
-            if stories {
-              "查看全部故事"
-            } else {
-              "查看全部活动"
-            },
-          ),
-          on_click=dispatch(OpenStreetContent(section, "")),
-          town_ui_icon("forward"),
-        ),
-      ]),
-      button(
-        class="street-notice-content",
-        on_click=dispatch(
-          OpenStreetContent(
-            section,
-            item.map(value => neighborhood_text(value, "id")).unwrap_or(""),
-          ),
-        ),
-        [
-          span(class="street-notice-title", title),
-          match item {
-            Some(item) =>
-              span(
-                class="street-notice-meta",
-                if stories {
-                  neighborhood_text(item, "author_name")
-                } else {
-                  neighborhood_event_status(item, browser_now_ms()) +
-                  " · " +
-                  neighborhood_date_label(
-                    neighborhood_field(item, "starts_ms")
-                    .unwrap_or(Json::null())
-                    .stringify(),
-                  )
-                },
-              )
-            None => @html.nothing
-          },
-        ],
+      town_ui_label(
+        if stories {
+          "book"
+        } else {
+          "clock"
+        },
+        if stories {
+          "故事"
+        } else {
+          "活动"
+        },
       ),
     ],
   )
@@ -203,49 +199,112 @@ fn render_street_living_room(
 ) -> @rabbita.Html {
   div(class="energy-valley-golden street-living-room", [
     div(class="street-scene", [
-      render_golden_valley_canvas(dispatch, snapshot, view, living_room=true),
+      render_golden_valley_canvas(
+        dispatch,
+        snapshot,
+        view,
+        living_room=true,
+        street_overview=model.street_overview,
+      ),
     ]),
-    div(
-      class="street-atmosphere",
-      attrs=@html.Attrs::build().aria_hidden("true"),
-      no_children(),
-    ),
     header(class="street-header", [
-      div(class="street-title", [p("未来中心"), h1("街区客厅")]),
+      h1(
+        class="street-location",
+        town_ui_label(
+          "pin",
+          if model.street_overview {
+            "全镇"
+          } else {
+            "未来中心 · 街区客厅"
+          },
+        ),
+      ),
       div(class="street-header-actions", [
         render_public_platform_account(),
         button(
           class="street-button street-overview",
-          on_click=dispatch(SetStreetLivingRoom(false)),
-          town_ui_label("menu", "总览"),
+          on_click=dispatch(StreetOverview),
+          attrs=@html.Attrs::build().aria_pressed(
+            if model.street_overview {
+              "true"
+            } else {
+              "false"
+            },
+          ),
+          town_ui_label(
+            if model.street_overview {
+              "back"
+            } else {
+              "menu"
+            },
+            if model.street_overview {
+              "回到街区"
+            } else {
+              "总览"
+            },
+          ),
         ),
       ]),
     ]),
-    div(class="street-door", [
-      button(
-        class="street-button street-door-button",
-        on_click=dispatch(OpenReferenceInterior),
-        town_ui_label("forward", "进入室内"),
-      ),
-    ]),
-    section(
-      class="street-noticeboard",
-      attrs=@html.Attrs::build().aria_label("街区公告栏"),
+    @html.nav(
+      class="street-destinations",
+      attrs=@html.Attrs::build().aria_label("街区去处"),
       [
+        button(
+          id="street-interior",
+          class="street-world-entry street-door-button",
+          on_click=dispatch(OpenReferenceInterior),
+          attrs=@html.Attrs::build().aria_label("进入室内"),
+          town_ui_label("forward", "室内"),
+        ),
         render_street_notice(dispatch, model.neighborhood, false),
         render_street_notice(dispatch, model.neighborhood, true),
-        if !model.neighborhood.error.is_empty() {
-          button(
-            class="street-retry",
-            disabled=model.neighborhood.loading,
-            on_click=dispatch(NeighborhoodEvent(Preview)),
-            town_ui_label("refresh", "重新连接"),
-          )
-        } else {
-          @html.nothing
-        },
       ],
     ),
+    div(class="street-walk-hud", [
+      button(
+        class="street-button street-recenter",
+        title="找到我",
+        attrs=@html.Attrs::build().aria_label("找到我"),
+        on_click=dispatch(StreetRecenter),
+        town_ui_icon("pin"),
+      ),
+      span(
+        id="street-walk-status",
+        attrs=@html.Attrs::build().role("status").aria_live("polite"),
+        "点击道路走走",
+      ),
+      @html.details(class="street-controls", [
+        @html.summary(
+          title="操作",
+          attrs=@html.Attrs::build().aria_label("行走操作"),
+          town_ui_icon("sliders"),
+        ),
+        div(class="street-dpad", [
+          button(
+            on_click=dispatch(StreetStep(-1, -1)),
+            attrs=@html.Attrs::build().aria_label("向屏幕上走"),
+            "↑",
+          ),
+          button(
+            on_click=dispatch(StreetStep(-1, 1)),
+            attrs=@html.Attrs::build().aria_label("向屏幕左走"),
+            "←",
+          ),
+          button(
+            on_click=dispatch(StreetStep(1, 1)),
+            attrs=@html.Attrs::build().aria_label("向屏幕下走"),
+            "↓",
+          ),
+          button(
+            on_click=dispatch(StreetStep(1, -1)),
+            attrs=@html.Attrs::build().aria_label("向屏幕右走"),
+            "→",
+          ),
+          span("WASD / 方向键 · 拖动环顾"),
+        ]),
+      ]),
+    ]),
     @html.footer(class="street-footer", [
       span("场景示意"),
       a(href="https://www.openstreetmap.org/copyright", "© OpenStreetMap"),
@@ -264,3 +323,48 @@ fn render_street_living_room(
     render_energy_valley_toast_stack(dispatch, model),
   ])
 }
+
+///|
+fn street_project_entries(width : Int32, height : Int32) -> Unit {
+  guard town_landmark_find("center") is Some(center) else { return }
+  let points = [
+    center.door,
+    town_landmark_at(center, -100.0, 90.0),
+    town_landmark_at(center, 110.0, 90.0),
+  ]
+  street_place_entries(
+    points
+    .map(p => {
+      [golden_screen_x(p.x, p.y, width), golden_screen_y(p.x, p.y, height)]
+    })
+    .to_json()
+    .stringify(),
+    width,
+    height,
+  )
+}
+
+///|
+/// DOM positioning only; content/actions remain MoonBit. When the destination
+/// is offscreen, use a compact dock instead of a misleading floating pin.
+extern "js" fn street_place_entries(
+  points : String,
+  width : Int32,
+  height : Int32,
+) -> Unit =
+  #| (points,w,h) => {
+  #|   const nav = document.querySelector('.street-destinations');
+  #|   if (nav) nav.style.transform = '';
+  #|   const ps=JSON.parse(points), ids=['street-interior','street-events','street-stories'];
+  #|   const dock=globalThis.__moontownGoldenValleyCamera?.streetOverview ||
+  #|     ps.some(([x,y])=>x<60 || x>w-60 || y<140 || y>h-100) ||
+  #|     ps.some(([x,y],i)=>ps.some(([a,b],j)=>i!==j && Math.abs(x-a)<100 && Math.abs(y-b)<70));
+  #|   for(let i=0;i<ids.length;i++) {
+  #|     const el=document.getElementById(ids[i]); if(!el) continue;
+  #|     const x=dock?w/2+(i-1)*92:ps[i][0], y=dock?h-110:ps[i][1]-28;
+  #|     const transform=`translate(${x}px,${y}px) translate(-50%,-50%)`;
+  #|     if(el.style.transform!==transform) el.style.transform=transform;
+  #|     el.style.visibility='visible';
+  #|     el.dataset.anchored=dock?'false':'true';
+  #|   }
+  #| }
