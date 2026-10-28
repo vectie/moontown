@@ -14,7 +14,7 @@ fn render_indoor_slot_inspector(
     [
       h2(selected.map(slot => slot.label).unwrap_or("选择工作位")),
       match selected {
-        None => p("点击模型中的家具，或展开工作位列表。")
+        None => @html.nothing
         Some(slot) =>
           div([
             p(

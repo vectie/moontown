@@ -32,31 +32,28 @@ fn render_imported_outputs_drawer(
     [
       @html.header(class="resident-explorer-head", [
         @html.div(class="resident-explorer-heading", [
-          @html.p(class="resident-explorer-eyebrow", "IMPORTED BOOK FILES"),
-          @html.h2(id="imported-outputs-title", "Imported outputs"),
-          @html.p(
-            "Choose a Book, an output and an included file. Read-only; the host verifies every read and download.",
-          ),
+          @html.h2(id="imported-outputs-title", "导入成果"),
         ]),
         @html.button(
           class="resident-explorer-close",
           autofocus=true,
           on_click=dispatch(ImportedOutputsEvent(CloseImportedOutputs)),
           attrs=@html.Attrs::build().aria_label("Close imported outputs"),
-          "✕",
+          town_ui_icon("close"),
         ),
       ]),
       @html.div(class="imported-outputs-actions", [
         @html.button(
           class="square-action",
+          title="刷新",
+          attrs=@html.Attrs::build().aria_label("刷新导入成果"),
           on_click=dispatch(ImportedOutputsEvent(RefreshImportedOutputs)),
-          "Refresh",
+          town_ui_icon("refresh"),
         ),
       ]),
       @html.div(class="imported-outputs-body", [
         match state.catalog {
-          CatalogIdle =>
-            imported_output_status("Choose Refresh to load imported outputs.")
+          CatalogIdle => @html.nothing
           CatalogLoading =>
             imported_output_status("Loading imported outputs…")
           CatalogUnavailable(message) => imported_output_status(message)
@@ -65,12 +62,13 @@ fn render_imported_outputs_drawer(
               imported_output_status("No imported Books are available.")
             } else {
               @html.div([
-                @html.h3("1 · Book"),
+                @html.h3("知识册"),
                 @html.div(
                   class="imported-outputs-choices",
                   catalog.books.map(book => {
                     @html.button(
                       class="square-action",
+                      title=book.book_id,
                       attrs=@html.Attrs::build().aria_pressed(
                         if state.book_handle == book.handle {
                           "true"
@@ -81,7 +79,7 @@ fn render_imported_outputs_drawer(
                       on_click=dispatch(
                         ImportedOutputsEvent(ChooseImportedBook(book.handle)),
                       ),
-                      book.name + " · " + book.book_id,
+                      book.name,
                     )
                   }),
                 ),
@@ -99,9 +97,7 @@ fn render_imported_outputs_book(
   dispatch : Dispatch[Msg],
   state : ImportedOutputsState,
 ) -> @rabbita.Html {
-  guard imported_outputs_book(state) is Some(book) else {
-    return imported_output_status("Select an imported Book.")
-  }
+  guard imported_outputs_book(state) is Some(book) else { return @html.nothing }
   if book.state != "ready" {
     return imported_output_status(
       if book.state == "unsupported" {
@@ -116,7 +112,7 @@ fn render_imported_outputs_book(
   @html.div([
     match book.source {
       Some(source) =>
-        @html.div(class="imported-outputs-provenance", [
+        render_advanced_details("来源与校验", [
           @html.p("Source: " + source.agent_id + " · " + source.agent_version),
           @html.p("Package SHA-256: " + source.package_sha256),
           @html.p(
@@ -126,7 +122,7 @@ fn render_imported_outputs_book(
         ])
       None => imported_output_status("Import provenance is unavailable.")
     },
-    @html.h3("2 · Output"),
+    @html.h3("成果"),
     if book.outputs.is_empty() {
       imported_output_status("No imported outputs.")
     } else {
@@ -135,6 +131,7 @@ fn render_imported_outputs_book(
         book.outputs.map(output => {
           @html.button(
             class="square-action",
+            title=output.artifact_id,
             attrs=@html.Attrs::build().aria_pressed(
               if state.artifact_id == output.artifact_id {
                 "true"
@@ -145,7 +142,7 @@ fn render_imported_outputs_book(
             on_click=dispatch(
               ImportedOutputsEvent(ChooseImportedOutput(output.artifact_id)),
             ),
-            output.label + " · " + output.artifact_id,
+            output.label,
           )
         }),
       )
@@ -163,7 +160,6 @@ fn render_imported_output_files(
     return @html.nothing
   }
   @html.div([
-    @html.p("Declared type: " + output.mime_type),
     if !output.included {
       @html.div([
         imported_output_status(
@@ -178,7 +174,7 @@ fn render_imported_output_files(
       imported_output_status("This output has no included files.")
     } else {
       @html.div([
-        @html.h3("3 · Included file"),
+        @html.h3("文件"),
         @html.div(
           class="imported-outputs-choices",
           output.files.map(file => {
@@ -210,18 +206,17 @@ fn render_imported_output_text(
   dispatch : Dispatch[Msg],
   state : ImportedOutputsState,
 ) -> @rabbita.Html {
-  guard state.selection is Some(selection) else {
-    return imported_output_status("Select an included file.")
-  }
+  guard state.selection is Some(selection) else { return @html.nothing }
   @html.div([
-    @html.p(
-      class="imported-outputs-provenance",
-      "File SHA-256: " + selection.digest,
-    ),
+    render_advanced_details("文件校验", [
+      @html.p("SHA-256: " + selection.digest),
+    ]),
     @html.button(
       class="square-action imported-outputs-download",
+      attrs=@html.Attrs::build().aria_label("Download exact file"),
+      title="下载原文件",
       on_click=dispatch(ImportedOutputsEvent(DownloadImportedFile)),
-      "Download exact file",
+      town_ui_label("download", "下载"),
     ),
     match state.download {
       DownloadIdle => @html.nothing

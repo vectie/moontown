@@ -456,23 +456,6 @@ function renderSystemSettings(root, snapshot, refresh, readOnly = false) {
     groups.get(descriptor.group).push(descriptor)
   }
 
-  const intro = append(
-    node('section', 'system-settings-intro'),
-    append(
-      node('div', 'system-settings-intro-copy'),
-      node('h2', '', 'Operational configuration'),
-      node(
-        'p',
-        '',
-        'Change runtime policy from one authoritative registry. Every value is range-checked, revision-protected, and audited.',
-      ),
-    ),
-    metric('Revision', model.revision),
-    metric('Managed settings', model.descriptors.length),
-    metric('Groups', groups.size),
-  )
-  form.append(intro)
-
   const updateFormState = () => {
     const values = { ...model.values }
     for (const [key, control] of controls) values[key] = Number(control.value)
@@ -512,7 +495,6 @@ function renderSystemSettings(root, snapshot, refresh, readOnly = false) {
         node('strong', '', groupName),
         node('span', '', `${descriptors.length} settings`),
       ),
-      node('span', 'account-management-badge', groupIndex < 2 ? 'Open' : 'Review'),
     )
     const list = node('div', 'system-settings-list')
     for (const descriptor of descriptors) {
@@ -536,12 +518,13 @@ function renderSystemSettings(root, snapshot, refresh, readOnly = false) {
         append(
           node('div', 'system-setting-copy'),
           node('label', 'system-setting-label', descriptor.label),
-          node('p', 'system-setting-description', descriptor.description),
           append(
-            node('div', 'system-setting-meta'),
+            node('details', 'system-setting-help'),
+            node('summary', '', 'Details'),
+            node('p', 'system-setting-description', descriptor.description),
             node('code', '', descriptor.key),
-            node('span', 'account-management-badge', settingModeLabel(descriptor.apply_mode)),
           ),
+          node('span', 'account-management-badge', settingModeLabel(descriptor.apply_mode)),
           node('span', 'system-setting-error', '',),
         ),
         append(

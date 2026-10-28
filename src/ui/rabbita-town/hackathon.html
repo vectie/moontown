@@ -19,9 +19,7 @@
   <main id="main" class="page-shell">
     <section class="hero" aria-labelledby="page-title">
       <div>
-        <p class="eyebrow">Energy Valley / Contest Express</p>
         <h1 id="page-title">Build together.<br><em>Show your work.</em></h1>
-        <p class="hero-copy">The Mayor publishes a question. Teams build a first person solution, submit an artifact, and learn from a shared benchmark. The Champion Wall follows each completed review.</p>
         <div class="hero-actions">
           <a class="button button-primary" href="#teams">Join a team</a>
           <a class="button button-light" href="#leaderboard">See Champion Wall</a>
@@ -33,7 +31,7 @@
     <div class="live-strip" role="status" aria-live="polite">
       <span class="live-dot" aria-hidden="true"></span>
       <span id="sync-status">Connecting to Contest Express…</span>
-      <button id="refresh-button" class="text-button" type="button">Refresh now</button>
+      <button id="refresh-button" class="text-button" type="button" title="Refresh" aria-label="Refresh"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9a9 9 0 1 1 0 7M3 3v6h6"/></svg></button>
     </div>
     <div class="event-picker"><label for="challenge-select">Competition <select id="challenge-select"></select></label><span id="event-state" class="version-tag"></span></div>
     <nav class="competition-tabs" aria-label="Competition pages">
@@ -49,7 +47,7 @@
 
     <section id="challenge" class="workspace-section" aria-labelledby="challenge-title">
       <div class="section-heading">
-        <div><p class="eyebrow">01 / The brief</p><h2 id="challenge-title">Open challenge</h2></div>
+        <div><h2 id="challenge-title">Open challenge</h2></div>
       </div>
       <div id="challenge-detail" class="card empty-state">The Mayor has not published a challenge yet.</div>
       <div id="event-calendar" class="milestone-strip"></div>
@@ -60,19 +58,19 @@
     <section id="faq" class="workspace-section" hidden><div class="section-heading"><h2>FAQ</h2></div><label class="search-label">Search questions<input id="faq-search" type="search" placeholder="Teams, materials, judging…"></label><div id="faq-list" class="editorial-content"></div></section>
 
     <section id="leaderboard" class="workspace-section" aria-labelledby="leaderboard-title">
-      <div class="section-heading"><div><p class="eyebrow">02 / Champion Wall</p><h2 id="leaderboard-title">Live leaderboard</h2></div><span id="leaderboard-version" class="version-tag"></span></div>
-      <p class="section-intro">A team appears after its submission receives a complete review. The strongest current benchmark score leads; equal scores favor the earlier review.</p>
+      <div class="section-heading"><div><h2 id="leaderboard-title">Leaderboard</h2></div><span id="leaderboard-version" class="version-tag"></span></div>
+      <details class="legacy-tools"><summary>Ranking rules</summary><p>A team appears after a complete review. Highest current score leads; ties favor the earlier review.</p></details>
       <label class="picker-label">Track <select id="board-track"></select></label>
       <div id="leaderboard-content" class="card empty-state">No scored submissions yet.</div>
     </section>
 
     <section id="teams" class="workspace-section" aria-labelledby="teams-title">
-      <div class="section-heading"><div><p class="eyebrow">03 / Build in public</p><h2 id="teams-title">Team workbench</h2></div></div>
+      <div class="section-heading"><div><h2 id="teams-title">My team</h2></div></div>
       <p id="participation-status" class="section-intro"></p>
       <div id="invitation-list" class="editorial-content"></div>
       <div class="two-column">
         <article class="card form-card">
-          <h3>Gather a team</h3><p class="card-intro">Give your crew a stable ID and list the people building together.</p>
+          <h3>Create team</h3>
           <form id="team-form">
             <label>Team ID <small>Lowercase letters, numbers, hyphens</small><input name="id" required pattern="[a-z0-9-]+" maxlength="64" placeholder="harbor-builders"></label>
             <label>Team name<input name="name" required maxlength="120" placeholder="Harbor Builders"></label>
@@ -84,7 +82,7 @@
           <p id="team-feedback" class="form-feedback" role="status" aria-live="polite"></p>
         </article>
         <article class="card form-card">
-          <h3>Submit a solution</h3><p class="card-intro">Share a public artifact and explain what your team actually built in your own voice.</p>
+          <h3>Submit a solution</h3>
           <form id="submission-form">
             <label>Registered team<select name="team_id" id="submission-team" required></select></label>
             <label>Artifact URL<input name="artifact_url" required type="url" placeholder="https://example.org/demo"></label>
@@ -97,7 +95,6 @@
       </div>
       <article class="card form-card join-card">
         <h3>Join an existing team</h3>
-        <p class="card-intro">Add yourself to a crew already building for this challenge.</p>
         <form id="join-form">
           <label>Team<select name="team_id" id="join-team" required></select></label>
           <label>Member ID <small>Your account ID</small><input name="member_id" required placeholder="your-account-id"></label>
@@ -110,7 +107,7 @@
     </section>
 
     <section id="reviews" class="workspace-section" aria-labelledby="reviews-title" hidden>
-      <div class="section-heading"><div><p class="eyebrow">04 / Evidence into feedback</p><h2 id="reviews-title">Review desk</h2></div></div>
+      <div class="section-heading"><div><h2 id="reviews-title">Review desk</h2></div></div>
       <p id="review-feedback" class="form-feedback" role="status"></p><div id="review-queue" class="editorial-content"></div>
       <div class="two-column review-layout">
         <article class="card form-card">
@@ -128,10 +125,10 @@
     </section>
 
     <section id="mayor" class="workspace-section" aria-labelledby="mayor-title" hidden>
-      <div class="section-heading"><div><p class="eyebrow">05 / Mayor desk</p><h2 id="mayor-title">Set the challenge</h2></div></div>
+      <div class="section-heading"><div><h2 id="mayor-title">Set the challenge</h2></div></div>
       <p class="section-intro">Publish the public brief before teams join. Revising benchmark materials starts a new score version; earlier reviews remain in the record, while the Champion Wall waits for current reviews.</p>
       <div id="program-controls" class="card form-card"></div>
-      <article class="card form-card setup-card"><div class="section-heading"><h3>Competition builder</h3><button id="load-program" type="button" class="button button-light">Edit selected competition</button></div><p class="card-intro">Save a draft, check the public preview, then open registration. Contest Express keeps the event record; MoonBook holds your shared brief and team receipts.</p>
+      <article class="card form-card setup-card"><div class="section-heading"><h3>Competition</h3><button id="load-program" type="button" class="button button-light">Edit selected</button></div>
         <form id="program-form">
           <fieldset><legend>1 · Mayor’s brief</legend><div class="two-column">
           <label>Competition ID<input name="id" required pattern="[a-z0-9-]+" maxlength="64" placeholder="valley-sprint-2026"></label><label>Name<input name="name" required></label>

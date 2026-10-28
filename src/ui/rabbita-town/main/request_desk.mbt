@@ -5,13 +5,11 @@ fn render_request_desk(
   compact~ : Bool = false,
 ) -> @rabbita.Html {
   section(class="request-desk", [
-    div(class="request-desk-head", [
-      if compact {
-        @html.nothing
-      } else {
-        div(class="request-desk-title", [h2("工作与成果")])
-      },
-    ]),
+    if compact {
+      @html.nothing
+    } else {
+      div(class="request-desk-head", [h2("工作与成果")])
+    },
     if compact {
       @html.nothing
     } else {

@@ -186,7 +186,7 @@ test "event creation uses server capability and publishing has one explicit acti
   )
   assert_true(event_html.contains("发布活动"))
   assert_false(event_html.contains("type=\"checkbox\""))
-  assert_true(event_html.contains("报名名单和联系方式不会公开"))
+  assert_true(event_html.contains("名单和联系方式仅你可见"))
   let (_, publishing) = update_neighborhood_manage(
     dispatch,
     editing,

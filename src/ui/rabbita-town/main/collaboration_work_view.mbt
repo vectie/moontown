@@ -78,19 +78,6 @@ fn render_collaboration_work(
         },
       ),
     ]),
-    if ["completed", "partial"].contains(work.status) {
-      p(
-        "结果已保留，请审核后再送入知识册。失败项不会被当作成功，也不会重新运行。",
-      )
-    } else if work.status == "running" {
-      p(
-        "正在等待原任务。刷新可收集结果；不会另开一次执行。",
-      )
-    } else {
-      p(
-        "读取进度可能保存已完成的结果；保存草稿或准备任务不会启动执行。",
-      )
-    },
     div(
       work.participants.map(participant => {
         div(class="request-desk-stack", [
@@ -106,7 +93,7 @@ fn render_collaboration_work(
           },
           if state.work_fields.get("work_salon_mode") == Some("compare") &&
             participant.status == "completed" {
-            p("可在下方比较这份贡献。")
+            @html.nothing
           } else {
             @html.pre(
               class="collaboration-retained-output",
@@ -131,13 +118,8 @@ fn render_collaboration_work(
         } else {
           @html.nothing
         },
-        p(
-          "审核确认这份结果记录是否准确，不代表所有任务成功或知识册已接受。",
-        ),
         if work.operator_id.is_empty() {
-          p(
-            "请以指定审阅人登录后审核。填写姓名不能获得审核权限。",
-          )
+          p("仅指定审阅人可审核。")
         } else {
           @html.nothing
         },

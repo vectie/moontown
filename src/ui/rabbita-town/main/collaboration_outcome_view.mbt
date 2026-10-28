@@ -79,9 +79,9 @@ fn render_collaboration_outcomes(
     if state.visible_outcomes().is_empty() {
       p(
         if state.outcomes.is_empty() {
-          "还没有成果。完成并收集研究结果后，会显示在这里。"
+          "暂无成果"
         } else {
-          "没有符合筛选的成果。可调整高级筛选或刷新列表。"
+          "没有符合筛选的成果"
         },
       )
     } else {
@@ -110,7 +110,7 @@ fn render_collaboration_outcomes(
                 !["completed", "partial"].contains(entry.outcome_status),
               ),
               on_click=dispatch(CollaborationOutcomeOpen(entry.key())),
-              "查看成果",
+              "查看",
             ),
             render_advanced_details("成果版本", [
               p(entry.draft_id),
@@ -181,9 +181,7 @@ fn render_collaboration_retained_result(
         )
       }),
     ),
-    p(
-      "这是所选历史版本。处理审核前需要读取任务的当前状态。",
-    ),
+    span(class="spatial-data-badge", "历史版本"),
     div(class="request-actions", [
       button(
         class="control-button",

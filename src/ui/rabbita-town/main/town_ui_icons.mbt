@@ -5,6 +5,7 @@ fn town_ui_icon(name : String) -> @rabbita.Html {
   let path = match name {
     "close" => "M6 6l12 12M18 6L6 18"
     "back" => "M15 5l-7 7 7 7M8 12h13"
+    "forward" => "M9 5l7 7-7 7M3 12h13"
     "work" => "M8 6V4h8v2M3 7h18v13H3zM3 12h18M10 12v3h4v-3"
     "book" =>
       "M12 5v16M12 5C8 2 4 3 2 4v15c4-1 7-1 10 2 3-3 6-3 10-2V4c-2-1-6-2-10 1"

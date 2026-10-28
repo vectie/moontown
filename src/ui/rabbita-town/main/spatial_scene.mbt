@@ -146,7 +146,7 @@ fn render_spatial_design_inspector(model : Model) -> @rabbita.Html {
   match spatial_scene_selected(model) {
     Some(selected) if selected.scope == "design" =>
       section(class="building-interior-panel spatial-design-inspector", [
-        span(class="spatial-data-badge", "设计示意"),
+        span(class="spatial-data-badge", "设计示意 · 未绑定"),
         h2(
           if selected.title.is_empty() {
             "选择空间对象"
@@ -155,7 +155,6 @@ fn render_spatial_design_inspector(model : Model) -> @rabbita.Html {
           },
         ),
         p(selected.detail),
-        p("此模型尚未绑定实际位置或设备。"),
       ])
     _ => @html.nothing
   }
@@ -272,8 +271,6 @@ fn render_reference_interior(
       div(class="building-interior-side", [
         render_spatial_design_inspector(model),
         section(class="building-interior-panel", [
-          h2("未来中心空间方案"),
-          p("按提供的三层图纸建模；点击房间查看用途。"),
           render_advanced_details(
             "空间来源与绑定",
             compact_label="空间来源",

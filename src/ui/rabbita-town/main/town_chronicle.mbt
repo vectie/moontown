@@ -698,16 +698,13 @@ fn render_town_chronicle(
         .aria_labelledby("town-chronicle-title"),
       [
         header(class="town-chronicle-head", [
-          div([
-            p(class="town-chronicle-kicker", "Town Today"),
-            h2(id="town-chronicle-title", "今天，小镇发生了什么"),
-          ]),
+          div([h2(id="town-chronicle-title", "小镇今日")]),
           button(
             class="town-chronicle-close",
             autofocus=true,
             on_click=dispatch(ToggleTownChronicle),
             attrs=@html.Attrs::build().aria_label("关闭小镇今日"),
-            "×",
+            town_ui_icon("close"),
           ),
         ]),
         div(
@@ -717,9 +714,9 @@ fn render_town_chronicle(
             div([
               span(
                 class="town-chronicle-phase-title",
+                title=town_chronicle_phase_copy(model.energy_valley_runtime),
                 town_chronicle_phase_title(model.energy_valley_runtime),
               ),
-              p(town_chronicle_phase_copy(model.energy_valley_runtime)),
             ]),
           ],
         ),
@@ -745,10 +742,6 @@ fn render_town_chronicle(
         ]),
         render_town_chronicle_history(dispatch, history_groups),
         render_town_chronicle_local(model),
-        p(
-          class="town-chronicle-footnote",
-          "当前任务与历史重试由同一份运行时投影分栏；历史债务不冒充当前阻塞，演示居民不进入此处。",
-        ),
       ],
     ),
   ])

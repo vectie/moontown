@@ -85,13 +85,13 @@ fn render_spatial_work_journey(
     match spatial_selected_work(model) {
       None =>
         div([
-          p(
-            if model.spatial_request_id.is_empty() {
-              "提出议题，或选择一项楼内工作。"
-            } else {
-              "请求已提交，等待分配。无需重复提交。"
-            },
-          ),
+          if !model.spatial_request_id.is_empty() {
+            p("已提交 · 等待分配")
+          } else if !show_start {
+            p("尚未选择")
+          } else {
+            @html.nothing
+          },
           if show_start && model.spatial_request_id.is_empty() {
             button(
               on_click=dispatch(StartIndoorWork),

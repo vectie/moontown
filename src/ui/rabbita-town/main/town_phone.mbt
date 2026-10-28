@@ -616,7 +616,6 @@ fn render_phone_fab(dispatch : Dispatch[Msg], model : Model) -> @rabbita.Html {
       ),
       span(class="moonclaw-pet-label", [
         span(class="moonclaw-pet-name", "小爪"),
-        span(class="moonclaw-pet-hint", "忘了？问我"),
       ]),
       if model.phone_unread > 0 {
         span(class="moonclaw-pet-badge", model.phone_unread.to_string())

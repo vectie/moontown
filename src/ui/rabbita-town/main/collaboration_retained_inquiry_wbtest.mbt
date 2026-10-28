@@ -45,11 +45,10 @@ test "retained inquiry native fixture renders historical evidence editable field
   )
   for
     expected in [
-      "继续研究 · 从此成果", "要研究的新问题", "Selected: water",
-      "Selected: forest", "Select: energy", "mobility", "Attributed fixture failure",
-      "Exact retained excerpt from water", "Independent challenge for forest", "审阅人姓名",
-      "异议审阅人", "保存并编辑研究", "取消继续研究", "sha256:",
-      "&lt;script&gt;",
+      "继续研究", "要研究的新问题", "Selected: water", "Selected: forest",
+      "Select: energy", "mobility", "Attributed fixture failure", "Exact retained excerpt from water",
+      "Independent challenge for forest", "审阅人姓名", "异议审阅人", "保存并编辑研究",
+      "取消继续研究", "sha256:", "&lt;script&gt;",
     ] {
     assert_true(html.contains(expected), msg=expected)
   }
@@ -153,6 +152,6 @@ test "retained inquiry native saved reply opens ordinary editing and Prepare whi
       render_collaboration_outcomes(dispatch, state.edit("inquiry_mode", "off")),
     ),
   )
-  assert_true(closed.contains("继续研究 · 从此成果"))
+  assert_true(closed.contains("继续研究"))
   assert_false(closed.contains("要研究的新问题"))
 }

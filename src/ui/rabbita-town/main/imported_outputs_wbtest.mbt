@@ -289,7 +289,8 @@ test "imported outputs full text is escaped with Unicode BOM CRLF markup and emp
   assert_true(html.contains("&lt;script&gt;"))
   assert_true(html.contains("&lt;svg"))
   assert_false(html.contains("<script>"))
-  assert_false(html.contains("<svg"))
+  // Trusted control icons are SVG; imported SVG markup must remain escaped.
+  assert_false(html.contains("<svg onload"))
   assert_true(html.contains("&amp; full text"))
   assert_true(html.contains("Verified full text"))
   assert_true(
@@ -430,7 +431,7 @@ test "imported outputs drawer accessible and canonical toolbar integrated withou
   assert_true(html.contains("aria-labelledby=\"imported-outputs-title\""))
   assert_true(html.contains("Close imported outputs"))
   assert_true(html.contains("aria-pressed=\"true\""))
-  assert_true(html.contains("Refresh"))
+  assert_true(html.contains("aria-label=\"刷新导入成果\""))
   assert_false(html.contains("<iframe"))
   let dispatch : Dispatch[Msg] = _ => @rabbita.none
   let model = { ..init_model(), imported_outputs: ready, }

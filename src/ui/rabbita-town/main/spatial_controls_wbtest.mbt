@@ -70,7 +70,7 @@ test "unavailable route stays visible without technical evidence upfront" {
   assert_true(primary.contains("Kimi"))
   assert_true(primary.contains("未观测"))
   assert_true(primary.contains("尚无观测快照"))
-  assert_true(primary.contains("外部服务 · 不对应本地机柜"))
+  assert_true(primary.contains("外部服务"))
   assert_false(primary.contains("MoonGate has not reported"))
   assert_true(html.contains("MoonGate has not reported"))
   assert_false(html.contains(" open"))
@@ -170,7 +170,7 @@ test "pending space request does not offer a second start action" {
   let dispatch : Dispatch[Msg] = Emit(_ => @rabbita.none)
   let model = { ..init_model(), spatial_request_id: "accepted-request", }
   let html = disclosure_test_html(render_spatial_work_journey(dispatch, model))
-  assert_true(html.contains("请求已提交"))
+  assert_true(html.contains("已提交 · 等待分配"))
   assert_false(html.contains("新工作"))
 }
 

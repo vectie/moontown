@@ -272,22 +272,11 @@ fn render_energy_valley_page_with_snapshot(
       if model.player is None &&
         !model.energy_intro_open &&
         !public_platform_enabled() {
-        div(class="quest-tracker pointer-events-auto", [
-          div(class="quest-tracker-head", [
-            span(class="quest-tracker-badge", "入住"),
-            span(class="quest-tracker-title", "创建你的角色"),
-          ]),
-          div(class="quest-tracker-hint", [
-            span(
-              "有了自己的角色，才能走路、聊天、盖楼、收藏。",
-            ),
-            button(
-              class="square-action mt-1",
-              on_click=dispatch(AvatarOpenEditor),
-              "立即创建",
-            ),
-          ]),
-        ])
+        button(
+          class="quest-tracker quest-create pointer-events-auto",
+          on_click=dispatch(AvatarOpenEditor),
+          town_ui_label("plus", "创建角色"),
+        )
       } else {
         @html.nothing
       },

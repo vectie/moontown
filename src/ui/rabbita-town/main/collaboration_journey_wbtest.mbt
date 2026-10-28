@@ -91,7 +91,8 @@ test "review counts require exact signed in decision owner rather than historica
   )
   assert_true(html.contains("工作区待处理"))
   assert_false(html.contains("待我审核 · 0"))
-  assert_true(html.contains("不代表你的个人待办数量"))
+  assert_true(html.contains("暂无待处理记录"))
+  assert_false(html.contains("不代表你的个人待办数量"))
 }
 
 ///|

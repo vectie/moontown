@@ -131,7 +131,7 @@ test "four account experiences keep distinct navigation" {
 }
 
 ///|
-test "account navigation exposes plan tenant and accessible label" {
+test "account navigation exposes tenant and accessible label without duplicate plan badge" {
   let html = @rabbita.render_to_string(
     @rabbita.static_cell(
       render_account_navigation(
@@ -144,7 +144,7 @@ test "account navigation exposes plan tenant and accessible label" {
     ),
   )
   assert_true(html.contains("aria-label=\"Account navigation\""))
-  assert_true(html.contains(">团队<"))
+  assert_false(html.contains(">团队<"))
   assert_true(html.contains("Energy Labs"))
   assert_true(html.contains("团队 Agent"))
   assert_true(html.contains("account-global-avatar"))

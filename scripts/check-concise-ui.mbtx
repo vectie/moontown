@@ -1,0 +1,47 @@
+///|
+import {
+  "moonbitlang/x@0.5.5/fs",
+}
+
+///|
+// Presentation-only guard: never remove control bindings, permission checks,
+// publication consent, real content, or unknown-data indicators to shorten UI.
+fn main raise {
+  let viewer = "src/ui/landmark-studio/web/"
+  for
+    (file, redundant) in [
+      ("index.html", "拖拽环视，查看建筑与周边环境。"),
+      ("interior.html", "点击房间，查看用途与陈设。"),
+      ("datacenter.html", "点击模型或展开设备列表。"),
+    ] {
+    let html = @fs.read_file_to_string(viewer + file)
+    assert_false(html.contains(redundant))
+    assert_true(html.contains("设计模型"))
+    assert_true(html.contains("操作帮助"))
+    assert_true(
+      html.contains("aria-label=\"复位视角\"") ||
+      html.contains("aria-label=\"恢复全层视角\""),
+    )
+    assert_true(html.contains("tabindex=\"0\""))
+    assert_true(html.contains("viewer-advanced"))
+  }
+  let space = @fs.read_file_to_string(viewer + "town-space.js")
+  assert_true(space.contains("this.selectionBar.hidden = !this.entity"))
+  assert_true(space.contains("b.setAttribute('aria-label', label)"))
+  assert_false(space.contains("点选机柜可逐层进入"))
+  assert_true(space.contains("import('./models.js')"))
+  let admin = @fs.read_file_to_string(
+    "src/ui/rabbita-town/account_management.js",
+  )
+  assert_true(admin.contains("node('details', 'system-setting-help')"))
+  assert_true(admin.contains("setCustomValidity(message)"))
+  assert_true(admin.contains("aria-describedby"))
+  assert_false(
+    admin.contains(
+      "Every value is range-checked, revision-protected, and audited.",
+    ),
+  )
+  println(
+    "Concise UI: viewer bindings, model loading, accessible controls and setting validation retained; redundant help removed.",
+  )
+}

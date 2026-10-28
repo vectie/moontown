@@ -86,7 +86,9 @@ test "oneoff unconfigured authority renders an ordinary blocker and cannot prete
     @rabbita.static_cell(render_collaboration_work(dispatch, state)),
   )
   assert_false(html.contains("开始执行"))
-  assert_true(html.contains("保存草稿或准备任务不会启动执行"))
+  assert_true(html.contains("尚未开始"))
+  assert_true(html.contains("读取任务进度"))
+  assert_false(html.contains("保存草稿或准备任务不会启动执行"))
   assert_false(html.contains("提交到知识册"))
   let result = {
     ..@collaboration.empty_work(state.draft.draft_id, "r-fixture"),
@@ -98,6 +100,6 @@ test "oneoff unconfigured authority renders an ordinary blocker and cannot prete
       render_collaboration_work(dispatch, { ..state, work: Some(result), }),
     ),
   )
-  assert_true(pending.contains("请以指定审阅人登录后审核"))
+  assert_true(pending.contains("仅指定审阅人可审核。"))
   assert_false(pending.contains("提交到知识册"))
 }

@@ -505,7 +505,6 @@ fn render_account_navigation(
     [
       div(class="account-global-identity", [
         span(class="account-global-brand", "MoonTown"),
-        span(class="account-global-plan", account_experience_name(kind)),
         span(class="account-global-tenant", tenant_label),
       ]),
       div(
@@ -710,20 +709,16 @@ fn account_management_heading(surface : String) -> (String, String) {
 
 ///|
 fn render_account_management_surface(surface : String) -> @rabbita.Html {
-  let (title, description) = account_management_heading(surface)
+  let (title, _) = account_management_heading(surface)
   @html.main_(class="account-management", [
     section(class="account-management-shell", [
-      header(class="account-management-header", [
-        span(class="account-access-kicker", "MoonTown account system"),
-        h1(title),
-        p(description),
-      ]),
+      header(class="account-management-header", [h1(title)]),
       div(id="account-management-root", class="account-management-workspace", [
         p(
           id="account-management-status",
           class="account-management-status",
           attrs=@html.Attrs::build().role("status").aria_live("polite"),
-          "Loading authoritative account data…",
+          "Loading…",
         ),
       ]),
     ]),
@@ -734,11 +729,8 @@ fn render_account_management_surface(surface : String) -> @rabbita.Html {
 fn render_account_operations_denied() -> @rabbita.Html {
   @html.main_(class="account-access-denied", [
     div(class="account-access-denied-panel", [
-      span(class="account-access-kicker", "MoonTown account boundary"),
       h1("Operations access is restricted"),
-      p(
-        "This console is available only to explicitly authorized platform administrators.",
-      ),
+      p("Platform administrator access required."),
       a(
         class="account-access-return",
         href="./index.html",

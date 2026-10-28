@@ -4,7 +4,6 @@ fn render_book_template_composer(
   model : Model,
 ) -> @rabbita.Html {
   article(class="request-composer book-template-composer", [
-    render_book_template_request_header(dispatch, model),
     render_book_template_request_field_grid(dispatch, model),
     render_request_textarea_field(
       "Websites",
@@ -74,14 +73,6 @@ fn book_template_request_intro() -> String {
 ///|
 fn book_template_request_target_label() -> String {
   "Queues a new book"
-}
-
-///|
-fn render_book_template_request_header(
-  _dispatch : Dispatch[Msg],
-  _model : Model,
-) -> @rabbita.Html {
-  div(class="request-composer-head", [h3("研究什么？")])
 }
 
 ///|

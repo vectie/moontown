@@ -12,7 +12,7 @@ test "Moonclaw pet remains available before avatar creation" {
   )
   assert_true(html.contains("moonclaw-pet"))
   assert_true(html.contains("小爪"))
-  assert_true(html.contains("忘了？问我"))
+  assert_false(html.contains("忘了？问我"))
   assert_true(html.contains("aria-controls=\"town-phone-panel\""))
 }
 

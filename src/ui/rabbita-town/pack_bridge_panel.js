@@ -290,7 +290,6 @@ export function candidateDialog(state, onSubmitted, sources = [], { fetcher = fe
     field('问题', title),
     field('为什么值得研究？', rationale),
     technical,
-    element('p', 'pack-layer-summary', '提交后进入领域审阅，不会执行操作或自动接受知识。'),
     status,
     submit,
   )

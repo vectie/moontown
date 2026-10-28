@@ -22,7 +22,7 @@ test "collective UI exposes connected experiment fields and explicit new-round a
   let entry = @rabbita.render_to_string(
     @rabbita.static_cell(render_collective_experiment(dispatch, state, work)),
   )
-  assert_true(entry.contains("继续研究 · 验证新假设"))
+  assert_true(entry.contains("验证新假设"))
   let opened = state.edit("work_collective_mode", "compose")
   let html = @rabbita.render_to_string(
     @rabbita.static_cell(render_collective_experiment(dispatch, opened, work)),
@@ -30,7 +30,7 @@ test "collective UI exposes connected experiment fields and explicit new-round a
   for
     expected in [
       "Combined hypothesis", "Connect water", "Connect mobility", "Exact supporting passage",
-      "What observable result would disprove", "Contradictions and dissent", "重新采集当前来源",
+      "What observable result would disprove", "Contradictions and dissent", "新草稿标识",
       "保存并编辑研究", "取消继续研究", "&lt;script&gt;",
     ] {
     assert_true(html.contains(expected), msg=expected)

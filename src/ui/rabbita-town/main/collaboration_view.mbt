@@ -241,9 +241,6 @@ fn render_collaboration_composer(
   ]
   div(id="collaboration-compose", class="request-composer", [
     h3("协作研究"),
-    p(
-      "选择资料和参与知识册，写下问题，再指定审阅人。保存草稿不会启动任务。",
-    ),
     div(class="request-actions", [
       button(
         class="control-button",

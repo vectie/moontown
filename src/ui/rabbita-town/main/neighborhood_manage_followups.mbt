@@ -8,12 +8,11 @@ fn render_neighborhood_manage_followups(
     !neighborhood_items(event, "followups").is_empty()
   })
   if groups.is_empty() {
-    return p(class="nh-empty", "还没有参与者提交的会后跟进。")
+    return p(class="nh-empty", "暂无跟进需求")
   }
   div(
     class="nh-stack",
     [
-      p(class="nh-muted", "回复参与者，记录下一步。"),
       ..groups.map(event => {
         div(
           class="nh-stack",
@@ -88,7 +87,7 @@ fn render_neighborhood_manage_followup(
       @html.nothing
     } else {
       @html.details([
-        @html.summary("对方为此次跟进留下的联系方式"),
+        @html.summary("联系方式"),
         p(neighborhood_text(followup, "contact")),
       ])
     },
@@ -96,7 +95,7 @@ fn render_neighborhood_manage_followup(
       div(class="nh-stack", [
         neighborhood_manage_field(
           "nh-followup-" + id + "-next",
-          "准备如何跟进",
+          "下一步",
           model.neighborhood_manage.followup_fields
           .get(id + ":next_step")
           .unwrap_or(""),

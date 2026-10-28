@@ -9,7 +9,7 @@ test "Policy Hall alone exposes the contextual question action" {
   )
   assert_true(policy_html.contains("你的本地议题是什么"))
   assert_true(policy_html.contains("问政策"))
-  assert_true(policy_html.contains("现状、受影响的人群和目标"))
+  assert_false(policy_html.contains("policy-hall-question-description"))
   assert_false(policy_html.contains("OCR"))
   assert_true(
     policy_html.contains("aria-label=\"打开 Moonclaw，询问昌平政策\""),

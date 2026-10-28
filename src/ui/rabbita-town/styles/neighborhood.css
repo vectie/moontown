@@ -31,7 +31,9 @@
 .nh-stack { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .nh-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .nh-card { border: 1px solid var(--town-ui-line, #c7cebc); border-radius: 14px; padding: 18px; background: var(--town-ui-card, #fffdf5); min-width: 0; }
-.nh-card-open { align-self: flex-start; }
+.nh-card:has(> .nh-card-open) { position: relative; }
+.nh-card:has(> .nh-card-open) > :is(h3, .nh-card-meta) { padding-right: 48px; }
+.nh-card-open { position: absolute; right: 12px; top: 12px; }
 .nh-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .nh-header .nh-actions { flex-wrap: nowrap; gap: 2px; }
 .nh-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 44px; min-height: 44px; padding: 9px 16px; border: 1px solid var(--town-ui-line, #c7cebc); border-radius: 10px; background: var(--town-ui-card, #fffdf5); color: var(--town-ui-ink, #293b30); font: inherit; font-size: 14px; font-weight: 550; text-decoration: none; cursor: pointer; transition: background 120ms, color 120ms; }

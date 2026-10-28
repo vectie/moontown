@@ -63,14 +63,14 @@ fn render_collaboration_notice(state : @collaboration.Client) -> @rabbita.Html {
   } else if notice.has_prefix("Unsaved ") {
     "有未保存的修改。"
   } else if notice.has_prefix("Exact retained result") {
-    "成果已读取；下载不会更改知识册。"
+    "成果已读取。"
   } else if notice.has_prefix("Saved source snapshots reopened") {
-    "草稿已打开，来源记录保持原版本。"
+    "草稿已打开。"
   } else if notice.has_prefix("Prepared locally.") {
     "任务已准备好，尚未执行。"
   } else if notice.has_prefix("New research-salon inquiry saved") ||
     notice.has_prefix("Peer-challenge draft saved") {
-    "继续研究的草稿已保存；请检查任务后再开始。"
+    "研究草稿已保存。"
   } else if notice.contains("Directory is missing") {
     "当前工作区尚未连接知识册，请配置资料后重试。"
   } else if notice.contains("not configured") {
@@ -115,15 +115,15 @@ fn render_collaboration_attention(
   })
   section(id="collaboration-attention", class="request-desk-stack", [
     h3("工作区待处理"),
-    p(
-      "先查看结果，再由指定审阅人决定。历史列表不代表都需要你审核。",
-    ),
     div(class="request-actions", [
       button(
         class="control-button",
-        attrs=@html.Attrs::build().disabled(state.busy()),
+        title="刷新待处理",
+        attrs=@html.Attrs::build()
+          .disabled(state.busy())
+          .aria_label("刷新待处理"),
         on_click=dispatch(CollaborationAction("outcome-list")),
-        town_ui_label("reset", "刷新待处理"),
+        town_ui_icon("refresh"),
       ),
       button(
         class="control-button",
@@ -149,17 +149,13 @@ fn render_collaboration_attention(
             p(collaboration_status_label(work.status))
           }
         } else {
-          p(
-            "已打开该版本。读取进度后可查看当前审核人和决定。",
-          )
+          p("尚未读取进度")
         },
         render_collaboration_work(dispatch, state),
       ])
     },
     if pending.is_empty() {
-      p(
-        "尚未显示待处理项目。请刷新工作区列表；这里不代表你的个人待办数量。",
-      )
+      p("暂无待处理记录")
     } else {
       div(
         class="request-desk-stack",
@@ -176,7 +172,7 @@ fn render_collaboration_attention(
               on_click=dispatch(
                 CollaborationReviewOpen(entry.draft_id, entry.revision),
               ),
-              "打开任务处理",
+              "处理",
             ),
           ])
         }),

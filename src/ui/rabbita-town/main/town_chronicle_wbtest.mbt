@@ -253,7 +253,8 @@ test "town today renders navigation, evidence, and explicit truth boundaries" {
   assert_true(html.contains("打开证据"))
   assert_true(html.contains("/book-output/policy-hall/report.html"))
   assert_true(html.contains("仅来自当前浏览器"))
-  assert_true(html.contains("演示居民不进入此处"))
+  assert_false(html.contains("演示居民不进入此处"))
+  assert_true(html.contains("本机足迹"))
 }
 
 ///|

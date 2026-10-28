@@ -409,22 +409,21 @@ fn render_resident_explorer(
     [
       header(class="resident-explorer-head", [
         div(class="resident-explorer-heading", [
-          p(class="resident-explorer-eyebrow", "RUNTIME RESIDENTS"),
           h2(id="resident-explorer-title", "镇上居民"),
-          p(
-            "找人、看他正在负责的真实工作，再进入建筑或发起协作。",
-          ),
         ]),
         button(
           class="resident-explorer-close",
           on_click=dispatch(ToggleResidentExplorer),
           attrs=@html.Attrs::build().aria_label("关闭居民列表"),
-          "✕",
+          town_ui_icon("close"),
         ),
       ]),
       div(class="resident-explorer-phase", [
-        span(class="resident-explorer-phase-label", phase_label),
-        span(phase_detail),
+        span(
+          class="resident-explorer-phase-label",
+          title=phase_detail,
+          phase_label,
+        ),
       ]),
       div(class="resident-search", [
         @html.label(for_="resident-search-input", "搜索真实居民"),
@@ -446,7 +445,7 @@ fn render_resident_explorer(
           div(class="resident-roster-empty", [
             @html.strong(
               if total == 0 {
-                "没有可核验的 Runtime Agent"
+                "暂无真实居民"
               } else {
                 "没有匹配的居民"
               },
@@ -467,10 +466,6 @@ fn render_resident_explorer(
             }),
           )
         },
-      ]),
-      @html.footer(class="resident-explorer-foot", [
-        span("身份源：MoonTown runtime projection"),
-        span("本地剧本联系人不会混入真实居民名单"),
       ]),
     ],
   )
@@ -644,7 +639,6 @@ fn render_resident_profile_for_agent(
       header(class="resident-profile-head", [
         render_runtime_resident_avatar(agent, "resident-profile-avatar"),
         div(class="resident-profile-identity", [
-          p(class="resident-profile-source", "RUNTIME AGENT · \{agent.id}"),
           h2(id="resident-profile-title", agent.name),
           p(resident_role_label(agent.role)),
         ]),
@@ -653,7 +647,7 @@ fn render_resident_profile_for_agent(
           autofocus=true,
           on_click=dispatch(SelectOverview),
           attrs=@html.Attrs::build().aria_label("关闭居民资料"),
-          "✕",
+          town_ui_icon("close"),
         ),
       ]),
       div(class="resident-profile-status", [
@@ -666,7 +660,7 @@ fn render_resident_profile_for_agent(
           if workplace_identity.is_empty() {
             "未记录"
           } else {
-            "\{workplace_label} · \{workplace_identity}"
+            workplace_label
           },
         ),
         render_resident_fact(
@@ -674,7 +668,7 @@ fn render_resident_profile_for_agent(
           if origin_identity.is_empty() {
             "未记录"
           } else {
-            "\{resident_building_label(model, origin_identity)} · \{origin_identity}"
+            resident_building_label(model, origin_identity)
           },
         ),
       ]),
@@ -690,38 +684,35 @@ fn render_resident_profile_for_agent(
         } else {
           button(
             class="resident-action",
+            attrs=@html.Attrs::build().aria_label("定位工作建筑"),
             on_click=dispatch(OpenEnergyBuilding(workplace_identity)),
-            "定位工作建筑",
+            town_ui_label("pin", "定位"),
           )
         },
         button(
           class="resident-action is-primary",
+          attrs=@html.Attrs::build().aria_label(
+            "用此上下文创建工作请求",
+          ),
           on_click=dispatch(
             OpenEnergyRequestForAgent(phone_runtime_contact_id(agent)),
           ),
-          "用此上下文创建工作请求",
+          town_ui_label("plus", "协作"),
         ),
       ]),
-      div(class="resident-truth-note", [
-        @html.strong(
-          if model.energy_valley_runtime.phase is Live {
-            "实时投影"
-          } else {
-            "历史快照"
-          },
-        ),
-        span(
-          "身份、任务、Run ID 和结果链接来自 \{model.energy_valley_runtime.projection.map(projection => projection.schema).unwrap_or("MoonTown runtime")}；界面不会把行走动画当作完成证据。",
+      render_advanced_details("居民来源", [
+        p("Agent · \{agent.id}"),
+        p(
+          model.energy_valley_runtime.projection
+          .map(projection => projection.schema)
+          .unwrap_or("MoonTown runtime"),
         ),
       ]),
       match task {
         Some(work) => render_resident_work_receipt(model, work)
         None =>
           div(class="resident-work resident-work-empty", [
-            h3("没有关联的真实工作项"),
-            p(
-              "这个身份来自运行时投影，但当前没有 Work item、Run ID 或结果页可供核验。",
-            ),
+            h3("暂无关联工作"),
           ])
       },
     ],
@@ -753,7 +744,6 @@ fn render_selected_resident_profile(
           header(class="resident-profile-head", [
             span(class="resident-avatar resident-profile-avatar", "?"),
             div(class="resident-profile-identity", [
-              p(class="resident-profile-source", "RUNTIME IDENTITY"),
               h2(id="resident-profile-title", agent_id),
               p("当前投影中不存在"),
             ]),
@@ -761,13 +751,10 @@ fn render_selected_resident_profile(
               class="resident-profile-close",
               on_click=dispatch(SelectOverview),
               attrs=@html.Attrs::build().aria_label("关闭居民资料"),
-              "✕",
+              town_ui_icon("close"),
             ),
           ]),
-          p(
-            class="resident-empty-copy",
-            "这个 Agent 可能已经结束、重启或更换身份。MoonTown 不会用演示居民补写它的任务和结果。",
-          ),
+          p(class="resident-empty-copy", "此 Agent 已离开当前名单。"),
         ],
       )
   }

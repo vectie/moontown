@@ -145,22 +145,15 @@ fn render_indoor_presence_summary(
 ///|
 fn render_indoor_compute_lift(dispatch : Dispatch[Msg]) -> @rabbita.Html {
   section(class="building-interior-panel building-compute-lift", [
-    div(class="building-lift-copy", [
-      h2("算力中心"),
-      p("只读查看授权机器、容量和连接状态。"),
-    ]),
     button(
       class="building-lift-button",
       on_click=dispatch(OpenSecretComputeRoom),
       attrs=@html.Attrs::build().aria_label(
         "乘安全电梯前往地下算力室",
       ),
-      town_ui_label("server", "地下"),
+      town_ui_label("server", "地下算力"),
     ),
     render_advanced_details("算力如何连接", [
-      p(
-        "楼内 Agent 的请求经 MoonGate 路由至 LunaNexa 本地算力或远程模型。",
-      ),
       div(
         class="building-lift-route",
         attrs=@html.Attrs::build().aria_label(
@@ -211,9 +204,6 @@ fn render_energy_valley_building_interior(
           None =>
             div(class="building-interior-unavailable", [
               h2("室内结构尚不可用"),
-              p(
-                "这座建筑仍可返回地面，但尚未发布可验证的交互位。",
-              ),
             ])
         },
       ]),

@@ -219,7 +219,7 @@ test "dashboard request launcher renders one selected composer at a time" {
     request_composer: RequestComposerFocus::StandingWatchComposer,
     request_status: "保存失败，请检查关注目标。",
   })
-  assert_true(watch.contains("关注什么？"))
+  assert_false(watch.contains("关注什么？"))
   assert_true(watch.contains("id=\"watch-title\""))
   assert_true(watch.contains("aria-expanded=\"true\""))
   assert_true(watch.contains("aria-live=\"polite\""))
@@ -232,7 +232,7 @@ test "dashboard request launcher renders one selected composer at a time" {
     ..init_model(),
     request_composer: RequestComposerFocus::EvidenceBookComposer,
   })
-  assert_true(book.contains("研究什么？"))
+  assert_false(book.contains("研究什么？"))
   assert_true(book.contains("id=\"book-request-title\""))
   assert_true(book.contains("id=\"book-request-websites\""))
   assert_true(book.contains("创建研究"))

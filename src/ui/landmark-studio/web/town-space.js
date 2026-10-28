@@ -57,7 +57,8 @@ class TownSpace {
     this.badge = node('span', 'space-badge', this.kind === 'indoor' ? '工作空间 · 示意布局' : '设计模型');
     this.viewport.append(this.canvas, this.labelLayer, this.badge, this.loading);
     this.selectionBar = node('div', 'space-selection-bar');
-    this.selectionName = node('span', '', '点击空间对象');
+    this.selectionBar.hidden = true;
+    this.selectionName = node('span', '', '未选择');
     this.focus = button('定位', 'fit', () => this.focusSelected(), true); this.focus.disabled = true;
     this.enter = button('进入', 'indoor', () => this.enterSelected()); this.enter.hidden = true;
     this.selectionBar.append(this.selectionName, this.focus, this.enter);
@@ -88,10 +89,10 @@ class TownSpace {
       if (this.reduced.matches) return;
       this.playing = !this.playing;
       const label = this.playing ? '暂停流动示意' : '播放流动示意';
-      this.play.replaceChildren(viewerIcon(this.playing ? 'pause' : 'play'),node('span','',label));
+      this.play.replaceChildren(viewerIcon(this.playing ? 'pause' : 'play'));
       this.play.setAttribute('aria-label',label); this.play.title = label;
       this.play.setAttribute('aria-pressed', String(this.playing)); this.invalidate();
-    }); families.append(this.play);
+    }, true); families.append(this.play);
     this.flowSelect = node('select'); this.flowSelect.setAttribute('aria-label', '流动路径');
     this.flowSelect.onchange = () => this.selectFlow(); this.flowDetail = node('p');
     this.flowPanel.append(families, this.flowSelect, this.flowDetail, node('small', '', '路径与流动为原理示意，不是实时任务或传感器数据。'));
@@ -254,7 +255,7 @@ class TownSpace {
     this.deliver(JSON.stringify({key:this.key, view:this.state.view, id:entity.id, title:entity.name, detail:entity.detail || '', scope, visit:entity.visit || ''}));
   }
   emitView() {
-    this.emit({id:'view:'+this.state.view, name:names[this.state.view], detail:'选择模型对象继续查看。'}, 'design');
+    this.emit({id:'view:'+this.state.view, name:names[this.state.view], detail:''}, 'design');
   }
   clearHighlight() {
     if (!this.highlight) return;
@@ -262,9 +263,9 @@ class TownSpace {
   }
   paintSelection() {
     this.clearHighlight();
+    this.selectionBar.hidden = !this.entity;
     this.host.dataset.selected = this.entity?.id || '';
-    const hint = {site:'选择设施查看详情', hall:'点选机柜可逐层进入', rack:'选择服务器或配电设备', server:'选择部件查看详情', board:'选择部件查看详情'};
-    this.selectionName.textContent = this.entity?.name || hint[this.state.view] || '点击房间或工作位';
+    this.selectionName.textContent = this.entity?.name || '未选择';
     this.focus.disabled = !this.entity || !this.camera; this.enter.hidden = !this.entity?.visit || !this.model;
     if (this.entity?.visit) {
       const label = '进入'+names[this.entity.visit];

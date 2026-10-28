@@ -41,7 +41,6 @@ fn render_policy_hall_map_entry(
       span(class="policy-hall-map-entry-dot", "●"),
       span(class="policy-hall-map-entry-copy", [
         span(class="policy-hall-map-entry-title", "昌平政策大厅"),
-        span(class="policy-hall-map-entry-hint", "进入政策大厅"),
       ]),
       span(class="policy-hall-map-entry-arrow", "→"),
     ],
@@ -61,12 +60,7 @@ fn render_policy_hall_question_action(
     attrs=@html.Attrs::build().aria_label("昌平政策问答"),
     [
       div(class="policy-hall-question-copy", [
-        span(class="policy-hall-question-eyebrow", "昌平政策问答"),
         h2(class="policy-hall-question-title", "你的本地议题是什么？"),
-        p(
-          class="policy-hall-question-description",
-          "说说现状、受影响的人群和目标，一起梳理可行的政策选项。",
-        ),
       ]),
       button(
         class="policy-hall-question-button",

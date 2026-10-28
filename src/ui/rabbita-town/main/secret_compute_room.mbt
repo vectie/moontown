@@ -174,18 +174,16 @@ fn render_compute_account_scope(
       .unwrap_or("我的算力")
   }
   let message = match state {
-    "public-demo" =>
-      "2 台 Trial 机器 · 展示目录，非实时运行数据。"
+    "public-demo" => "2 台 Trial · 非实时数据"
     "bound" =>
       if projection.local_cluster.machines.is_empty() {
-        "账户已连接，暂无授权机器。"
+        "暂无授权机器"
       } else if audience == "admin" {
         "\{projection.local_cluster.machines.length()} 台平台机器"
       } else {
         "\{projection.local_cluster.machines.length()} 台授权机器"
       }
-    "sign-in-required" =>
-      "登录后查看自己的算力，无需先启动模型。"
+    "sign-in-required" => "登录后查看算力"
     "select-organization" => "选择要查看的组织。"
     "access-denied" => "当前账户没有此组织的机器访问权限。"
     "not-configured" => "统一账户尚未接入。"
@@ -512,7 +510,7 @@ fn render_secret_compute_evidence(
     }
   }
   let detail = if selected == "moongate" {
-    "连接本地机器与远程模型。选择终端可查看其连接状态。"
+    "本地机器 / 远程模型"
   } else {
     match selected_machine {
       Some(machine) =>
@@ -521,12 +519,7 @@ fn render_secret_compute_evidence(
         } else {
           "\{machine.architecture} · \{machine.accelerator_count} 个加速器"
         }
-      None =>
-        if selected_route is Some(_) {
-          "远程模型路由"
-        } else {
-          "选择机器或终端查看状态。"
-        }
+      None => if selected_route is Some(_) { "远程模型路由" } else { "" }
     }
   }
   aside(
@@ -546,11 +539,15 @@ fn render_secret_compute_evidence(
             )
           },
         ),
-        p(detail),
+        if detail.is_empty() {
+          @html.nothing
+        } else {
+          p(detail)
+        },
         if selected_machine is Some(_) {
           p(class="spatial-data-badge", "物理位置未绑定")
         } else if selected_route is Some(_) {
-          p(class="spatial-data-badge", "外部服务 · 不对应本地机柜")
+          p(class="spatial-data-badge", "外部服务")
         } else {
           @html.nothing
         },
@@ -633,20 +630,7 @@ fn render_secret_compute_room(
       div(class="compute-room-title", [
         p(class="compute-kicker", "小镇 / 地下"),
         h1("算力中心"),
-        p(
-          match
-            projection.scope
-            .map(s => s.audience.unwrap_or("personal"))
-            .unwrap_or("personal") {
-            "public" => "Trial 展示 · 登录后查看自己的算力"
-            "admin" => "平台四台机器 · 管理员只读视图"
-            _ => "当前账户的算力目录"
-          },
-        ),
-        p(
-          class="spatial-data-badge",
-          "只读查看 · 不分配或启动机器",
-        ),
+        p(class="spatial-data-badge", "只读"),
       ]),
       div(class="compute-room-header-actions", [
         render_secret_compute_status(

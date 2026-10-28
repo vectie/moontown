@@ -72,7 +72,11 @@ test "table places maps explicit columns and explores filters selects and export
   assert_eq(selected.text, initial.text)
   let raw = imported_outputs_transition(selected, GeoEvent(Raw)).0
   assert_true(imported_fixture_render(raw).contains("Place,North,East,Type"))
-  assert_false(imported_fixture_render(raw).contains("<svg"))
+  assert_false(
+    imported_fixture_render(raw).contains(
+      "Coordinate schematic of imported features",
+    ),
+  )
   let table_view = imported_outputs_transition(
       selected,
       ShowImportedTable(true),
@@ -107,7 +111,11 @@ test "table places errors leave original accessible and stop entire invalid inta
     ).0
   assert_true(imported_fixture_render(invalid).contains("Data row 2: latitude"))
   assert_true(imported_fixture_render(invalid).contains("Download exact file"))
-  assert_false(imported_fixture_render(invalid).contains("<svg"))
+  assert_false(
+    imported_fixture_render(invalid).contains(
+      "Coordinate schematic of imported features",
+    ),
+  )
   assert_eq(
     imported_outputs_transition(invalid, GeoEvent(Export(false))).1,
     None,

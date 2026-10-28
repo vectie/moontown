@@ -15,7 +15,14 @@ fn render_advanced_details(
     ),
     div(
       class="town-advanced-body",
-      [p(class="town-advanced-heading", label), ..children],
+      [
+        if compact_label == "高级" {
+          p(class="town-advanced-heading", label)
+        } else {
+          @html.nothing
+        },
+        ..children,
+      ],
     ),
   ])
 }

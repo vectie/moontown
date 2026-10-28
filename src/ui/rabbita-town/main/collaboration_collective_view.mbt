@@ -12,7 +12,7 @@ fn render_collective_experiment(
     return button(
       attrs=@html.Attrs::build().disabled(disabled),
       on_click=dispatch(CollaborationEdit("work_collective_mode", "compose")),
-      "继续研究 · 验证新假设",
+      "验证新假设",
     )
   }
   let saved : @collaboration.SavedDraft = {
@@ -29,10 +29,7 @@ fn render_collective_experiment(
     collaboration_work_payload(state),
   )
   div(class="request-desk-stack", [
-    h3("继续研究 · 验证新假设"),
-    p(
-      "连接已有证据，提出可验证的新假设，并请各知识册独立质疑。这里只创建研究草稿，不执行实验。",
-    ),
+    h3("验证新假设"),
     render_advanced_details(
       "新研究的保存标识",
       needs_attention=state.work_fields
@@ -120,16 +117,10 @@ fn render_collective_experiment(
       "Unresolved assumptions and missing evidence",
       multiline=true,
     ),
-    p(
-      "保留失败项与原始引文，重新采集当前来源。新研究不继承审核；保存不会运行 Agent 或实验。",
-    ),
-    p(
-      match validation {
-        Ok(_) =>
-          "可以保存并进入研究编辑。准备与执行仍需分别确认。"
-        Err(error) => error
-      },
-    ),
+    match validation {
+      Ok(_) => @html.nothing
+      Err(error) => p(attrs=@html.Attrs::build().role("status"), error)
+    },
     button(
       attrs=@html.Attrs::build().disabled(disabled || validation is Err(_)),
       on_click=dispatch(CollaborationAction("oneoff-followup")),

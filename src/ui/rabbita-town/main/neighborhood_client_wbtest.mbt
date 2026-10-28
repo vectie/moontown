@@ -52,7 +52,7 @@ fn neighborhood_test_ready(actor~ : String = "alice") -> NeighborhoodState {
 }
 
 ///|
-test "neighborhood personal replies precede registration history and explanations stay advanced" {
+test "neighborhood personal replies precede registration history without boilerplate" {
   let mine : Json = {
     "actor_id": "alice",
     "can_host": false,
@@ -79,9 +79,9 @@ test "neighborhood personal replies precede registration history and explanation
   )
   let before_registration = html.split_once("我的报名").unwrap().0.to_string()
   assert_true(before_registration.contains("确认分享时间"))
-  assert_true(before_registration.contains("高级 · 回复说明"))
-  assert_true(before_registration.contains("<details"))
-  assert_false(before_registration.contains(" open"))
+  assert_true(before_registration.contains("已有回复"))
+  assert_false(before_registration.contains("高级 · 回复说明"))
+  assert_false(before_registration.contains("不代表已自动创建任务"))
 }
 
 ///|
@@ -458,7 +458,7 @@ test "neighborhood mine login offers an effective refresh and no private managem
   let html = @rabbita.render_to_string(
     @rabbita.static_cell(render_neighborhood_panel(dispatch, model)),
   )
-  assert_true(html.contains("已登录，刷新"))
+  assert_true(html.contains("刷新登录"))
   assert_true(html.contains("https://suanli.kechuangfuwu.com:8443/user/"))
   assert_false(html.contains("故事草稿"))
   assert_false(html.contains("neighborhood-manage"))

@@ -50,6 +50,7 @@ function resetCamera(mode='overview'){
 }
 function select(id,focus=false){
   const entity=current.entities.find(e=>e.id===id);if(!entity)return;selected=entity;viewport.dataset.selected=id;
+  $('device-selection').hidden=false;
   $('entity-kind').textContent=entity.kind;$('entity-name').textContent=entity.name;$('entity-detail').textContent=entity.detail;
   $('focus').disabled=false;$('enter').disabled=!entity.visit;$('enter').hidden=!entity.visit;$('enter').textContent=entity.visit?`进入${names[entity.visit]}`:'进入';
   document.querySelectorAll('[data-entity]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.entity===id)));
@@ -91,6 +92,7 @@ function showView(id){
   const data=views.find(v=>v.study.id===id)||views[0];if(model){scene.remove(model.root);model.dispose();scene.remove(flows.root);flows.dispose();}
   if(highlight){scene.remove(highlight);highlight.geometry.dispose();highlight.material.dispose();highlight=null;}
   current=data;selected=null;delete viewport.dataset.selected;model=buildStudy(data.study,materials);flows=buildFlows(data.flows,data.study.span);scene.add(model.root,flows.root);
+  $('device-selection').hidden=true;
   $('title').textContent=data.study.title;$('chapter').textContent=data.study.subtitle;
   const context=id==='site'?names.site:`${names.hall}${['rack','server','board'].includes(id)?' / '+rackId:''}${['server','board'].includes(id)?' / '+slotId+'–'+(Number(slotId.slice(1))+1):''}${id==='board'?' / PCB':''}`;
   $('location').textContent=context;$('model-note').textContent='设计模型，非竣工模型。';
@@ -101,11 +103,11 @@ function showView(id){
     b.addEventListener('click',()=>select(entity.id));b.addEventListener('dblclick',()=>{select(entity.id);enter();});$('entities').append(b);
     const label=document.createElement('button');label.className='model-label';label.textContent=entity.name;label.addEventListener('click',()=>select(entity.id));label.addEventListener('dblclick',()=>{select(entity.id);enter();});$('labels').append(label);labelNodes.set(entity.id,label);
   }
-  $('entity-kind').textContent='';$('entity-name').textContent='选择一个设备';$('entity-detail').textContent='点击模型或展开设备列表。';$('focus').disabled=true;$('enter').disabled=true;$('enter').hidden=true;$('enter').textContent='进入';
+  $('entity-kind').textContent='';$('entity-name').textContent='设备';$('entity-detail').textContent='';$('focus').disabled=true;$('enter').disabled=true;$('enter').hidden=true;$('enter').textContent='进入';
   $('cutaway').checked=['hall','server','board'].includes(id);$('cutaway').disabled=['rack','board'].includes(id);$('containment-option').hidden=id!=='hall';$('explode-option').hidden=!['server','board'].includes(id);$('explode').value=0;
   const s=data.study.span;sun.position.set(-s*.45,s*.85,s*.6);sun.target.position.fromArray(data.study.focus);Object.assign(sun.shadow.camera,{left:-s*.65,right:s*.65,top:s*.65,bottom:-s*.65,near:s*.005,far:s*3});sun.shadow.camera.updateProjectionMatrix();sun.shadow.normalBias=s*.0002;sun.shadow.bias=-.00006;
   document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===id)));
-  layers();resetCamera();setFamily(family);history.replaceState(null,'','#'+data.study.id);$('status').textContent='拖拽环视 · 滚轮缩放 · 点击设备 · 双击进入';
+  layers();resetCamera();setFamily(family);history.replaceState(null,'','#'+data.study.id);$('status').textContent='';
   document.querySelector('.inspector').scrollTop=0;$('entities').scrollTop=0;document.querySelector('main').scrollTop=0;
 }
 function toggleStats(open){$('stats').hidden=!open;$('open-stats').setAttribute('aria-expanded',String(open));if(open)$('close-stats').focus();else $('open-stats').focus();invalidate();}

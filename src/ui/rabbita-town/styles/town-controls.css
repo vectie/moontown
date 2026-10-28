@@ -18,6 +18,12 @@
 .town-ui-label { display: inline-flex; align-items: center; justify-content: center; gap: 8px; line-height: 1.4; }
 .town-ui-icon-button { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 10px; border: 1px solid transparent; border-radius: 12px; background: transparent; color: var(--town-ui-muted); cursor: pointer; }
 .town-ui-icon-button:hover { background: var(--town-ui-wash); color: var(--town-ui-ink); }
+.town-ui-icon-button:focus-visible { outline: 2px solid var(--town-ui-focus); outline-offset: 2px; }
+.quest-tracker.quest-create { width: fit-content; min-height: 44px; color: #f7f4e9; font: inherit; cursor: pointer; }
+.quest-tracker.quest-create:focus-visible { outline: 2px solid var(--town-ui-focus); outline-offset: 3px; }
+.system-setting-help > summary { width: fit-content; min-height: 32px; display: flex; align-items: center; cursor: pointer; color: var(--town-ui-muted); }
+.system-setting-help > summary:focus-visible { outline: 2px solid var(--town-ui-focus); outline-offset: 2px; }
+.system-setting-help code { overflow-wrap: anywhere; }
 .town-advanced > summary { display: flex; align-items: center; width: fit-content; gap: 8px; list-style: none; font-size: 12px; }
 .town-advanced > summary::-webkit-details-marker { display: none; }
 .town-advanced > summary::after { content: ''; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); margin: -3px 6px 0 4px; }

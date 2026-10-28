@@ -17,13 +17,10 @@ fn render_neighborhood_manage_events(
         ),
       ])
     } else {
-      p(
-        class="nh-muted",
-        "当前账户不能创建新活动；已有的本人主办记录仍可在这里管理。",
-      )
+      p(class="nh-muted", "无创建活动权限")
     },
     if events.is_empty() {
-      p(class="nh-empty", "还没有你主办的活动。")
+      p(class="nh-empty", "暂无主办活动")
     } else {
       div(
         class="nh-actions",
@@ -83,11 +80,10 @@ fn render_neighborhood_manage_events(
                 },
                 disabled=busy,
               ),
-              p(class="nh-muted", "时间使用你当前设备所在时区。"),
               div(class="nh-grid", [
                 neighborhood_manage_field(
                   "nh-event-starts",
-                  "开始时间",
+                  "开始（本地时间）",
                   form.starts,
                   value => {
                     dispatch(
@@ -99,7 +95,7 @@ fn render_neighborhood_manage_events(
                 ),
                 neighborhood_manage_field(
                   "nh-event-ends",
-                  "结束时间",
+                  "结束（本地时间）",
                   form.ends,
                   value => {
                     dispatch(NeighborhoodManageEvent(EventField("ends", value)))
@@ -142,7 +138,7 @@ fn render_neighborhood_manage_events(
               if saved {
                 div(class="nh-stack", [
                   p(
-                    "发布后，活动名称、说明、时间、地点和名额会公开，并接受报名。报名名单和联系方式不会公开。",
+                    "活动将公开并接受报名；名单和联系方式仅你可见。",
                   ),
                   neighborhood_manage_button(
                     dispatch,

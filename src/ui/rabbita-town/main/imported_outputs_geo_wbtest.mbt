@@ -111,7 +111,11 @@ test "GeoJSON explorer filters selects preserves source and exports local files"
   assert_eq(imported_outputs_transition(both, GeoEvent(Clear)).0.geo.selected, [])
   let raw_view = imported_outputs_transition(selected, GeoEvent(Raw)).0
   assert_true(imported_fixture_render(raw_view).contains("FeatureCollection"))
-  assert_false(imported_fixture_render(raw_view).contains("<svg"))
+  assert_false(
+    imported_fixture_render(raw_view).contains(
+      "Coordinate schematic of imported features",
+    ),
+  )
   assert_eq(
     imported_outputs_transition(selected, GeoEvent(Toggle(-1))).0,
     selected,

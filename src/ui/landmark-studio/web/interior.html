@@ -3,8 +3,8 @@
 <body class="viewer viewer-interior">
 <header class="viewer-header"><a class="brand viewer-link" href="index.html#center" aria-label="返回未来中心建筑模型"><span data-icon="back"></span>未来中心</a><span class="viewer-badge">室内 · 设计模型</span></header>
 <main><aside class="viewer-inspector">
-  <h1>G 座 · 三层</h1><p>点击房间，查看用途与陈设。</p>
-  <section id="room-info" class="viewer-selection" aria-live="polite"><h2 id="room-title">选择一个房间</h2><p id="room-area">中央挑空 · 双服务核心 · 周边功能区</p><button id="focus-room" class="viewer-primary" disabled><span data-icon="fit"></span>近看</button></section>
+  <h1>G 座 · 三层</h1>
+  <section id="room-info" class="viewer-selection" aria-live="polite" hidden><h2 id="room-title">全层</h2><p id="room-area"></p><button id="focus-room" class="viewer-icon-button" aria-label="近看房间" title="近看" disabled><span data-icon="fit"></span></button></section>
   <details class="viewer-picker"><summary>房间</summary><nav id="zones" aria-label="房间选择"></nav></details>
   <details class="viewer-advanced"><summary>高级</summary><div class="viewer-advanced-body">
     <h2>显示设置</h2><div class="viewer-options"><label><input id="furniture" type="checkbox" checked>家具提案</label><label><input id="labels" type="checkbox" checked>房间编号</label><label><input id="ceiling" type="checkbox">顶棚</label><button id="light" aria-pressed="false">暖光</button><button data-view="reverse" aria-pressed="false">背面视角</button></div>
@@ -15,5 +15,5 @@
 </aside><section id="viewport" aria-label="三层交互式3D室内模型">
   <canvas id="scene" tabindex="0" aria-label="拖拽旋转，滚轮缩放，右键平移；方向键旋转，加减号缩放，Home恢复总览"></canvas>
   <div class="viewer-camera" role="group" aria-label="视角"><button data-view="overview" aria-pressed="true"><span data-icon="cube"></span>总览</button><button data-view="plan" aria-pressed="false"><span data-icon="top"></span>平面</button><label><input id="cutaway" type="checkbox" checked>剖切</label><button id="reset" class="viewer-icon-button" aria-label="恢复全层视角" title="复位视角 (Home)"><span data-icon="reset"></span></button></div>
-  <div id="room-labels"></div><div id="loading" role="status">正在加载室内模型…</div><div id="status" class="viewer-hint" aria-live="polite">拖拽旋转 · 滚轮缩放 · 点击房间</div>
+  <div id="room-labels"></div><div id="loading" role="status">正在加载…</div><div id="status" class="viewer-hint" aria-live="polite"></div>
 </section></main><script type="module" src="interior.js"></script></body></html>

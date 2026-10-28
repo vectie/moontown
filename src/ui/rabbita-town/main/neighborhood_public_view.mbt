@@ -55,7 +55,14 @@ fn neighborhood_status(
 
 ///|
 fn neighborhood_empty(title : String, detail : String) -> @rabbita.Html {
-  div(class="nh-empty", [h3(title), p(class="nh-muted", detail)])
+  div(class="nh-empty", [
+    h3(title),
+    if detail.is_empty() {
+      @html.nothing
+    } else {
+      p(class="nh-muted", detail)
+    },
+  ])
 }
 
 ///|
@@ -64,7 +71,6 @@ fn render_neighborhood_login(
   loading : Bool,
 ) -> @rabbita.Html {
   div(class="nh-card nh-stack", [
-    p("登录后可报名、投稿和查看自己的进展。"),
     div(class="nh-actions", [
       a(
         class="nh-button nh-button-primary",
@@ -81,7 +87,7 @@ fn render_neighborhood_login(
         class="nh-button",
         disabled=loading,
         on_click=dispatch(NeighborhoodEvent(Refresh)),
-        "已登录，刷新",
+        town_ui_label("refresh", "刷新登录"),
       ),
     ]),
   ])
@@ -94,9 +100,7 @@ fn render_neighborhood_account_gate(
 ) -> @rabbita.Html {
   if !state.actor_id.is_empty() && !state.mine_error.is_empty() {
     return div(class="nh-card nh-stack", [
-      p(
-        "暂时无法读取我的街区。原有草稿仍在，刷新后继续。",
-      ),
+      p("读取失败，草稿已保留。"),
       button(
         type_="button",
         class="nh-button",
@@ -134,10 +138,7 @@ fn render_neighborhood_panel(
       }),
     [
       header(class="nh-header", [
-        div([
-          p(class="nh-eyebrow", "MOONTOWN / 街区"),
-          h2(id="neighborhood-title", "身边的人与事"),
-        ]),
+        div([h2(id="neighborhood-title", "身边的人与事")]),
         div(class="nh-actions", [
           button(
             type_="button",
@@ -229,9 +230,7 @@ fn render_neighborhood_feed(
   state : NeighborhoodState,
 ) -> @rabbita.Html {
   guard state.snapshot is Some(snapshot) else {
-    return neighborhood_empty(
-      "街区暂未连接", "点击右上角刷新；小镇地图仍可使用。",
-    )
+    return neighborhood_empty("街区暂未连接", "请刷新重试。")
   }
   let stories = state.section == "stories"
   let items = neighborhood_items(
@@ -249,24 +248,12 @@ fn render_neighborhood_feed(
       } else {
         "还没有公开活动"
       },
-      if stories {
-        "居民发布的真实故事会出现在这里。"
-      } else {
-        "主办方发布活动后，可在这里查看和报名。"
-      },
+      "",
     )
   }
   div(
     class="nh-stack",
     [
-      p(
-        class="nh-muted",
-        if stories {
-          "街区居民分享的经历与想法。"
-        } else {
-          "了解安排，选择想参加的活动。时间为北京时间。"
-        },
-      ),
       ..items.map(item => {
         let id = neighborhood_text(item, "id")
         article(class="nh-card nh-stack", [
@@ -278,7 +265,10 @@ fn render_neighborhood_feed(
                 class="nh-badge",
                 neighborhood_event_status(item, browser_now_ms()),
               ),
-              span(neighborhood_event_time(item)),
+              span(
+                title="北京时间（UTC+8）",
+                neighborhood_event_time(item) + "（北京）",
+              ),
             ])
           },
           h3(neighborhood_text(item, "title")),
@@ -308,7 +298,8 @@ fn render_neighborhood_feed(
           },
           button(
             type_="button",
-            class="nh-button nh-card-open",
+            class="town-ui-icon-button nh-card-open",
+            title="查看",
             attrs=@html.Attrs::build().aria_label(
               "查看" + neighborhood_text(item, "title"),
             ),
@@ -321,7 +312,7 @@ fn render_neighborhood_feed(
                 },
               ),
             ),
-            "查看",
+            town_ui_icon("forward"),
           ),
         ])
       }),
@@ -396,15 +387,14 @@ fn render_neighborhood_detail(
   div(class="nh-stack", [
     button(
       type_="button",
-      class="nh-button nh-back",
+      class="town-ui-icon-button nh-back",
+      title="返回列表",
+      attrs=@html.Attrs::build().aria_label("返回列表"),
       on_click=dispatch(NeighborhoodEvent(Back)),
-      town_ui_label("back", "返回"),
+      town_ui_icon("back"),
     ),
     match neighborhood_selected(state) {
-      None =>
-        neighborhood_empty(
-          "内容已不可用", "它可能已被撤回；返回列表查看最新内容。",
-        )
+      None => neighborhood_empty("内容已撤回或不可用", "")
       Some(item) =>
         article(class="nh-stack", [
           h3(class="nh-detail-title", neighborhood_text(item, "title")),
@@ -422,7 +412,10 @@ fn render_neighborhood_detail(
                 class="nh-badge",
                 neighborhood_event_status(item, browser_now_ms()),
               ),
-              span(neighborhood_event_time(item)),
+              span(
+                title="北京时间（UTC+8）",
+                neighborhood_event_time(item) + "（北京）",
+              ),
               span(town_ui_label("pin", neighborhood_text(item, "location"))),
               span(
                 "名额 " +
@@ -496,7 +489,6 @@ fn render_neighborhood_participation(
     if registration is Some(item) {
       p(
         class="nh-status",
-        "我的状态 · " +
         neighborhood_status_label(neighborhood_text(item, "state")),
       )
     } else {
@@ -504,12 +496,11 @@ fn render_neighborhood_participation(
     },
     if neighborhood_registration_open(event) && !active_registration {
       div(class="nh-stack", [
-        h3("参加活动"),
         render_neighborhood_field(
           dispatch,
           state,
           "name",
-          "报名姓名",
+          "姓名",
           state.display_name,
           100,
         ),
@@ -517,14 +508,11 @@ fn render_neighborhood_participation(
           dispatch,
           state,
           "contact",
-          "联系方式（选填，仅主办方可见）",
+          "联系方式（选填）",
           state.contact,
           500,
         ),
-        p(
-          class="nh-muted",
-          "姓名和联系方式仅用于本次活动，不公开展示。",
-        ),
+        p(class="nh-muted", "报名信息仅主办方可见。"),
         button(
           type_="button",
           class="nh-button nh-button-primary",
@@ -607,10 +595,6 @@ fn render_neighborhood_followup_form(
 ) -> @rabbita.Html {
   div(class="nh-stack", [
     h3("会后跟进（自愿）"),
-    p(
-      class="nh-muted",
-      "有需要可以告诉主办方；不提交也不影响参与记录。",
-    ),
     @html.label(class="nh-field", [
       span("希望获得什么帮助？"),
       textarea(
@@ -689,16 +673,9 @@ fn render_neighborhood_followup_receipt(followup : Json) -> @rabbita.Html {
             "回复 · " + neighborhood_text(followup, "outcome"),
           )
         },
-        @html.details(class="nh-disclosure town-advanced", [
-          @html.summary("高级 · 回复说明"),
-          p(
-            class="nh-muted",
-            "这是主办方的回复记录，不代表已自动创建任务或完成服务。",
-          ),
-        ]),
       ])
     } else {
-      p(class="nh-muted", "主办方收到后，可在这里回复下一步。")
+      p(class="nh-muted", "等待主办方回复")
     },
   ])
 }
@@ -738,7 +715,7 @@ fn render_neighborhood_mine(
       }),
       h3("我的报名"),
       if registrations.is_empty() {
-        p(class="nh-muted", "还没有报名。去活动页看看吧。")
+        p(class="nh-muted", "暂无报名")
       } else {
         div(
           class="nh-stack",

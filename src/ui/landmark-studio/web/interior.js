@@ -55,11 +55,12 @@ function setView(name,zone=null){
   else offset=new THREE.Vector3(name==='reverse'?-25:25,76,name==='reverse'?-83:83).multiplyScalar(fit);
   camera.position.copy(target).add(offset);bind(target);lastAspect=0;resize();controls.update();
   document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===name)));
-  $('status').textContent=zone?`${zone.id} · ${zone.name} · 拖拽继续环视`:'拖拽旋转 · 滚轮缩放 · 点击房间选区';
+  $('status').textContent=zone?zone.name:'';
   invalidate();
 }
 function selectZone(id,focus=false){
   selected=zones.find(z=>z.id===id);if(!selected)return;
+  $('room-info').hidden=false;
   viewport.dataset.selected=id;
   $('room-id').textContent=id==='atrium'?'VOID / 非办公楼面':`SPACE / ${id}`;
   $('room-title').textContent=selected.name;$('room-area').textContent=`图纸标注：${selected.area}`;

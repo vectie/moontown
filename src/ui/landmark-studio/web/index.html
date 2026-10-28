@@ -5,7 +5,7 @@
 </head><body class="viewer viewer-architecture">
 <header class="masthead viewer-header"><a class="brand" href="#center" aria-label="建筑模型首页"><span data-icon="cube"></span><span>MoonTown · 建筑</span></a><span class="viewer-badge">设计模型</span></header>
 <main><aside class="inspector viewer-inspector">
-  <h1 id="title">未来中心</h1><p>拖拽环视，查看建筑与周边环境。</p>
+  <h1 id="title">未来中心</h1>
   <button id="references"><span data-icon="photo"></span>参考图</button>
   <div class="viewer-links"><a id="interior-link" href="interior.html" class="viewer-link"><span data-icon="indoor"></span>室内</a><a href="datacenter.html" class="viewer-link"><span data-icon="server"></span>数据中心</a></div>
   <details class="viewer-advanced"><summary>高级</summary><div class="viewer-advanced-body">
@@ -18,8 +18,8 @@
 </aside><section id="viewport" aria-label="交互式建筑模型">
   <canvas id="scene" tabindex="0" aria-label="拖拽旋转，滚轮缩放，右键平移；方向键旋转，加减号缩放，Home复位"></canvas>
   <div class="viewer-camera" role="group" aria-label="视角"><button data-view="hero" class="selected" aria-pressed="true"><span data-icon="cube"></span>总览</button><button data-view="detail" aria-pressed="false"><span data-icon="fit"></span>细节</button><button data-view="top" aria-pressed="false"><span data-icon="top"></span>俯视</button><button id="reset" class="viewer-icon-button" aria-label="复位视角" title="复位视角 (Home)"><span data-icon="reset"></span></button></div>
-  <span id="north-arrow" hidden></span><div id="loading" class="loading" role="status"><span class="spinner"></span>正在加载建筑模型…</div><div class="viewer-hint">拖拽旋转 · 滚轮缩放</div><div class="view-status" id="view-status" aria-live="polite"></div>
+  <span id="north-arrow" hidden></span><div id="loading" class="loading" role="status"><span class="spinner"></span>正在加载…</div><div class="view-status" id="view-status" aria-live="polite"></div>
 </section></main>
 <nav class="landmarks" aria-label="选择地标"><button data-study="center" aria-pressed="true"><strong>未来中心</strong></button><button data-study="vision" aria-pressed="false"><strong>未来视界</strong></button><button data-study="east-bridge" aria-pressed="false" title="未来科学城东路桥"><strong>东路桥</strong></button><button data-study="arch-bridge" aria-pressed="false" title="未来科学城路桥"><strong>科学城路桥</strong></button></nav>
-<dialog id="reference-dialog" aria-labelledby="reference-title"><div class="dialog-head"><h2 id="reference-title">参考图</h2><button id="close-references" class="viewer-icon-button" aria-label="关闭参考图" title="关闭"><span data-icon="close"></span></button></div><p class="dialog-intro">照片与图纸来自原发布者，点击查看原图。</p><div id="reference-grid"></div></dialog>
+<dialog id="reference-dialog" aria-labelledby="reference-title"><div class="dialog-head"><h2 id="reference-title">参考图</h2><button id="close-references" class="viewer-icon-button" aria-label="关闭参考图" title="关闭"><span data-icon="close"></span></button></div><div id="reference-grid"></div></dialog>
 <script type="module" src="studio.js"></script></body></html>

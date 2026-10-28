@@ -28,14 +28,12 @@ fn render_retained_inquiry(
         state.busy() || !@collaboration.salon_ready(outcome.work),
       ),
       on_click=dispatch(CollaborationEdit("inquiry_mode", "compose")),
-      "继续研究 · 从此成果",
+      "继续研究",
     )
   }
   let content : Array[@rabbita.Html] = [
-    h3("继续研究 · 从此成果"),
-    p(
-      "选择至少两个成功贡献，引用原文，写下新问题与各自要验证的疑点。失败项保留，新研究不继承历史审核。",
-    ),
+    h3("继续研究"),
+    p("至少选择两份贡献。"),
     render_advanced_details("所选成果的来源版本", [
       p(
         "Pinned origin: " +
@@ -48,9 +46,6 @@ fn render_retained_inquiry(
         outcome.key.review_digest,
       ),
     ]),
-    p(
-      "保存后进入统一研究编辑器，可调整任务和资料。会重新采集当前来源；这里不会启动执行。",
-    ),
   ]
   for p in @collaboration.salon_candidates(outcome.work) {
     let selected = state.inquiry_fields.get("inquiry_include_" + p.book_id) ==
@@ -59,6 +54,9 @@ fn render_retained_inquiry(
       button(
         attrs=@html.Attrs::build()
           .disabled(state.busy())
+          .aria_label(
+            (if selected { "Selected: " } else { "Select: " }) + p.book_id,
+          )
           .aria_pressed(if selected { "true" } else { "false" }),
         on_click=dispatch(
           CollaborationEdit(
@@ -70,7 +68,7 @@ fn render_retained_inquiry(
             },
           ),
         ),
-        (if selected { "Selected: " } else { "Select: " }) + p.book_id,
+        town_ui_label(if selected { "check" } else { "plus" }, p.book_id),
       ),
     )
     if selected {
@@ -145,13 +143,10 @@ fn render_retained_inquiry(
   }
   let validation = state.retained_inquiry_preview()
   content.push(
-    p(
-      match validation {
-        Ok(_) =>
-          "可以保存并编辑研究；当前来源文件仍需可读取。"
-        Err(error) => error
-      },
-    ),
+    match validation {
+      Ok(_) => @html.nothing
+      Err(error) => p(attrs=@html.Attrs::build().role("status"), error)
+    },
   )
   content.push(
     button(

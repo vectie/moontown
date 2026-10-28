@@ -339,17 +339,14 @@ fn render_neighborhood_manage_stories(
                 ]),
                 neighborhood_manage_button(
                   dispatch,
-                  "公开发布故事",
+                  "公开发布",
                   PublishStory,
                   disabled=busy || !form.consent,
                   primary=true,
                 ),
               ])
             } else {
-              p(
-                class="nh-muted",
-                "先保存草稿，再决定是否公开。修改内容后需要重新授权。",
-              )
+              @html.nothing
             },
           ])
         }
@@ -368,16 +365,12 @@ fn render_neighborhood_work_context(
     return @html.nothing
   }
   article(class="nh-card nh-stack", [
-    h3("街区跟进 · 工作说明"),
-    p(
-      "这只是参考说明，尚未创建任务；仍需在工作区填写并提交。",
-    ),
+    h3("工作说明"),
+    span(class="nh-badge", "尚未提交"),
     @html.pre(class="nh-copy", context),
     if public_platform_enabled() {
       div(class="nh-stack", [
-        p(
-          "可复制以上说明，再从账户中心进入自己的工作区；本页不会替你发起工作。",
-        ),
+        p("复制到工作区后提交。"),
         render_shared_account_entry("signed-in"),
       ])
     } else {
@@ -385,7 +378,7 @@ fn render_neighborhood_work_context(
     },
     neighborhood_manage_button(
       dispatch,
-      "收起说明",
+      "收起",
       ClearWorkContext,
       disabled=false,
     ),

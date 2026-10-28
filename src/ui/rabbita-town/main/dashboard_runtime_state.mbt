@@ -43,10 +43,8 @@ fn render_town_runtime_notice(model : Model) -> @rabbita.Html {
     ConnectingRuntime =>
       div(class="town-runtime-notice town-runtime-connecting", [
         div(class="town-runtime-notice-copy", [
-          p(class="eyebrow", "Live town data"),
           h2("Connecting to the town runtime"),
         ]),
-        p("MoonTown is checking the local town projection."),
         a(
           href=canonical_energy_valley_dashboard_href(),
           class="town-runtime-notice-action",
@@ -56,12 +54,8 @@ fn render_town_runtime_notice(model : Model) -> @rabbita.Html {
     OfflineRuntime =>
       div(class="town-runtime-notice town-runtime-offline", [
         div(class="town-runtime-notice-copy", [
-          p(class="eyebrow", "Live town data"),
           h2("Town runtime is not connected"),
         ]),
-        p(
-          "Requests remain available, but operating signals stay empty until a town snapshot is published.",
-        ),
         a(
           href=canonical_energy_valley_dashboard_href(),
           class="town-runtime-notice-action",
@@ -77,11 +71,7 @@ fn render_town_runtime_notice(model : Model) -> @rabbita.Html {
 fn render_town_area_unavailable(target : DashboardSection) -> @rabbita.Html {
   section(class="town-area-unavailable", [
     div(class="town-area-unavailable-copy", [
-      p(class="eyebrow", "Live town data"),
       h2("\{dashboard_section_label(target)} are not connected"),
-      p(
-        "This area will show real town records after the runtime publishes a live snapshot.",
-      ),
     ]),
     a(
       href=canonical_energy_valley_dashboard_href(),

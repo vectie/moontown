@@ -4,7 +4,6 @@ fn render_request_composer(
   model : Model,
 ) -> @rabbita.Html {
   article(class="request-composer", [
-    render_operator_request_header(dispatch, model),
     render_watch_request_mode(dispatch, model),
     render_operator_request_field_grid(dispatch, model),
     render_request_textarea_field(
@@ -40,14 +39,6 @@ fn operator_request_submit_label(submitting : Bool) -> String {
   } else {
     "保存关注"
   }
-}
-
-///|
-fn render_operator_request_header(
-  _dispatch : Dispatch[Msg],
-  _model : Model,
-) -> @rabbita.Html {
-  div(class="request-composer-head", [h3("关注什么？")])
 }
 
 ///|
