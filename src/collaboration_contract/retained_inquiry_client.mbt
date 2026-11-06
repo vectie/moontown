@@ -8,11 +8,30 @@ fn Client::edit_retained_inquiry(
     return {
       ..self.dismiss(),
       inquiry_fields: Map([]),
+      inquiry_dossiers: [],
+      inquiry_outcomes: [],
       notice: "Inquiry notes discarded. The ordinary draft is unchanged; reopen saved drafts if a save was interrupted.",
     }
   }
   if self.busy() || self.inquiry_fields.get(field) == Some(value) {
     return self
+  }
+  if field == "inquiry_add_dossier" {
+    return self.add_inquiry_dossier()
+  }
+  if field == "inquiry_remove_dossier" {
+    let dossiers = self.inquiry_dossiers.filter(d => {
+      d.origin.to_json().stringify() != value
+    })
+    return {
+      ..self,
+      inquiry_dossiers: dossiers,
+      inquiry_outcomes: self.inquiry_outcomes.filter(o => {
+        dossiers.any(d => d.origin == o.key)
+      }),
+      generation: self.generation + 1,
+      notice: "Dossier removed from the cross-dossier inquiry",
+    }
   }
   guard self.outcome is Some(outcome) && salon_ready(outcome.work) else {
     return {
@@ -23,6 +42,72 @@ fn Client::edit_retained_inquiry(
   let fields = self.inquiry_fields.copy()
   fields[field] = value
   { ..self, inquiry_fields: fields, generation: self.generation + 1, }
+}
+
+///|
+fn Client::add_inquiry_dossier(self : Client) -> Client {
+  guard self.retained_inquiry_input() is Ok(input) &&
+    self.outcome is Some(outcome) else {
+    return { ..self, notice: "Inspect a retained dossier first", }
+  }
+  guard !input.contributions.is_empty() &&
+    input.contributions.all(c => {
+      !c.quote.trim().is_empty() &&
+      c.quote.length() <= 1000 &&
+      !c.challenge.trim().is_empty() &&
+      c.challenge.length() <= 4000 &&
+      salon_candidates(outcome.work).any(p => {
+        p.book_id == c.book_id && p.output_text.contains(c.quote)
+      })
+    }) else {
+    return {
+      ..self,
+      notice: "Select successful contributions with exact quotes and independent challenges before adding this dossier",
+    }
+  }
+  let dossiers = self.inquiry_dossiers.filter(d => d.origin != input.origin)
+  dossiers.push({ origin: input.origin, contributions: input.contributions, })
+  let outcomes = self.inquiry_outcomes.filter(o => o.key != input.origin)
+  outcomes.push(outcome)
+  {
+    ..self,
+    inquiry_dossiers: dossiers,
+    inquiry_outcomes: outcomes,
+    generation: self.generation + 1,
+    notice: "Selection added. Inspect another retained dossier, choose its excerpts and add it; then save the cross-dossier inquiry.",
+  }
+}
+
+///|
+pub fn Client::cross_dossier_inquiry_input(
+  self : Client,
+) -> Result[CrossDossierInquiry, String] {
+  guard !self.inquiry_dossiers.is_empty() else {
+    return Err("Add selected contributions to the inquiry first")
+  }
+  let authored = match self.retained_inquiry_input() {
+    Ok(value) => value
+    Err(error) => return Err(error)
+  }
+  let first = self.inquiry_dossiers[0]
+  Ok({
+    inquiry: {
+      ..authored,
+      origin: first.origin,
+      contributions: first.contributions,
+    },
+    additional: self.inquiry_dossiers.filter(d => d.origin != first.origin),
+  })
+}
+
+///|
+pub fn Client::cross_dossier_inquiry_preview(
+  self : Client,
+) -> Result[Draft, String] {
+  match self.cross_dossier_inquiry_input() {
+    Ok(input) => cross_dossier_inquiry_draft(input, self.inquiry_outcomes)
+    Err(error) => Err(error)
+  }
 }
 
 ///|

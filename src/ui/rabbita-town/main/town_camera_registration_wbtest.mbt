@@ -23,7 +23,7 @@ extern "js" fn calibration_test_zoom(zoom : Double) -> Unit =
 ///|
 extern "js" fn calibration_test_gentle_asset(install : Bool) -> Unit =
   #| install => {
-  #|   if (install) globalThis.__wenyuGentleGroundOverlay = { state: 'ready', image: {} };
+  #|   if (install) globalThis.__wenyuGentleGroundOverlay = { state: 'ready', image: {}, daylight: Boolean(globalThis.__moontownGoldenValleyCamera?.livingRoom) };
   #|   else delete globalThis.__wenyuGentleGroundOverlay;
   #| }
 

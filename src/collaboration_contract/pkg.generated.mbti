@@ -13,6 +13,8 @@ pub fn collective_followup(SavedDraft, OneoffWork, Json) -> Result[Draft, String
 
 pub fn compare_outcomes(RetainedOutcome, RetainedOutcome) -> OutcomeComparison raise
 
+pub fn cross_dossier_inquiry_draft(CrossDossierInquiry, Array[RetainedOutcome]) -> Result[Draft, String]
+
 pub fn decode_claim_comparison(String) -> Result[ClaimComparison, String]
 
 pub fn empty_draft(String) -> Draft
@@ -97,6 +99,8 @@ pub(all) struct Client {
   work_fields : Map[String, String]
   claim_fields : Map[String, String]
   inquiry_fields : Map[String, String]
+  inquiry_dossiers : Array[InquiryDossier]
+  inquiry_outcomes : Array[RetainedOutcome]
   books : Array[CatalogBook]
   drafts : Array[SavedDraft]
   new_draft_id : String
@@ -117,6 +121,8 @@ pub(all) struct Client {
 pub fn Client::begin(Self, String, String) -> Self
 pub fn Client::busy(Self) -> Bool
 pub fn Client::claim_challenge_input(Self) -> Result[ClaimChallenge, String]
+pub fn Client::cross_dossier_inquiry_input(Self) -> Result[CrossDossierInquiry, String]
+pub fn Client::cross_dossier_inquiry_preview(Self) -> Result[Draft, String]
 pub fn Client::dismiss(Self) -> Self
 pub fn Client::download_settled(Self, Int, String) -> Self
 pub fn Client::edit(Self, String, String) -> Self
@@ -157,6 +163,11 @@ pub(all) struct ComparedSource {
   size_bytes : Int
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
+pub(all) struct CrossDossierInquiry {
+  inquiry : RetainedInquiry
+  additional : Array[InquiryDossier]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
 pub(all) struct Draft {
   draft_id : String
   title : String
@@ -174,6 +185,11 @@ pub(all) struct InquiryContribution {
   book_id : String
   quote : String
   challenge : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct InquiryDossier {
+  origin : OutcomeKey
+  contributions : Array[InquiryContribution]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 pub(all) struct MaterialContextMatch {

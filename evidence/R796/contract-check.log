@@ -1,0 +1,19 @@
+Warning: `exclude` in `/workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/moon.mod` is deprecated; use `.gitignore` or `.moonignore` to control which files are packaged instead. `.moonignore` overrides `.gitignore` in the same directory.
+Error: [4014]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/cross_dossier_inquiry.mbt:51:33 ]
+    │
+ 51 │       match participants.search(p => p.book_id == participant.book_id) {
+    │                                 ──────────────────┬──────────────────  
+    │                                                   ╰──────────────────── Type Mismatch
+        has type : function type
+        wanted   : Participant
+────╯
+Error: [4028]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/cross_dossier_inquiry.mbt:51:38 ]
+    │
+ 51 │       match participants.search(p => p.book_id == participant.book_id) {
+    │                                      ────┬────  
+    │                                          ╰────── This expression has type _/0, which is a unknown type and not a struct.
+────╯
+Failed with 0 warnings, 2 errors.
+Error: failed when checking project

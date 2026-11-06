@@ -68,6 +68,7 @@ pub async fn Store::request_oneoff(Self, Request, OneoffRuntime?, String?, Strin
 pub async fn Store::reuse(Self, String, String, String, String) -> @collaboration_contract.SavedDraft
 pub async fn Store::save(Self, @collaboration_contract.Draft, String, String) -> @collaboration_contract.SavedDraft
 pub async fn Store::save_claim_challenge(Self, @collaboration_contract.ClaimChallenge, String) -> @collaboration_contract.SavedDraft
+pub async fn Store::save_cross_dossier_inquiry(Self, @collaboration_contract.CrossDossierInquiry, String) -> @collaboration_contract.SavedDraft
 pub async fn Store::save_material_notebook(Self, @collaboration_contract.MaterialNotebook, String) -> @collaboration_contract.SavedDraft
 pub async fn Store::save_retained_inquiry(Self, @collaboration_contract.RetainedInquiry, String) -> @collaboration_contract.SavedDraft
 pub async fn Store::search_outcomes(Self, @collaboration_contract.OutcomeSearchQuery) -> @collaboration_contract.OutcomeSearch

@@ -28,6 +28,7 @@ test "actual displayed-road index agrees with exhaustive nearest-segment search"
   let saved = town_street_segments.map(s => s)
   town_street_index(parsed)
   let errors : Array[Double] = []
+  let orientation_errors : Array[Double] = []
   for x in [1.0, 32.0, 96.0, 128.0, 192.0, 255.0] {
     for y in [1.0, 36.0, 72.0, 108.0, 143.0] {
       let mut expected = 8.0
@@ -39,11 +40,34 @@ test "actual displayed-road index agrees with exhaustive nearest-segment search"
         None => 8.0
       }
       errors.push((actual - expected).abs())
+      if town_street_nearest(x, y) is Some(hit) {
+        let building : IntersectionRoadPreviewBuilding = {
+          id: "alignment-fixture-\{x}-\{y}",
+          style: "lowrise",
+          asset_path: "",
+          x: x.to_int() - 1,
+          y: y.to_int() - 1,
+          width: 2,
+          depth: 2,
+          apron: 0,
+          depth_key: 0,
+        }
+        let b = town_building_bearing(building)
+        orientation_errors.push(
+          (b.east.x * hit.dy - b.east.y * hit.dx)
+          .abs()
+          .min((b.north.x * hit.dy - b.north.y * hit.dx).abs()),
+        )
+      }
     }
   }
   town_street_index(saved)
   assert_true(parsed.length() > 3000)
   for error in errors {
+    assert_true(error < 0.000001)
+  }
+  assert_true(!orientation_errors.is_empty())
+  for error in orientation_errors {
     assert_true(error < 0.000001)
   }
 }

@@ -15,7 +15,7 @@ extern "js" fn wenyu_gentle_ground_trial_fit_camera(
 ) -> Unit =
   #| (width, height) => {
   #|   const camera = globalThis.__moontownGoldenValleyCamera;
-  #|   if (!camera || camera.gentleTrialFramed) return;
+  #|   if (!camera || camera.livingRoom || camera.gentleTrialFramed) return;
   #|   camera.x = 32 * (128 - 72);
   #|   camera.y = 16 * (128 + 72);
   #|   camera.z = Math.max(0.03, Math.min((width - 100) / 12800, (height - 220) / 6400));
@@ -37,9 +37,10 @@ extern "js" fn wenyu_gentle_ground_overlay(
   #|   const params = new URLSearchParams(globalThis.location?.search || '');
   #|   const shore = Boolean(globalThis.location) && (!params.has('road-trial') || params.get('shore') === '1');
   #|   let asset = globalThis.__wenyuGentleGroundOverlay;
-  #|   if (!asset || Boolean(asset.shore) !== shore) {
+  #|   const daylight = Boolean(globalThis.__moontownGoldenValleyCamera?.livingRoom);
+  #|   if (!asset || Boolean(asset.shore) !== shore || Boolean(asset.daylight) !== daylight) {
   #|     const image = new Image();
-  #|     asset = { image, state: 'loading', shore };
+  #|     asset = { image, state: 'loading', shore, daylight };
   #|     globalThis.__wenyuGentleGroundOverlay = asset;
   #|     const complete = state => {
   #|       asset.state = state;
@@ -48,7 +49,12 @@ extern "js" fn wenyu_gentle_ground_overlay(
   #|     };
   #|     image.onload = () => complete('ready');
   #|     image.onerror = () => complete('error');
-  #|     image.src = 'tilemap/wenyu-unshifted-road-overlay.svg';
+  #|     if(daylight){
+  #|       fetch('tilemap/wenyu-unshifted-road-overlay.svg').then(r=>{if(!r.ok)throw new Error('road palette');return r.text()}).then(svg=>{
+  #|         const url=URL.createObjectURL(new Blob([svg.replaceAll('#ffc46d','#eeddb8').replaceAll('#86ab70','#96b975')],{type:'image/svg+xml'}));
+  #|         image.onload=()=>{URL.revokeObjectURL(url);complete('ready')};image.onerror=()=>{URL.revokeObjectURL(url);image.onload=()=>complete('ready');image.onerror=()=>complete('error');image.src='tilemap/wenyu-unshifted-road-overlay.svg'};image.src=url;
+  #|       }).catch(()=>{image.src='tilemap/wenyu-unshifted-road-overlay.svg'});
+  #|     }else image.src = 'tilemap/wenyu-unshifted-road-overlay.svg';
   #|   }
   #|   context.save();
   #|   context.transform(32 * zoom, 16 * zoom, -32 * zoom, 16 * zoom,
@@ -90,10 +96,20 @@ fn draw_wenyu_gentle_ground_trial(
   context.clear_rect(0.0, 0.0, width.to_double(), height.to_double())
   golden_draw_background(context, width, height, view.hour)
   let scene_ready = wenyu_rigid_scene_active() && wenyu_scene_prepare()
+  let exterior = scene_ready &&
+    street &&
+    frontier_requested() &&
+    frontier_boundary_prepare()
+  let exterior_chunks = if exterior {
+    frontier_visible_chunks(width + 384, height + 384)
+  } else {
+    []
+  }
   if scene_ready {
     town_landmark_prepare()
   }
   let bearing_review = scene_ready && town_bearing_buildings_requested()
+  let bearing_render = scene_ready && town_bearing_render_enabled()
   let buildings : Map[Int32, Array[IntersectionRoadPreviewBuilding]] = if scene_ready {
     intersection_road_preview_buildings_by_depth(snapshot)
   } else {
@@ -109,7 +125,10 @@ fn draw_wenyu_gentle_ground_trial(
   if !wenyu_ground_cache_restore(
       context,
       snapshot.world,
-      intersection_road_preview_cache_key(snapshot),
+      intersection_road_preview_cache_key(snapshot) +
+      (if exterior { ":exterior-v1" } else { "" }) +
+      (if street { ":sunny-diorama-v3" } else { "" }) +
+      (if bearing_render { ":street-alignment-v1" } else { "" }),
       width,
       height,
       golden_valley_camera_x(),
@@ -120,6 +139,9 @@ fn draw_wenyu_gentle_ground_trial(
     let context = wenyu_ground_cache_context(target)
     let width = width + 2 * wenyu_ground_cache_padding()
     let height = height + 2 * wenyu_ground_cache_padding()
+    if exterior {
+      frontier_draw_ground(context, exterior_chunks, width, height)
+    }
     let chunks = golden_canvas_visible_tile_chunks(
       town_snapshot_canvas_cols(snapshot),
       town_snapshot_canvas_rows(snapshot),
@@ -135,7 +157,7 @@ fn draw_wenyu_gentle_ground_trial(
           let terrain_override = if scene_ready &&
             town_landmark_reserved(x.to_double() + 0.5, y.to_double() + 0.5, 0) {
             Some(intersection_road_view_stale_ground_terrain(x, y))
-          } else if bearing_review {
+          } else if bearing_render {
             Some(
               if reference_tile_kind_at(x, y) == Some("bridge") {
                 "water"
@@ -191,6 +213,9 @@ fn draw_wenyu_gentle_ground_trial(
         }
       }
     }
+    if street {
+      town_daylight_draw_water(context, width, height)
+    }
     if scene_ready {
       for _, items in buildings {
         for building in items {
@@ -198,7 +223,7 @@ fn draw_wenyu_gentle_ground_trial(
           if town_landmark_reserved(x, y, building.width.to_double() / 2.0) {
             continue
           }
-          if bearing_review {
+          if bearing_render {
             town_bearing_draw_lot(context, building, width, height)
             continue
           }
@@ -222,7 +247,20 @@ fn draw_wenyu_gentle_ground_trial(
       width,
       height,
     )
+    if street {
+      street_courtyard_draw_ground(context, width, height)
+    }
     wenyu_ground_cache_present(target)
+  }
+  if street {
+    town_water_ripples_draw(
+      context,
+      width,
+      height,
+      golden_animation_seconds(),
+      golden_prefers_reduced_motion(),
+      wenyu_scene_road_prefix,
+    )
   }
   if scene_ready {
     let production = wenyu_scene_default_requested()
@@ -270,6 +308,11 @@ fn draw_wenyu_gentle_ground_trial(
     let street_depth = street_position
       .map(p => (p.0 + p.1).floor().to_int())
       .unwrap_or(-1)
+    let life = if street {
+      street_life_frame(street_position, width, height)
+    } else {
+      []
+    }
     golden_begin_spring_civic_building_asset_frame()
     for depth in 0..<432 {
       town_landmark_draw(
@@ -302,7 +345,17 @@ fn draw_wenyu_gentle_ground_trial(
         None => ()
       }
       golden_draw_agents_at_depth(context, agents, depth, width, height)
-      if depth == street_depth {
+      if street {
+        street_courtyard_draw_depth(context, depth, width, height)
+        street_life_draw(context, life, depth, width, height)
+      }
+      if depth == street_depth &&
+        (
+          !exterior ||
+          street_position
+          .map(p => frontier_core.contains({ x: p.0, y: p.1, }))
+          .unwrap_or(true)
+        ) {
         street_draw_visitor(context, view, depth, width, height)
       }
       match buildings.get(depth) {
@@ -336,7 +389,6 @@ fn draw_wenyu_gentle_ground_trial(
         }
       }
     }
-    golden_end_spring_civic_building_asset_frame()
     town_landmark_draw_walker(context, width, height)
     let (images, vectors) = intersection_road_preview_building_counts(buildings)
     intersection_road_preview_record_building_counts(images, vectors)
@@ -350,5 +402,11 @@ fn draw_wenyu_gentle_ground_trial(
         snapshot, false,
       )
     }
+  }
+  if exterior {
+    frontier_draw_props(context, exterior_chunks, view, width, height)
+  }
+  if scene_ready {
+    golden_end_spring_civic_building_asset_frame()
   }
 }

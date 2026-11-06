@@ -325,15 +325,16 @@ extern "js" fn golden_draw_public_boardwalk_scaled(
   #|   context.save();
   #|   context.lineCap = "round";
   #|   context.lineJoin = "round";
+  #|   const daylight = Boolean(globalThis.__moontownGoldenValleyCamera?.livingRoom);
   #|   for (const [bit, from, to] of edges) {
   #|     if (!(mask & bit)) continue;
-  #|     context.strokeStyle = "rgba(67,46,29,0.44)";
+  #|     context.strokeStyle = daylight ? "rgba(85,115,87,0.18)" : "rgba(67,46,29,0.44)";
   #|     context.lineWidth = casingWidth;
   #|     context.beginPath();
   #|     context.moveTo(from[0], from[1] + shadowOffset);
   #|     context.lineTo(to[0], to[1] + shadowOffset);
   #|     context.stroke();
-  #|     context.strokeStyle = "#b9824b";
+  #|     context.strokeStyle = daylight ? "#e6d5ad" : "#b9824b";
   #|     context.lineWidth = deckWidth;
   #|     context.beginPath();
   #|     context.moveTo(from[0], from[1]);

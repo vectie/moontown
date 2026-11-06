@@ -132,6 +132,7 @@ const FIXED_RUNTIME_ASSETS = [
   'tilemap/wenyu_reference_labels.json',
   'tilemap/wenyu-unshifted-road-overlay.svg',
   'tilemap/wenyu-unshifted-scene.json',
+  'tilemap/wenyu-frontier-exits.json',
   'tilemap/wenyu_reference_roads.json',
   'tilemap/wenyu_reference_tilemap_iso.png',
 ]

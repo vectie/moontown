@@ -282,6 +282,10 @@ priv struct Model {
   street_living_room : Bool
   street_overview : Bool
   street_motion : PlayerMotion?
+  street_visit : String
+  street_visit_generation : Int32
+  street_seated : Bool
+  street_memories : Array[String]
   secret_compute_room_selected_id : String
   indoor_selected_slot_id : String
   spatial_scene_selections : Map[String, SpatialSceneSelection]
@@ -426,6 +430,8 @@ priv enum Msg {
   StreetOverview
   StreetRecenter
   StreetStep(Int32, Int32)
+  StreetVisit(String)
+  StreetVisitArrived(Int32)
   OpenStreetContent(String, String)
   NeighborhoodEvent(NeighborhoodMsg)
   NeighborhoodManageEvent(NeighborhoodManageMsg)

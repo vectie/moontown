@@ -17,6 +17,7 @@ import {
   "vectie/moontown/imported_output_contract",
   "vectie/moontown/domain_catalog",
   "vectie/moontown/energy_valley_contract",
+  "vectie/moontown/world_frontier" @frontier,
   "vectie/moontown/health",
   "vectie/moontown/ui",
   "vectie/moontown/collaboration_contract" @collaboration,

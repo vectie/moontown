@@ -260,11 +260,17 @@ test "comparison refuses ambiguous duplicate identities and mismatched selected 
     },
   }
   assert_true(
-    (try? @collaboration_contract.compare_outcomes(before, duplicate)) is Err(_),
+    (Ok(@collaboration_contract.compare_outcomes(before, duplicate)) catch {
+      e => Err(e)
+    })
+    is Err(_),
   )
   let wrong = { ..before, key: { ..before.key, revision: "other", }, }
   assert_true(
-    (try? @collaboration_contract.compare_outcomes(before, wrong)) is Err(_),
+    (Ok(@collaboration_contract.compare_outcomes(before, wrong)) catch {
+      e => Err(e)
+    })
+    is Err(_),
   )
   let duplicate = {
     ..before,
@@ -274,7 +280,10 @@ test "comparison refuses ambiguous duplicate identities and mismatched selected 
     },
   }
   assert_true(
-    (try? @collaboration_contract.compare_outcomes(duplicate, before)) is Err(_),
+    (Ok(@collaboration_contract.compare_outcomes(duplicate, before)) catch {
+      e => Err(e)
+    })
+    is Err(_),
   )
 }
 
@@ -325,5 +334,5 @@ test "comparison oversized briefs fail explicitly rather than silently truncatin
     },
   }
   let result = @collaboration_contract.compare_outcomes(before, after)
-  assert_true((try? result.markdown()) is Err(_))
+  assert_true((Ok(result.markdown()) catch { e => Err(e) }) is Err(_))
 }

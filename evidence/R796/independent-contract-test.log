@@ -1,0 +1,1507 @@
+Warning: `exclude` in `/workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/moon.mod` is deprecated; use `.gitignore` or `.moonignore` to control which files are packaged instead. `.moonignore` overrides `.gitignore` in the same directory.
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:10:10 ]
+    │
+ 10 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for ComparedClaim` are implicit promoted as regular method for `ComparedClaim`. This behavior is deprecated and will be removed in the future. Add a `pub extend ComparedClaim with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `ComparedClaim` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:10:17 ]
+    │
+ 10 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for ComparedClaim` are implicit promoted as regular method for `ComparedClaim`. This behavior is deprecated and will be removed in the future. Add a `pub extend ComparedClaim with Eq::{not_equal, equal}` declaration or manually define regular methods for type `ComparedClaim` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:10:21 ]
+    │
+ 10 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for ComparedClaim` are implicit promoted as regular method for `ComparedClaim`. This behavior is deprecated and will be removed in the future. Add a `pub extend ComparedClaim with ToJson::{to_json}` declaration or manually define regular methods for type `ComparedClaim` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:10:29 ]
+    │
+ 10 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for ComparedClaim` are implicit promoted as regular method for `ComparedClaim`. This behavior is deprecated and will be removed in the future. Add a `pub extend ComparedClaim with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `ComparedClaim` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:17:10 ]
+    │
+ 17 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for ComparedSource` are implicit promoted as regular method for `ComparedSource`. This behavior is deprecated and will be removed in the future. Add a `pub extend ComparedSource with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `ComparedSource` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:17:17 ]
+    │
+ 17 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for ComparedSource` are implicit promoted as regular method for `ComparedSource`. This behavior is deprecated and will be removed in the future. Add a `pub extend ComparedSource with Eq::{not_equal, equal}` declaration or manually define regular methods for type `ComparedSource` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:17:21 ]
+    │
+ 17 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for ComparedSource` are implicit promoted as regular method for `ComparedSource`. This behavior is deprecated and will be removed in the future. Add a `pub extend ComparedSource with ToJson::{to_json}` declaration or manually define regular methods for type `ComparedSource` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:17:29 ]
+    │
+ 17 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for ComparedSource` are implicit promoted as regular method for `ComparedSource`. This behavior is deprecated and will be removed in the future. Add a `pub extend ComparedSource with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `ComparedSource` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:26:10 ]
+    │
+ 26 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for ComparedGroup` are implicit promoted as regular method for `ComparedGroup`. This behavior is deprecated and will be removed in the future. Add a `pub extend ComparedGroup with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `ComparedGroup` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:26:17 ]
+    │
+ 26 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for ComparedGroup` are implicit promoted as regular method for `ComparedGroup`. This behavior is deprecated and will be removed in the future. Add a `pub extend ComparedGroup with Eq::{not_equal, equal}` declaration or manually define regular methods for type `ComparedGroup` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:26:21 ]
+    │
+ 26 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for ComparedGroup` are implicit promoted as regular method for `ComparedGroup`. This behavior is deprecated and will be removed in the future. Add a `pub extend ComparedGroup with ToJson::{to_json}` declaration or manually define regular methods for type `ComparedGroup` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:26:29 ]
+    │
+ 26 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for ComparedGroup` are implicit promoted as regular method for `ComparedGroup`. This behavior is deprecated and will be removed in the future. Add a `pub extend ComparedGroup with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `ComparedGroup` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:38:10 ]
+    │
+ 38 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for ClaimComparison` are implicit promoted as regular method for `ClaimComparison`. This behavior is deprecated and will be removed in the future. Add a `pub extend ClaimComparison with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `ClaimComparison` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:38:17 ]
+    │
+ 38 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for ClaimComparison` are implicit promoted as regular method for `ClaimComparison`. This behavior is deprecated and will be removed in the future. Add a `pub extend ClaimComparison with Eq::{not_equal, equal}` declaration or manually define regular methods for type `ClaimComparison` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:38:21 ]
+    │
+ 38 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for ClaimComparison` are implicit promoted as regular method for `ClaimComparison`. This behavior is deprecated and will be removed in the future. Add a `pub extend ClaimComparison with ToJson::{to_json}` declaration or manually define regular methods for type `ClaimComparison` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:38:29 ]
+    │
+ 38 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for ClaimComparison` are implicit promoted as regular method for `ClaimComparison`. This behavior is deprecated and will be removed in the future. Add a `pub extend ClaimComparison with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `ClaimComparison` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0025]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:53:19 ]
+    │
+ 53 │ ///   assert_true(decode_claim_comparison("{}") is Err(_))
+    │                   ───────────┬───────────  
+    │                              ╰───────────── Warning (test_unqualified_package): `decode_claim_comparison` is implicitly imported in test. Use `@collaboration_contract.decode_claim_comparison` instead.
+────╯
+Warning: [0020]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:63:18 ]
+    │
+ 63 │     guard report.to_json() == json &&
+    │                  ───┬───  
+    │                     ╰───── Warning (deprecated): The method `to_json` is implicitly promoted from `impl ToJson for ClaimComparison`. This behavior is deprecated, either use `ToJson::to_json` instead or add a `extend ClaimComparison with ToJson::{to_json, ..}` declaration.
+────╯
+Warning: [0079]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:166:10 ]
+     │
+ 166 │ } derive(Debug, Eq, ToJson, FromJson)
+     │          ──┬──  
+     │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for ClaimSourceMapping` are implicit promoted as regular method for `ClaimSourceMapping`. This behavior is deprecated and will be removed in the future. Add a `pub extend ClaimSourceMapping with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `ClaimSourceMapping` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+─────╯
+Warning: [0079]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:166:17 ]
+     │
+ 166 │ } derive(Debug, Eq, ToJson, FromJson)
+     │                 ─┬  
+     │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for ClaimSourceMapping` are implicit promoted as regular method for `ClaimSourceMapping`. This behavior is deprecated and will be removed in the future. Add a `pub extend ClaimSourceMapping with Eq::{not_equal, equal}` declaration or manually define regular methods for type `ClaimSourceMapping` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+─────╯
+Warning: [0079]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:166:21 ]
+     │
+ 166 │ } derive(Debug, Eq, ToJson, FromJson)
+     │                     ───┬──  
+     │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for ClaimSourceMapping` are implicit promoted as regular method for `ClaimSourceMapping`. This behavior is deprecated and will be removed in the future. Add a `pub extend ClaimSourceMapping with ToJson::{to_json}` declaration or manually define regular methods for type `ClaimSourceMapping` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+─────╯
+Warning: [0079]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:166:29 ]
+     │
+ 166 │ } derive(Debug, Eq, ToJson, FromJson)
+     │                             ────┬───  
+     │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for ClaimSourceMapping` are implicit promoted as regular method for `ClaimSourceMapping`. This behavior is deprecated and will be removed in the future. Add a `pub extend ClaimSourceMapping with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `ClaimSourceMapping` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+─────╯
+Warning: [0079]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:182:10 ]
+     │
+ 182 │ } derive(Debug, Eq, ToJson, FromJson)
+     │          ──┬──  
+     │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for ClaimChallenge` are implicit promoted as regular method for `ClaimChallenge`. This behavior is deprecated and will be removed in the future. Add a `pub extend ClaimChallenge with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `ClaimChallenge` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+─────╯
+Warning: [0079]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:182:17 ]
+     │
+ 182 │ } derive(Debug, Eq, ToJson, FromJson)
+     │                 ─┬  
+     │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for ClaimChallenge` are implicit promoted as regular method for `ClaimChallenge`. This behavior is deprecated and will be removed in the future. Add a `pub extend ClaimChallenge with Eq::{not_equal, equal}` declaration or manually define regular methods for type `ClaimChallenge` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+─────╯
+Warning: [0079]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:182:21 ]
+     │
+ 182 │ } derive(Debug, Eq, ToJson, FromJson)
+     │                     ───┬──  
+     │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for ClaimChallenge` are implicit promoted as regular method for `ClaimChallenge`. This behavior is deprecated and will be removed in the future. Add a `pub extend ClaimChallenge with ToJson::{to_json}` declaration or manually define regular methods for type `ClaimChallenge` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+─────╯
+Warning: [0079]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:182:29 ]
+     │
+ 182 │ } derive(Debug, Eq, ToJson, FromJson)
+     │                             ────┬───  
+     │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for ClaimChallenge` are implicit promoted as regular method for `ClaimChallenge`. This behavior is deprecated and will be removed in the future. Add a `pub extend ClaimChallenge with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `ClaimChallenge` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+─────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:241:33 ]
+     │
+ 241 │         "imported_claim": claim.to_json(),
+     │                                 ───┬───  
+     │                                    ╰───── Warning (deprecated): The method `to_json` is implicitly promoted from `impl ToJson for ComparedClaim`. This behavior is deprecated, either use `ToJson::to_json` instead or add a `extend ComparedClaim with ToJson::{to_json, ..}` declaration.
+─────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:242:35 ]
+     │
+ 242 │         "reported_source": source.to_json(),
+     │                                   ───┬───  
+     │                                      ╰───── Warning (deprecated): The method `to_json` is implicitly promoted from `impl ToJson for ComparedSource`. This behavior is deprecated, either use `ToJson::to_json` instead or add a `extend ComparedSource with ToJson::{to_json, ..}` declaration.
+─────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:243:37 ]
+     │
+ 243 │         "explicit_mapping": mapping.to_json(),
+     │                                     ───┬───  
+     │                                        ╰───── Warning (deprecated): The method `to_json` is implicitly promoted from `impl ToJson for ClaimSourceMapping`. This behavior is deprecated, either use `ToJson::to_json` instead or add a `extend ClaimSourceMapping with ToJson::{to_json, ..}` declaration.
+─────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/claim_challenge.mbt:313:30 ]
+     │
+ 313 │     guard @utf8.encode(draft.to_json().stringify()).length() <= 65536 else {
+     │                              ───┬───  
+     │                                 ╰───── Warning (deprecated): The method `to_json` is implicitly promoted from `impl ToJson for Draft`. This behavior is deprecated, either use `ToJson::to_json` instead or add a `extend Draft with ToJson::{to_json, ..}` declaration.
+─────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/client.mbt:31:10 ]
+    │
+ 31 │ } derive(Debug)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for Client` are implicit promoted as regular method for `Client`. This behavior is deprecated and will be removed in the future. Add a `pub extend Client with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `Client` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0020]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/collective.mbt:86:8 ]
+    │
+ 86 │       .to_json(),
+    │        ───┬───  
+    │           ╰───── Warning (deprecated): Use `Json(value)` instead
+────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/collective.mbt:106:46 ]
+     │
+ 106 │     "prior_result_decisions": work.decisions.to_json(),
+     │                                              ───┬───  
+     │                                                 ╰───── Warning (deprecated): Use `Json(value)` instead
+─────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/collective.mbt:115:30 ]
+     │
+ 115 │     "contributions": bridges.to_json(),
+     │                              ───┬───  
+     │                                 ╰───── Warning (deprecated): Use `Json(value)` instead
+─────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/collective.mbt:118:6 ]
+     │
+ 118 │     .to_json(),
+     │      ───┬───  
+     │         ╰───── Warning (deprecated): Use `Json(value)` instead
+─────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/collective_test.mbt:114:47 ]
+     │
+ 114 │         change_salon_field(fields, key, value.to_json()),
+     │                                               ───┬───  
+     │                                                  ╰───── Warning (deprecated): Use `Json(value)` instead
+─────╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/cross_dossier_inquiry.mbt:6:10 ]
+   │
+ 6 │ } derive(Debug, Eq, ToJson, FromJson)
+   │          ──┬──  
+   │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for InquiryDossier` are implicit promoted as regular method for `InquiryDossier`. This behavior is deprecated and will be removed in the future. Add a `pub extend InquiryDossier with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `InquiryDossier` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/cross_dossier_inquiry.mbt:6:17 ]
+   │
+ 6 │ } derive(Debug, Eq, ToJson, FromJson)
+   │                 ─┬  
+   │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for InquiryDossier` are implicit promoted as regular method for `InquiryDossier`. This behavior is deprecated and will be removed in the future. Add a `pub extend InquiryDossier with Eq::{not_equal, equal}` declaration or manually define regular methods for type `InquiryDossier` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/cross_dossier_inquiry.mbt:6:21 ]
+   │
+ 6 │ } derive(Debug, Eq, ToJson, FromJson)
+   │                     ───┬──  
+   │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for InquiryDossier` are implicit promoted as regular method for `InquiryDossier`. This behavior is deprecated and will be removed in the future. Add a `pub extend InquiryDossier with ToJson::{to_json}` declaration or manually define regular methods for type `InquiryDossier` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/cross_dossier_inquiry.mbt:6:29 ]
+   │
+ 6 │ } derive(Debug, Eq, ToJson, FromJson)
+   │                             ────┬───  
+   │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for InquiryDossier` are implicit promoted as regular method for `InquiryDossier`. This behavior is deprecated and will be removed in the future. Add a `pub extend InquiryDossier with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `InquiryDossier` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/cross_dossier_inquiry.mbt:14:10 ]
+    │
+ 14 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for CrossDossierInquiry` are implicit promoted as regular method for `CrossDossierInquiry`. This behavior is deprecated and will be removed in the future. Add a `pub extend CrossDossierInquiry with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `CrossDossierInquiry` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/cross_dossier_inquiry.mbt:14:17 ]
+    │
+ 14 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for CrossDossierInquiry` are implicit promoted as regular method for `CrossDossierInquiry`. This behavior is deprecated and will be removed in the future. Add a `pub extend CrossDossierInquiry with Eq::{not_equal, equal}` declaration or manually define regular methods for type `CrossDossierInquiry` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/cross_dossier_inquiry.mbt:14:21 ]
+    │
+ 14 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for CrossDossierInquiry` are implicit promoted as regular method for `CrossDossierInquiry`. This behavior is deprecated and will be removed in the future. Add a `pub extend CrossDossierInquiry with ToJson::{to_json}` declaration or manually define regular methods for type `CrossDossierInquiry` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/cross_dossier_inquiry.mbt:14:29 ]
+    │
+ 14 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for CrossDossierInquiry` are implicit promoted as regular method for `CrossDossierInquiry`. This behavior is deprecated and will be removed in the future. Add a `pub extend CrossDossierInquiry with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `CrossDossierInquiry` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/cross_dossier_inquiry.mbt:105:28 ]
+     │
+ 105 │   guard @utf8.encode(draft.to_json().stringify()).length() <= 65536 else {
+     │                            ───┬───  
+     │                               ╰───── Warning (deprecated): The method `to_json` is implicitly promoted from `impl ToJson for Draft`. This behavior is deprecated, either use `ToJson::to_json` instead or add a `extend Draft with ToJson::{to_json, ..}` declaration.
+─────╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_context.mbt:7:10 ]
+   │
+ 7 │ } derive(Debug, Eq, ToJson, FromJson)
+   │          ──┬──  
+   │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for MaterialContextMatch` are implicit promoted as regular method for `MaterialContextMatch`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialContextMatch with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `MaterialContextMatch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_context.mbt:7:17 ]
+   │
+ 7 │ } derive(Debug, Eq, ToJson, FromJson)
+   │                 ─┬  
+   │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for MaterialContextMatch` are implicit promoted as regular method for `MaterialContextMatch`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialContextMatch with Eq::{not_equal, equal}` declaration or manually define regular methods for type `MaterialContextMatch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_context.mbt:7:21 ]
+   │
+ 7 │ } derive(Debug, Eq, ToJson, FromJson)
+   │                     ───┬──  
+   │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for MaterialContextMatch` are implicit promoted as regular method for `MaterialContextMatch`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialContextMatch with ToJson::{to_json}` declaration or manually define regular methods for type `MaterialContextMatch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_context.mbt:7:29 ]
+   │
+ 7 │ } derive(Debug, Eq, ToJson, FromJson)
+   │                             ────┬───  
+   │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for MaterialContextMatch` are implicit promoted as regular method for `MaterialContextMatch`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialContextMatch with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `MaterialContextMatch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_context.mbt:14:10 ]
+    │
+ 14 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for MaterialContextSearch` are implicit promoted as regular method for `MaterialContextSearch`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialContextSearch with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `MaterialContextSearch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_context.mbt:14:17 ]
+    │
+ 14 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for MaterialContextSearch` are implicit promoted as regular method for `MaterialContextSearch`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialContextSearch with Eq::{not_equal, equal}` declaration or manually define regular methods for type `MaterialContextSearch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_context.mbt:14:21 ]
+    │
+ 14 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for MaterialContextSearch` are implicit promoted as regular method for `MaterialContextSearch`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialContextSearch with ToJson::{to_json}` declaration or manually define regular methods for type `MaterialContextSearch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_context.mbt:14:29 ]
+    │
+ 14 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for MaterialContextSearch` are implicit promoted as regular method for `MaterialContextSearch`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialContextSearch with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `MaterialContextSearch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0025]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_context_test.mbt:4:14 ]
+   │
+ 4 │   let page : MaterialPage = {
+   │              ──────┬─────  
+   │                    ╰─────── Warning (test_unqualified_package): `MaterialPage` is implicitly imported in test. Use `@collaboration_contract.MaterialPage` instead.
+───╯
+Warning: [0025]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_context_test.mbt:12:18 ]
+    │
+ 12 │   let notebook = empty_material_notebook("inquiry", [page])
+    │                  ───────────┬───────────  
+    │                             ╰───────────── Warning (test_unqualified_package): `empty_material_notebook` is implicitly imported in test. Use `@collaboration_contract.empty_material_notebook` instead.
+────╯
+Warning: [0025]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_context_test.mbt:38:14 ]
+    │
+ 38 │   let page : MaterialPage = {
+    │              ──────┬─────  
+    │                    ╰─────── Warning (test_unqualified_package): `MaterialPage` is implicitly imported in test. Use `@collaboration_contract.MaterialPage` instead.
+────╯
+Warning: [0025]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_context_test.mbt:46:18 ]
+    │
+ 46 │   let notebook = empty_material_notebook("inquiry", [page])
+    │                  ───────────┬───────────  
+    │                             ╰───────────── Warning (test_unqualified_package): `empty_material_notebook` is implicitly imported in test. Use `@collaboration_contract.empty_material_notebook` instead.
+────╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:6:10 ]
+   │
+ 6 │ } derive(Debug, Eq, ToJson, FromJson)
+   │          ──┬──  
+   │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for MaterialSelection` are implicit promoted as regular method for `MaterialSelection`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialSelection with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `MaterialSelection` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:6:17 ]
+   │
+ 6 │ } derive(Debug, Eq, ToJson, FromJson)
+   │                 ─┬  
+   │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for MaterialSelection` are implicit promoted as regular method for `MaterialSelection`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialSelection with Eq::{not_equal, equal}` declaration or manually define regular methods for type `MaterialSelection` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:6:21 ]
+   │
+ 6 │ } derive(Debug, Eq, ToJson, FromJson)
+   │                     ───┬──  
+   │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for MaterialSelection` are implicit promoted as regular method for `MaterialSelection`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialSelection with ToJson::{to_json}` declaration or manually define regular methods for type `MaterialSelection` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:6:29 ]
+   │
+ 6 │ } derive(Debug, Eq, ToJson, FromJson)
+   │                             ────┬───  
+   │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for MaterialSelection` are implicit promoted as regular method for `MaterialSelection`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialSelection with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `MaterialSelection` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:17:10 ]
+    │
+ 17 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for MaterialPage` are implicit promoted as regular method for `MaterialPage`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialPage with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `MaterialPage` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:17:17 ]
+    │
+ 17 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for MaterialPage` are implicit promoted as regular method for `MaterialPage`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialPage with Eq::{not_equal, equal}` declaration or manually define regular methods for type `MaterialPage` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:17:21 ]
+    │
+ 17 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for MaterialPage` are implicit promoted as regular method for `MaterialPage`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialPage with ToJson::{to_json}` declaration or manually define regular methods for type `MaterialPage` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:17:29 ]
+    │
+ 17 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for MaterialPage` are implicit promoted as regular method for `MaterialPage`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialPage with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `MaterialPage` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:26:10 ]
+    │
+ 26 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for MaterialExcerpt` are implicit promoted as regular method for `MaterialExcerpt`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialExcerpt with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `MaterialExcerpt` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:26:17 ]
+    │
+ 26 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for MaterialExcerpt` are implicit promoted as regular method for `MaterialExcerpt`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialExcerpt with Eq::{not_equal, equal}` declaration or manually define regular methods for type `MaterialExcerpt` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:26:21 ]
+    │
+ 26 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for MaterialExcerpt` are implicit promoted as regular method for `MaterialExcerpt`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialExcerpt with ToJson::{to_json}` declaration or manually define regular methods for type `MaterialExcerpt` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:26:29 ]
+    │
+ 26 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for MaterialExcerpt` are implicit promoted as regular method for `MaterialExcerpt`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialExcerpt with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `MaterialExcerpt` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:44:10 ]
+    │
+ 44 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for MaterialNotebook` are implicit promoted as regular method for `MaterialNotebook`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialNotebook with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `MaterialNotebook` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:44:17 ]
+    │
+ 44 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for MaterialNotebook` are implicit promoted as regular method for `MaterialNotebook`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialNotebook with Eq::{not_equal, equal}` declaration or manually define regular methods for type `MaterialNotebook` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:44:21 ]
+    │
+ 44 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for MaterialNotebook` are implicit promoted as regular method for `MaterialNotebook`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialNotebook with ToJson::{to_json}` declaration or manually define regular methods for type `MaterialNotebook` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:44:29 ]
+    │
+ 44 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for MaterialNotebook` are implicit promoted as regular method for `MaterialNotebook`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialNotebook with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `MaterialNotebook` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:53:10 ]
+    │
+ 53 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for MaterialMatch` are implicit promoted as regular method for `MaterialMatch`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialMatch with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `MaterialMatch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:53:17 ]
+    │
+ 53 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for MaterialMatch` are implicit promoted as regular method for `MaterialMatch`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialMatch with Eq::{not_equal, equal}` declaration or manually define regular methods for type `MaterialMatch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:53:21 ]
+    │
+ 53 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for MaterialMatch` are implicit promoted as regular method for `MaterialMatch`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialMatch with ToJson::{to_json}` declaration or manually define regular methods for type `MaterialMatch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:53:29 ]
+    │
+ 53 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for MaterialMatch` are implicit promoted as regular method for `MaterialMatch`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialMatch with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `MaterialMatch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:62:10 ]
+    │
+ 62 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for MaterialSearch` are implicit promoted as regular method for `MaterialSearch`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialSearch with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `MaterialSearch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:62:17 ]
+    │
+ 62 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for MaterialSearch` are implicit promoted as regular method for `MaterialSearch`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialSearch with Eq::{not_equal, equal}` declaration or manually define regular methods for type `MaterialSearch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:62:21 ]
+    │
+ 62 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for MaterialSearch` are implicit promoted as regular method for `MaterialSearch`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialSearch with ToJson::{to_json}` declaration or manually define regular methods for type `MaterialSearch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:62:29 ]
+    │
+ 62 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for MaterialSearch` are implicit promoted as regular method for `MaterialSearch`. This behavior is deprecated and will be removed in the future. Add a `pub extend MaterialSearch with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `MaterialSearch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0025]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:69:22 ]
+    │
+ 69 │ ///   let notebook = empty_material_notebook("field-question", [])
+    │                      ───────────┬───────────  
+    │                                 ╰───────────── Warning (test_unqualified_package): `empty_material_notebook` is implicitly imported in test. Use `@collaboration_contract.empty_material_notebook` instead.
+────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:267:26 ]
+     │
+ 267 │     "passages": evidence.to_json(),
+     │                          ───┬───  
+     │                             ╰───── Warning (deprecated): Use `Json(value)` instead
+─────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_notebook.mbt:288:28 ]
+     │
+ 288 │   guard @utf8.encode(draft.to_json().stringify()).length() <= 65536 else {
+     │                            ───┬───  
+     │                               ╰───── Warning (deprecated): The method `to_json` is implicitly promoted from `impl ToJson for Draft`. This behavior is deprecated, either use `ToJson::to_json` instead or add a `extend Draft with ToJson::{to_json, ..}` declaration.
+─────╯
+Warning: [0025]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_selection.mbt:7:18 ]
+   │
+ 7 │ ///   let page : MaterialPage = {
+   │                  ──────┬─────  
+   │                        ╰─────── Warning (test_unqualified_package): `MaterialPage` is implicitly imported in test. Use `@collaboration_contract.MaterialPage` instead.
+───╯
+Warning: [0025]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/material_selection.mbt:15:22 ]
+    │
+ 15 │ ///   let notebook = empty_material_notebook("inquiry", [page])
+    │                      ───────────┬───────────  
+    │                                 ╰───────────── Warning (test_unqualified_package): `empty_material_notebook` is implicitly imported in test. Use `@collaboration_contract.empty_material_notebook` instead.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/oneoff.mbt:12:10 ]
+    │
+ 12 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for ParticipantWork` are implicit promoted as regular method for `ParticipantWork`. This behavior is deprecated and will be removed in the future. Add a `pub extend ParticipantWork with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `ParticipantWork` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/oneoff.mbt:12:17 ]
+    │
+ 12 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for ParticipantWork` are implicit promoted as regular method for `ParticipantWork`. This behavior is deprecated and will be removed in the future. Add a `pub extend ParticipantWork with Eq::{not_equal, equal}` declaration or manually define regular methods for type `ParticipantWork` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/oneoff.mbt:12:21 ]
+    │
+ 12 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for ParticipantWork` are implicit promoted as regular method for `ParticipantWork`. This behavior is deprecated and will be removed in the future. Add a `pub extend ParticipantWork with ToJson::{to_json}` declaration or manually define regular methods for type `ParticipantWork` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/oneoff.mbt:12:29 ]
+    │
+ 12 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for ParticipantWork` are implicit promoted as regular method for `ParticipantWork`. This behavior is deprecated and will be removed in the future. Add a `pub extend ParticipantWork with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `ParticipantWork` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/oneoff.mbt:22:10 ]
+    │
+ 22 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for WorkDecision` are implicit promoted as regular method for `WorkDecision`. This behavior is deprecated and will be removed in the future. Add a `pub extend WorkDecision with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `WorkDecision` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/oneoff.mbt:22:17 ]
+    │
+ 22 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for WorkDecision` are implicit promoted as regular method for `WorkDecision`. This behavior is deprecated and will be removed in the future. Add a `pub extend WorkDecision with Eq::{not_equal, equal}` declaration or manually define regular methods for type `WorkDecision` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/oneoff.mbt:22:21 ]
+    │
+ 22 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for WorkDecision` are implicit promoted as regular method for `WorkDecision`. This behavior is deprecated and will be removed in the future. Add a `pub extend WorkDecision with ToJson::{to_json}` declaration or manually define regular methods for type `WorkDecision` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/oneoff.mbt:22:29 ]
+    │
+ 22 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for WorkDecision` are implicit promoted as regular method for `WorkDecision`. This behavior is deprecated and will be removed in the future. Add a `pub extend WorkDecision with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `WorkDecision` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/oneoff.mbt:41:10 ]
+    │
+ 41 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for OneoffWork` are implicit promoted as regular method for `OneoffWork`. This behavior is deprecated and will be removed in the future. Add a `pub extend OneoffWork with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `OneoffWork` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/oneoff.mbt:41:17 ]
+    │
+ 41 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for OneoffWork` are implicit promoted as regular method for `OneoffWork`. This behavior is deprecated and will be removed in the future. Add a `pub extend OneoffWork with Eq::{not_equal, equal}` declaration or manually define regular methods for type `OneoffWork` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/oneoff.mbt:41:21 ]
+    │
+ 41 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for OneoffWork` are implicit promoted as regular method for `OneoffWork`. This behavior is deprecated and will be removed in the future. Add a `pub extend OneoffWork with ToJson::{to_json}` declaration or manually define regular methods for type `OneoffWork` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/oneoff.mbt:41:29 ]
+    │
+ 41 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for OneoffWork` are implicit promoted as regular method for `OneoffWork`. This behavior is deprecated and will be removed in the future. Add a `pub extend OneoffWork with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `OneoffWork` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome.mbt:15:10 ]
+    │
+ 15 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for OutcomeEntry` are implicit promoted as regular method for `OutcomeEntry`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeEntry with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `OutcomeEntry` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome.mbt:15:17 ]
+    │
+ 15 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for OutcomeEntry` are implicit promoted as regular method for `OutcomeEntry`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeEntry with Eq::{not_equal, equal}` declaration or manually define regular methods for type `OutcomeEntry` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome.mbt:15:21 ]
+    │
+ 15 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for OutcomeEntry` are implicit promoted as regular method for `OutcomeEntry`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeEntry with ToJson::{to_json}` declaration or manually define regular methods for type `OutcomeEntry` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome.mbt:15:29 ]
+    │
+ 15 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for OutcomeEntry` are implicit promoted as regular method for `OutcomeEntry`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeEntry with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `OutcomeEntry` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome.mbt:25:10 ]
+    │
+ 25 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for OutcomeKey` are implicit promoted as regular method for `OutcomeKey`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeKey with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `OutcomeKey` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome.mbt:25:17 ]
+    │
+ 25 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for OutcomeKey` are implicit promoted as regular method for `OutcomeKey`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeKey with Eq::{not_equal, equal}` declaration or manually define regular methods for type `OutcomeKey` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome.mbt:25:21 ]
+    │
+ 25 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for OutcomeKey` are implicit promoted as regular method for `OutcomeKey`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeKey with ToJson::{to_json}` declaration or manually define regular methods for type `OutcomeKey` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome.mbt:25:29 ]
+    │
+ 25 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for OutcomeKey` are implicit promoted as regular method for `OutcomeKey`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeKey with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `OutcomeKey` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome.mbt:31:10 ]
+    │
+ 31 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for OutcomeReview` are implicit promoted as regular method for `OutcomeReview`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeReview with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `OutcomeReview` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome.mbt:31:17 ]
+    │
+ 31 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for OutcomeReview` are implicit promoted as regular method for `OutcomeReview`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeReview with Eq::{not_equal, equal}` declaration or manually define regular methods for type `OutcomeReview` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome.mbt:31:21 ]
+    │
+ 31 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for OutcomeReview` are implicit promoted as regular method for `OutcomeReview`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeReview with ToJson::{to_json}` declaration or manually define regular methods for type `OutcomeReview` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome.mbt:31:29 ]
+    │
+ 31 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for OutcomeReview` are implicit promoted as regular method for `OutcomeReview`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeReview with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `OutcomeReview` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome.mbt:44:10 ]
+    │
+ 44 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for RetainedOutcome` are implicit promoted as regular method for `RetainedOutcome`. This behavior is deprecated and will be removed in the future. Add a `pub extend RetainedOutcome with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `RetainedOutcome` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome.mbt:44:17 ]
+    │
+ 44 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for RetainedOutcome` are implicit promoted as regular method for `RetainedOutcome`. This behavior is deprecated and will be removed in the future. Add a `pub extend RetainedOutcome with Eq::{not_equal, equal}` declaration or manually define regular methods for type `RetainedOutcome` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome.mbt:44:21 ]
+    │
+ 44 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for RetainedOutcome` are implicit promoted as regular method for `RetainedOutcome`. This behavior is deprecated and will be removed in the future. Add a `pub extend RetainedOutcome with ToJson::{to_json}` declaration or manually define regular methods for type `RetainedOutcome` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome.mbt:44:29 ]
+    │
+ 44 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for RetainedOutcome` are implicit promoted as regular method for `RetainedOutcome`. This behavior is deprecated and will be removed in the future. Add a `pub extend RetainedOutcome with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `RetainedOutcome` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_comparison.mbt:9:10 ]
+   │
+ 9 │ } derive(Debug, Eq, ToJson, FromJson)
+   │          ──┬──  
+   │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for OutcomeChange` are implicit promoted as regular method for `OutcomeChange`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeChange with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `OutcomeChange` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_comparison.mbt:9:17 ]
+   │
+ 9 │ } derive(Debug, Eq, ToJson, FromJson)
+   │                 ─┬  
+   │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for OutcomeChange` are implicit promoted as regular method for `OutcomeChange`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeChange with Eq::{not_equal, equal}` declaration or manually define regular methods for type `OutcomeChange` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_comparison.mbt:9:21 ]
+   │
+ 9 │ } derive(Debug, Eq, ToJson, FromJson)
+   │                     ───┬──  
+   │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for OutcomeChange` are implicit promoted as regular method for `OutcomeChange`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeChange with ToJson::{to_json}` declaration or manually define regular methods for type `OutcomeChange` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_comparison.mbt:9:29 ]
+   │
+ 9 │ } derive(Debug, Eq, ToJson, FromJson)
+   │                             ────┬───  
+   │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for OutcomeChange` are implicit promoted as regular method for `OutcomeChange`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeChange with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `OutcomeChange` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_comparison.mbt:26:10 ]
+    │
+ 26 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for OutcomeComparison` are implicit promoted as regular method for `OutcomeComparison`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeComparison with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `OutcomeComparison` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_comparison.mbt:26:17 ]
+    │
+ 26 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for OutcomeComparison` are implicit promoted as regular method for `OutcomeComparison`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeComparison with Eq::{not_equal, equal}` declaration or manually define regular methods for type `OutcomeComparison` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_comparison.mbt:26:21 ]
+    │
+ 26 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for OutcomeComparison` are implicit promoted as regular method for `OutcomeComparison`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeComparison with ToJson::{to_json}` declaration or manually define regular methods for type `OutcomeComparison` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_comparison.mbt:26:29 ]
+    │
+ 26 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for OutcomeComparison` are implicit promoted as regular method for `OutcomeComparison`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeComparison with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `OutcomeComparison` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_comparison_markdown.mbt:154:36 ]
+     │
+ 154 │     comparison_literal(self.before.to_json().stringify(indent=2)),
+     │                                    ───┬───  
+     │                                       ╰───── Warning (deprecated): The method `to_json` is implicitly promoted from `impl ToJson for OutcomeKey`. This behavior is deprecated, either use `ToJson::to_json` instead or add a `extend OutcomeKey with ToJson::{to_json, ..}` declaration.
+─────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_comparison_markdown.mbt:165:35 ]
+     │
+ 165 │     comparison_literal(self.after.to_json().stringify(indent=2)),
+     │                                   ───┬───  
+     │                                      ╰───── Warning (deprecated): The method `to_json` is implicitly promoted from `impl ToJson for OutcomeKey`. This behavior is deprecated, either use `ToJson::to_json` instead or add a `extend OutcomeKey with ToJson::{to_json, ..}` declaration.
+─────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:10:10 ]
+    │
+ 10 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for OutcomeSearchQuery` are implicit promoted as regular method for `OutcomeSearchQuery`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearchQuery with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `OutcomeSearchQuery` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:10:17 ]
+    │
+ 10 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for OutcomeSearchQuery` are implicit promoted as regular method for `OutcomeSearchQuery`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearchQuery with Eq::{not_equal, equal}` declaration or manually define regular methods for type `OutcomeSearchQuery` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:10:21 ]
+    │
+ 10 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for OutcomeSearchQuery` are implicit promoted as regular method for `OutcomeSearchQuery`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearchQuery with ToJson::{to_json}` declaration or manually define regular methods for type `OutcomeSearchQuery` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:10:29 ]
+    │
+ 10 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for OutcomeSearchQuery` are implicit promoted as regular method for `OutcomeSearchQuery`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearchQuery with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `OutcomeSearchQuery` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:23:10 ]
+    │
+ 23 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for OutcomeSearchMatch` are implicit promoted as regular method for `OutcomeSearchMatch`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearchMatch with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `OutcomeSearchMatch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:23:17 ]
+    │
+ 23 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for OutcomeSearchMatch` are implicit promoted as regular method for `OutcomeSearchMatch`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearchMatch with Eq::{not_equal, equal}` declaration or manually define regular methods for type `OutcomeSearchMatch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:23:21 ]
+    │
+ 23 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for OutcomeSearchMatch` are implicit promoted as regular method for `OutcomeSearchMatch`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearchMatch with ToJson::{to_json}` declaration or manually define regular methods for type `OutcomeSearchMatch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:23:29 ]
+    │
+ 23 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for OutcomeSearchMatch` are implicit promoted as regular method for `OutcomeSearchMatch`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearchMatch with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `OutcomeSearchMatch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:34:10 ]
+    │
+ 34 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for OutcomeSearchHit` are implicit promoted as regular method for `OutcomeSearchHit`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearchHit with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `OutcomeSearchHit` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:34:17 ]
+    │
+ 34 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for OutcomeSearchHit` are implicit promoted as regular method for `OutcomeSearchHit`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearchHit with Eq::{not_equal, equal}` declaration or manually define regular methods for type `OutcomeSearchHit` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:34:21 ]
+    │
+ 34 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for OutcomeSearchHit` are implicit promoted as regular method for `OutcomeSearchHit`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearchHit with ToJson::{to_json}` declaration or manually define regular methods for type `OutcomeSearchHit` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:34:29 ]
+    │
+ 34 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for OutcomeSearchHit` are implicit promoted as regular method for `OutcomeSearchHit`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearchHit with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `OutcomeSearchHit` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:45:10 ]
+    │
+ 45 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for OutcomeSearchGap` are implicit promoted as regular method for `OutcomeSearchGap`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearchGap with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `OutcomeSearchGap` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:45:17 ]
+    │
+ 45 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for OutcomeSearchGap` are implicit promoted as regular method for `OutcomeSearchGap`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearchGap with Eq::{not_equal, equal}` declaration or manually define regular methods for type `OutcomeSearchGap` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:45:21 ]
+    │
+ 45 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for OutcomeSearchGap` are implicit promoted as regular method for `OutcomeSearchGap`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearchGap with ToJson::{to_json}` declaration or manually define regular methods for type `OutcomeSearchGap` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:45:29 ]
+    │
+ 45 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for OutcomeSearchGap` are implicit promoted as regular method for `OutcomeSearchGap`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearchGap with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `OutcomeSearchGap` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:57:10 ]
+    │
+ 57 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for OutcomeSearch` are implicit promoted as regular method for `OutcomeSearch`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearch with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `OutcomeSearch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:57:17 ]
+    │
+ 57 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for OutcomeSearch` are implicit promoted as regular method for `OutcomeSearch`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearch with Eq::{not_equal, equal}` declaration or manually define regular methods for type `OutcomeSearch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:57:21 ]
+    │
+ 57 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for OutcomeSearch` are implicit promoted as regular method for `OutcomeSearch`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearch with ToJson::{to_json}` declaration or manually define regular methods for type `OutcomeSearch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:57:29 ]
+    │
+ 57 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for OutcomeSearch` are implicit promoted as regular method for `OutcomeSearch`. This behavior is deprecated and will be removed in the future. Add a `pub extend OutcomeSearch with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `OutcomeSearch` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search.mbt:159:32 ]
+     │
+ 159 │       excerpt: text[start:end].to_string(),
+     │                                ────┬────  
+     │                                    ╰────── Warning (deprecated): Use `to_owned` to allocate an owned String from a StringView; use `Show::to_string` or format strings for display
+─────╯
+Warning: [0020]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search_output.mbt:3:21 ]
+   │
+ 3 │   let output = self.to_json().stringify(indent=2) + "\n"
+   │                     ───┬───  
+   │                        ╰───── Warning (deprecated): The method `to_json` is implicitly promoted from `impl ToJson for OutcomeSearch`. This behavior is deprecated, either use `ToJson::to_json` instead or add a `extend OutcomeSearch with ToJson::{to_json, ..}` declaration.
+───╯
+Warning: [0020]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search_output.mbt:56:17 ]
+    │
+ 56 │         hit.key.to_json().stringify(indent=2),
+    │                 ───┬───  
+    │                    ╰───── Warning (deprecated): The method `to_json` is implicitly promoted from `impl ToJson for OutcomeKey`. This behavior is deprecated, either use `ToJson::to_json` instead or add a `extend OutcomeKey with ToJson::{to_json, ..}` declaration.
+────╯
+Warning: [0020]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search_output.mbt:87:42 ]
+    │
+ 87 │     sections.push(comparison_literal(gap.to_json().stringify(indent=2)))
+    │                                          ───┬───  
+    │                                             ╰───── Warning (deprecated): The method `to_json` is implicitly promoted from `impl ToJson for OutcomeSearchGap`. This behavior is deprecated, either use `ToJson::to_json` instead or add a `extend OutcomeSearchGap with ToJson::{to_json, ..}` declaration.
+────╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/retained_inquiry.mbt:6:10 ]
+   │
+ 6 │ } derive(Debug, Eq, ToJson, FromJson)
+   │          ──┬──  
+   │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for InquiryContribution` are implicit promoted as regular method for `InquiryContribution`. This behavior is deprecated and will be removed in the future. Add a `pub extend InquiryContribution with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `InquiryContribution` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/retained_inquiry.mbt:6:17 ]
+   │
+ 6 │ } derive(Debug, Eq, ToJson, FromJson)
+   │                 ─┬  
+   │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for InquiryContribution` are implicit promoted as regular method for `InquiryContribution`. This behavior is deprecated and will be removed in the future. Add a `pub extend InquiryContribution with Eq::{not_equal, equal}` declaration or manually define regular methods for type `InquiryContribution` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/retained_inquiry.mbt:6:21 ]
+   │
+ 6 │ } derive(Debug, Eq, ToJson, FromJson)
+   │                     ───┬──  
+   │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for InquiryContribution` are implicit promoted as regular method for `InquiryContribution`. This behavior is deprecated and will be removed in the future. Add a `pub extend InquiryContribution with ToJson::{to_json}` declaration or manually define regular methods for type `InquiryContribution` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+   ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/retained_inquiry.mbt:6:29 ]
+   │
+ 6 │ } derive(Debug, Eq, ToJson, FromJson)
+   │                             ────┬───  
+   │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for InquiryContribution` are implicit promoted as regular method for `InquiryContribution`. This behavior is deprecated and will be removed in the future. Add a `pub extend InquiryContribution with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `InquiryContribution` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+───╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/retained_inquiry.mbt:24:10 ]
+    │
+ 24 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for RetainedInquiry` are implicit promoted as regular method for `RetainedInquiry`. This behavior is deprecated and will be removed in the future. Add a `pub extend RetainedInquiry with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `RetainedInquiry` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/retained_inquiry.mbt:24:17 ]
+    │
+ 24 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for RetainedInquiry` are implicit promoted as regular method for `RetainedInquiry`. This behavior is deprecated and will be removed in the future. Add a `pub extend RetainedInquiry with Eq::{not_equal, equal}` declaration or manually define regular methods for type `RetainedInquiry` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/retained_inquiry.mbt:24:21 ]
+    │
+ 24 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for RetainedInquiry` are implicit promoted as regular method for `RetainedInquiry`. This behavior is deprecated and will be removed in the future. Add a `pub extend RetainedInquiry with ToJson::{to_json}` declaration or manually define regular methods for type `RetainedInquiry` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/retained_inquiry.mbt:24:29 ]
+    │
+ 24 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for RetainedInquiry` are implicit promoted as regular method for `RetainedInquiry`. This behavior is deprecated and will be removed in the future. Add a `pub extend RetainedInquiry with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `RetainedInquiry` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/retained_inquiry.mbt:140:8 ]
+     │
+ 140 │       .to_json(),
+     │        ───┬───  
+     │           ╰───── Warning (deprecated): Use `Json(value)` instead
+─────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/retained_inquiry.mbt:153:28 ]
+     │
+ 153 │     "origin": input.origin.to_json(),
+     │                            ───┬───  
+     │                               ╰───── Warning (deprecated): The method `to_json` is implicitly promoted from `impl ToJson for OutcomeKey`. This behavior is deprecated, either use `ToJson::to_json` instead or add a `extend OutcomeKey with ToJson::{to_json, ..}` declaration.
+─────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/retained_inquiry.mbt:157:46 ]
+     │
+ 157 │     "prior_result_decisions": work.decisions.to_json(),
+     │                                              ───┬───  
+     │                                                 ╰───── Warning (deprecated): Use `Json(value)` instead
+─────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/retained_inquiry.mbt:165:30 ]
+     │
+ 165 │     "contributions": bridges.to_json(),
+     │                              ───┬───  
+     │                                 ╰───── Warning (deprecated): Use `Json(value)` instead
+─────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/retained_inquiry.mbt:169:6 ]
+     │
+ 169 │     .to_json(),
+     │      ───┬───  
+     │         ╰───── Warning (deprecated): Use `Json(value)` instead
+─────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/retained_inquiry.mbt:172:6 ]
+     │
+ 172 │     .to_json(),
+     │      ───┬───  
+     │         ╰───── Warning (deprecated): Use `Json(value)` instead
+─────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/retained_inquiry.mbt:196:28 ]
+     │
+ 196 │   guard @utf8.encode(draft.to_json().stringify()).length() <= 65536 else {
+     │                            ───┬───  
+     │                               ╰───── Warning (deprecated): The method `to_json` is implicitly promoted from `impl ToJson for Draft`. This behavior is deprecated, either use `ToJson::to_json` instead or add a `extend Draft with ToJson::{to_json, ..}` declaration.
+─────╯
+Warning: [0020]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/retained_inquiry_client.mbt:24:16 ]
+    │
+ 24 │       d.origin.to_json().stringify() != value
+    │                ───┬───  
+    │                   ╰───── Warning (deprecated): The method `to_json` is implicitly promoted from `impl ToJson for OutcomeKey`. This behavior is deprecated, either use `ToJson::to_json` instead or add a `extend OutcomeKey with ToJson::{to_json, ..}` declaration.
+────╯
+Warning: [0020]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/salon.mbt:83:60 ]
+    │
+ 83 │     "contract_version": "moontown.idea-salon-selection.v1".to_json(),
+    │                                                            ───┬───  
+    │                                                               ╰───── Warning (deprecated): Use `Json(value)` instead
+────╯
+Warning: [0020]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/salon.mbt:84:38 ]
+    │
+ 84 │     "draft_id": saved.draft.draft_id.to_json(),
+    │                                      ───┬───  
+    │                                         ╰───── Warning (deprecated): Use `Json(value)` instead
+────╯
+Warning: [0020]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/salon.mbt:85:32 ]
+    │
+ 85 │     "revision": saved.revision.to_json(),
+    │                                ───┬───  
+    │                                   ╰───── Warning (deprecated): Use `Json(value)` instead
+────╯
+Warning: [0020]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/salon.mbt:86:38 ]
+    │
+ 86 │     "question": saved.draft.question.to_json(),
+    │                                      ───┬───  
+    │                                         ╰───── Warning (deprecated): Use `Json(value)` instead
+────╯
+Warning: [0020]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/salon.mbt:87:41 ]
+    │
+ 87 │     "result_digest": work.result_digest.to_json(),
+    │                                         ───┬───  
+    │                                            ╰───── Warning (deprecated): Use `Json(value)` instead
+────╯
+Warning: [0020]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/salon.mbt:88:34 ]
+    │
+ 88 │     "selected_book_id": selected.to_json(),
+    │                                  ───┬───  
+    │                                     ╰───── Warning (deprecated): Use `Json(value)` instead
+────╯
+Warning: [0020]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/salon.mbt:89:75 ]
+    │
+ 89 │     "comparison_kind": "operator-authored comparison of retained outputs".to_json(),
+    │                                                                           ───┬───  
+    │                                                                              ╰───── Warning (deprecated): Use `Json(value)` instead
+────╯
+Warning: [0020]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/salon.mbt:90:41 ]
+    │
+ 90 │     "genuine_emergence_verified": false.to_json(),
+    │                                         ───┬───  
+    │                                            ╰───── Warning (deprecated): Use `Json(value)` instead
+────╯
+Warning: [0020]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/salon.mbt:91:179 ]
+    │
+ 91 │     "authority": "Proposed outcome only. Result review covers the accurate source account; Book independently reviews this selection. Fixture outputs remain fixture rehearsals.".to_json(),
+    │                                                                                                                                                                                   ───┬───  
+    │                                                                                                                                                                                      ╰───── Warning (deprecated): Use `Json(value)` instead
+────╯
+Warning: [0020]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/salon.mbt:92:49 ]
+    │
+ 92 │     "authored_objection": saved.draft.objection.to_json(),
+    │                                                 ───┬───  
+    │                                                    ╰───── Warning (deprecated): Use `Json(value)` instead
+────╯
+Warning: [0020]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/salon.mbt:96:6 ]
+    │
+ 96 │     .to_json(),
+    │      ───┬───  
+    │         ╰───── Warning (deprecated): Use `Json(value)` instead
+────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/salon.mbt:100:43 ]
+     │
+ 100 │       Ok(value) => statement[key] = value.to_json()
+     │                                           ───┬───  
+     │                                              ╰───── Warning (deprecated): Use `Json(value)` instead
+─────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/salon.mbt:129:8 ]
+     │
+ 129 │       .to_json(),
+     │        ───┬───  
+     │           ╰───── Warning (deprecated): Use `Json(value)` instead
+─────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/salon.mbt:132:42 ]
+     │
+ 132 │   statement["comparisons"] = comparisons.to_json()
+     │                                          ───┬───  
+     │                                             ╰───── Warning (deprecated): Use `Json(value)` instead
+─────╯
+Warning: [0020]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/salon_test.mbt:137:47 ]
+     │
+ 137 │         change_salon_field(fields, key, value.to_json()),
+     │                                               ───┬───  
+     │                                                  ╰───── Warning (deprecated): Use `Json(value)` instead
+─────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/source_picker.mbt:11:10 ]
+    │
+ 11 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for SourceListing` are implicit promoted as regular method for `SourceListing`. This behavior is deprecated and will be removed in the future. Add a `pub extend SourceListing with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `SourceListing` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/source_picker.mbt:11:17 ]
+    │
+ 11 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for SourceListing` are implicit promoted as regular method for `SourceListing`. This behavior is deprecated and will be removed in the future. Add a `pub extend SourceListing with Eq::{not_equal, equal}` declaration or manually define regular methods for type `SourceListing` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/source_picker.mbt:11:21 ]
+    │
+ 11 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for SourceListing` are implicit promoted as regular method for `SourceListing`. This behavior is deprecated and will be removed in the future. Add a `pub extend SourceListing with ToJson::{to_json}` declaration or manually define regular methods for type `SourceListing` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/source_picker.mbt:11:29 ]
+    │
+ 11 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for SourceListing` are implicit promoted as regular method for `SourceListing`. This behavior is deprecated and will be removed in the future. Add a `pub extend SourceListing with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `SourceListing` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:10:10 ]
+    │
+ 10 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for Participant` are implicit promoted as regular method for `Participant`. This behavior is deprecated and will be removed in the future. Add a `pub extend Participant with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `Participant` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:10:17 ]
+    │
+ 10 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for Participant` are implicit promoted as regular method for `Participant`. This behavior is deprecated and will be removed in the future. Add a `pub extend Participant with Eq::{not_equal, equal}` declaration or manually define regular methods for type `Participant` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:10:21 ]
+    │
+ 10 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for Participant` are implicit promoted as regular method for `Participant`. This behavior is deprecated and will be removed in the future. Add a `pub extend Participant with ToJson::{to_json}` declaration or manually define regular methods for type `Participant` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:10:29 ]
+    │
+ 10 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for Participant` are implicit promoted as regular method for `Participant`. This behavior is deprecated and will be removed in the future. Add a `pub extend Participant with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `Participant` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:25:10 ]
+    │
+ 25 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for Draft` are implicit promoted as regular method for `Draft`. This behavior is deprecated and will be removed in the future. Add a `pub extend Draft with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `Draft` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:25:17 ]
+    │
+ 25 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for Draft` are implicit promoted as regular method for `Draft`. This behavior is deprecated and will be removed in the future. Add a `pub extend Draft with Eq::{not_equal, equal}` declaration or manually define regular methods for type `Draft` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:25:21 ]
+    │
+ 25 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for Draft` are implicit promoted as regular method for `Draft`. This behavior is deprecated and will be removed in the future. Add a `pub extend Draft with ToJson::{to_json}` declaration or manually define regular methods for type `Draft` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:25:29 ]
+    │
+ 25 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for Draft` are implicit promoted as regular method for `Draft`. This behavior is deprecated and will be removed in the future. Add a `pub extend Draft with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `Draft` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:36:10 ]
+    │
+ 36 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for SourceSnapshot` are implicit promoted as regular method for `SourceSnapshot`. This behavior is deprecated and will be removed in the future. Add a `pub extend SourceSnapshot with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `SourceSnapshot` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:36:17 ]
+    │
+ 36 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for SourceSnapshot` are implicit promoted as regular method for `SourceSnapshot`. This behavior is deprecated and will be removed in the future. Add a `pub extend SourceSnapshot with Eq::{not_equal, equal}` declaration or manually define regular methods for type `SourceSnapshot` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:36:21 ]
+    │
+ 36 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for SourceSnapshot` are implicit promoted as regular method for `SourceSnapshot`. This behavior is deprecated and will be removed in the future. Add a `pub extend SourceSnapshot with ToJson::{to_json}` declaration or manually define regular methods for type `SourceSnapshot` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:36:29 ]
+    │
+ 36 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for SourceSnapshot` are implicit promoted as regular method for `SourceSnapshot`. This behavior is deprecated and will be removed in the future. Add a `pub extend SourceSnapshot with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `SourceSnapshot` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:47:10 ]
+    │
+ 47 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for SavedDraft` are implicit promoted as regular method for `SavedDraft`. This behavior is deprecated and will be removed in the future. Add a `pub extend SavedDraft with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `SavedDraft` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:47:17 ]
+    │
+ 47 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for SavedDraft` are implicit promoted as regular method for `SavedDraft`. This behavior is deprecated and will be removed in the future. Add a `pub extend SavedDraft with Eq::{not_equal, equal}` declaration or manually define regular methods for type `SavedDraft` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:47:21 ]
+    │
+ 47 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for SavedDraft` are implicit promoted as regular method for `SavedDraft`. This behavior is deprecated and will be removed in the future. Add a `pub extend SavedDraft with ToJson::{to_json}` declaration or manually define regular methods for type `SavedDraft` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:47:29 ]
+    │
+ 47 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for SavedDraft` are implicit promoted as regular method for `SavedDraft`. This behavior is deprecated and will be removed in the future. Add a `pub extend SavedDraft with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `SavedDraft` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:53:10 ]
+    │
+ 53 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for CatalogBook` are implicit promoted as regular method for `CatalogBook`. This behavior is deprecated and will be removed in the future. Add a `pub extend CatalogBook with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `CatalogBook` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:53:17 ]
+    │
+ 53 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for CatalogBook` are implicit promoted as regular method for `CatalogBook`. This behavior is deprecated and will be removed in the future. Add a `pub extend CatalogBook with Eq::{not_equal, equal}` declaration or manually define regular methods for type `CatalogBook` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:53:21 ]
+    │
+ 53 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for CatalogBook` are implicit promoted as regular method for `CatalogBook`. This behavior is deprecated and will be removed in the future. Add a `pub extend CatalogBook with ToJson::{to_json}` declaration or manually define regular methods for type `CatalogBook` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:53:29 ]
+    │
+ 53 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for CatalogBook` are implicit promoted as regular method for `CatalogBook`. This behavior is deprecated and will be removed in the future. Add a `pub extend CatalogBook with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `CatalogBook` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:60:10 ]
+    │
+ 60 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for Artifact` are implicit promoted as regular method for `Artifact`. This behavior is deprecated and will be removed in the future. Add a `pub extend Artifact with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `Artifact` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:60:17 ]
+    │
+ 60 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for Artifact` are implicit promoted as regular method for `Artifact`. This behavior is deprecated and will be removed in the future. Add a `pub extend Artifact with Eq::{not_equal, equal}` declaration or manually define regular methods for type `Artifact` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:60:21 ]
+    │
+ 60 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for Artifact` are implicit promoted as regular method for `Artifact`. This behavior is deprecated and will be removed in the future. Add a `pub extend Artifact with ToJson::{to_json}` declaration or manually define regular methods for type `Artifact` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:60:29 ]
+    │
+ 60 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for Artifact` are implicit promoted as regular method for `Artifact`. This behavior is deprecated and will be removed in the future. Add a `pub extend Artifact with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `Artifact` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:69:10 ]
+    │
+ 69 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for Prepared` are implicit promoted as regular method for `Prepared`. This behavior is deprecated and will be removed in the future. Add a `pub extend Prepared with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `Prepared` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:69:17 ]
+    │
+ 69 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for Prepared` are implicit promoted as regular method for `Prepared`. This behavior is deprecated and will be removed in the future. Add a `pub extend Prepared with Eq::{not_equal, equal}` declaration or manually define regular methods for type `Prepared` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:69:21 ]
+    │
+ 69 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for Prepared` are implicit promoted as regular method for `Prepared`. This behavior is deprecated and will be removed in the future. Add a `pub extend Prepared with ToJson::{to_json}` declaration or manually define regular methods for type `Prepared` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:69:29 ]
+    │
+ 69 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for Prepared` are implicit promoted as regular method for `Prepared`. This behavior is deprecated and will be removed in the future. Add a `pub extend Prepared with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `Prepared` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:87:10 ]
+    │
+ 87 │ } derive(Debug, Eq, ToJson, FromJson)
+    │          ──┬──  
+    │            ╰──── Warning (implicit_impl_as_method): The methods to_repr from `impl @moonbitlang/core/debug.Debug for Reply` are implicit promoted as regular method for `Reply`. This behavior is deprecated and will be removed in the future. Add a `pub extend Reply with @moonbitlang/core/debug.Debug::{to_repr}` declaration or manually define regular methods for type `Reply` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:87:17 ]
+    │
+ 87 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                 ─┬  
+    │                  ╰── Warning (implicit_impl_as_method): The methods not_equal, equal from `impl Eq for Reply` are implicit promoted as regular method for `Reply`. This behavior is deprecated and will be removed in the future. Add a `pub extend Reply with Eq::{not_equal, equal}` declaration or manually define regular methods for type `Reply` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:87:21 ]
+    │
+ 87 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                     ───┬──  
+    │                        ╰──── Warning (implicit_impl_as_method): The methods to_json from `impl ToJson for Reply` are implicit promoted as regular method for `Reply`. This behavior is deprecated and will be removed in the future. Add a `pub extend Reply with ToJson::{to_json}` declaration or manually define regular methods for type `Reply` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Warning: [0079]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/types.mbt:87:29 ]
+    │
+ 87 │ } derive(Debug, Eq, ToJson, FromJson)
+    │                             ────┬───  
+    │                                 ╰───── Warning (implicit_impl_as_method): The methods from_json from `impl @moonbitlang/core/json.FromJson for Reply` are implicit promoted as regular method for `Reply`. This behavior is deprecated and will be removed in the future. Add a `pub extend Reply with @moonbitlang/core/json.FromJson::{from_json}` declaration or manually define regular methods for type `Reply` instead. If the promotion is not desirable, add `#deprecated` on the `extend` declaration.
+────╯
+Total tests: 51, passed: 51, failed: 0.

@@ -107,7 +107,7 @@ fn town_bearing_box(
       if i == 0 {
         wall
       } else {
-        "#d9d5c7"
+        "#a4b29b"
       },
     )
   }
@@ -148,7 +148,7 @@ fn town_bearing_facade(
         bearing,
         span,
         [make(a, z), make(b, z), make(b, z + 0.145), make(a, z + 0.145)],
-        "#5a7878",
+        "#3c686e",
       )
       town_bearing_quad(
         mesh,
@@ -161,9 +161,9 @@ fn town_bearing_facade(
           make(a + 0.008, z + 0.137),
         ],
         if south {
-          "#add5d3"
+          "#75bbc5"
         } else {
-          "#81b7bb"
+          "#4d8e9b"
         },
       )
       town_bearing_quad(
@@ -394,21 +394,22 @@ let town_bearing_mesh_cache : Map[String, TownBearingMesh] = Map([])
 ///|
 fn town_bearing_mesh(
   building : IntersectionRoadPreviewBuilding,
+  bearing? : TownBuildingBearing,
+  variant? : Int32,
 ) -> TownBearingMesh {
-  let key = "\{building.id}:\{building.x}:\{building.y}:\{building.style}:\{building.width}:\{building.depth}"
+  let b = bearing.unwrap_or_else(() => town_building_bearing(building))
+  let span = town_bearing_span(b, building.width, building.depth)
+  let variant = variant.unwrap_or_else(() => town_bearing_variant(building.id))
+  // Reuse the same architectural mesh across repeated exterior lots. World
+  // position is supplied at draw time, not baked into the geometry cache key.
+  let rounded = fn(n : Double) { (n * 1000000).round() / 1000000 }
+  let key = "\{building.style}:\{variant}:\{rounded(span)}:\{rounded(b.east.x)}:\{rounded(b.east.y)}:\{rounded(b.north.x)}:\{rounded(b.north.y)}"
   match town_bearing_mesh_cache.get(key) {
     Some(mesh) => return mesh
     None => ()
   }
-  let b = town_building_bearing(building)
-  let span = town_bearing_span(b, building.width, building.depth)
-  let mesh = town_bearing_make_mesh(
-    b,
-    span,
-    building.style,
-    town_bearing_variant(building.id),
-  )
-  if town_bearing_mesh_cache.length() > 256 {
+  let mesh = town_bearing_make_mesh(b, span, building.style, variant)
+  if town_bearing_mesh_cache.length() >= 768 {
     town_bearing_mesh_cache.clear()
   }
   town_bearing_mesh_cache[key] = mesh
@@ -425,17 +426,28 @@ extern "js" fn town_bearing_paint_mesh(
   zoom : Double,
 ) -> Unit =
   #| (c,ps,colors,sx,sy,z)=>{
-  #|   c.save();c.translate(sx,sy);c.scale(z,z);c.lineJoin='round';
+  #|   const cache=globalThis.__townBearingPaintCache ||= {entries:new Map(),bytes:0};
+  #|   let tile=cache.entries.get(ps);
+  #|   if(!tile){
+  #|     let left=Infinity,top=Infinity,right=-Infinity,bottom=-Infinity;
+  #|     for(let i=0;i<ps.length;i+=3){const x=(ps[i]-ps[i+1])*32,y=(ps[i]+ps[i+1])*16-ps[i+2]*32;left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}
+  #|     left-=2;top-=2;right+=2;bottom+=2;const width=right-left,height=bottom-top;if(!(width>0&&height>0))return;
+  #|     const ratio=Math.min(2,768/Math.max(width,height)),canvas=document.createElement('canvas');canvas.width=Math.ceil(width*ratio);canvas.height=Math.ceil(height*ratio);
+  #|     const out=canvas.getContext('2d');out.scale(ratio,ratio);out.translate(-left,-top);out.lineJoin='round';
   #|   for(let f=0;f<colors.length;f++){
-  #|     c.beginPath();
+  #|     out.beginPath();
   #|     for(let v=0;v<4;v++){
   #|       const i=f*12+v*3,x=(ps[i]-ps[i+1])*32,y=(ps[i]+ps[i+1])*16-ps[i+2]*32;
-  #|       if(v===0)c.moveTo(x,y);else c.lineTo(x,y);
+  #|       if(v===0)out.moveTo(x,y);else out.lineTo(x,y);
   #|     }
-  #|     c.closePath();c.fillStyle=colors[f];c.fill();
-  #|     c.lineWidth=.55;c.strokeStyle='rgba(80,92,80,0.26)';c.stroke();
+  #|     out.closePath();out.fillStyle=colors[f];out.fill();
+  #|     out.lineWidth=.45;out.strokeStyle='rgba(80,92,80,0.18)';out.stroke();
   #|   }
-  #|   c.restore();
+  #|     tile={canvas,left,top,width:canvas.width/ratio,height:canvas.height/ratio,bytes:canvas.width*canvas.height*4};
+  #|     cache.entries.set(ps,tile);cache.bytes+=tile.bytes;
+  #|     while(cache.entries.size>512||cache.bytes>96*1024*1024){const key=cache.entries.keys().next().value;cache.bytes-=cache.entries.get(key).bytes;cache.entries.delete(key);}
+  #|   }else{cache.entries.delete(ps);cache.entries.set(ps,tile);}
+  #|   c.drawImage(tile.canvas,sx+tile.left*z,sy+tile.top*z,tile.width*z,tile.height*z);
   #| }
 
 ///|
@@ -444,9 +456,11 @@ fn town_bearing_draw_building(
   building : IntersectionRoadPreviewBuilding,
   width : Int32,
   height : Int32,
+  bearing? : TownBuildingBearing,
+  variant? : Int32,
 ) -> Unit {
   let (x, y) = intersection_road_preview_building_center(building)
-  let mesh = town_bearing_mesh(building)
+  let mesh = town_bearing_mesh(building, bearing?, variant?)
   town_bearing_paint_mesh(
     context,
     mesh.points,
@@ -463,9 +477,12 @@ fn town_bearing_draw_lot(
   building : IntersectionRoadPreviewBuilding,
   width : Int32,
   height : Int32,
+  bearing? : TownBuildingBearing,
+  variant? : Int32,
+  connect_street~ : Bool = true,
 ) -> Unit {
   let (x, y) = intersection_road_preview_building_center(building)
-  let b = town_building_bearing(building)
+  let b = bearing.unwrap_or_else(() => town_building_bearing(building))
   let span = town_bearing_span(b, building.width, building.depth)
   let mesh : TownBearingMesh = { points: [], colors: [], }
   town_bearing_roof(mesh, b, span, 0, 0, 1, 1, 0, "#adc393")
@@ -473,7 +490,7 @@ fn town_bearing_draw_lot(
   for
     block in town_bearing_blocks(
       building.style,
-      town_bearing_variant(building.id),
+      variant.unwrap_or_else(() => town_bearing_variant(building.id)),
     ) {
     town_bearing_roof(
       mesh,
@@ -484,7 +501,7 @@ fn town_bearing_draw_lot(
       block.width + 0.04,
       block.depth + 0.035,
       0.0015,
-      "rgba(73,88,65,0.14)",
+      "rgba(40,80,60,0.26)",
     )
   }
   // South-facing entry court and planted strips share the building frame.
@@ -499,5 +516,7 @@ fn town_bearing_draw_lot(
     golden_screen_y(x, y, height),
     golden_valley_camera_zoom(),
   )
-  town_street_draw_entry(context, building, width, height)
+  if connect_street {
+    town_street_draw_entry(context, building, width, height)
+  }
 }

@@ -37,6 +37,12 @@ export async function loadTownTiles(places) {
   if(exportMode&&['localhost','127.0.0.1','::1'].includes(location.hostname)){
     const output=document.createElement('script');output.type='application/json';output.id='town-projection-export';
     output.textContent=JSON.stringify({schema:'moontown.town-projections.v1',version:version.sha256,registration,tiles:records});document.body.append(output);
+    // Local authoring export is a normal downloadable file, not an undocumented
+    // browser-state extraction. Never shown on the public map.
+    const link=document.createElement('a');link.textContent='下载地图投影';link.download='town-projections.json';
+    const blob=URL.createObjectURL(new Blob([output.textContent],{type:'application/json'}));link.href=blob;
+    link.style.cssText='position:fixed;right:20px;bottom:100px;z-index:10000;padding:14px 20px;background:#fff3d9;color:#304c3f;border-radius:12px';document.body.append(link);
+    addEventListener('pagehide',()=>URL.revokeObjectURL(blob),{once:true});
   }
   return records;
 }

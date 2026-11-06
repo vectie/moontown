@@ -129,8 +129,8 @@ fn town_bearing_at(x : Double, y : Double) -> TownBuildingBearing {
 }
 
 ///|
-/// Only accept an actual nearby street axis within 10 geographic degrees of
-/// cardinal alignment. Do not clamp arbitrary diagonal roads to a fake 10°.
+/// Parallel or perpendicular to the actual frontage, whichever is closest to
+/// the geographic axes. A diagonal street must not silently reset to north.
 fn town_bearing_street_deviation(
   b : TownBuildingBearing,
   dx : Double,
@@ -140,12 +140,7 @@ fn town_bearing_street_deviation(
   let east = (b.north.y * dx - b.north.x * dy) / det
   let north = (b.east.x * dy - b.east.y * dx) / det
   let angle = @math.atan2(north, east) * 180.0 / @math.PI
-  let deviation = angle - (angle / 90.0).round() * 90.0
-  if deviation.abs() <= 10.0 {
-    deviation
-  } else {
-    0.0
-  }
+  angle - (angle / 90.0).round() * 90.0
 }
 
 ///|
@@ -235,3 +230,9 @@ fn town_bearing_span(
 ///|
 extern "js" fn town_bearing_buildings_requested() -> Bool =
   #| () => Boolean(globalThis.location) && new URLSearchParams(globalThis.location.search || '').get('building-bearing') === 'geo'
+
+///|
+/// Orientation is a production rule, not a review-only toggle. Historical
+/// calibration views keep their original renderer; populated districts are default.
+extern "js" fn town_bearing_render_enabled() -> Bool =
+  #| ()=>{if(!globalThis.location)return false;const p=new URLSearchParams(location.search||'');return p.get('building-bearing')!=='legacy'&&(p.get('building-bearing')==='geo'||(!p.has('road-trial')&&!p.has('registration-review')));}

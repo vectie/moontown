@@ -93,8 +93,9 @@ as new receipts, schedule work, run a provider, write Book memory or accept a
 Book change. New work still requires the existing configured execution and
 named-owner review paths. No PRD requirement status is promoted by this slice.
 
-This slice selects contributions from one exact historical dossier. Combining
-separate dossiers is outside this interaction. Source/output/review integrity
+This interaction selects contributions from one exact historical dossier. The
+[cross-dossier inquiry](CROSS_DOSSIER_INQUIRY.md) extension adds an explicit basket
+for combining selections from separate historical questions. Source/output/review integrity
 is unsigned local evidence; no hostile-filesystem transaction or authenticated
 reviewer identity is claimed by authoring fields.
 

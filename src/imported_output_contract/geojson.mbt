@@ -60,7 +60,7 @@ pub fn parse_geojson(content : String) -> Result[Array[GeoFeature], String] {
   if @utf8.encode(content).length() > 1048576 {
     return Err("GeoJSON exceeds 1 MiB")
   }
-  let value = match (try? @json.parse(content)) {
+  let value = match (Ok(@json.parse(content)) catch { e => Err(e) }) {
     Ok(j) => j
     Err(_) => return Err("Invalid GeoJSON JSON")
   }
@@ -147,9 +147,9 @@ pub fn geo_matches(
   features : Array[GeoFeature],
   query : String,
   kind : String,
-) -> Array[Int] {
+) -> Array[Int32] {
   let needle = query.to_lower()
-  let result : Array[Int] = []
+  let result : Array[Int32] = []
   for index, feature in features {
     if (kind.is_empty() || feature.kind == kind) &&
       (
@@ -167,7 +167,7 @@ pub fn geo_matches(
 /// properties, IDs and third coordinates survive the derived collection.
 pub fn geojson_selection(
   features : Array[GeoFeature],
-  selected : Array[Int],
+  selected : Array[Int32],
 ) -> String {
   let rows : Array[Json] = []
   for index, feature in features {
@@ -184,7 +184,7 @@ pub fn geojson_selection(
 
 ///|
 /// One CSV row per geometry vertex; route order is preserved, not optimized.
-pub fn geo_csv(features : Array[GeoFeature], selected : Array[Int]) -> String {
+pub fn geo_csv(features : Array[GeoFeature], selected : Array[Int32]) -> String {
   let zones = selected.any(i => {
     i >= 0 && i < features.length() && features[i].kind == "Polygon"
   })

@@ -11,7 +11,8 @@ test "research replacement actions preserve an unsaved ordinary draft and inline
   }
   for
     action in [
-      "load", "reuse", "retained-inquiry", "claim-challenge", "oneoff-followup",
+      "load", "reuse", "retained-inquiry", "cross-dossier-inquiry", "claim-challenge",
+      "oneoff-followup",
     ] {
     let (_, next) = collaboration_action(
       dispatch, model, action, "other", "r-other",

@@ -1,0 +1,2 @@
+Warning: `exclude` in `/workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/moon.mod` is deprecated; use `.gitignore` or `.moonignore` to control which files are packaged instead. `.moonignore` overrides `.gitignore` in the same directory.
+Total tests: 1, passed: 1, failed: 0.

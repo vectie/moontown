@@ -86,10 +86,11 @@ async test "retained comparison pins historical review and leaves corrupt or abs
   assert_eq(comparison.decisions[0].after.unwrap().decision, "defer")
   assert_eq(outcome_tree(root), before)
   assert_true(
-    (try? store.compare_outcomes(old, {
-      ..current,
-      review_digest: "sha256:wrong",
-    }))
+    (Ok(
+      store.compare_outcomes(old, { ..current, review_digest: "sha256:wrong", }),
+    ) catch {
+      e => Err(e)
+    })
     is Err(_),
   )
   assert_eq(outcome_tree(root), before)
@@ -98,6 +99,8 @@ async test "retained comparison pins historical review and leaves corrupt or abs
     "substituted",
   )
   let corrupt = outcome_tree(root)
-  assert_true((try? store.compare_outcomes(old, current)) is Err(_))
+  assert_true(
+    (Ok(store.compare_outcomes(old, current)) catch { e => Err(e) }) is Err(_),
+  )
   assert_eq(outcome_tree(root), corrupt)
 }

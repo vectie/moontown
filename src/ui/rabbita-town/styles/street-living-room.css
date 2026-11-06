@@ -1,5 +1,5 @@
 /* One playable world. HUD and signs use the town's existing paper/green kit. */
-.street-living-room { position:relative; isolation:isolate; width:100%; height:100dvh; min-height:0; overflow:hidden; background:var(--town-ui-wash); color:var(--town-ui-ink); }
+.street-living-room { --town-ui-paper:#fff9eb; --town-ui-wash:#edf0dd; --town-ui-line:#d4dcc2; --town-ui-ink:#304c3f; --town-ui-accent:#4f7559; --town-ui-focus:#376a66; position:relative; isolation:isolate; width:100%; height:100dvh; min-height:0; overflow:hidden; background:var(--town-ui-wash); color:var(--town-ui-ink); }
 .account-product-surface:has(> .street-living-room) { overflow:hidden; }
 .street-scene { position:absolute; inset:0; }
 .street-scene canvas { touch-action:none; }
@@ -16,21 +16,36 @@ body:has(.street-living-room) :is(.town-landmark-inspector,.town-landmark-pins) 
 .street-world-entry { position:absolute; left:0; top:0; pointer-events:auto; white-space:nowrap; visibility:hidden; }
 .street-world-entry::after { content:""; position:absolute; top:100%; left:calc(50% - 1px); width:2px; height:12px; background:var(--town-ui-accent); pointer-events:none; }
 .street-world-entry[data-anchored="false"]::after { display:none; }
+.street-world-entry[data-anchored="true"] { border-radius:50%; min-width:44px; padding:10px; background:#fff9ebeb; box-shadow:0 3px 10px rgb(47 78 50 / 12%); }
+.street-world-entry[data-anchored="true"] .town-ui-label > span:last-child { display:none; }
+.street-world-entry[data-anchored="true"][data-near="true"] { border-radius:22px; }
+.street-world-entry[data-anchored="true"][data-near="true"] .town-ui-label > span:last-child { display:inline; }
+.street-world-entry[data-anchored="true"]::after { height:8px; opacity:.5; }
+.street-prop-entry { width:44px; padding:10px; }
+.street-door-button[data-anchored="true"] { color:var(--town-ui-ink); }
 .street-door-button { background:var(--town-ui-accent); color:var(--town-ui-paper); border-color:var(--town-ui-accent); }
 .street-door-button:hover { color:var(--town-ui-ink); }
-.street-walk-hud { position:absolute; z-index:3; left:24px; bottom:max(32px,env(safe-area-inset-bottom)); display:flex; align-items:center; gap:12px; }
-.street-recenter { width:44px; padding:10px; border-radius:50%; }
-#street-walk-status { min-width:104px; text-align:center; padding:6px 10px; border-radius:12px; background:var(--town-ui-paper); font-size:12px; }
+.street-walk-hud { position:absolute; z-index:3; left:24px; bottom:max(32px,env(safe-area-inset-bottom)); display:flex; align-items:center; gap:8px; }
+.street-tool { width:44px; padding:10px; border-radius:50%; }
+.street-overview[aria-pressed="true"] { background:var(--town-ui-accent); color:var(--town-ui-paper); border-color:var(--town-ui-accent); }
+.street-sr-only { position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip-path:inset(50%); white-space:nowrap; border:0!important; }
 .street-controls { position:relative; }
-.street-controls summary { display:flex; align-items:center; justify-content:center; width:44px; height:44px; border:1px solid var(--town-ui-line); border-radius:50%; background:var(--town-ui-paper); cursor:pointer; list-style:none; }
-.street-controls summary::-webkit-details-marker { display:none; }
-.street-dpad { position:absolute; bottom:56px; left:-120px; width:208px; padding:12px; display:grid; grid-template-columns:repeat(3,1fr); gap:8px; border:1px solid var(--town-ui-line); border-radius:16px; background:var(--town-ui-paper); box-shadow:var(--town-ui-shadow); }
+.street-controls > summary { display:flex; align-items:center; justify-content:center; width:44px; height:44px; border:1px solid var(--town-ui-line); border-radius:50%; background:var(--town-ui-paper); cursor:pointer; list-style:none; box-shadow:0 4px 14px rgb(32 47 35 / 12%); }
+.street-controls > summary::-webkit-details-marker { display:none; }
+.street-controls > summary:hover { background:var(--town-ui-wash); }
+.street-controls[open] > summary { background:var(--town-ui-accent); color:var(--town-ui-paper); }
+.street-controls-panel { position:absolute; bottom:56px; left:-104px; width:232px; max-height:calc(100dvh - 180px); overflow:auto; padding:12px; border:1px solid var(--town-ui-line); border-radius:16px; background:var(--town-ui-paper); box-shadow:var(--town-ui-shadow); }
+.street-dpad { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
 .street-dpad button { min-height:44px; border:1px solid var(--town-ui-line); border-radius:10px; background:var(--town-ui-wash); color:var(--town-ui-ink); font-size:20px; cursor:pointer; }
 .street-dpad button:first-child { grid-column:2; }
 .street-dpad button:nth-child(2) { grid-column:1; }
 .street-dpad span { grid-column:1/-1; font-size:12px; text-align:center; line-height:1.5; }
-.street-footer { position:absolute; pointer-events:none; bottom:8px; left:24px; right:24px; display:flex; justify-content:space-between; color:#3d513e; font-size:10px; }
+.street-footer { position:absolute; pointer-events:none; bottom:8px; right:24px; color:#3d513e; font-size:10px; }
 .street-footer a { pointer-events:auto; text-decoration:none; }
+.frontier-diagnostics { margin-top:8px; border-top:1px solid var(--town-ui-line); font-size:12px; }
+.frontier-diagnostics summary { cursor:pointer; min-height:44px; padding:12px 4px; }
+.frontier-diagnostics[open] > div { padding:0 4px 8px; line-height:1.6; overflow-wrap:anywhere; }
+.street-scene-note { display:block; margin-top:8px; text-align:center; font-size:11px; color:var(--town-ui-muted); }
 .street-return { position:absolute; z-index:35; top:80px; left:16px; }
 .energy-valley-golden:has(.street-return) .town-quest-wrap { top:144px; }
 @media(max-width:699px) {
@@ -39,7 +54,7 @@ body:has(.street-living-room) :is(.town-landmark-inspector,.town-landmark-pins) 
   .street-header-actions { flex-wrap:wrap; justify-content:flex-end; max-width:120px; }
   .street-button,.street-world-entry { padding:10px 12px; font-size:13px; }
   .street-walk-hud { left:12px; bottom:max(32px,env(safe-area-inset-bottom)); gap:8px; }
-  .street-footer { left:12px; right:12px; }
+  .street-footer { right:12px; }
 }
 @media(prefers-reduced-motion:reduce) {
   .street-button,.street-return,.street-world-entry { transition:none; }

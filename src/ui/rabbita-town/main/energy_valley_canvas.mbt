@@ -579,7 +579,8 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     const mx = event.clientX - rect.left - rect.width / 2;
   #|     const my = event.clientY - rect.top - rect.height / 2;
   #|     const previous = camera.z;
-  #|     camera.z = Math.min(camera.livingRoom ? 3.6 : 1.8, Math.max(0.07, previous * (
+  #|     const minimum = camera.livingRoom && !camera.streetOverview ? (camera.streetMinZoom || 2.1) : (camera.frontierMinZoom || 0.07);
+  #|     camera.z = Math.min(camera.livingRoom ? 3.6 : 1.8, Math.max(minimum, previous * (
   #|       event.deltaY < 0 ? 1.12 : 0.89
   #|     )));
   #|     camera.x += mx / previous - mx / camera.z;
@@ -911,9 +912,9 @@ extern "js" fn golden_draw_water_detail(
 ) -> Unit =
   #| (context, sx, sy, zoom, phase, time) => {
   #|   // A continuous matte water value; highlights are sparse, not per-tile.
-  #|   context.fillStyle = "#72b9bd";
+  #|   context.fillStyle = globalThis.__moontownGoldenValleyCamera?.livingRoom ? "#319fc8" : "#72b9bd";
   #|   context.fill();
-  #|   if (zoom < 0.55 || Math.sin(phase * 17) < 0.70) return;
+  #|   if (globalThis.__moontownGoldenValleyCamera?.livingRoom || zoom < 0.55 || Math.sin(phase * 17) < 0.70) return;
   #|   context.save();
   #|   context.clip();
   #|   const progress = (time * 0.16 + phase * 0.11) % 1;
@@ -1774,8 +1775,8 @@ extern "js" fn golden_draw_sprite_agent(
   #|   );
   #|   context.fill();
   #|   if (selected) {
-  #|     context.fillStyle = "rgba(251,191,36,0.14)";
-  #|     context.strokeStyle = "rgba(253,230,138,0.96)";
+  #|     context.fillStyle = globalThis.__moontownGoldenValleyCamera?.livingRoom ? "rgba(255,249,226,.12)" : "rgba(251,191,36,0.14)";
+  #|     context.strokeStyle = globalThis.__moontownGoldenValleyCamera?.livingRoom ? "rgba(255,249,226,.9)" : "rgba(253,230,138,0.96)";
   #|     context.lineWidth = Math.max(2, zoom * 2.2);
   #|     context.beginPath();
   #|     context.ellipse(
@@ -2035,6 +2036,17 @@ fn golden_draw_canonical_old_map_terrain(
   y : Int32,
 ) -> Unit {
   golden_diamond(context, sx, sy)
+  if town_paint_daylight_ground(
+      context,
+      terrain,
+      sx,
+      sy,
+      golden_valley_camera_zoom(),
+      x,
+      y,
+    ) {
+    return
+  }
   if terrain == "water" || terrain == "bridge" {
     golden_draw_water_detail(
       context,

@@ -1,0 +1,6 @@
+Using cached vectie/lepusa@0.1.4
+Using cached vectie/moonlib@0.1.19
+Downloading moonbit-community/rabbita@0.14.0
+Using cached moonbitlang/x@0.4.50
+Using cached moonbitlang/async@0.20.2
+Warning: `exclude` in `/workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/moon.mod` is deprecated; use `.gitignore` or `.moonignore` to control which files are packaged instead. `.moonignore` overrides `.gitignore` in the same directory.

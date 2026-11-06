@@ -100,6 +100,9 @@ fn update_non_form_message_before_imported_surface_fence(
       model_only_update({ ..model, street_overview: false, })
     }
     StreetStep(dx, dy) => model_only_update(street_step(model, dx, dy))
+    StreetVisit(place) => street_visit_begin(dispatch, model, place)
+    StreetVisitArrived(generation) =>
+      street_visit_arrive(dispatch, model, generation)
     SetStreetLivingRoom(arriving) => {
       replace_browser_query_param(
         "view",

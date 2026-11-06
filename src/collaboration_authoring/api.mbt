@@ -72,6 +72,23 @@ pub async fn Store::request(
   }
   try {
     match request.action {
+      "cross-dossier-inquiry" => {
+        guard request.payload is Some(payload) else {
+          raise CollaborationError("Cross-dossier inquiry fields are missing")
+        }
+        let input : @contract.CrossDossierInquiry = @json.from_json(payload)
+        guard input.to_json() == payload &&
+          input.inquiry.draft_id == request.draft_id &&
+          request.revision.is_empty() else {
+          raise CollaborationError(
+            "A cross-dossier inquiry requires a new draft identity and exact fields",
+          )
+        }
+        {
+          ..reply,
+          saved: Some(self.save_cross_dossier_inquiry(input, recorded_at)),
+        }
+      }
       "retained-inquiry" => {
         guard request.payload is Some(payload) else {
           raise CollaborationError("Retained inquiry fields are missing")

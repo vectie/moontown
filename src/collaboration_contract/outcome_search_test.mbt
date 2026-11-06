@@ -202,23 +202,37 @@ test "search Markdown keeps arbitrary stored text literal and JSON roundtrips ex
 ///|
 test "search rejects invalid queries duplicate pins and mismatched outcome identities" {
   for text in ["", " \n\t", "x".repeat(129)] {
-    assert_true((try? search_query(text).validate()) is Err(_))
+    assert_true(
+      (Ok(search_query(text).validate()) catch { e => Err(e) }) is Err(_),
+    )
   }
   let query = search_query("x")
-  assert_true((try? { ..query, book_id: "../book", }.validate()) is Err(_))
   assert_true(
-    (try? { ..query, review_status: "approved", }.validate()) is Err(_),
+    (Ok({ ..query, book_id: "../book", }.validate()) catch { e => Err(e) })
+    is Err(_),
   )
   assert_true(
-    (try? { ..query, selections: [outcome_key(), outcome_key()], }.validate())
+    (Ok({ ..query, review_status: "approved", }.validate()) catch {
+      e => Err(e)
+    })
+    is Err(_),
+  )
+  assert_true(
+    (Ok({ ..query, selections: [outcome_key(), outcome_key()], }.validate()) catch {
+      e => Err(e)
+    })
     is Err(_),
   )
   let base = comparison_fixture()
   assert_true(
-    (try? @collaboration_contract.search_outcome(
-      { ..base, key: { ..base.key, revision: "wrong", }, },
-      query,
-    ))
+    (Ok(
+      @collaboration_contract.search_outcome(
+        { ..base, key: { ..base.key, revision: "wrong", }, },
+        query,
+      ),
+    ) catch {
+      e => Err(e)
+    })
     is Err(_),
   )
 }
@@ -231,10 +245,14 @@ test "search output and per-outcome field bounds fail explicitly rather than tru
     source_path: "raw/match-" + i.to_string(),
   })
   assert_true(
-    (try? @collaboration_contract.search_outcome(
-      { ..base, saved: { ..base.saved, sources, }, },
-      search_query("raw/match"),
-    ))
+    (Ok(
+      @collaboration_contract.search_outcome(
+        { ..base, saved: { ..base.saved, sources, }, },
+        search_query("raw/match"),
+      ),
+    ) catch {
+      e => Err(e)
+    })
     is Err(_),
   )
   let result = {
@@ -249,6 +267,6 @@ test "search output and per-outcome field bounds fail explicitly rather than tru
       },
     ],
   }
-  assert_true((try? result.json_text()) is Err(_))
-  assert_true((try? result.markdown()) is Err(_))
+  assert_true((Ok(result.json_text()) catch { e => Err(e) }) is Err(_))
+  assert_true((Ok(result.markdown()) catch { e => Err(e) }) is Err(_))
 }

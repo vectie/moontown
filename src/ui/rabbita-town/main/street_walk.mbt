@@ -150,8 +150,8 @@ fn street_walk_to(model : Model, point : (Double, Double)) -> Model {
     model.energy_request_open {
     return model
   }
-  guard town_landmark_graph.get("active") is Some(graph) &&
-    street_position(model) is Some(start) else {
+  guard street_position(model) is Some(start) &&
+    street_active_graph(Some(start)).map(street_courtyard_graph) is Some(graph) else {
     return {
       ..model,
       life_toast: "道路加载中",
@@ -176,6 +176,9 @@ fn street_walk_to(model : Model, point : (Double, Double)) -> Model {
   let target = path[path.length() - 1]
   {
     ..model,
+    street_visit: "",
+    street_visit_generation: model.street_visit_generation + 1,
+    street_seated: false,
     street_motion: Some({
       from_x: start.0,
       from_y: start.1,
@@ -221,7 +224,7 @@ fn street_walk_screen(
 ///|
 fn street_step(model : Model, dx : Int32, dy : Int32) -> Model {
   guard street_position(model) is Some(p) &&
-    town_landmark_graph.get("active") is Some(graph) else {
+    street_active_graph(Some(p)).map(street_courtyard_graph) is Some(graph) else {
     return model
   }
   // A screen-direction step selects a nearby connected edge, not a raw tile.
@@ -270,11 +273,12 @@ fn street_draw_visitor(
   let next = view.player_motion
     .map(m => player_point_along(m.path, elapsed * player_walk_speed + 0.05))
     .unwrap_or(p)
+  street_pose_begin(context, golden_screen_y(p.0, p.1, height))
   golden_draw_sprite_agent(
     context,
     golden_screen_x(p.0, p.1, width),
     golden_screen_y(p.0, p.1, height),
-    golden_valley_camera_zoom().min(0.9).max(0.35),
+    golden_valley_camera_zoom().min(1.12).max(0.35),
     golden_valley_agent_sprite_path("resident", 0),
     next.0 - next.1 < p.0 - p.1,
     if moving && !golden_prefers_reduced_motion() {
@@ -283,13 +287,22 @@ fn street_draw_visitor(
       0.0
     },
     "#45634e",
-    "你",
-    "你",
+    "",
+    "",
     false,
     true,
   )
+  context.restore()
   street_visitor_readout(p.0, p.1, moving)
 }
+
+///|
+extern "js" fn street_pose_begin(
+  c : @dom.CanvasRenderingContext2D,
+  y : Double,
+) -> Unit =
+  #| (c,y)=>{c.save();if(document.documentElement.dataset.streetSeated==='true'){
+  #| c.translate(0,y-9);c.scale(1,.78);c.translate(0,-y);}}
 
 ///|
 extern "js" fn street_visitor_readout(
@@ -301,6 +314,6 @@ extern "js" fn street_visitor_readout(
   #|   const el = document.getElementById('street-walk-status');
   #|   if (!el) return;
   #|   el.dataset.position = `${x.toFixed(4)},${y.toFixed(4)}`;
-  #|   const text = moving ? '行走中' : '点击道路走走';
+  #|   const text = moving ? '行走中' : '';
   #|   if (el.textContent !== text) el.textContent = text;
   #| }

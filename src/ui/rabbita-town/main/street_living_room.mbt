@@ -24,15 +24,14 @@ fn prepare_street_living_room_camera(
 ) -> Unit {
   town_landmarks_init()
   match town_landmark_find("center") {
-    Some(center) =>
-      street_living_room_camera(
-        arriving,
-        overview,
-        center.origin.x,
-        center.origin.y,
-      )
+    Some(center) => {
+      // The south forecourt, not the roof mass, is the arrival focal point.
+      let forecourt = town_landmark_at(center, -15.0, 125.0)
+      street_living_room_camera(arriving, overview, forecourt.x, forecourt.y)
+    }
     None => ()
   }
+  frontier_camera_limits(arriving && frontier_requested())
 }
 
 ///|
@@ -62,13 +61,15 @@ extern "js" fn street_living_room_camera(
   #|   }
   #|   const w = canvas.clientWidth || 1280, h = canvas.clientHeight || 720;
   #|   const stamp = `${w}:${h}`;
+  #|   camera.streetMinZoom = w < 700 ? 1.8 : 2.1;
   #|   if (!camera.livingRoom) {
   #|     const mobile = w < 700;
-  #|     camera.z = mobile ? 1.8 : Math.min(3.0, Math.max(2.2, w / 460));
+  #|     camera.z = mobile ? 2.6 : Math.min(3.6, Math.max(2.8, w / 340));
   #|     camera.x = (worldX-worldY)*32;
-  #|     camera.y = (worldX+worldY)*16 + h*0.04/camera.z;
+  #|     camera.y = (worldX+worldY)*16 - h*0.08/camera.z;
   #|     camera.livingRoom = true;
   #|     camera.streetOverview = false;
+  #|     camera.streetFollow = true;
   #|   }
   #|   if (overview !== camera.streetOverview) {
   #|     const from = {x:camera.x,y:camera.y,z:camera.z};
@@ -77,7 +78,7 @@ extern "js" fn street_living_room_camera(
   #|       camera.streetClose = camera.streetTransition?.to || from;
   #|       to = {x:1792,y:3200,z:Math.max(.03,Math.min((w-48)/12800,(h-160)/6400))};
   #|     } else if (camera.streetClose) {
-  #|       to = camera.streetClose;
+  #|       to = {...camera.streetClose,z:Math.max(camera.streetMinZoom,camera.streetClose.z)};
   #|     }
   #|     camera.streetOverview = overview;
   #|     if (to) camera.streetTransition = {from,to,start:performance.now()};
@@ -91,9 +92,11 @@ extern "js" fn street_living_room_camera(
   #|     camera.z=Math.exp(Math.log(t.from.z)+(Math.log(t.to.z)-Math.log(t.from.z))*mix);
   #|     if(progress===1) { Object.assign(camera,t.to); delete camera.streetTransition; }
   #|   }
+  #|   if(!overview && !camera.streetTransition) camera.z=Math.max(camera.streetMinZoom,Math.min(3.6,camera.z));
   #|   camera.livingRoomSize = stamp;
   #|   camera.gentleTrialFramed = true;
   #|   canvas.dataset.townView = overview ? 'street-overview' : 'living-room';
+  #|   canvas.dataset.streetZoom=String(camera.z);
   #| }
 
 ///|
@@ -147,6 +150,7 @@ fn render_street_notice(
   dispatch : Dispatch[Msg],
   state : NeighborhoodState,
   stories : Bool,
+  walk~ : Bool = true,
 ) -> @rabbita.Html {
   let section = if stories { "stories" } else { "events" }
   let item = street_featured_item(state, stories, browser_now_ms())
@@ -172,7 +176,13 @@ fn render_street_notice(
         "街区活动"
       },
     ),
-    on_click=dispatch(OpenStreetContent(section, "")),
+    on_click=dispatch(
+      if walk {
+        StreetVisit(section)
+      } else {
+        OpenStreetContent(section, "")
+      },
+    ),
     [
       town_ui_label(
         if stories {
@@ -197,6 +207,11 @@ fn render_street_living_room(
   snapshot : @energy_valley_contract.TownSnapshot,
   view : TownCanvasViewState,
 ) -> @rabbita.Html {
+  street_courtyard_state(
+    model.street_seated,
+    model.street_visit,
+    model.street_memories.join(","),
+  )
   div(class="energy-valley-golden street-living-room", [
     div(class="street-scene", [
       render_golden_valley_canvas(
@@ -209,42 +224,21 @@ fn render_street_living_room(
     ]),
     header(class="street-header", [
       h1(
-        class="street-location",
+        class=if model.street_overview {
+          "street-location street-sr-only"
+        } else {
+          "street-location"
+        },
         town_ui_label(
           "pin",
           if model.street_overview {
             "全镇"
           } else {
-            "未来中心 · 街区客厅"
+            "未来中心"
           },
         ),
       ),
-      div(class="street-header-actions", [
-        render_public_platform_account(),
-        button(
-          class="street-button street-overview",
-          on_click=dispatch(StreetOverview),
-          attrs=@html.Attrs::build().aria_pressed(
-            if model.street_overview {
-              "true"
-            } else {
-              "false"
-            },
-          ),
-          town_ui_label(
-            if model.street_overview {
-              "back"
-            } else {
-              "menu"
-            },
-            if model.street_overview {
-              "回到街区"
-            } else {
-              "总览"
-            },
-          ),
-        ),
-      ]),
+      div(class="street-header-actions", [render_public_platform_account()]),
     ]),
     @html.nav(
       class="street-destinations",
@@ -253,60 +247,54 @@ fn render_street_living_room(
         button(
           id="street-interior",
           class="street-world-entry street-door-button",
-          on_click=dispatch(OpenReferenceInterior),
+          on_click=dispatch(
+            if model.street_overview {
+              OpenReferenceInterior
+            } else {
+              StreetVisit("interior")
+            },
+          ),
           attrs=@html.Attrs::build().aria_label("进入室内"),
           town_ui_label("forward", "室内"),
         ),
-        render_street_notice(dispatch, model.neighborhood, false),
-        render_street_notice(dispatch, model.neighborhood, true),
+        render_street_notice(
+          dispatch,
+          model.neighborhood,
+          false,
+          walk=!model.street_overview,
+        ),
+        render_street_notice(
+          dispatch,
+          model.neighborhood,
+          true,
+          walk=!model.street_overview,
+        ),
+        button(
+          id="street-seat",
+          class="street-world-entry street-prop-entry",
+          title=if model.street_seated { "起身" } else { "坐一会" },
+          attrs=@html.Attrs::build().aria_label(
+            if model.street_seated {
+              "起身"
+            } else {
+              "坐一会"
+            },
+          ),
+          on_click=dispatch(StreetVisit("seat")),
+          town_ui_icon(if model.street_seated { "forward" } else { "seat" }),
+        ),
+        button(
+          id="street-cafe",
+          class="street-world-entry street-prop-entry",
+          title="去咖啡亭看看",
+          attrs=@html.Attrs::build().aria_label("去咖啡亭看看"),
+          on_click=dispatch(StreetVisit("cafe")),
+          town_ui_icon("coffee"),
+        ),
       ],
     ),
-    div(class="street-walk-hud", [
-      button(
-        class="street-button street-recenter",
-        title="找到我",
-        attrs=@html.Attrs::build().aria_label("找到我"),
-        on_click=dispatch(StreetRecenter),
-        town_ui_icon("pin"),
-      ),
-      span(
-        id="street-walk-status",
-        attrs=@html.Attrs::build().role("status").aria_live("polite"),
-        "点击道路走走",
-      ),
-      @html.details(class="street-controls", [
-        @html.summary(
-          title="操作",
-          attrs=@html.Attrs::build().aria_label("行走操作"),
-          town_ui_icon("sliders"),
-        ),
-        div(class="street-dpad", [
-          button(
-            on_click=dispatch(StreetStep(-1, -1)),
-            attrs=@html.Attrs::build().aria_label("向屏幕上走"),
-            "↑",
-          ),
-          button(
-            on_click=dispatch(StreetStep(-1, 1)),
-            attrs=@html.Attrs::build().aria_label("向屏幕左走"),
-            "←",
-          ),
-          button(
-            on_click=dispatch(StreetStep(1, 1)),
-            attrs=@html.Attrs::build().aria_label("向屏幕下走"),
-            "↓",
-          ),
-          button(
-            on_click=dispatch(StreetStep(1, -1)),
-            attrs=@html.Attrs::build().aria_label("向屏幕右走"),
-            "→",
-          ),
-          span("WASD / 方向键 · 拖动环顾"),
-        ]),
-      ]),
-    ]),
+    render_street_tools(dispatch, model.street_overview, frontier_requested()),
     @html.footer(class="street-footer", [
-      span("场景示意"),
       a(href="https://www.openstreetmap.org/copyright", "© OpenStreetMap"),
     ]),
     render_neighborhood_panel(dispatch, model),
@@ -325,17 +313,97 @@ fn render_street_living_room(
 }
 
 ///|
+/// Conventional utilities share one compact dock. Explanations appear only
+/// inside the control panel; live walking state remains available to readers.
+fn render_street_tools(
+  dispatch : Dispatch[Msg],
+  overview : Bool,
+  experiment : Bool,
+) -> @rabbita.Html {
+  div(
+    class="street-walk-hud",
+    attrs=@html.Attrs::build().role("group").aria_label("地图操作"),
+    [
+      button(
+        id="street-overview",
+        class="street-button street-tool street-overview",
+        title=if overview { "返回街区" } else { "总览" },
+        attrs=@html.Attrs::build()
+          .aria_label(if overview { "返回街区" } else { "总览" })
+          .aria_pressed(if overview { "true" } else { "false" }),
+        on_click=dispatch(StreetOverview),
+        town_ui_icon(if overview { "back" } else { "menu" }),
+      ),
+      button(
+        class="street-button street-tool street-recenter",
+        title="找到我",
+        attrs=@html.Attrs::build().aria_label("找到我"),
+        on_click=dispatch(StreetRecenter),
+        town_ui_icon("pin"),
+      ),
+      span(
+        id="street-walk-status",
+        class="street-sr-only",
+        attrs=@html.Attrs::build().role("status").aria_live("polite"),
+        "",
+      ),
+      @html.details(class="street-controls", [
+        @html.summary(
+          title="地图设置",
+          attrs=@html.Attrs::build().aria_label("地图设置"),
+          town_ui_icon("sliders"),
+        ),
+        div(class="street-controls-panel", [
+          div(class="street-dpad", [
+            button(
+              on_click=dispatch(StreetStep(-1, -1)),
+              attrs=@html.Attrs::build().aria_label("向屏幕上走"),
+              "↑",
+            ),
+            button(
+              on_click=dispatch(StreetStep(-1, 1)),
+              attrs=@html.Attrs::build().aria_label("向屏幕左走"),
+              "←",
+            ),
+            button(
+              on_click=dispatch(StreetStep(1, 1)),
+              attrs=@html.Attrs::build().aria_label("向屏幕下走"),
+              "↓",
+            ),
+            button(
+              on_click=dispatch(StreetStep(1, -1)),
+              attrs=@html.Attrs::build().aria_label("向屏幕右走"),
+              "→",
+            ),
+            span("WASD / 方向键 · 拖动环顾"),
+          ]),
+          if experiment {
+            @html.details(class="frontier-diagnostics", [
+              @html.summary("高级"),
+              div([
+                span("外围生成 · 实验"),
+                div(id="frontier-diagnostics", ""),
+              ]),
+            ])
+          } else {
+            span(class="street-scene-note", "场景示意")
+          },
+        ]),
+      ]),
+    ],
+  )
+}
+
+///|
 fn street_project_entries(width : Int32, height : Int32) -> Unit {
-  guard town_landmark_find("center") is Some(center) else { return }
-  let points = [
-    center.door,
-    town_landmark_at(center, -100.0, 90.0),
-    town_landmark_at(center, 110.0, 90.0),
-  ]
+  let points = ["interior", "events", "stories", "seat", "cafe"].filter_map(
+    street_courtyard_point,
+  )
+  guard points.length() == 5 else { return }
   street_place_entries(
     points
     .map(p => {
-      [golden_screen_x(p.x, p.y, width), golden_screen_y(p.x, p.y, height)]
+      [golden_screen_x(p.0, p.1, width), golden_screen_y(p.0, p.1, height)]
     })
     .to_json()
     .stringify(),
@@ -355,16 +423,21 @@ extern "js" fn street_place_entries(
   #| (points,w,h) => {
   #|   const nav = document.querySelector('.street-destinations');
   #|   if (nav) nav.style.transform = '';
-  #|   const ps=JSON.parse(points), ids=['street-interior','street-events','street-stories'];
-  #|   const dock=globalThis.__moontownGoldenValleyCamera?.streetOverview ||
-  #|     ps.some(([x,y])=>x<60 || x>w-60 || y<140 || y>h-100) ||
-  #|     ps.some(([x,y],i)=>ps.some(([a,b],j)=>i!==j && Math.abs(x-a)<100 && Math.abs(y-b)<70));
+  #|   const ps=JSON.parse(points), ids=['street-interior','street-events','street-stories','street-seat','street-cafe'];
+  #|   const dock=globalThis.__moontownGoldenValleyCamera?.streetOverview;
+  #|   const pos=document.getElementById('street-walk-status')?.dataset.position?.split(',').map(Number);
+  #|   const camera=globalThis.__moontownGoldenValleyCamera;
+  #|   const visitor=pos?[w/2+((pos[0]-pos[1])*32-camera.x)*camera.z,h/2+((pos[0]+pos[1])*16-camera.y)*camera.z]:null;
   #|   for(let i=0;i<ids.length;i++) {
   #|     const el=document.getElementById(ids[i]); if(!el) continue;
-  #|     const x=dock?w/2+(i-1)*92:ps[i][0], y=dock?h-110:ps[i][1]-28;
+  #|     const x=dock?w/2+(i-1)*92:ps[i][0]+(i===3?52:0), y=dock?h-110:ps[i][1]+(i===3?16:-52);
   #|     const transform=`translate(${x}px,${y}px) translate(-50%,-50%)`;
   #|     if(el.style.transform!==transform) el.style.transform=transform;
-  #|     el.style.visibility='visible';
+  #|     const visible=dock?i<3:x>24&&x<w-24&&y>70&&y<h-76;
+  #|     el.style.visibility=visible?'visible':'hidden';
+  #|     const near=visitor&&Math.hypot(visitor[0]-ps[i][0],visitor[1]-ps[i][1])<150;
+  #|     // Keep the icon at its world point; don't let an expanded label clip on phones.
+  #|     el.dataset.near=dock||(near&&x>60&&x<w-60)?'true':'false';
   #|     el.dataset.anchored=dock?'false':'true';
   #|   }
   #| }

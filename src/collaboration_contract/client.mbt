@@ -10,11 +10,13 @@ pub(all) struct Client {
   work_fields : Map[String, String]
   claim_fields : Map[String, String]
   inquiry_fields : Map[String, String]
+  inquiry_dossiers : Array[InquiryDossier]
+  inquiry_outcomes : Array[RetainedOutcome]
   books : Array[CatalogBook]
   drafts : Array[SavedDraft]
   new_draft_id : String
   dirty : Bool
-  generation : Int
+  generation : Int32
   pending_action : String
   pending_id : String
   notice : String
@@ -40,6 +42,8 @@ pub fn Client::new() -> Client {
     work_fields: Map([]),
     claim_fields: Map([]),
     inquiry_fields: Map([]),
+    inquiry_dossiers: [],
+    inquiry_outcomes: [],
     books: [],
     drafts: [],
     new_draft_id: "",
@@ -107,7 +111,11 @@ pub fn Client::edit(self : Client, field : String, value : String) -> Client {
   if field == "outcome_filter" || field == "review_filter" {
     return {
       ..self.dismiss(),
-      inquiry_fields: Map([]),
+      inquiry_fields: if self.inquiry_dossiers.is_empty() {
+        Map([])
+      } else {
+        self.inquiry_fields
+      },
       outcome_filter: if field == "outcome_filter" {
         value
       } else {
@@ -287,6 +295,11 @@ pub fn Client::begin(self : Client, action : String, id : String) -> Client {
       return { ..self, notice: error, }
     }
   }
+  if action == "cross-dossier-inquiry" {
+    if self.cross_dossier_inquiry_preview() is Err(error) {
+      return { ..self, notice: error, }
+    }
+  }
   if action == "claim-challenge" {
     let validation = match self.claim_challenge_input() {
       Ok(input) => claim_challenge_draft(input, self.books)
@@ -320,7 +333,7 @@ pub fn Client::begin(self : Client, action : String, id : String) -> Client {
 ///|
 pub fn Client::settle(
   self : Client,
-  generation : Int,
+  generation : Int32,
   action : String,
   raw : String,
 ) -> Client {
@@ -433,7 +446,8 @@ pub fn Client::settle(
     } else {
       self.pending_id
     }
-    let expected_id = if action == "retained-inquiry" {
+    let expected_id = if action == "retained-inquiry" ||
+      action == "cross-dossier-inquiry" {
       self.inquiry_fields.get("inquiry_id").unwrap_or("")
     } else if action == "claim-challenge" {
       self.claim_fields.get("claim_id").unwrap_or("")
@@ -442,6 +456,8 @@ pub fn Client::settle(
     }
     let claim_matches = if action == "retained-inquiry" {
       self.retained_inquiry_preview() == Ok(saved.draft)
+    } else if action == "cross-dossier-inquiry" {
+      self.cross_dossier_inquiry_preview() == Ok(saved.draft)
     } else if action == "claim-challenge" {
       match self.claim_challenge_input() {
         Ok(input) => claim_challenge_draft(input, self.books) == Ok(saved.draft)
@@ -472,6 +488,8 @@ pub fn Client::settle(
       work: None,
       claim_fields: Map([]),
       inquiry_fields: Map([]),
+      inquiry_dossiers: [],
+      inquiry_outcomes: [],
       work_fields: if action == "oneoff-followup" {
         Map([])
       } else {
@@ -482,7 +500,8 @@ pub fn Client::settle(
       dirty: false,
       source_book: "",
       source_listing: None,
-      notice: if action == "retained-inquiry" {
+      notice: if action == "retained-inquiry" ||
+        action == "cross-dossier-inquiry" {
         "New research-salon inquiry saved with attributed historical excerpts and newly captured current sources. Edit assignments or sources, then Prepare. No work has run and no prior review was inherited."
       } else if action == "oneoff-followup" {
         "Peer-challenge draft saved with exact prior excerpts and newly captured current Book sources. No work has run. Inspect assignments, then prepare and explicitly run the new round."
@@ -515,7 +534,7 @@ pub fn Client::settle(
 ///|
 pub fn Client::download_settled(
   self : Client,
-  generation : Int,
+  generation : Int32,
   message : String,
 ) -> Client {
   if generation != self.generation ||
@@ -534,6 +553,16 @@ pub fn Client::select_outcome(self : Client, key : OutcomeKey) -> Client {
     ..self.dismiss(),
     inquiry_fields: if self.outcome_key == Some(key) {
       self.inquiry_fields
+    } else if !self.inquiry_dossiers.is_empty() {
+      let fields = self.inquiry_fields.copy()
+      for name in self.inquiry_fields.keys() {
+        if name.has_prefix("inquiry_include_") ||
+          name.has_prefix("inquiry_quote_") ||
+          name.has_prefix("inquiry_challenge_") {
+          ignore(fields.remove(name))
+        }
+      }
+      fields
     } else {
       Map([])
     },

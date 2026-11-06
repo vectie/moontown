@@ -287,7 +287,18 @@ fn town_bearing_archetype(
         "#98a9a3",
       )
   }
-  { name, blocks, roof, wall, roof_color: color, }
+  let colors = match style {
+    "lowrise" => ["#568b7b", "#b87658", "#77a158"]
+    "row" => ["#a5684f", "#4c9482", "#718d62"]
+    "tower" => ["#427f91", "#568c9c", "#618d7c"]
+    "block" => ["#647b7b", "#829d75", "#5f8e72"]
+    "courtyard" => ["#506967", "#986a55", "#5d8176"]
+    "campus" => ["#6e9585", "#b48759", "#49a6b0"]
+    "civic" => ["#506f7e", "#72a173", "#aa805e"]
+    "industrial" => ["#6c9390", "#9c6550", "#668691"]
+    _ => [color, color, color]
+  }
+  { name, blocks, roof, wall, roof_color: colors[v], }
 }
 
 ///|
@@ -376,7 +387,7 @@ fn town_bearing_architectural_roof(
       if kind == "glass" {
         "#bbded6"
       } else {
-        "#bdc2b3"
+        "#8da296"
       },
     )
     town_bearing_quad(
@@ -394,7 +405,7 @@ fn town_bearing_architectural_roof(
       if kind == "glass" {
         "#abd1cf"
       } else if kind == "hip" {
-        "#a6aea4"
+        "#728d81"
       } else {
         "#dcd7c6"
       },

@@ -90,7 +90,12 @@ fn collaboration_payload(
     "revision": revision,
     "new_draft_id": state.new_draft_id,
     "artifact_path": path,
-    "payload": if action == "retained-inquiry" {
+    "payload": if action == "cross-dossier-inquiry" {
+      match state.cross_dossier_inquiry_input() {
+        Ok(input) => input.to_json()
+        Err(_) => Json::null()
+      }
+    } else if action == "retained-inquiry" {
       match state.retained_inquiry_input() {
         Ok(input) => input.to_json()
         Err(_) => Json::null()
@@ -221,9 +226,10 @@ fn collaboration_settle_reply(
   let state = model.collaboration.settle(generation, action, raw)
   let saved_followup = if generation == model.collaboration.generation &&
     model.collaboration.pending_action == action &&
-    ["retained-inquiry", "claim-challenge", "oneoff-followup", "reuse"].contains(
-      action,
-    ) {
+    [
+      "retained-inquiry", "cross-dossier-inquiry", "claim-challenge", "oneoff-followup",
+      "reuse",
+    ].contains(action) {
     let reply : @collaboration.Reply? = Some(@json.from_json(@json.parse(raw))) catch {
       _ => None
     }
@@ -259,16 +265,18 @@ fn collaboration_action(
   id : String,
   revision : String,
 ) -> (Cmd, Model) {
-  if ["load", "reuse", "retained-inquiry", "claim-challenge", "oneoff-followup"].contains(
-      action,
-    ) &&
+  if [
+      "load", "reuse", "retained-inquiry", "cross-dossier-inquiry", "claim-challenge",
+      "oneoff-followup",
+    ].contains(action) &&
     collaboration_has_unsaved_draft(model.collaboration) {
     return collaboration_replace(model, {
       ..model.collaboration,
       notice: "请先保存当前研究草稿，再保存这份新研究。",
     })
   }
-  let (id, revision) = if action == "retained-inquiry" {
+  let (id, revision) = if action == "retained-inquiry" ||
+    action == "cross-dossier-inquiry" {
     (model.collaboration.inquiry_fields.get("inquiry_id").unwrap_or(""), "")
   } else if action == "claim-challenge" {
     (model.collaboration.claim_fields.get("claim_id").unwrap_or(""), "")

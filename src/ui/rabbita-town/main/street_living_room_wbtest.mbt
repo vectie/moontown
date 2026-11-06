@@ -165,3 +165,23 @@ test "arrival camera uses registered center and cannot change road calibration" 
   calibration_test_gentle_asset(false)
   canvas_frame_test_remove_harness()
 }
+
+///|
+test "map utilities have accessible icon names and closed advanced diagnostics" {
+  let dispatch : Dispatch[Msg] = _ => @rabbita.none
+  let home = disclosure_test_html(render_street_tools(dispatch, false, false))
+  assert_true(home.contains("aria-label=\"总览\""))
+  assert_true(home.contains("aria-label=\"找到我\""))
+  assert_true(home.contains("aria-label=\"地图设置\""))
+  assert_true(home.contains("aria-pressed=\"false\""))
+  assert_true(home.contains("street-sr-only"))
+  assert_false(home.contains("点击道路走走"))
+  assert_false(home.contains("frontier-diagnostics"))
+  let overview = disclosure_test_html(render_street_tools(dispatch, true, true))
+  assert_true(overview.contains("aria-label=\"返回街区\""))
+  assert_true(overview.contains("aria-pressed=\"true\""))
+  assert_true(overview.contains("class=\"street-controls-panel\""))
+  assert_true(overview.contains("class=\"frontier-diagnostics\""))
+  assert_false(overview.contains(" open"))
+  assert_false(overview.contains("Advanced"))
+}

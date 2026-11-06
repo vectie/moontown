@@ -25,7 +25,7 @@ test "geographic building frame reproduces the unshifted road calibration" {
 }
 
 ///|
-test "building street adaptation is geographic bounded and direction independent" {
+test "building frontage follows diagonal streets as well as cardinal streets" {
   let b = town_bearing_at(128, 72)
   let turned = town_bearing_turn(b, 7.0)
   assert_true(
@@ -37,9 +37,9 @@ test "building street adaptation is geographic bounded and direction independent
     0.00001,
   )
   let diagonal = town_bearing_turn(b, 28.0)
-  assert_eq(
-    town_bearing_street_deviation(b, diagonal.east.x, diagonal.east.y),
-    0.0,
+  assert_true(
+    (town_bearing_street_deviation(b, diagonal.east.x, diagonal.east.y) - 28.0).abs() <
+    0.00001,
   )
 }
 
@@ -47,7 +47,7 @@ test "building street adaptation is geographic bounded and direction independent
 test "oriented building lots remain inside validated reservations across the town" {
   for x in [4, 64, 128, 192, 252] {
     for y in [4, 36, 72, 108, 140] {
-      for deviation in [-10.0, 0.0, 10.0] {
+      for deviation in [-45.0, -28.0, -10.0, 0.0, 10.0, 28.0, 45.0] {
         let b = town_bearing_turn(
           town_bearing_at(x.to_double(), y.to_double()),
           deviation,
@@ -92,14 +92,40 @@ test "bearing prefabs contain complete finite quads for all architectural famili
 }
 
 ///|
-test "geographic building review is opt in and preserves the authored production kit" {
+test "populated street aligned rendering is default while compass review remains opt in" {
   wenyu_scene_test_location("", false)
   assert_false(town_bearing_buildings_requested())
+  assert_true(town_bearing_render_enabled())
   wenyu_scene_test_location("?building-bearing=geo", false)
   assert_true(town_bearing_buildings_requested())
+  assert_true(town_bearing_render_enabled())
   wenyu_scene_test_location("?building-bearing=legacy", false)
   assert_false(town_bearing_buildings_requested())
+  assert_false(town_bearing_render_enabled())
+  wenyu_scene_test_location("?road-trial=gentle", false)
+  assert_false(town_bearing_render_enabled())
+  wenyu_scene_test_location("?registration-review=1", false)
+  assert_false(town_bearing_render_enabled())
   wenyu_scene_test_location("", true)
+}
+
+///|
+test "all local street tangents produce a parallel projected building edge" {
+  for (x, y) in [(20.0, 20.0), (128.0, 72.0), (230.0, 130.0)] {
+    let base = town_bearing_at(x, y)
+    for angle in [-170.0, -90.0, -28.0, 0.0, 28.0, 44.0, 70.0, 150.0] {
+      let road = town_bearing_turn(base, angle).east
+      let b = town_bearing_turn(
+        base,
+        town_bearing_street_deviation(base, road.x, road.y),
+      )
+      let cross = fn(p : WenyuScenePoint) {
+        (32.0 * (p.x - p.y) * (16.0 * (road.x + road.y)) -
+        16.0 * (p.x + p.y) * (32.0 * (road.x - road.y))).abs()
+      }
+      assert_true(cross(b.east).min(cross(b.north)) < 0.000001)
+    }
+  }
 }
 
 ///|

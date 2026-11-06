@@ -1,0 +1,127 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/world_frontier"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn city(Int, Int, Int, CityFrame, Rect, Array[Road], Array[Mouth]) -> Chunk
+
+pub fn city_gate(Int, Point, Point, CityFrame, Rect, Array[Mouth]) -> Array[Road]
+
+pub fn coordinate(Double) -> Int
+
+pub let coordinate_limit : Int
+
+pub fn distance(Point, Point) -> Double
+
+pub fn exterior(Chunk, Rect, Array[Road], Array[Mouth]) -> Chunk
+
+pub fn gate_roads(Point, Point, Point, Array[Mouth]) -> Array[Road]
+
+pub fn generate(Int, Int, Int, organic? : Bool) -> Chunk
+
+pub fn mouth_water(Array[Mouth], Point) -> Bool
+
+pub fn nearest_on(Road, Point) -> Point
+
+pub fn node_id(Point) -> String
+
+pub fn river_center(Int, Double) -> Double
+
+pub fn river_distance(Point) -> Double
+
+pub let size : Int
+
+pub let version : String
+
+pub fn water(Point) -> Bool
+
+pub fn woodland(Point) -> Double
+
+// Errors
+
+// Types and methods
+pub(all) struct Chunk {
+  x : Int
+  y : Int
+  theme : String
+  hub : Point
+  arms : Int
+  roads : Array[Road]
+  lots : Array[Lot]
+  plants : Array[Plant]
+} derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct CityFrame {
+  origin : Point
+  east : Point
+  south : Point
+} derive(Eq, @debug.Debug)
+pub fn CityFrame::ground(Self, Double, Double) -> Point
+pub fn CityFrame::plan(Self, Point) -> Point
+
+pub(all) struct Lot {
+  id : String
+  x : Int
+  y : Int
+  size : Int
+  style : String
+  variant : Int
+  entrance : Point
+  frontage : Point
+  east : Point
+  north : Point
+} derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct Mouth {
+  point : Point
+  normal : Point
+  radius : Double
+  drift : Double
+} derive(Eq, @debug.Debug)
+pub fn Mouth::center_at(Self, Double) -> Point
+pub fn Mouth::radius_at(Self, Double) -> Double
+
+pub(all) struct Plant {
+  point : Point
+  kind : Int
+  size : Double
+} derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct Point {
+  x : Double
+  y : Double
+} derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct Rect {
+  min_x : Double
+  min_y : Double
+  max_x : Double
+  max_y : Double
+} derive(Eq, @debug.Debug)
+pub fn Rect::chunk_envelope(Self) -> Self
+pub fn Rect::contains(Self, Point, pad? : Double) -> Bool
+pub fn Rect::distance(Self, Point) -> Double
+
+pub(all) struct Road {
+  a : Point
+  b : Point
+  bridge : Bool
+  width : Double
+} derive(Eq, ToJson, @debug.Debug)
+
+pub struct Window {
+  seed : Int
+  organic : Bool
+  chunks : Map[String, Chunk]
+  mut center : (Int, Int)?
+}
+pub fn Window::around(Self, Point) -> Array[Chunk]
+pub fn Window::count(Self) -> Int
+pub fn Window::new(Int, organic? : Bool) -> Self
+
+// Type aliases
+
+// Traits

@@ -1,0 +1,337 @@
+Warning: `exclude` in `/workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/moon.mod` is deprecated; use `.gitignore` or `.moonignore` to control which files are packaged instead. `.moonignore` overrides `.gitignore` in the same directory.
+Error: [3002]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_comparison_test.mbt:263:6 ]
+     │
+ 263 │     (try? @collaboration_contract.compare_outcomes(before, duplicate)) is Err(_),
+     │      ──┬─  
+     │        ╰─── `try?` has been removed. Replace `try? expr` with `try Ok(expr) catch { e => Err(e) }`, or with `try Some(expr) catch { _ => None }` if the error value is not needed.
+─────╯
+Error: [4014]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_comparison_test.mbt:263:75 ]
+     │
+ 263 │     (try? @collaboration_contract.compare_outcomes(before, duplicate)) is Err(_),
+     │                                                                           ───┬──  
+     │                                                                              ╰──── Constr Type Mismatch(constructor Err)
+        has type : Result[_/0, _/1]
+        wanted   : @vectie/moontown/collaboration_contract.OutcomeComparison
+─────╯
+Error: [3002]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_comparison_test.mbt:267:6 ]
+     │
+ 267 │     (try? @collaboration_contract.compare_outcomes(before, wrong)) is Err(_),
+     │      ──┬─  
+     │        ╰─── `try?` has been removed. Replace `try? expr` with `try Ok(expr) catch { e => Err(e) }`, or with `try Some(expr) catch { _ => None }` if the error value is not needed.
+─────╯
+Error: [4014]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_comparison_test.mbt:267:71 ]
+     │
+ 267 │     (try? @collaboration_contract.compare_outcomes(before, wrong)) is Err(_),
+     │                                                                       ───┬──  
+     │                                                                          ╰──── Constr Type Mismatch(constructor Err)
+        has type : Result[_/0, _/1]
+        wanted   : @vectie/moontown/collaboration_contract.OutcomeComparison
+─────╯
+Error: [3002]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_comparison_test.mbt:277:6 ]
+     │
+ 277 │     (try? @collaboration_contract.compare_outcomes(duplicate, before)) is Err(_),
+     │      ──┬─  
+     │        ╰─── `try?` has been removed. Replace `try? expr` with `try Ok(expr) catch { e => Err(e) }`, or with `try Some(expr) catch { _ => None }` if the error value is not needed.
+─────╯
+Error: [4014]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_comparison_test.mbt:277:75 ]
+     │
+ 277 │     (try? @collaboration_contract.compare_outcomes(duplicate, before)) is Err(_),
+     │                                                                           ───┬──  
+     │                                                                              ╰──── Constr Type Mismatch(constructor Err)
+        has type : Result[_/0, _/1]
+        wanted   : @vectie/moontown/collaboration_contract.OutcomeComparison
+─────╯
+Error: [3002]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_comparison_test.mbt:328:16 ]
+     │
+ 328 │   assert_true((try? result.markdown()) is Err(_))
+     │                ──┬─  
+     │                  ╰─── `try?` has been removed. Replace `try? expr` with `try Ok(expr) catch { e => Err(e) }`, or with `try Some(expr) catch { _ => None }` if the error value is not needed.
+─────╯
+Error: [4014]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_comparison_test.mbt:328:43 ]
+     │
+ 328 │   assert_true((try? result.markdown()) is Err(_))
+     │                                           ───┬──  
+     │                                              ╰──── Constr Type Mismatch(constructor Err)
+        has type : Result[_/0, _/1]
+        wanted   : String
+─────╯
+Error: [3002]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search_test.mbt:205:18 ]
+     │
+ 205 │     assert_true((try? search_query(text).validate()) is Err(_))
+     │                  ──┬─  
+     │                    ╰─── `try?` has been removed. Replace `try? expr` with `try Ok(expr) catch { e => Err(e) }`, or with `try Some(expr) catch { _ => None }` if the error value is not needed.
+─────╯
+Error: [4014]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search_test.mbt:205:57 ]
+     │
+ 205 │     assert_true((try? search_query(text).validate()) is Err(_))
+     │                                                         ───┬──  
+     │                                                            ╰──── Constr Type Mismatch(constructor Err)
+        has type : Result[_/0, _/1]
+        wanted   : Unit
+─────╯
+Error: [3002]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search_test.mbt:208:16 ]
+     │
+ 208 │   assert_true((try? { ..query, book_id: "../book", }.validate()) is Err(_))
+     │                ──┬─  
+     │                  ╰─── `try?` has been removed. Replace `try? expr` with `try Ok(expr) catch { e => Err(e) }`, or with `try Some(expr) catch { _ => None }` if the error value is not needed.
+─────╯
+Error: [4014]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search_test.mbt:208:69 ]
+     │
+ 208 │   assert_true((try? { ..query, book_id: "../book", }.validate()) is Err(_))
+     │                                                                     ───┬──  
+     │                                                                        ╰──── Constr Type Mismatch(constructor Err)
+        has type : Result[_/0, _/1]
+        wanted   : Unit
+─────╯
+Error: [3002]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search_test.mbt:210:6 ]
+     │
+ 210 │     (try? { ..query, review_status: "approved", }.validate()) is Err(_),
+     │      ──┬─  
+     │        ╰─── `try?` has been removed. Replace `try? expr` with `try Ok(expr) catch { e => Err(e) }`, or with `try Some(expr) catch { _ => None }` if the error value is not needed.
+─────╯
+Error: [4014]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search_test.mbt:210:66 ]
+     │
+ 210 │     (try? { ..query, review_status: "approved", }.validate()) is Err(_),
+     │                                                                  ───┬──  
+     │                                                                     ╰──── Constr Type Mismatch(constructor Err)
+        has type : Result[_/0, _/1]
+        wanted   : Unit
+─────╯
+Error: [3002]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search_test.mbt:213:6 ]
+     │
+ 213 │     (try? { ..query, selections: [outcome_key(), outcome_key()], }.validate())
+     │      ──┬─  
+     │        ╰─── `try?` has been removed. Replace `try? expr` with `try Ok(expr) catch { e => Err(e) }`, or with `try Some(expr) catch { _ => None }` if the error value is not needed.
+─────╯
+Error: [4014]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search_test.mbt:214:8 ]
+     │
+ 214 │     is Err(_),
+     │        ───┬──  
+     │           ╰──── Constr Type Mismatch(constructor Err)
+        has type : Result[_/0, _/1]
+        wanted   : Unit
+─────╯
+Error: [3002]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search_test.mbt:218:6 ]
+     │
+ 218 │     (try? @collaboration_contract.search_outcome(
+     │      ──┬─  
+     │        ╰─── `try?` has been removed. Replace `try? expr` with `try Ok(expr) catch { e => Err(e) }`, or with `try Some(expr) catch { _ => None }` if the error value is not needed.
+─────╯
+Error: [4014]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search_test.mbt:222:8 ]
+     │
+ 222 │     is Err(_),
+     │        ───┬──  
+     │           ╰──── Constr Type Mismatch(constructor Err)
+        has type : Result[_/0, _/1]
+        wanted   : @vectie/moontown/collaboration_contract.OutcomeSearchHit?
+─────╯
+Error: [3002]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search_test.mbt:234:6 ]
+     │
+ 234 │     (try? @collaboration_contract.search_outcome(
+     │      ──┬─  
+     │        ╰─── `try?` has been removed. Replace `try? expr` with `try Ok(expr) catch { e => Err(e) }`, or with `try Some(expr) catch { _ => None }` if the error value is not needed.
+─────╯
+Error: [4014]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search_test.mbt:238:8 ]
+     │
+ 238 │     is Err(_),
+     │        ───┬──  
+     │           ╰──── Constr Type Mismatch(constructor Err)
+        has type : Result[_/0, _/1]
+        wanted   : @vectie/moontown/collaboration_contract.OutcomeSearchHit?
+─────╯
+Error: [3002]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search_test.mbt:252:16 ]
+     │
+ 252 │   assert_true((try? result.json_text()) is Err(_))
+     │                ──┬─  
+     │                  ╰─── `try?` has been removed. Replace `try? expr` with `try Ok(expr) catch { e => Err(e) }`, or with `try Some(expr) catch { _ => None }` if the error value is not needed.
+─────╯
+Error: [4014]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search_test.mbt:252:44 ]
+     │
+ 252 │   assert_true((try? result.json_text()) is Err(_))
+     │                                            ───┬──  
+     │                                               ╰──── Constr Type Mismatch(constructor Err)
+        has type : Result[_/0, _/1]
+        wanted   : String
+─────╯
+Error: [3002]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search_test.mbt:253:16 ]
+     │
+ 253 │   assert_true((try? result.markdown()) is Err(_))
+     │                ──┬─  
+     │                  ╰─── `try?` has been removed. Replace `try? expr` with `try Ok(expr) catch { e => Err(e) }`, or with `try Some(expr) catch { _ => None }` if the error value is not needed.
+─────╯
+Error: [4014]
+     ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/collaboration_contract/outcome_search_test.mbt:253:43 ]
+     │
+ 253 │   assert_true((try? result.markdown()) is Err(_))
+     │                                           ───┬──  
+     │                                              ╰──── Constr Type Mismatch(constructor Err)
+        has type : Result[_/0, _/1]
+        wanted   : String
+─────╯
+Error: [3002]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/imported_output_contract/geojson.mbt:63:22 ]
+    │
+ 63 │   let value = match (try? @json.parse(content)) {
+    │                      ──┬─  
+    │                        ╰─── `try?` has been removed. Replace `try? expr` with `try Ok(expr) catch { e => Err(e) }`, or with `try Some(expr) catch { _ => None }` if the error value is not needed.
+────╯
+Error: [4122]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/imported_output_contract/geojson.mbt:63:27 ]
+    │
+ 63 │   let value = match (try? @json.parse(content)) {
+    │                           ──────────┬─────────  
+    │                                     ╰─────────── Function with error can only be used inside a function with error types in its signature. Please fix the return type of this function.
+────╯
+Error: [4014]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/imported_output_contract/geojson.mbt:64:5 ]
+    │
+ 64 │     Ok(j) => j
+    │     ──┬──  
+    │       ╰──── Constr Type Mismatch(constructor Ok)
+        has type : Result[_/0, _/1]
+        wanted   : Json
+────╯
+Error: [4014]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/imported_output_contract/geojson.mbt:65:5 ]
+    │
+ 65 │     Err(_) => return Err("Invalid GeoJSON JSON")
+    │     ───┬──  
+    │        ╰──── Constr Type Mismatch(constructor Err)
+        has type : Result[_/0, _/1]
+        wanted   : Json
+────╯
+Error: [3002]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/imported_output_contract/table_places.mbt:35:22 ]
+    │
+ 35 │     let lat = match (try? @string.parse_double(row[latitude].trim())) {
+    │                      ──┬─  
+    │                        ╰─── `try?` has been removed. Replace `try? expr` with `try Ok(expr) catch { e => Err(e) }`, or with `try Some(expr) catch { _ => None }` if the error value is not needed.
+────╯
+Error: [4122]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/imported_output_contract/table_places.mbt:35:27 ]
+    │
+ 35 │     let lat = match (try? @string.parse_double(row[latitude].trim())) {
+    │                           ─────────────────────┬────────────────────  
+    │                                                ╰────────────────────── Function with error can only be used inside a function with error types in its signature. Please fix the return type of this function.
+────╯
+Error: [4014]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/imported_output_contract/table_places.mbt:36:7 ]
+    │
+ 36 │       Ok(value) if value >= -90.0 && value <= 90.0 => value
+    │       ────┬────  
+    │           ╰────── Constr Type Mismatch(constructor Ok)
+        has type : Result[_/0, _/1]
+        wanted   : Double
+────╯
+Error: [3002]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/imported_output_contract/table_places.mbt:39:22 ]
+    │
+ 39 │     let lon = match (try? @string.parse_double(row[longitude].trim())) {
+    │                      ──┬─  
+    │                        ╰─── `try?` has been removed. Replace `try? expr` with `try Ok(expr) catch { e => Err(e) }`, or with `try Some(expr) catch { _ => None }` if the error value is not needed.
+────╯
+Error: [4122]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/imported_output_contract/table_places.mbt:39:27 ]
+    │
+ 39 │     let lon = match (try? @string.parse_double(row[longitude].trim())) {
+    │                           ─────────────────────┬─────────────────────  
+    │                                                ╰─────────────────────── Function with error can only be used inside a function with error types in its signature. Please fix the return type of this function.
+────╯
+Error: [4014]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/imported_output_contract/table_places.mbt:40:7 ]
+    │
+ 40 │       Ok(value) if value >= -180.0 && value <= 180.0 => value
+    │       ────┬────  
+    │           ╰────── Constr Type Mismatch(constructor Ok)
+        has type : Result[_/0, _/1]
+        wanted   : Double
+────╯
+Error: [3002]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/imported_output_contract/table_zones.mbt:22:27 ]
+    │
+ 22 │   let table_text = match (try? @utf8.decode(table_bytes)) {
+    │                           ──┬─  
+    │                             ╰─── `try?` has been removed. Replace `try? expr` with `try Ok(expr) catch { e => Err(e) }`, or with `try Some(expr) catch { _ => None }` if the error value is not needed.
+────╯
+Error: [4122]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/imported_output_contract/table_zones.mbt:22:32 ]
+    │
+ 22 │   let table_text = match (try? @utf8.decode(table_bytes)) {
+    │                                ────────────┬────────────  
+    │                                            ╰────────────── Function with error can only be used inside a function with error types in its signature. Please fix the return type of this function.
+────╯
+Error: [4014]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/imported_output_contract/table_zones.mbt:23:5 ]
+    │
+ 23 │     Ok(text) => text
+    │     ────┬───  
+    │         ╰───── Constr Type Mismatch(constructor Ok)
+        has type : Result[_/0, _/1]
+        wanted   : String
+────╯
+Error: [4014]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/imported_output_contract/table_zones.mbt:24:5 ]
+    │
+ 24 │     Err(_) => return Err("Place table must be valid UTF-8")
+    │     ───┬──  
+    │        ╰──── Constr Type Mismatch(constructor Err)
+        has type : Result[_/0, _/1]
+        wanted   : String
+────╯
+Error: [3002]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/imported_output_contract/table_zones.mbt:26:26 ]
+    │
+ 26 │   let zone_text = match (try? @utf8.decode(zone_bytes)) {
+    │                          ──┬─  
+    │                            ╰─── `try?` has been removed. Replace `try? expr` with `try Ok(expr) catch { e => Err(e) }`, or with `try Some(expr) catch { _ => None }` if the error value is not needed.
+────╯
+Error: [4122]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/imported_output_contract/table_zones.mbt:26:31 ]
+    │
+ 26 │   let zone_text = match (try? @utf8.decode(zone_bytes)) {
+    │                               ────────────┬───────────  
+    │                                           ╰───────────── Function with error can only be used inside a function with error types in its signature. Please fix the return type of this function.
+────╯
+Error: [4014]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/imported_output_contract/table_zones.mbt:27:5 ]
+    │
+ 27 │     Ok(text) => text
+    │     ────┬───  
+    │         ╰───── Constr Type Mismatch(constructor Ok)
+        has type : Result[_/0, _/1]
+        wanted   : String
+────╯
+Error: [4014]
+    ╭─[ /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/work/R796/moontown/src/imported_output_contract/table_zones.mbt:28:5 ]
+    │
+ 28 │     Err(_) => return Err("Zones must be valid UTF-8")
+    │     ───┬──  
+    │        ╰──── Constr Type Mismatch(constructor Err)
+        has type : Result[_/0, _/1]
+        wanted   : String
+────╯
+Failed with 0 warnings, 42 errors.
+Error: failed when checking project

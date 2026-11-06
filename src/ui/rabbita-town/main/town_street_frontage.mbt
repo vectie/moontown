@@ -117,6 +117,7 @@ fn town_street_index(parsed : Array[TownStreetSegment]) -> Unit {
   town_street_bins.clear()
   town_street_hit_cache.clear()
   town_building_bearing_cache.clear()
+  town_bearing_mesh_cache.clear()
   for segment in parsed {
     let index = town_street_segments.length()
     town_street_segments.push(segment)

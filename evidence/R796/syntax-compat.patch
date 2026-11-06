@@ -1,0 +1,277 @@
+--- /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/sources/moontown/src/imported_output_contract/geojson.mbt	2026-10-12 18:50:36.000000000 -0700
++++ src/imported_output_contract/geojson.mbt	2026-10-19 21:02:25.860630954 -0700
+@@ -60,7 +60,7 @@
+   if @utf8.encode(content).length() > 1048576 {
+     return Err("GeoJSON exceeds 1 MiB")
+   }
+-  let value = match (try? @json.parse(content)) {
++  let value = match (Ok(@json.parse(content)) catch { e => Err(e) }) {
+     Ok(j) => j
+     Err(_) => return Err("Invalid GeoJSON JSON")
+   }
+@@ -147,9 +147,9 @@
+   features : Array[GeoFeature],
+   query : String,
+   kind : String,
+-) -> Array[Int] {
++) -> Array[Int32] {
+   let needle = query.to_lower()
+-  let result : Array[Int] = []
++  let result : Array[Int32] = []
+   for index, feature in features {
+     if (kind.is_empty() || feature.kind == kind) &&
+       (
+@@ -167,7 +167,7 @@
+ /// properties, IDs and third coordinates survive the derived collection.
+ pub fn geojson_selection(
+   features : Array[GeoFeature],
+-  selected : Array[Int],
++  selected : Array[Int32],
+ ) -> String {
+   let rows : Array[Json] = []
+   for index, feature in features {
+@@ -184,7 +184,7 @@
+ 
+ ///|
+ /// One CSV row per geometry vertex; route order is preserved, not optimized.
+-pub fn geo_csv(features : Array[GeoFeature], selected : Array[Int]) -> String {
++pub fn geo_csv(features : Array[GeoFeature], selected : Array[Int32]) -> String {
+   let zones = selected.any(i => {
+     i >= 0 && i < features.length() && features[i].kind == "Polygon"
+   })
+--- /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/sources/moontown/src/imported_output_contract/table_places.mbt	2026-10-12 18:50:36.000000000 -0700
++++ src/imported_output_contract/table_places.mbt	2026-10-19 21:02:25.860542588 -0700
+@@ -4,10 +4,10 @@
+ /// retained in properties.source_table, including duplicate/empty labels.
+ pub fn DataTable::places(
+   self : DataTable,
+-  latitude~ : Int,
+-  longitude~ : Int,
+-  name~ : Int,
+-  category~ : Int,
++  latitude~ : Int32,
++  longitude~ : Int32,
++  name~ : Int32,
++  category~ : Int32,
+ ) -> Result[Array[GeoFeature], String] {
+   let columns = [latitude, longitude, name, category]
+   for i, column in columns {
+@@ -32,11 +32,13 @@
+     if row.length() != self.headers.length() {
+       return Err(prefix + "column count differs from the header")
+     }
+-    let lat = match (try? @string.parse_double(row[latitude].trim())) {
++    let lat = match
++      (Ok(@string.parse_double(row[latitude].trim())) catch { e => Err(e) }) {
+       Ok(value) if value >= -90.0 && value <= 90.0 => value
+       _ => return Err(prefix + "latitude must be a number from -90 to 90")
+     }
+-    let lon = match (try? @string.parse_double(row[longitude].trim())) {
++    let lon = match
++      (Ok(@string.parse_double(row[longitude].trim())) catch { e => Err(e) }) {
+       Ok(value) if value >= -180.0 && value <= 180.0 => value
+       _ => return Err(prefix + "longitude must be a number from -180 to 180")
+     }
+@@ -85,7 +87,7 @@
+ /// and order. CSV escaping and formula neutralization match the table explorer.
+ pub fn DataTable::selection_csv(
+   self : DataTable,
+-  selected : Array[Int],
++  selected : Array[Int32],
+ ) -> String {
+   let lines = [self.headers.map(csv_cell).join(",")]
+   for index, row in self.rows {
+--- /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/sources/moontown/src/imported_output_contract/table_zones.mbt	2026-10-12 18:50:36.000000000 -0700
++++ src/imported_output_contract/table_zones.mbt	2026-10-19 21:02:25.874585883 -0700
+@@ -7,10 +7,10 @@
+   table_bytes : Bytes,
+   zone_bytes : Bytes,
+   delimiter : Char,
+-  latitude~ : Int,
+-  longitude~ : Int,
+-  name~ : Int,
+-  category~ : Int,
++  latitude~ : Int32,
++  longitude~ : Int32,
++  name~ : Int32,
++  category~ : Int32,
+   format~ : String,
+ ) -> Result[String, String] {
+   if format != "geojson" && format != "csv" {
+@@ -19,11 +19,11 @@
+   if table_bytes.length() > 1048576 || zone_bytes.length() > 1048576 {
+     return Err("Each source must be at most 1 MiB")
+   }
+-  let table_text = match (try? @utf8.decode(table_bytes)) {
++  let table_text = match (Ok(@utf8.decode(table_bytes)) catch { e => Err(e) }) {
+     Ok(text) => text
+     Err(_) => return Err("Place table must be valid UTF-8")
+   }
+-  let zone_text = match (try? @utf8.decode(zone_bytes)) {
++  let zone_text = match (Ok(@utf8.decode(zone_bytes)) catch { e => Err(e) }) {
+     Ok(text) => text
+     Err(_) => return Err("Zones must be valid UTF-8")
+   }
+@@ -52,7 +52,7 @@
+       "Join exceeds 20 million point/zone-position checks; narrow the sources",
+     )
+   }
+-  let memberships : Array[Array[Int]] = places.map(_ => [])
++  let memberships : Array[Array[Int32]] = places.map(_ => [])
+   let mut total_matches = 0
+   // Reuse the established outer-edge/hole policy, with one parsed ring set per
+   // zone, without merging or rewriting either source FeatureCollection.
+@@ -146,7 +146,7 @@
+ }
+ 
+ ///|
+-fn table_zone_reference(zone : GeoFeature, source_index : Int) -> Json {
++fn table_zone_reference(zone : GeoFeature, source_index : Int32) -> Json {
+   {
+     "source_feature": source_index + 1,
+     "id": geo_field(zone.source, "id"),
+--- /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/sources/moontown/src/collaboration_contract/outcome_comparison_test.mbt	2026-10-12 18:50:36.000000000 -0700
++++ src/collaboration_contract/outcome_comparison_test.mbt	2026-10-19 21:02:25.804590677 -0700
+@@ -260,11 +260,17 @@
+     },
+   }
+   assert_true(
+-    (try? @collaboration_contract.compare_outcomes(before, duplicate)) is Err(_),
++    (Ok(@collaboration_contract.compare_outcomes(before, duplicate)) catch {
++      e => Err(e)
++    })
++    is Err(_),
+   )
+   let wrong = { ..before, key: { ..before.key, revision: "other", }, }
+   assert_true(
+-    (try? @collaboration_contract.compare_outcomes(before, wrong)) is Err(_),
++    (Ok(@collaboration_contract.compare_outcomes(before, wrong)) catch {
++      e => Err(e)
++    })
++    is Err(_),
+   )
+   let duplicate = {
+     ..before,
+@@ -274,7 +280,10 @@
+     },
+   }
+   assert_true(
+-    (try? @collaboration_contract.compare_outcomes(duplicate, before)) is Err(_),
++    (Ok(@collaboration_contract.compare_outcomes(duplicate, before)) catch {
++      e => Err(e)
++    })
++    is Err(_),
+   )
+ }
+ 
+@@ -325,5 +334,5 @@
+     },
+   }
+   let result = @collaboration_contract.compare_outcomes(before, after)
+-  assert_true((try? result.markdown()) is Err(_))
++  assert_true((Ok(result.markdown()) catch { e => Err(e) }) is Err(_))
+ }
+--- /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/sources/moontown/src/collaboration_contract/outcome_search_test.mbt	2026-10-12 18:50:36.000000000 -0700
++++ src/collaboration_contract/outcome_search_test.mbt	2026-10-19 21:02:25.808102011 -0700
+@@ -202,23 +202,37 @@
+ ///|
+ test "search rejects invalid queries duplicate pins and mismatched outcome identities" {
+   for text in ["", " \n\t", "x".repeat(129)] {
+-    assert_true((try? search_query(text).validate()) is Err(_))
++    assert_true(
++      (Ok(search_query(text).validate()) catch { e => Err(e) }) is Err(_),
++    )
+   }
+   let query = search_query("x")
+-  assert_true((try? { ..query, book_id: "../book", }.validate()) is Err(_))
+   assert_true(
+-    (try? { ..query, review_status: "approved", }.validate()) is Err(_),
++    (Ok({ ..query, book_id: "../book", }.validate()) catch { e => Err(e) })
++    is Err(_),
++  )
++  assert_true(
++    (Ok({ ..query, review_status: "approved", }.validate()) catch {
++      e => Err(e)
++    })
++    is Err(_),
+   )
+   assert_true(
+-    (try? { ..query, selections: [outcome_key(), outcome_key()], }.validate())
++    (Ok({ ..query, selections: [outcome_key(), outcome_key()], }.validate()) catch {
++      e => Err(e)
++    })
+     is Err(_),
+   )
+   let base = comparison_fixture()
+   assert_true(
+-    (try? @collaboration_contract.search_outcome(
+-      { ..base, key: { ..base.key, revision: "wrong", }, },
+-      query,
+-    ))
++    (Ok(
++      @collaboration_contract.search_outcome(
++        { ..base, key: { ..base.key, revision: "wrong", }, },
++        query,
++      ),
++    ) catch {
++      e => Err(e)
++    })
+     is Err(_),
+   )
+ }
+@@ -231,10 +245,14 @@
+     source_path: "raw/match-" + i.to_string(),
+   })
+   assert_true(
+-    (try? @collaboration_contract.search_outcome(
+-      { ..base, saved: { ..base.saved, sources, }, },
+-      search_query("raw/match"),
+-    ))
++    (Ok(
++      @collaboration_contract.search_outcome(
++        { ..base, saved: { ..base.saved, sources, }, },
++        search_query("raw/match"),
++      ),
++    ) catch {
++      e => Err(e)
++    })
+     is Err(_),
+   )
+   let result = {
+@@ -249,6 +267,6 @@
+       },
+     ],
+   }
+-  assert_true((try? result.json_text()) is Err(_))
+-  assert_true((try? result.markdown()) is Err(_))
++  assert_true((Ok(result.json_text()) catch { e => Err(e) }) is Err(_))
++  assert_true((Ok(result.markdown()) catch { e => Err(e) }) is Err(_))
+ }
+--- /workspace/scratch/665adc5202cf/moonsuite-cloud-20261020/sources/moontown/src/collaboration_authoring/outcome_comparison_wbtest.mbt	2026-10-12 18:50:36.000000000 -0700
++++ src/collaboration_authoring/outcome_comparison_wbtest.mbt	2026-10-19 21:02:25.704595164 -0700
+@@ -86,10 +86,11 @@
+   assert_eq(comparison.decisions[0].after.unwrap().decision, "defer")
+   assert_eq(outcome_tree(root), before)
+   assert_true(
+-    (try? store.compare_outcomes(old, {
+-      ..current,
+-      review_digest: "sha256:wrong",
+-    }))
++    (Ok(
++      store.compare_outcomes(old, { ..current, review_digest: "sha256:wrong", }),
++    ) catch {
++      e => Err(e)
++    })
+     is Err(_),
+   )
+   assert_eq(outcome_tree(root), before)
+@@ -98,6 +99,8 @@
+     "substituted",
+   )
+   let corrupt = outcome_tree(root)
+-  assert_true((try? store.compare_outcomes(old, current)) is Err(_))
++  assert_true(
++    (Ok(store.compare_outcomes(old, current)) catch { e => Err(e) }) is Err(_),
++  )
+   assert_eq(outcome_tree(root), corrupt)
+ }

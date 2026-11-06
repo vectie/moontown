@@ -60,7 +60,7 @@ extern "js" fn wenyu_scene_input() -> String =
 
 ///|
 fn wenyu_scene_prepare() -> Bool {
-  if town_bearing_buildings_requested() && !town_street_prepare() {
+  if town_bearing_render_enabled() && !town_street_prepare() {
     return false
   }
   if !wenyu_scene_prefix.is_empty() {

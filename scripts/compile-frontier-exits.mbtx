@@ -1,0 +1,154 @@
+import {
+  "moonbitlang/x@0.5.5/fs",
+  "moonbitlang/core/json",
+}
+
+fn field(j : Json, k : String) -> Json {
+  match j { Object(m) => m.get(k).unwrap_or(Json::null()); _ => Json::null() }
+}
+fn arr(j : Json) -> Array[Json] { match j { Array(a) => a; _ => [] } }
+fn num(j : Json) -> Double { match j { Number(n, ..) => n; _ => 0 } }
+fn str(j : Json) -> String { match j { String(s) => s; _ => "" } }
+fn inside(p : (Double, Double)) -> Bool { p.0 >= 0 && p.0 <= 256 && p.1 >= 0 && p.1 <= 144 }
+
+fn main raise {
+  let source = @json.parse(@fs.read_file_to_string("docs/project/wenyu-lower-perspective.json"))
+  let base = @json.parse(@fs.read_file_to_string("src/ui/assets/landmark-studio/navigation.json"))
+  let terrain = arr(field(@json.parse(@fs.read_file_to_string("src/ui/assets/tilemap/wenyu_reference_labels.json")), "rows")).map(str)
+  let nodes : Map[String, (Double, Double)] = Map([])
+  let adj : Map[String, Array[String]] = Map([])
+  let bridges : Map[String, Bool] = Map([])
+  for way in arr(field(source, "ways")) {
+    let tags = field(way, "tags")
+    if !["secondary", "tertiary", "residential", "unclassified", "service", "footway", "path", "pedestrian", "steps", "cycleway"].contains(str(field(tags,"highway"))) ||
+      ["no", "private"].contains(str(field(tags,"access"))) || str(field(tags,"foot")) == "no" || str(field(tags,"tunnel")) == "yes" { continue }
+    let ps = arr(field(way, "pathGrid"))
+    let ids = arr(field(way, "nodes"))
+    for i,p in ps {
+      let x = num(field(p,"x")); let y = num(field(p,"y"))
+      let w = 1.0 + 0.01 * ((x - 256.0) / 256.0 - y / 144.0)
+      let id = ids[i].stringify()
+      nodes[id] = (256.0 + (x-256.0)/w, y/w)
+      if !adj.contains(id) { adj[id] = [] }
+      if i > 0 {
+        let prev = ids[i-1].stringify()
+        let a = nodes[prev]; let b = nodes[id]
+        let bridge = str(field(tags,"bridge")) == "yes"
+        let count = (((a.0-b.0)*(a.0-b.0)+(a.1-b.1)*(a.1-b.1)).sqrt()*4).ceil().to_int().max(1)
+        let mut wet = false
+        for k in 0..<=count {
+          let t = k.to_double()/count.to_double()
+          let px = (a.0+(b.0-a.0)*t).floor().to_int()
+          let py = (a.1+(b.1-a.1)*t).floor().to_int()
+          if px >= 0 && px < 256 && py >= 0 && py < 144 && (terrain[py][px] == 'r' || terrain[py][px] == 'l' || terrain[py][px] == 'w') { wet = true }
+        }
+        if wet && !bridge { continue }
+        adj[id].push(prev); adj[prev].push(id)
+        bridges[prev+":"+id] = str(field(tags,"bridge")) == "yes"
+        bridges[id+":"+prev] = str(field(tags,"bridge")) == "yes"
+      }
+    }
+  }
+  // Multi-source only from the existing graph's connected arrival component.
+  let base_adj : Map[String, Array[String]] = Map([])
+  for n in arr(field(base,"nodes")) { base_adj[str(field(n,"id"))] = [] }
+  for e in arr(field(base,"edges")) {
+    let a = str(field(e,"a")); let b = str(field(e,"b"))
+    base_adj[a].push(b); base_adj[b].push(a)
+  }
+  let queue = ["605009901"]
+  let seen : Map[String,Bool] = Map([("605009901",true)])
+  let mut at = 0
+  while at < queue.length() {
+    for next in base_adj.get(queue[at]).unwrap_or([]) {
+      if !seen.contains(next) { seen[next] = true; queue.push(next) }
+    }
+    at += 1
+  }
+  println("Base connected component: \{queue.length()}")
+  let prev : Map[String,String] = Map([])
+  let candidates : Map[String, (String,String)] = Map([])
+  at = 0
+  while at < queue.length() {
+    let id = queue[at]; at += 1
+    let p = nodes.get(id).unwrap_or((0,0))
+    for next in adj.get(id).unwrap_or([]) {
+      let q = nodes[next]
+      if inside(p) && !inside(q) {
+        let side = if q.0 < 0 { "west" } else if q.0 > 256 { "east" } else if q.1 < 0 { "north" } else { "south" }
+        if !candidates.contains(side) && !bridges.get(id+":"+next).unwrap_or(false) { candidates[side] = (id,next) }
+      } else if inside(q) && !seen.contains(next) {
+        seen[next] = true; prev[next] = id; queue.push(next)
+      }
+    }
+  }
+  let extra_nodes : Map[String,Json] = Map([])
+  let extra_edges : Map[String,Json] = Map([])
+  let exits : Array[Json] = []
+  for side in ["east", "south", "north", "west"] {
+    guard candidates.get(side) is Some(pair) else { continue }
+    let mut id = pair.0
+    let path = [id]
+    while prev.contains(id) { id = prev[id]; path.push(id) }
+    let path = path.rev()
+    for i,n in path {
+      let p = nodes[n]
+      extra_nodes[n] = {"id":n,"x":p.0,"y":p.1}
+      if i > 0 { let a=path[i-1]; extra_edges[a+":"+n] = {"a":a,"b":n,"bridge":bridges.get(a+":"+n).unwrap_or(false)} }
+    }
+    let p = nodes[pair.0]; let q = nodes[pair.1]
+    let t : Double = match side { "east" => (256.0-p.0)/(q.0-p.0); "west" => -p.0/(q.0-p.0); "north" => -p.1/(q.1-p.1); _ => (144.0-p.1)/(q.1-p.1) }
+    let x = p.0 + (q.0-p.0)*t; let y = p.1+(q.1-p.1)*t
+    assert_true(t >= 0 && t <= 1)
+    let id = "frontier-exit-"+side
+    let length = ((q.0-p.0)*(q.0-p.0)+(q.1-p.1)*(q.1-p.1)).sqrt()
+    extra_nodes[id] = {"id":id,"x":x,"y":y}
+    extra_edges[id] = {"a":pair.0,"b":id,"bridge":false}
+    exits.push({"id":id,"side":side,"x":x,"y":y,"dx":(q.0-p.0)/length,"dy":(q.1-p.1)/length})
+    println("\{side}: boundary (\{x}, \{y}), \{path.length()} source road vertices")
+  }
+  let ns = extra_nodes.values().collect(); ns.sort_by((a,b) => str(field(a,"id")).compare(str(field(b,"id"))))
+  let es = extra_edges.values().collect(); es.sort_by((a,b) => (str(field(a,"a"))+str(field(a,"b"))).compare(str(field(b,"a"))+str(field(b,"b"))))
+  let rivers : Array[Json] = []
+  for side in ["north","south","west","east"] {
+    let length = if side == "north" || side == "south" {256} else {144}
+    let mut start = -1
+    for i in 0..<=length {
+      let code : UInt16 = if i == length { 0 } else {
+        match side {"north" => terrain[0][i]; "south" => terrain[143][i]; "west" => terrain[i][0]; _ => terrain[i][255]}
+      }
+      let wet = code == 'r' || code == 'l' || code == 'b'
+      if wet && start < 0 { start = i }
+      if !wet && start >= 0 {
+        let center = (start+i).to_double()/2
+        let (x,y,dx,dy) : (Double,Double,Double,Double) = match side {
+          "north" => (center,0,0,-1); "south" => (center,144,0,1); "west" => (0,center,-1,0); _ => (256,center,1,0)
+        }
+        // Follow the nearest same river's centre six cells inside the core.
+        // Keep the boundary span exact; derive its outgoing tangent separately.
+        let mut near_center=center
+        let mut best=1.0e12
+        let mut run = -1
+        for k in 0..<=length {
+          let code : UInt16 = if k==length {0} else {
+            match side {"north"=>terrain[6][k];"south"=>terrain[137][k];"west"=>terrain[k][6];_=>terrain[k][249]}
+          }
+          let wet=code=='r' || code=='l' || code=='b'
+          if wet && run<0 {run=k}
+          if !wet && run>=0 {
+            let c=(run+k).to_double()/2
+            if (c-center).abs()<best {best=(c-center).abs();near_center=c}
+            run = -1
+          }
+        }
+        let sign=if side=="south" || side=="west" {-1.0} else {1.0}
+        let drift=if best<20 {((center-near_center)/6*sign).clamp(min=-1.5,max=1.5)} else {0.0}
+        rivers.push({"x":x,"y":y,"dx":dx,"dy":dy,"radius":(i-start).to_double()/2,"drift":drift})
+        start = -1
+      }
+    }
+  }
+  assert_eq(exits.length(),4)
+  let result : Json = {"schema":"moontown.frontier-exits.v1","authority":"local navigation simulation only","source":"wenyu-lower-perspective.json; same unshifted gentle 0.01 calibration","core":[0,0,256,144],"nodes":ns,"edges":es,"exits":exits,"rivers":rivers}
+  @fs.write_string_to_file("src/ui/assets/tilemap/wenyu-frontier-exits.json",result.stringify())
+}

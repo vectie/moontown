@@ -4,10 +4,10 @@
 /// retained in properties.source_table, including duplicate/empty labels.
 pub fn DataTable::places(
   self : DataTable,
-  latitude~ : Int,
-  longitude~ : Int,
-  name~ : Int,
-  category~ : Int,
+  latitude~ : Int32,
+  longitude~ : Int32,
+  name~ : Int32,
+  category~ : Int32,
 ) -> Result[Array[GeoFeature], String] {
   let columns = [latitude, longitude, name, category]
   for i, column in columns {
@@ -32,11 +32,13 @@ pub fn DataTable::places(
     if row.length() != self.headers.length() {
       return Err(prefix + "column count differs from the header")
     }
-    let lat = match (try? @string.parse_double(row[latitude].trim())) {
+    let lat = match
+      (Ok(@string.parse_double(row[latitude].trim())) catch { e => Err(e) }) {
       Ok(value) if value >= -90.0 && value <= 90.0 => value
       _ => return Err(prefix + "latitude must be a number from -90 to 90")
     }
-    let lon = match (try? @string.parse_double(row[longitude].trim())) {
+    let lon = match
+      (Ok(@string.parse_double(row[longitude].trim())) catch { e => Err(e) }) {
       Ok(value) if value >= -180.0 && value <= 180.0 => value
       _ => return Err(prefix + "longitude must be a number from -180 to 180")
     }
@@ -85,7 +87,7 @@ pub fn DataTable::places(
 /// and order. CSV escaping and formula neutralization match the table explorer.
 pub fn DataTable::selection_csv(
   self : DataTable,
-  selected : Array[Int],
+  selected : Array[Int32],
 ) -> String {
   let lines = [self.headers.map(csv_cell).join(",")]
   for index, row in self.rows {

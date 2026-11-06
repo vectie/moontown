@@ -127,9 +127,8 @@ fn intersection_road_preview_graph_identity() -> String {
 fn intersection_road_preview_cache_key(
   snapshot : @energy_valley_contract.TownSnapshot,
 ) -> String {
-  let bearing = if wenyu_rigid_scene_active() &&
-    town_bearing_buildings_requested() {
-    ":bearing-streetfront-v2"
+  let bearing = if wenyu_rigid_scene_active() && town_bearing_render_enabled() {
+    ":bearing-streetfront-v3-populated"
   } else {
     ""
   }
@@ -727,7 +726,7 @@ fn intersection_road_preview_buildings_by_depth(
       }
     }
   }
-  if wenyu_rigid_scene_active() && town_bearing_buildings_requested() {
+  if wenyu_rigid_scene_active() && town_bearing_render_enabled() {
     town_bearing_complete_mix(result)
     town_bearing_fill_density(result, town_bearing_density_target)
   }
@@ -768,7 +767,7 @@ fn intersection_road_preview_building_counts(
   for _, items in buildings {
     for building in items {
       if building.asset_path.is_empty() ||
-        (wenyu_rigid_scene_active() && town_bearing_buildings_requested()) {
+        (wenyu_rigid_scene_active() && town_bearing_render_enabled()) {
         vector_count += 1
       } else {
         image_count += 1
@@ -1025,7 +1024,7 @@ fn golden_draw_intersection_road_preview_building(
       viewport_width,
       viewport_height,
     ) {
-    if wenyu_rigid_scene_active() && town_bearing_buildings_requested() {
+    if wenyu_rigid_scene_active() && town_bearing_render_enabled() {
       town_bearing_draw_building(
         context, building, viewport_width, viewport_height,
       )

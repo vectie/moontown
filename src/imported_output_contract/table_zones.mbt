@@ -7,10 +7,10 @@ pub fn table_zones_export(
   table_bytes : Bytes,
   zone_bytes : Bytes,
   delimiter : Char,
-  latitude~ : Int,
-  longitude~ : Int,
-  name~ : Int,
-  category~ : Int,
+  latitude~ : Int32,
+  longitude~ : Int32,
+  name~ : Int32,
+  category~ : Int32,
   format~ : String,
 ) -> Result[String, String] {
   if format != "geojson" && format != "csv" {
@@ -19,11 +19,11 @@ pub fn table_zones_export(
   if table_bytes.length() > 1048576 || zone_bytes.length() > 1048576 {
     return Err("Each source must be at most 1 MiB")
   }
-  let table_text = match (try? @utf8.decode(table_bytes)) {
+  let table_text = match (Ok(@utf8.decode(table_bytes)) catch { e => Err(e) }) {
     Ok(text) => text
     Err(_) => return Err("Place table must be valid UTF-8")
   }
-  let zone_text = match (try? @utf8.decode(zone_bytes)) {
+  let zone_text = match (Ok(@utf8.decode(zone_bytes)) catch { e => Err(e) }) {
     Ok(text) => text
     Err(_) => return Err("Zones must be valid UTF-8")
   }
@@ -52,7 +52,7 @@ pub fn table_zones_export(
       "Join exceeds 20 million point/zone-position checks; narrow the sources",
     )
   }
-  let memberships : Array[Array[Int]] = places.map(_ => [])
+  let memberships : Array[Array[Int32]] = places.map(_ => [])
   let mut total_matches = 0
   // Reuse the established outer-edge/hole policy, with one parsed ring set per
   // zone, without merging or rewriting either source FeatureCollection.
@@ -146,7 +146,7 @@ pub fn table_zones_export(
 }
 
 ///|
-fn table_zone_reference(zone : GeoFeature, source_index : Int) -> Json {
+fn table_zone_reference(zone : GeoFeature, source_index : Int32) -> Json {
   {
     "source_feature": source_index + 1,
     "id": geo_field(zone.source, "id"),

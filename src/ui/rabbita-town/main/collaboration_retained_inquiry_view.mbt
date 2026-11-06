@@ -33,17 +33,27 @@ fn render_retained_inquiry(
   }
   let content : Array[@rabbita.Html] = [
     h3("继续研究"),
-    p("至少选择两份贡献。"),
+    p(
+      "选择成功成果中的原文片段，并填写独立质疑。可从多份历史记录中添加贡献，合计至少来自两本 Book。",
+    ),
     render_advanced_details("所选成果的来源版本", [
       p(
-        "Pinned origin: " +
+        "来源：" +
         outcome.key.draft_id +
         " / " +
         outcome.key.revision +
-        " / review " +
+        " / 审核 " +
         outcome.key.review_version.to_string() +
         " / " +
         outcome.key.review_digest,
+      ),
+    ]),
+    render_advanced_details("保存与准备", [
+      p(
+        "未成功的 Book 保留为缺口；历史审核决定不代表新研究已获批准。",
+      ),
+      p(
+        "保存会读取所选 Book 路径的当前文件，并在普通编辑器中打开新草稿。请先保存现有草稿；之后可修改分工和来源路径，再执行准备。此处不会自动运行研究。",
       ),
     ]),
   ]
@@ -55,7 +65,7 @@ fn render_retained_inquiry(
         attrs=@html.Attrs::build()
           .disabled(state.busy())
           .aria_label(
-            (if selected { "Selected: " } else { "Select: " }) + p.book_id,
+            (if selected { "已选择：" } else { "选择：" }) + p.book_id,
           )
           .aria_pressed(if selected { "true" } else { "false" }),
         on_click=dispatch(
@@ -77,9 +87,7 @@ fn render_retained_inquiry(
           dispatch,
           state,
           "quote_" + p.book_id,
-          "Exact retained excerpt from " +
-          p.book_id +
-          " (up to 1000 characters)",
+          "原文片段 · " + p.book_id + "（最多 1000 字符）",
           multiline=true,
         ),
       )
@@ -88,8 +96,61 @@ fn render_retained_inquiry(
           dispatch,
           state,
           "challenge_" + p.book_id,
-          "Independent challenge for " + p.book_id,
+          "独立质疑 · " + p.book_id,
           multiline=true,
+        ),
+      )
+    }
+  }
+  content.push(
+    button(
+      attrs=@html.Attrs::build().disabled(state.busy()),
+      on_click=dispatch(CollaborationEdit("inquiry_add_dossier", "add")),
+      if state.inquiry_dossiers.any(d => d.origin == outcome.key) {
+        "更新所选贡献"
+      } else {
+        "加入研究"
+      },
+    ),
+  )
+  if !state.inquiry_dossiers.is_empty() {
+    content.push(h3("跨记录研究"))
+    content.push(
+      p(
+        "从上方切换记录继续选择；修改片段后重新加入。",
+      ),
+    )
+    for dossier in state.inquiry_dossiers {
+      content.push(
+        p(
+          dossier.origin.draft_id +
+          " / " +
+          dossier.origin.revision +
+          " / 审核 " +
+          dossier.origin.review_version.to_string(),
+        ),
+      )
+      for selection in dossier.contributions {
+        content.push(
+          p(
+            selection.book_id +
+            ": " +
+            selection.quote +
+            "\n质疑：" +
+            selection.challenge,
+          ),
+        )
+      }
+      content.push(
+        button(
+          attrs=@html.Attrs::build().disabled(state.busy()),
+          on_click=dispatch(
+            CollaborationEdit(
+              "inquiry_remove_dossier",
+              dossier.origin.to_json().stringify(),
+            ),
+          ),
+          "移除此记录",
         ),
       )
     }
@@ -141,7 +202,12 @@ fn render_retained_inquiry(
       p("请先保存当前研究草稿，再保存这份新研究。"),
     )
   }
-  let validation = state.retained_inquiry_preview()
+  let cross_dossier = !state.inquiry_dossiers.is_empty()
+  let validation = if cross_dossier {
+    state.cross_dossier_inquiry_preview()
+  } else {
+    state.retained_inquiry_preview()
+  }
   content.push(
     match validation {
       Ok(_) => @html.nothing
@@ -155,12 +221,17 @@ fn render_retained_inquiry(
         validation is Err(_) ||
         collaboration_has_unsaved_draft(state),
       ),
-      on_click=dispatch(CollaborationAction("retained-inquiry")),
-      "保存并编辑研究",
+      on_click=dispatch(
+        CollaborationAction(
+          if cross_dossier { "cross-dossier-inquiry" } else { "retained-inquiry" },
+        ),
+      ),
+      if cross_dossier { "保存跨记录研究" } else { "保存并编辑研究" },
     ),
   )
   content.push(
     button(
+      attrs=@html.Attrs::build().disabled(state.busy()),
       on_click=dispatch(CollaborationEdit("inquiry_mode", "off")),
       "取消继续研究",
     ),

@@ -92,7 +92,7 @@ extern "js" fn town_bearing_review_paint(
   #|   root.dataset.townBuildingOrientation='geographic-prefab-review';
   #|   root.dataset.townBearingBuildings=String(count);
   #|   root.dataset.townBearingNorthDegrees=String(Math.atan2(nx,-ny)*180/Math.PI);
-  #|   root.dataset.townBearingMaximumStreetDeviation='10';
+  #|   root.dataset.townBearingMaximumStreetDeviation='45';
   #|   const len=Math.hypot(nx,ny),dx=nx/len,dy=ny/len,x=width-106,y=140;
   #|   c.save();c.fillStyle='rgba(246,246,230,0.92)';c.beginPath();c.roundRect(x-50,y-35,132,77,12);c.fill();
   #|   c.strokeStyle='#3a5b4b';c.lineWidth=2;c.beginPath();c.moveTo(x-22*dx,y-22*dy);c.lineTo(x+22*dx,y+22*dy);c.stroke();

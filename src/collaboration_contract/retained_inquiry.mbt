@@ -30,6 +30,15 @@ pub fn retained_inquiry_draft(
   input : RetainedInquiry,
   outcome : RetainedOutcome,
 ) -> Result[Draft, String] {
+  inquiry_dossier_draft(input, outcome, 2)
+}
+
+///|
+fn inquiry_dossier_draft(
+  input : RetainedInquiry,
+  outcome : RetainedOutcome,
+  minimum : Int32,
+) -> Result[Draft, String] {
   let saved = outcome.saved
   let work = outcome.work
   guard input.origin == outcome.key &&
@@ -76,7 +85,8 @@ pub fn retained_inquiry_draft(
       "Assign named human review and objection owners with consistent, safe IDs",
     )
   }
-  guard input.contributions.length() >= 2 && input.contributions.length() <= 16 else {
+  guard input.contributions.length() >= minimum &&
+    input.contributions.length() <= 16 else {
     return Err("Select between two and sixteen successful Book contributions")
   }
   let participants : Array[Participant] = []
