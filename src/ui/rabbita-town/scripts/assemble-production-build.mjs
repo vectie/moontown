@@ -28,6 +28,11 @@ const compiledMainPath = path.join(
 )
 
 const BROWSER_FILES = [
+  'coffee-contest.html',
+  'coffee-contest.js',
+  'coffee-contest.css',
+  'coffee-vote-preview.html',
+  'coffee-vote-preview.js',
   'index.html',
   'performance-probe.js',
   'viewport.html',

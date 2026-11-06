@@ -8,6 +8,8 @@ struct PublicPlatform {
   controller_ca : String
   public_origin : String
   neighborhood_path : String?
+  creative_path : String?
+  creative_config : String?
 }
 
 ///|
@@ -40,7 +42,9 @@ fn public_asset_allowed(relative : String) -> Bool {
   if relative.has_suffix(".gz") || relative.has_suffix(".etag") {
     return false
   }
-  if relative == "index.html" || relative == "viewport.html" {
+  if [
+      "index.html", "viewport.html", "coffee-contest.html", "coffee-vote-preview.html",
+    ].contains(relative) {
     return true
   }
   if relative.has_prefix("landmark-studio/") {
@@ -164,6 +168,11 @@ async fn PublicPlatform::handle(
   conn : @http.ServerConnection,
 ) -> Unit {
   if public_relative_path(request.path) is Some(relative) &&
+    creative_route(relative) {
+    self.creative(request, body, conn, relative)
+    return
+  }
+  if public_relative_path(request.path) is Some(relative) &&
     neighborhood_route(relative) {
     self.neighborhood(request, body, conn, relative)
     return
@@ -275,6 +284,12 @@ async fn run_public_platform(identity : BrowserIdentity) -> Unit {
     controller: required("MOONTOWN_COMPUTE_CONTROLLER_ENDPOINT"),
     controller_ca: required("MOONTOWN_COMPUTE_CONTROLLER_CA_FILE"),
     public_origin: required("LUNANEXA_WEBIDE_PUBLIC_ORIGIN"),
+    creative_path: @env.get_env_var("MOONTOWN_CREATIVE_STATE_FILE").filter(p => {
+      p.has_prefix("/")
+    }),
+    creative_config: @env.get_env_var("MOONTOWN_CREATIVE_CONFIG_FILE").filter(p => {
+      p.has_prefix("/")
+    }),
     neighborhood_path: @env.get_env_var("MOONTOWN_NEIGHBORHOOD_STATE_FILE").filter(path => {
         path.has_prefix("/") && !path.trim().is_empty()
       },
@@ -284,9 +299,22 @@ async fn run_public_platform(identity : BrowserIdentity) -> Unit {
     @socket.Addr::parse(required("LUNANEXA_WEBIDE_BIND")),
   )
   defer server.close()
-  server.run_forever(
-    (request, body, conn) => platform.handle(request, body, conn),
-    max_connections=256,
-    allow_failure=true,
-  )
+  @async.with_task_group(group => {
+    if platform.creative_path is Some(path) &&
+      platform.creative_config is Some(config_path) {
+      group.spawn_bg(() => {
+        while true {
+          let _ = @creative_contest.process_next(path, config_path) catch {
+            _ => false
+          }
+          @async.sleep(1000)
+        }
+      })
+    }
+    server.run_forever(
+      (request, body, conn) => platform.handle(request, body, conn),
+      max_connections=256,
+      allow_failure=true,
+    )
+  })
 }

@@ -1,4 +1,5 @@
 import {
+  "vectie/moontown/competition_brief",
   "moonbitlang/async",
   "moonbitlang/async/fs",
   "moonbitlang/async/process",

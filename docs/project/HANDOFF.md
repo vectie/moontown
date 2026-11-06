@@ -32,3 +32,26 @@ existing documentation and record concrete pitfalls here.
   177/177 passed. Earlier transfer-deadline and reviewer-source tests failed
   intermittently, then passed isolated and in the final full run; see
   `MAIN_INTEGRATION_2026-11-06.md` for the actual sequence.
+
+## 2026-11-07 · 半醒咖啡首期
+
+- The published creation page is `/moontown/coffee-contest.html` on the existing
+  8443 public origin. Use `BANXING_COFFEE_IMPLEMENTATION.md` for current facts,
+  qualification measurements and remaining real-account/prize/voting work.
+- The source visuals and reusable curator live in the private registered
+  `banxing-coffee-curator` MoonBook; do not copy original posters into a contest
+  gallery as submissions. Portable media use `portable/outputs/`, not `raw/`.
+- Only 177 changed its Qwen reservation and device-plugin profile, with explicit
+  user authorization. CPU adapters, event code and credentials remain on 175.
+  Fresh-seed warm images took about 8.1s; text latency increased during overlap.
+- Package static UI from the existing web base: the native gateway base lacks
+  `/bin/cp`. Public deployment uses one replica and maxSurge=0. Exclude macOS
+  AppleDouble files when exporting MoonBit sources to Linux.
+- The private UI harness can use a loopback qualified provider only when its
+  explicit rehearsal environment is present. Test logins remain `_wbtest` code,
+  never production auth. Real images plus A/B/moderation/withdrawal were tested;
+  real SSO accounts still need the owner's participation.
+- Current acceptance: native 2035/2035, gateway 8/8, browser JS 180/180 and the
+  unchanged 194-file Rabbita batch suite passed. A same-seed cache hit is not
+  a fresh-generation benchmark. Downloaded PNGs have a visible AI footer and
+  structured AIGC metadata. State backup extraction matched its source bytes.

@@ -38,6 +38,8 @@ async test "public shell separates anonymous, customers, admin and expiry withou
     prefix="/user",
   ).unwrap()
   let platform : PublicPlatform = {
+    creative_path: None,
+    creative_config: None,
     identity: { flights: {}, resolve: cookie => client.resolve(cookie), },
     assets: "/nonexistent-public-fixture",
     controller: origin,

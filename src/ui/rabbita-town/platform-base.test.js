@@ -72,6 +72,16 @@ test('personal workspace uses the shared neighborhood without unscoping private 
   assert.equal(app.fetch('/account/self.json'), 'https://example.test/moontown/workspace/account/self.json')
 })
 
+test('weekly public activity leaves a personal workspace without unscoping its other paths', () => {
+  const app = load('/moontown/workspace/platform-base.js')
+  app.location.pathname = '/moontown/workspace/'
+  const link = new app.Element()
+  link.setAttribute('href', './coffee-contest.html')
+  assert.equal(link.getAttribute('href'), 'https://example.test/moontown/coffee-contest.html')
+  assert.equal(app.fetch('/account/self.json'), 'https://example.test/moontown/workspace/account/self.json')
+  assert.equal(app.fetch('/moontown/workspace/private.html'), '/moontown/workspace/private.html')
+})
+
 test('two hosted accounts cannot read each others browser state', () => {
   const shared = storage()
   const alice = load('/moontown/platform-base.js', `webide-${'a'.repeat(64)}`, shared)

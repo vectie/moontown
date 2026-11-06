@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>投票预览 · 半醒咖啡</title>
+  <link rel="stylesheet" href="coffee-contest.css">
+  <script src="platform-scope.js"></script>
+  <script src="platform-base.js"></script>
+  <script type="module" src="coffee-vote-preview.js"></script>
+</head>
+<body>
+  <header class="site-header"><a class="town-link" href="./coffee-contest.html">← 返回半醒咖啡</a><span>投票预览</span></header>
+  <main>
+    <section class="gallery-section">
+      <h1>先看看，你会喜欢哪一张？</h1>
+      <p class="notice">这是占位投票页，不收集选票，不计入获奖结果。正式入口确定后由主办替换。</p>
+      <p id="vote-status" class="notice" role="status" aria-live="polite"></p>
+      <div id="preview-gallery" class="gallery-grid"></div>
+    </section>
+  </main>
+</body>
+</html>

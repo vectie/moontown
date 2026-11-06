@@ -1,0 +1,158 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn command(program : String, args : Array[String]) -> String {
+  let result = @shell.Cmd(program, args).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+async fn kube(args : Array[String]) -> Json {
+  @json.parse(
+    command(
+      "kubectl",
+      [
+        "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", ..args, "-o",
+        "json",
+      ],
+    ),
+  )
+}
+
+///|
+/// One explicit backup and restore check; this creates no schedule and copies
+/// no Secrets, credentials, model weights or unrelated workspace directories.
+async fn main {
+  guard @env.args() is [_, root] && root.has_prefix("/home/HwHiAiUser/") else {
+    fail("backup-coffee-contest.mbtx NEW_PRIVATE_BACKUP_DIR")
+  }
+  @fs.mkdir(root, permission=0o700)
+  let paths : Array[String] = []
+  for
+    (ns, name) in [
+      ("lunanexa", "image-adapter-state"),
+      ("aigc-acceptance-20260915", "moontown-creative-state"),
+    ] {
+    guard kube(["-n", ns, "get", "pvc", name])
+      is { "spec": { "volumeName": String(pv), .. }, .. } else {
+      fail("Unbound state volume")
+    }
+    guard kube(["get", "pv", pv])
+      is {
+        "spec": {
+          "csi": {
+            "volumeAttributes": {
+              "server": "192.168.2.175",
+              "share": "/data/lunanexa-workspaces",
+              "subDir": String(path),
+              ..
+            },
+            ..
+          },
+          ..
+        },
+        ..
+      } &&
+      !path.contains("..") &&
+      path.has_prefix(ns + "/" + name + "/") else {
+      fail("Unexpected state volume location")
+    }
+    paths.push(path)
+  }
+  let base = "/data/lunanexa-workspaces/"
+  let adapter = base + paths[0] + "/z-image-turbo-v1"
+  let event = base + paths[1] + "/banxing-coffee-20261106/state.json"
+  let event_lock = @fs.open(
+    event + ".lock",
+    mode=ReadWrite,
+    create_mode=OpenOrCreate,
+    permission=0o600,
+  )
+  defer event_lock.close()
+  event_lock.lock(Exclusive)
+  defer event_lock.unlock()
+  let provider_lock = @fs.open(
+    adapter + "/jobs.lock",
+    mode=ReadWrite,
+    create_mode=OpenOrCreate,
+    permission=0o600,
+  )
+  defer provider_lock.close()
+  provider_lock.lock(Exclusive)
+  defer provider_lock.unlock()
+  guard @json.parse(@fs.read_file(adapter + "/jobs.json").text())
+    is { "jobs": Array(jobs), .. } &&
+    jobs.all(job => job is { "state": String("Completed" | "Failed"), .. }) else {
+    fail("Quiesce image jobs before this one-shot backup")
+  }
+  let state = event
+  if @fs.exists(state) {
+    guard @json.parse(@fs.read_file(state).text())
+      is { "generations": Array(generations), .. } &&
+      generations.all(job => {
+        job is { "state": String("completed" | "failed"), .. }
+      }) else {
+      fail("Quiesce event jobs before this one-shot backup")
+    }
+  }
+  let archive = root + "/creative-state.tar.gz"
+  ignore(
+    command(
+      "tar",
+      ["-C", "/data/lunanexa-workspaces", "-czf", archive, ..paths],
+    ),
+  )
+  @fs.chmod(archive, 0o600)
+  let restored = root + "/restore-check"
+  @fs.mkdir(restored, permission=0o700)
+  ignore(command("tar", ["-xzf", archive, "-C", restored]))
+  ignore(
+    command("cmp", [
+      adapter + "/jobs.json",
+      restored + "/" + paths[0] + "/z-image-turbo-v1/jobs.json",
+    ]),
+  )
+  for job in jobs {
+    if job is { "state": "Completed", "id": String(id), .. } &&
+      id.length() == 64 &&
+      id.all(c => c is ('a'..<='f' | '0'..<='9')) {
+      ignore(
+        command("cmp", [
+          adapter + "/" + id + ".png",
+          restored + "/" + paths[0] + "/z-image-turbo-v1/" + id + ".png",
+        ]),
+      )
+    }
+  }
+  let digest = command("sha256sum", [archive])
+    .split(" ")
+    .next()
+    .unwrap()
+    .to_owned()
+  @fs.write_file(
+    root + "/manifest.json",
+    (
+      {
+        "sha256": digest,
+        "volumes": paths,
+        "restore_file_comparison": true,
+        "secret_backup": false,
+        "created_ms": @async.now().to_string(),
+      } : Json).stringify(indent=2),
+    create_mode=CreateNew,
+    permission=0o600,
+    sync=Full,
+  )
+  println(
+    "Private state archive and extracted image/journal comparison passed: " +
+    digest,
+  )
+}

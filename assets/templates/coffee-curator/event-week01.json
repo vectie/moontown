@@ -1,0 +1,25 @@
+{
+  "brief": {
+    "id": "banxing-coffee-20261106",
+    "name": "半醒咖啡 · 第 01 期",
+    "topic": "给半醒的日常，加一点想象",
+    "scope": "围绕半醒咖啡创作原创插画。品牌原稿只作参考，不要求模型重绘准确中文或价格。",
+    "possibility_wiki": "./coffee-contest.html#inspiration",
+    "first_person_solution": "我写一段提示词，生成图片，选一张正式投稿；主办审核后公开展示。",
+    "deadline_ms": "1794477600000",
+    "benchmark_version": 1,
+    "benchmark_materials": [],
+    "evaluation_materials": ["主题相关性、内容与使用权利核对；获奖由主办确认"],
+    "rubric": [],
+    "published": true
+  },
+  "opens_ms": "1793894400000",
+  "voting_opens_ms": "1794484800000",
+  "voting_closes_ms": "1794556800000",
+  "awards_ms": "1794564000000",
+  "participant_quota": 10,
+  "event_quota": 500,
+  "provider_origin": "",
+  "provider_key_file": "",
+  "model": "z-image-turbo"
+}

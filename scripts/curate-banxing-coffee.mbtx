@@ -1,0 +1,231 @@
+///|
+import {
+  "moonbitlang/x@0.5.5/fs",
+  "moonbitlang/x@0.5.5/crypto",
+  "moonbitlang/core/json",
+  "moonbitlang/core/env",
+}
+
+///|
+fn put(root : String, path : String, content : String) -> Unit raise {
+  let parts = path.split("/").to_array()
+  let mut parent = root
+  for i in 0..<(parts.length() - 1) {
+    parent += "/" + parts[i].to_owned()
+    if !@fs.path_exists(parent) {
+      @fs.create_dir(parent)
+    }
+  }
+  @fs.write_string_to_file(root + "/" + path, content)
+}
+
+///|
+fn copy_tree(
+  source : String,
+  target : String,
+  relative : String,
+  manifest : Array[Json],
+  portable : Array[Json],
+) -> Unit raise {
+  if !@fs.path_exists(target) {
+    @fs.create_dir(target)
+  }
+  let names = @fs.read_dir(source).to_array()
+  names.sort()
+  for name in names {
+    let from = source + "/" + name
+    let to = target + "/" + name
+    let item_path = if relative.is_empty() {
+      name
+    } else {
+      relative + "/" + name
+    }
+    if @fs.is_dir(from) {
+      copy_tree(from, to, item_path, manifest, portable)
+    } else {
+      let bytes = @fs.read_file_to_bytes(from)
+      @fs.write_bytes_to_file(to, bytes)
+      let hash = "sha256:" + @crypto.bytes_to_hex_string(@crypto.sha256(bytes))
+      manifest.push({
+        "path": "raw/curation/" + item_path,
+        "sha256": hash,
+        "size_bytes": bytes.length(),
+      })
+      if item_path.has_prefix("assets/") ||
+        item_path.has_prefix("vendor/") ||
+        item_path == "preview.html" ||
+        item_path == "HANDOFF.md" ||
+        item_path == "coffee-competition-opposed-rows-4k.mp4" {
+        portable.push({
+          "source_path": "raw/curation/" + item_path,
+          "path": item_path,
+        })
+      }
+    }
+  }
+}
+
+///|
+fn main raise {
+  guard @env.args() is [_, source, root] else {
+    fail("Usage: curate-banxing-coffee.mbtx MATERIALS EXISTING_MOONBOOK_ROOT")
+  }
+  guard @fs.path_exists(root + "/wiki/index.md") else {
+    fail("Initialize the MoonBook wiki first")
+  }
+  guard !@fs.path_exists(root + "/raw/curation-manifest.json") else {
+    fail(
+      "This MoonBook is already curated. Review new evidence before updating its existing pages.",
+    )
+  }
+  let manifest : Array[Json] = []
+  let portable : Array[Json] = []
+  copy_tree(source, root + "/raw/curation", "", manifest, portable)
+  put(
+    root,
+    "raw/curation-manifest.json",
+    (
+      {
+        "source_name": "rotating-cup-opposed-rows",
+        "authority": "user-supplied curation materials; not contestant submissions",
+        "files": manifest,
+      } : Json).stringify(indent=2),
+  )
+  put(
+    root,
+    "raw/portable-selection.json",
+    (
+      [
+        {
+          "artifact_id": "coffee-curation-materials",
+          "label": "半醒咖啡品牌与策展素材",
+          "mime_type": "text/html",
+          "included": true,
+          "files": portable,
+          "preview_path": "preview.html",
+          "app_entrypoint": "preview.html",
+        },
+      ] : Json).stringify(indent=2),
+  )
+  put(
+    root,
+    "IDENTITY.md",
+    @fs.read_file_to_string("assets/templates/coffee-curator/IDENTITY.md"),
+  )
+  put(
+    root,
+    "skills/coffee-curator/SKILL.md",
+    @fs.read_file_to_string("assets/templates/coffee-curator/SKILL.md"),
+  )
+  put(
+    root, "USER.md", "# 主办偏好\n\n用户确认：首期 2026-11-06 开题，11-13 结束；每周五发题和发奖，周四截稿。\n每月现金运营预算 1000 元，自购小惊喜奖品。网页是 MoonTown 自有页面，\n只改提示词就能生成，ComfyUI 图片工作流放在 177，与现有文本服务的资源关系需实测。\n奖品类别为手办、帆布包、特调咖啡。三个轻松奖名和详细票选规则仍为建议。\n腾讯投票链接、实际奖品采购信息、品牌公开授权范围待主办确认。\n不保存任何集群密码、身份令牌或 API 密钥。\n",
+  )
+  put(
+    root, "wiki/index.md", "# 半醒咖啡策展 MoonBook\n\n- [素材与品牌](sources/brand-materials.md)\n- [视觉方法](concepts/visual-language.md)\n- [第 1 期活动](planning/week01.md)\n- [服务接入](planning/launch.md)\n- [每周策展](planning/weekly-curation.md)\n- [待审事项](reviews/pending.md)\n\n原始资料、17 张背景、杯型、logo、旋转展览和来源说明在 raw/curation/。\n这些是主办提供的参考素材，不是已获审或获奖的参赛作品。\n",
+  )
+  put(
+    root, "wiki/sources/brand-materials.md", "# 素材与品牌\n\n来源：用户指定的 rotating-cup-opposed-rows 文件夹，按字节复制，校验见 raw/curation-manifest.json。\n包含 17 种海报背景、暖奶油色杯型、咖啡表面、原始提取 logo、9+8 排列、\n12 秒上下行反相旋转预览和 4K 视频。原始脚本保留作证据，不自动执行。\n\n## 品牌关系\n\n活动主题名为「半醒咖啡」；所给标志中文字为「半醒工坊」。保留原标志和中文，\n不擅自换字或字体。来源海报的「热美式」「12元」属于素材事实，不是本期售价承诺。\n商业印制与公开传播范围仍需主办明确；私人策展归档不自动授予第三方权利。\n\n## 灵感索引\n\n咖啡馆漫画、涂鸦波普、表现性速写、超现实插画、光泽编辑、街头拼贴、红黑极简、\n新艺术、装饰艺术、日式木版画、迷幻艺术、瑞士排版、孟菲斯、构成主义、植物版画、\n黏土微缩、剪纸立体画。背景、主杯、logo 和版式分层管理。\n",
+  )
+  put(
+    root, "wiki/concepts/visual-language.md", "# 视觉方法\n\n生成可变的原创背景与情绪；官方杯型与标志作为受控素材使用。\n需要准确中文或售价时用授权素材和排版层，不让模型凭空写价格。\n主页面简洁、中文、清晰操作，先提示词，再图片，再明确参赛。\n提供三个可编辑起点，保留输入；异常状态才给简洁解释。\n只在展览页加载旋转展示，手机和减少动态模式提供静态替代。\n原 9+8 布局与 12 秒相位关系保存在 raw/curation/HANDOFF.md。\n",
+  )
+  for
+    (from, to) in [
+      ("docs/project/BANXING_COFFEE_WEEK01.md", "wiki/planning/week01.md"),
+      ("docs/project/BANXING_COFFEE_LAUNCH_GAP.md", "wiki/planning/launch.md"),
+    ] {
+    put(root, to, @fs.read_file_to_string(from))
+  }
+  put(
+    root, "wiki/planning/weekly-curation.md", "# 每周策展\n\n周五：根据上周证据准备一份新主题、三条提示词起点和准确素材包，主办发布。\n日常：把主题、内容安全和权利问题列成可核对的建议，主办决定是否公开。\n周四：核对截止前正式图片版本、审核状态和公开授权，准备固定投票名单。\n周五：保存原始投票导出，列出异常与获奖建议；主办确认结果与兑奖。\n复盘：有效创作者、投稿、回访、到店核销、实际增量成本与主办耗时。\n把可复用经验写成带来源的候选，不把一次演示称为已验证运营能力。\n",
+  )
+  put(
+    root, "wiki/reviews/pending.md", "# 待审事项\n\n- 确认原 logo「半醒工坊」与活动名「半醒咖啡」的公开呈现关系。\n- 确认实际奖品、价值信息、兑奖规则与腾讯投票链接。\n- 核对品牌素材公开展示与印制授权范围。\n- 真实图片生成、隔离、审核与发布链路验收后再声称可用。\n- 策展助手提供建议，主办批准、支出与发布不自动执行。\n",
+  )
+  put(
+    root, "wiki/log.md", "# 策展记录\n\n2026-11-06：依用户指令建立独立私人策展 MoonBook，导入带哈希的原始素材，\n整理品牌、视觉方法、首期规则、接入设计、每周策展流程与待审事项。\n未运行模型，没有发布参赛作品或模拟投票。\n",
+  )
+  put(
+    root, "MEMORY.md", "# 已确认约束\n\n每月现金预算 1000 元；轻松、短周期、自有网页；每周五开题/发奖、周四截稿。\n素材事实与比赛结果分开；主办保留审核、发布、奖品采购与开奖决定。\n",
+  )
+  put(
+    root, "ROUTINES.md", "# 例行工作\n\n读取 wiki/index.md 和 USER.md。每周按 skills/coffee-curator/SKILL.md 准备策展草案，\n引用原始素材清单，更新 wiki/log.md，把未确认事项保留在 wiki/reviews/pending.md。\n仅在用户明确启动任务时运行，不自行开启定时模型任务。\n",
+  )
+  put(
+    root,
+    "moonclaw.jobs.json",
+    (
+      {
+        "jobs": {
+          "profiles": {
+            "coffee_curator": {
+              "family": "coffee-curator",
+              "label": "半醒咖啡每周策展",
+              "role": "worker",
+              "priority": 120,
+              "tags": ["coffee", "curation", "contest"],
+              "steps": [
+                {
+                  "id": "curate_week",
+                  "title": "准备每周创作策展草案",
+                  "kind": "job.analysis",
+                  "prompt_template": "Read IDENTITY.md, USER.md, wiki/index.md and skills/coffee-curator/SKILL.md. Prepare a source-bound curation draft for ${request}. Write artifacts inside this book and return summary, artifacts, evidence_refs, open_questions, requires_review:true. Do not publish, buy, award prizes or expose credentials.",
+                  "metadata": {
+                    "preferred_skills": ["coffee-curator"],
+                    "enable_tools": true,
+                    "web_search": false,
+                    "report_file_name": "coffee-curation.md",
+                    "result_file_name": "coffee-curation.json",
+                  },
+                },
+              ],
+            },
+          },
+        },
+      } : Json).stringify(indent=2),
+  )
+  let profile = @json.parse(
+    @fs.read_file_to_string(root + "/moonclaw.jobs.json"),
+  )
+  if profile
+    is {
+      "jobs": { "profiles": { "coffee_curator": Object(settings), .. }, .. },
+      ..
+    } {
+    settings.set("match", {
+      "any": ["半醒", "咖啡", "策展", "coffee", "curation"],
+    })
+  }
+  put(root, "moonclaw.jobs.json", profile.stringify(indent=2))
+  put(
+    root,
+    "skills/coffee-curator/references/moonclaw.jobs.json",
+    profile.stringify(indent=2),
+  )
+  put(
+    root,
+    "skills/coffee-curator/activate.mbtx",
+    @fs.read_file_to_string("assets/templates/coffee-curator/activate.mbtx"),
+  )
+  put(
+    root,
+    "skills/coffee-curator/README.md",
+    @fs.read_file_to_string("assets/templates/coffee-curator/README.md"),
+  )
+  for file in ["COMFYUI_RUNBOOK.md", "event-week01.json"] {
+    put(
+      root,
+      "skills/coffee-curator/references/" + file,
+      @fs.read_file_to_string("assets/templates/coffee-curator/" + file),
+    )
+  }
+  put(
+    root, "book.toml", "[book]\ntitle = \"半醒咖啡 · 每周策展\"\nauthors = []\nsrc = \".\"\nlanguage = \"zh-CN\"\nmultilingual = false\n\n[build]\nbuild-dir = \"book\"\ncreate-missing = false\nuse-default-preprocessors = true\n",
+  )
+  put(
+    root, "SUMMARY.md", "# Summary\n\n- [半醒咖啡策展](wiki/index.md)\n- [素材与品牌](wiki/sources/brand-materials.md)\n- [视觉方法](wiki/concepts/visual-language.md)\n- [第一期](wiki/planning/week01.md)\n- [每周策展](wiki/planning/weekly-curation.md)\n- [服务接入](wiki/planning/launch.md)\n- [待审事项](wiki/reviews/pending.md)\n- [复用策展助手](skills/coffee-curator/README.md)\n",
+  )
+  println(
+    "Curated " + manifest.length().to_string() + " source files into " + root,
+  )
+}

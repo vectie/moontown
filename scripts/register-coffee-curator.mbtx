@@ -1,0 +1,57 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+/// Append to the existing catalog without changing any other book or its scope.
+async fn main {
+  guard @env.args() is [_, book, catalog] else {
+    fail("Usage: register-coffee-curator.mbtx BOOK EXISTING_CATALOG")
+  }
+  guard @fs.exists(book + "/raw/curation-manifest.json") else {
+    fail("Curate the MoonBook first")
+  }
+  let entries = @json.parse(@fs.read_file(catalog).text())
+  guard entries is Array(values) else {
+    fail("Expected existing MoonTown book catalog")
+  }
+  let existing = values
+    .iter()
+    .find_first(value => value is { "id": String("banxing-coffee-curator"), .. })
+  if existing is Some(value) {
+    guard value is { "workspace_root": String(root), .. } && root == book else {
+      fail("Catalog already points to another curator book")
+    }
+    println("Curator book is already registered")
+    return
+  }
+  values.push({
+    "id": "banxing-coffee-curator",
+    "name": "半醒咖啡 · 每周策展",
+    "purpose": "Contest Express 的品牌素材、赛题、提示词与每周策展草案；主办审核后发布。",
+    "workspace_root": book,
+    "memory_scope": "BookPrivate",
+    "tags": ["coffee", "curation", "contest-express", "weekly"],
+    "skills": ["coffee-curator"],
+  })
+  @fs.write_file(
+    catalog + ".before-coffee",
+    @fs.read_file(catalog).binary(),
+    create_mode=CreateNew,
+    permission=0o600,
+    sync=Full,
+  )
+  @fs.write_file(
+    catalog + ".coffee-next",
+    entries.stringify(),
+    create_mode=CreateNew,
+    permission=0o600,
+    sync=Full,
+  )
+  @fs.rename(catalog + ".coffee-next", catalog, replace=true)
+  println("Registered the private curator MoonBook")
+}

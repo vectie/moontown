@@ -11,4 +11,5 @@ import {
   "vectie/lunanexa@0.2.0",
   "moonbitlang/async@0.22.4",
   "moonbitlang/x@0.5.5",
+  "vectie/moonlib@0.1.23",
 }

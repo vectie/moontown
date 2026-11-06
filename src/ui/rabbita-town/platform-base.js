@@ -71,6 +71,12 @@
       (location.protocol === 'http:' && url.protocol === 'ws:')
     )
     if (!sameOrigin || !url.pathname.startsWith('/')) return input
+    // A weekly public activity belongs to the shared town, including when
+    // entered from someone's private workspace.
+    if (base === '/moontown/workspace' && url.pathname === `${base}/coffee-contest.html`) {
+      url.pathname = '/moontown/coffee-contest.html'
+      return url.href
+    }
     if (sharedNeighborhoodPaths.has(url.pathname)) return input
     if (url.pathname === base || url.pathname.startsWith(`${base}/`)) return input
     if (otherProducts.some(prefix => url.pathname === prefix || url.pathname.startsWith(`${prefix}/`))) return input

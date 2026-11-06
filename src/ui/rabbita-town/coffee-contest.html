@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>半醒咖啡 · 每周创作｜MoonTown</title>
+  <meta name="description" content="写下一点想象，让半醒咖啡长出新的样子。生成、投稿、一起看作品。">
+  <link rel="icon" href="coffee/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="coffee-contest.css">
+  <script src="platform-scope.js">
+</script>
+  <script src="platform-base.js">
+</script>
+  <script type="module" src="coffee-contest.js">
+</script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="town-link" href="./" aria-label="返回 MoonTown">
+<img class="moon-mark" src="moontown.svg" width="25" height="25" alt=""> MOONTOWN<span class="divider">/</span>
+<span>每周创作</span>
+</a>
+    <nav aria-label="活动导航">
+<a href="#gallery">作品墙</a>
+<a href="#about">活动说明</a>
+<a id="login" href="/user/">登录参与 <span aria-hidden="true">↗</span>
+</a>
+</nav>
+  </header>
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">
+<span class="live-dot" aria-hidden="true">
+</span> <span id="event-name">第 01 期 · 半醒咖啡</span>
+</p>
+        <h1 id="hero-title">给半醒的日常，<br>加一点<span class="imagination">想象。</span>
+</h1>
+        <p class="hero-description">一杯咖啡，能装下什么？<br>写一段提示词，让你的答案变成一张画。</p>
+        <div class="event-note">
+<span id="phase">11.06 — 11.13</span>
+<span>周四截止 · 周五揭晓</span>
+</div>
+      </div>
+      <div class="hero-art" aria-label="主办提供的半醒工坊咖啡杯参考素材">
+        <span class="art-orbit" aria-hidden="true">
+</span>
+        <img src="coffee/cup.png" width="1040" height="1400" alt="奶油色半醒工坊咖啡杯，杯上保留原始品牌标志" fetchpriority="high">
+        <span class="reference-note">品牌素材 · 非参赛作品</span>
+      </div>
+    </section>
+
+    <section class="create-section" aria-labelledby="create-title">
+      <div class="section-heading">
+<div>
+<h2 id="create-title">你的灵感，从这里开始</h2>
+</div>
+<span class="step-note">写提示词 → 生成图片 → 选一张参赛</span>
+</div>
+      <div class="studio">
+        <form id="create-form" class="composer">
+          <label for="prompt">把今天的想象写下来</label>
+          <textarea id="prompt" name="prompt" maxlength="2000" rows="6" placeholder="比如：清晨的咖啡杯里，住着一座还没醒来的小小城市。暖奶油色，手绘插画，轻松又有一点奇妙……" required>
+</textarea>
+          <div class="prompt-meta">
+<span>围绕「半醒咖啡」，风格由你决定</span>
+<span id="prompt-count">0 / 2000</span>
+</div>
+          <p class="small-label">没想好？从一个灵感开始</p>
+          <div class="prompt-chips" aria-label="提示词灵感">
+<button type="button" data-prompt="一只装着清晨的咖啡杯，杯中是一座还没有醒来的微缩小城，奶油色和森林绿，温暖的手绘插画，安静而奇妙，不要文字和商标">杯里的小城 <span>↗</span>
+</button>
+<button type="button" data-prompt="半醒咖啡的奇妙早晨，一只打哈欠的小云朵坐在咖啡杯边，纸质拼贴与柔软的剪纸层次，温暖阳光，简洁构图，不要文字和商标">云朵打个盹 <span>↗</span>
+</button>
+<button type="button" data-prompt="半醒时刻的咖啡想象，咖啡香气化成一片会生长的小森林，黏土微缩世界，圆润可爱，暖奶油底色与自然绿，不要文字和商标">一口小森林 <span>↗</span>
+</button>
+</div>
+          <button id="generate" class="primary" type="submit">生成一张图 <span aria-hidden="true">✦</span>
+</button>
+          <p id="credits" class="fine-print">登录后生成；图片确认参赛前仅自己可见。</p>
+          <p id="notice" class="notice" role="status" aria-live="polite">
+</p>
+        </form>
+        <div class="result-panel">
+          <div id="empty-preview" class="empty-preview">
+<span class="preview-sun" aria-hidden="true">✳</span>
+<p>这里，等一个好点子</p>
+<span>生成的图片会出现在这里</span>
+</div>
+          <div id="result" hidden>
+<div class="image-wrap">
+<img id="result-image" alt="你本次生成的作品">
+<span class="ai-label">AI 生成</span>
+</div>
+<div class="result-actions">
+<button id="choose" class="primary" type="button">用这张参赛 <span aria-hidden="true">→</span>
+</button>
+<button id="download" class="text-button" type="button">保存图片 ↓</button>
+</div>
+<p class="fine-print">先看看喜不喜欢，再决定是否公开参赛。</p>
+</div>
+          <div id="job-status" class="job-status" role="status" aria-live="polite" hidden>
+</div>
+          <div id="history" class="history" aria-label="本期生成记录">
+</div>
+        </div>
+      </div>
+      <section id="my-entry" class="my-entry" aria-label="我的投稿" hidden>
+</section>
+    </section>
+
+    <section id="gallery" class="gallery-section" aria-labelledby="gallery-title">
+<div class="section-heading">
+<div>
+<h2 id="gallery-title">看看大家的半醒时刻</h2>
+</div>
+<a id="vote" class="secondary" href="#" target="_blank" rel="noopener noreferrer" hidden>为喜欢的作品投一票 ↗</a>
+</div>
+<p id="vote-note" class="section-description">过审作品会出现在这里。投票开放后，可以为喜欢的作品加油。</p>
+<div id="gallery-grid" class="gallery-grid">
+</div>
+<p id="gallery-empty" class="gallery-empty">第一张灵感，还在路上。<br>
+<span>你的那一张，会是什么样？</span>
+</p>
+<div id="awards" class="awards" hidden>
+</div>
+</section>
+
+    <section id="about" class="about-section" aria-labelledby="about-title">
+<div>
+<h2 id="about-title">本期活动</h2>
+<p>每人一张有效投稿。<br>过审后，一起为喜欢的作品投票。</p>
+<img class="brand-logo" src="coffee/logo.svg" alt="半醒工坊原始标志" loading="lazy">
+</div>
+<div class="about-details">
+<div class="schedule">
+<div>
+<span id="start-time">11.06 · 周五</span>
+<strong>第一期开始</strong>
+</div>
+<div>
+<span id="deadline-time">11.12 · 周四 18:00</span>
+<strong>投稿截止</strong>
+</div>
+<div>
+<span id="awards-time">11.13 · 周五</span>
+<strong>公布惊喜，下一期见</strong>
+</div>
+</div>
+<p>手办、帆布包、半醒特调咖啡，等三个好点子。实际款式和兑奖安排由主办公布。</p>
+<details id="inspiration">
+<summary>主题与创作提示</summary>
+<p id="event-topic">给半醒的日常，加一点想象。</p>
+<p id="event-scope">围绕半醒咖啡创作原创插画；主办杯型与标志用作参考。</p>
+<p id="first-person-solution">我写提示词，生成一张图，再选一张正式参赛。</p>
+<p>可以从清晨的小城、打盹的云朵、杯里的森林开始。准确中文、logo 和价格使用主办原稿，不要求模型重新绘制。</p>
+</details>
+<details>
+<summary>参赛、公开展示与投票说明</summary>
+<p>每个账户本期只保留一张有效投稿；换一张参赛会替换上一张，并重新审核。每次生成都会占用本期次数。投稿截止后不能新增或替换作品。</p>
+<p>图片须围绕本期主题。请避免未经授权的角色、商标、真人肖像及不适宜内容。生成图片不代表已获准公开；审核通过后才进入作品墙。提示词不会因参赛自动公开。</p>
+<p>投稿时需主动同意本期作品展示与投票；其他商业使用需另行联系作者。你可以撤回投稿。AI 生成的图片可能存在细节错误，下载图片会保留 AI 标识。</p>
+<p>大众投票使用主办配置的腾讯文档链接，投票规则与异常票处理以主办公布为准。本站不展示未经核对的实时票数，不自动认定获奖。所有时间为北京时间。</p>
+</details>
+</div>
+</section>
+    <section id="moderation" class="moderation" hidden aria-labelledby="moderation-title">
+<div class="section-heading">
+<div>
+<h2 id="moderation-title">主办工作台</h2>
+</div>
+<button id="refresh" class="text-button" type="button">刷新状态 ↻</button>
+</div>
+<p id="host-notice" class="notice" role="status" aria-live="polite">
+</p>
+<form id="voting-form">
+<label for="voting-url">腾讯文档投票链接</label>
+<div class="inline-form">
+<input id="voting-url" type="url" placeholder="https://docs.qq.com/…" required>
+<button class="secondary" type="submit">保存链接</button>
+<button id="voting-preview" class="text-button" type="button">使用预览页（不计票）</button>
+<button id="export" class="text-button" type="button">导出过审名单 ↓</button>
+</div>
+</form>
+<p class="fine-print">只展示正式投稿。投票开始后冻结批准名单；自己的作品需另一位主办审核。</p>
+<div id="review-queue" class="review-queue">
+</div>
+<form id="award-form">
+<h3>本期小惊喜</h3>
+<div class="award-fields">
+<label>奖项<select id="prize">
+<option value="creative">创意惊喜 · 手办</option>
+<option value="popular">人气灵感 · 帆布包</option>
+<option value="coffee">咖啡共鸣 · 特调</option>
+</select>
+</label>
+<label>过审作品<select id="award-entry" required>
+</select>
+</label>
+<label>选择理由<input id="award-reason" maxlength="1000" required>
+</label>
+</div>
+<button class="secondary" type="submit">记录获奖建议</button> <button id="publish-results" class="text-button" type="button">确认公布三个奖项</button>
+<p class="fine-print">投票结束后才能记录；到开奖时间，核对三个不同作品后再公布。人气奖需先核对原始投票结果。</p>
+</form>
+</section>
+  </main>
+  <footer>
+<a href="./">MoonTown</a>
+<span>半醒咖啡 · 每周创作</span>
+<a href="#create-title">回到创作 ↑</a>
+</footer>
+  <dialog id="submit-dialog">
+<form id="submit-form">
+<button class="dialog-close text-button" type="button" id="close-dialog" aria-label="关闭投稿">×</button>
+<h2>给这份灵感起个名字</h2>
+<label for="entry-title">作品名</label>
+<input id="entry-title" maxlength="60" placeholder="比如：小城还没醒" required>
+<label for="display-name">展示昵称</label>
+<input id="display-name" maxlength="40" placeholder="希望大家怎么称呼你？" required>
+<label class="consent">
+<input id="consent" type="checkbox" required>
+<span>我确认有权使用相关素材，同意本张作品在本期活动中公开展示和投票。</span>
+</label>
+<p class="fine-print">每人一张有效投稿；新投稿会替换旧版并重新审核。</p>
+<button class="primary" type="submit">提交审核 →</button>
+<p id="submit-notice" class="notice" role="status">
+</p>
+</form>
+</dialog>
+</body>
+</html>

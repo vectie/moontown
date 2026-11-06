@@ -4,6 +4,7 @@ package "vectie/moontown/hackathon"
 import {
   "moonbitlang/core/debug",
   "moonbitlang/core/json",
+  "vectie/moontown/competition_brief",
 }
 
 // Values
@@ -47,7 +48,7 @@ pub async fn process_next_competition_benchmark(path? : String, registry_path? :
 
 pub fn program_readiness(HackathonState, String) -> Array[String]
 
-pub fn publish_challenge(HackathonState, Challenge) -> HackathonState raise
+pub fn publish_challenge(HackathonState, @competition_brief.Challenge) -> HackathonState raise
 
 pub async fn reconcile_competition_workspaces(HackathonState, path? : String) -> Json noraise
 
@@ -59,7 +60,7 @@ pub fn require_competition_reviewer(HackathonState, String, String, UInt64) -> U
 
 pub fn require_unfrozen_program(HackathonState, String) -> Unit raise
 
-pub fn revise_benchmark(HackathonState, String, Array[String], Array[String], Array[RubricCriterion]) -> HackathonState raise
+pub fn revise_benchmark(HackathonState, String, Array[String], Array[String], Array[@competition_brief.RubricCriterion]) -> HackathonState raise
 
 pub fn submit_solution(HackathonState, Submission) -> HackathonState raise
 
@@ -99,21 +100,6 @@ pub struct BenchmarkRun {
   evidence : Array[String]
   queued_ms : UInt64
   finished_ms : UInt64
-} derive(ToJson, @debug.Debug, @json.FromJson)
-
-pub struct Challenge {
-  id : String
-  name : String
-  topic : String
-  scope : String
-  possibility_wiki : String
-  first_person_solution : String
-  deadline_ms : UInt64
-  benchmark_version : Int
-  benchmark_materials : Array[String]
-  evaluation_materials : Array[String]
-  rubric : Array[RubricCriterion]
-  published : Bool
 } derive(ToJson, @debug.Debug, @json.FromJson)
 
 pub struct CompetitionAnnouncement {
@@ -221,8 +207,8 @@ pub struct Evaluation {
 pub struct HackathonState {
   schema : String
   revision : Int
-  challenges : Array[Challenge]
-  challenge_history : Array[Challenge]
+  challenges : Array[@competition_brief.Challenge]
+  challenge_history : Array[@competition_brief.Challenge]
   teams : Array[Team]
   submissions : Array[Submission]
   evaluations : Array[Evaluation]
@@ -284,12 +270,6 @@ type RemoveMemberRequest derive(@json.FromJson)
 
 type ResolveAppealRequest derive(@json.FromJson)
 
-pub struct RubricCriterion {
-  id : String
-  label : String
-  max_points : Int
-} derive(ToJson, @debug.Debug, @json.FromJson)
-
 type RunIdRequest derive(@json.FromJson)
 
 type RunnerOutput derive(@json.FromJson)
@@ -345,5 +325,8 @@ pub struct TeamProfile {
 } derive(ToJson, @debug.Debug, @json.FromJson)
 
 // Type aliases
+pub using @competition_brief {type Challenge}
+
+pub using @competition_brief {type RubricCriterion}
 
 // Traits

@@ -1,0 +1,53 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/creative_contest"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+  "vectie/moontown/competition_brief",
+}
+
+// Values
+pub async fn execute(String, Json, UInt64, String?, Bool, String, String) -> Json
+
+pub async fn image(String, String?, String, String, operator? : Bool) -> Bytes
+
+pub async fn load_config(String) -> Config
+
+pub fn private_metadata_removed(Bytes) -> Bytes raise
+
+pub async fn process_next(String, String) -> Bool
+
+// Errors
+pub(all) suberror CreativeError {
+  Denied
+  Invalid(String)
+  Conflict(String)
+  Unavailable
+} derive(@debug.Debug)
+
+// Types and methods
+type Award derive(ToJson, @json.FromJson)
+
+pub struct Config {
+  brief : @competition_brief.Challenge
+  opens_ms : UInt64
+  voting_opens_ms : UInt64
+  voting_closes_ms : UInt64
+  awards_ms : UInt64
+  participant_quota : Int
+  event_quota : Int
+  provider_origin : String
+  provider_key_file : String
+  model : String
+} derive(@json.FromJson)
+
+type Entry derive(ToJson, @json.FromJson)
+
+type Generation derive(ToJson, @json.FromJson)
+
+type State derive(ToJson, @json.FromJson)
+
+// Type aliases
+
+// Traits

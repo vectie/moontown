@@ -7,6 +7,38 @@ import {
 }
 
 ///|
+async fn stage_package(
+  name : String,
+  town : String,
+  copied : Set[String],
+) -> Unit {
+  if copied.contains(name) {
+    return
+  }
+  copied.add(name)
+  let source = "src/" + name
+  let target = town + "/src/" + name
+  @fs.mkdir(target, recursive=true)
+  @shell.Cmd("cp", ["-R", source + "/.", target]).run()
+  let metadata = @fs.read_file(source + "/moon.pkg").text()
+  for line in metadata.split("\n") {
+    let value = line.trim()
+    if value.has_prefix("\"vectie/moontown/") {
+      let dependency = value
+        .split("\"")
+        .nth(1)
+        .unwrap_or("")
+        .strip_prefix("vectie/moontown/")
+        .unwrap_or("")
+        .to_owned()
+      if !dependency.is_empty() {
+        stage_package(dependency, town, copied)
+      }
+    }
+  }
+}
+
+///|
 /// Run from the MoonTown root. Export only the gateway dependency closure;
 /// unrelated dirty LunaNexa source, runtime state and credentials are excluded.
 async fn main {
@@ -19,12 +51,13 @@ async fn main {
   let town = destination + "/moontown"
   @fs.mkdir(town + "/src", recursive=true)
   @shell.Cmd("cp", ["moon.mod", "README.mbt.md", town]).run()
+  let copied : Set[String] = Set::new()
   for
     pkg in [
       "account_identity", "account_system", "account_compute", "support", "core",
-      "system_settings", "integration",
+      "system_settings", "integration", "neighborhood", "creative_contest", "competition_brief",
     ] {
-    @shell.Cmd("cp", ["-R", "src/" + pkg, town + "/src/" + pkg]).run()
+    stage_package(pkg, town, copied)
   }
   let gateway = town + "/src/account_gateway"
   @fs.mkdir(gateway)

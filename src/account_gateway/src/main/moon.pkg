@@ -5,6 +5,7 @@ import {
   "vectie/moontown/account_system",
   "vectie/moontown/account_compute",
   "vectie/moontown/neighborhood",
+  "vectie/moontown/creative_contest",
   "moonbitlang/async",
   "moonbitlang/async/fs",
   "moonbitlang/async/http",

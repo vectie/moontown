@@ -1,0 +1,37 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/competition_brief"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) struct Challenge {
+  id : String
+  name : String
+  topic : String
+  scope : String
+  possibility_wiki : String
+  first_person_solution : String
+  deadline_ms : UInt64
+  benchmark_version : Int
+  benchmark_materials : Array[String]
+  evaluation_materials : Array[String]
+  rubric : Array[RubricCriterion]
+  published : Bool
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct RubricCriterion {
+  id : String
+  label : String
+  max_points : Int
+} derive(ToJson, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits

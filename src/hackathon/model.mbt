@@ -1,26 +1,5 @@
 ///|
-/// A Mayor-published challenge lives in the existing Contest Express lane.
-pub struct Challenge {
-  id : String
-  name : String
-  topic : String
-  scope : String
-  possibility_wiki : String
-  first_person_solution : String
-  deadline_ms : UInt64
-  benchmark_version : Int
-  benchmark_materials : Array[String]
-  evaluation_materials : Array[String]
-  rubric : Array[RubricCriterion]
-  published : Bool
-} derive(Debug, ToJson, FromJson)
-
-///|
-pub struct RubricCriterion {
-  id : String
-  label : String
-  max_points : Int
-} derive(Debug, ToJson, FromJson)
+pub using @competition_brief {type Challenge, type RubricCriterion}
 
 ///|
 pub struct Team {

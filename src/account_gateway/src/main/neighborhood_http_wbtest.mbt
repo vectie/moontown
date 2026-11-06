@@ -63,6 +63,8 @@ async test "neighborhood HTTP trusts session roles preserves owner isolation and
     @fs.remove(directory)
   }
   let platform : PublicPlatform = {
+    creative_path: None,
+    creative_config: None,
     identity: {
       flights: {},
       resolve: cookie => client.resolve(identity_cookies(cookie)),
@@ -128,9 +130,25 @@ async test "neighborhood HTTP trusts session roles preserves owner isolation and
       })
     }
     let write = async fn(principal : String, action : String, payload : Json) {
-      let expected = match @json.parse(read(principal, "mine").1.text()) {
+      let snapshot = @json.parse(read(principal, "mine").1.text())
+      let expected = match snapshot {
         { "payload": { "mine": { "actor_id": String(id), .. }, .. }, .. } => id
         _ => ""
+      }
+      if ["publish-story", "publish-event"].contains(action) &&
+        payload is Object(fields) &&
+        snapshot is { "payload": { "mine": Object(mine), .. }, .. } {
+        let stories = action == "publish-story"
+        let key = if stories { "story_id" } else { "event_id" }
+        if mine.get(if stories { "stories" } else { "events" })
+          is Some(Array(items)) {
+          for item in items {
+            if item is { "id": String(id), "content_revision": revision, .. } &&
+              fields.get(key) == Some(Json::string(id)) {
+              fields.set("expected_content_revision", revision)
+            }
+          }
+        }
       }
       let input : Json = {
         "action": action,

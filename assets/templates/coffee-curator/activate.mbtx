@@ -1,0 +1,67 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+fn object(value : Json) -> Map[String, Json] raise {
+  guard value is Object(fields) else { fail("Expected JSON object") }
+  fields
+}
+
+///|
+/// Run after an agent import. Merge a single named profile and preserve all
+/// other host jobs. This does not start a model, gateway or scheduled task.
+async fn main {
+  guard @env.args() is [_, root] else {
+    fail("Usage: moon run activate.mbtx MOONBOOK_ROOT")
+  }
+  let source = @json.parse(
+    @fs.read_file(root + "/skills/coffee-curator/references/moonclaw.jobs.json").text(),
+  )
+  let source_profiles = object(
+    object(object(source).get("jobs").unwrap()).get("profiles").unwrap(),
+  )
+  let profile = source_profiles.get("coffee_curator").unwrap()
+  let target = root + "/moonclaw.jobs.json"
+  let config = if @fs.exists(target) {
+    @json.parse(@fs.read_file(target).text())
+  } else {
+    Json::object({})
+  }
+  let config_fields = object(config)
+  let jobs = object(config_fields.get("jobs").unwrap_or(Json::object({})))
+  let profiles = object(jobs.get("profiles").unwrap_or(Json::object({})))
+  if profiles.get("coffee_curator") is Some(existing) {
+    guard existing == profile else {
+      fail(
+        "A different coffee_curator profile already exists; review before replacing it",
+      )
+    }
+    println("coffee_curator is already installed; no task started")
+    return
+  }
+  profiles.set("coffee_curator", profile)
+  jobs.set("profiles", Json::object(profiles))
+  config_fields.set("jobs", Json::object(jobs))
+  if @fs.exists(target) {
+    @fs.write_file(
+      target + ".coffee-curator-backup",
+      @fs.read_file(target).binary(),
+      create_mode=CreateNew,
+      permission=0o600,
+      sync=Full,
+    )
+  }
+  @fs.write_file(
+    target,
+    Json::object(config_fields).stringify(indent=2),
+    create_mode=CreateOrTruncate,
+    permission=0o600,
+    sync=Full,
+  )
+  println("Installed coffee_curator; no task started")
+}

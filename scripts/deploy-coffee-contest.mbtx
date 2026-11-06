@@ -1,0 +1,208 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  let result = @shell.Cmd(
+    "kubectl",
+    ["--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", ..args],
+  ).output()
+  if result.exit_code() != 0 {
+    eprintln(result.stderr())
+  }
+  result.check()
+  result.stdout()
+}
+
+///|
+/// Run on 175 after qualifying the private model provider. Patch the existing
+/// public platform; identity, private workspace gateways and ingress survive.
+async fn main {
+  guard @env.args() is [_, root] && root.has_prefix("/home/HwHiAiUser/") else {
+    fail("deploy-coffee-contest.mbtx PRIVATE_RELEASE_DIR")
+  }
+  let ns = "aigc-acceptance-20260915"
+  let adapter = @json.parse(
+    kube(["-n", "lunanexa", "get", "deployment", "image-adapter", "-o", "json"]),
+  )
+  guard adapter is { "status": { "readyReplicas": Number(1, ..), .. }, .. } else {
+    fail("The qualified image adapter must be ready")
+  }
+  let current = @json.parse(
+    kube(["-n", ns, "get", "deployment", "moontown-platform", "-o", "json"]),
+  )
+  guard current
+    is {
+      "metadata": { "resourceVersion": String(version), .. },
+      "spec": { "template": { "spec": Object(spec), .. }, .. },
+      ..
+    } &&
+    spec.get("containers") is Some(Array(containers)) &&
+    containers.length() == 1 &&
+    containers[0] is Object(container) &&
+    container.get("image") ==
+    Some(
+      Json::string(
+        "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@sha256:a930a8b61a5d75db2b6f1367e6c832a6c0eccd06dc3c2a0309d2570296bd625a",
+      ),
+    ) &&
+    spec.get("initContainers") is Some(Array(inits)) &&
+    inits.length() == 1 &&
+    inits[0] is Object(init) &&
+    spec.get("volumes") is Some(Array(volumes)) &&
+    container.get("volumeMounts") is Some(Array(mounts)) &&
+    container.get("env") is Some(Array(env)) else {
+    fail("Public deployment changed; inspect before publishing")
+  }
+  @fs.write_file(
+    root + "/public-platform-before.json",
+    current.stringify(indent=2),
+    create_mode=CreateNew,
+    permission=0o600,
+    sync=Full,
+  )
+  guard @json.parse(@fs.read_file(root + "/event-week01.json").text())
+    is Object(event) else {
+    fail("Invalid event template")
+  }
+  event.set(
+    "provider_origin", "http://image-adapter.lunanexa.svc.cluster.local:18991",
+  )
+  event.set("provider_key_file", "/run/creative-client/token")
+  let cm : Json = {
+    "apiVersion": "v1",
+    "kind": "ConfigMap",
+    "metadata": { "name": "moontown-coffee-week01", "namespace": ns },
+    "data": { "event.json": Json::object(event).stringify() },
+  }
+  let pvc : Json = {
+    "apiVersion": "v1",
+    "kind": "PersistentVolumeClaim",
+    "metadata": { "name": "moontown-creative-state", "namespace": ns },
+    "spec": {
+      "storageClassName": "lunanexa-workspaces-rwx",
+      "accessModes": ["ReadWriteMany"],
+      "resources": { "requests": { "storage": "8Gi" } },
+    },
+  }
+  let network : Json = {
+    "apiVersion": "networking.k8s.io/v1",
+    "kind": "NetworkPolicy",
+    "metadata": { "name": "moontown-creative-provider", "namespace": ns },
+    "spec": {
+      "podSelector": { "matchLabels": { "app": "moontown-platform" } },
+      "policyTypes": ["Egress"],
+      "egress": [
+        {
+          "to": [
+            {
+              "namespaceSelector": {
+                "matchLabels": { "kubernetes.io/metadata.name": "lunanexa" },
+              },
+              "podSelector": { "matchLabels": { "app": "image-adapter" } },
+            },
+          ],
+          "ports": [{ "protocol": "TCP", "port": 18991 }],
+        },
+      ],
+    },
+  }
+  for
+    (name, value) in [
+      ("coffee-config", cm),
+      ("coffee-state", pvc),
+      ("coffee-provider-network", network),
+    ] {
+    let path = root + "/" + name + ".json"
+    @fs.write_file(
+      path,
+      value.stringify(indent=2),
+      create_mode=CreateNew,
+      permission=0o600,
+    )
+    println(kube(["apply", "-f", path]))
+  }
+  for item in env {
+    if item is { "name": String(name), .. } &&
+      name.has_prefix("MOONTOWN_CREATIVE_") {
+      fail("Creative configuration already exists")
+    }
+  }
+  env.push({
+    "name": "MOONTOWN_CREATIVE_STATE_FILE",
+    "value": "/creative/banxing-coffee-20261106/state.json",
+  })
+  env.push({
+    "name": "MOONTOWN_CREATIVE_CONFIG_FILE",
+    "value": "/run/creative-config/event.json",
+  })
+  env.push({
+    "name": "MOONTOWN_CREATIVE_ALLOWED_ORIGINS",
+    "value": "[\"https://suanli.kechuangfuwu.com\",\"https://suanli.kechuangfuwu.com:8443\"]",
+  })
+  mounts.push({ "name": "creative-state", "mountPath": "/creative" })
+  mounts.push({
+    "name": "creative-config",
+    "mountPath": "/run/creative-config",
+    "readOnly": true,
+  })
+  mounts.push({
+    "name": "creative-client",
+    "mountPath": "/run/creative-client",
+    "readOnly": true,
+  })
+  volumes.push({
+    "name": "creative-state",
+    "persistentVolumeClaim": { "claimName": "moontown-creative-state" },
+  })
+  volumes.push({
+    "name": "creative-config",
+    "configMap": { "name": "moontown-coffee-week01", "defaultMode": 292 },
+  })
+  volumes.push({
+    "name": "creative-client",
+    "secret": { "secretName": "image-adapter-client", "defaultMode": 288 },
+  })
+  container.set(
+    "image", "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@sha256:fdb14e92ae6544cb8b61a2d065724c6c8e179587c7ab5c587ee4c50fefcb9fdb",
+  )
+  init.set(
+    "image", "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-ui@sha256:7c6984d70500238dce6fe097abe5e1f82cfc03a9853c7140355ae4a9ab5e06e6",
+  )
+  // One desired worker without a surge replica; durable claims and provider
+  // idempotency also fence any process still finishing its termination.
+  let patch : Json = [
+    { "op": "test", "path": "/metadata/resourceVersion", "value": version },
+    {
+      "op": "replace",
+      "path": "/spec/strategy",
+      "value": {
+        "type": "RollingUpdate",
+        "rollingUpdate": { "maxSurge": 0, "maxUnavailable": 1 },
+      },
+    },
+    {
+      "op": "replace",
+      "path": "/spec/template/spec",
+      "value": Json::object(spec),
+    },
+  ]
+  println(
+    kube([
+      "-n",
+      ns,
+      "patch",
+      "deployment",
+      "moontown-platform",
+      "--type=json",
+      "-p",
+      patch.stringify(),
+    ]),
+  )
+}
