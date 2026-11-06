@@ -1,0 +1,24 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/http",
+  "moonbitlang/core/json",
+}
+
+///|
+/// Read-only deployment preflight. Run inside the public gateway's network
+/// namespace; no identity, model grant, prompt or generation is involved.
+/// On Linux, native linking needs -pthread -ldl, as in the gateway package.
+async fn main {
+  @async.with_timeout(8000, () => {
+    let (response, body) = @http.get(
+      "http://image-adapter.lunanexa.svc.cluster.local:18991/health",
+    )
+    guard response.code == 200 &&
+      @json.parse(body.text())
+      is { "status": "ok", "component": "qualified-image-adapter", .. } else {
+      fail("Qualified image provider is not reachable from this network")
+    }
+    println("Public gateway network reached the qualified image adapter")
+  })
+}
