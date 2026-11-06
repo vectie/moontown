@@ -45,14 +45,14 @@ test "retained inquiry native fixture renders historical evidence editable field
   )
   for
     expected in [
-      "继续研究", "要研究的新问题", "Selected: water", "Selected: forest",
-      "Select: energy", "mobility", "Attributed fixture failure", "Exact retained excerpt from water",
-      "Independent challenge for forest", "审阅人姓名", "异议审阅人", "保存并编辑研究",
+      "继续研究", "要研究的新问题", "已选择：water", "已选择：forest",
+      "选择：energy", "mobility", "Attributed fixture failure", "原文片段 · water",
+      "独立质疑 · forest", "审阅人姓名", "异议审阅人", "保存并编辑研究",
       "取消继续研究", "sha256:", "&lt;script&gt;",
     ] {
     assert_true(html.contains(expected), msg=expected)
   }
-  assert_false(html.contains("Select: mobility"))
+  assert_false(html.contains("选择：mobility"))
   assert_false(html.contains("<script>"))
   let input : @collaboration.RetainedInquiry = @json.from_json(
     @json.parse(retained_inquiry_fixture_input()),

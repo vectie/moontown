@@ -116,9 +116,7 @@ fn render_retained_inquiry(
   if !state.inquiry_dossiers.is_empty() {
     content.push(h3("跨记录研究"))
     content.push(
-      p(
-        "从上方切换记录继续选择；修改片段后重新加入。",
-      ),
+      p("从上方切换记录继续选择；修改片段后重新加入。"),
     )
     for dossier in state.inquiry_dossiers {
       content.push(
@@ -223,10 +221,18 @@ fn render_retained_inquiry(
       ),
       on_click=dispatch(
         CollaborationAction(
-          if cross_dossier { "cross-dossier-inquiry" } else { "retained-inquiry" },
+          if cross_dossier {
+            "cross-dossier-inquiry"
+          } else {
+            "retained-inquiry"
+          },
         ),
       ),
-      if cross_dossier { "保存跨记录研究" } else { "保存并编辑研究" },
+      if cross_dossier {
+        "保存跨记录研究"
+      } else {
+        "保存并编辑研究"
+      },
     ),
   )
   content.push(
