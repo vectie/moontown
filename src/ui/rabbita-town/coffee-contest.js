@@ -39,7 +39,18 @@ function init() {
   const url = (path) => new URL(path, endpoint).href;
   let state = null, selected = "", actor = "", pendingIntent = null, writing = false, refreshing = false, timer, clockOffset = 0;
   const reviewDrafts = /* @__PURE__ */ new Map();
-  let votingDirty = false;
+  let votingDirty = false, followGeneration = false;
+  const dialog = $("submit-dialog");
+  function fitDialog() {
+    if (!dialog.open) return;
+    const viewport = window.visualViewport;
+    const height = viewport?.height || window.innerHeight;
+    dialog.style.setProperty("--dialog-height", `${height}px`);
+    dialog.style.setProperty("--dialog-center", `${(viewport?.offsetTop || 0) + height / 2}px`);
+  }
+  window.visualViewport?.addEventListener("resize", fitDialog);
+  window.visualViewport?.addEventListener("scroll", fitDialog);
+  window.addEventListener("resize", fitDialog);
   const node = (tag, text, className) => {
     const element = document.createElement(tag);
     if (text !== void 0) element.textContent = text;
@@ -55,14 +66,19 @@ function init() {
   function clearPrivate() {
     selected = "";
     pendingIntent = null;
+    followGeneration = false;
     $("create-form").reset();
     $("submit-form").reset();
     $("prompt-count").textContent = "0 / 2000";
+    document.querySelectorAll("[data-prompt]").forEach(button => button.setAttribute("aria-pressed", "false"));
     $("submit-dialog").close();
+    $("artwork-dialog").close();
+    $("artwork-image").removeAttribute("src");
     $("result-image").removeAttribute("src");
     $("result-image").removeAttribute("data-job");
     $("result").hidden = true;
     $("empty-preview").hidden = false;
+    $("result-panel").classList.add("is-empty");
     $("moderation").hidden = true;
     $("my-entry").hidden = true;
     $("history").replaceChildren();
@@ -83,7 +99,16 @@ function init() {
     return body;
   }
   function image(jobId, title) {
-    const wrap = node("div", void 0, "image-wrap");
+    const wrap = node("button", void 0, "image-wrap image-open");
+    wrap.type = "button";
+    wrap.setAttribute("aria-label", `放大查看：${title}`);
+    wrap.onclick = () => {
+      $("artwork-title").textContent = title;
+      $("artwork-image").src = url(`images/${jobId}`);
+      $("artwork-image").dataset.job = jobId;
+      $("artwork-image").alt = title;
+      $("artwork-dialog").showModal();
+    };
     const img = node("img");
     img.src = url(`images/${jobId}`);
     img.alt = title;
@@ -105,10 +130,14 @@ function init() {
     }
     actor = nextActor;
     state = value;
-    $("login").textContent = actor ? "我的账户 ↗" : "登录参与 ↗";
+    $("login").textContent = actor ? "账户 ↗" : "登录 ↗";
     $("generate").disabled = writing || Boolean(actor && (!open() || active() || state.remaining === 0 || state.event_remaining === 0 || !state.event.provider_ready));
-    $("generate").firstChild.textContent = actor ? !open() ? "本期投稿已截止 " : active() ? "有一张灵感正在路上 " : state.event_remaining===0 ? "本期生成名额已用完 " : !state.event.provider_ready ? "生成服务准备中 " : "生成一张图 " : "登录，开始创作 ";
-    $("credits").textContent = actor ? `本期还可生成 ${state.remaining} 张 · 参赛前仅自己可见` : "登录后生成；图片确认参赛前仅自己可见。";
+    $("generate").textContent = actor ? !open() ? "本期投稿已截止" : active() ? "正在生成，请稍等…" : state.remaining===0 ? "本期次数已用完" : state.event_remaining===0 ? "本期生成名额已用完" : !state.event.provider_ready ? "生成服务准备中" : "生成一张图" : "登录后生成";
+    $("generate").formNoValidate = !actor;
+    $("generate").setAttribute("aria-busy", String(writing || active()));
+    $("submit-entry").disabled = writing;
+    $("submit-entry").textContent = writing && dialog.open ? "正在提交…" : "提交审核";
+    $("credits").textContent = actor ? `本期还可生成 ${state.remaining} 张 · 投稿前仅自己可见` : `每人本期 ${state.event.participant_quota} 张 · 投稿前仅自己可见`;
     const now = Date.now() + clockOffset, ev = state.event;
     if(ev.name)$("event-name").textContent=ev.name;
     if(ev.topic)$("event-topic").textContent=`本期主题：${ev.topic}`;
@@ -117,21 +146,34 @@ function init() {
     const date = (value,withTime=false) => new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',weekday:'short',...(withTime?{hour:'2-digit',minute:'2-digit',hour12:false}:{})}).format(Number(value));
     $("start-time").textContent=date(ev.opens_ms);
     $("deadline-time").textContent=date(ev.deadline_ms,true);
+    $("deadline-note").textContent = `${new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(Number(ev.deadline_ms))} 截稿`;
     $("awards-time").textContent=date(ev.awards_ms);
     $("phase").textContent = now < Number(ev.deadline_ms) && !ev.provider_ready ? "创作即将开放" : now < Number(ev.opens_ms) ? "即将开始" : now < Number(ev.deadline_ms) ? "正在征集灵感" : now < Number(ev.voting_opens_ms) ? "投稿结束 · 正在审核" : now < Number(ev.voting_closes_ms) ? "一起为灵感投票" : "本期已结束";
     const jobs = state.generations || [], completed = jobs.filter((j) => j.state === "completed");
+    const job = jobs.find((j) => ["queued", "running", "needs_reconcile"].includes(j.state)) || jobs.at(-1);
+    if (followGeneration && job?.state === "completed") selected = job.id;
     if (!completed.some((j) => j.id === selected)) selected = completed.at(-1)?.id || "";
-    $("empty-preview").hidden = Boolean(selected);
     $("result").hidden = !selected;
     if (selected && $("result-image").dataset.job !== selected) {
       $("result-image").src = url(`images/${selected}`);
       $("result-image").dataset.job = selected;
     }
     $("choose").disabled = writing || !open();
-    const job = jobs.find((j) => ["queued", "running", "needs_reconcile"].includes(j.state)) || jobs.at(-1);
+    $("empty-preview").hidden = Boolean(selected || job);
+    $("result-panel").classList.toggle("is-empty", !selected && !job);
     $("job-status").hidden = !job || job.state === "completed";
     $("job-status").textContent = jobLabels[job?.state] || "";
     $("job-status").dataset.active = String(["queued", "running"].includes(job?.state));
+    if (followGeneration && job && !["queued", "running"].includes(job.state)) {
+      followGeneration = false;
+      notice(job.state === "completed" ? "图片已生成，喜欢就用这张参赛。" : "");
+      if (job.state === "completed" && window.matchMedia("(max-width: 800px)").matches && !document.activeElement?.matches("input, textarea, select")) {
+        requestAnimationFrame(() => {
+          $("result").focus({ preventScroll: true });
+          $("result").scrollIntoView({ block: "start", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+        });
+      }
+    }
     if (changed) $("history").replaceChildren(...completed.map((job2) => {
       const button = node("button");
       button.type = "button";
@@ -164,7 +206,12 @@ function init() {
       }
     }
     const gallery = state.gallery || [];
+    if ($("artwork-dialog").open && ![...gallery.map(e => e.generation_id), ...jobs.map(j => j.id), ...(state.review_queue || []).map(item => item.generation.id)].includes($("artwork-image").dataset.job)) {
+      $("artwork-dialog").close();
+      $("artwork-image").removeAttribute("src");
+    }
     $("gallery-empty").hidden = gallery.length > 0;
+    $("vote-note").hidden = !gallery.length && !state.voting_url;
     if (changed) $("gallery-grid").replaceChildren(...gallery.map((entry2) => {
       const card = node("article", void 0, "gallery-card");
       card.append(image(entry2.generation_id, entry2.title), node("h3", entry2.title), node("p", `${entry2.display_name} · 作品 ${entry2.id.slice(0, 8)}`));
@@ -271,6 +318,9 @@ function init() {
     }
     writing = true;
     $("generate").disabled = true;
+    $("generate").setAttribute("aria-busy", "true");
+    $("submit-entry").disabled = true;
+    if (dialog.open) $("submit-entry").textContent = "正在提交…";
     try {
       const value = await request("actions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, payload, expected_actor_id: actor }) });
       writing = false;
@@ -294,12 +344,12 @@ function init() {
   }
   $("prompt").addEventListener("input", () => {
     $("prompt-count").textContent = `${$("prompt").value.length} / 2000`;
+    document.querySelectorAll("[data-prompt]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.prompt === $("prompt").value)));
     pendingIntent = null;
   });
   document.querySelectorAll("[data-prompt]").forEach((button) => button.onclick = () => {
     $("prompt").value = button.dataset.prompt;
     $("prompt").dispatchEvent(new Event("input"));
-    $("prompt").focus();
   });
   $("create-form").onsubmit = async (event) => {
     event.preventDefault();
@@ -309,15 +359,20 @@ function init() {
     }
     const prompt = $("prompt").value.trim();
     if (!prompt) return;
+    $("prompt").blur();
+    followGeneration = true;
     if (!pendingIntent || pendingIntent.prompt !== prompt) pendingIntent = { prompt, intent: crypto.randomUUID() };
     if (await perform("generate", pendingIntent)) pendingIntent = null;
+    else followGeneration = false;
   };
   $("choose").onclick = () => {
     notice("", false, "submit-notice");
     $("submit-dialog").showModal();
+    fitDialog();
     $("entry-title").focus();
   };
   $("close-dialog").onclick = () => $("submit-dialog").close();
+  $("close-artwork").onclick = () => $("artwork-dialog").close();
   $("submit-form").onsubmit = async (event) => {
     event.preventDefault();
     if (await perform("submit", { generation_id: selected, title: $("entry-title").value, display_name: $("display-name").value, consent: $("consent").checked }, "submit-notice")) {
@@ -339,6 +394,15 @@ function init() {
   };
   $("publish-results").onclick = () => perform("publish-results", {});
   $("refresh").onclick = refresh;
+  document.querySelector('a[href="#about"]').addEventListener("click", () => { $("about").open = true; });
+  function revealDetailsTarget() {
+    if (!["#about", "#inspiration"].includes(location.hash)) return;
+    $("about").open = true;
+    if (location.hash === "#inspiration") $("inspiration").open = true;
+    document.querySelector(location.hash)?.scrollIntoView({ block: "start" });
+  }
+  window.addEventListener("hashchange", revealDetailsTarget);
+  revealDetailsTarget();
   function saveBlob(blob, name) {
     const link = node("a");
     link.href = URL.createObjectURL(blob);

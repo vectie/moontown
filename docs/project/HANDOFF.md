@@ -55,3 +55,25 @@ existing documentation and record concrete pitfalls here.
   unchanged 194-file Rabbita batch suite passed. A same-seed cache hit is not
   a fresh-generation benchmark. Downloaded PNGs have a visible AI footer and
   structured AIGC metadata. State backup extraction matched its source bytes.
+
+## 2026-11-07 · 手机端精简复核
+
+- Keep the established cream/green coffee page. The hero, prompt and generation
+  action fit a 320×568 viewport, including the private rehearsal banner. Keep
+  rules/prizes collapsed, an empty result area hidden on mobile, 44px touch
+  targets and 16px form inputs. Do not add a fixed footer above the keyboard.
+- Submission dialogs follow visualViewport and retain a sticky close control
+  while scrolling. Verified a 375×400 contracted viewport, not a real iOS/Android
+  keyboard. The gallery opens an accessible, AI-labelled image dialog; landscape
+  812×375 was checked. New generations select the newest image and focus the
+  result on mobile without interrupting someone typing into another field.
+- For visual QA, the `_wbtest` harness can load an explicit local base64 image
+  only in rehearsal mode. Its banner says static sample/no GPU. Never describe
+  that path as fresh inference or ship its test login routes in production.
+- UI-only releases use `deploy-account-ui.mbtx`: compare resourceVersion and
+  previous digest, back up privately and patch only the public-assets image.
+- This pass: browser JS 180/180, isolated gateway native 184/184, production
+  artifact 797 files verified. `moon info`/`moon fmt` passed in the isolated
+  dependency closure; the shared workspace info command encounters unrelated
+  in-progress dependency errors. Do not rewrite neighbouring projects to fix
+  those while making this UI change.

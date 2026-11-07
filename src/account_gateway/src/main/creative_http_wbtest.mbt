@@ -1,6 +1,21 @@
 ///|
 async test "creative HTTP isolates two accounts and publishes only the approved version" {
   let rehearsal = @env.get_env_var("MOONTOWN_CREATIVE_UI_REHEARSAL_DIST")
+  let static_image = if rehearsal is Some(_) {
+    @env.get_env_var("MOONTOWN_CREATIVE_UI_FIXTURE_B64_FILE")
+  } else {
+    None
+  }
+  let fixture_image = if static_image is Some(path) {
+    guard path.has_prefix("/") else {
+      fail("UI sample must be an explicit local file")
+    }
+    let encoded = @fs.read_file(path).text().trim().to_owned()
+    guard encoded.length() < 12000000 else { fail("UI sample is too large") }
+    encoded
+  } else {
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aH2QAAAAASUVORK5CYII="
+  }
   let real_provider = if rehearsal is Some(_) {
     @env.get_env_var("MOONTOWN_CREATIVE_UI_PROVIDER_ORIGIN")
   } else {
@@ -142,11 +157,7 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
         )
         reply_json(conn, 200, {
           "id": "fixture-output",
-          "data": [
-            {
-              "b64_json": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aH2QAAAAASUVORK5CYII=",
-            },
-          ],
+          "data": [{ "b64_json": fixture_image }],
         })
       })
     })
@@ -184,7 +195,9 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
             .text()
             .replace(
               old="<body>",
-              new=if real_provider is Some(_) {
+              new=if static_image is Some(_) {
+                "<body><div class='rehearsal-notice' style='padding:8px;background:#ffe7a1;text-align:center;font-size:12px'>私有界面验收 · 静态样图，不请求 GPU · <a href='/user/'>切换测试账户</a></div>"
+              } else if real_provider is Some(_) {
                 "<body><div style='padding:12px;background:#ffe7a1;text-align:center'>私有联调 · 177 真实 AI 出图 · 测试身份，不是正式参赛 · <a href='/user/'>切换测试账户</a></div>"
               } else {
                 "<body><div style='padding:12px;background:#ffe7a1;text-align:center'>本地接口测试 · 返回 1 像素测试图，非真实 AI 出图 · <a href='/user/'>切换测试账户</a></div>"

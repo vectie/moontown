@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light">
   <title>半醒咖啡 · 每周创作｜MoonTown</title>
   <meta name="description" content="写下一点想象，让半醒咖啡长出新的样子。生成、投稿、一起看作品。">
@@ -24,71 +24,48 @@
     <nav aria-label="活动导航">
 <a href="#gallery">作品墙</a>
 <a href="#about">活动说明</a>
-<a id="login" href="/user/">登录参与 <span aria-hidden="true">↗</span>
+<a id="login" href="/user/">登录 <span aria-hidden="true">↗</span>
 </a>
 </nav>
   </header>
   <main>
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <p class="eyebrow">
-<span class="live-dot" aria-hidden="true">
-</span> <span id="event-name">第 01 期 · 半醒咖啡</span>
-</p>
-        <h1 id="hero-title">给半醒的日常，<br>加一点<span class="imagination">想象。</span>
-</h1>
-        <p class="hero-description">一杯咖啡，能装下什么？<br>写一段提示词，让你的答案变成一张画。</p>
+        <h1 id="hero-title"><span id="event-name">半醒咖啡 · 第 01 期</span></h1>
         <div class="event-note">
-<span id="phase">11.06 — 11.13</span>
-<span>周四截止 · 周五揭晓</span>
+<span id="phase">征集中</span>
+<span id="deadline-note">11 月 12 日 18:00 截稿</span>
 </div>
       </div>
       <div class="hero-art" aria-label="主办提供的半醒工坊咖啡杯参考素材">
-        <span class="art-orbit" aria-hidden="true">
-</span>
-        <img src="coffee/cup.png" width="1040" height="1400" alt="奶油色半醒工坊咖啡杯，杯上保留原始品牌标志" fetchpriority="high">
-        <span class="reference-note">品牌素材 · 非参赛作品</span>
+        <img src="coffee/cup.png" width="1040" height="1400" alt="主办参考杯型，非参赛作品" fetchpriority="high">
       </div>
     </section>
 
     <section class="create-section" aria-labelledby="create-title">
-      <div class="section-heading">
-<div>
-<h2 id="create-title">你的灵感，从这里开始</h2>
-</div>
-<span class="step-note">写提示词 → 生成图片 → 选一张参赛</span>
-</div>
       <div class="studio">
         <form id="create-form" class="composer">
-          <label for="prompt">把今天的想象写下来</label>
-          <textarea id="prompt" name="prompt" maxlength="2000" rows="6" placeholder="比如：清晨的咖啡杯里，住着一座还没醒来的小小城市。暖奶油色，手绘插画，轻松又有一点奇妙……" required>
+          <label id="create-title" for="prompt">描述你的半醒时刻</label>
+          <textarea id="prompt" name="prompt" maxlength="2000" rows="4" placeholder="例：咖啡杯里住着一座还没醒来的小城，暖奶油色，手绘插画。" required>
 </textarea>
           <div class="prompt-meta">
-<span>围绕「半醒咖啡」，风格由你决定</span>
+<span>点一个灵感，也可以自己写</span>
 <span id="prompt-count">0 / 2000</span>
 </div>
-          <p class="small-label">没想好？从一个灵感开始</p>
           <div class="prompt-chips" aria-label="提示词灵感">
-<button type="button" data-prompt="一只装着清晨的咖啡杯，杯中是一座还没有醒来的微缩小城，奶油色和森林绿，温暖的手绘插画，安静而奇妙，不要文字和商标">杯里的小城 <span>↗</span>
-</button>
-<button type="button" data-prompt="半醒咖啡的奇妙早晨，一只打哈欠的小云朵坐在咖啡杯边，纸质拼贴与柔软的剪纸层次，温暖阳光，简洁构图，不要文字和商标">云朵打个盹 <span>↗</span>
-</button>
-<button type="button" data-prompt="半醒时刻的咖啡想象，咖啡香气化成一片会生长的小森林，黏土微缩世界，圆润可爱，暖奶油底色与自然绿，不要文字和商标">一口小森林 <span>↗</span>
-</button>
+<button type="button" aria-pressed="false" data-prompt="一只装着清晨的咖啡杯，杯中是一座还没有醒来的微缩小城，奶油色和森林绿，温暖的手绘插画，安静而奇妙，不要文字和商标">杯里小城</button>
+<button type="button" aria-pressed="false" data-prompt="半醒咖啡的奇妙早晨，一只打哈欠的小云朵坐在咖啡杯边，纸质拼贴与柔软的剪纸层次，温暖阳光，简洁构图，不要文字和商标">云朵打盹</button>
+<button type="button" aria-pressed="false" data-prompt="半醒时刻的咖啡想象，咖啡香气化成一片会生长的小森林，黏土微缩世界，圆润可爱，暖奶油底色与自然绿，不要文字和商标">一口森林</button>
 </div>
-          <button id="generate" class="primary" type="submit">生成一张图 <span aria-hidden="true">✦</span>
-</button>
-          <p id="credits" class="fine-print">登录后生成；图片确认参赛前仅自己可见。</p>
-          <p id="notice" class="notice" role="status" aria-live="polite">
-</p>
+          <button id="generate" class="primary" type="submit" formnovalidate>登录后生成</button>
+          <p id="credits" class="fine-print">投稿前仅自己可见。</p>
+          <p id="notice" class="notice" role="status" aria-live="polite"></p>
         </form>
-        <div class="result-panel">
+        <div id="result-panel" class="result-panel is-empty">
           <div id="empty-preview" class="empty-preview">
-<span class="preview-sun" aria-hidden="true">✳</span>
-<p>这里，等一个好点子</p>
-<span>生成的图片会出现在这里</span>
+<p>生成的图片会出现在这里</p>
 </div>
-          <div id="result" hidden>
+          <div id="result" tabindex="-1" aria-label="生成结果" hidden>
 <div class="image-wrap">
 <img id="result-image" alt="你本次生成的作品">
 <span class="ai-label">AI 生成</span>
@@ -102,8 +79,7 @@
 </div>
           <div id="job-status" class="job-status" role="status" aria-live="polite" hidden>
 </div>
-          <div id="history" class="history" aria-label="本期生成记录">
-</div>
+          <div id="history" class="history" aria-label="本期生成记录"></div>
         </div>
       </div>
       <section id="my-entry" class="my-entry" aria-label="我的投稿" hidden>
@@ -113,23 +89,22 @@
     <section id="gallery" class="gallery-section" aria-labelledby="gallery-title">
 <div class="section-heading">
 <div>
-<h2 id="gallery-title">看看大家的半醒时刻</h2>
+<h2 id="gallery-title">作品墙</h2>
 </div>
 <a id="vote" class="secondary" href="#" target="_blank" rel="noopener noreferrer" hidden>为喜欢的作品投一票 ↗</a>
 </div>
 <p id="vote-note" class="section-description">过审作品会出现在这里。投票开放后，可以为喜欢的作品加油。</p>
 <div id="gallery-grid" class="gallery-grid">
 </div>
-<p id="gallery-empty" class="gallery-empty">第一张灵感，还在路上。<br>
-<span>你的那一张，会是什么样？</span>
-</p>
+<p id="gallery-empty" class="gallery-empty">还没有过审作品。</p>
 <div id="awards" class="awards" hidden>
 </div>
 </section>
 
-    <section id="about" class="about-section" aria-labelledby="about-title">
+    <details id="about" class="about-section">
+<summary><h2 id="about-title">活动说明与奖品</h2></summary>
+<div class="about-content">
 <div>
-<h2 id="about-title">本期活动</h2>
 <p>每人一张有效投稿。<br>过审后，一起为喜欢的作品投票。</p>
 <img class="brand-logo" src="coffee/logo.svg" alt="半醒工坊原始标志" loading="lazy">
 </div>
@@ -164,7 +139,8 @@
 <p>大众投票使用主办配置的腾讯文档链接，投票规则与异常票处理以主办公布为准。本站不展示未经核对的实时票数，不自动认定获奖。所有时间为北京时间。</p>
 </details>
 </div>
-</section>
+</div>
+</details>
     <section id="moderation" class="moderation" hidden aria-labelledby="moderation-title">
 <div class="section-heading">
 <div>
@@ -172,8 +148,7 @@
 </div>
 <button id="refresh" class="text-button" type="button">刷新状态 ↻</button>
 </div>
-<p id="host-notice" class="notice" role="status" aria-live="polite">
-</p>
+<p id="host-notice" class="notice" role="status" aria-live="polite"></p>
 <form id="voting-form">
 <label for="voting-url">腾讯文档投票链接</label>
 <div class="inline-form">
@@ -208,26 +183,36 @@
   </main>
   <footer>
 <a href="./">MoonTown</a>
-<span>半醒咖啡 · 每周创作</span>
 <a href="#create-title">回到创作 ↑</a>
 </footer>
-  <dialog id="submit-dialog">
+  <dialog id="submit-dialog" aria-labelledby="submit-title">
 <form id="submit-form">
+<div class="dialog-heading">
+<h2 id="submit-title">用这张参赛</h2>
 <button class="dialog-close text-button" type="button" id="close-dialog" aria-label="关闭投稿">×</button>
-<h2>给这份灵感起个名字</h2>
+</div>
 <label for="entry-title">作品名</label>
-<input id="entry-title" maxlength="60" placeholder="比如：小城还没醒" required>
+<input id="entry-title" maxlength="60" placeholder="比如：小城还没醒" enterkeyhint="next" required>
 <label for="display-name">展示昵称</label>
-<input id="display-name" maxlength="40" placeholder="希望大家怎么称呼你？" required>
+<input id="display-name" maxlength="40" placeholder="希望大家怎么称呼你？" autocomplete="nickname" enterkeyhint="done" required>
 <label class="consent">
 <input id="consent" type="checkbox" required>
 <span>我确认有权使用相关素材，同意本张作品在本期活动中公开展示和投票。</span>
 </label>
 <p class="fine-print">每人一张有效投稿；新投稿会替换旧版并重新审核。</p>
-<button class="primary" type="submit">提交审核 →</button>
-<p id="submit-notice" class="notice" role="status">
-</p>
+<button id="submit-entry" class="primary" type="submit">提交审核</button>
+<p id="submit-notice" class="notice" role="status"></p>
 </form>
+</dialog>
+<dialog id="artwork-dialog" class="artwork-dialog" aria-labelledby="artwork-title">
+<div class="dialog-heading">
+<h2 id="artwork-title">作品</h2>
+<button id="close-artwork" class="dialog-close text-button" type="button" aria-label="关闭大图">×</button>
+</div>
+<div class="image-wrap">
+<img id="artwork-image" alt="">
+<span class="ai-label">AI 生成</span>
+</div>
 </dialog>
 </body>
 </html>

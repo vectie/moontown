@@ -1,0 +1,109 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  let result = @shell.Cmd(
+    "kubectl",
+    ["--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", ..args],
+  ).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+/// Publish static resources without changing application, identity or compute.
+async fn main {
+  guard @env.args() is [_, root, previous, next] &&
+    root.has_prefix("/home/HwHiAiUser/") else {
+    fail(
+      "deploy-account-ui.mbtx PRIVATE_RELEASE_DIR PREVIOUS_DIGEST NEXT_DIGEST",
+    )
+  }
+  for digest in [previous, next] {
+    guard digest.has_prefix("sha256:") &&
+      digest.length() == 71 &&
+      digest
+      .strip_prefix("sha256:")
+      .unwrap()
+      .all(c => c is ('0'..<='9' | 'a'..<='f')) else {
+      fail("Use immutable SHA256 image digests")
+    }
+  }
+  guard previous != next else { fail("UI image has not changed") }
+  let ns = "aigc-acceptance-20260915"
+  let current = @json.parse(
+    kube(["-n", ns, "get", "deployment", "moontown-platform", "-o", "json"]),
+  )
+  let image = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-ui@"
+  guard current
+    is {
+      "metadata": { "resourceVersion": String(version), .. },
+      "spec": {
+        "replicas": 1,
+        "template": {
+          "spec": {
+            "initContainers": [
+              { "name": "public-assets", "image": String(old), .. },
+            ],
+            "containers": [{ "name": "platform", "image": String(runtime), .. }],
+            ..
+          },
+          ..
+        },
+        ..
+      },
+      ..
+    } &&
+    old == image + previous else {
+    fail("Public deployment changed; inspect before publishing")
+  }
+  @fs.write_file(
+    root + "/platform-before-ui.json",
+    current.stringify(indent=2),
+    create_mode=CreateNew,
+    permission=0o600,
+    sync=Full,
+  )
+  let patch : Json = [
+    { "op": "test", "path": "/metadata/resourceVersion", "value": version },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/initContainers/0/name",
+      "value": "public-assets",
+    },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/initContainers/0/image",
+      "value": old,
+    },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/containers/0/image",
+      "value": runtime,
+    },
+    {
+      "op": "replace",
+      "path": "/spec/template/spec/initContainers/0/image",
+      "value": image + next,
+    },
+  ]
+  println(
+    kube([
+      "-n",
+      ns,
+      "patch",
+      "deployment",
+      "moontown-platform",
+      "--type=json",
+      "--patch",
+      patch.stringify(),
+    ]),
+  )
+}
