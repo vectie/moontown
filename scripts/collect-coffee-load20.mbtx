@@ -1,0 +1,87 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  let result = @shell.Cmd(
+    "kubectl",
+    ["--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", ..args],
+  ).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, root] && root.has_prefix("/home/HwHiAiUser/") else {
+    fail("collect-coffee-load20.mbtx PRIVATE_RELEASE_DIR")
+  }
+  let ns = "aigc-acceptance-20260915"
+  guard @json.parse(
+      kube([
+        "-n", ns, "get", "pvc", "moontown-coffee-load20-state", "-o", "json",
+      ]),
+    )
+    is { "spec": { "volumeName": String(pv), .. }, .. } else {
+    fail("Missing load PVC")
+  }
+  guard @json.parse(kube(["get", "pv", pv, "-o", "json"]))
+    is {
+      "spec": {
+        "csi": {
+          "volumeAttributes": {
+            "server": "192.168.2.175",
+            "share": "/data/lunanexa-workspaces",
+            "subDir": String(subdir),
+            ..
+          },
+          ..
+        },
+        ..
+      },
+      ..
+    } &&
+    subdir.has_prefix(ns + "/moontown-coffee-load20-state/") &&
+    !subdir.contains("..") else {
+    fail("Unexpected load storage")
+  }
+  let state = @fs.read_file(
+    "/data/lunanexa-workspaces/" + subdir + "/coffee-load20-20261107/state.json",
+  ).text()
+  guard @json.parse(state)
+    is {
+      "challenge_id": "coffee-load20-20261107",
+      "generations": Array(jobs),
+      ..
+    } &&
+    jobs.length() == 20 &&
+    jobs.all(job => {
+      job is { "state": String("completed" | "failed" | "needs_reconcile"), .. }
+    }) else {
+    fail("20jobs have not reached terminal state")
+  }
+  @fs.write_file(root + "/server-state.json", state, permission=0o600)
+  @fs.write_file(root + "/stop-monitor", "complete", permission=0o600)
+  @fs.write_file(
+    root + "/pods-after.json",
+    kube([
+      "-n", ns, "get", "pods", "-l", "app=moontown-coffee-load20", "-o", "json",
+    ]),
+    permission=0o600,
+  )
+  @fs.write_file(
+    root + "/models-after.json",
+    kube([
+      "-n", "lunanexa", "get", "pods", "-l", "app in (image-adapter,comfyui-image,qwen3-llm)",
+      "-o", "json",
+    ]),
+    permission=0o600,
+  )
+  println("Collected20terminalserverrecords and retained private evidence")
+}

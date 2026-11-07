@@ -1,0 +1,116 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  let result = @shell.Cmd(
+    "kubectl",
+    ["--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", ..args],
+  ).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, root] &&
+    root.has_prefix("/home/HwHiAiUser/") &&
+    @json.parse(@fs.read_file(root + "/server-state.json").text())
+    is {
+      "challenge_id": "coffee-load20-20261107",
+      "generations": Array(jobs),
+      ..
+    } &&
+    jobs.length() == 20 &&
+    jobs.all(job => job is { "state": "completed", .. }) else {
+    fail("Only stop the completed20-job rehearsal")
+  }
+  let ns = "aigc-acceptance-20260915"
+  let name = "moontown-coffee-load20"
+  let current = @json.parse(
+    kube(["-n", ns, "get", "deployment", name, "-o", "json"]),
+  )
+  guard current
+    is {
+      "metadata": { "resourceVersion": String(version), .. },
+      "spec": {
+        "replicas": 1,
+        "template": {
+          "spec": {
+            "containers": [
+              {
+                "name": "platform",
+                "image": String(image),
+                "env": Array(environment),
+                ..
+              },
+            ],
+            ..
+          },
+          ..
+        },
+        ..
+      },
+      ..
+    } &&
+    image ==
+    "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@sha256:62213c1b44971cb81730fb288dcab73477b855833e2572272d4b7dabea2bfff4" &&
+    environment.any(item => {
+      item
+      is {
+        "name": "MOONTOWN_CREATIVE_STATE_FILE",
+        "value": "/creative/coffee-load20-20261107/state.json",
+        ..
+      }
+    }) else {
+    fail("Rehearsal drift")
+  }
+  @fs.write_file(
+    root + "/deployment-finished.json",
+    current.stringify(),
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  let patch : Json = [
+    { "op": "test", "path": "/metadata/resourceVersion", "value": version },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/containers/0/image",
+      "value": image,
+    },
+    { "op": "test", "path": "/spec/replicas", "value": 1 },
+    { "op": "replace", "path": "/spec/replicas", "value": 0 },
+  ]
+  println(
+    kube([
+      "-n",
+      ns,
+      "patch",
+      "deployment",
+      name,
+      "--type=json",
+      "--patch",
+      patch.stringify(),
+    ]),
+  )
+  // Remove only this run's public exposure and added policy grants. Preserve
+  // the complete PVC, files and reproducible manifests for inspection.
+  for
+    resource in [
+      "route", "rewrite", "provider-network", "network-moontown-creative-provider",
+      "network-moontown-platform",
+    ] {
+    println(
+      kube(["delete", "-f", root + "/" + resource + ".json", "--wait=true"]),
+    )
+  }
+  println(
+    "Stopped load instance and removed its route/policies; retained20images and state, no production/GPU settings changed",
+  )
+}

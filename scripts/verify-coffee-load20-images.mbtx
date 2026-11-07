@@ -1,0 +1,35 @@
+///|
+import {
+  "moonbitlang/x@0.5.5/fs",
+  "moonbitlang/x@0.5.5/crypto",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+fn main raise {
+  guard @env.args() is [_, root] &&
+    @json.parse(@fs.read_file_to_string(root + "/jobs.json")) is Array(jobs) else {
+    fail("Need evidence directory")
+  }
+  let results : Array[Json] = []
+  for job in jobs {
+    guard job is { "user": String(key), "sha256": String(expected), .. } else {
+      fail("Bad job")
+    }
+    let bytes = @fs.read_file_to_bytes(root + "/" + key + "-image.png")
+    let actual = @crypto.bytes_to_hex_string(@crypto.sha256(bytes))
+    results.push({
+      "user": key,
+      "bytes": bytes.length(),
+      "match": actual == expected,
+      "actual": actual,
+      "expected": expected,
+    })
+  }
+  @fs.write_string_to_file(
+    root + "/image-verification.json",
+    Json::array(results).stringify(indent=2),
+  )
+  println(Json::array(results).stringify(indent=2))
+}

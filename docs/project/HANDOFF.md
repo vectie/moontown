@@ -3,6 +3,26 @@
 Read this with `AGENTS.md` before starting work. Keep task evidence in its
 existing documentation and record concrete pitfalls here.
 
+## 2026-11-07 · 20-user coffee load test
+
+- Read `COFFEE_LOAD20_2026-11-07.md`. Twenty real ordinary sessions submitted
+  within 2ms; all twenty distinct images completed. The formal-first-event
+  creative path was cloned into an isolated instance; this is not a benchmark
+  of twenty physical browsers or twenty concurrent Book launches.
+- The worker and image adapter serialize inference. Median execution was 8.56s,
+  but median user-visible completion was 105.20s and the tail 204.12s. Do not
+  equate twenty accepted jobs with twenty GPU executions.
+- Forty of 620 authenticated polls returned 503 in two waves near the 3500ms
+  identity budget; subsequent polls recovered. Idle read-only replay was 80/80.
+  Diagnose the auth dependency before claiming the concurrent UX is ready.
+  Do not cache completed authorization to hide this while breaking revocation.
+- First image-download verification retained one truncated file; a download-only
+  replay passed 20/20 without GPU resubmission. A load tool must persist all
+  response/transport errors before failing; early task-group cancellation loses
+  diagnostic evidence and must not be mistaken for a complete success report.
+- Test route/policies removed, dedicated deployment scaled to zero, PVC and
+  evidence retained. Existing formal/QA events and model settings were untouched.
+
 ## Integration and UI rules, 2026-11-06
 
 - `AGENTS.md` now carries MoonDesk's working style and UI/UX guidance, adapted

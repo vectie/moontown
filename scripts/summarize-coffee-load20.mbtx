@@ -1,0 +1,264 @@
+///|
+import {
+  "moonbitlang/x@0.5.5/fs",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+}
+
+///|
+fn field(value : Json, key : String) -> Json raise {
+  guard value is Object(fields) else { fail("Expected object") }
+  fields[key]
+}
+
+///|
+fn txt(value : Json) -> String raise {
+  guard value is String(text) else { fail("Expected string") }
+  text
+}
+
+///|
+fn number(value : Json) -> Double raise {
+  match value {
+    String(text) => @string.parse_double(text)
+    Number(value, ..) => value
+    _ => fail("Expected numeric value")
+  }
+}
+
+///|
+fn stats(values : Array[Double]) -> Json {
+  if values.is_empty() {
+    return Json::null()
+  }
+  let sorted = values.copy()
+  sorted.sort()
+  let count = sorted.length()
+  {
+    "n": count,
+    "min": sorted[0],
+    "p50": sorted[(count * 50 + 99) / 100 - 1],
+    "p95": sorted[(count * 95 + 99) / 100 - 1],
+    "max": sorted[count - 1],
+    "mean": sorted.fold(init=0.0, (a, b) => a + b) / count.to_double(),
+  }
+}
+
+///|
+fn maximum_overlap(intervals : Array[(Double, Double)]) -> Int32 {
+  let events : Array[(Double, Int32)] = []
+  for (a, b) in intervals {
+    events.push((a, 1))
+    events.push((b, -1))
+  }
+  events.sort_by((a, b) => {
+    if a.0 < b.0 {
+      -1
+    } else if a.0 > b.0 {
+      1
+    } else {
+      a.1 - b.1
+    }
+  })
+  let mut active = 0
+  let mut maximum = 0
+  for (_, delta) in events {
+    active += delta
+    maximum = maximum.max(active)
+  }
+  maximum
+}
+
+///|
+fn read(path : String) -> Json raise {
+  @json.parse(@fs.read_file_to_string(path))
+}
+
+///|
+fn main raise {
+  guard @env.args() is [_, root, output] &&
+    root.has_prefix("/") &&
+    output.has_prefix("/") else {
+    fail("summarize-coffee-load20.mbtx PRIVATE_EVIDENCE PUBLIC_SUMMARY_JSON")
+  }
+  guard read(root + "/samples.json") is Array(samples) &&
+    read(root + "/jobs.json") is Array(observed) &&
+    read(root + "/server-state.json") is { "generations": Array(jobs), .. } else {
+    fail("Incomplete evidence")
+  }
+  let phases : Map[String, Array[Double]] = Map([])
+  let all_phases : Map[String, Array[Double]] = Map([])
+  let errors : Array[Json] = []
+  let admissions : Map[String, Json] = Map([])
+  let starts : Array[Double] = []
+  let intervals : Array[(Double, Double)] = []
+  for sample in samples {
+    let phase = txt(field(sample, "phase"))
+    if !all_phases.contains(phase) {
+      all_phases[phase] = []
+    }
+    all_phases[phase].push(number(field(sample, "elapsed_ms")))
+    if sample is { "code": "200", "exit": 0, .. } {
+      if !phases.contains(phase) {
+        phases[phase] = []
+      }
+      phases[phase].push(number(field(sample, "elapsed_ms")))
+    } else {
+      errors.push(sample)
+    }
+    if phase == "admission.json" {
+      admissions[txt(field(sample, "user"))] = sample
+      let a = number(field(sample, "started_ms"))
+      let b = number(field(sample, "finished_ms"))
+      starts.push(a)
+      intervals.push((a, b))
+    }
+  }
+  let http : Map[String, Json] = Map([])
+  for phase, values in phases {
+    http[phase] = stats(values)
+  }
+  let all_http : Map[String, Json] = Map([])
+  for phase, values in all_phases {
+    all_http[phase] = stats(values)
+  }
+  let queue : Array[Double] = []
+  let generation : Array[Double] = []
+  let total : Array[Double] = []
+  let visible : Array[Double] = []
+  let server_intervals : Array[(Double, Double)] = []
+  let timing_rows : Array[Json] = []
+  let image_hashes : Set[String] = Set([])
+  for job in jobs {
+    if field(job, "state") != Json::string("completed") {
+      continue
+    }
+    image_hashes.add(txt(field(job, "sha256")))
+    let id = field(job, "id")
+    guard observed.iter().find_first(row => field(row, "id") == id) is Some(row) else {
+      fail("Missing observed completion")
+    }
+    let key = txt(field(row, "user"))
+    let submitted = number(field(job, "created_ms"))
+    let started = number(field(job, "started_ms"))
+    let finished = number(field(job, "finished_ms"))
+    let q = started - submitted
+    let g = finished - started
+    let t = finished - submitted
+    let v = number(field(row, "observed_ms")) -
+      number(field(admissions[key], "started_ms"))
+    queue.push(q)
+    generation.push(g)
+    total.push(t)
+    visible.push(v)
+    server_intervals.push((started, finished))
+    timing_rows.push({
+      "user": key,
+      "queue_ms": q,
+      "generation_ms": g,
+      "server_total_ms": t,
+      "client_visible_ms": v,
+    })
+  }
+  timing_rows.sort_by((a, b) => {
+    match (a, b) {
+      ({ "user": String(x), .. }, { "user": String(y), .. }) => x.compare(y)
+      _ => 0
+    }
+  })
+  let gpu : Array[Double] = []
+  let power : Array[Double] = []
+  let temperature : Array[Double] = []
+  let peak_memory : Map[String, Double] = Map([])
+  let peak_cpu : Map[String, Double] = Map([])
+  guard read(root + "/resource-samples.json") is Array(resources) else {
+    fail("No resource evidence")
+  }
+  for item in resources {
+    if field(item, "gpu") is { "exit": 0, "output": String(text), .. } {
+      let cells = text
+        .trim()
+        .split(",")
+        .map(x => x.trim().to_owned())
+        .to_array()
+      if cells.length() == 6 {
+        gpu.push(@string.parse_double(cells[1]))
+        power.push(@string.parse_double(cells[4]))
+        temperature.push(@string.parse_double(cells[5]))
+      }
+    }
+    for key in ["pods", "web", "formal"] {
+      if field(item, key) is { "exit": 0, "output": String(text), .. } {
+        for line in text.split("\n") {
+          let cells = line
+            .split(" ")
+            .filter(x => !x.is_empty())
+            .map(x => x.to_owned())
+            .to_array()
+          if cells.length() >= 3 &&
+            cells[1].has_suffix("m") &&
+            cells[2].has_suffix("Mi") {
+            let name = if cells[0].has_prefix("moontown-coffee-load20-") {
+              "load-web"
+            } else if cells[0].has_prefix("moontown-platform-") {
+              "formal-web"
+            } else if cells[0].has_prefix("image-adapter-") {
+              "image-adapter"
+            } else if cells[0].has_prefix("comfyui-image-") {
+              "comfyui"
+            } else if cells[0].has_prefix("qwen3-llm-") {
+              "qwen"
+            } else {
+              continue
+            }
+            let cpu = @string.parse_double(cells[1].strip_suffix("m").unwrap())
+            let mem = @string.parse_double(cells[2].strip_suffix("Mi").unwrap())
+            peak_cpu[name] = peak_cpu.get(name).unwrap_or(0.0).max(cpu)
+            peak_memory[name] = peak_memory.get(name).unwrap_or(0.0).max(mem)
+          }
+        }
+      }
+    }
+  }
+  starts.sort()
+  guard read(root + "/download-checks.json") is Array(downloads) &&
+    read(root + "/image-verification.json") is Array(initial) else {
+    fail("Missing download verification")
+  }
+  let download_latencies = downloads.map(row => {
+    number(field(field(row, "http"), "elapsed_ms"))
+  })
+  let summary : Json = {
+    "users": 20,
+    "jobs": jobs.length(),
+    "completed": queue.length(),
+    "http_requests": samples.length(),
+    "http_errors": Json::array(errors),
+    "latency_ms": Json::object(http),
+    "latency_including_errors_ms": Json::object(all_http),
+    "initial_download_hash_matches": initial
+    .filter(row => row is { "match": True, .. })
+    .length(),
+    "download_recheck_matches": downloads
+    .filter(row => row is { "match": True, .. })
+    .length(),
+    "download_recheck_latency_ms": stats(download_latencies),
+    "admission_start_spread_ms": starts[starts.length() - 1] - starts[0],
+    "peak_client_generation_requests": maximum_overlap(intervals),
+    "peak_server_inference_jobs": maximum_overlap(server_intervals),
+    "queue_ms": stats(queue),
+    "generation_ms": stats(generation),
+    "server_total_ms": stats(total),
+    "client_visible_ms": stats(visible),
+    "timings": Json::array(timing_rows),
+    "gpu_utilization_percent": stats(gpu),
+    "gpu_power_watts": stats(power),
+    "gpu_temperature_c": stats(temperature),
+    "peak_pod_memory_mib": Json(peak_memory),
+    "peak_pod_cpu_millicores": Json(peak_cpu),
+    "distinct_images": image_hashes.length(),
+  }
+  @fs.write_string_to_file(output, summary.stringify(indent=2) + "\n")
+  println(summary.stringify(indent=2))
+}

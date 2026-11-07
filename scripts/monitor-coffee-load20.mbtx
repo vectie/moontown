@@ -1,0 +1,72 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn probe(args : Array[String]) -> Json {
+  let started = @async.now()
+  let value = @shell.Cmd(
+    "kubectl",
+    ["--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", ..args],
+  ).output()
+  {
+    "started_ms": started.to_string(),
+    "exit": value.exit_code(),
+    "output": value.stdout(),
+  }
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, root] && root.has_prefix("/home/HwHiAiUser/") else {
+    fail("monitor-coffee-load20.mbtx PRIVATE_RELEASE_DIR")
+  }
+  let rows : Array[Json] = []
+  for i in 0..<90 {
+    let row : Map[String, Json] = {
+      "at_ms": Json::string(@async.now().to_string()),
+    }
+    @async.with_task_group(group => {
+      group.spawn_bg(() => {
+        row["gpu"] = probe([
+          "-n", "lunanexa", "exec", "deployment/comfyui-image", "-c", "runtime",
+          "--", "nvidia-smi", "--query-gpu=name,utilization.gpu,memory.used,memory.total,power.draw,temperature.gpu",
+          "--format=csv,noheader,nounits",
+        ])
+      })
+      group.spawn_bg(() => {
+        row["pods"] = probe([
+          "-n", "lunanexa", "top", "pods", "-l", "app in (image-adapter,comfyui-image,qwen3-llm)",
+        ])
+      })
+      group.spawn_bg(() => {
+        row["web"] = probe([
+          "-n", "aigc-acceptance-20260915", "top", "pods", "-l", "app=moontown-coffee-load20",
+        ])
+      })
+      group.spawn_bg(() => {
+        row["formal"] = probe([
+          "-n", "aigc-acceptance-20260915", "top", "pods", "-l", "app=moontown-platform",
+        ])
+      })
+    })
+    rows.push(Json::object(row))
+    @fs.write_file(
+      root + "/resource-samples.json",
+      Json::array(rows).stringify(),
+      permission=0o600,
+    )
+    if @fs.exists(root + "/stop-monitor") {
+      break
+    }
+    if i % 6 == 0 {
+      println("Recorded resource sample " + i.to_string())
+    }
+    @async.sleep(5000)
+  }
+}

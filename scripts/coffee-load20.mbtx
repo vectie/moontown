@@ -1,0 +1,516 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+let origin = "https://suanli.kechuangfuwu.com:8443"
+
+///|
+async fn write(path : String, value : Json) -> Unit {
+  @fs.write_file(path, value.stringify(), permission=0o600)
+}
+
+///|
+async fn request(
+  root : String,
+  key : String,
+  label : String,
+  url : String,
+  post~ : String? = None,
+) -> Json {
+  let output = root + "/" + key + "-" + label
+  @fs.write_file(output, "", permission=0o600)
+  let args = [
+    "--silent",
+    "--show-error",
+    "--max-time",
+    "30",
+    "--cookie",
+    root + "/" + key + "-cookies.txt",
+    "--output",
+    output,
+    "--write-out",
+    "%{http_code} %{time_total} %{size_download}",
+  ]
+  if post is Some(file) {
+    args.append([
+      "--header",
+      "Origin: " + origin,
+      "--header",
+      "Sec-Fetch-Site: same-origin",
+      "--header",
+      "Content-Type: application/json",
+      "--data-binary",
+      "@" + file,
+    ])
+  }
+  args.push(url)
+  let started = @async.now()
+  let result = @shell.Cmd("curl", args).output()
+  let finished = @async.now()
+  if result.exit_code() != 0 {
+    @fs.write_file(output + ".stderr", result.stderr(), permission=0o600)
+  }
+  let stats = result
+    .stdout()
+    .trim()
+    .split(" ")
+    .map(x => x.to_owned())
+    .to_array()
+  let code = if stats.length() > 0 { stats[0] } else { "000" }
+  if code != "200" {
+    @fs.write_file(
+      output + "." + started.to_string() + ".error",
+      @fs.read_file(output).binary(),
+      permission=0o600,
+    )
+  }
+  {
+    "user": key,
+    "phase": label,
+    "code": code,
+    "started_ms": started.to_string(),
+    "finished_ms": finished.to_string(),
+    "elapsed_ms": (finished - started).to_string(),
+    "curl": result.stdout().trim().to_owned(),
+    "exit": result.exit_code(),
+  }
+}
+
+///|
+fn ok(value : Json) -> Bool {
+  value is { "code": "200", "exit": 0, .. }
+}
+
+///|
+async fn prepare(root : String) -> Unit {
+  if !@fs.exists(root) {
+    @fs.mkdir(root, permission=0o700)
+  }
+  let manifest = root + "/run.json"
+  let run : Json = if @fs.exists(manifest) {
+    @json.parse(@fs.read_file(manifest).text())
+  } else {
+    let value : Json = { "run_id": @async.now().to_string(), "users": 20 }
+    write(manifest, value)
+    value
+  }
+  guard run is { "run_id": String(stamp), "users": 20, .. } else {
+    fail("Wrong run")
+  }
+  let credentials : Array[Json] = []
+  let members : Array[Json] = []
+  for i in 1..<=20 {
+    let key = (if i < 10 { "0" } else { "" }) + i.to_string()
+    let register = root + "/" + key + "-register.json"
+    let registration : Json = if @fs.exists(register) {
+      @json.parse(@fs.read_file(register).text())
+    } else {
+      guard @env.rand(18) is Some(random) else { fail("No entropy") }
+      let value : Json = {
+        "email": "moontown.coffee.load20." + stamp + "." + key + "@example.test",
+        "display_name": "并发验收 " + key,
+        "password": "Moon!20-" + @crypto.bytes_to_hex_string(random),
+        "audience": "enterprise",
+      }
+      write(register, value)
+      value
+    }
+    guard registration
+      is { "email": String(email), "password": String(password), .. } else {
+      fail("Wrong account")
+    }
+    let cookies = root + "/" + key + "-cookies.txt"
+    @fs.write_file(cookies, "", permission=0o600)
+    let response = root + "/" + key + "-registration.json"
+    @fs.write_file(response, "", permission=0o600)
+    let registered = @shell.Cmd("curl", [
+      "--silent",
+      "--show-error",
+      "--max-time",
+      "45",
+      "--header",
+      "Origin: " + origin,
+      "--header",
+      "Sec-Fetch-Site: same-origin",
+      "--header",
+      "Content-Type: application/json",
+      "--data-binary",
+      "@" + register,
+      "--cookie-jar",
+      cookies,
+      "--output",
+      response,
+      "--write-out",
+      "%{http_code}",
+      origin + "/user/auth/register",
+    ]).output()
+    registered.check()
+    if registered.stdout().trim() != "201" {
+      guard ["409", "503"].contains(registered.stdout().trim().to_owned()) else {
+        fail("Registration HTTP " + registered.stdout())
+      }
+      let login = root + "/" + key + "-login.json"
+      write(login, {
+        "username": email,
+        "password": password,
+        "audience": "enterprise",
+      })
+      let result = @shell.Cmd("curl", [
+        "--silent",
+        "--show-error",
+        "--max-time",
+        "45",
+        "--header",
+        "Origin: " + origin,
+        "--header",
+        "Sec-Fetch-Site: same-origin",
+        "--header",
+        "Content-Type: application/json",
+        "--data-binary",
+        "@" + login,
+        "--cookie-jar",
+        cookies,
+        "--output",
+        response,
+        "--write-out",
+        "%{http_code}",
+        origin + "/user/auth/password",
+      ]).output()
+      result.check()
+      guard result.stdout().trim() == "200" else {
+        fail("Login HTTP " + result.stdout())
+      }
+    }
+    let verified = request(
+      root,
+      key,
+      "identity.json",
+      origin + "/moontown/api/creative/mine",
+    )
+    guard ok(verified) &&
+      @json.parse(@fs.read_file(root + "/" + key + "-identity.json").text())
+      is {
+        "viewer": { "account_id": String(actor), "operator": False, .. },
+        ..
+      } &&
+      actor.has_prefix("lunanexa:") else {
+      fail("Identity was not ordinary")
+    }
+    members.push({ "role": key, "account_id": actor })
+    credentials.push({ "role": key, "username": email, "password": password })
+    write(root + "/members.json", Json::array(members))
+    write(root + "/credentials.json", Json::array(credentials))
+    println("Verified ordinary load-test user " + key)
+  }
+}
+
+///|
+async fn run(root : String) -> Unit {
+  let base = origin + "/coffee-load20/"
+  guard @json.parse(@fs.read_file(root + "/members.json").text())
+    is Array(members) &&
+    members.length() == 20 else {
+    fail("Need 20 identities")
+  }
+  guard !@fs.exists(root + "/started.json") else {
+    fail("Run already started; never resubmit GPU jobs")
+  }
+  let check = request(
+    root,
+    "01",
+    "preflight.json",
+    base + "api/creative/public",
+  )
+  guard ok(check) &&
+    @json.parse(@fs.read_file(root + "/01-preflight.json").text())
+    is {
+      "event": { "id": "coffee-load20-20261107", .. },
+      "event_remaining": 20,
+      ..
+    } else {
+    fail("Not the fresh isolated load event")
+  }
+  let samples : Array[Json] = []
+  @async.with_task_group(group => {
+    for entry in members {
+      guard entry is { "role": String(key), .. } else { fail("Wrong member") }
+      group.spawn_bg(() => {
+        for
+          (label, path) in [
+            ("page.html", "coffee-contest.html"),
+            ("script.js", "coffee-contest.js"),
+            ("style.css", "coffee-contest.css"),
+            ("warm.json", "api/creative/mine"),
+          ] {
+          samples.push(request(root, key, label, base + path))
+        }
+      })
+    }
+  })
+  guard samples.all(ok) else {
+    write(root + "/samples.json", Json::array(samples))
+    fail("Warm-up failed")
+  }
+  let release = @async.now() + 2000L
+  write(root + "/started.json", {
+    "release_ms": release.to_string(),
+    "users": 20,
+    "maximum_generations": 20,
+  })
+  @async.with_task_group(group => {
+    for entry in members {
+      guard entry is { "role": String(key), "account_id": String(actor), .. } else {
+        fail("Wrong member")
+      }
+      let body = root + "/" + key + "-generate.json"
+      write(body, {
+        "expected_actor_id": actor,
+        "action": "generate",
+        "payload": {
+          "prompt": "半醒咖啡，一只安静的猫和一杯清晨咖啡，暖奶油色水彩，柔和晨光，无文字。构图编号 " +
+          key +
+          "。",
+          "intent": "load20-20261107-" + key,
+        },
+      })
+      group.spawn_bg(() => {
+        let delay = release - @async.now()
+        if delay > 0L {
+          @async.sleep(delay.to_int())
+        }
+        samples.push(
+          request(
+            root,
+            key,
+            "admission.json",
+            base + "api/creative/actions",
+            post=Some(body),
+          ),
+        )
+      })
+    }
+  })
+  write(root + "/samples.json", Json::array(samples))
+  let done : Set[String] = Set([])
+  let jobs : Array[Json] = []
+  let stop = @async.now() + 900000L
+  let mut round = 0
+  while done.length() < 20 && @async.now() < stop {
+    round += 1
+    @async.with_task_group(group => {
+      group.spawn_bg(() => {
+        samples.push(
+          request(
+            root,
+            "01",
+            "formal.json",
+            origin + "/moontown/api/creative/public",
+          ),
+        )
+      })
+      for entry in members {
+        guard entry is { "role": String(key), .. } else { fail("Wrong member") }
+        group.spawn_bg(() => {
+          let response = request(
+            root,
+            key,
+            "live.json",
+            base + "api/creative/mine",
+          )
+          samples.push(response)
+          if ok(response) && !done.contains(key) {
+            let value = @json.parse(
+              @fs.read_file(root + "/" + key + "-live.json").text(),
+            )
+            if value is { "generations": [Object(job)], .. } &&
+              job.get("state")
+              is Some(String("completed" | "failed" | "needs_reconcile")) {
+              let result : Map[String, Json] = Map([])
+              for name in ["id", "state", "created_ms", "sha256", "reason"] {
+                result[name] = job.get(name).unwrap_or(Json::null())
+              }
+              result["user"] = Json::string(key)
+              result["observed_ms"] = Json::string(@async.now().to_string())
+              jobs.push(Json::object(result))
+              done.add(key)
+              println(
+                "User " +
+                key +
+                " reached " +
+                job["state"].stringify() +
+                " (" +
+                done.length().to_string() +
+                "/20)",
+              )
+            }
+          }
+        })
+      }
+    })
+    write(root + "/jobs.json", Json::array(jobs))
+    write(root + "/samples.json", Json::array(samples))
+    if round % 5 == 0 {
+      println(
+        "Polling round " +
+        round.to_string() +
+        ", terminal " +
+        done.length().to_string() +
+        "/20",
+      )
+    }
+    if done.length() < 20 {
+      @async.sleep(4000)
+    }
+  }
+  let image_checks : Array[Json] = []
+  @async.with_task_group(group => {
+    for value in jobs {
+      guard value
+        is {
+          "user": String(key),
+          "state": "completed",
+          "id": String(id),
+          "sha256": String(expected),
+          ..
+        } else {
+        continue
+      }
+      group.spawn_bg(() => {
+        let sample = request(
+          root,
+          key,
+          "image.png",
+          base + "api/creative/images/" + id,
+        )
+        samples.push(sample)
+        let bytes = @fs.read_file(root + "/" + key + "-image.png").binary()
+        image_checks.push({
+          "user": key,
+          "http": sample,
+          "bytes": bytes.length(),
+          "match": ok(sample) &&
+          bytes.length() > 1000 &&
+          @crypto.bytes_to_hex_string(@crypto.sha256(bytes)) == expected,
+        })
+      })
+    }
+  })
+  write(root + "/samples.json", Json::array(samples))
+  write(root + "/image-checks.json", Json::array(image_checks))
+  write(root + "/finished.json", {
+    "finished_ms": @async.now().to_string(),
+    "terminal": done.length(),
+    "jobs": Json::array(jobs),
+  })
+  guard done.length() == 20 &&
+    image_checks.all(row => row is { "match": True, .. }) else {
+    fail("Run finished with failures; private evidence retained")
+  }
+  println("Finished bounded 20-user run; private evidence saved")
+}
+
+///|
+async fn downloads(root : String) -> Unit {
+  guard @json.parse(@fs.read_file(root + "/jobs.json").text()) is Array(jobs) &&
+    jobs.length() == 20 else {
+    fail("Need20completedjobs")
+  }
+  let checks : Array[Json] = []
+  let release = @async.now() + 1000L
+  @async.with_task_group(group => {
+    for value in jobs {
+      guard value
+        is {
+          "user": String(key),
+          "id": String(id),
+          "sha256": String(expected),
+          "state": "completed",
+          ..
+        } else {
+        fail("Not completed")
+      }
+      group.spawn_bg(() => {
+        let wait = release - @async.now()
+        if wait > 0L {
+          @async.sleep(wait.to_int())
+        }
+        let sample = request(
+          root,
+          key,
+          "download.png",
+          origin + "/coffee-load20/api/creative/images/" + id,
+        )
+        let bytes = @fs.read_file(root + "/" + key + "-download.png").binary()
+        checks.push({
+          "user": key,
+          "http": sample,
+          "bytes": bytes.length(),
+          "match": ok(sample) &&
+          bytes.length() > 1000 &&
+          @crypto.bytes_to_hex_string(@crypto.sha256(bytes)) == expected,
+        })
+      })
+    }
+  })
+  write(root + "/download-checks.json", Json::array(checks))
+  println(Json::array(checks).stringify(indent=2))
+  guard checks.all(row => row is { "match": True, .. }) else {
+    fail("Image verification failed; private evidence retained")
+  }
+}
+
+///|
+async fn readonly_probe(root : String) -> Unit {
+  guard @json.parse(@fs.read_file(root + "/members.json").text())
+    is Array(members) &&
+    members.length() == 20 else {
+    fail("Need20users")
+  }
+  let samples : Array[Json] = []
+  for round in 0..<4 {
+    @async.with_task_group(group => {
+      for value in members {
+        guard value is { "role": String(key), .. } else { fail("Bad member") }
+        group.spawn_bg(() => {
+          samples.push(
+            request(
+              root,
+              key,
+              "readonly-" + round.to_string() + ".json",
+              origin + "/coffee-load20/api/creative/mine",
+            ),
+          )
+        })
+      }
+    })
+    @async.sleep(4000)
+  }
+  write(root + "/readonly-samples.json", Json::array(samples))
+  println(
+    "Readonly replay: " +
+    samples.filter(sample => !ok(sample)).length().to_string() +
+    " non200 out of80; no generation submitted",
+  )
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, mode, root] && root.has_prefix("/") else {
+    fail("coffee-load20.mbtx prepare|run|downloads|readonly PRIVATE_DIRECTORY")
+  }
+  match mode {
+    "prepare" => prepare(root)
+    "run" => run(root)
+    "downloads" => downloads(root)
+    "readonly" => readonly_probe(root)
+    _ => fail("Unknown mode")
+  }
+}
