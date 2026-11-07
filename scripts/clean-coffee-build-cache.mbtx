@@ -1,0 +1,63 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/coffee-auth-queue-20261107"
+  let removed : Array[String] = []
+  // Only generated, superseded OCI caches. Deployed images remain in the
+  // registry; final runtime/UI archives and every PVC backup remain untouched.
+  for
+    name in [
+      "gateway-oci", "diagnostic-runtime-oci", "stderr-runtime-oci", "preview-gateway-oci",
+      "preview-qualified-gateway-oci", "preview-runtime-oci", "preview-runtime-v2-oci",
+      "preview-final-gateway-oci", "ui-oci", "ui-mobile-oci", "ui-previews-oci",
+      "ui-previews-final-oci",
+    ] {
+    let directory = root + "/" + name
+    guard @json.parse(@fs.read_file(directory + "/oci-layout").text())
+      is { "imageLayoutVersion": "1.0.0", .. } &&
+      @json.parse(@fs.read_file(directory + "/index.json").text())
+      is { "manifests": [{ "digest": String(digest), .. }], .. } &&
+      digest.has_prefix("sha256:") else {
+      fail("Not a generated OCI cache")
+    }
+    for item in ["blobs", "layer"] {
+      let path = directory + "/" + item
+      if @fs.exists(path) {
+        guard @fs.kind(path, follow_symlink=false) is Directory else {
+          fail("Unexpected cache path")
+        }
+        @fs.rmdir(path, recursive=true)
+      }
+    }
+    for
+      path in [
+        directory + ".oci.tar",
+        directory + "/webide-gateway-layer.tar",
+        directory + "/moontown-ui-layer.tar",
+        directory + "/preview-libraries.tar",
+      ] {
+      if @fs.exists(path) {
+        guard @fs.kind(path, follow_symlink=false) is Regular else {
+          fail("Unexpected generated archive")
+        }
+        @fs.remove(path)
+      }
+    }
+    removed.push(name + "@" + digest)
+  }
+  @fs.write_file(
+    root + "/superseded-cache-cleanup.json",
+    removed.to_json().stringify(indent=2),
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  println(
+    "Removed superseded generated OCI caches; retained final artifacts, source, credentials and all test/backup data",
+  )
+}

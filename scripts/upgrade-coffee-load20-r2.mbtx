@@ -1,0 +1,117 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  let r = @shell.Cmd(
+    "kubectl",
+    [
+      "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", "-n", "aigc-acceptance-20260915",
+      ..args,
+    ],
+  ).output()
+  r.check()
+  r.stdout()
+}
+
+///|
+async fn main {
+  let (digest, third) = match @env.args() {
+    [_, digest] => (digest, false)
+    [_, digest, "r3"] => (digest, true)
+    _ => fail("Pinned diagnostic runtime digest required [r3]")
+  }
+  guard digest.has_prefix("sha256:") &&
+    digest.length() == 71 &&
+    digest[7:].all(c => c is ('0'..<='9' | 'a'..<='f')) else {
+    fail("Pinned diagnostic runtime digest required")
+  }
+  let name = if third {
+    "moontown-coffee-load20-r3"
+  } else {
+    "moontown-coffee-load20-r2"
+  }
+  let root = "/home/HwHiAiUser/coffee-auth-queue-20261107/" +
+    (if third { "load-r3" } else { "load-r2" })
+  guard @json.parse(@fs.read_file(root + "/server-state.json").text())
+    is { "generations": Array(jobs), .. } &&
+    jobs.length() == 20 &&
+    jobs.all(j => j is { "state": "completed", .. }) else {
+    fail("Never restart an active inference run")
+  }
+  let raw = kube(["get", "deployment", name, "-o", "json"])
+  guard @json.parse(raw)
+    is {
+      "metadata": { "resourceVersion": String(version), .. },
+      "spec": {
+        "replicas": 1,
+        "template": {
+          "spec": {
+            "containers": [{ "image": String(runtime), .. }],
+            "initContainers": [{ "image": String(ui), .. }],
+            ..
+          },
+          ..
+        },
+        ..
+      },
+      ..
+    } &&
+    runtime.has_suffix(
+      if third {
+        "@sha256:32a21f916ca9ebd8bfd6161d0a3956ff4d41bb12c9bf8c73207c3ac390242af7"
+      } else {
+        "@sha256:6328c19fc8833fa90eaad70fb0529c3ab640856b568d7749fc0261fbd1012a2e"
+      },
+    ) &&
+    ui.has_suffix(
+      if third {
+        "@sha256:03db73cbae517cfd3767bf4bc2ea87282ffaf74d338742691532a2dbc29822ac"
+      } else {
+        "@sha256:5fce1705ce06aa5eeb806e95c7eab414def0131cb7fe0dfb76dceb584cc11a4e"
+      },
+    ) else {
+    fail("Test deployment drifted")
+  }
+  @fs.write_file(
+    root + "/deployment-before-diagnostic.json",
+    raw,
+    create_mode=CreateNew,
+    permission=0o600,
+    sync=Full,
+  )
+  let patch : Json = [
+    { "op": "test", "path": "/metadata/resourceVersion", "value": version },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/containers/0/image",
+      "value": runtime,
+    },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/initContainers/0/image",
+      "value": ui,
+    },
+    {
+      "op": "replace",
+      "path": "/spec/template/spec/containers/0/image",
+      "value": "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@" +
+      digest,
+    },
+    {
+      "op": "replace",
+      "path": "/spec/template/spec/initContainers/0/image",
+      "value": "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-ui@sha256:03db73cbae517cfd3767bf4bc2ea87282ffaf74d338742691532a2dbc29822ac",
+    },
+  ]
+  println(
+    kube(["patch", "deployment", name, "--type=json", "-p", patch.stringify()]),
+  )
+  println(kube(["rollout", "status", "deployment/" + name, "--timeout=55s"]))
+}

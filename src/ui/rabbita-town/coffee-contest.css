@@ -390,6 +390,7 @@ nav a, .town-link, footer a {
 #host-settings form { margin-top: 16px; }
 .artwork-dialog { width: min(760px, calc(100dvh - 100px)); }
 .artwork-dialog .image-wrap { height: auto; aspect-ratio: 1; }
+.artwork-dialog .image-wrap img { object-fit: contain; }
 .artwork-dialog h2 { overflow-wrap: anywhere; }
 .ai-label {
   position: absolute;
@@ -443,7 +444,8 @@ nav a, .town-link, footer a {
 }
 .job-status {
   padding: 18px 0;
-  font-size: 12px;
+  font-size: 16px;
+  line-height: 1.5;
   color: var(--ink);
   text-align: center;
 }

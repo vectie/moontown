@@ -1,0 +1,171 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+}
+
+///|
+async fn command(cmd : String, args : Array[String]) -> String {
+  let r = @shell.Cmd(cmd, args).output()
+  r.check()
+  r.stdout().trim().to_owned()
+}
+
+///|
+async fn hash(path : String) -> String {
+  command("sha256sum", [path]).split(" ").next().unwrap().to_owned()
+}
+
+///|
+async fn size(path : String) -> Int32 {
+  @string.parse_int(command("stat", ["-c", "%s", path]))
+}
+
+///|
+async fn json_blob(root : String, name : String, value : Json) -> Json {
+  let path = root + "/" + name
+  @fs.write_file(path, value.stringify(), create_mode=CreateNew)
+  let digest = hash(path)
+  let bytes = size(path)
+  @fs.rename(path, root + "/blobs/sha256/" + digest)
+  { "digest": "sha256:" + digest, "size": bytes }
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, base, expected, root, tag] &&
+    root.has_prefix("/home/HwHiAiUser/coffee-auth-queue-20261107/") else {
+    fail("BASE_OCI EXPECTED_MANIFEST NEW_PRIVATE_DIR TAG")
+  }
+  guard command("uname", ["-m"]) == "x86_64" else {
+    fail("Linux amd64 release only")
+  }
+  @fs.mkdir(root, permission=0o700)
+  @shell.Cmd("tar", ["-xf", base, "-C", root]).run()
+  guard @json.parse(@fs.read_file(root + "/index.json").text())
+    is { "manifests": [{ "digest": String(digest), .. }], .. } &&
+    digest == expected &&
+    expected.has_prefix("sha256:") &&
+    expected.length() == 71 else {
+    fail("Gateway manifest drift")
+  }
+  let manifest = @json.parse(
+    @fs.read_file(root + "/blobs/sha256/" + digest[7:].to_owned()).text(),
+  )
+  guard manifest is Object(fields) &&
+    manifest
+    is {
+      "config": { "digest": String(config_hash), .. },
+      "layers": Array(layers),
+      ..
+    } else {
+    fail("Invalid base")
+  }
+  let config = @json.parse(
+    @fs.read_file(root + "/blobs/sha256/" + config_hash[7:].to_owned()).text(),
+  )
+  guard config
+    is {
+      "architecture": "amd64",
+      "os": "linux",
+      "rootfs": { "diff_ids": Array(diffs), .. },
+      "config": Object(runtime),
+      ..
+    } &&
+    layers.length() >= 5 &&
+    layers.length() == diffs.length() &&
+    runtime.get("Entrypoint") ==
+    Some((["/usr/local/bin/lunanexa-webide-gateway"] : Json)) else {
+    fail("Qualified gateway/runtime base required")
+  }
+  let deps = "/home/HwHiAiUser/coffee-auth-queue-20261107/image-deps/unpack"
+  let directory = root + "/layer/usr/lib/x86_64-linux-gnu"
+  @fs.mkdir(directory, recursive=true)
+  let rows : Array[Json] = []
+  for
+    (source, name) in [
+      ("/lib/x86_64-linux-gnu/libpng16.so.16", "libpng16.so.16"),
+      (deps + "/usr/lib/x86_64-linux-gnu/libwebp.so.6.0.2", "libwebp.so.6"),
+      ("/lib/x86_64-linux-gnu/libz.so.1", "libz.so.1"),
+      ("/lib/x86_64-linux-gnu/libm.so.6", "libm.so.6"),
+    ] {
+    let real = @fs.realpath(source)
+    guard @fs.kind(real, follow_symlink=false) is Regular else {
+      fail("Expected qualified regular library")
+    }
+    @shell.Cmd("install", ["-m", "644", real, directory + "/" + name]).run()
+    rows.push({ "name": name, "sha256": hash(real), "bytes": size(real) })
+  }
+  let licenses = root + "/layer/usr/share/doc/moontown-image-preview"
+  @fs.mkdir(licenses, recursive=true)
+  for
+    (source, name) in [
+      ("/usr/share/doc/libpng16-16/copyright", "libpng.COPYRIGHT"),
+      (deps + "/usr/share/doc/libwebp6/copyright", "libwebp.COPYRIGHT"),
+      ("/usr/share/doc/zlib1g/copyright", "zlib.COPYRIGHT"),
+      ("/usr/share/doc/libc6/copyright", "glibc.COPYRIGHT"),
+    ] {
+    @shell.Cmd("install", ["-m", "644", source, licenses + "/" + name]).run()
+  }
+  let archive = root + "/preview-libraries.tar"
+  @shell.Cmd("tar", [
+    "--owner=0",
+    "--group=0",
+    "--mode=u+rwX,go+rX",
+    "-C",
+    root + "/layer",
+    "-cf",
+    archive,
+    ".",
+  ]).run()
+  let uncompressed = hash(archive)
+  @shell.Cmd("gzip", ["-n", "-k", archive]).run()
+  let compressed = hash(archive + ".gz")
+  let compressed_size = size(archive + ".gz")
+  @fs.rename(archive + ".gz", root + "/blobs/sha256/" + compressed)
+  diffs.push(Json::string("sha256:" + uncompressed))
+  layers.push({
+    "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+    "digest": "sha256:" + compressed,
+    "size": compressed_size,
+  })
+  guard json_blob(root, "preview-config.json", config) is Object(new_config) else {
+    fail("Config descriptor")
+  }
+  new_config["mediaType"] = "application/vnd.oci.image.config.v1+json"
+  fields["config"] = Json::object(new_config)
+  guard json_blob(root, "preview-manifest.json", manifest) is Object(descriptor) else {
+    fail("Manifest descriptor")
+  }
+  descriptor["mediaType"] = "application/vnd.oci.image.manifest.v1+json"
+  descriptor["annotations"] = { "org.opencontainers.image.ref.name": tag }
+  @fs.write_file(
+    root + "/index.json",
+    ({ "schemaVersion": 2, "manifests": [Json::object(descriptor)] } : Json).stringify(),
+  )
+  @fs.write_file(
+    root + "/preview-build.json",
+    (
+      {
+        "base": expected,
+        "manifest": descriptor["digest"],
+        "libraries": Json::array(rows),
+        "originals_unchanged": true,
+      } : Json).stringify(indent=2),
+    create_mode=CreateNew,
+  )
+  @shell.Cmd("tar", [
+    "-C",
+    root,
+    "-cf",
+    root + ".oci.tar",
+    "oci-layout",
+    "index.json",
+    "blobs",
+  ]).run()
+  println(descriptor["digest"].stringify())
+}

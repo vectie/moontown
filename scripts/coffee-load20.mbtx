@@ -13,6 +13,20 @@ import {
 let origin = "https://suanli.kechuangfuwu.com:8443"
 
 ///|
+async fn route(root : String) -> String {
+  if @json.parse(@fs.read_file(root + "/run.json").text())
+    is { "route": String(path), .. } &&
+    [
+      "coffee-load20-r2", "coffee-load20-r3", "coffee-load20-r4", "coffee-load20-r5",
+      "coffee-load20-r6",
+    ].contains(path) {
+    path
+  } else {
+    "coffee-load20"
+  }
+}
+
+///|
 async fn write(path : String, value : Json) -> Unit {
   @fs.write_file(path, value.stringify(), permission=0o600)
 }
@@ -128,34 +142,71 @@ async fn prepare(root : String) -> Unit {
       fail("Wrong account")
     }
     let cookies = root + "/" + key + "-cookies.txt"
-    @fs.write_file(cookies, "", permission=0o600)
+    let repeat = route(root) != "coffee-load20"
+    @fs.write_file(
+      cookies,
+      if repeat {
+        @fs.read_file(
+          "/Users/kq/.codex/coffee-load20-20261107/" + key + "-cookies.txt",
+        ).text()
+      } else {
+        ""
+      },
+      permission=0o600,
+    )
     let response = root + "/" + key + "-registration.json"
     @fs.write_file(response, "", permission=0o600)
-    let registered = @shell.Cmd("curl", [
-      "--silent",
-      "--show-error",
-      "--max-time",
-      "45",
-      "--header",
-      "Origin: " + origin,
-      "--header",
-      "Sec-Fetch-Site: same-origin",
-      "--header",
-      "Content-Type: application/json",
-      "--data-binary",
-      "@" + register,
-      "--cookie-jar",
-      cookies,
-      "--output",
-      response,
-      "--write-out",
-      "%{http_code}",
-      origin + "/user/auth/register",
-    ]).output()
-    registered.check()
-    if registered.stdout().trim() != "201" {
-      guard ["409", "503"].contains(registered.stdout().trim().to_owned()) else {
-        fail("Registration HTTP " + registered.stdout())
+    let registered = if repeat {
+      None
+    } else {
+      Some(
+        @shell.Cmd("curl", [
+          "--silent",
+          "--show-error",
+          "--max-time",
+          "45",
+          "--header",
+          "Origin: " + origin,
+          "--header",
+          "Sec-Fetch-Site: same-origin",
+          "--header",
+          "Content-Type: application/json",
+          "--data-binary",
+          "@" + register,
+          "--cookie-jar",
+          cookies,
+          "--output",
+          response,
+          "--write-out",
+          "%{http_code}",
+          origin + "/user/auth/register",
+        ]).output(),
+      )
+    }
+    if registered is Some(result) {
+      result.check()
+    }
+    let reuse = if repeat {
+      Some(
+        request(root, key, "reuse.json", origin + "/moontown/api/creative/mine"),
+      )
+    } else {
+      None
+    }
+    if (repeat && !reuse.map(ok).unwrap_or(false)) ||
+      (
+        !repeat &&
+        registered
+        .map(result => result.stdout().trim() != "201")
+        .unwrap_or(true)
+      ) {
+      guard repeat ||
+        registered
+        .map(result => {
+          ["409", "503"].contains(result.stdout().trim().to_owned())
+        })
+        .unwrap_or(true) else {
+        fail("Registration rejected")
       }
       let login = root + "/" + key + "-login.json"
       write(login, {
@@ -214,7 +265,8 @@ async fn prepare(root : String) -> Unit {
 
 ///|
 async fn run(root : String) -> Unit {
-  let base = origin + "/coffee-load20/"
+  let path = route(root)
+  let base = origin + "/" + path + "/"
   guard @json.parse(@fs.read_file(root + "/members.json").text())
     is Array(members) &&
     members.length() == 20 else {
@@ -231,11 +283,8 @@ async fn run(root : String) -> Unit {
   )
   guard ok(check) &&
     @json.parse(@fs.read_file(root + "/01-preflight.json").text())
-    is {
-      "event": { "id": "coffee-load20-20261107", .. },
-      "event_remaining": 20,
-      ..
-    } else {
+    is { "event": { "id": String(event_id), .. }, "event_remaining": 20, .. } &&
+    event_id == path + "-20261107" else {
     fail("Not the fresh isolated load event")
   }
   let samples : Array[Json] = []
@@ -278,7 +327,7 @@ async fn run(root : String) -> Unit {
           "prompt": "半醒咖啡，一只安静的猫和一杯清晨咖啡，暖奶油色水彩，柔和晨光，无文字。构图编号 " +
           key +
           "。",
-          "intent": "load20-20261107-" + key,
+          "intent": path + "-20261107-" + key,
         },
       })
       group.spawn_bg(() => {
@@ -301,6 +350,7 @@ async fn run(root : String) -> Unit {
   write(root + "/samples.json", Json::array(samples))
   let done : Set[String] = Set([])
   let jobs : Array[Json] = []
+  let queue_samples : Array[Json] = []
   let stop = @async.now() + 900000L
   let mut round = 0
   while done.length() < 20 && @async.now() < stop {
@@ -330,6 +380,21 @@ async fn run(root : String) -> Unit {
             let value = @json.parse(
               @fs.read_file(root + "/" + key + "-live.json").text(),
             )
+            if value
+              is {
+                "server_ms": server_ms,
+                "generations": [
+                  { "state": String(status), "queue": Object(queue), .. },
+                ],
+                ..
+              } {
+              queue_samples.push({
+                "user": key,
+                "server_ms": server_ms,
+                "state": status,
+                "queue": Json::object(queue),
+              })
+            }
             if value is { "generations": [Object(job)], .. } &&
               job.get("state")
               is Some(String("completed" | "failed" | "needs_reconcile")) {
@@ -356,6 +421,7 @@ async fn run(root : String) -> Unit {
       }
     })
     write(root + "/jobs.json", Json::array(jobs))
+    write(root + "/queue-samples.json", Json::array(queue_samples))
     write(root + "/samples.json", Json::array(samples))
     if round % 5 == 0 {
       println(
@@ -405,12 +471,52 @@ async fn run(root : String) -> Unit {
   })
   write(root + "/samples.json", Json::array(samples))
   write(root + "/image-checks.json", Json::array(image_checks))
+  let preview_checks : Array[Json] = []
+  @async.with_task_group(group => {
+    for value in jobs {
+      guard value
+        is { "user": String(key), "state": "completed", "id": String(id), .. } else {
+        continue
+      }
+      group.spawn_bg(() => {
+        for variant in ["thumb", "preview"] {
+          let label = variant + ".webp"
+          let sample = request(
+            root,
+            key,
+            label,
+            base + "api/creative/images/" + id + "/" + variant,
+          )
+          samples.push(sample)
+          let target = root + "/" + key + "-" + label
+          let decoded = @shell.Cmd("/opt/homebrew/bin/dwebp", [
+            target, "-o", "/dev/null",
+          ]).output()
+          let bytes = @fs.read_file(target).binary()
+          preview_checks.push({
+            "user": key,
+            "variant": variant,
+            "http": sample,
+            "bytes": bytes.length(),
+            "valid": ok(sample) &&
+            decoded.exit_code() == 0 &&
+            bytes.length() > 100,
+            "sha256": @crypto.bytes_to_hex_string(@crypto.sha256(bytes)),
+          })
+        }
+      })
+    }
+  })
+  write(root + "/preview-checks.json", Json::array(preview_checks))
+  write(root + "/samples.json", Json::array(samples))
   write(root + "/finished.json", {
     "finished_ms": @async.now().to_string(),
     "terminal": done.length(),
     "jobs": Json::array(jobs),
   })
   guard done.length() == 20 &&
+    preview_checks.length() == 40 &&
+    preview_checks.all(row => row is { "valid": True, .. }) &&
     image_checks.all(row => row is { "match": True, .. }) else {
     fail("Run finished with failures; private evidence retained")
   }
@@ -446,7 +552,7 @@ async fn downloads(root : String) -> Unit {
           root,
           key,
           "download.png",
-          origin + "/coffee-load20/api/creative/images/" + id,
+          origin + "/" + route(root) + "/api/creative/images/" + id,
         )
         let bytes = @fs.read_file(root + "/" + key + "-download.png").binary()
         checks.push({
@@ -468,14 +574,14 @@ async fn downloads(root : String) -> Unit {
 }
 
 ///|
-async fn readonly_probe(root : String) -> Unit {
+async fn readonly_probe(root : String, rounds~ : Int32 = 4) -> Unit {
   guard @json.parse(@fs.read_file(root + "/members.json").text())
     is Array(members) &&
     members.length() == 20 else {
     fail("Need20users")
   }
   let samples : Array[Json] = []
-  for round in 0..<4 {
+  for round in 0..<rounds {
     @async.with_task_group(group => {
       for value in members {
         guard value is { "role": String(key), .. } else { fail("Bad member") }
@@ -485,7 +591,7 @@ async fn readonly_probe(root : String) -> Unit {
               root,
               key,
               "readonly-" + round.to_string() + ".json",
-              origin + "/coffee-load20/api/creative/mine",
+              origin + "/" + route(root) + "/api/creative/mine",
             ),
           )
         })
@@ -497,8 +603,48 @@ async fn readonly_probe(root : String) -> Unit {
   println(
     "Readonly replay: " +
     samples.filter(sample => !ok(sample)).length().to_string() +
-    " non200 out of80; no generation submitted",
+    " non200 out of" +
+    samples.length().to_string() +
+    "; no generation submitted",
   )
+}
+
+///|
+async fn gallery_probe(root : String) -> Unit {
+  let base = origin + "/" + route(root) + "/api/creative/"
+  let first = request(root, "01", "gallery-public.json", base + "public")
+  guard ok(first) &&
+    @json.parse(@fs.read_file(root + "/01-gallery-public.json").text())
+    is { "gallery": Array(works), .. } &&
+    works.length() == 20 else {
+    fail("Need 20 approved works")
+  }
+  let samples : Array[Json] = []
+  @async.with_task_group(group => {
+    for i in 1..<=20 {
+      let key = (if i < 10 { "0" } else { "" }) + i.to_string()
+      group.spawn_bg(() => {
+        for n, work in works {
+          guard work is { "generation_id": String(id), .. } else {
+            fail("Missing image")
+          }
+          samples.push(
+            request(
+              root,
+              key,
+              "gallery-" + n.to_string() + ".webp",
+              base + "images/" + id + "/thumb",
+            ),
+          )
+        }
+      })
+    }
+  })
+  write(root + "/gallery-samples.json", Json::array(samples))
+  guard samples.length() == 400 && samples.all(ok) else {
+    fail("Gallery load failed; evidence retained")
+  }
+  println("20 visitors each loaded 20 public thumbnails: 400/400 successful")
 }
 
 ///|
@@ -508,9 +654,43 @@ async fn main {
   }
   match mode {
     "prepare" => prepare(root)
+    "prepare-resume" => prepare(root)
+    "prepare-r2" | "prepare-r3" | "prepare-r4" | "prepare-r5" | "prepare-r6" => {
+      guard !@fs.exists(root) else { fail("Use a new private directory") }
+      @fs.mkdir(root, permission=0o700)
+      write(root + "/run.json", {
+        "run_id": @async.now().to_string(),
+        "users": 20,
+        "route": if mode == "prepare-r6" {
+          "coffee-load20-r6"
+        } else if mode == "prepare-r5" {
+          "coffee-load20-r5"
+        } else if mode == "prepare-r4" {
+          "coffee-load20-r4"
+        } else if mode == "prepare-r3" {
+          "coffee-load20-r3"
+        } else {
+          "coffee-load20-r2"
+        },
+      })
+      for i in 1..<=20 {
+        let key = (if i < 10 { "0" } else { "" }) + i.to_string()
+        @fs.write_file(
+          root + "/" + key + "-register.json",
+          @fs.read_file(
+            "/Users/kq/.codex/coffee-load20-20261107/" + key + "-register.json",
+          ).binary(),
+          create_mode=CreateNew,
+          permission=0o600,
+        )
+      }
+      prepare(root)
+    }
     "run" => run(root)
     "downloads" => downloads(root)
     "readonly" => readonly_probe(root)
+    "readonly-long" => readonly_probe(root, rounds=50)
+    "gallery" => gallery_probe(root)
     _ => fail("Unknown mode")
   }
 }

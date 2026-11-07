@@ -10,13 +10,15 @@ import {
 // Values
 pub async fn execute(String, Json, UInt64, String?, Bool, String, String) -> Json
 
-pub async fn image(String, String?, String, String, operator? : Bool, manager? : Bool) -> Bytes
+pub async fn image(String, String?, String, String, operator? : Bool, manager? : Bool, variant? : ImageVariant) -> Bytes
 
 pub async fn load_config(String) -> Config
 
 pub fn private_metadata_removed(Bytes) -> Bytes raise
 
 pub async fn process_next(String, String, allow_generation? : Bool) -> Bool
+
+pub async fn process_previews(String, String) -> Bool
 
 // Errors
 pub(all) suberror CreativeError {
@@ -48,6 +50,12 @@ pub struct Config {
 type Entry derive(ToJson, @json.FromJson)
 
 type Generation derive(ToJson, @json.FromJson)
+
+pub(all) enum ImageVariant {
+  Original
+  Thumbnail
+  Preview
+} derive(Eq)
 
 type ReviewEvent derive(ToJson, @json.FromJson)
 

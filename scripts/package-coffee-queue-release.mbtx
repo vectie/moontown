@@ -1,0 +1,57 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/coffee-auth-queue-20261107"
+  let moon = "/home/HwHiAiUser/.moon-new/bin/moon"
+  @shell.Cmd(moon, [
+    "run",
+    root + "/gateway-source/lunanexa/scripts/package-webide-gateway.mbtx",
+    "--",
+    "/home/HwHiAiUser/image-runtime-20261107/coffee-gateway-oci-v2.oci.tar",
+    "/home/HwHiAiUser/activity-launch-release-20261107/moontown/src/account_gateway/_build/native/release/build/vectie/moontown-account-gateway/main/main.exe",
+    root + "/gateway-oci",
+    "account-binding-coffee-queue-native-20261107",
+  ]).run()
+  guard @json.parse(@fs.read_file(root + "/gateway-oci/index.json").text())
+    is { "manifests": [{ "digest": String(base), .. }], .. } else {
+    fail("Missing base digest")
+  }
+  let book = "/home/HwHiAiUser/moonbook-release-verify.15VuDJ"
+  @shell.Cmd(moon, [
+    "run",
+    root + "/package-activity-runtime.mbtx",
+    "--",
+    root + "/gateway-oci.oci.tar",
+    base,
+    book + "/_build-final/native/release/build/cmd/main/main.exe",
+    book + "/seed",
+    "/home/HwHiAiUser/activity-curator-bridge-20261107/coffee-curator-runtime-1.2.0.moonbook-agent",
+    root + "/runtime-oci",
+    "account-binding-coffee-queue-runtime-20261107",
+  ]).run()
+  for
+    (directory, repository, tag) in [
+      (
+        "runtime-oci", "moontown-account-gateway", "account-binding-coffee-queue-runtime-20261107",
+      ),
+      ("ui-oci", "moontown-account-ui", "account-binding-coffee-queue-20261107"),
+    ] {
+    @shell.Cmd(moon, [
+      "run",
+      "/home/HwHiAiUser/image-runtime-20261107/publish-account-gateway.mbtx",
+      "--",
+      root + "/" + directory,
+      "https://lunanexa-registry.lunanexa-registry.svc.cluster.local:5000",
+      "moon/" + repository,
+      tag,
+      "/etc/ssl/certs/ca-certificates.crt",
+    ]).run()
+  }
+}

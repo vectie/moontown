@@ -39,6 +39,76 @@ fn creative_error_reply(error : Error) -> (Int32, String) {
 }
 
 ///|
+async fn PublicPlatform::creative_image(
+  self : PublicPlatform,
+  id : String,
+  variant : @creative_contest.ImageVariant,
+  actor : String?,
+  operator : Bool,
+  owner : Bool,
+  activity_id : String?,
+) -> Bytes {
+  match activity_id {
+    Some(activity) =>
+      @activity_program.with_activity(
+        activity,
+        @async.now().reinterpret_as_uint64(),
+        actor,
+        owner,
+        "image",
+        self.program_root.unwrap(),
+        binding => {
+          @creative_contest.image(
+            id,
+            actor,
+            binding.state_path,
+            binding.config_path,
+            operator~,
+            manager=binding.may_manage,
+            variant~,
+          )
+        },
+      )
+    None =>
+      @creative_contest.image(
+        id,
+        actor,
+        self.creative_path.unwrap(),
+        self.creative_config.unwrap(),
+        operator~,
+        variant~,
+      )
+  }
+}
+
+///|
+async fn reply_creative_image(
+  conn : @http.ServerConnection,
+  bytes : Bytes,
+  variant : @creative_contest.ImageVariant,
+) -> Unit {
+  let original = variant is Original
+  conn.send_response(200, "OK", extra_headers={
+    "content-type": if original {
+      "image/png"
+    } else {
+      "image/webp"
+    },
+    "content-length": bytes.length().to_string(),
+    "cache-control": "private, no-store",
+    "x-content-type-options": "nosniff",
+    "cross-origin-resource-policy": "same-origin",
+    "content-disposition": if original {
+      "inline; filename=AI-generated.png"
+    } else {
+      "inline; filename=AI-generated.webp"
+    },
+  })
+  conn.write(bytes)
+  conn.end_response()
+}
+
+///|
 async fn PublicPlatform::creative(
   self : PublicPlatform,
   request : @http.Request,
@@ -84,6 +154,39 @@ async fn PublicPlatform::creative(
       "message": "创作活动正在准备，请稍后再来。",
     })
   }
+  let requested_image = if image_request {
+    let parts = relative["api/creative/images/".length():]
+      .split("/")
+      .map(p => p.to_owned())
+      .to_array()
+    let variant : @creative_contest.ImageVariant = match parts {
+      [_] => Original
+      [_, "thumb"] => Thumbnail
+      [_, "preview"] => Preview
+      _ => return reply_json(conn, 404, { "error": "image_not_available" })
+    }
+    guard parts[0].length() == 64 &&
+      parts[0].all(c => c is ('0'..<='9' | 'a'..<='f')) else {
+      return reply_json(conn, 404, { "error": "image_not_available" })
+    }
+    Some((parts[0], variant))
+  } else {
+    None
+  }
+  if requested_image is Some((id, variant)) {
+    // Published media is public already. Check the live approval on every read
+    // without repeating browser authentication for every thumbnail in a grid.
+    let public_image = Some(
+      self.creative_image(id, variant, None, false, false, activity_id),
+    ) catch {
+      @creative_contest.CreativeError::Unavailable =>
+        return reply_json(conn, 503, { "error": "preview_unavailable" })
+      _ => None
+    }
+    if public_image is Some(bytes) {
+      return reply_creative_image(conn, bytes, variant)
+    }
+  }
   let session = if relative == "api/creative/public" {
     None
   } else {
@@ -110,51 +213,18 @@ async fn PublicPlatform::creative(
   }
   let actor = session.map(s => s.context().user_id)
   let operator = session.map(s => s.is_platform_operator()).unwrap_or(false)
-  let now = @async.now().reinterpret_as_uint64()
-  if image_request {
-    let id = relative["api/creative/images/".length():].to_owned()
-    let bytes = try {
-      match activity_id {
-        Some(activity) =>
-          @activity_program.with_activity(
-            activity,
-            now,
-            actor,
-            self.program_owner(session),
-            "image",
-            self.program_root.unwrap(),
-            binding => {
-              @creative_contest.image(
-                id,
-                actor,
-                binding.state_path,
-                binding.config_path,
-                operator~,
-                manager=binding.may_manage,
-              )
-            },
-          )
-        None =>
-          @creative_contest.image(
-            id,
-            actor,
-            self.creative_path.unwrap(),
-            self.creative_config.unwrap(),
-            operator~,
-          )
-      }
-    } catch {
+  if requested_image is Some((id, variant)) {
+    let bytes = self.creative_image(
+      id,
+      variant,
+      actor,
+      operator,
+      self.program_owner(session),
+      activity_id,
+    ) catch {
       _ => return reply_json(conn, 404, { "error": "image_not_available" })
     }
-    conn.send_response(200, "OK", extra_headers={
-      "content-type": "image/png",
-      "cache-control": "private, no-store",
-      "x-content-type-options": "nosniff",
-      "cross-origin-resource-policy": "same-origin",
-      "content-disposition": "inline; filename=AI-generated.png",
-    })
-    conn.write(bytes)
-    conn.end_response()
+    reply_creative_image(conn, bytes, variant)
     return
   }
   let (action, payload) = if write {

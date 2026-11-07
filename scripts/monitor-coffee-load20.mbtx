@@ -23,8 +23,17 @@ async fn probe(args : Array[String]) -> Json {
 
 ///|
 async fn main {
-  guard @env.args() is [_, root] && root.has_prefix("/home/HwHiAiUser/") else {
-    fail("monitor-coffee-load20.mbtx PRIVATE_RELEASE_DIR")
+  let (root, name) = match @env.args() {
+    [_, root] => (root, "moontown-coffee-load20")
+    [_, root, "r2"] => (root, "moontown-coffee-load20-r2")
+    [_, root, "r3"] => (root, "moontown-coffee-load20-r3")
+    [_, root, "r4"] => (root, "moontown-coffee-load20-r4")
+    [_, root, "r5"] => (root, "moontown-coffee-load20-r5")
+    [_, root, "r6"] => (root, "moontown-coffee-load20-r6")
+    _ => fail("monitor-coffee-load20.mbtx PRIVATE_RELEASE_DIR [r2]")
+  }
+  guard root.has_prefix("/home/HwHiAiUser/") else {
+    fail("Private directory required")
   }
   let rows : Array[Json] = []
   for i in 0..<90 {
@@ -46,7 +55,12 @@ async fn main {
       })
       group.spawn_bg(() => {
         row["web"] = probe([
-          "-n", "aigc-acceptance-20260915", "top", "pods", "-l", "app=moontown-coffee-load20",
+          "-n",
+          "aigc-acceptance-20260915",
+          "top",
+          "pods",
+          "-l",
+          "app=" + name,
         ])
       })
       group.spawn_bg(() => {

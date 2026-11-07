@@ -180,6 +180,10 @@ async fn finish(
         permission=0o600,
         sync=Full,
       )
+      // The image job stays successful if a derivative needs a later retry.
+      save_previews(path, job.id, bytes) catch {
+        _ => eprintln("moontown_preview_pending")
+      }
       {
         ..job,
         state: "completed",
@@ -225,6 +229,9 @@ pub async fn process_next(
     if next.revision != state.revision {
       save(path, next)
     }
+  }
+  if process_previews(path, config_path) {
+    return false
   }
   if config.provider_origin.is_empty() {
     return false

@@ -1,0 +1,15 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/image_preview"
+
+// Values
+pub fn dimensions(Bytes) -> (Int, Int)?
+
+pub fn make(Bytes, Int) -> Bytes?
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

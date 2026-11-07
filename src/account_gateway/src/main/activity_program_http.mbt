@@ -185,6 +185,17 @@ async fn PublicPlatform::activity_program(
 ///|
 fn activity_snapshot(value : Json, binding : @activity_program.Binding) -> Json {
   if value is Object(fields) {
+    if !binding.allow_generation &&
+      fields.get("generations") is Some(Array(jobs)) {
+      for job in jobs {
+        if job is { "queue": Object(queue), .. } {
+          queue["status"] = "blocked"
+          queue["reason"] = "activity"
+          queue["estimated_start_ms"] = Json::null()
+          queue["estimated_ready_ms"] = Json::null()
+        }
+      }
+    }
     fields["activity"] = {
       "id": binding.id,
       "status": binding.status,

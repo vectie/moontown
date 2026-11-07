@@ -19,11 +19,62 @@ async fn kube(args : Array[String]) -> String {
 
 ///|
 async fn main {
-  guard @env.args() is [_, root] && root.has_prefix("/home/HwHiAiUser/") else {
-    fail("deploy-coffee-load20.mbtx NEW_PRIVATE_RELEASE_DIR")
+  let (root, runtime, ui, repeat) = match @env.args() {
+    [_, root] => (root, "", "", false)
+    [_, root, "r2", runtime, ui] => (root, runtime, ui, true)
+    [_, root, "r3", runtime, ui] => (root, runtime, ui, true)
+    [_, root, "r4", runtime, ui] => (root, runtime, ui, true)
+    [_, root, "r5", runtime, ui] => (root, runtime, ui, true)
+    [_, root, "r6", runtime, ui] => (root, runtime, ui, true)
+    _ =>
+      fail(
+        "deploy-coffee-load20.mbtx NEW_PRIVATE_RELEASE_DIR [r2 RUNTIME_DIGEST UI_DIGEST]",
+      )
+  }
+  guard root.has_prefix("/home/HwHiAiUser/") else {
+    fail("Private directory required")
+  }
+  if repeat {
+    for digest in [runtime, ui] {
+      guard digest.has_prefix("sha256:") &&
+        digest.length() == 71 &&
+        digest[7:].all(c => c is ('0'..<='9' | 'a'..<='f')) else {
+        fail("Pinned image digest required")
+      }
+    }
   }
   let ns = "aigc-acceptance-20260915"
-  let name = "moontown-coffee-load20"
+  let third = @env.args().contains("r3")
+  let fourth = @env.args().contains("r4")
+  let fifth = @env.args().contains("r5")
+  let sixth = @env.args().contains("r6")
+  let name = if sixth {
+    "moontown-coffee-load20-r6"
+  } else if fifth {
+    "moontown-coffee-load20-r5"
+  } else if fourth {
+    "moontown-coffee-load20-r4"
+  } else if third {
+    "moontown-coffee-load20-r3"
+  } else if repeat {
+    "moontown-coffee-load20-r2"
+  } else {
+    "moontown-coffee-load20"
+  }
+  let route = if sixth {
+    "coffee-load20-r6"
+  } else if fifth {
+    "coffee-load20-r5"
+  } else if fourth {
+    "coffee-load20-r4"
+  } else if third {
+    "coffee-load20-r3"
+  } else if repeat {
+    "coffee-load20-r2"
+  } else {
+    "coffee-load20"
+  }
+  let event_id = route + "-20261107"
   for
     kind in [
       "deployment", "service", "configmap", "pvc", "ingressroute", "middleware",
@@ -74,10 +125,23 @@ async fn main {
     !(item is { "name": String(value), .. } &&
     value.has_prefix("MOONTOWN_ACTIVITY_"))
   })
+  if repeat {
+    container["image"] = Json::string(
+      "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@" +
+      runtime,
+    )
+    guard pod.get("initContainers") is Some(Array([Object(init)])) else {
+      fail("Missing UI init container")
+    }
+    init["image"] = Json::string(
+      "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-ui@" +
+      ui,
+    )
+  }
   for item in env {
     if item is Object(values) &&
       values.get("name") == Some(Json::string("MOONTOWN_CREATIVE_STATE_FILE")) {
-      values["value"] = "/creative/coffee-load20-20261107/state.json"
+      values["value"] = Json::string("/creative/" + event_id + "/state.json")
     }
   }
   container["env"] = Json::array(env)
@@ -112,7 +176,7 @@ async fn main {
     fail("Missing trusted event config")
   }
   let now = @async.now().reinterpret_as_uint64()
-  brief["id"] = "coffee-load20-20261107"
+  brief["id"] = Json::string(event_id)
   brief["name"] = "20 人并发验收 · 非正式活动"
   brief["scope"] = "独立压测，20个受邀普通账户，各生成一张；不参与正式评奖。"
   brief["deadline_ms"] = Json::string((now + 21600000UL).to_string())
@@ -260,7 +324,7 @@ async fn main {
         "metadata": { "name": name, "namespace": ns },
         "spec": {
           "replacePathRegex": {
-            "regex": "^/coffee-load20/(.*)",
+            "regex": "^/" + route + "/(.*)",
             "replacement": "/moontown/${1}",
           },
         },
@@ -278,7 +342,9 @@ async fn main {
           "routes": [
             {
               "kind": "Rule",
-              "match": "Host(`suanli.kechuangfuwu.com`) && PathPrefix(`/coffee-load20/`)",
+              "match": "Host(`suanli.kechuangfuwu.com`) && PathPrefix(`/" +
+              route +
+              "/`)",
               "priority": 200,
               "middlewares": [{ "name": name }],
               "services": [{ "name": name, "port": 8082 }],
@@ -333,7 +399,23 @@ async fn main {
           {
             "apiVersion": "networking.k8s.io/v1",
             "kind": "NetworkPolicy",
-            "metadata": { "name": "load20-" + original, "namespace": ns },
+            "metadata": {
+              "name": (if sixth {
+                "load20-r6-"
+              } else if fifth {
+                "load20-r5-"
+              } else if fourth {
+                "load20-r4-"
+              } else if third {
+                "load20-r3-"
+              } else if repeat {
+                "load20-r2-"
+              } else {
+                "load20-"
+              }) +
+              original,
+              "namespace": ns,
+            },
             "spec": Json::object(spec),
           },
         ),

@@ -61,6 +61,7 @@ fn snapshot(
           "created_ms": job.created_ms,
           "sha256": job.sha256,
           "reason": job.reason,
+          "queue": generation_queue(job, state, config, now),
         } : Json)
     }),
     "entries": mine.map(entry => entry.to_json()),
@@ -452,6 +453,7 @@ pub async fn image(
   config_path : String,
   operator~ : Bool = false,
   manager~ : Bool = false,
+  variant~ : ImageVariant = Original,
 ) -> Bytes {
   guard identifier(id) else { raise Denied }
   let config = load_config(config_path)
@@ -479,8 +481,11 @@ pub async fn image(
   }) else {
     raise Denied
   }
-  let target = path + ".images/" + id + ".png"
-  guard @fs.kind(target, follow_symlink=false) is Regular else {
+  let target = preview_path(path, id, variant)
+  guard @fs.exists(target) && @fs.kind(target, follow_symlink=false) is Regular else {
+    if !(variant is Original) {
+      preview_files.remove(preview_key(path, id))
+    }
     raise Unavailable
   }
   @fs.read_file(target).binary()

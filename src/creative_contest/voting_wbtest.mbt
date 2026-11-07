@@ -438,7 +438,11 @@ async test "legacy state migration and real concurrent callers retain a single d
   let path = root + "/state.json"
   let config_path = root + "/config.json"
   let config = builtin_config()
-  @fs.write_file(config_path, fixture_config_json(config).stringify())
+  @fs.write_file(
+    config_path,
+    fixture_config_json(config).stringify(),
+    create_mode=CreateOrTruncate,
+  )
   let state = voting_works()
   guard state.to_json() is Object(legacy) else { fail("invalid fixture") }
   for
@@ -447,7 +451,11 @@ async test "legacy state migration and real concurrent callers retain a single d
     ] {
     ignore(legacy.remove(key))
   }
-  @fs.write_file(path, Json::object(legacy).stringify())
+  @fs.write_file(
+    path,
+    Json::object(legacy).stringify(),
+    create_mode=CreateOrTruncate,
+  )
   let migrated = read(path, config)
   assert_true(migrated.vote_events.is_empty())
   let id = work_id(state, "creator-a")
@@ -524,7 +532,11 @@ async test "paused workers seal voting without dispatching a queued image" {
   let path = root + "/state.json"
   let config_path = root + "/config.json"
   let config = builtin_config()
-  @fs.write_file(config_path, fixture_config_json(config).stringify())
+  @fs.write_file(
+    config_path,
+    fixture_config_json(config).stringify(),
+    create_mode=CreateOrTruncate,
+  )
   save(path, voting_works())
   assert_false(process_next(path, config_path, allow_generation=false))
   assert_eq(read(path, config).voting_settlements.length(), 1)
@@ -537,7 +549,11 @@ async test "paused workers seal voting without dispatching a queued image" {
     voting_closes_ms: now + 100002UL,
     awards_ms: now + 100003UL,
   }
-  @fs.write_file(config_path, fixture_config_json(future).stringify())
+  @fs.write_file(
+    config_path,
+    fixture_config_json(future).stringify(),
+    create_mode=CreateOrTruncate,
+  )
   let queued = transition(
     empty(future),
     future,
@@ -559,7 +575,11 @@ async test "a vote blocked across closing seals first without an existing bounda
   let path = root + "/state.json"
   let config_path = root + "/config.json"
   let config = builtin_config()
-  @fs.write_file(config_path, fixture_config_json(config).stringify())
+  @fs.write_file(
+    config_path,
+    fixture_config_json(config).stringify(),
+    create_mode=CreateOrTruncate,
+  )
   let state = voting_works()
   save(path, state)
   let id = work_id(state, "creator-a")
@@ -627,7 +647,11 @@ async test "a paused worker waiting across close uses time after its file lock" 
     awards_ms: now + 100UL,
     provider_origin: "",
   }
-  @fs.write_file(config_path, fixture_config_json(config).stringify())
+  @fs.write_file(
+    config_path,
+    fixture_config_json(config).stringify(),
+    create_mode=CreateOrTruncate,
+  )
   let started = Ref(false)
   let finished = Ref(false)
   @async.with_task_group(group => {

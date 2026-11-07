@@ -1,0 +1,154 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+}
+
+///|
+let root = "/home/HwHiAiUser/coffee-auth-queue-20261107"
+
+///|
+let repo = "/home/HwHiAiUser/lunanexa-event-trial-20261022.9DbhEI/lunanexa"
+
+///|
+async fn command(cmd : String, args : Array[String]) -> String {
+  let result = @shell.Cmd(cmd, args).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  command(
+    "kubectl",
+    [
+      "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", "-n", "lunanexa",
+      ..args,
+    ],
+  )
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, phase] else { fail("build | publish") }
+  if phase == "build" {
+    let disk = command("df", ["--output=avail", "-B1", repo])
+      .trim()
+      .split("\n")
+      .to_array()
+    guard disk.length() == 2 &&
+      @string.parse_int64(disk[1].trim()) > 35000000000L else {
+      fail("Need 35 GB free before native compilation")
+    }
+    let original = repo + "/account/store.mbt"
+    guard @fs.read_file(original).text() ==
+      @fs.read_file(root + "/account-store.before.mbt").text() else {
+      fail("Deployed source has drifted")
+    }
+    @fs.write_file(
+      original,
+      @fs.read_file(root + "/coffee-deployed-store-after.mbt").binary(),
+    )
+    @fs.write_file(
+      repo + "/account/activity_checkpoint_test.mbt",
+      @fs.read_file(root + "/activity_checkpoint_test.mbt").binary(),
+      create_mode=CreateNew,
+    )
+    let moon = "/home/HwHiAiUser/.moon-new/bin/moon"
+    @shell.Cmd(
+      "prlimit",
+      [
+        "--stack=unlimited", moon, "test", "-p", "vectie/lunanexa/account", "--target",
+        "native", "--jobs", "2",
+      ],
+      cwd=repo,
+    ).run()
+    @shell.Cmd(
+      moon,
+      ["build", "cmd/control", "--target", "native", "--release", "--jobs", "2"],
+      cwd=repo,
+    ).run()
+    return
+  }
+  guard phase == "publish" else { fail("Unknown phase") }
+  let prior = "/home/HwHiAiUser/access-onboarding-r2-20261104/control"
+  guard command("sha256sum", [prior + "/control.exe"]).has_prefix(
+    "ae2916350301201328c3012a71a70187ac349d83ce489727db2c73e9aed12615 ",
+  ) else {
+    fail("Live controller has drifted")
+  }
+  let before = kube(["get", "deployment", "lunanexa-control", "-o", "json"])
+  guard @json.parse(before)
+    is {
+      "metadata": { "resourceVersion": String(version), .. },
+      "spec": {
+        "template": { "spec": { "volumes": Array(volumes), .. }, .. },
+        ..
+      },
+      ..
+    } else {
+    fail("Missing controller volumes")
+  }
+  let dest = root + "/control"
+  let patches : Array[Json] = [
+    { "op": "test", "path": "/metadata/resourceVersion", "value": version },
+  ]
+  for i, volume in volumes {
+    if volume
+      is {
+        "name": "native-glm-control",
+        "hostPath": { "path": String(path), .. },
+        ..
+      } {
+      guard path == prior else { fail("Unexpected mounted binary directory") }
+      @fs.write_file(
+        root + "/controller-before.json",
+        before,
+        create_mode=CreateNew,
+        permission=0o600,
+        sync=Full,
+      )
+      @fs.mkdir(dest)
+      ignore(command("cp", ["-a", prior + "/.", dest]))
+      ignore(
+        command("install", [
+          "-m",
+          "755",
+          repo +
+          "/_build/native/release/build/vectie/lunanexa/cmd/control/control.exe",
+          dest + "/control.exe",
+        ]),
+      )
+      patches.append([
+        {
+          "op": "test",
+          "path": "/spec/template/spec/volumes/\{i}/hostPath/path",
+          "value": prior,
+        },
+        {
+          "op": "replace",
+          "path": "/spec/template/spec/volumes/\{i}/hostPath/path",
+          "value": dest,
+        },
+      ])
+    }
+  }
+  guard patches.length() == 3 else { fail("Controller mount missing") }
+  println(
+    kube([
+      "patch",
+      "deployment",
+      "lunanexa-control",
+      "--type=json",
+      "-p",
+      Json(patches).stringify(),
+    ]),
+  )
+  println(
+    kube(["rollout", "status", "deployment/lunanexa-control", "--timeout=55s"]),
+  )
+}

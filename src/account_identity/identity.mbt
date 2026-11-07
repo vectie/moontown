@@ -121,9 +121,7 @@ pub async fn Client::resolve(self : Client, cookie : String) -> Resolution {
   if cookie.is_empty() || cookie.length() > 16384 {
     return SignedOut
   }
-  @async.with_timeout(3500, () => resolve_inner(self.configuration, cookie)) catch {
-    _ => Unavailable
-  }
+  resolve_bounded(self.configuration, cookie)
 }
 
 ///|
@@ -198,10 +196,15 @@ fn parse_session(
 }
 
 ///|
-async fn resolve_inner(config : Config, cookie : String) -> Resolution {
+async fn resolve_inner(
+  config : Config,
+  cookie : String,
+  stage : Ref[String],
+) -> Resolution {
   let client = identity_http_client(config, cookie)
   defer client.close()
   resolve_using(config, cookie, (path, bearer) => {
+    stage.val = path
     // Client derives Host from the validated endpoint. Never append a second
     // Host header: that is invalid HTTP and can select a different audience.
     let response = client.get(
@@ -221,6 +224,24 @@ async fn resolve_inner(config : Config, cookie : String) -> Resolution {
       },
     )
   })
+}
+
+///|
+async fn resolve_bounded(config : Config, cookie : String) -> Resolution {
+  let stage = Ref("connection")
+  let started = @async.now()
+  let result = @async.with_timeout(3500, () => {
+    resolve_inner(config, cookie, stage)
+  }) catch {
+    _ => Unavailable
+  }
+  if result is Unavailable {
+    // No cookies, bearer values, account identifiers or response bodies in logs.
+    eprintln(
+      "moontown_identity_unavailable stage=\{stage.val} elapsed_ms=\{@async.now()-started}",
+    )
+  }
+  result
 }
 
 ///| Injectable transport keeps rejection/expiry and identity isolation testable
@@ -262,9 +283,7 @@ pub async fn resolve(cookie : String) -> Resolution {
   if cookie.is_empty() || cookie.length() > 16384 {
     return SignedOut
   }
-  @async.with_timeout(3500, () => resolve_inner(configuration, cookie)) catch {
-    _ => Unavailable
-  }
+  resolve_bounded(configuration, cookie)
 }
 
 ///|

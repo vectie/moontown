@@ -19,20 +19,40 @@ async fn kube(args : Array[String]) -> String {
 
 ///|
 async fn main {
-  guard @env.args() is [_, root] &&
-    root.has_prefix("/home/HwHiAiUser/") &&
+  let (root, suffix, expected) = match @env.args() {
+    [_, root] =>
+      (
+        root, "", "62213c1b44971cb81730fb288dcab73477b855833e2572272d4b7dabea2bfff4",
+      )
+    [_, root, "r3"] =>
+      (
+        root, "-r3", "32a21f916ca9ebd8bfd6161d0a3956ff4d41bb12c9bf8c73207c3ac390242af7",
+      )
+    [_, root, "r4"] =>
+      (
+        root, "-r4", "4fc3b7c6e9ba98e004858e8b61d18fee2e7a5c8b8099059376e92bf37afad33c",
+      )
+    [_, root, "r2"] =>
+      (
+        root, "-r2", "b760272cdac808f232d468873add989dbfe374cef0d2ddf19ce7d538caa7e743",
+      )
+    [_, root, "r6"] =>
+      (
+        root, "-r6", "b760272cdac808f232d468873add989dbfe374cef0d2ddf19ce7d538caa7e743",
+      )
+    _ => fail("PRIVATE_COMPLETED_RUN [r3|r4]")
+  }
+  let event_id = "coffee-load20" + suffix + "-20261107"
+  guard root.has_prefix("/home/HwHiAiUser/") &&
     @json.parse(@fs.read_file(root + "/server-state.json").text())
-    is {
-      "challenge_id": "coffee-load20-20261107",
-      "generations": Array(jobs),
-      ..
-    } &&
+    is { "challenge_id": String(challenge), "generations": Array(jobs), .. } &&
+    challenge == event_id &&
     jobs.length() == 20 &&
     jobs.all(job => job is { "state": "completed", .. }) else {
     fail("Only stop the completed20-job rehearsal")
   }
   let ns = "aigc-acceptance-20260915"
-  let name = "moontown-coffee-load20"
+  let name = "moontown-coffee-load20" + suffix
   let current = @json.parse(
     kube(["-n", ns, "get", "deployment", name, "-o", "json"]),
   )
@@ -60,14 +80,16 @@ async fn main {
       ..
     } &&
     image ==
-    "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@sha256:62213c1b44971cb81730fb288dcab73477b855833e2572272d4b7dabea2bfff4" &&
+    "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@sha256:" +
+    expected &&
     environment.any(item => {
       item
       is {
         "name": "MOONTOWN_CREATIVE_STATE_FILE",
-        "value": "/creative/coffee-load20-20261107/state.json",
+        "value": String(state_path),
         ..
-      }
+      } &&
+      state_path == "/creative/" + event_id + "/state.json"
     }) else {
     fail("Rehearsal drift")
   }

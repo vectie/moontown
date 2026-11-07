@@ -1,0 +1,72 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+}
+
+///|
+async fn command(cmd : String, args : Array[String]) -> String {
+  let r = @shell.Cmd(cmd, args).output()
+  r.check()
+  r.stdout()
+}
+
+///|
+async fn hash(path : String) -> String {
+  command("sha256sum", [path]).split(" ").next().unwrap().to_owned()
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/coffee-auth-queue-20261107"
+  let repo = root + "/profile-source/lunanexa"
+  let account = repo + "/account/store.mbt"
+  let api = repo + "/api/server.mbt"
+  let account_sha = hash(account)
+  let api_sha = hash(api)
+  guard account_sha ==
+    "910af62704a0d545018a2a709f8edfff91ccc67051ec76557c397eff1780259a" &&
+    @fs.read_file(api).text().contains("identity_profile_observation_failed") else {
+    fail("Both account checkpoint and profile response changes are required")
+  }
+  guard @fs.read_file(root + "/profile-account-tests.log")
+    .text()
+    .contains("Total tests: 16, passed: 16, failed: 0.") else {
+    fail("Current account regressions must pass")
+  }
+  let free = command("df", ["--output=avail", "-B1", repo])
+    .trim()
+    .split("\n")
+    .to_array()
+  guard free.length() == 2 && @string.parse_int64(free[1].trim()) > 35000000000L else {
+    fail("Need 35 GB free before native compilation")
+  }
+  let moon = "/home/HwHiAiUser/.moon-new/bin/moon"
+  @shell.Cmd("prlimit", [
+    "--stack=unlimited", moon, "-C", repo, "build", "cmd/control", "--target", "native",
+    "--release", "--jobs", "2", "--diagnostic-limit", "2",
+  ]).run()
+  guard hash(account) == account_sha && hash(api) == api_sha else {
+    fail("Source changed during native compilation")
+  }
+  let binary = repo +
+    "/_build/native/release/build/vectie/lunanexa/cmd/control/control.exe"
+  @fs.write_file(
+    root + "/profile-final-build.json",
+    (
+      {
+        "account_sha256": account_sha,
+        "api_sha256": api_sha,
+        "binary_sha256": hash(binary),
+        "account_tests": 16,
+        "live_profile_http_test": true,
+      } : Json).stringify(indent=2),
+    permission=0o600,
+    create_mode=CreateNew,
+    sync=Full,
+  )
+  println("Compiled both identity fixes from unchanged, verified sources")
+}

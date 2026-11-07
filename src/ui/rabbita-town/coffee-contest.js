@@ -17,10 +17,42 @@ function creationPhase(event,now) {
   return now<Number(event.opens_ms)?'waiting':now<Number(event.deadline_ms)?'open':'closed';
 }
 function generationCredits(value,signedIn) {
+  if(signedIn && value.generations?.some(job=>['queued','running','needs_reconcile'].includes(job.state)))return '';
   if(value.event_remaining===0)return '本期生成名额已用完 · 已生成图片仍可投稿';
   const personal=signedIn?value.remaining:value.event.participant_quota;
   const remaining=Number.isFinite(value.event_remaining)?Math.min(personal,value.event_remaining):personal;
   return signedIn?`本期还可生成 ${remaining} 张 · 投稿前仅自己可见`:`本期最多可生成 ${remaining} 张 · 投稿前仅自己可见`;
+}
+async function originalImage(path, fetcher = fetch, onRetry = () => {}, signal) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    if (signal?.aborted) throw new DOMException('请求已取消','AbortError');
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    signal?.addEventListener('abort',abort,{once:true});
+    const timeout = setTimeout(abort,12000);
+    try {
+      const response = await fetcher(path, {credentials:'same-origin',cache:'no-store',signal:controller.signal});
+      if (!response.ok) {
+        const error = new Error('原图暂不可用');
+        error.status = response.status;
+        throw error;
+      }
+      const blob = await response.blob();
+      if (blob.size < 32 || blob.size > 12 * 1024 * 1024) {
+        const error = new Error('原图数据不完整');
+        error.status = 422;
+        throw error;
+      }
+      return blob;
+    } catch (error) {
+      if (signal?.aborted || attempt || error.status && error.status < 500) throw error;
+      onRetry();
+      await new Promise(resolve => setTimeout(resolve, 250 + Math.random() * 250));
+    } finally {
+      clearTimeout(timeout);
+      signal?.removeEventListener('abort',abort);
+    }
+  }
 }
 const jobLabels = Object.freeze({
   queued: "已经排好队，轮到你就开始画。",
@@ -29,6 +61,20 @@ const jobLabels = Object.freeze({
   failed: "这次没有完成，次数已退回。可以再试一次。"
 });
 const entryLabels = Object.freeze({ pending: "等待审核", approved: "已进入作品墙", rejected: "需要调整后重新投稿", superseded: "已被新版替换", withdrawn: "已撤回", disqualified:'已下架' });
+function generationStatus(job, now, activity) {
+  if (!job) return '';
+  if (!['queued', 'running'].includes(job.state) || !job.queue) return jobLabels[job.state] || '';
+  if (activity?.generation_allowed === false) return '活动暂不可生成，排队进度等待主办确认。';
+  const q = job.queue, ahead = Math.max(0, Number(q.ahead) || 0);
+  if (q.status === 'blocked') return q.reason === 'closed' ? '本期已截止，排队任务正在结算。' : '队列暂时暂停，等待主办核对。';
+  if (q.status === 'delayed') return job.state === 'running' ? '还在生成，已超过预计时间。离开页面也不会丢失任务。' : `前面还有 ${ahead} 人，当前生成比预计久一些。`;
+  const time = job.state === 'running' || ahead === 0 ? q.estimated_ready_ms : q.estimated_start_ms;
+  if (time == null || !Number.isFinite(Number(time))) return jobLabels[job.state];
+  const seconds = Math.max(0, Math.ceil((Number(time) - now) / 1000));
+  const duration = seconds >= 60 ? `${Math.ceil(seconds / 60)} 分钟` : `${Math.max(5, Math.ceil(seconds / 5) * 5)} 秒`;
+  if (job.state === 'running') return seconds === 0 ? '正在收尾，请稍等。' : `正在生成 · 预计还需约 ${duration}`;
+  return ahead ? `前面还有 ${ahead} 人 · 预计约 ${duration}开始` : `马上轮到你 · 预计约 ${duration}完成`;
+}
 const prizeLabels = Object.freeze({ creative: "创意惊喜 · 手办", popular: "人气灵感 · 帆布包", coffee: "咖啡共鸣 · 特调" });
 function csvCell(value) {
   const text = String(value ?? "");
@@ -66,7 +112,10 @@ function init() {
   let state = null, selected = "", actor = "", pendingIntent = null, writing = false, refreshing = false, timer, clockOffset = 0;
   const reviewDrafts = /* @__PURE__ */ new Map();
   let votingDirty = false, followGeneration = false, identityEpoch = 0;
-  let rankingKey = '';
+  let rankingKey = '', historyKey = '';
+  let refreshError = '';
+  let artworkRequest = 0, artworkUrl = '';
+  let artworkController = null, downloadController = null;
   let disqualifyEntry = '';
   const dialog = $("submit-dialog");
   function fitDialog() {
@@ -94,12 +143,17 @@ function init() {
     return element;
   };
   const notice = (message, error = false, target = "notice") => {
+    if (target === 'notice') refreshError = '';
     $(target).textContent = message;
     $(target).dataset.error = String(error);
   };
   const active = () => state?.generations?.some((job) => ["queued", "running", "needs_reconcile"].includes(job.state));
   const open = () => state && Date.now() + clockOffset >= Number(state.event.opens_ms) && Date.now() + clockOffset < Number(state.event.deadline_ms);
   function clearPrivate() {
+    downloadController?.abort();
+    downloadController = null;
+    $('download').disabled = false;
+    $('download').textContent = '保存图片 ↓';
     selected = "";
     pendingIntent = null;
     followGeneration = false;
@@ -122,6 +176,7 @@ function init() {
     rankingKey = '';
     $("my-entry").hidden = true;
     $("history").replaceChildren();
+    historyKey = '';
     reviewDrafts.clear();
     votingDirty = false;
     $("voting-form").reset();
@@ -138,23 +193,63 @@ function init() {
     }
     return body;
   }
-  function image(jobId, title) {
+  async function loadArtwork() {
+    artworkController?.abort();
+    artworkController = new AbortController();
+    const controller = artworkController;
+    const token = ++artworkRequest, epoch = identityEpoch;
+    const current = () => token === artworkRequest && epoch === identityEpoch && $('artwork-dialog').open;
+    if (artworkUrl) URL.revokeObjectURL(artworkUrl);
+    artworkUrl = '';
+    $('artwork-image').hidden = true;
+    $('artwork-loading').hidden = false;
+    $('artwork-loading').textContent = '正在加载原图…';
+    $('retry-artwork').hidden = true;
+    try {
+      const blob = await originalImage(url(`images/${$('artwork-image').dataset.job}`), fetch, () => {
+        if (current()) $('artwork-loading').textContent = '连接较慢，正在重新加载…';
+      },controller.signal);
+      if (!current()) return;
+      artworkUrl = URL.createObjectURL(blob);
+      $('artwork-image').src = artworkUrl;
+      await $('artwork-image').decode();
+      if (!current()) return;
+      $('artwork-image').hidden = false;
+      $('artwork-loading').hidden = true;
+    } catch {
+      if (!current()) return;
+      $('artwork-loading').textContent = '原图暂时无法加载，请重试。';
+      $('retry-artwork').hidden = false;
+    }
+  }
+  function openArtwork(jobId, title) {
+    $('artwork-title').textContent = title;
+    $('artwork-image').dataset.job = jobId;
+    $('artwork-image').alt = title;
+    $('artwork-dialog').showModal();
+    fitDialog();
+    loadArtwork();
+  }
+  $('retry-artwork').onclick = loadArtwork;
+  $('open-result-image').onclick = () => { if (selected) openArtwork(selected, '生成作品'); };
+  function image(jobId, title, variant = 'thumb') {
     const wrap = node("button", void 0, "image-wrap image-open");
     wrap.type = "button";
     wrap.setAttribute("aria-label", `放大查看：${title}`);
-    wrap.onclick = () => {
-      $("artwork-title").textContent = title;
-      $("artwork-image").src = url(`images/${jobId}`);
-      $("artwork-image").dataset.job = jobId;
-      $("artwork-image").alt = title;
-      $("artwork-dialog").showModal();
-    };
+    wrap.onclick = () => openArtwork(jobId,title);
     const img = node("img");
-    img.src = url(`images/${jobId}`);
+    if (variant === 'thumb') {
+      img.sizes = '(max-width: 590px) calc((100vw - 44px) / 2), (max-width: 800px) calc((100vw - 92px) / 3), (max-width: 1180px) calc((100vw - 120px) / 3), 354px';
+      img.srcset = `${url(`images/${jobId}/thumb`)} 384w, ${url(`images/${jobId}/preview`)} 768w`;
+    }
+    img.src = url(`images/${jobId}/${variant}`);
     img.alt = title;
     img.loading = "lazy";
+    img.decoding = 'async';
+    img.width = variant === 'preview' ? 768 : 384;
+    img.height = img.width;
     img.addEventListener("error", () => {
-      img.alt = "图片暂时无法加载，请刷新重试。";
+      img.alt = "预览暂不可用，点按查看原图。";
     });
     wrap.append(img, node("span", "AI 生成", "ai-label"));
     return wrap;
@@ -183,6 +278,7 @@ function init() {
     $("submit-entry").disabled = writing;
     $("submit-entry").textContent = writing && dialog.open ? "正在提交…" : "提交审核";
     $("credits").textContent = generationCredits(state,Boolean(actor));
+    $("credits").hidden = !$("credits").textContent;
     const closed = phase==='closed';
     $("create-form").hidden = closed;
     document.querySelector('.create-section').classList.toggle('is-closed', closed);
@@ -204,7 +300,7 @@ function init() {
     if (!completed.some((j) => j.id === selected)) selected = completed.at(-1)?.id || "";
     $("result").hidden = !selected;
     if (selected && $("result-image").dataset.job !== selected) {
-      $("result-image").src = url(`images/${selected}`);
+      $("result-image").src = url(`images/${selected}/preview`);
       $("result-image").dataset.job = selected;
     }
     $("choose").disabled = writing || !open() || !activityAllowed;
@@ -213,7 +309,7 @@ function init() {
     $("empty-preview").hidden = Boolean(selected || job);
     $("result-panel").classList.toggle("is-empty", !selected && !job);
     $("job-status").hidden = !job || job.state === "completed";
-    $("job-status").textContent = jobLabels[job?.state] || "";
+    $("job-status").textContent = generationStatus(job, now, state.activity);
     $("job-status").dataset.active = String(["queued", "running"].includes(job?.state));
     if (followGeneration && job && !["queued", "running"].includes(job.state)) {
       followGeneration = false;
@@ -225,13 +321,16 @@ function init() {
         });
       }
     }
-    if (changed) $("history").replaceChildren(...completed.map((job2) => {
+    const nextHistoryKey = completed.map(job => job.id).join(':');
+    if (historyKey !== nextHistoryKey) $("history").replaceChildren(...completed.map((job2) => {
       const button = node("button");
       button.type = "button";
       button.setAttribute("aria-label", `查看第 ${completed.indexOf(job2) + 1} 张生成图片`);
       button.setAttribute("aria-pressed", String(job2.id === selected));
       const img = node("img");
-      img.src = url(`images/${job2.id}`);
+      img.src = url(`images/${job2.id}/thumb`);
+      img.loading = 'lazy';
+      img.decoding = 'async';
       img.alt = "";
       button.append(img);
       button.dataset.job = job2.id;
@@ -241,6 +340,7 @@ function init() {
       };
       return button;
     }));
+    historyKey = nextHistoryKey;
     $("history").querySelectorAll("button").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.job === selected)));
     const entry = [...state.entries || []].reverse().find((e) => e.state !== "superseded");
     $("my-entry").hidden = !entry;
@@ -369,7 +469,7 @@ function init() {
     for (const id of reviewDrafts.keys()) if (!pending.has(id)) reviewDrafts.delete(id);
     $("review-queue").replaceChildren(...state.review_queue.map(({ entry, generation }) => {
       const card = node("article", void 0, "review-card");
-      card.append(image(generation.id, entry.title), node("h3", entry.title), node("p", entry.display_name));
+      card.append(image(generation.id, entry.title, 'preview'), node("h3", entry.title), node("p", entry.display_name));
       const details = node("details");
       details.append(node("summary", "查看提示词"), node("p", generation.prompt));
       card.append(details);
@@ -437,9 +537,13 @@ function init() {
         if (error.status !== 401) throw error;
         value = await request("public");
       }
-      if (epoch === identityEpoch) render(value);
+      if (epoch === identityEpoch) {
+        render(value);
+        if (refreshError) notice('');
+      }
     } catch (error) {
       notice(error.message, true);
+      refreshError = error.message;
       if(!state)$('phase').textContent='活动暂未载入';
     } finally {
       refreshing = false;
@@ -521,6 +625,14 @@ function init() {
   $("choose").onclick = () => openSubmission();
   $("close-dialog").onclick = () => $("submit-dialog").close();
   $("close-artwork").onclick = () => $("artwork-dialog").close();
+  $('artwork-dialog').addEventListener('close', () => {
+    artworkController?.abort();
+    artworkController = null;
+    artworkRequest++;
+    if (artworkUrl) URL.revokeObjectURL(artworkUrl);
+    artworkUrl = '';
+    $('artwork-image').removeAttribute('src');
+  });
   $('close-disqualify').onclick=()=>$('disqualify-dialog').close();
   $('disqualify-dialog').addEventListener('cancel',event=>{if(writing)event.preventDefault();});
   $('disqualify-form').onsubmit=async event=>{
@@ -582,9 +694,20 @@ function init() {
     saveBlob(new Blob(["\uFEFF" + rows.map((row) => row.map(csvCell).join(",")).join("\r\n")], { type: "text/csv;charset=utf-8" }), "半醒咖啡-过审作品.csv");
   };
   $("download").onclick = async () => {
+    if (!selected || $('download').disabled) return;
+    const downloadJob = selected, downloadActor = actor, downloadEpoch = identityEpoch;
+    const controller = new AbortController();
+    downloadController = controller;
+    $('download').disabled = true;
+    $('download').textContent = '正在保存…';
+    let source;
     try {
-      const img = $("result-image");
+      const blob = await originalImage(url(`images/${downloadJob}`), fetch, () => { if (downloadActor === actor && downloadEpoch === identityEpoch) $('download').textContent = '正在重试…'; },controller.signal);
+      source = URL.createObjectURL(blob);
+      const img = new Image();
+      img.src = source;
       await img.decode();
+      if (downloadActor !== actor || downloadEpoch !== identityEpoch) return;
       const canvas = document.createElement("canvas");
       canvas.width = img.naturalWidth;
       canvas.height = img.naturalHeight + 60;
@@ -595,17 +718,25 @@ function init() {
       ctx.fillStyle = "#243e32";
       ctx.font = "22px sans-serif";
       ctx.fillText("AI 生成 · 半醒咖啡每周创作", 24, canvas.height - 22);
-      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
-      if (!blob) throw new Error("无法保存图片");
-      saveBlob(new Blob([labelPng(new Uint8Array(await blob.arrayBuffer()), selected)], { type: "image/png" }), `半醒咖啡-AI生成-${selected.slice(0, 8)}.png`);
+      const labeledBlob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+      if (!labeledBlob) throw new Error("无法保存图片");
+      if (downloadActor !== actor || downloadEpoch !== identityEpoch) return;
+      saveBlob(new Blob([labelPng(new Uint8Array(await labeledBlob.arrayBuffer()), downloadJob)], { type: "image/png" }), `半醒咖啡-AI生成-${downloadJob.slice(0, 8)}.png`);
     } catch {
-      notice("图片暂时无法保存，请等图片加载完成后重试。", true);
+      if (downloadActor === actor && downloadEpoch === identityEpoch) notice("原图暂时无法保存，请重试。", true);
+    } finally {
+      if (source) URL.revokeObjectURL(source);
+      if (downloadController === controller) {
+        downloadController = null;
+        $('download').disabled = false;
+        $('download').textContent = '保存图片 ↓';
+      }
     }
   };
   async function poll() {
     clearTimeout(timer);
     if (!document.hidden) await refresh();
-    timer = setTimeout(poll, active() || state?.voting?.mode === 'builtin' && state.voting.phase === 'open' ? 4e3 : 15e3);
+    timer = setTimeout(poll, (active() || state?.voting?.mode === 'builtin' && state.voting.phase === 'open' ? 4e3 : 15e3) + Math.floor(Math.random() * 1000));
   }
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) poll();
@@ -617,6 +748,8 @@ function init() {
 export {
   creationPhase,
   generationCredits,
+  generationStatus,
+  originalImage,
   creativeEndpoint,
   votingRows,
   csvCell,

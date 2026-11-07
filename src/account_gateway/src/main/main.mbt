@@ -26,6 +26,15 @@ async fn main {
       is Some(client) else {
       fail("Identity and workspace origins must agree")
     }
+    if @env.args() is [_,"--prepare-previews"] {
+      let mut count=0
+      while @creative_contest.process_previews(required("MOONTOWN_CREATIVE_STATE_FILE"),required("MOONTOWN_CREATIVE_CONFIG_FILE")) {
+        count+=1
+        @async.sleep(1)
+      }
+      println("Prepared previews for \{count} existing images; originals and activity state unchanged")
+      return
+    }
     if @env.args() is [_, "--check-identity"] {
       // Deployment preflight only: no real account, controller grant, workspace
       // provisioning, or Kubernetes credential is needed for this probe.

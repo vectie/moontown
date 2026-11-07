@@ -69,10 +69,10 @@
 <p>生成的图片会出现在这里</p>
 </div>
           <div id="result" tabindex="-1" aria-label="生成结果" hidden>
-<div class="image-wrap">
-<img id="result-image" alt="你本次生成的作品">
+<button id="open-result-image" type="button" class="image-wrap image-open" aria-label="放大查看生成作品">
+<img id="result-image" alt="你本次生成的作品" width="768" height="768" decoding="async">
 <span class="ai-label">AI 生成</span>
-</div>
+</button>
 <div class="result-actions">
 <button id="choose" class="primary" type="button">用这张参赛 <span aria-hidden="true">→</span>
 </button>
@@ -247,6 +247,8 @@
 <h2 id="artwork-title">作品</h2>
 <button id="close-artwork" class="dialog-close text-button" type="button" aria-label="关闭大图">×</button>
 </div>
+<p id="artwork-loading" class="fine-print" role="status" hidden></p>
+<button id="retry-artwork" class="secondary" type="button" hidden>重新加载原图</button>
 <div class="image-wrap">
 <img id="artwork-image" alt="">
 <span class="ai-label">AI 生成</span>

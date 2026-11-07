@@ -1,0 +1,196 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn command(cmd : String, args : Array[String]) -> String {
+  let r = @shell.Cmd(cmd, args).output()
+  r.check()
+  r.stdout()
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  command(
+    "kubectl",
+    [
+      "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", "-n", "aigc-acceptance-20260915",
+      ..args,
+    ],
+  )
+}
+
+///|
+async fn main {
+  let (root, rollback) = match @env.args() {
+    [_, root] => (root, false)
+    [_, root, "rollback"] => (root, true)
+    _ => fail("PRIVATE_RELEASE_DIR [rollback]")
+  }
+  guard root.has_prefix("/home/HwHiAiUser/coffee-auth-queue-20261107/") &&
+    !root.contains("..") else {
+    fail("Use a new private QA release directory")
+  }
+  let name = "moontown-coffee-load20-r2"
+  let old = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@sha256:32a21f916ca9ebd8bfd6161d0a3956ff4d41bb12c9bf8c73207c3ac390242af7"
+  let next = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@sha256:b760272cdac808f232d468873add989dbfe374cef0d2ddf19ce7d538caa7e743"
+  let ui = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-ui@sha256:03db73cbae517cfd3767bf4bc2ea87282ffaf74d338742691532a2dbc29822ac"
+  let raw = kube(["get", "deployment", name, "-o", "json"])
+  guard @json.parse(raw)
+    is {
+      "metadata": { "resourceVersion": String(version), .. },
+      "spec": {
+        "replicas": 1,
+        "template": {
+          "spec": {
+            "containers": [{ "image": String(runtime), .. }],
+            "initContainers": [{ "image": String(assets), .. }],
+            ..
+          },
+          ..
+        },
+        ..
+      },
+      ..
+    } &&
+    runtime == (if rollback { next } else { old }) &&
+    assets == ui else {
+    fail("QA image/version drift")
+  }
+  if rollback {
+    let patch : Json = [
+      { "op": "test", "path": "/metadata/resourceVersion", "value": version },
+      {
+        "op": "test",
+        "path": "/spec/template/spec/containers/0/image",
+        "value": next,
+      },
+      {
+        "op": "replace",
+        "path": "/spec/template/spec/containers/0/image",
+        "value": old,
+      },
+    ]
+    println(
+      kube(["patch", "deployment", name, "--type=json", "-p", patch.stringify()]),
+    )
+    println(kube(["rollout", "status", "deployment/" + name, "--timeout=55s"]))
+    return
+  }
+  guard @json.parse(kube(["get", "pvc", name + "-state", "-o", "json"]))
+    is { "spec": { "volumeName": String(pv), .. }, .. } else {
+    fail("PVC missing")
+  }
+  guard @json.parse(kube(["get", "pv", pv, "-o", "json"]))
+    is {
+      "spec": {
+        "csi": {
+          "volumeAttributes": {
+            "server": "192.168.2.175",
+            "share": "/data/lunanexa-workspaces",
+            "subDir": String(subdir),
+            ..
+          },
+          ..
+        },
+        ..
+      },
+      ..
+    } &&
+    subdir.has_prefix("aigc-acceptance-20260915/" + name + "-state/") &&
+    !subdir.contains("..") else {
+    fail("Unexpected QA storage")
+  }
+  let directory = "/data/lunanexa-workspaces/" + subdir
+  let state_path = directory + "/coffee-load20-r2-20261107/state.json"
+  let state = @fs.read_file(state_path).text()
+  guard @json.parse(state)
+    is { "generations": Array(jobs), "voting_settlements": Array([_]), .. } &&
+    jobs.length() == 20 &&
+    jobs.all(job => job is { "state": "completed", .. }) else {
+    fail("QA must be terminal and naturally sealed")
+  }
+  @fs.mkdir(root, permission=0o700)
+  @fs.write_file(
+    root + "/deployment-before.json",
+    raw,
+    create_mode=CreateNew,
+    permission=0o600,
+    sync=Full,
+  )
+  @fs.write_file(
+    root + "/state-before.json",
+    state,
+    create_mode=CreateNew,
+    permission=0o600,
+    sync=Full,
+  )
+  ignore(
+    command("tar", ["-C", directory, "-czf", root + "/state-before.tgz", "."]),
+  )
+  @fs.chmod(root + "/state-before.tgz", 0o600)
+  @fs.write_file(
+    root + "/state-path.txt",
+    state_path,
+    create_mode=CreateNew,
+    permission=0o600,
+  )
+  let patch : Json = [
+    { "op": "test", "path": "/metadata/resourceVersion", "value": version },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/containers/0/image",
+      "value": old,
+    },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/initContainers/0/image",
+      "value": ui,
+    },
+    {
+      "op": "replace",
+      "path": "/spec/template/spec/containers/0/image",
+      "value": next,
+    },
+  ]
+  println(
+    kube(["patch", "deployment", name, "--type=json", "-p", patch.stringify()]),
+  )
+  println(kube(["rollout", "status", "deployment/" + name, "--timeout=55s"]))
+  println(
+    kube([
+      "exec",
+      "deployment/" + name,
+      "-c",
+      "platform",
+      "--",
+      "/usr/local/bin/lunanexa-webide-gateway",
+      "--prepare-previews",
+    ]),
+  )
+  guard @fs.read_file(state_path).text() == state else {
+    fail(
+      "Activity state changed during derivative preparation; inspect without restoring stale state",
+    )
+  }
+  @fs.write_file(
+    root + "/verification.json",
+    (
+      {
+        "state_unchanged": true,
+        "jobs": 20,
+        "sealed_votes_unchanged": true,
+        "runtime": next,
+      } : Json).stringify(indent=2),
+    create_mode=CreateNew,
+    permission=0o600,
+  )
+  println(
+    "Prepared existing QA derivatives; original event and voting state are identical",
+  )
+}

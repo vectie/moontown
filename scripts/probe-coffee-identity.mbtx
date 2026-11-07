@@ -1,0 +1,124 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/http",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, root] && root.has_prefix("/home/HwHiAiUser/") else {
+    fail("probe-coffee-identity.mbtx PRIVATE_DIRECTORY")
+  }
+  let result = @shell.Cmd("kubectl", [
+    "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", "-n", "aigc-acceptance-20260915",
+    "get", "configmap", "moontown-browser-identity-ca", "-o", "json",
+  ]).output()
+  result.check()
+  guard @json.parse(result.stdout())
+    is { "data": { "ca-bundle.crt": String(ca), .. }, .. } else {
+    fail("Missing trusted CA")
+  }
+  @fs.write_file(root + "/identity-ca.pem", ca, permission=0o600)
+  let origin = "https://suanli.kechuangfuwu.com:8443"
+  let rows : Array[Json] = []
+  let release = @async.now() + 1000L
+  @async.with_task_group(group => {
+    for i in 1..<=20 {
+      let key = (if i < 10 { "0" } else { "" }) + i.to_string()
+      let cookie = @fs.read_file(root + "/" + key + "-cookies.txt")
+        .text()
+        .split("\n")
+        .filter_map(line => {
+          let fields = line.split("\t").map(p => p.to_owned()).to_array()
+          if fields.length() == 7 &&
+            [
+              "__Host-lunanexa_enterprise_oidc", "lunanexa_http_enterprise_oidc",
+              "__Host-lunanexa_enterprise_oidc_8443", "lunanexa_http_enterprise_oidc_8443",
+            ].contains(fields[5]) {
+            Some(fields[5] + "=" + fields[6])
+          } else {
+            None
+          }
+        })
+        .join("; ")
+      guard !cookie.is_empty() else { fail("Missing expected cookie") }
+      group.spawn_bg(() => {
+        let delay = release - @async.now()
+        if delay > 0L {
+          @async.sleep(delay.to_int())
+        }
+        let start = @async.now()
+        let values : Array[Json] = []
+        let completed = @async.with_timeout(10000, () => {
+          let client = @http.Client(
+            origin,
+            headers={
+              "Cookie": cookie,
+              "Origin": origin,
+              "Sec-Fetch-Site": "same-origin",
+              "Sec-Fetch-Dest": "empty",
+              "Accept": "application/json",
+            },
+            trust=CustomPemFile(root + "/identity-ca.pem"),
+          )
+          defer client.close()
+          let connected = @async.now()
+          for round in 0..<3 {
+            let before = @async.now()
+            let session = client.get("/user/auth/session")
+            let session_json = client.read_all().json()
+            let session_done = @async.now()
+            guard session.code == 200 &&
+              session_json is { "session_token": String(bearer), .. } else {
+              fail("Session rejected")
+            }
+            let direct_start = @async.now()
+            let control = @http.Client("http://10.43.192.21:8080")
+            let direct = control.get("/v1/auth/self", extra_headers={
+              "Authorization": "Bearer " + bearer,
+            })
+            ignore(control.read_all())
+            control.close()
+            let direct_ms = @async.now() - direct_start
+            let profile_start = @async.now()
+            let profile = client.get("/user/v1/auth/self", extra_headers={
+              "Authorization": "Bearer " + bearer,
+            })
+            ignore(client.read_all())
+            let ended = @async.now()
+            values.push({
+              "round": round,
+              "connect_ms": (connected - start).to_string(),
+              "session_ms": (session_done - before).to_string(),
+              "direct_ms": direct_ms.to_string(),
+              "direct_code": direct.code,
+              "profile_ms": (ended - profile_start).to_string(),
+              "round_ms": (ended - before).to_string(),
+              "profile_code": profile.code,
+            })
+            @async.sleep(250)
+          }
+          true
+        }) catch {
+          _ => false
+        }
+        rows.push({
+          "user": key,
+          "complete": completed,
+          "elapsed_ms": (@async.now() - start).to_string(),
+          "samples": Json::array(values),
+        })
+      })
+    }
+  })
+  @fs.write_file(
+    root + "/identity-probe.json",
+    Json::array(rows).stringify(indent=2),
+    permission=0o600,
+  )
+  println(Json::array(rows).stringify(indent=2))
+}

@@ -1,0 +1,76 @@
+///|
+import {
+  "moonbitlang/x@0.5.5/fs",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+}
+
+///|
+fn stats(values : Array[Int32]) -> Json {
+  let sorted = values.copy()
+  sorted.sort()
+  guard !sorted.is_empty() else { return Json::null() }
+  let n = sorted.length()
+  {
+    "n": n,
+    "p50": sorted[(n * 50 + 99) / 100 - 1],
+    "p95": sorted[(n * 95 + 99) / 100 - 1],
+    "max": sorted[n - 1],
+  }
+}
+
+///|
+fn summarize(path : String) -> Json raise {
+  guard @json.parse(@fs.read_file_to_string(path)) is Array(rows) else {
+    fail("Missing native probe")
+  }
+  let sessions : Array[Int32] = []
+  let profiles : Array[Int32] = []
+  let rounds : Array[Int32] = []
+  let mut ok = 0
+  for row in rows {
+    guard row is { "samples": Array(samples), .. } else { fail("Bad row") }
+    for sample in samples {
+      guard sample
+        is {
+          "session_ms": String(session),
+          "profile_ms": String(profile),
+          "round_ms": String(round),
+          "profile_code": Number(code, ..),
+          ..
+        } else {
+        fail("Bad sample")
+      }
+      sessions.push(@string.parse_int(session))
+      profiles.push(@string.parse_int(profile))
+      rounds.push(@string.parse_int(round))
+      if code == 200.0 {
+        ok += 1
+      }
+    }
+  }
+  {
+    "users": rows.length(),
+    "completed_users": rows
+    .filter(row => row is { "complete": True, .. })
+    .length(),
+    "successful_profiles": ok,
+    "session_ms": stats(sessions),
+    "profile_ms": stats(profiles),
+    "combined_ms": stats(rounds),
+  }
+}
+
+///|
+fn main raise {
+  guard @env.args() is [_, root, output] else {
+    fail("summarize-coffee-auth.mbtx PRIVATE_R2_DIRECTORY PUBLIC_SUMMARY")
+  }
+  let summary : Json = {
+    "before": summarize(root + "/identity-before.json"),
+    "after": summarize(root + "/identity-after.json"),
+  }
+  @fs.write_string_to_file(output, summary.stringify(indent=2) + "\n")
+  println(summary.stringify(indent=2))
+}

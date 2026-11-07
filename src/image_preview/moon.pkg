@@ -1,0 +1,15 @@
+import {
+  "moonbitlang/core/encoding/base64",
+} for "wbtest"
+
+supported_targets = "native"
+
+options(
+  "native-stub": [ "preview.c" ],
+  link: {
+    "native": {
+      "stub-cc-flags": "-I/opt/homebrew/include",
+      "cc-link-flags": "-pthread -ldl -L/opt/homebrew/lib -lpng16 -lwebp",
+    },
+  },
+)

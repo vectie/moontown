@@ -1,0 +1,145 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn command(cmd : String, args : Array[String]) -> String {
+  let r = @shell.Cmd(cmd, args).output()
+  r.check()
+  r.stdout()
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/coffee-auth-queue-20261107"
+  let source = root + "/profile-source/lunanexa"
+  guard @fs.read_file(root + "/profile-final-control-build.log")
+    .text()
+    .contains("Compiled both identity fixes") &&
+    @fs.read_file(root + "/profile-final-http-test.log")
+    .text()
+    .contains("Total tests: 1, passed: 1, failed: 0.") else {
+    fail("Wait for both fixes to compile and pass the live HTTP regression")
+  }
+  let executable = source +
+    "/_build/native/release/build/vectie/lunanexa/cmd/control/control.exe"
+  guard command("strings", ["-e", "l", executable]).contains(
+    "identity_profile_observation_failed",
+  ) else {
+    fail("Missing profile response change")
+  }
+  guard @json.parse(@fs.read_file(root + "/profile-final-build.json").text())
+    is {
+      "account_sha256": "910af62704a0d545018a2a709f8edfff91ccc67051ec76557c397eff1780259a",
+      "api_sha256": String(api_sha),
+      "binary_sha256": String(binary_sha),
+      "account_tests": 16,
+      ..
+    } &&
+    command("sha256sum", [executable]).has_prefix(binary_sha + " ") &&
+    command("sha256sum", [source + "/api/server.mbt"]).has_prefix(api_sha + " ") &&
+    command("sha256sum", [source + "/account/store.mbt"]).has_prefix(
+      "910af62704a0d545018a2a709f8edfff91ccc67051ec76557c397eff1780259a ",
+    ) else {
+    fail("Both source hashes must match the qualified binary receipt")
+  }
+  let prior = root + "/profile-control"
+  guard command("sha256sum", [prior + "/control.exe"]).has_prefix(
+    "b8afc8a1e579709ea0f51e4d3f91c1d772889f0ba0f952146d73686ea72df837 ",
+  ) else {
+    fail("Controller changed; preserve the newer release")
+  }
+  let next = root + "/profile-final-control"
+  let base = [
+    "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", "-n", "lunanexa",
+  ]
+  let raw = command(
+    "kubectl",
+    [..base, "get", "deployment", "lunanexa-control", "-o", "json"],
+  )
+  guard @json.parse(raw)
+    is {
+      "metadata": { "resourceVersion": String(version), .. },
+      "spec": {
+        "template": { "spec": { "volumes": Array(volumes), .. }, .. },
+        ..
+      },
+      ..
+    } else {
+    fail("Controller unavailable")
+  }
+  let patch : Array[Json] = [
+    { "op": "test", "path": "/metadata/resourceVersion", "value": version },
+  ]
+  for i, volume in volumes {
+    if volume
+      is {
+        "name": "native-glm-control",
+        "hostPath": { "path": String(path), .. },
+        ..
+      } {
+      guard path == prior else { fail("Controller deployment drift") }
+      patch.append([
+        {
+          "op": "test",
+          "path": "/spec/template/spec/volumes/" +
+          i.to_string() +
+          "/hostPath/path",
+          "value": prior,
+        },
+        {
+          "op": "replace",
+          "path": "/spec/template/spec/volumes/" +
+          i.to_string() +
+          "/hostPath/path",
+          "value": next,
+        },
+      ])
+    }
+  }
+  guard patch.length() == 3 else { fail("Controller mount missing") }
+  @fs.write_file(
+    root + "/controller-before-profile-final.json",
+    raw,
+    permission=0o600,
+    create_mode=CreateNew,
+    sync=Full,
+  )
+  @fs.mkdir(next, permission=0o755)
+  @fs.chmod(next, 0o755)
+  ignore(command("cp", ["-a", prior + "/.", next]))
+  @fs.chmod(next, 0o755)
+  ignore(command("install", ["-m", "755", executable, next + "/control.exe"]))
+  @fs.write_file(
+    root + "/profile-final-control.sha256",
+    command("sha256sum", [next + "/control.exe"]),
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  println(
+    command(
+      "kubectl",
+      [
+        ..base,
+        "patch",
+        "deployment",
+        "lunanexa-control",
+        "--type=json",
+        "-p",
+        Json::array(patch).stringify(),
+      ],
+    ),
+  )
+  println(
+    command(
+      "kubectl",
+      [
+        ..base, "rollout", "status", "deployment/lunanexa-control", "--timeout=55s",
+      ],
+    ),
+  )
+}

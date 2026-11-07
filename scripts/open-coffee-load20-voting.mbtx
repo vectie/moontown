@@ -1,0 +1,166 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn command(program : String, args : Array[String]) -> String {
+  let result = @shell.Cmd(program, args).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  command(
+    "kubectl",
+    ["--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", ..args],
+  )
+}
+
+///|
+async fn main {
+  let (root, suffix) = match @env.args() {
+    [_, root] => (root, "r2")
+    [_, root, "r5"] => (root, "r5")
+    _ => fail("NEW_PRIVATE_BACKUP [r5]")
+  }
+  guard root.has_prefix("/home/HwHiAiUser/coffee-auth-queue-20261107/") else {
+    fail("Use a new private backup directory")
+  }
+  let ns = "aigc-acceptance-20260915"
+  let name = "moontown-coffee-load20-" + suffix
+  let id = "coffee-load20-" + suffix + "-20261107"
+  guard @json.parse(
+      kube(["-n", ns, "get", "pvc", name + "-state", "-o", "json"]),
+    )
+    is { "spec": { "volumeName": String(pv), .. }, .. } else {
+    fail("Missing isolated PVC")
+  }
+  guard @json.parse(kube(["get", "pv", pv, "-o", "json"]))
+    is {
+      "spec": {
+        "csi": {
+          "volumeAttributes": {
+            "server": "192.168.2.175",
+            "share": "/data/lunanexa-workspaces",
+            "subDir": String(subdir),
+            ..
+          },
+          ..
+        },
+        ..
+      },
+      ..
+    } &&
+    subdir.has_prefix(ns + "/" + name + "-state/") &&
+    !subdir.contains("..") else {
+    fail("Unexpected test storage")
+  }
+  let directory = "/data/lunanexa-workspaces/" + subdir
+  let state_path = directory + "/" + id + "/state.json"
+  let raw_state = @fs.read_file(state_path).text()
+  guard @json.parse(raw_state)
+    is {
+      "challenge_id": String(challenge),
+      "generations": Array(jobs),
+      "entries": Array(entries),
+      "voting_rosters": Array([]),
+      "vote_events": Array([]),
+      "voting_settlements": Array([]),
+      ..
+    } &&
+    challenge == id &&
+    jobs.length() == 20 &&
+    jobs.all(job => job is { "state": "completed", .. }) &&
+    entries.length() == 20 &&
+    entries.all(entry => entry is { "state": "approved", .. }) else {
+    fail(
+      "Need 20 real approved works before the first freeze; never reopen a frozen vote",
+    )
+  }
+  let cm = kube(["-n", ns, "get", "configmap", name, "-o", "json"])
+  guard @json.parse(cm)
+    is {
+      "metadata": { "resourceVersion": String(version), .. },
+      "data": { "event.json": String(raw), .. },
+      ..
+    } &&
+    @json.parse(raw) is Object(config) &&
+    config.get("brief") is Some(Object(brief)) &&
+    brief.get("id") == Some(Json::string(id)) else {
+    fail("Unexpected event config")
+  }
+  @fs.mkdir(root, permission=0o700)
+  @fs.write_file(
+    root + "/configmap-before.json",
+    cm,
+    create_mode=CreateNew,
+    permission=0o600,
+    sync=Full,
+  )
+  ignore(
+    command("tar", ["-C", directory, "-czf", root + "/state-before.tgz", "."]),
+  )
+  @fs.chmod(root + "/state-before.tgz", 0o600)
+  @fs.mkdir(root + "/restore-check", permission=0o700)
+  ignore(
+    command("tar", [
+      "--no-same-owner",
+      "-xzf",
+      root + "/state-before.tgz",
+      "-C",
+      root + "/restore-check",
+    ]),
+  )
+  guard @fs.read_file(root + "/restore-check/" + id + "/state.json").text() ==
+    raw_state &&
+    @fs.read_file(state_path).text() == raw_state else {
+    fail("Backup validation or live state changed")
+  }
+  let now = @async.now().reinterpret_as_uint64()
+  brief["deadline_ms"] = Json::string((now - 30000UL).to_string())
+  config["voting_opens_ms"] = Json::string((now - 10000UL).to_string())
+  config["voting_closes_ms"] = Json::string((now + 300000UL).to_string())
+  config["awards_ms"] = Json::string((now + 360000UL).to_string())
+  let patch : Json = [
+    { "op": "test", "path": "/metadata/resourceVersion", "value": version },
+    { "op": "test", "path": "/data/event.json", "value": raw },
+    {
+      "op": "replace",
+      "path": "/data/event.json",
+      "value": Json::object(config).stringify(),
+    },
+  ]
+  @fs.write_file(
+    root + "/patch.json",
+    patch.stringify(),
+    create_mode=CreateNew,
+    permission=0o600,
+  )
+  println(
+    kube([
+      "-n",
+      ns,
+      "patch",
+      "configmap",
+      name,
+      "--type=json",
+      "--patch-file",
+      root + "/patch.json",
+    ]),
+  )
+  @fs.write_file(
+    root + "/backup-digest.txt",
+    command("sha256sum", [root + "/state-before.tgz"]),
+    create_mode=CreateNew,
+    permission=0o600,
+  )
+  println(
+    "Opened a five-minute test vote; projection reloads naturally. State was backed up, never rewritten. The deadline must never be reopened after freeze.",
+  )
+}

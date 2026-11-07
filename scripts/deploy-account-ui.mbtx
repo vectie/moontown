@@ -24,6 +24,12 @@ async fn main {
     [_, root, previous, next] => (root, previous, next, "moontown-platform")
     [_, root, previous, next, "moontown-coffee-qa"] =>
       (root, previous, next, "moontown-coffee-qa")
+    [_, root, previous, next, "moontown-coffee-load20-r2"] =>
+      (root, previous, next, "moontown-coffee-load20-r2")
+    [_, root, previous, next, "moontown-coffee-load20-r5"] =>
+      (root, previous, next, "moontown-coffee-load20-r5")
+    [_, root, previous, next, "moontown-coffee-load20-r6"] =>
+      (root, previous, next, "moontown-coffee-load20-r6")
     _ =>
       fail(
         "deploy-account-ui.mbtx PRIVATE_RELEASE_DIR PREVIOUS_DIGEST NEXT_DIGEST [moontown-coffee-qa]",

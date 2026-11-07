@@ -175,3 +175,72 @@ existing documentation and record concrete pitfalls here.
 - Still bounded to the coffee template and three awards. No automatic MoonClaw
   jobs, payments, anti-Sybil identity or monthly reset; physical mobile keyboard
   testing remains outstanding. Do not turn those proposal items into claims.
+
+## 2026-11-08 · Coffee queue, image variants and authentication diagnosis
+
+- Current work/evidence: `COFFEE_AUTH_QUEUE_LOAD20_2026-11-07.md`. Runtime
+  b760272c… and UI 7dccb07f… are deployed formally and in QA. They retain the
+  real MoonBook CLI/seed/1.2.0 curator package. Original PNGs remain unchanged;
+  gallery/history use 384px WebPs, review/results 768px, explicit zoom/save use
+  originals. Approved media checks current visibility without repeated identity
+  HTTP calls; private variants and withdrawal retain the same ACL.
+- Native libpng/libwebp flags must preserve `-pthread -ldl` in executable/test
+  consumers. Ship libm as well as libpng/webp/zlib. Normalize OCI layer directory
+  modes; async mkdir under host umask can produce 0750 despite requesting 0755.
+  Explicitly chmod nonroot hostPath executable directories. Startup failures in
+  private candidates were rolled back before any inference or state write.
+- Thumbnail backfill never resubmits inference or rewrites event/vote state.
+  The bounded cache remembers only derivative presence, never authorization;
+  missing media reads invalidate it for repair. R5's 20.35 MB originals became
+  0.20 MB thumbnails / 0.55 MB previews. A 400-image, twenty-visitor public load
+  succeeded; this does not qualify the separate live identity pipeline.
+- Auth latency has multiple layers: account authorize used to persist a whole
+  snapshot on every read; global 30s activity checkpoints retain fresh role and
+  revocation checks. Browser gateway session I/O was synchronous and serialized;
+  use the existing async PgPool. GET profile responses must not wait for durable
+  operational metrics; mutations retain their existing audit order. Preserve
+  the internal TLS service alias, strict origin and unchanged 3500ms deadline.
+- Retain failed iterations. R2/R3 had 20/49 HTTP503s, R4 had one timed-out image
+  body, R5 had 150 profile-stage HTTP503s despite all 20 generations/images
+  completing. Do not call these a passing end-to-end load test. R3/R4 are stopped
+  with public routes/policies removed and PVC evidence retained.
+- Native database test URLs must name a disposable *_test database. A management
+  host cannot resolve cluster DNS; use the verified service IP for host-side
+  tests. The session-pool regression passed against lunanexa_test. Large native
+  API test linking needed `ulimit -s 65536` to avoid a compiler stack overflow.
+- Formal programme registry may legitimately be absent. Accept absence only for
+  a wholly empty programme volume (apart from an empty regular registry.lock),
+  preserve it, and back up both full PVCs. Failed/Succeeded historical Pods are
+  not active writers and must not block a stop-and-backup wait forever.
+- Final paired controller 7bef5632… / browser gateway 2c973649… retains both auth
+  fixes. A later controller release had overwritten checkpoint source; final
+  build receipts now pin both source hashes and the executable. LunaNexa main
+  0685c0e is on both remotes; its strict native check and full 1,959-test suite
+  passed. The local LunaNexa checkout was fast-forwarded without touching its
+  unrelated dirty files. Session/profile P95 is 42/57ms; 1,000 reads had no 503.
+- R6 completes twenty distinct new images (20 concurrent admissions in 1ms),
+  all forty WebPs and 1,147 HTTP200s / no 503. One original body still timed out
+  after HTTP200; first hashes were 19/20, download recheck 20/20. HTTP/1.1's
+  twenty originals succeeded first time; HTTP/2 recovered one timeout with a
+  single retry. Retain these attempts; do not describe all original first loads
+  as successful or infer the exact client/proxy/network fault from this alone.
+- Final zoom/save uses one bounded image-only retry, cancellation on close or
+  identity change, and explicit recovery. It does not retry authorization errors
+  or inference. Queue status hides exhausted-quota copy while a job is pending.
+  Browser tests are 194/194; actual mobile zoom/save verification is recorded in
+  the report. Await build/transfer completion and verify archive hashes before
+  OCI packaging: a private empty-UI candidate was rejected before publication.
+- R2/R3/R4/R6 routes and added policies are removed, replicas zero, all PVCs and
+  evidence retained. R5 remains the single twenty-work public example, with
+  twenty votes naturally sealed. Formal still has no public entries/programme
+  activities and retains 500 generations. Only the final OCI archives/caches
+  and state backups are needed; superseded generated OCI caches were cleaned.
+- Final MoonTown native suite is **2,067/2,067**, browser source **194/194**.
+  Provide the two documented Claw/Book fixture variables above; without them,
+  six crossings correctly refuse to run. Do not substitute a real provider.
+  Use `--jobs 2` when development disk headroom is tight. The first broad run
+  exhausted local storage; `moon clean` removed owned generated caches, and the
+  bounded complete rerun passed. Root async 0.16.6 defaults file writes
+  differently from gateway 0.22.4: explicitly select creation modes in preview
+  writes and fixtures. Production's effective CreateOrTruncate behavior is the
+  same. Generated .mbti changes are the new image variants/preview API only.

@@ -1,12 +1,62 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {labelPng,csvCell,creativeEndpoint,votingRows,creationPhase,generationCredits} from './coffee-contest.js'
+import {labelPng,csvCell,creativeEndpoint,votingRows,creationPhase,generationCredits,generationStatus,originalImage} from './coffee-contest.js'
+
+test('original downloads recover once from a broken body without retrying authorization failures',async()=>{
+  const image = new Blob([new Uint8Array(64)],{type:'image/png'});
+  let calls=0,retries=0;
+  const result=await originalImage('/original',async(_,options)=>{
+    calls++;
+    assert.equal(options.credentials,'same-origin');
+    assert.equal(options.cache,'no-store');
+    return {ok:true,blob:async()=>{if(calls===1)throw new TypeError('connection terminated');return image}};
+  },()=>retries++);
+  assert.equal(result,image);
+  assert.equal(calls,2);
+  assert.equal(retries,1);
+  calls=0;
+  await assert.rejects(originalImage('/private',async()=>{calls++;return {ok:false,status:403}}));
+  assert.equal(calls,1);
+  calls=0;
+  const cancelled=new AbortController();
+  cancelled.abort();
+  await assert.rejects(originalImage('/original',async()=>{calls++;return image},()=>{},cancelled.signal));
+  assert.equal(calls,0);
+});
+
+test('original retries are bounded and reject incomplete image bodies',async()=>{
+  let calls=0;
+  await assert.rejects(originalImage('/original',async()=>{calls++;throw new TypeError('offline')}));
+  assert.equal(calls,2);
+  calls=0;
+  await assert.rejects(originalImage('/original',async()=>{calls++;return {ok:true,blob:async()=>new Blob([])}}));
+  assert.equal(calls,1);
+});
+
+test('queue copy uses authoritative position and server clock without promising an exact finish',()=>{
+  const job={state:'queued',queue:{ahead:19,status:'queued',estimated_start_ms:'181000',estimated_ready_ms:'190000'}}
+  assert.equal(generationStatus(job,1000),'前面还有 19 人 · 预计约 3 分钟开始')
+  assert.equal(generationStatus({...job,state:'running'},181000),'正在生成 · 预计还需约 10 秒')
+  assert.equal(generationStatus({...job,state:'running'},190000),'正在收尾，请稍等。')
+  assert.equal(generationStatus({...job,queue:{...job.queue,ahead:0}},181000),'马上轮到你 · 预计约 10 秒完成')
+})
+
+test('uncertain or paused queues never show a stale countdown',()=>{
+  const job={state:'queued',queue:{ahead:19,status:'blocked',reason:'reconcile',estimated_start_ms:'181000'}}
+  assert.equal(generationStatus(job,1000),'队列暂时暂停，等待主办核对。')
+  assert.equal(generationStatus({...job,queue:{...job.queue,reason:'closed'}},1000),'本期已截止，排队任务正在结算。')
+  assert.match(generationStatus({...job,queue:{...job.queue,status:'delayed'}},1000),/前面还有 19 人/)
+  assert.doesNotMatch(generationStatus(job,1000,{generation_allowed:false}),/预计|分钟|秒/)
+  assert.match(generationStatus({state:'running'},1000),/正在把想象画出来/)
+})
 
 test('generation allowance copy respects the shared event budget even with personal credits left',()=>{
   const value={remaining:2,event_remaining:1,event:{participant_quota:3}}
   assert.match(generationCredits(value,true),/还可生成 1 张/)
   assert.match(generationCredits(value,false),/最多可生成 1 张/)
   assert.equal(generationCredits({...value,event_remaining:0},true),'本期生成名额已用完 · 已生成图片仍可投稿')
+  assert.equal(generationCredits({...value,event_remaining:0,generations:[{state:'queued'}]},true),'')
+  assert.match(generationCredits({...value,event_remaining:0,generations:[{state:'completed'}]},true),/已生成图片仍可投稿/)
   assert.match(generationCredits({...value,event_remaining:20},true),/还可生成 2 张/)
 })
 

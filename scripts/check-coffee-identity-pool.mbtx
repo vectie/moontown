@@ -1,0 +1,98 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/base64",
+  "moonbitlang/core/encoding/utf8",
+}
+
+///|
+async fn command(args : Array[String]) -> String {
+  let r = @shell.Cmd(
+    "kubectl",
+    [
+      "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", "-n", "lunanexa",
+      ..args,
+    ],
+  ).output()
+  r.check()
+  r.stdout()
+}
+
+///|
+async fn main {
+  let spec = @json.parse(
+    command(["get", "deployment", "lunanexa-control", "-o", "json"]),
+  )
+  guard spec
+    is {
+      "spec": {
+        "template": { "spec": { "containers": Array(containers), .. }, .. },
+        ..
+      },
+      ..
+    } &&
+    containers.iter().find_first(c => c is { "name": "control", .. })
+    is Some({ "env": Array(environment), .. }) else {
+    fail("Missing controller env")
+  }
+  guard environment
+    .iter()
+    .find_first(e => e is { "name": "LUNANEXA_DATABASE_URL", .. })
+    is Some(value) else {
+    fail("Database environment not found")
+  }
+  let url = match value {
+    { "value": String(url), .. } => url
+    {
+      "valueFrom": {
+        "secretKeyRef": { "name": String(name), "key": String(key), .. },
+        ..
+      },
+      ..
+    } => {
+      guard @json.parse(command(["get", "secret", name, "-o", "json"]))
+        is { "data": Object(data), .. } &&
+        data.get(key) is Some(String(encoded)) else {
+        fail("Secret missing")
+      }
+      @utf8.decode(@base64.decode(encoded))
+    }
+    _ => fail("Unsupported database configuration")
+  }
+  let resolved = url
+    .split("lunanexa-postgres.lunanexa.svc.cluster.local")
+    .map(p => p.to_owned())
+    .join("10.43.91.95")
+  let pieces = resolved.split("/").map(v => v.to_owned()).to_array()
+  guard pieces.length() >= 4 else { fail("Unexpected database URL") }
+  pieces[pieces.length() - 1] = "lunanexa_test"
+  let root = "/home/HwHiAiUser/coffee-auth-queue-20261107"
+  let result = @shell.Cmd("env", [
+    "LUNANEXA_TEST_DATABASE_URL=" + pieces.join("/"),
+    "/home/HwHiAiUser/.moon-new/bin/moon",
+    "-C",
+    "/home/HwHiAiUser/lunanexa-event-trial-20261022.9DbhEI/lunanexa",
+    "test",
+    "cmd/identity-gateway",
+    "--target",
+    "native",
+    "--target-dir",
+    root + "/_build-identity-pool-test",
+    "--jobs",
+    "2",
+    "--diagnostic-limit",
+    "2",
+  ]).output()
+  @fs.write_file(
+    root + "/gateway-pool-integration.log",
+    result.stdout() + result.stderr(),
+    permission=0o600,
+  )
+  result.check()
+  println(
+    "Gateway tests passed against the dedicated lunanexa_test database; production session rows were not used",
+  )
+}

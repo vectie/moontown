@@ -1,0 +1,110 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, root, protocol] &&
+    root.has_prefix("/Users/kq/.codex/") &&
+    ["h1", "h2"].contains(protocol) else {
+    fail("PRIVATE_RUN h1|h2")
+  }
+  guard @json.parse(@fs.read_file(root + "/run.json").text())
+    is { "route": "coffee-load20-r6", .. } &&
+    @json.parse(@fs.read_file(root + "/jobs.json").text()) is Array(jobs) &&
+    jobs.length() == 20 else {
+    fail("Completed isolated R6 only")
+  }
+  let output = root + "/originals-" + protocol + "-" + @async.now().to_string()
+  @fs.mkdir(output, permission=0o700)
+  let results : Array[Json] = []
+  @async.with_task_group(group => {
+    for job in jobs {
+      guard job
+        is {
+          "user": String(key),
+          "id": String(id),
+          "sha256": String(expected),
+          "state": "completed",
+          ..
+        } &&
+        id.length() == 64 &&
+        id.all(c => c is ('0'..<='9' | 'a'..<='f')) &&
+        key.length() == 2 &&
+        key.all(c => c is ('0'..<='9')) else {
+        fail("Invalid test job")
+      }
+      group.spawn_bg(() => {
+        let attempts : Array[Json] = []
+        let mut valid = false
+        for attempt in 0..<2 {
+          let file = output + "/" + key + "-" + attempt.to_string() + ".png"
+          @fs.write_file(file, "", permission=0o600)
+          let result = @shell.Cmd("curl", [
+            "--silent",
+            "--show-error",
+            "--max-time",
+            "12",
+            if protocol == "h1" {
+              "--http1.1"
+            } else {
+              "--http2"
+            },
+            "--cookie",
+            root + "/" + key + "-cookies.txt",
+            "--output",
+            file,
+            "--write-out",
+            "%{http_code} %{http_version} %{size_download} %{time_total}",
+            "https://suanli.kechuangfuwu.com:8443/coffee-load20-r6/api/creative/images/" +
+            id,
+          ]).output()
+          let bytes = @fs.read_file(file).binary()
+          valid = result.exit_code() == 0 &&
+            result.stdout().has_prefix("200 ") &&
+            @crypto.bytes_to_hex_string(@crypto.sha256(bytes)) == expected
+          attempts.push({
+            "exit": result.exit_code(),
+            "curl": result.stdout(),
+            "bytes": bytes.length(),
+            "valid": valid,
+          })
+          @fs.write_file(file + ".stderr", result.stderr(), permission=0o600)
+          if valid ||
+            (result.exit_code() == 0 && !result.stdout().has_prefix("5")) {
+            break
+          }
+          @async.sleep(350)
+        }
+        results.push({
+          "user": key,
+          "valid": valid,
+          "attempts": Json::array(attempts),
+        })
+      })
+    }
+  })
+  @fs.write_file(
+    root + "/originals-" + protocol + "-checks.json",
+    Json::array(results).stringify(indent=2),
+    permission=0o600,
+  )
+  let summary : Json = {
+    "users": 20,
+    "valid": results.count_if(r => r is { "valid": True, .. }),
+    "first_attempt_failures": results.count_if(r => {
+      r is { "attempts": [{ "valid": False, .. }, ..], .. }
+    }),
+    "protocol": protocol,
+  }
+  println(summary.stringify(indent=2))
+  guard results.all(r => r is { "valid": True, .. }) else {
+    fail("Original recovery failed; all attempts retained")
+  }
+}

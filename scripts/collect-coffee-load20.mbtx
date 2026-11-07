@@ -19,14 +19,26 @@ async fn kube(args : Array[String]) -> String {
 
 ///|
 async fn main {
-  guard @env.args() is [_, root] && root.has_prefix("/home/HwHiAiUser/") else {
-    fail("collect-coffee-load20.mbtx PRIVATE_RELEASE_DIR")
+  let (root, name, event_id) = match @env.args() {
+    [_, root] => (root, "moontown-coffee-load20", "coffee-load20-20261107")
+    [_, root, "r2"] =>
+      (root, "moontown-coffee-load20-r2", "coffee-load20-r2-20261107")
+    [_, root, "r3"] =>
+      (root, "moontown-coffee-load20-r3", "coffee-load20-r3-20261107")
+    [_, root, "r4"] =>
+      (root, "moontown-coffee-load20-r4", "coffee-load20-r4-20261107")
+    [_, root, "r5"] =>
+      (root, "moontown-coffee-load20-r5", "coffee-load20-r5-20261107")
+    [_, root, "r6"] =>
+      (root, "moontown-coffee-load20-r6", "coffee-load20-r6-20261107")
+    _ => fail("collect-coffee-load20.mbtx PRIVATE_RELEASE_DIR [r2]")
+  }
+  guard root.has_prefix("/home/HwHiAiUser/") else {
+    fail("Private directory required")
   }
   let ns = "aigc-acceptance-20260915"
   guard @json.parse(
-      kube([
-        "-n", ns, "get", "pvc", "moontown-coffee-load20-state", "-o", "json",
-      ]),
+      kube(["-n", ns, "get", "pvc", name + "-state", "-o", "json"]),
     )
     is { "spec": { "volumeName": String(pv), .. }, .. } else {
     fail("Missing load PVC")
@@ -47,19 +59,16 @@ async fn main {
       },
       ..
     } &&
-    subdir.has_prefix(ns + "/moontown-coffee-load20-state/") &&
+    subdir.has_prefix(ns + "/" + name + "-state/") &&
     !subdir.contains("..") else {
     fail("Unexpected load storage")
   }
   let state = @fs.read_file(
-    "/data/lunanexa-workspaces/" + subdir + "/coffee-load20-20261107/state.json",
+    "/data/lunanexa-workspaces/" + subdir + "/" + event_id + "/state.json",
   ).text()
   guard @json.parse(state)
-    is {
-      "challenge_id": "coffee-load20-20261107",
-      "generations": Array(jobs),
-      ..
-    } &&
+    is { "challenge_id": String(challenge_id), "generations": Array(jobs), .. } &&
+    challenge_id == event_id &&
     jobs.length() == 20 &&
     jobs.all(job => {
       job is { "state": String("completed" | "failed" | "needs_reconcile"), .. }
@@ -70,9 +79,7 @@ async fn main {
   @fs.write_file(root + "/stop-monitor", "complete", permission=0o600)
   @fs.write_file(
     root + "/pods-after.json",
-    kube([
-      "-n", ns, "get", "pods", "-l", "app=moontown-coffee-load20", "-o", "json",
-    ]),
+    kube(["-n", ns, "get", "pods", "-l", "app=" + name, "-o", "json"]),
     permission=0o600,
   )
   @fs.write_file(

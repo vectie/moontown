@@ -11,13 +11,37 @@ import {
 let namespace_name = "aigc-acceptance-20260915"
 
 ///|
-let deployment_name = "moontown-coffee-qa"
+let deployment_name : String = if @env.args().contains("--formal") {
+  "moontown-platform"
+} else {
+  "moontown-coffee-qa"
+}
 
 ///|
-let old_image = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@sha256:fd234d60ed4be54d55ceb927713a2bf49f960120143870b300ff3780957e2716"
+let programme_claim : String = deployment_name + "-activity-20261107"
 
 ///|
-let new_image = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@sha256:62213c1b44971cb81730fb288dcab73477b855833e2572272d4b7dabea2bfff4"
+let creative_claim : String = if deployment_name == "moontown-platform" {
+  "moontown-creative-state"
+} else {
+  "moontown-coffee-qa-state"
+}
+
+///|
+let old_image : String = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@" +
+  (if @env.args().contains("--queue") {
+    "sha256:62213c1b44971cb81730fb288dcab73477b855833e2572272d4b7dabea2bfff4"
+  } else {
+    "sha256:fd234d60ed4be54d55ceb927713a2bf49f960120143870b300ff3780957e2716"
+  })
+
+///|
+let new_image : String = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@" +
+  (if @env.args().contains("--queue") {
+    "sha256:b760272cdac808f232d468873add989dbfe374cef0d2ddf19ce7d538caa7e743"
+  } else {
+    "sha256:62213c1b44971cb81730fb288dcab73477b855833e2572272d4b7dabea2bfff4"
+  })
 
 ///|
 let ui_image = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-ui@sha256:4914aeaf173eee31c3729f6499814ad4c8ebe42582c98164beb5e95581c9dcc8"
@@ -138,9 +162,7 @@ async fn restore_compatible_runtime() -> Unit {
     },
     { "op": "replace", "path": "/spec/replicas", "value": 1 },
   ])
-  println(
-    "Restored compatible QA runtime fd234d60 and replicas=1; no older writer selected.",
-  )
+  println("Restored compatible previous runtime and replicas=1.")
 }
 
 ///|
@@ -150,6 +172,11 @@ async fn main {
   let (root, expected_version, apply) = match @env.args() {
     [_, root, version] => (root, version, false)
     [_, root, version, "--apply"] => (root, version, true)
+    [_, root, version, "--queue"] => (root, version, false)
+    [_, root, version, "--queue", "--apply"] => (root, version, true)
+    [_, root, version, "--queue", "--formal"] => (root, version, false)
+    [_, root, version, "--queue", "--formal", "--apply"] =>
+      (root, version, true)
     _ =>
       fail(
         "update-activity-qa-runtime.mbtx NEW_PRIVATE_DIR EXPECTED_RESOURCE_VERSION [--apply]",
@@ -221,20 +248,19 @@ async fn main {
       item
       is {
         "name": "activity-program",
-        "persistentVolumeClaim": {
-          "claimName": "moontown-coffee-qa-activity-20261107",
-          ..
-        },
+        "persistentVolumeClaim": { "claimName": String(claim), .. },
         ..
-      }
+      } &&
+      claim == programme_claim
     }) &&
     volumes.any(item => {
       item
       is {
         "name": "creative-state",
-        "persistentVolumeClaim": { "claimName": "moontown-coffee-qa-state", .. },
+        "persistentVolumeClaim": { "claimName": String(claim), .. },
         ..
-      }
+      } &&
+      claim == creative_claim
     }) else {
     fail("Expected configured QA programme and creative mounts")
   }
@@ -242,8 +268,8 @@ async fn main {
   ignore(save(root, "deployment-before", current))
   for
     (claim, storage) in [
-      ("moontown-coffee-qa-activity-20261107", "local-path"),
-      ("moontown-coffee-qa-state", "lunanexa-workspaces-rwx"),
+      (programme_claim, "local-path"),
+      (creative_claim, "lunanexa-workspaces-rwx"),
     ] {
     let pvc = @json.parse(
       kube(["-n", namespace_name, "get", "pvc", claim, "-o", "json"]),
@@ -338,14 +364,14 @@ async fn main {
         {
           "name": "programme",
           "persistentVolumeClaim": {
-            "claimName": "moontown-coffee-qa-activity-20261107",
+            "claimName": programme_claim,
             "readOnly": true,
           },
         },
         {
           "name": "creative",
           "persistentVolumeClaim": {
-            "claimName": "moontown-coffee-qa-state",
+            "claimName": creative_claim,
             "readOnly": true,
           },
         },
@@ -421,7 +447,9 @@ async fn main {
       is { "items": Array(pods), .. } else {
       fail("Cannot inspect old QA Pods")
     }
-    if pods.is_empty() {
+    if pods.all(pod => {
+        pod is { "status": { "phase": "Failed" | "Succeeded", .. }, .. }
+      }) {
       break
     }
     guard @async.now() - wait_started < 120000L else {
@@ -486,17 +514,34 @@ async fn main {
   @fs.mkdir(restored, permission=0o700)
   ignore(command("tar", ["-xzf", archive, "-C", restored]))
   let registry_file = restored + "/programme/registry.json"
-  guard @fs.kind(registry_file, follow_symlink=false) is Regular &&
-    @json.parse(@fs.read_file(registry_file).text())
-    is {
-      "schema": "moontown.activity-program.v1",
-      "activities": Array(activities),
-      ..
-    } &&
-    activities.all(activity => {
-      activity is { "status": String(status), .. } && status != "preparing"
-    }) else {
-    fail("Backup contains preparing activity or invalid registry")
+  let registry_present = @fs.exists(registry_file)
+  let activities = if registry_present {
+    guard @fs.kind(registry_file, follow_symlink=false) is Regular &&
+      @json.parse(@fs.read_file(registry_file).text())
+      is {
+        "schema": "moontown.activity-program.v1",
+        "activities": Array(activities),
+        ..
+      } &&
+      activities.all(activity => {
+        activity is { "status": String(status), .. } && status != "preparing"
+      }) else {
+      fail("Backup contains preparing activity or invalid registry")
+    }
+    activities
+  } else {
+    guard deployment_name == "moontown-platform" else {
+      fail("Missing QA registry")
+    }
+    for name in @fs.readdir(restored + "/programme", include_hidden=true) {
+      guard name == "registry.lock" &&
+        @fs.kind(restored + "/programme/" + name, follow_symlink=false)
+        is Regular &&
+        @fs.read_file(restored + "/programme/" + name).binary().length() == 0 else {
+        fail("Missing registry beside existing programme data")
+      }
+    }
+    []
   }
   let activity_states : Array[Json] = []
   for activity in activities {
@@ -519,11 +564,10 @@ async fn main {
     save(root, "backup-manifest", {
       "sha256": local_sha,
       "archive": "qa-state.tar.gz",
-      "whole_pvcs": [
-        "moontown-coffee-qa-activity-20261107", "moontown-coffee-qa-state",
-      ],
+      "whole_pvcs": [programme_claim, creative_claim],
       "old_qa_pods_fully_gone": true,
       "legacy_state_present": legacy_present,
+      "registry_present": registry_present,
       "activity_states": activity_states,
       "restore_validation": true,
     }),

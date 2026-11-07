@@ -11,3 +11,11 @@ import {
 }
 
 supported_targets = "native"
+
+options(
+  link: {
+    "native": {
+      "cc-link-flags": "-pthread -ldl -L/opt/homebrew/lib -lpng16 -lwebp",
+    },
+  },
+)

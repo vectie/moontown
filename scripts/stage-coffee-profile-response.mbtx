@@ -1,0 +1,34 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/coffee-auth-queue-20261107/profile-source/lunanexa"
+  let path = root + "/api/server.mbt"
+  let source = @fs.read_file(path).text()
+  let anchor = "    let allow_asserted_subject = loopback_client(connection.client_addr())\n"
+  let pieces = source.split(anchor).map(s => s.to_owned()).to_array()
+  guard pieces.length() == 2 &&
+    !source.contains("identity_profile_observation_failed") else {
+    fail("Profile patch anchor drift")
+  }
+  let patch =
+    #|    // Send a freshly checked profile before durable operational recording.
+    #|    // Mutations retain the existing audit-before-response behavior.
+    #|    if request.meth == Get && request.path == "/v1/auth/self" {
+    #|      let started = @async.now()
+    #|      let reply = self.handle_accounts(Get,request.path,headers,"",allow_asserted_subject)
+    #|      send_listener_reply(connection,reply)
+    #|      self.record_operational_request(Get,request.path,headers,reply,started,allow_asserted_subject) catch {
+    #|        _ => eprintln("identity_profile_observation_failed")
+    #|      }
+    #|      return
+    #|    }
+  @fs.write_file(path, pieces[0] + anchor + patch + "\n" + pieces[1], sync=Full)
+  println(
+    "Patched only the isolated live-profile response path; no mutation route changed",
+  )
+}

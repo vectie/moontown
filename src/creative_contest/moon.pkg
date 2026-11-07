@@ -10,9 +10,18 @@ import {
   "moonbitlang/x/crypto",
   "vectie/moontown/support",
   "vectie/moontown/competition_brief",
+  "vectie/moontown/image_preview",
 }
 
 supported_targets = "native"
+
+options(
+  link: {
+    "native": {
+      "cc-link-flags": "-pthread -ldl -L/opt/homebrew/lib -lpng16 -lwebp",
+    },
+  },
+)
 
 import {
   "moonbitlang/async/socket",

@@ -1,0 +1,131 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn command(cmd : String, args : Array[String]) -> String {
+  let r = @shell.Cmd(cmd, args).output()
+  r.check()
+  r.stdout()
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/coffee-auth-queue-20261107"
+  guard @fs.read_file(root + "/gateway-pool-final-build.log")
+    .text()
+    .contains("Finished. moon:") &&
+    @fs.read_file(root + "/gateway-pool-integration-monotonic-result.log")
+    .text()
+    .contains("Gateway tests passed") else {
+    fail("Qualified gateway build and real database regression required")
+  }
+  let prior = root + "/identity-gateway-pool"
+  guard command("sha256sum", [prior + "/identity-gateway.exe"]).has_prefix(
+    "aafffa7adf6176da7efcc8a1133ae63d20a74f1ae92aa2d3801de1cd63eca965 ",
+  ) else {
+    fail("Gateway executable drift")
+  }
+  let next = root + "/identity-gateway-final"
+  let base = [
+    "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", "-n", "lunanexa",
+  ]
+  let raw = command(
+    "kubectl",
+    [
+      ..base, "get", "deployment", "lunanexa-identity-gateway-suanli", "-o", "json",
+    ],
+  )
+  guard @json.parse(raw)
+    is {
+      "metadata": { "resourceVersion": String(version), .. },
+      "spec": {
+        "template": { "spec": { "volumes": Array(volumes), .. }, .. },
+        ..
+      },
+      ..
+    } else {
+    fail("Gateway deployment unavailable")
+  }
+  let patches : Array[Json] = [
+    { "op": "test", "path": "/metadata/resourceVersion", "value": version },
+  ]
+  for i, volume in volumes {
+    if volume
+      is {
+        "name": "native-long-context",
+        "hostPath": { "path": String(path), .. },
+        ..
+      } {
+      guard path == prior else { fail("Gateway binary drift") }
+      patches.append([
+        {
+          "op": "test",
+          "path": "/spec/template/spec/volumes/" +
+          i.to_string() +
+          "/hostPath/path",
+          "value": prior,
+        },
+        {
+          "op": "replace",
+          "path": "/spec/template/spec/volumes/" +
+          i.to_string() +
+          "/hostPath/path",
+          "value": next,
+        },
+      ])
+    }
+  }
+  guard patches.length() == 3 else { fail("Gateway mount missing") }
+  @fs.write_file(
+    root + "/identity-gateway-before-final.json",
+    raw,
+    permission=0o600,
+    create_mode=CreateNew,
+    sync=Full,
+  )
+  @fs.mkdir(next, permission=0o755)
+  @fs.chmod(next, 0o755)
+  ignore(
+    command("install", [
+      "-m",
+      "755",
+      root +
+      "/_build-identity-pool-final/native/release/build/vectie/lunanexa/cmd/identity-gateway/identity-gateway.exe",
+      next + "/identity-gateway.exe",
+    ]),
+  )
+  @fs.write_file(
+    root + "/identity-gateway-final.sha256",
+    command("sha256sum", [next + "/identity-gateway.exe"]),
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  println(
+    command(
+      "kubectl",
+      [
+        ..base,
+        "patch",
+        "deployment",
+        "lunanexa-identity-gateway-suanli",
+        "--type=json",
+        "-p",
+        Json::array(patches).stringify(),
+      ],
+    ),
+  )
+  println(
+    command(
+      "kubectl",
+      [
+        ..base, "rollout", "status", "deployment/lunanexa-identity-gateway-suanli",
+        "--timeout=55s",
+      ],
+    ),
+  )
+}

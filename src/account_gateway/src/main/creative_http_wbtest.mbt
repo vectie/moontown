@@ -1,4 +1,7 @@
 ///|
+extern "C" fn creative_fixture_png() -> Bytes = "moontown_preview_test_png"
+
+///|
 async test "creative HTTP isolates two accounts and publishes only the approved version" {
   let rehearsal = @env.get_env_var("MOONTOWN_CREATIVE_UI_REHEARSAL_DIST")
   let static_image = if rehearsal is Some(_) {
@@ -14,7 +17,7 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
     guard encoded.length() < 12000000 else { fail("UI sample is too large") }
     encoded
   } else {
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aH2QAAAAASUVORK5CYII="
+    @base64.encode(creative_fixture_png())
   }
   let real_provider = if rehearsal is Some(_) {
     @env.get_env_var("MOONTOWN_CREATIVE_UI_PROVIDER_ORIGIN")
@@ -109,10 +112,15 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
     },
   }
   @fs.write_file(config_path, config.stringify(), create_mode=CreateNew)
+  let unavailable = Ref(false)
+  let identity_reads = Ref(0)
   let platform : PublicPlatform = {
     identity: {
       flights: {},
-      resolve: cookie => identity.resolve(identity_cookies(cookie)),
+      resolve: cookie => {
+        identity_reads.val += 1
+        identity.resolve(identity_cookies(cookie))
+      },
     },
     assets: rehearsal.unwrap_or(root),
     controller: identity_origin,
@@ -128,6 +136,9 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
   @async.with_task_group(group => {
     group.spawn_bg(no_wait=true, allow_failure=true, () => {
       upstream.run_forever((request, _, conn) => {
+        if unavailable.val {
+          return reply_json(conn, 503, {})
+        }
         let cookie = request.headers.get("cookie").unwrap_or("")
         let principal = if cookie.contains("=a") {
           "a"
@@ -284,6 +295,18 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
     }
     assert_false(read("b", "mine").1.text().contains("private-a-prompt"))
     assert_eq(read("b", "images/" + id).0.code, 404)
+    assert_eq(read("b", "images/" + id + "/thumb").0.code, 404)
+    let thumbnail = read("a", "images/" + id + "/thumb")
+    assert_eq(thumbnail.0.code, 200)
+    assert_eq(thumbnail.0.headers.get("content-type"), Some("image/webp"))
+    assert_eq(
+      thumbnail.0.headers.get("content-length"),
+      Some(thumbnail.1.binary().length().to_string()),
+    )
+    assert_eq(read("a", "images/" + id + "/preview").0.code, 200)
+    unavailable.val = true
+    assert_eq(read("a", "images/" + id + "/thumb").0.code, 503)
+    unavailable.val = false
     assert_eq(read("mayor", "images/" + id).0.code, 404)
     assert_eq(
       write("a", "submit", {
@@ -309,8 +332,16 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
     assert_true(read("", "public").1.text().contains("接口测试作品"))
     assert_false(read("", "public").1.text().contains("private-a-prompt"))
     assert_eq(read("b", "images/" + id).0.code, 200)
+    unavailable.val = true
+    let before = identity_reads.val
+    assert_eq(read("b", "images/" + id + "/thumb").0.code, 200)
+    assert_eq(read("b", "images/" + id + "/preview").0.code, 200)
+    assert_eq(identity_reads.val, before)
+    assert_eq(read("b", "mine").0.code, 503)
+    unavailable.val = false
     assert_eq(write("a", "withdraw", { "entry_id": entry }).0.code, 200)
     assert_eq(read("b", "images/" + id).0.code, 404)
+    assert_eq(read("b", "images/" + id + "/thumb").0.code, 404)
     assert_eq(read("mayor", "images/" + id).0.code, 404)
     guard config is Object(config_fields) else {
       fail("invalid fixture config")
