@@ -1,0 +1,13 @@
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/async/http",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/x/crypto",
+  "vectie/moontown/integration",
+  "vectie/moontown/creative_contest",
+}
+
+supported_targets = "native"

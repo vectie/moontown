@@ -1,0 +1,399 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/async@0.22.4/os_error",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+fn object(value : Json) -> Map[String, Json] raise {
+  guard value is Object(fields) else { fail("Expected object") }
+  fields
+}
+
+///|
+fn field(value : Json, key : String) -> Json raise {
+  object(value).get(key).unwrap()
+}
+
+///|
+fn text(value : Json, key : String) -> String raise {
+  guard field(value, key) is String(text) && !text.is_empty() else {
+    fail("Missing string: " + key)
+  }
+  text
+}
+
+///|
+fn digest(value : String) -> Unit raise {
+  guard value.has_prefix("sha256:") &&
+    value.length() == 71 &&
+    value
+    .strip_prefix("sha256:")
+    .unwrap()
+    .all(c => c is ('0'..<='9' | 'a'..<='f')) else {
+    fail("Immutable SHA256 digests required")
+  }
+}
+
+///|
+async fn command(program : String, args : Array[String]) -> String {
+  let output = @shell.Cmd(program, args).output()
+  output.check()
+  output.stdout()
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  command(
+    "kubectl",
+    ["--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", ..args],
+  )
+}
+
+///|
+async fn save(root : String, name : String, value : Json) -> String {
+  let path = root + "/" + name + ".json"
+  @fs.write_file(
+    path,
+    value.stringify(indent=2) + "\n",
+    create_mode=CreateNew,
+    permission=0o600,
+    sync=Full,
+  )
+  path
+}
+
+///|
+/// First-install helper. The plan and all generated files are operator-private.
+/// Default mode reads cluster state and writes a reviewable local release only.
+/// Live resources change solely with the explicit --apply argument.
+async fn main {
+  let (plan_path, apply) = match @env.args() {
+    [_, path] => (path, false)
+    [_, path, "--apply"] => (path, true)
+    _ => fail("deploy-activity-program.mbtx PLAN_JSON [--apply]")
+  }
+  let plan = @json.parse(@fs.read_file(plan_path).text())
+  let root = text(plan, "output_dir")
+  guard root.has_prefix("/home/HwHiAiUser/") && !root.contains("..") else {
+    fail("Use a new private release directory on the management node")
+  }
+  let ns = "aigc-acceptance-20260915"
+  let deployment = text(plan, "deployment")
+  guard ["moontown-platform", "moontown-coffee-qa"].contains(deployment) else {
+    fail("Unexpected deployment")
+  }
+  let expected_version = text(plan, "expected_resource_version")
+  let old_runtime = text(plan, "expected_runtime_digest")
+  let old_ui = text(plan, "expected_ui_digest")
+  let runtime = text(plan, "runtime_digest")
+  let ui = text(plan, "ui_digest")
+  for value in [old_runtime, old_ui, runtime, ui] {
+    digest(value)
+  }
+  let claim = text(plan, "pvc_name")
+  let cm_name = text(plan, "configmap_name")
+  for name in [claim, cm_name] {
+    guard name.has_prefix(deployment + "-activity-") &&
+      name.length() <= 63 &&
+      name.all(c => c is ('a'..<='z' | '0'..<='9' | '-')) else {
+      fail("Use unique deployment-scoped resource names")
+    }
+  }
+  let approvers = object(plan).get("qa_approver_ids").unwrap_or(Json::array([]))
+  guard approvers is Array(ids) &&
+    ids.all(id => {
+      id is String(account) &&
+      account.has_prefix("lunanexa:") &&
+      account.length() < 200
+    }) &&
+    (ids.is_empty() || deployment == "moontown-coffee-qa") else {
+    fail("Scoped QA approvers are forbidden on the formal deployment")
+  }
+  let source = @json.parse(
+    kube(["-n", ns, "get", "deployment", deployment, "-o", "json"]),
+  )
+  guard source
+    is {
+      "metadata": { "resourceVersion": String(version), .. },
+      "spec": { "replicas": 1, "template": { "spec": Object(pod), .. }, .. },
+      ..
+    } &&
+    version == expected_version &&
+    pod.get("containers") is Some(Array([Object(container)])) &&
+    pod.get("initContainers") is Some(Array([Object(init)])) &&
+    container.get("name") == Some(Json::string("platform")) &&
+    init.get("name") == Some(Json::string("public-assets")) &&
+    container.get("env") is Some(Array(environment)) &&
+    container.get("volumeMounts") is Some(Array(mounts)) &&
+    pod.get("volumes") is Some(Array(volumes)) else {
+    fail("Deployment shape/resourceVersion drift; inspect before continuing")
+  }
+  let registry = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/"
+  let runtime_image = registry + "moontown-account-gateway@"
+  let ui_image = registry + "moontown-account-ui@"
+  guard container.get("image") ==
+    Some(Json::string(runtime_image + old_runtime)) &&
+    init.get("image") == Some(Json::string(ui_image + old_ui)) else {
+    fail("Image drift; refuse replacement")
+  }
+  guard !environment.any(setting => {
+      setting is { "name": String(name), .. } &&
+      name.has_prefix("MOONTOWN_ACTIVITY_")
+    }) &&
+    !volumes.any(volume => {
+      volume
+      is { "name": String("activity-program" | "activity-program-config"), .. }
+    }) else {
+    fail(
+      "Programme already configured; this first-install helper cannot overwrite it",
+    )
+  }
+  for (kind, name) in [("pvc", claim), ("configmap", cm_name)] {
+    guard kube(["-n", ns, "get", kind, name, "--ignore-not-found", "-o", "name"])
+      .trim()
+      .is_empty() else {
+      fail("Release resource already exists; inspect or choose a new release")
+    }
+  }
+  let template_raw = @fs.read_file(text(plan, "template_file")).text()
+  let preset_raw = @fs.read_file(text(plan, "preset_file")).text()
+  let template = @json.parse(template_raw)
+  let metadata = field(template, "program_template")
+  let preset = @json.parse(preset_raw)
+  guard text(metadata, "template_id") == "coffee-image-v1" &&
+    text(metadata, "book_id") == "banxing-coffee-curator" &&
+    text(metadata, "book_version") == "1.2.0" &&
+    text(preset, "book_cli") == "/opt/moonbook/moonbook" &&
+    text(preset, "book_cli_cwd") == "/opt/moonbook" &&
+    text(preset, "bundle_path") ==
+    "/opt/moonbook/presets/coffee-curator-runtime-1.2.0.moonbook-agent" &&
+    text(preset, "source_book_id") == text(metadata, "book_id") else {
+    fail(
+      "Trusted native Book preset is not the qualified fixed coffee template",
+    )
+  }
+  for
+    key in [
+      "template_id", "template_version", "book_version", "curator_profile", "workflow_id",
+      "workflow_version",
+    ] {
+    guard text(preset, key) == text(metadata, key) else {
+      fail("Preset/template mismatch: " + key)
+    }
+  }
+  for key in ["book_cli_sha256", "bundle_file_sha256", "bundle_digest"] {
+    digest(text(preset, key))
+  }
+  @fs.mkdir(root, permission=0o700)
+  ignore(save(root, "deployment-before", source))
+  ignore(save(root, "plan", plan))
+  // Resolve the current creative volume through its verified NFS PV. Preserve
+  // every legacy event byte before the new native writer migrates its schema.
+  guard environment
+    .iter()
+    .find_first(setting => {
+      setting is { "name": "MOONTOWN_CREATIVE_STATE_FILE", .. }
+    })
+    is Some({ "value": String(creative_file), .. }) &&
+    creative_file.has_prefix("/creative/") &&
+    !creative_file.contains("..") &&
+    volumes
+    .iter()
+    .find_first(volume => volume is { "name": "creative-state", .. })
+    is Some(
+      {
+        "persistentVolumeClaim": { "claimName": String(creative_claim), .. },
+        ..
+      }
+    ) else {
+    fail("Existing creative state must be explicitly backed up")
+  }
+  let current_pvc = @json.parse(
+    kube(["-n", ns, "get", "pvc", creative_claim, "-o", "json"]),
+  )
+  guard current_pvc is { "spec": { "volumeName": String(pv_name), .. }, .. } else {
+    fail("Creative PVC not bound")
+  }
+  let pv = @json.parse(kube(["get", "pv", pv_name, "-o", "json"]))
+  guard pv
+    is {
+      "spec": {
+        "csi": {
+          "volumeAttributes": {
+            "server": "192.168.2.175",
+            "share": "/data/lunanexa-workspaces",
+            "subDir": String(subdir),
+            ..
+          },
+          ..
+        },
+        ..
+      },
+      ..
+    } &&
+    subdir.has_prefix(ns + "/" + creative_claim + "/") &&
+    !subdir.contains("..") else {
+    fail("Unexpected creative storage location; no unchecked host path backup")
+  }
+  let legacy_root = "/data/lunanexa-workspaces/" + subdir
+  let state_path = legacy_root +
+    "/" +
+    creative_file.strip_prefix("/creative/").unwrap().to_owned()
+  let legacy_lock = @fs.open(
+    state_path + ".lock",
+    mode=ReadWrite,
+    create_mode=OpenOrCreate,
+    permission=0o600,
+  )
+  defer legacy_lock.close()
+  legacy_lock.lock(Exclusive)
+  defer legacy_lock.unlock()
+  let state_kind = Some(@fs.kind(state_path, follow_symlink=false)) catch {
+    @os_error.OSError(_) as err if err.is_ENOENT() => None
+    err => raise err
+  }
+  let state_present = state_kind is Some(_)
+  if state_present {
+    guard state_kind is Some(Regular) &&
+      @json.parse(@fs.read_file(state_path).text())
+      is { "generations": Array(jobs), .. } &&
+      jobs.all(job => job is { "state": String("completed" | "failed"), .. }) else {
+      fail(
+        "Existing creative state must be a regular file with terminal image jobs",
+      )
+    }
+  }
+  let archive = root + "/legacy-creative-state.tar.gz"
+  ignore(command("tar", ["-C", legacy_root, "-czf", archive, "."]))
+  @fs.chmod(archive, 0o600)
+  ignore(command("tar", ["-tzf", archive]))
+  ignore(
+    save(root, "legacy-backup", {
+      "pvc": creative_claim,
+      "state_file": creative_file,
+      "state_present": state_present,
+      "sha256sum": command("sha256sum", [archive]).trim().to_owned(),
+      "quiescent": true,
+    }),
+  )
+  for volume in volumes {
+    if volume is { "configMap": { "name": String(name), .. }, .. } {
+      ignore(
+        save(
+          root,
+          "before-configmap-" + name,
+          @json.parse(kube(["-n", ns, "get", "configmap", name, "-o", "json"])),
+        ),
+      )
+    }
+  }
+  let configmap : Json = {
+    "apiVersion": "v1",
+    "kind": "ConfigMap",
+    "immutable": true,
+    "metadata": { "name": cm_name, "namespace": ns },
+    "data": { "template.json": template_raw, "preset.json": preset_raw },
+  }
+  let pvc : Json = {
+    "apiVersion": "v1",
+    "kind": "PersistentVolumeClaim",
+    "metadata": { "name": claim, "namespace": ns },
+    "spec": {
+      "storageClassName": "local-path",
+      "accessModes": ["ReadWriteOnce"],
+      "resources": { "requests": { "storage": "1Gi" } },
+    },
+  }
+  let cm_path = save(root, "configmap", configmap)
+  let pvc_path = save(root, "pvc", pvc)
+  for
+    (name, value) in [
+      ("MOONTOWN_ACTIVITY_PROGRAM_ROOT", "/activity-program"),
+      (
+        "MOONTOWN_ACTIVITY_TEMPLATE_CONFIG_FILE", "/run/activity-program/template.json",
+      ),
+      (
+        "MOONTOWN_ACTIVITY_CURATION_PRESET_FILE", "/run/activity-program/preset.json",
+      ),
+    ] {
+    environment.push({ "name": name, "value": value })
+  }
+  if !ids.is_empty() {
+    environment.push({
+      "name": "MOONTOWN_ACTIVITY_PROGRAM_APPROVER_IDS",
+      "value": approvers.stringify(),
+    })
+  }
+  mounts.push({ "name": "activity-program", "mountPath": "/activity-program" })
+  for filename in ["template.json", "preset.json"] {
+    mounts.push({
+      "name": "activity-program-config",
+      "mountPath": "/run/activity-program/" + filename,
+      "subPath": filename,
+      "readOnly": true,
+    })
+  }
+  volumes.push({
+    "name": "activity-program",
+    "persistentVolumeClaim": { "claimName": claim },
+  })
+  volumes.push({
+    "name": "activity-program-config",
+    "configMap": { "name": cm_name, "defaultMode": 292 },
+  })
+  container["image"] = Json::string(runtime_image + runtime)
+  init["image"] = Json::string(ui_image + ui)
+  let patch : Json = [
+    {
+      "op": "test",
+      "path": "/metadata/resourceVersion",
+      "value": expected_version,
+    },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/containers/0/image",
+      "value": runtime_image + old_runtime,
+    },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/initContainers/0/image",
+      "value": ui_image + old_ui,
+    },
+    {
+      "op": "replace",
+      "path": "/spec/strategy",
+      "value": {
+        "type": "RollingUpdate",
+        "rollingUpdate": { "maxSurge": 0, "maxUnavailable": 1 },
+      },
+    },
+    {
+      "op": "replace",
+      "path": "/spec/template/spec",
+      "value": Json::object(pod),
+    },
+  ]
+  let patch_path = save(root, "deployment-patch", patch)
+  if apply {
+    println(kube(["create", "-f", pvc_path]))
+    println(kube(["create", "-f", cm_path]))
+    println(
+      kube([
+        "-n", ns, "patch", "deployment", deployment, "--type=json", "--patch-file",
+        patch_path,
+      ]),
+    )
+    println(
+      "Patched expected deployment; verify rollout and real authenticated programme before publication.",
+    )
+  } else {
+    println(
+      "Prepared private backup, immutable config, new PVC and guarded patch. No live resources changed.",
+    )
+  }
+}

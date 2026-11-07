@@ -28,6 +28,9 @@ const compiledMainPath = path.join(
 )
 
 const BROWSER_FILES = [
+  'activity-program.html',
+  'activity-program.js',
+  'activity-program.css',
   'coffee-contest.html',
   'coffee-contest.js',
   'coffee-auth.js',

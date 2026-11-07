@@ -1,0 +1,146 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  let result = @shell.Cmd(
+    "kubectl",
+    ["--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", ..args],
+  ).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+/// Repair only the QA programme's projected configuration mounts. SubPath bind
+/// mounts are regular files, preserving the runtime's no-symlink trust boundary.
+async fn main {
+  let (root, expected_version, digest, apply) = match @env.args() {
+    [_, root, version, digest] => (root, version, digest, false)
+    [_, root, version, digest, "--apply"] => (root, version, digest, true)
+    _ =>
+      fail(
+        "fix-activity-config-mounts.mbtx NEW_PRIVATE_DIR RESOURCE_VERSION RUNTIME_DIGEST [--apply]",
+      )
+  }
+  guard root.has_prefix("/home/HwHiAiUser/") &&
+    !root.contains("..") &&
+    digest.has_prefix("sha256:") &&
+    digest.length() == 71 &&
+    digest
+    .strip_prefix("sha256:")
+    .unwrap()
+    .all(c => c is ('0'..<='9' | 'a'..<='f')) else {
+    fail("Private directory and immutable runtime digest required")
+  }
+  let ns = "aigc-acceptance-20260915"
+  let deployment = "moontown-coffee-qa"
+  let current = @json.parse(
+    kube(["-n", ns, "get", "deployment", deployment, "-o", "json"]),
+  )
+  guard current
+    is {
+      "metadata": { "resourceVersion": String(version), .. },
+      "spec": {
+        "template": {
+          "spec": {
+            "containers": [
+              {
+                "name": "platform",
+                "image": String(image),
+                "volumeMounts": Array(mounts),
+                ..
+              },
+            ],
+            ..
+          },
+          ..
+        },
+        ..
+      },
+      ..
+    } &&
+    version == expected_version &&
+    image ==
+    "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@" +
+    digest else {
+    fail("QA deployment drift; inspect before repairing")
+  }
+  let original = mounts.filter(mount => {
+    mount is { "name": "activity-program-config", .. }
+  })
+  guard original
+    is [{ "mountPath": "/run/activity-program", "readOnly": True, .. }] else {
+    fail("Expected exactly the original projected programme directory mount")
+  }
+  let next = mounts.filter(mount => {
+    !(mount is { "name": "activity-program-config", .. })
+  })
+  for filename in ["template.json", "preset.json"] {
+    next.push({
+      "name": "activity-program-config",
+      "mountPath": "/run/activity-program/" + filename,
+      "subPath": filename,
+      "readOnly": true,
+    })
+  }
+  @fs.mkdir(root, permission=0o700)
+  @fs.write_file(
+    root + "/deployment-before.json",
+    current.stringify(indent=2),
+    create_mode=CreateNew,
+    permission=0o600,
+    sync=Full,
+  )
+  let patch : Json = [
+    {
+      "op": "test",
+      "path": "/metadata/resourceVersion",
+      "value": expected_version,
+    },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/containers/0/name",
+      "value": "platform",
+    },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/containers/0/image",
+      "value": image,
+    },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/containers/0/volumeMounts",
+      "value": mounts,
+    },
+    {
+      "op": "replace",
+      "path": "/spec/template/spec/containers/0/volumeMounts",
+      "value": next,
+    },
+  ]
+  let path = root + "/mount-patch.json"
+  @fs.write_file(
+    path,
+    patch.stringify(indent=2),
+    create_mode=CreateNew,
+    permission=0o600,
+    sync=Full,
+  )
+  if apply {
+    println(
+      kube([
+        "-n", ns, "patch", "deployment", deployment, "--type=json", "--patch-file",
+        path,
+      ]),
+    )
+  } else {
+    println("Prepared guarded QA mount-only repair; no live resources changed.")
+  }
+}

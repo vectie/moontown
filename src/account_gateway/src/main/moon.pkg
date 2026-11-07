@@ -6,6 +6,8 @@ import {
   "vectie/moontown/account_compute",
   "vectie/moontown/neighborhood",
   "vectie/moontown/creative_contest",
+  "vectie/moontown/activity_program",
+  "vectie/moontown/activity_curation",
   "moonbitlang/async",
   "moonbitlang/async/fs",
   "moonbitlang/async/http",

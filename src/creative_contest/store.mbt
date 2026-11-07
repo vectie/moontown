@@ -48,6 +48,7 @@ fn snapshot(
       "provider_ready": !config.provider_origin.is_empty(),
     },
     "revision": state.revision,
+    "voting": voting_projection(state, config, now, actor),
     "event_remaining": (config.event_quota - state.generations.length()).max(0),
     "viewer": { "account_id": actor.unwrap_or(""), "operator": operator },
     "gallery": approved.map(entry => public_entry(entry, state)),
@@ -92,7 +93,8 @@ fn snapshot(
     },
     "remaining": (config.participant_quota -
     own.filter(job => job.state != "failed").length()).max(0),
-    "voting_url": if now >= config.voting_opens_ms &&
+    "voting_url": if !builtin(config) &&
+      now >= config.voting_opens_ms &&
       now < config.voting_closes_ms {
       if state.voting_url == "preview" {
         "./coffee-vote-preview.html"
@@ -107,7 +109,7 @@ fn snapshot(
     } else {
       ""
     },
-    "voting_preview": state.voting_url == "preview",
+    "voting_preview": !builtin(config) && state.voting_url == "preview",
     "awards": if state.results_published && now >= config.awards_ms {
       state.awards.map(award => {
         (
@@ -136,6 +138,8 @@ fn transition(
   guard !actor.is_empty() else { raise Denied }
   let next = { ..state, revision: state.revision + 1, }
   match action {
+    "vote" | "cancel-vote" =>
+      vote_transition(state, config, action, payload, now, actor)
     "resolve-failed" => {
       guard operator && payload is { "confirmed_no_output": True, .. } else {
         raise Denied
@@ -169,7 +173,9 @@ fn transition(
         .unwrap_or(true) else {
         raise Denied
       }
-      guard now >= config.opens_ms && now < config.brief.deadline_ms else {
+      guard state.voting_rosters.is_empty() &&
+        now >= config.opens_ms &&
+        now < config.brief.deadline_ms else {
         raise Conflict("本期创作已截止。")
       }
       guard !config.provider_origin.is_empty() else { raise Unavailable }
@@ -221,7 +227,9 @@ fn transition(
       }
     }
     "submit" => {
-      guard now >= config.opens_ms && now < config.brief.deadline_ms else {
+      guard state.voting_rosters.is_empty() &&
+        now >= config.opens_ms &&
+        now < config.brief.deadline_ms else {
         raise Conflict("本期投稿已截止。")
       }
       guard payload is { "consent": True, .. } else {
@@ -269,7 +277,7 @@ fn transition(
       })
       { ..next, entries, }
     }
-    "approve" | "reject" | "withdraw" => {
+    "approve" | "reject" | "withdraw" | "disqualify" => {
       let id = text(payload, "entry_id", 64)
       guard state.entries.iter().find_first(entry => entry.id == id)
         is Some(entry) else {
@@ -277,6 +285,8 @@ fn transition(
       }
       if action == "withdraw" {
         guard entry.actor == actor else { raise Denied }
+      } else if action == "disqualify" {
+        guard operator && entry.state == "approved" else { raise Denied }
       } else {
         guard operator && entry.state == "pending" else { raise Denied }
       }
@@ -284,17 +294,24 @@ fn transition(
         guard entry.actor != actor else {
           raise Conflict("请由另一位主办审核自己的作品。")
         }
-        guard now < config.voting_opens_ms else {
+        guard state.voting_rosters.is_empty() && now < config.voting_opens_ms else {
           raise Conflict("投票已开始，本期作品名单已锁定。")
         }
       }
-      let reason = text(payload, "reason", 1000, optional=action != "reject")
+      let reason = text(
+        payload,
+        "reason",
+        1000,
+        optional=action != "reject" && action != "disqualify",
+      )
       let value = {
         ..entry,
         state: if action == "approve" {
           "approved"
         } else if action == "reject" {
           "rejected"
+        } else if action == "disqualify" {
+          "disqualified"
         } else {
           "withdrawn"
         },
@@ -311,9 +328,25 @@ fn transition(
             entry
           }
         }),
+        review_events: state.review_events +
+        [
+          {
+            entry_id: id,
+            actor,
+            action,
+            reason,
+            previous_state: entry.state,
+            resulting_state: value.state,
+            revision: next.revision,
+            created_ms: now,
+          },
+        ],
       }
     }
     "set-voting-url" => {
+      guard !builtin(config) else {
+        raise Conflict("站内投票已启用，无需设置外部链接。")
+      }
       guard operator && now < config.voting_opens_ms else { raise Denied }
       let url = text(payload, "url", 1000)
       guard (url == "preview" || url.has_prefix("https://docs.qq.com/")) &&
@@ -375,12 +408,24 @@ pub async fn execute(
   path : String,
   config_path : String,
 ) -> Json {
+  let started = @async.now()
   let config = load_config(config_path)
   let operator = event_manager(config, actor, operator)
   let file = lock(path)
   defer file.close()
   defer file.unlock()
-  let state = read(path, config)
+  // Preserve the caller's clock origin while including time spent waiting for
+  // the transaction lock. Reconcile boundaries before applying the action.
+  let now = now + (@async.now() - started).max(0L).reinterpret_as_uint64()
+  let original = read(path, config)
+  let state = advance_voting(original, config, now)
+  if state.revision != original.revision {
+    save(path, state)
+  }
+  if action == "settlement" {
+    guard operator else { raise Denied }
+    return settlement_export(state, config)
+  }
   if action == "snapshot" {
     return snapshot(state, config, now, actor, operator)
   }
@@ -406,6 +451,7 @@ pub async fn image(
   path : String,
   config_path : String,
   operator~ : Bool = false,
+  manager~ : Bool = false,
 ) -> Bytes {
   guard identifier(id) else { raise Denied }
   let config = load_config(config_path)
@@ -420,7 +466,7 @@ pub async fn image(
       operator ||
       actor == Some(job.actor) ||
       (
-        event_manager(config, actor, false) &&
+        (manager || event_manager(config, actor, false)) &&
         state.entries.any(entry => {
           entry.generation_id == id &&
           ["pending", "rejected", "approved"].contains(entry.state)

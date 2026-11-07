@@ -1,0 +1,68 @@
+///|
+import {
+  "moonbitlang/x@0.5.5/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/core/env",
+}
+
+///|
+/// Run only on a private workspace previously created by native `agent import`.
+/// Packing with no explicit portable output selection excludes the heavy media.
+fn main raise {
+  guard @env.args() is [_, root] && root.has_prefix("/") else {
+    fail("Usage: activity-curator-runtime-source.mbtx IMPORTED_PRIVATE_BOOK")
+  }
+  let installation = @json.parse(
+    @fs.read_file_to_string(root + "/state/agent-installation.json"),
+  )
+  guard installation
+    is {
+      "agent_id": String("banxing-coffee-curator"),
+      "version": String("1.1.0"),
+      "bundle_digest": String(
+        "sha256:4c4ee1a279bfb9df109524b3c8146a8447d24b90c7a98efb842404d6eb2c6bf2"
+      ),
+      ..
+    } else {
+    fail("Use a real import of the approved 1.1.0 source archive")
+  }
+  let provenance = "# Runtime preset provenance\n\nThis is the text-only 1.2.0 runtime derivative of banxing-coffee-curator 1.1.0.\nOriginal archive digest: sha256:4c4ee1a279bfb9df109524b3c8146a8447d24b90c7a98efb842404d6eb2c6bf2.\nOriginal archive file SHA-256: ee41cbb81c384ad1171251a62ed02ca416b7732e4aee42793dd23aaa8d075dbd.\nThe source archive retains the 17 poster examples and original 4K exhibition material. This runtime preset intentionally does not distribute those files per activity. Their absence is not a missing import.\nThe MoonTown application serves reviewed shared brand assets from its existing coffee assets route; no host path or archive-relative media path is a live runtime source.\nOnly plans/activity-launch/approved-workbook.json and wiki/planning/activity-launch.md are authoritative for an instantiated activity. Historical event-week01.json is a source example, not the current schedule or permission grant.\nThe configured coffee_curator profile is not started automatically. A future runner must bind this actual Book workspace, verify its activity approval, enforce tool/token/time policy, and obtain a separate execution grant.\n"
+  @fs.write_string_to_file(
+    root + "/skills/coffee-curator/references/runtime-provenance.md",
+    provenance,
+  )
+  @fs.write_string_to_file(
+    root + "/USER.md",
+    "# 活动策展运行上下文\n\n本书复用半醒咖啡策展方法。当前活动的主办方、主题、赛程、预算、奖品及算力额度以 `plans/activity-launch/approved-workbook.json` 和 `wiki/planning/activity-launch.md` 为准，未实例化前不视为已批准活动。\n原始 1.1.0 完整素材档案和本运行版的差别见 `skills/coffee-curator/references/runtime-provenance.md`。不将历史活动配置或素材样张当成当前赛程、投稿、票数或获奖记录。\n",
+  )
+  @fs.write_string_to_file(
+    root + "/RESOLVER.md",
+    "# 活动策展上下文\n\n- intent: coffee-curator\n  skill: `skills/coffee-curator/SKILL.md`\n  load_first: `USER.md`, `skills/coffee-curator/references/runtime-provenance.md`, `plans/activity-launch/approved-workbook.json`, `wiki/planning/activity-launch.md`\n- intent: planbook\n  skill: `skills/planbook/SKILL.md`\n  load_first: `plans/activity-launch/approved-workbook.json`, `wiki/planning/activity-launch.md`\n\n活动工作簿只会在平台完成真实导入后建立。其他导入技能用于历史方法参考，不授予工具执行权限。\n",
+  )
+  @fs.write_string_to_file(
+    root + "/skills/coffee-curator/README.md",
+    "# 活动策展运行版\n\n平台真实导入后将已批准工作簿写入 `plans/activity-launch/approved-workbook.json`，将当前活动页写入 `wiki/planning/activity-launch.md`，配置 `coffee_curator` 草案 profile。它未启动任务。\n\n本版本不带原始视频、预览或 portable 素材；来源档案的版本和校验值见 `references/runtime-provenance.md`。品牌素材通过 MoonTown 的已有共享素材页面展示，不从历史 raw/portable 路径读取。\n\n不要执行历史激活脚本。未来运行器须确认活动授权、以本书实际目录作为 cwd/workspace，强制应用禁用工具和联网、时间和 token 上限；没有独立运行授权时不调用模型。最终审核、发布、预算和发奖保留在 MoonTown 的人工权限流程中。\n",
+  )
+  @fs.write_string_to_file(
+    root + "/skills/coffee-curator/activate.mbtx",
+    "///|\nfn main { println(\"This activity preset is platform-managed. No profile changed and no job started.\") }\n",
+  )
+  let skill_path = root + "/skills/coffee-curator/SKILL.md"
+  let original = @fs.read_file_to_string(skill_path)
+  if original.find("原始策展书的资料在") is Some(start) {
+    let end = original.find("## 工作方法").unwrap()
+    @fs.write_string_to_file(
+      skill_path,
+      original[:start].to_owned() +
+      "先读 `references/runtime-provenance.md`。当前活动落地书在 `plans/activity-launch/approved-workbook.json`；活动页面在 `wiki/planning/activity-launch.md`。它们由平台在真实导入后写入。\n本运行版不包含原始素材、portable 输出或 4K 视频，不能假设这些路径可读。共享品牌素材由 MoonTown 页面提供；素材档案只作为有明确摘要校验值的历史来源。不得执行导入脚本。\n\n" +
+      original[end:].to_owned(),
+    )
+  } else {
+    guard original.contains("references/runtime-provenance.md") else {
+      fail("Unexpected source skill")
+    }
+  }
+  println(
+    "Prepared actual imported workspace for native agent pack 1.2.0 without portable output selection",
+  )
+}

@@ -10,6 +10,9 @@ struct PublicPlatform {
   neighborhood_path : String?
   creative_path : String?
   creative_config : String?
+  program_root : String?
+  program_template_config : String?
+  program_approver_ids : Array[String]
 }
 
 ///|
@@ -44,6 +47,7 @@ fn public_asset_allowed(relative : String) -> Bool {
   }
   if [
       "index.html", "viewport.html", "coffee-contest.html", "coffee-vote-preview.html",
+      "activity-program.html",
     ].contains(relative) {
     return true
   }
@@ -168,6 +172,11 @@ async fn PublicPlatform::handle(
   conn : @http.ServerConnection,
 ) -> Unit {
   if public_relative_path(request.path) is Some(relative) &&
+    activity_program_route(relative) {
+    self.activity_program(request, body, conn, relative)
+    return
+  }
+  if public_relative_path(request.path) is Some(relative) &&
     creative_route(relative) {
     self.creative(request, body, conn, relative)
     return
@@ -290,6 +299,13 @@ async fn run_public_platform(identity : BrowserIdentity) -> Unit {
     creative_config: @env.get_env_var("MOONTOWN_CREATIVE_CONFIG_FILE").filter(p => {
       p.has_prefix("/")
     }),
+    program_root: @env.get_env_var("MOONTOWN_ACTIVITY_PROGRAM_ROOT").filter(p => {
+      p.has_prefix("/")
+    }),
+    program_template_config: @env.get_env_var(
+      "MOONTOWN_ACTIVITY_TEMPLATE_CONFIG_FILE",
+    ).filter(p => p.has_prefix("/")),
+    program_approver_ids: program_approvers(),
     neighborhood_path: @env.get_env_var("MOONTOWN_NEIGHBORHOOD_STATE_FILE").filter(path => {
         path.has_prefix("/") && !path.trim().is_empty()
       },
@@ -306,6 +322,53 @@ async fn run_public_platform(identity : BrowserIdentity) -> Unit {
         while true {
           let _ = @creative_contest.process_next(path, config_path) catch {
             _ => false
+          }
+          @async.sleep(1000)
+        }
+      })
+    }
+    if platform.program_root is Some(root) &&
+      platform.program_template_config is Some(template_path) {
+      group.spawn_bg(() => {
+        while true {
+          let _ = @activity_program.process_next(
+            root,
+            template_path,
+            @async.now().reinterpret_as_uint64(),
+            (id, dossier, directory) => {
+              @activity_curation.prepare(id, dossier, directory) catch {
+                error => {
+                  println(
+                    "Activity curation preparation failed for " +
+                    id +
+                    ": \{error}",
+                  )
+                  raise error
+                }
+              }
+            },
+          ) catch {
+            _ => false
+          }
+          let ids = @activity_program.list_activities(root) catch { _ => [] }
+          for id in ids {
+            let _ = @activity_program.with_activity(
+              id,
+              @async.now().reinterpret_as_uint64(),
+              None,
+              false,
+              "worker",
+              root,
+              binding => {
+                @creative_contest.process_next(
+                  binding.state_path,
+                  binding.config_path,
+                  allow_generation=binding.allow_generation,
+                )
+              },
+            ) catch {
+              _ => false
+            }
           }
           @async.sleep(1000)
         }

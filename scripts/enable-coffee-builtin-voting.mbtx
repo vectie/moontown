@@ -1,0 +1,318 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn command(program : String, args : Array[String]) -> String {
+  let result = @shell.Cmd(program, args).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  command(
+    "kubectl",
+    ["--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", ..args],
+  )
+}
+
+///|
+async fn save(root : String, name : String, value : Json) -> Unit {
+  @fs.write_file(
+    root + "/" + name + ".json",
+    value.stringify(indent=2) + "\n",
+    create_mode=CreateNew,
+    permission=0o600,
+    sync=Full,
+  )
+}
+
+///|
+async fn digest(path : String) -> String {
+  command("sha256sum", [path]).split(" ").next().unwrap().to_owned()
+}
+
+///|
+async fn regular_tree(path : String) -> Unit {
+  match @fs.kind(path, follow_symlink=false) {
+    Directory =>
+      for name in @fs.readdir(path, include_hidden=true) {
+        regular_tree(path + "/" + name)
+      }
+    Regular => ()
+    _ =>
+      fail(
+        "Formal event backup must contain only regular files and directories",
+      )
+  }
+}
+
+///|
+/// Enable the published account-level voting rules without changing any dates,
+/// prizes, quotas, provider details or event state. Never reset a frozen event.
+async fn main {
+  guard @env.args() is [_, root, expected_version] &&
+    root.has_prefix("/home/HwHiAiUser/") &&
+    !root.contains("..") &&
+    !expected_version.is_empty() &&
+    expected_version.length() <= 32 &&
+    expected_version.all(c => c is ('0'..<='9')) else {
+    fail(
+      "Usage: enable-coffee-builtin-voting.mbtx NEW_PRIVATE_RELEASE_DIR EXPECTED_CONFIGMAP_RESOURCE_VERSION",
+    )
+  }
+  let ns = "aigc-acceptance-20260915"
+  let deployment_name = "moontown-platform"
+  let config_name = "moontown-coffee-week01"
+  let claim = "moontown-creative-state"
+  let event_id = "banxing-coffee-20261106"
+  let config_map = @json.parse(
+    kube(["-n", ns, "get", "configmap", config_name, "-o", "json"]),
+  )
+  guard config_map
+    is {
+      "metadata": {
+        "name": "moontown-coffee-week01",
+        "namespace": "aigc-acceptance-20260915",
+        "resourceVersion": String(version),
+        ..
+      },
+      "data": { "event.json": String(raw), .. },
+      ..
+    } &&
+    version == expected_version else {
+    fail("Formal ConfigMap identity or expected resourceVersion changed")
+  }
+  guard @json.parse(raw) is Object(config) &&
+    config.get("brief") is Some({ "id": "banxing-coffee-20261106", .. }) &&
+    (
+      config.get("voting_mode") is None ||
+      config.get("voting_mode") == Some(Json::string("external"))
+    ) else {
+    fail("Only the unchanged formal coffee event in external mode may opt in")
+  }
+  let deployment = @json.parse(
+    kube(["-n", ns, "get", "deployment", deployment_name, "-o", "json"]),
+  )
+  guard deployment
+    is {
+      "spec": {
+        "replicas": 1,
+        "template": {
+          "spec": {
+            "containers": [
+              {
+                "name": "platform",
+                "image": String(image),
+                "env": Array(environment),
+                "volumeMounts": Array(mounts),
+                ..
+              },
+            ],
+            "volumes": Array(volumes),
+            ..
+          },
+          ..
+        },
+        ..
+      },
+      ..
+    } &&
+    image ==
+    "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@sha256:62213c1b44971cb81730fb288dcab73477b855833e2572272d4b7dabea2bfff4" &&
+    environment.filter(item => {
+      item is { "name": "MOONTOWN_CREATIVE_STATE_FILE", .. }
+    })
+    is [{ "value": "/creative/banxing-coffee-20261106/state.json", .. }] &&
+    environment.filter(item => {
+      item is { "name": "MOONTOWN_CREATIVE_CONFIG_FILE", .. }
+    })
+    is [{ "value": "/run/creative-config/event.json", .. }] &&
+    mounts.filter(item => item is { "name": "creative-state", .. })
+    is [{ "mountPath": "/creative", .. }] &&
+    mounts.filter(item => item is { "name": "creative-config", .. })
+    is [{ "mountPath": "/run/creative-config", .. }] &&
+    volumes.filter(item => item is { "name": "creative-config", .. })
+    is [{ "configMap": { "name": "moontown-coffee-week01", .. }, .. }] &&
+    volumes.filter(item => item is { "name": "creative-state", .. })
+    is [
+      {
+        "persistentVolumeClaim": { "claimName": "moontown-creative-state", .. },
+        ..
+      },
+    ] else {
+    fail(
+      "Formal runtime/config/state bindings differ from the reviewed deployment",
+    )
+  }
+  let pvc = @json.parse(kube(["-n", ns, "get", "pvc", claim, "-o", "json"]))
+  guard pvc is { "spec": { "volumeName": String(pv_name), .. }, .. } else {
+    fail("Formal state volume is unbound")
+  }
+  let pv = @json.parse(kube(["get", "pv", pv_name, "-o", "json"]))
+  guard pv
+    is {
+      "spec": {
+        "csi": {
+          "volumeAttributes": {
+            "server": "192.168.2.175",
+            "share": "/data/lunanexa-workspaces",
+            "subDir": String(subdir),
+            ..
+          },
+          ..
+        },
+        ..
+      },
+      ..
+    } &&
+    subdir.has_prefix(ns + "/" + claim + "/") &&
+    !subdir.contains("..") else {
+    fail("Unexpected formal state volume location")
+  }
+  let volume_root = "/data/lunanexa-workspaces/" + subdir
+  let event_root = volume_root + "/" + event_id
+  let state_path = event_root + "/state.json"
+  guard @fs.kind(event_root, follow_symlink=false) is Directory else {
+    fail("Formal event directory does not exist")
+  }
+  if @fs.exists(state_path + ".lock") {
+    guard @fs.kind(state_path + ".lock", follow_symlink=false) is Regular else {
+      fail("Invalid formal state lock")
+    }
+  }
+  let file = @fs.open(
+    state_path + ".lock",
+    mode=ReadWrite,
+    create_mode=OpenOrCreate,
+    permission=0o600,
+  )
+  defer file.close()
+  file.lock(Exclusive)
+  defer file.unlock()
+  // A never-used event can have only a lock file and no journal. Preserve that
+  // absence rather than manufacturing an initial state or participation record.
+  let state_raw = if @fs.exists(state_path) {
+    guard @fs.kind(state_path, follow_symlink=false) is Regular else {
+      fail("Invalid formal state journal")
+    }
+    let encoded = @fs.read_file(state_path).text()
+    guard @json.parse(encoded) is Object(state) &&
+      state.get("challenge_id") == Some(Json::string(event_id)) &&
+      state.get("generations") is Some(Array(jobs)) &&
+      jobs.all(job => job is { "state": "completed" | "failed", .. }) else {
+      fail("Formal identity mismatch or image jobs still queued/running")
+    }
+    for key in ["vote_events", "voting_rosters", "voting_settlements"] {
+      guard state.get(key) is None || state.get(key) == Some(Json::array([])) else {
+        fail(
+          "Existing ballots, frozen roster or settlement forbid mode changes",
+        )
+      }
+    }
+    Some(encoded)
+  } else {
+    guard @fs.readdir(event_root, include_hidden=true).all(name => {
+      name == "state.json.lock"
+    }) else {
+      fail(
+        "Journal is missing but the event contains other data; inspect before changing voting mode",
+      )
+    }
+    None
+  }
+  regular_tree(event_root)
+  @fs.mkdir(root, permission=0o700)
+  save(root, "configmap-before", config_map)
+  save(root, "deployment-reference", deployment)
+  if state_raw is Some(encoded) {
+    @fs.write_file(
+      root + "/state-before.json",
+      encoded,
+      create_mode=CreateNew,
+      permission=0o600,
+      sync=Full,
+    )
+  }
+  let archive = root + "/formal-event-state.tar.gz"
+  ignore(command("tar", ["-C", volume_root, "-czf", archive, event_id]))
+  @fs.chmod(archive, 0o600)
+  @fs.mkdir(root + "/restore-check", permission=0o700)
+  ignore(command("tar", ["-xzf", archive, "-C", root + "/restore-check"]))
+  ignore(
+    command("diff", [
+      "--no-dereference",
+      "-qr",
+      event_root,
+      root + "/restore-check/" + event_id,
+    ]),
+  )
+  config["voting_mode"] = Json::string("builtin")
+  let changed = Json::object(config).stringify()
+  // A parsed comparison proves every setting other than the single opt-in is
+  // identical, including any future fields this helper does not know about.
+  guard @json.parse(raw) is Object(before) &&
+    @json.parse(changed) is Object(after) else {
+    fail("Invalid comparison")
+  }
+  ignore(before.remove("voting_mode"))
+  ignore(after.remove("voting_mode"))
+  guard Json::object(before) == Json::object(after) else {
+    fail("An event setting other than voting_mode changed")
+  }
+  let patch : Json = [
+    {
+      "op": "test",
+      "path": "/metadata/resourceVersion",
+      "value": expected_version,
+    },
+    { "op": "test", "path": "/data/event.json", "value": raw },
+    { "op": "replace", "path": "/data/event.json", "value": changed },
+  ]
+  save(root, "configmap-patch", patch)
+  save(root, "transition-plan", {
+    "event_id": event_id,
+    "expected_configmap_version": expected_version,
+    "changed_fields": ["voting_mode"],
+    "voting_mode": "builtin",
+    "state_existed": state_raw is Some(_),
+    "state_unchanged": true,
+    "backup_restore_comparison": true,
+    "archive_sha256": digest(archive),
+    "all_other_event_settings_unchanged": true,
+    "roster_previously_frozen": false,
+    "automatic_rollback": false,
+  })
+  let patched = @json.parse(
+    kube([
+      "-n",
+      ns,
+      "patch",
+      "configmap",
+      config_name,
+      "--type=json",
+      "--patch-file",
+      root + "/configmap-patch.json",
+      "-o",
+      "json",
+    ]),
+  )
+  save(root, "configmap-after", patched)
+  let unchanged = match state_raw {
+    Some(encoded) =>
+      @fs.exists(state_path) && @fs.read_file(state_path).text() == encoded
+    None => !@fs.exists(state_path)
+  }
+  guard unchanged else {
+    fail("Formal state changed while the transition lock was held")
+  }
+  println(
+    "Formal builtin voting enabled; only voting_mode changed. Existing dates, prizes, quotas, provider and state preserved. Wait for projected configuration; never revert after roster freeze.",
+  )
+}

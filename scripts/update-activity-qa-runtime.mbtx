@@ -1,0 +1,585 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+let namespace_name = "aigc-acceptance-20260915"
+
+///|
+let deployment_name = "moontown-coffee-qa"
+
+///|
+let old_image = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@sha256:fd234d60ed4be54d55ceb927713a2bf49f960120143870b300ff3780957e2716"
+
+///|
+let new_image = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@sha256:62213c1b44971cb81730fb288dcab73477b855833e2572272d4b7dabea2bfff4"
+
+///|
+let ui_image = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-ui@sha256:4914aeaf173eee31c3729f6499814ad4c8ebe42582c98164beb5e95581c9dcc8"
+
+///|
+async fn command(program : String, args : Array[String]) -> String {
+  let output = @shell.Cmd(program, args).output()
+  output.check()
+  output.stdout()
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  command(
+    "kubectl",
+    ["--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", ..args],
+  )
+}
+
+///|
+async fn save(root : String, name : String, value : Json) -> String {
+  let path = root + "/" + name + ".json"
+  @fs.write_file(
+    path,
+    value.stringify(indent=2),
+    create_mode=CreateNew,
+    permission=0o600,
+    sync=Full,
+  )
+  path
+}
+
+///|
+async fn current_deployment() -> Json {
+  @json.parse(
+    kube([
+      "-n", namespace_name, "get", "deployment", deployment_name, "-o", "json",
+    ]),
+  )
+}
+
+///|
+async fn patch(value : Json) -> Unit {
+  println(
+    kube([
+      "-n",
+      namespace_name,
+      "patch",
+      "deployment",
+      deployment_name,
+      "--type=json",
+      "--patch",
+      value.stringify(),
+    ]),
+  )
+}
+
+///|
+fn valid_id(id : String) -> Bool {
+  id.length() == 64 && id.all(c => c is ('0'..<='9' | 'a'..<='f'))
+}
+
+///|
+async fn terminal_state(path : String) -> Bool {
+  if !@fs.exists(path) {
+    return false
+  }
+  guard @fs.kind(path, follow_symlink=false) is Regular &&
+    @json.parse(@fs.read_file(path).text())
+    is { "generations": Array(jobs), .. } &&
+    jobs.all(job => job is { "state": String("completed" | "failed"), .. }) else {
+    fail("Backup has nonterminal image jobs or nonregular state")
+  }
+  true
+}
+
+///|
+async fn restore_compatible_runtime() -> Unit {
+  let current = current_deployment()
+  guard current
+    is {
+      "metadata": { "resourceVersion": String(version), .. },
+      "spec": {
+        "template": {
+          "spec": {
+            "containers": [{ "name": "platform", "image": String(runtime), .. }],
+            "initContainers": [{ "image": String(ui), .. }],
+            ..
+          },
+          ..
+        },
+        ..
+      },
+      ..
+    } &&
+    (runtime == old_image || runtime == new_image) &&
+    ui == ui_image else {
+    fail(
+      "Cannot automatically restore drifted QA deployment; inspect its replicas and runtime",
+    )
+  }
+  patch([
+    { "op": "test", "path": "/metadata/resourceVersion", "value": version },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/containers/0/image",
+      "value": runtime,
+    },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/initContainers/0/image",
+      "value": ui_image,
+    },
+    {
+      "op": "replace",
+      "path": "/spec/template/spec/containers/0/image",
+      "value": old_image,
+    },
+    { "op": "replace", "path": "/spec/replicas", "value": 1 },
+  ])
+  println(
+    "Restored compatible QA runtime fd234d60 and replicas=1; no older writer selected.",
+  )
+}
+
+///|
+/// --apply authorizes a short QA outage and a temporary unprivileged backup
+/// Pod. Default only writes private review artifacts; no protected host paths.
+async fn main {
+  let (root, expected_version, apply) = match @env.args() {
+    [_, root, version] => (root, version, false)
+    [_, root, version, "--apply"] => (root, version, true)
+    _ =>
+      fail(
+        "update-activity-qa-runtime.mbtx NEW_PRIVATE_DIR EXPECTED_RESOURCE_VERSION [--apply]",
+      )
+  }
+  guard root.has_prefix("/home/HwHiAiUser/") && !root.contains("..") else {
+    fail("Use a new private release directory")
+  }
+  let current = current_deployment()
+  guard current
+    is {
+      "metadata": { "resourceVersion": String(version), .. },
+      "spec": {
+        "replicas": 1,
+        "strategy": {
+          "type": "RollingUpdate",
+          "rollingUpdate": { "maxSurge": 0, "maxUnavailable": 1, .. },
+          ..
+        },
+        "template": { "spec": Object(pod_spec), .. },
+        ..
+      },
+      ..
+    } &&
+    version == expected_version &&
+    pod_spec.get("containers")
+    is Some(
+      Array(
+        [
+          {
+            "name": "platform",
+            "image": String(runtime),
+            "env": Array(environment),
+            "volumeMounts": Array(mounts),
+            ..
+          },
+        ]
+      )
+    ) &&
+    pod_spec.get("initContainers")
+    is Some(Array([{ "name": "public-assets", "image": String(ui), .. }])) &&
+    pod_spec.get("volumes") is Some(Array(volumes)) &&
+    runtime == old_image &&
+    ui == ui_image else {
+    fail("QA version/image/worker strategy drift")
+  }
+  guard environment.any(item => {
+      item
+      is {
+        "name": "MOONTOWN_ACTIVITY_PROGRAM_ROOT",
+        "value": "/activity-program",
+        ..
+      }
+    }) &&
+    environment
+    .iter()
+    .find_first(item => item is { "name": "MOONTOWN_CREATIVE_STATE_FILE", .. })
+    is Some({ "value": String(creative_file), .. }) &&
+    creative_file.has_prefix("/creative/") &&
+    !creative_file.contains("..") &&
+    mounts.any(item => {
+      item
+      is { "name": "activity-program", "mountPath": "/activity-program", .. }
+    }) &&
+    mounts.any(item => {
+      item is { "name": "creative-state", "mountPath": "/creative", .. }
+    }) &&
+    volumes.any(item => {
+      item
+      is {
+        "name": "activity-program",
+        "persistentVolumeClaim": {
+          "claimName": "moontown-coffee-qa-activity-20261107",
+          ..
+        },
+        ..
+      }
+    }) &&
+    volumes.any(item => {
+      item
+      is {
+        "name": "creative-state",
+        "persistentVolumeClaim": { "claimName": "moontown-coffee-qa-state", .. },
+        ..
+      }
+    }) else {
+    fail("Expected configured QA programme and creative mounts")
+  }
+  @fs.mkdir(root, permission=0o700)
+  ignore(save(root, "deployment-before", current))
+  for
+    (claim, storage) in [
+      ("moontown-coffee-qa-activity-20261107", "local-path"),
+      ("moontown-coffee-qa-state", "lunanexa-workspaces-rwx"),
+    ] {
+    let pvc = @json.parse(
+      kube(["-n", namespace_name, "get", "pvc", claim, "-o", "json"]),
+    )
+    guard pvc
+      is {
+        "metadata": { "uid": String(uid), .. },
+        "spec": {
+          "volumeName": String(pv_name),
+          "storageClassName": String(storage_class),
+          ..
+        },
+        "status": { "phase": "Bound", .. },
+        ..
+      } &&
+      storage_class == storage else {
+      fail("Unexpected bound QA PVC")
+    }
+    let pv = @json.parse(kube(["get", "pv", pv_name, "-o", "json"]))
+    guard pv
+      is {
+        "spec": {
+          "claimRef": {
+            "name": String(name),
+            "namespace": String(ns),
+            "uid": String(claim_uid),
+            ..
+          },
+          ..
+        },
+        ..
+      } &&
+      name == claim &&
+      ns == namespace_name &&
+      uid == claim_uid else {
+      fail("PV claim mismatch")
+    }
+    ignore(save(root, claim + "-pvc", pvc))
+    ignore(save(root, claim + "-pv", pv))
+  }
+  let backup_name = "moontown-coffee-qa-runtime-backup-" +
+    @async.now().to_string()
+  let backup_pod : Json = {
+    "apiVersion": "v1",
+    "kind": "Pod",
+    "metadata": {
+      "name": backup_name,
+      "namespace": namespace_name,
+      "labels": { "app": "moontown-coffee-qa-runtime-backup" },
+    },
+    "spec": {
+      "restartPolicy": "Never",
+      "automountServiceAccountToken": false,
+      "nodeSelector": { "kubernetes.io/hostname": "ubuntu" },
+      "securityContext": {
+        "runAsNonRoot": true,
+        "runAsUser": 1000,
+        "runAsGroup": 1000,
+        "fsGroup": 1000,
+        "seccompProfile": { "type": "RuntimeDefault" },
+      },
+      "containers": [
+        {
+          "name": "backup",
+          "image": ui_image,
+          "command": ["/bin/sleep", "1800"],
+          "resources": {
+            "requests": { "cpu": "50m", "memory": "64Mi" },
+            "limits": { "cpu": "500m", "memory": "256Mi" },
+          },
+          "securityContext": {
+            "allowPrivilegeEscalation": false,
+            "readOnlyRootFilesystem": true,
+            "capabilities": { "drop": ["ALL"] },
+          },
+          "volumeMounts": [
+            {
+              "name": "programme",
+              "mountPath": "/state/programme",
+              "readOnly": true,
+            },
+            {
+              "name": "creative",
+              "mountPath": "/state/creative",
+              "readOnly": true,
+            },
+            { "name": "backup", "mountPath": "/backup" },
+          ],
+        },
+      ],
+      "volumes": [
+        {
+          "name": "programme",
+          "persistentVolumeClaim": {
+            "claimName": "moontown-coffee-qa-activity-20261107",
+            "readOnly": true,
+          },
+        },
+        {
+          "name": "creative",
+          "persistentVolumeClaim": {
+            "claimName": "moontown-coffee-qa-state",
+            "readOnly": true,
+          },
+        },
+        { "name": "backup", "emptyDir": { "sizeLimit": "1Gi" } },
+      ],
+    },
+  }
+  guard backup_pod is { "spec": Object(backup_spec), .. } else {
+    fail("Invalid backup Pod")
+  }
+  for key in ["imagePullSecrets", "tolerations"] {
+    if pod_spec.get(key) is Some(value) {
+      backup_spec[key] = value
+    }
+  }
+  let pod_path = save(root, "backup-pod", backup_pod)
+  let scale_patch : Json = [
+    {
+      "op": "test",
+      "path": "/metadata/resourceVersion",
+      "value": expected_version,
+    },
+    {
+      "op": "test",
+      "path": "/spec/template/spec",
+      "value": Json::object(pod_spec),
+    },
+    { "op": "test", "path": "/spec/replicas", "value": 1 },
+    { "op": "replace", "path": "/spec/replicas", "value": 0 },
+  ]
+  ignore(save(root, "scale-zero-patch", scale_patch))
+  if !apply {
+    println(
+      "Prepared QA stop/readonly-backup/runtime update plan. No live resources changed; --apply performs guarded sequence.",
+    )
+    return
+  }
+  let mut stopped = false
+  let mut pod_created = false
+  let mut finished = false
+  errdefer {
+    if stopped && !finished {
+      restore_compatible_runtime() catch {
+        error => eprintln("QA compatible runtime restoration failed: \{error}")
+      }
+    }
+    if pod_created {
+      ignore(
+        kube([
+          "-n", namespace_name, "delete", "pod", backup_name, "--wait=false",
+        ]),
+      ) catch {
+        error => eprintln("QA backup Pod cleanup failed: \{error}")
+      }
+    }
+  }
+  patch(scale_patch)
+  stopped = true
+  let wait_started = @async.now()
+  while true {
+    guard @json.parse(
+        kube([
+          "-n",
+          namespace_name,
+          "get",
+          "pods",
+          "-l",
+          "app=" + deployment_name,
+          "-o",
+          "json",
+        ]),
+      )
+      is { "items": Array(pods), .. } else {
+      fail("Cannot inspect old QA Pods")
+    }
+    if pods.is_empty() {
+      break
+    }
+    guard @async.now() - wait_started < 120000L else {
+      fail("Old QA Pods did not fully terminate")
+    }
+    @async.sleep(1000)
+  }
+  println(kube(["create", "-f", pod_path]))
+  pod_created = true
+  println(
+    kube([
+      "-n",
+      namespace_name,
+      "wait",
+      "--for=condition=Ready",
+      "pod/" + backup_name,
+      "--timeout=120s",
+    ]),
+  )
+  ignore(
+    kube([
+      "-n", namespace_name, "exec", backup_name, "--", "/bin/tar", "-czf", "/backup/state.tar.gz",
+      "-C", "/state", ".",
+    ]),
+  )
+  let remote_sha = kube([
+      "-n", namespace_name, "exec", backup_name, "--", "/bin/busybox", "sha256sum",
+      "/backup/state.tar.gz",
+    ])
+    .split(" ")
+    .next()
+    .unwrap()
+    .to_owned()
+  let archive = root + "/qa-state.tar.gz"
+  ignore(
+    kube([
+      "-n",
+      namespace_name,
+      "cp",
+      backup_name + ":/backup/state.tar.gz",
+      archive,
+    ]),
+  )
+  @fs.chmod(archive, 0o600)
+  let local_sha = command("sha256sum", [archive])
+    .split(" ")
+    .next()
+    .unwrap()
+    .to_owned()
+  guard local_sha == remote_sha && local_sha.length() == 64 else {
+    fail("Backup archive copy digest mismatch")
+  }
+  let inventory = command("tar", ["-tzf", archive])
+  @fs.write_file(
+    root + "/archive-inventory.txt",
+    inventory,
+    create_mode=CreateNew,
+    permission=0o600,
+    sync=Full,
+  )
+  let restored = root + "/restore-check"
+  @fs.mkdir(restored, permission=0o700)
+  ignore(command("tar", ["-xzf", archive, "-C", restored]))
+  let registry_file = restored + "/programme/registry.json"
+  guard @fs.kind(registry_file, follow_symlink=false) is Regular &&
+    @json.parse(@fs.read_file(registry_file).text())
+    is {
+      "schema": "moontown.activity-program.v1",
+      "activities": Array(activities),
+      ..
+    } &&
+    activities.all(activity => {
+      activity is { "status": String(status), .. } && status != "preparing"
+    }) else {
+    fail("Backup contains preparing activity or invalid registry")
+  }
+  let activity_states : Array[Json] = []
+  for activity in activities {
+    guard activity is { "id": String(id), .. } && valid_id(id) else {
+      fail("Invalid activity identity in backup")
+    }
+    activity_states.push({
+      "activity_id": id,
+      "state_present": terminal_state(
+        restored + "/programme/activities/" + id + "/state.json",
+      ),
+    })
+  }
+  let legacy_present = terminal_state(
+    restored +
+    "/creative/" +
+    creative_file.strip_prefix("/creative/").unwrap().to_owned(),
+  )
+  ignore(
+    save(root, "backup-manifest", {
+      "sha256": local_sha,
+      "archive": "qa-state.tar.gz",
+      "whole_pvcs": [
+        "moontown-coffee-qa-activity-20261107", "moontown-coffee-qa-state",
+      ],
+      "old_qa_pods_fully_gone": true,
+      "legacy_state_present": legacy_present,
+      "activity_states": activity_states,
+      "restore_validation": true,
+    }),
+  )
+  let before_update = current_deployment()
+  guard before_update
+    is {
+      "metadata": { "resourceVersion": String(update_version), .. },
+      "spec": {
+        "replicas": 0,
+        "template": { "spec": Object(unchanged), .. },
+        ..
+      },
+      ..
+    } &&
+    Json::object(unchanged) == Json::object(pod_spec) else {
+    fail("Stopped QA deployment drifted during backup")
+  }
+  let update_patch : Json = [
+    {
+      "op": "test",
+      "path": "/metadata/resourceVersion",
+      "value": update_version,
+    },
+    { "op": "test", "path": "/spec/replicas", "value": 0 },
+    {
+      "op": "test",
+      "path": "/spec/template/spec",
+      "value": Json::object(pod_spec),
+    },
+    {
+      "op": "replace",
+      "path": "/spec/template/spec/containers/0/image",
+      "value": new_image,
+    },
+    { "op": "replace", "path": "/spec/replicas", "value": 1 },
+  ]
+  ignore(save(root, "runtime-update-patch", update_patch))
+  patch(update_patch)
+  println(
+    kube([
+      "-n",
+      namespace_name,
+      "rollout",
+      "status",
+      "deployment/" + deployment_name,
+      "--timeout=180s",
+    ]),
+  )
+  finished = true
+  if pod_created {
+    println(
+      kube(["-n", namespace_name, "delete", "pod", backup_name, "--wait=false"]),
+    )
+  }
+  println(
+    "QA hotfix ready; UI/config preserved, verified private backups retained.",
+  )
+}

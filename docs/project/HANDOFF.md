@@ -108,3 +108,50 @@ existing documentation and record concrete pitfalls here.
   caches and target `src/main`; building every package in the reduced workspace
   can attempt to link dependency libraries as executables. Keep sources and
   credentials out of the UI layer and use the existing web base for its copier.
+
+## 2026-11-07 · 主办申请、真实 Book 落地与站内投票
+
+- Current evidence is `ACTIVITY_LAUNCH_ACCEPTANCE_2026-11-07.md`; earlier mobile
+  journey/implementation/proposal files are historical snapshots. The expanded
+  flow is deployed formally and verified end-to-end in isolated QA. Natural
+  13:30 voting passed vote/cancel/revote and the two-entry live tie; natural
+  13:35 close sealed settlement 16 / roster 11. No three-award result was published.
+- Ordinary A submitted a bounded two-event application; the QA scoped approver
+  granted 4 total generations / 2 per event / 2 per participant, cash 0 and
+  allow_publish=false. A completed the three-step workbook; actual native Book
+  readiness preceded preview and the independent host's publication. A/B each
+  generated and submitted a real new image; the host approved both. B's actual
+  UI exposed no A private preview or organizer entry; A's self-review stayed
+  disabled. HTTP 403/404 isolation assertions are separate regression evidence.
+- Activity Book imports are real, immutable and resumable. The 1.2.0 thin runtime
+  preset retains source methods/provenance without duplicating 1.1.0's media.
+  Actual Linux import fell from 869,216 KiB / 9.55s to 20,228 KiB / 1.50s. Ship
+  the trusted CLI with seed/ and configure book_cli_cwd; never fake Book init.
+  The curated profile is configured-not-started and needs a runtime grant.
+- ConfigMap projected files are symlinks; use individual subPath mounts for the
+  strict regular-file configuration reader. After vote-state schema changes,
+  never resume an old native writer against the new state; it can discard fields.
+- Keep success/error feedback current, derive dynamic dates/quotas from the
+  selected activity and invalidate stale identity responses when switching users.
+  Quota exhaustion copy must distinguish personal and event limits.
+- Validate grant time after the body is read, using a fresh server clock; the
+  actual streamed-body regression returns 403. Hotfix native image 62213c1b… is
+  deployed formally and in QA (Ready 1/1). After upgrade QA retains settlement
+  16 / 2 votes / the same f9afbe6e… digest and the second event's 2 remaining uses.
+- Focused native 44/44 (11 program, 5 bridge, 19 creative, 9 gateway), browser JS
+  190/190; static package 809 files / 72.1 MiB. Both native digests are 62213c1b…;
+  final UI v3 4914aeaf… is deployed formally and to QA. This is not a full-suite run.
+- Formal program registry returns 200 and is empty; no QA approver allowlist was
+  copied. The logged-in QA host sees New proposal, not approval controls. The
+  existing formal event changed only voting_mode under an exclusive backup guard;
+  all other configuration deep-equals its prior value. It has no votes or gallery
+  entries and retains 500 generations. New program template limits are separate.
+- For the QA hotfix, stop the writer before backing up both complete PVCs through
+  a read-only UID 1000 Pod. kubectl cp, archive digest and restored terminal state
+  were verified; root access fallback was not used. Private 175 archives remain
+  in qa-runtime-final-apply with mode 0600; the owned backup Pod was deleted.
+  Formal backup guards record state-file presence/absence rather than inventing
+  an empty state file when none existed.
+- Still bounded to the coffee template and three awards. No automatic MoonClaw
+  jobs, payments, anti-Sybil identity or monthly reset; physical mobile keyboard
+  testing remains outstanding. Do not turn those proposal items into claims.

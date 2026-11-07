@@ -1,0 +1,80 @@
+///|
+import {
+  "moonbitlang/x@0.5.5/fs",
+  "moonbitlang/x@0.5.5/crypto",
+  "moonbitlang/core/json",
+  "moonbitlang/core/env",
+}
+
+///|
+fn sha(path : String) -> String raise {
+  "sha256:" +
+  @crypto.bytes_to_hex_string(@crypto.sha256(@fs.read_file_to_bytes(path)))
+}
+
+///|
+fn field(value : Json, key : String) -> String raise {
+  guard value is Object(fields) &&
+    fields.get(key) is Some(String(text)) &&
+    !text.is_empty() else {
+    fail("Missing preset field: " + key)
+  }
+  text
+}
+
+///|
+/// All paths are operator-owned inputs. This file must not be served to clients.
+fn main raise {
+  guard @env.args()
+    is [
+      _,
+      cli,
+      bundle,
+      template,
+      output,
+      installed_cli,
+      installed_bundle,
+      installed_cwd,
+    ] else {
+    fail(
+      "Usage: activity-curator-preset.mbtx CLI BUNDLE TEMPLATE OUTPUT INSTALLED_CLI INSTALLED_BUNDLE INSTALLED_CWD",
+    )
+  }
+  for
+    path in [
+      cli, bundle, template, output, installed_cli, installed_bundle, installed_cwd,
+    ] {
+    guard path.has_prefix("/") else {
+      fail("All preset paths must be absolute")
+    }
+  }
+  let source = @json.parse(@fs.read_file_to_string(bundle))
+  let config = @json.parse(@fs.read_file_to_string(template))
+  guard config is Object(fields) &&
+    fields.get("program_template") is Some(metadata) else {
+    fail("The creative config must define program_template explicitly")
+  }
+  guard field(source, "agent_id") == field(metadata, "book_id") &&
+    field(source, "version") == field(metadata, "book_version") else {
+    fail("Template Book identity differs from the native package")
+  }
+  let preset : Json = {
+    "template_id": field(metadata, "template_id"),
+    "template_version": field(metadata, "template_version"),
+    "book_cli": installed_cli,
+    "book_cli_cwd": installed_cwd,
+    "book_cli_sha256": sha(cli),
+    "bundle_path": installed_bundle,
+    "bundle_file_sha256": sha(bundle),
+    "bundle_digest": field(source, "bundle_digest"),
+    "source_book_id": field(source, "agent_id"),
+    "book_version": field(source, "version"),
+    "curator_profile": field(metadata, "curator_profile"),
+    "workflow_id": field(metadata, "workflow_id"),
+    "workflow_version": field(metadata, "workflow_version"),
+  }
+  @fs.write_string_to_file(output, preset.stringify(indent=2) + "\n")
+  println(
+    "Wrote deployment-owned curation preset; set private file permissions before installation",
+  )
+}

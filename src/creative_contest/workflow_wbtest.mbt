@@ -26,6 +26,7 @@ fn fixture_config() -> Config {
     model: "z-image-turbo",
     manager_account_ids: None,
     participant_account_ids: None,
+    voting_mode: None,
   }
 }
 
@@ -43,6 +44,7 @@ fn fixture_config_json(config : Config) -> Json {
     "provider_key_file": config.provider_key_file,
     "model": config.model,
     "manager_account_ids": config.manager_account_ids.unwrap_or([]).to_json(),
+    "voting_mode": config.voting_mode.unwrap_or("external"),
   }
 }
 

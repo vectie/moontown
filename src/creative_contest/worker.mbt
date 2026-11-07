@@ -210,8 +210,22 @@ async fn finish(
 }
 
 ///|
-pub async fn process_next(path : String, config_path : String) -> Bool {
+pub async fn process_next(
+  path : String,
+  config_path : String,
+  allow_generation~ : Bool = true,
+) -> Bool {
   let config = load_config(config_path)
+  {
+    let file = lock(path)
+    defer file.close()
+    defer file.unlock()
+    let state = read(path, config)
+    let next = advance_voting(state, config, @env.now())
+    if next.revision != state.revision {
+      save(path, next)
+    }
+  }
   if config.provider_origin.is_empty() {
     return false
   }
@@ -318,6 +332,9 @@ pub async fn process_next(path : String, config_path : String) -> Bool {
     if state.generations.any(job => {
         job.state == "running" || job.state == "needs_reconcile"
       }) {
+      return false
+    }
+    if !allow_generation {
       return false
     }
     guard state.generations.iter().find_first(job => job.state == "queued")

@@ -1,0 +1,300 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+}
+
+///|
+async fn command(program : String, args : Array[String]) -> String {
+  let result = @shell.Cmd(program, args).output()
+  result.check()
+  result.stdout().trim().to_owned()
+}
+
+///|
+async fn digest(path : String) -> String {
+  command("sha256sum", [path]).split(" ").next().unwrap().to_owned()
+}
+
+///|
+async fn size(path : String) -> Int32 {
+  @string.parse_int(command("stat", ["-c", "%s", path]))
+}
+
+///|
+fn valid_hash(hash : String) -> Bool {
+  hash.length() == 64 && hash.all(c => c is ('0'..<='9' | 'a'..<='f'))
+}
+
+///|
+async fn blob(root : String, hash : String) -> String {
+  guard hash.strip_prefix("sha256:") is Some(value) &&
+    valid_hash(value.to_owned()) else {
+    fail("Invalid pinned OCI digest")
+  }
+  let path = root + "/blobs/sha256/" + value.to_owned()
+  guard @fs.kind(path, follow_symlink=false) is Regular &&
+    digest(path) == value.to_owned() else {
+    fail("OCI blob does not match its descriptor")
+  }
+  path
+}
+
+///|
+async fn json_blob(root : String, name : String, value : Json) -> Json {
+  let path = root + "/" + name
+  @fs.write_file(path, value.stringify(), create_mode=CreateNew)
+  let hash = digest(path)
+  let bytes = size(path)
+  @fs.rename(path, root + "/blobs/sha256/" + hash)
+  { "digest": "sha256:" + hash, "size": bytes }
+}
+
+///|
+async fn seed_inventory(
+  root : String,
+  relative : String,
+  rows : Array[Json],
+) -> Unit {
+  let directory = root + relative
+  guard @fs.kind(directory, follow_symlink=false) is Directory else {
+    fail("Expected regular seed directory")
+  }
+  let names = @fs.readdir(directory, include_hidden=true)
+  names.sort()
+  for name in names {
+    guard !name.contains("\n") && !name.contains("\r") else {
+      fail("Invalid seed filename")
+    }
+    let item = relative + "/" + name
+    match @fs.kind(root + item, follow_symlink=false) {
+      Directory => seed_inventory(root, item, rows)
+      Regular =>
+        rows.push({ "path": item[1:].to_owned(), "sha256": digest(root + item) })
+      _ => fail("Seed must contain only regular directories and files")
+    }
+  }
+}
+
+///|
+/// Append only the qualified CLI, its seed tree, and the 1.2.0 runtime package.
+/// This produces an OCI archive, never changes Kubernetes or live configuration.
+async fn main {
+  guard @env.args() is [_, base, base_digest, cli, seed, bundle, root, image] else {
+    fail(
+      "Usage: package-activity-runtime.mbtx GATEWAY_OCI_TAR EXPECTED_MANIFEST_SHA256 CLI SEED_DIR RUNTIME_BUNDLE NEW_WORK_DIR IMAGE_TAG",
+    )
+  }
+  guard command("uname", ["-m"]) == "x86_64" &&
+    command("uname", ["-s"]) == "Linux" else {
+    fail("Package the activity runtime on its Linux amd64 build host")
+  }
+  for path in [base, cli, seed, bundle, root] {
+    guard path.has_prefix("/") else { fail("All build paths must be absolute") }
+  }
+  let cli_hash = "5925e3ed2a909a0c273089d97cea57dec10251e217fb67351455029905565181"
+  let package_hash = "55cccaa818a8bf7fc4b6c7d5020339ac90ddcb018d82e76d4bdda9036e50c8bf"
+  let seed_hash = "e21c30a71df0e2f171e7883ac7c9e14a9adeb7133cf98555da6942b13490eca9"
+  for (path, expected) in [(cli, cli_hash), (bundle, package_hash)] {
+    guard @fs.kind(path, follow_symlink=false) is Regular &&
+      digest(path) == expected else {
+      fail("Activity runtime input differs from the qualified artifact")
+    }
+  }
+  guard @json.parse(@fs.read_file(bundle).text())
+    is {
+      "agent_id": "banxing-coffee-curator",
+      "version": "1.2.0",
+      "bundle_digest": "sha256:0569dd437ba243510127cec012e929b086934a8560dac3c42b6aad890999983f",
+      ..
+    } else {
+    fail("Unexpected curator runtime identity")
+  }
+  @fs.mkdir(root, permission=0o700)
+  let inventory : Array[Json] = []
+  seed_inventory(seed, "", inventory)
+  @fs.write_file(
+    root + "/seed-inventory.json",
+    Json::array(inventory).stringify(),
+    create_mode=CreateNew,
+  )
+  guard digest(root + "/seed-inventory.json") == seed_hash else {
+    fail("Seed tree differs from the qualified CLI seed")
+  }
+  // Accept only OCI layout files and regular directory/file tar members.
+  for entry in command("tar", ["-tf", base]).split("\n") {
+    let item = entry.strip_prefix("./").unwrap_or(entry).to_owned()
+    guard ["oci-layout", "index.json", "blobs/", "blobs/sha256/"].contains(item) ||
+      (item.has_prefix("blobs/sha256/") && valid_hash(item[13:].to_owned())) else {
+      fail("Unexpected path in gateway OCI archive")
+    }
+  }
+  for entry in command("tar", ["-tvf", base]).split("\n") {
+    guard entry.has_prefix("-") || entry.has_prefix("d") else {
+      fail("OCI archive contains a link or special file")
+    }
+  }
+  @shell.Cmd("tar", ["--no-same-owner", "-xf", base, "-C", root]).run()
+  guard @json.parse(@fs.read_file(root + "/index.json").text())
+    is { "manifests": [{ "digest": String(manifest_hash), .. }], .. } &&
+    manifest_hash == base_digest else {
+    fail("Gateway manifest differs from the approved native build")
+  }
+  let manifest = @json.parse(@fs.read_file(blob(root, manifest_hash)).text())
+  guard manifest is Object(fields) &&
+    manifest
+    is {
+      "config": { "digest": String(config_hash), .. },
+      "layers": Array(layers),
+      ..
+    } else {
+    fail("Invalid OCI manifest")
+  }
+  for entry in layers {
+    guard entry is { "digest": String(hash), .. } else {
+      fail("Invalid OCI layer")
+    }
+    ignore(blob(root, hash))
+  }
+  let config = @json.parse(@fs.read_file(blob(root, config_hash)).text())
+  guard config
+    is {
+      "architecture": "amd64",
+      "os": "linux",
+      "config": Object(runtime),
+      "rootfs": { "diff_ids": Array(diffs), .. },
+      ..
+    } else {
+    fail("Expected Linux amd64 gateway configuration")
+  }
+  let preserved_runtime = Json::object(runtime).stringify()
+  if runtime.get("Env") is Some(Array(environment)) {
+    guard !environment.any(entry => {
+      match entry {
+        String(value) => value.has_prefix("MOONBOOK_MODULE_ROOT=")
+        _ => true
+      }
+    }) else {
+      fail("Gateway image contains a conflicting MoonBook module root")
+    }
+  }
+  let destination = root + "/layer/opt/moonbook"
+  @shell.Cmd("install", ["-d", destination + "/seed", destination + "/presets"]).run()
+  @shell.Cmd("install", ["-m", "755", cli, destination + "/moonbook"]).run()
+  @shell.Cmd("install", [
+    "-m",
+    "644",
+    bundle,
+    destination + "/presets/coffee-curator-runtime-1.2.0.moonbook-agent",
+  ]).run()
+  for entry in inventory {
+    guard entry is { "path": String(relative), "sha256": String(expected), .. } else {
+      fail("Invalid seed inventory")
+    }
+    let target = destination + "/seed/" + relative
+    let parent = target[:target.rev_find("/").unwrap()].to_owned()
+    @shell.Cmd("install", ["-d", parent]).run()
+    @shell.Cmd("install", ["-m", "644", seed + "/" + relative, target]).run()
+    guard digest(target) == expected else {
+      fail("Seed changed while packaging")
+    }
+  }
+  guard digest(destination + "/moonbook") == cli_hash &&
+    digest(destination + "/presets/coffee-curator-runtime-1.2.0.moonbook-agent") ==
+    package_hash else {
+    fail("Runtime changed while packaging")
+  }
+  let archive = root + "/activity-runtime-layer.tar"
+  @shell.Cmd("tar", [
+    "--sort=name",
+    "--mtime=@0",
+    "--format=gnu",
+    "--owner=0",
+    "--group=0",
+    "--numeric-owner",
+    "--mode=u+rwX,go+rX",
+    "-C",
+    root + "/layer",
+    "-cf",
+    archive,
+    ".",
+  ]).run()
+  diffs.push(Json::string("sha256:" + digest(archive)))
+  @shell.Cmd("gzip", ["-n", "-k", archive]).run()
+  let layer_hash = digest(archive + ".gz")
+  let layer_bytes = size(archive + ".gz")
+  @fs.rename(archive + ".gz", root + "/blobs/sha256/" + layer_hash)
+  layers.push({
+    "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+    "digest": "sha256:" + layer_hash,
+    "size": layer_bytes,
+  })
+  fields["mediaType"] = Json::string(
+    "application/vnd.oci.image.manifest.v1+json",
+  )
+  for entry in layers {
+    guard entry is Object(layer_fields) else {
+      fail("Invalid layer descriptor")
+    }
+    if layer_fields.get("mediaType") ==
+      Some(Json::string("application/vnd.docker.image.rootfs.diff.tar.gzip")) {
+      layer_fields["mediaType"] = Json::string(
+        "application/vnd.oci.image.layer.v1.tar+gzip",
+      )
+    }
+  }
+  guard Json::object(runtime).stringify() == preserved_runtime else {
+    fail("Gateway runtime configuration changed")
+  }
+  guard json_blob(root, "new-config.json", config) is Object(new_config) else {
+    fail("Invalid OCI config descriptor")
+  }
+  new_config["mediaType"] = Json::string(
+    "application/vnd.oci.image.config.v1+json",
+  )
+  fields["config"] = Json::object(new_config)
+  guard json_blob(root, "new-manifest.json", manifest) is Object(descriptor) else {
+    fail("Invalid OCI manifest descriptor")
+  }
+  descriptor["mediaType"] = Json::string(
+    "application/vnd.oci.image.manifest.v1+json",
+  )
+  descriptor["annotations"] = {
+    "org.opencontainers.image.ref.name": image,
+    "io.containerd.image.name": image,
+  }
+  descriptor["platform"] = { "architecture": "amd64", "os": "linux" }
+  @fs.write_file(
+    root + "/index.json",
+    ({ "schemaVersion": 2, "manifests": [Json::object(descriptor)] } : Json).stringify(),
+  )
+  @shell.Cmd("tar", [
+    "-C",
+    root,
+    "-cf",
+    root + ".oci.tar",
+    "oci-layout",
+    "index.json",
+    "blobs",
+  ]).run()
+  @fs.write_file(
+    root + "/activity-runtime-build.json",
+    (
+      {
+        "base_manifest": base_digest,
+        "manifest": descriptor["digest"],
+        "cli_sha256": cli_hash,
+        "seed_inventory_sha256": seed_hash,
+        "seed_files": inventory.length(),
+        "bundle_file_sha256": package_hash,
+        "book_version": "1.2.0",
+        "runtime_config_preserved": true,
+      } : Json).stringify(),
+    create_mode=CreateNew,
+  )
+  println(image + " " + descriptor["digest"].stringify())
+}

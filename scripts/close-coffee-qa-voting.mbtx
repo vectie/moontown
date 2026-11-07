@@ -1,0 +1,313 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+}
+
+///|
+async fn command(program : String, args : Array[String]) -> String {
+  let result = @shell.Cmd(program, args).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  command(
+    "kubectl",
+    ["--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", ..args],
+  )
+}
+
+///|
+async fn save(root : String, name : String, value : Json) -> Unit {
+  @fs.write_file(
+    root + "/" + name + ".json",
+    value.stringify(indent=2) + "\n",
+    create_mode=CreateNew,
+    permission=0o600,
+    sync=Full,
+  )
+}
+
+///|
+async fn digest(path : String) -> String {
+  command("sha256sum", [path]).split(" ").next().unwrap().to_owned()
+}
+
+///|
+fn milliseconds(value : Json) -> UInt64 raise {
+  match value {
+    String(text) => @string.parse_uint64(text)
+    Number(number, ..) if number >= 0 && number.floor() == number =>
+      number.to_uint64()
+    _ => fail("Expected an event timestamp")
+  }
+}
+
+///|
+async fn regular_tree(path : String) -> Unit {
+  match @fs.kind(path, follow_symlink=false) {
+    Directory =>
+      for name in @fs.readdir(path, include_hidden=true) {
+        regular_tree(path + "/" + name)
+      }
+    Regular => ()
+    _ => fail("QA backup may contain only regular files and directories")
+  }
+}
+
+///|
+/// One-way QA-only transition. Never resets a frozen roster, votes, or results.
+/// Execute only when the operator is ready to use the selected 5/10-minute window.
+async fn main {
+  guard @env.args() is [_, root, expected_version, minutes] &&
+    root.has_prefix("/home/HwHiAiUser/") &&
+    !root.contains("..") &&
+    !expected_version.is_empty() &&
+    expected_version.length() <= 32 &&
+    expected_version.all(c => c is ('0'..<='9')) &&
+    ["5", "10"].contains(minutes) else {
+    fail(
+      "Usage: close-coffee-qa-voting.mbtx NEW_PRIVATE_RELEASE_DIR EXPECTED_CONFIGMAP_RESOURCE_VERSION 5|10",
+    )
+  }
+  let ns = "aigc-acceptance-20260915"
+  let name = "moontown-coffee-qa"
+  let event_id = "coffee-mobile-qa-20261107"
+  let config_map = @json.parse(
+    kube(["-n", ns, "get", "configmap", name, "-o", "json"]),
+  )
+  guard config_map
+    is {
+      "metadata": {
+        "name": "moontown-coffee-qa",
+        "namespace": "aigc-acceptance-20260915",
+        "resourceVersion": String(version),
+        ..
+      },
+      "data": { "event.json": String(raw), .. },
+      ..
+    } &&
+    version == expected_version else {
+    fail("QA ConfigMap identity or expected resourceVersion changed")
+  }
+  guard @json.parse(raw) is Object(config) &&
+    config.get("brief") is Some(Object(brief)) &&
+    brief.get("id") == Some(Json::string(event_id)) &&
+    (
+      config.get("voting_mode") is None ||
+      config.get("voting_mode") == Some(Json::string("external"))
+    ) else {
+    fail(
+      "Only the unconverted dedicated legacy QA event may enter builtin voting",
+    )
+  }
+  let deployment = @json.parse(
+    kube(["-n", ns, "get", "deployment", name, "-o", "json"]),
+  )
+  guard deployment
+    is {
+      "spec": {
+        "replicas": 1,
+        "template": {
+          "spec": {
+            "containers": [
+              {
+                "name": "platform",
+                "image": String(image),
+                "env": Array(environment),
+                "volumeMounts": Array(mounts),
+                ..
+              },
+            ],
+            "volumes": Array(volumes),
+            ..
+          },
+          ..
+        },
+        ..
+      },
+      ..
+    } &&
+    image ==
+    "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@sha256:62213c1b44971cb81730fb288dcab73477b855833e2572272d4b7dabea2bfff4" &&
+    environment.filter(item => {
+      item is { "name": "MOONTOWN_CREATIVE_STATE_FILE", .. }
+    })
+    is [{ "value": String(creative_file), .. }] &&
+    creative_file == "/creative/coffee-mobile-qa-20261107/state.json" &&
+    environment.filter(item => {
+      item is { "name": "MOONTOWN_CREATIVE_CONFIG_FILE", .. }
+    })
+    is [{ "value": "/run/creative-config/event.json", .. }] &&
+    mounts.filter(item => item is { "name": "creative-state", .. })
+    is [{ "mountPath": "/creative", .. }] &&
+    mounts.filter(item => item is { "name": "creative-config", .. })
+    is [{ "mountPath": "/run/creative-config", .. }] &&
+    volumes.filter(item => item is { "name": "creative-config", .. })
+    is [{ "configMap": { "name": "moontown-coffee-qa", .. }, .. }] &&
+    volumes.filter(item => item is { "name": "creative-state", .. })
+    is [
+      {
+        "persistentVolumeClaim": { "claimName": "moontown-coffee-qa-state", .. },
+        ..
+      },
+    ] else {
+    fail(
+      "QA runtime/config/state bindings differ from the reviewed isolated deployment",
+    )
+  }
+  let pvc = @json.parse(
+    kube(["-n", ns, "get", "pvc", name + "-state", "-o", "json"]),
+  )
+  guard pvc is { "spec": { "volumeName": String(pv_name), .. }, .. } else {
+    fail("QA state volume is unbound")
+  }
+  let pv = @json.parse(kube(["get", "pv", pv_name, "-o", "json"]))
+  guard pv
+    is {
+      "spec": {
+        "csi": {
+          "volumeAttributes": {
+            "server": "192.168.2.175",
+            "share": "/data/lunanexa-workspaces",
+            "subDir": String(subdir),
+            ..
+          },
+          ..
+        },
+        ..
+      },
+      ..
+    } &&
+    subdir.has_prefix(ns + "/" + name + "-state/") &&
+    !subdir.contains("..") else {
+    fail("Unexpected QA state volume location")
+  }
+  let volume_root = "/data/lunanexa-workspaces/" + subdir
+  let event_root = volume_root + "/" + event_id
+  let state_path = event_root + "/state.json"
+  guard @fs.kind(event_root, follow_symlink=false) is Directory &&
+    @fs.kind(state_path, follow_symlink=false) is Regular else {
+    fail("Dedicated QA state does not exist")
+  }
+  if @fs.exists(state_path + ".lock") {
+    guard @fs.kind(state_path + ".lock", follow_symlink=false) is Regular else {
+      fail("Invalid QA state lock")
+    }
+  }
+  let file = @fs.open(
+    state_path + ".lock",
+    mode=ReadWrite,
+    create_mode=OpenOrCreate,
+    permission=0o600,
+  )
+  defer file.close()
+  file.lock(Exclusive)
+  defer file.unlock()
+  let state_raw = @fs.read_file(state_path).text()
+  guard @json.parse(state_raw) is Object(state) &&
+    state.get("challenge_id") == Some(Json::string(event_id)) &&
+    state.get("generations") is Some(Array(jobs)) &&
+    jobs.all(job => job is { "state": "completed" | "failed", .. }) else {
+    fail(
+      "QA identity mismatch or image jobs are still queued/running; wait before closing creation",
+    )
+  }
+  for key in ["vote_events", "voting_rosters", "voting_settlements"] {
+    guard state.get(key) is None || state.get(key) == Some(Json::array([])) else {
+      fail(
+        "Existing ballots, frozen roster or settlement forbid any schedule/mode rewrite",
+      )
+    }
+  }
+  regular_tree(event_root)
+  @fs.mkdir(root, permission=0o700)
+  save(root, "configmap-before", config_map)
+  save(root, "deployment-reference", deployment)
+  @fs.write_file(
+    root + "/state-before.json",
+    state_raw,
+    create_mode=CreateNew,
+    permission=0o600,
+    sync=Full,
+  )
+  let archive = root + "/qa-event-state.tar.gz"
+  ignore(command("tar", ["-C", volume_root, "-czf", archive, event_id]))
+  @fs.chmod(archive, 0o600)
+  @fs.mkdir(root + "/restore-check", permission=0o700)
+  ignore(command("tar", ["-xzf", archive, "-C", root + "/restore-check"]))
+  ignore(
+    command("diff", [
+      "--no-dereference",
+      "-qr",
+      event_root,
+      root + "/restore-check/" + event_id,
+    ]),
+  )
+  let now = @async.now().reinterpret_as_uint64()
+  guard brief.get("published") == Some(Json::boolean(true)) &&
+    brief.get("deadline_ms") is Some(_) &&
+    config.get("opens_ms") is Some(opens) &&
+    milliseconds(opens) < now - 30000UL else {
+    fail("The QA creation window must already be published and opened")
+  }
+  let closes_ms = now + (if minutes == "5" { 300000UL } else { 600000UL })
+  brief["deadline_ms"] = Json::string((now - 30000UL).to_string())
+  config["voting_opens_ms"] = Json::string((now - 10000UL).to_string())
+  config["voting_closes_ms"] = Json::string(closes_ms.to_string())
+  config["awards_ms"] = Json::string((closes_ms + 60000UL).to_string())
+  config["voting_mode"] = Json::string("builtin")
+  let changed = Json::object(config).stringify()
+  let patch : Json = [
+    {
+      "op": "test",
+      "path": "/metadata/resourceVersion",
+      "value": expected_version,
+    },
+    { "op": "test", "path": "/data/event.json", "value": raw },
+    { "op": "replace", "path": "/data/event.json", "value": changed },
+  ]
+  save(root, "configmap-patch", patch)
+  save(root, "transition-plan", {
+    "event_id": event_id,
+    "expected_configmap_version": expected_version,
+    "state_unchanged": true,
+    "backup_restore_comparison": true,
+    "archive_sha256": digest(archive),
+    "state_sha256": digest(root + "/state-before.json"),
+    "voting_mode": "builtin",
+    "voting_closes_ms": closes_ms.to_string(),
+    "window_minutes": minutes,
+    "roster_previously_frozen": false,
+    "automatic_rollback": false,
+  })
+  let after = @json.parse(
+    kube([
+      "-n",
+      ns,
+      "patch",
+      "configmap",
+      name,
+      "--type=json",
+      "--patch-file",
+      root + "/configmap-patch.json",
+      "-o",
+      "json",
+    ]),
+  )
+  save(root, "configmap-after", after)
+  guard @fs.read_file(state_path).text() == state_raw else {
+    fail("QA state changed while the transition lock was held")
+  }
+  println(
+    "Dedicated QA builtin voting requested; closes_ms=" +
+    closes_ms.to_string() +
+    "; wait for projected config and verify public phase. No state was rewritten. Never rerun or reset after freeze.",
+  )
+}

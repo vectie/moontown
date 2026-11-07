@@ -121,6 +121,9 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
     neighborhood_path: None,
     creative_path: Some(path),
     creative_config: Some(config_path),
+    program_root: None,
+    program_template_config: None,
+    program_approver_ids: [],
   }
   @async.with_task_group(group => {
     group.spawn_bg(no_wait=true, allow_failure=true, () => {

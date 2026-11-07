@@ -1,0 +1,15 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/moontown/activity_curation"
+
+// Values
+pub async fn prepare(String, Json, String) -> Json
+
+pub async fn prepare_from_config(String, Json, String, String, String) -> Json
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

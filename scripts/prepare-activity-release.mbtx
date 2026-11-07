@@ -1,0 +1,84 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, root, mode, runtime, ui, stage] &&
+    root.has_prefix("/home/HwHiAiUser/") &&
+    ["qa", "formal"].contains(mode) &&
+    ["preview", "apply"].contains(stage) else {
+    fail(
+      "prepare-activity-release.mbtx PRIVATE_RELEASE_DIR qa|formal RUNTIME_DIGEST UI_DIGEST preview|apply",
+    )
+  }
+  let deployment = if mode == "qa" {
+    "moontown-coffee-qa"
+  } else {
+    "moontown-platform"
+  }
+  let result = @shell.Cmd("kubectl", [
+    "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", "-n", "aigc-acceptance-20260915",
+    "get", "deployment", deployment, "-o", "json",
+  ]).output()
+  result.check()
+  guard @json.parse(result.stdout())
+    is {
+      "metadata": { "resourceVersion": String(version), .. },
+      "spec": {
+        "template": {
+          "spec": {
+            "containers": [{ "image": String(old_runtime), .. }],
+            "initContainers": [{ "image": String(old_ui), .. }],
+            ..
+          },
+          ..
+        },
+        ..
+      },
+      ..
+    } else {
+    fail("Unexpected deployment shape")
+  }
+  let approvers : Array[Json] = []
+  if mode == "qa" {
+    guard @json.parse(
+        @fs.read_file("/home/HwHiAiUser/image-runtime-20261107/members.json").text(),
+      )
+      is Array(members) else {
+      fail("Missing verified QA members")
+    }
+    guard members.iter().find_first(item => item is { "role": "host", .. })
+      is Some({ "account_id": String(id), .. }) else {
+      fail("Missing verified QA host")
+    }
+    approvers.push(Json::string(id))
+  }
+  let plan : Json = {
+    "output_dir": root + "/" + mode + "-" + stage,
+    "deployment": deployment,
+    "expected_resource_version": version,
+    "expected_runtime_digest": old_runtime.split("@").nth(1).unwrap().to_owned(),
+    "expected_ui_digest": old_ui.split("@").nth(1).unwrap().to_owned(),
+    "runtime_digest": runtime,
+    "ui_digest": ui,
+    "pvc_name": deployment + "-activity-20261107",
+    "configmap_name": deployment + "-activity-20261107",
+    "template_file": root + "/activity-template-" + mode + ".json",
+    "preset_file": root + "/curation-preset-" + mode + ".json",
+    "qa_approver_ids": Json::array(approvers),
+  }
+  @fs.write_file(
+    root + "/" + mode + "-" + stage + "-plan.json",
+    plan.stringify(indent=2),
+    permission=0o600,
+    create_mode=CreateNew,
+    sync=Full,
+  )
+  println("Prepared guarded " + mode + " " + stage + " plan")
+}

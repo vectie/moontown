@@ -31,11 +31,12 @@
   <main>
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <h1 id="hero-title"><span id="event-name">半醒咖啡 · 第 01 期</span></h1>
+        <h1 id="hero-title"><span id="event-name">正在载入活动…</span></h1>
         <div class="event-note">
-<span id="phase">征集中</span>
-<span id="deadline-note">11 月 12 日 18:00 截稿</span>
+<span id="phase">正在核对赛程</span>
+<span id="deadline-note"></span>
 </div>
+<p id="activity-message" class="notice" role="status" hidden></p>
 <a id="host-shortcut" class="secondary hero-action" href="#moderation" hidden>审核投稿</a>
 <a id="vote" class="secondary hero-action" href="#" target="_blank" rel="noopener noreferrer" hidden>为喜欢的作品投一票 ↗</a>
       </div>
@@ -77,7 +78,7 @@
 </button>
 <button id="download" class="text-button" type="button">保存图片 ↓</button>
 </div>
-<p class="fine-print">先看看喜不喜欢，再决定是否公开参赛。</p>
+<p id="result-note" class="fine-print">先看看喜不喜欢，再决定是否公开参赛。</p>
 </div>
           <div id="job-status" class="job-status" role="status" aria-live="polite" hidden>
 </div>
@@ -95,9 +96,16 @@
 </div>
 </div>
 <p id="vote-note" class="section-description">过审作品会出现在这里。投票开放后，可以为喜欢的作品加油。</p>
+<p id="vote-feedback" class="notice" role="status" aria-live="polite"></p>
+<button id="cancel-vote" class="text-button" type="button" hidden>撤回我的选票</button>
 <div id="gallery-grid" class="gallery-grid">
 </div>
 <p id="gallery-empty" class="gallery-empty">还没有过审作品。</p>
+<section id="leaderboard" class="leaderboard" aria-labelledby="leaderboard-title" hidden>
+<div class="section-heading"><h3 id="leaderboard-title">人气榜</h3><span id="tally-status" class="fine-print"></span></div>
+<ol id="leaderboard-list"></ol>
+<details><summary>名单与结算版本</summary><p id="vote-version" class="fine-print"></p></details>
+</section>
 <div id="awards" class="awards" hidden>
 </div>
 </section>
@@ -112,19 +120,19 @@
 <div class="about-details">
 <div class="schedule">
 <div>
-<span id="start-time">11.06 · 周五</span>
-<strong>第一期开始</strong>
+<span id="start-time">—</span>
+<strong>征集开始</strong>
 </div>
 <div>
-<span id="deadline-time">11.12 · 周四 18:00</span>
+<span id="deadline-time">—</span>
 <strong>投稿截止</strong>
 </div>
 <div>
-<span id="awards-time">11.13 · 周五</span>
+<span id="awards-time">—</span>
 <strong>公布惊喜，下一期见</strong>
 </div>
 </div>
-<p>手办、帆布包、半醒特调咖啡，等三个好点子。实际款式和兑奖安排由主办公布。</p>
+<p id="prize-description">手办、帆布包、半醒特调咖啡，等三个好点子。实际款式和兑奖安排由主办公布。</p>
 <details id="inspiration">
 <summary>主题与创作提示</summary>
 <p id="event-topic">给半醒的日常，加一点想象。</p>
@@ -137,7 +145,7 @@
 <p>每个账户本期只保留一张有效投稿；换一张参赛会替换上一张，并重新审核。每次生成都会占用本期次数。投稿截止后不能新增或替换作品。</p>
 <p>图片须围绕本期主题。请避免未经授权的角色、商标、真人肖像及不适宜内容。生成图片不代表已获准公开；审核通过后才进入作品墙。提示词不会因参赛自动公开。</p>
 <p>投稿时需主动同意本期作品展示与投票；其他商业使用需另行联系作者。你可以撤回投稿。AI 生成的图片可能存在细节错误，下载图片会保留 AI 标识。</p>
-<p>大众投票使用主办配置的腾讯文档链接，投票规则与异常票处理以主办公布为准。本站不展示未经核对的实时票数，不自动认定获奖。所有时间为北京时间。</p>
+<p id="voting-rules">大众投票使用主办配置的腾讯文档链接，投票规则与异常票处理以主办公布为准。本站不展示未经核对的实时票数，不自动认定获奖。所有时间为北京时间。</p>
 </details>
 </div>
 </div>
@@ -161,9 +169,12 @@
 <input id="voting-url" type="url" placeholder="https://docs.qq.com/…" required>
 <button class="secondary" type="submit">保存链接</button>
 <button id="voting-preview" class="text-button" type="button">使用预览页（不计票）</button>
-<button id="export" class="text-button" type="button">导出过审名单 ↓</button>
 </div>
 </form>
+<div class="inline-form">
+<button id="export" class="text-button" type="button">导出过审名单 ↓</button>
+<button id="settlement-export" class="text-button" type="button" hidden>导出结算快照 ↓</button>
+</div>
 <p id="voting-config-note" class="fine-print" hidden>投票已开始，投票入口和批准名单已锁定。</p>
 <form id="award-form">
 <h3>本期小惊喜</h3>
@@ -188,6 +199,7 @@
   </main>
   <footer>
 <a href="./">MoonTown</a>
+<a href="activity-program.html">举办活动</a>
 <a href="#create-title">回到创作 ↑</a>
 </footer>
   <dialog id="submit-dialog" aria-labelledby="submit-title">
@@ -240,5 +252,6 @@
 <span class="ai-label">AI 生成</span>
 </div>
 </dialog>
+<dialog id="disqualify-dialog" aria-labelledby="disqualify-title"><form id="disqualify-form"><div class="dialog-heading"><h2 id="disqualify-title">撤下作品</h2><button id="close-disqualify" class="dialog-close text-button" type="button" aria-label="关闭撤下作品">×</button></div><p id="disqualify-work"></p><label for="disqualify-reason">原因<textarea id="disqualify-reason" maxlength="1000" rows="3" required></textarea></label><p class="fine-print">作品将从作品墙移除。投票结束前相关票不再计入；封榜后保留截止时票数。</p><p id="disqualify-notice" class="notice" role="status"></p><button id="confirm-disqualify" class="primary" type="submit">确认撤下作品</button></form></dialog>
 </body>
 </html>

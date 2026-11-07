@@ -1,11 +1,34 @@
 import { coffeeAuth } from './coffee-auth.js';
+function creativeEndpoint(href) {
+  const page = new URL(href);
+  const id = page.searchParams.get('activity');
+  if (id === null) return new URL('./api/creative/', page);
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(id)) throw new Error('活动链接无效，请从活动列表重新打开。');
+  return new URL(`./api/activities/${encodeURIComponent(id)}/`, page);
+}
+function votingRows(value) {
+  const gallery = new Map((value.gallery || []).map(entry => [entry.id, entry]));
+  return (value.voting?.counts || []).filter(row => row.eligible).map(row => ({
+    ...row, title: gallery.get(row.entry_id)?.title || '作品已撤回',
+    display_name: gallery.get(row.entry_id)?.display_name || ''
+  })).sort((a,b) => a.rank - b.rank || a.entry_id.localeCompare(b.entry_id));
+}
+function creationPhase(event,now) {
+  return now<Number(event.opens_ms)?'waiting':now<Number(event.deadline_ms)?'open':'closed';
+}
+function generationCredits(value,signedIn) {
+  if(value.event_remaining===0)return '本期生成名额已用完 · 已生成图片仍可投稿';
+  const personal=signedIn?value.remaining:value.event.participant_quota;
+  const remaining=Number.isFinite(value.event_remaining)?Math.min(personal,value.event_remaining):personal;
+  return signedIn?`本期还可生成 ${remaining} 张 · 投稿前仅自己可见`:`本期最多可生成 ${remaining} 张 · 投稿前仅自己可见`;
+}
 const jobLabels = Object.freeze({
   queued: "已经排好队，轮到你就开始画。",
   running: "正在把想象画出来，请稍等。离开页面也不会丢失任务。",
   needs_reconcile: "这次生成需要主办核对。我们会保留记录，不会自动重复生成。",
   failed: "这次没有完成，次数已退回。可以再试一次。"
 });
-const entryLabels = Object.freeze({ pending: "等待审核", approved: "已进入作品墙", rejected: "需要调整后重新投稿", superseded: "已被新版替换", withdrawn: "已撤回" });
+const entryLabels = Object.freeze({ pending: "等待审核", approved: "已进入作品墙", rejected: "需要调整后重新投稿", superseded: "已被新版替换", withdrawn: "已撤回", disqualified:'已下架' });
 const prizeLabels = Object.freeze({ creative: "创意惊喜 · 手办", popular: "人气灵感 · 帆布包", coffee: "咖啡共鸣 · 特调" });
 function csvCell(value) {
   const text = String(value ?? "");
@@ -36,11 +59,15 @@ function labelPng(bytes, produceId = "") {
 if (typeof document !== "undefined") init();
 function init() {
   const $ = (id) => document.getElementById(id);
-  const endpoint = new URL("./api/creative/", location.href);
+  let endpoint;
+  try { endpoint = creativeEndpoint(location.href); }
+  catch (error) { $('notice').textContent = error.message; $('notice').dataset.error = 'true'; $('phase').textContent='活动链接无效'; return; }
   const url = (path) => new URL(path, endpoint).href;
   let state = null, selected = "", actor = "", pendingIntent = null, writing = false, refreshing = false, timer, clockOffset = 0;
   const reviewDrafts = /* @__PURE__ */ new Map();
   let votingDirty = false, followGeneration = false, identityEpoch = 0;
+  let rankingKey = '';
+  let disqualifyEntry = '';
   const dialog = $("submit-dialog");
   function fitDialog() {
     const viewport = window.visualViewport;
@@ -54,7 +81,7 @@ function init() {
     identityEpoch += 1;
     render(await request('mine'));
     if (!actor) throw new Error('登录状态尚未确认，请重试。');
-    notice('已登录，点击生成一张图继续。');
+    notice(state.activity?.generation_allowed===false ? '已登录，请查看活动状态。' : open() ? '已登录，点击生成一张图继续。' : creationPhase(state.event,Date.now()+clockOffset)==='waiting' ? '已登录，征集开始后可以生成作品。' : state.voting?.phase==='open' ? '已登录，可以为喜欢的作品投票。' : '已登录，可以查看自己的投稿。');
   } });
   $("login").addEventListener('click', event => { if (!actor) { event.preventDefault(); auth.open(); } });
   window.visualViewport?.addEventListener("resize", fitDialog);
@@ -82,6 +109,7 @@ function init() {
     document.querySelectorAll("[data-prompt]").forEach(button => button.setAttribute("aria-pressed", "false"));
     $("submit-dialog").close();
     $("artwork-dialog").close();
+    $('disqualify-dialog').close();disqualifyEntry='';
     $("artwork-image").removeAttribute("src");
     $("result-image").removeAttribute("src");
     $("result-image").removeAttribute("data-job");
@@ -90,6 +118,8 @@ function init() {
     $("result-panel").classList.add("is-empty");
     $("moderation").hidden = true;
     $("host-shortcut").hidden = true;
+    $('vote-feedback').textContent = '';
+    rankingKey = '';
     $("my-entry").hidden = true;
     $("history").replaceChildren();
     reviewDrafts.clear();
@@ -132,6 +162,7 @@ function init() {
   function render(value) {
     if (state && value.viewer.account_id === actor && value.revision < state.revision) return;
     const nextActor = value.viewer.account_id;
+    const galleryChanged = !state || JSON.stringify(value.gallery) !== JSON.stringify(state.gallery);
     const changed = !state || value.revision !== state.revision || nextActor !== actor || value.viewer.operator !== state.viewer.operator || value.awards?.length !== state.awards?.length;
     if (value.server_ms) clockOffset = Number(value.server_ms) - Date.now();
     if (actor && actor !== nextActor) {
@@ -140,28 +171,32 @@ function init() {
     }
     actor = nextActor;
     state = value;
+    const now = Date.now() + clockOffset, ev = state.event, phase=creationPhase(ev,now);
     $("login").textContent = actor ? "账户 ↗" : "登录 ↗";
-    $("generate").disabled = writing || Boolean(actor && (!open() || active() || state.remaining === 0 || state.event_remaining === 0 || !state.event.provider_ready));
-    $("generate").textContent = actor ? !open() ? "本期投稿已截止" : active() ? "正在生成，请稍等…" : state.remaining===0 ? "本期次数已用完" : state.event_remaining===0 ? "本期生成名额已用完" : !state.event.provider_ready ? "生成服务准备中" : "生成一张图" : "登录后生成";
+    const activityAllowed = state.activity?.generation_allowed !== false;
+    $('activity-message').hidden = !state.activity?.message;
+    $('activity-message').textContent = state.activity?.message || '';
+    $("generate").disabled = writing || !activityAllowed || Boolean(actor && (!open() || active() || state.remaining === 0 || state.event_remaining === 0 || !state.event.provider_ready));
+    $("generate").textContent = !activityAllowed ? '活动暂不可生成' : actor ? phase==='waiting' ? '创作尚未开始' : phase==='closed' ? "本期投稿已截止" : active() ? "正在生成，请稍等…" : state.remaining===0 ? "本期次数已用完" : state.event_remaining===0 ? "本期生成名额已用完" : !state.event.provider_ready ? "生成服务准备中" : "生成一张图" : "登录后生成";
     $("generate").formNoValidate = !actor;
     $("generate").setAttribute("aria-busy", String(writing || active()));
     $("submit-entry").disabled = writing;
     $("submit-entry").textContent = writing && dialog.open ? "正在提交…" : "提交审核";
-    $("credits").textContent = actor ? `本期还可生成 ${state.remaining} 张 · 投稿前仅自己可见` : `每人本期 ${state.event.participant_quota} 张 · 投稿前仅自己可见`;
-    const now = Date.now() + clockOffset, ev = state.event;
-    const closed = now >= Number(ev.deadline_ms);
+    $("credits").textContent = generationCredits(state,Boolean(actor));
+    const closed = phase==='closed';
     $("create-form").hidden = closed;
     document.querySelector('.create-section').classList.toggle('is-closed', closed);
-    if(ev.name)$("event-name").textContent=ev.name;
+    if(ev.name){$("event-name").textContent=ev.name;document.title=`${ev.name}｜MoonTown`;}
     if(ev.topic)$("event-topic").textContent=`本期主题：${ev.topic}`;
     if(ev.scope)$("event-scope").textContent=ev.scope;
     if(ev.first_person_solution)$("first-person-solution").textContent=ev.first_person_solution;
+    if(ev.prize_plan)$('prize-description').textContent=ev.prize_plan;
     const date = (value,withTime=false) => new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',weekday:'short',...(withTime?{hour:'2-digit',minute:'2-digit',hour12:false}:{})}).format(Number(value));
     $("start-time").textContent=date(ev.opens_ms);
     $("deadline-time").textContent=date(ev.deadline_ms,true);
     $("deadline-note").textContent = `${new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(Number(ev.deadline_ms))} 截稿`;
     $("awards-time").textContent=date(ev.awards_ms);
-    $("phase").textContent = now < Number(ev.deadline_ms) && !ev.provider_ready ? "创作即将开放" : now < Number(ev.opens_ms) ? "即将开始" : now < Number(ev.deadline_ms) ? "正在征集灵感" : now < Number(ev.voting_opens_ms) ? "投稿结束 · 正在审核" : now < Number(ev.voting_closes_ms) ? "一起为灵感投票" : "本期已结束";
+    $("phase").textContent = phase==='waiting' ? "即将开始" : phase==='open' && !ev.provider_ready ? "创作即将开放" : phase==='open' ? "正在征集灵感" : now < Number(ev.voting_opens_ms) ? "投稿结束 · 正在审核" : now < Number(ev.voting_closes_ms) ? "一起为灵感投票" : "本期已结束";
     const jobs = state.generations || [], completed = jobs.filter((j) => j.state === "completed");
     $("studio").hidden = closed && !jobs.length;
     const job = jobs.find((j) => ["queued", "running", "needs_reconcile"].includes(j.state)) || jobs.at(-1);
@@ -172,8 +207,9 @@ function init() {
       $("result-image").src = url(`images/${selected}`);
       $("result-image").dataset.job = selected;
     }
-    $("choose").disabled = writing || !open();
-    $("choose").firstChild.textContent = closed ? '投稿已截止 ' : '用这张参赛 ';
+    $("choose").disabled = writing || !open() || !activityAllowed;
+    $("choose").firstChild.textContent = closed ? '投稿已截止 ' : phase==='waiting' ? '投稿尚未开始 ' : '用这张参赛 ';
+    $('result-note').textContent = closed ? '本期投稿已截止，仍可保存自己的图片。' : '先看看喜不喜欢，再决定是否公开参赛。';
     $("empty-preview").hidden = Boolean(selected || job);
     $("result-panel").classList.toggle("is-empty", !selected && !job);
     $("job-status").hidden = !job || job.state === "completed";
@@ -234,9 +270,21 @@ function init() {
     }
     $("gallery-empty").hidden = gallery.length > 0;
     $("vote-note").hidden = !gallery.length && !state.voting_url;
-    if (changed) $("gallery-grid").replaceChildren(...gallery.map((entry2) => {
+    if (galleryChanged) $("gallery-grid").replaceChildren(...gallery.map((entry2) => {
       const card = node("article", void 0, "gallery-card");
       card.append(image(entry2.generation_id, entry2.title), node("h3", entry2.title), node("p", `${entry2.display_name} · 作品 ${entry2.id.slice(0, 8)}`));
+      const cast = node('button', '', 'secondary gallery-vote');
+      cast.type = 'button'; cast.dataset.voteEntry = entry2.id; cast.hidden = true;
+      cast.onclick = () => perform('vote', {entry_id:entry2.id,intent:crypto.randomUUID()}, 'vote-feedback');
+      card.append(cast);
+      const remove = node('button','撤下作品','text-button');
+      remove.type='button';remove.dataset.disqualifyEntry=entry2.id;remove.hidden=true;
+      remove.onclick=()=>{
+        disqualifyEntry=entry2.id;$('disqualify-work').textContent=entry2.title;
+        $('disqualify-reason').value='';notice('',false,'disqualify-notice');
+        $('disqualify-dialog').showModal();fitDialog();$('disqualify-reason').focus();
+      };
+      card.append(remove);
       return card;
     }));
     const vote = state.voting_url;
@@ -244,6 +292,7 @@ function init() {
     $("vote").textContent=state.voting_preview ? "预览投票页（不计票） ↗" : "为喜欢的作品投一票 ↗";
     if (vote) $("vote").href = vote;
     $("vote-note").textContent = now >= Number(ev.voting_opens_ms) && now < Number(ev.voting_closes_ms) ? vote ? state.voting_preview ? "作品名单已锁定。当前为投票预览，不记录票数；正式投票入口稍后公布。" : "作品名单已锁定。到腾讯文档，为喜欢的灵感加油。" : "投票入口正在准备，主办配置后会出现在这里。" : "过审作品会出现在这里。投票开放后，可以为喜欢的作品加油。";
+    renderVoting();
     $("awards").hidden = !state.awards?.length;
     $("awards").replaceChildren(...(state.awards || []).map((award) => {
       const entry2 = gallery.find((e) => e.id === award.entry_id);
@@ -252,16 +301,61 @@ function init() {
     if (changed) renderHost();
     renderHostControls();
   }
+  function renderVoting() {
+    const voting = state.voting, builtin = voting?.mode === 'builtin';
+    $('leaderboard').hidden = !builtin || voting.phase === 'waiting';
+    $('cancel-vote').hidden = !builtin || !actor || !voting.my_entry_id || voting.phase !== 'open';
+    $('cancel-vote').disabled = writing;
+    const own = new Set((state.entries || []).map(entry => entry.id));
+    const counts = new Map((voting?.counts || []).map(row => [row.entry_id,row]));
+    $('gallery-grid').querySelectorAll('[data-vote-entry]').forEach(button => {
+      const id = button.dataset.voteEntry, count = counts.get(id), chosen = voting?.my_entry_id === id;
+      button.hidden = !builtin || voting.phase === 'waiting';
+      button.setAttribute('aria-pressed', String(chosen));
+      button.disabled = writing || voting?.phase !== 'open' || own.has(id) || count?.eligible === false || Boolean(actor && !voting.can_vote);
+      button.textContent = voting?.phase === 'closed' ? `${count?.votes || 0} 票 · 已封榜` : `${own.has(id) ? '你的作品' : chosen ? '已投这张' : actor ? '投给这张' : '登录后投票'} · ${count?.votes || 0} 票`;
+      if (!actor && builtin && voting.phase === 'open') button.disabled = writing;
+    });
+    if (!builtin) return;
+    $('vote').hidden = voting.phase === 'waiting';
+    $('vote').href = voting.phase === 'closed' ? '#leaderboard' : '#gallery';
+    $('vote').removeAttribute('target');
+    $('vote').textContent = voting.phase === 'closed' ? '查看封榜结果' : '为喜欢的作品投票';
+    $('vote-note').hidden = voting.phase==='waiting' && !state.gallery.length;
+    $('vote-note').textContent = voting.phase === 'waiting' ? '审核通过的作品将在投票开始时锁定名单。' : voting.phase === 'open' ? (voting.rules || '每个账户一张选票，可以改投或撤回，不能投给自己。') : `投票已结束，结果已按截止时的有效选票封榜。${(voting.counts || []).some(row=>!row.eligible)?'已撤回或下架的作品不再展示，封榜总票数保留历史记录。':''}`;
+    $('voting-rules').textContent = `${voting.rules || '每个账户一张选票，可以改投或撤回，不能投给自己。'} 活动时间均为北京时间。`;
+    $('tally-status').textContent = voting.settled ? `${voting.total_votes} 张截止时有效票 · 已封榜` : `${voting.total_votes} 张有效票 · 每 4 秒更新`;
+    $('vote-version').textContent = `名单版本 ${voting.roster_version || 0} · ${voting.roster_digest || '尚未锁定'}${voting.settled ? `\n结算版本 ${voting.settlement_version} · ${voting.settlement_digest}` : ''}`;
+    const rows = votingRows(state), key = JSON.stringify(rows);
+    if (key !== rankingKey) {
+      rankingKey = key;
+      $('leaderboard-list').replaceChildren(...rows.map(row => {
+        const li=node('li',undefined,'ranking-row'), title=node('span',row.title);
+        if (row.display_name) title.append(node('small',row.display_name));
+        li.append(node('strong',String(row.rank)),title,node('strong',`${row.votes} 票`));
+        return li;
+      }));
+    }
+  }
   function renderHostControls() {
-    $("moderation").hidden = !state.viewer.operator;
-    $("host-shortcut").hidden = !state.viewer.operator;
-    if (!state.viewer.operator) return;
+    const manager = state.viewer.operator && state.activity?.management_allowed !== false;
+    $("moderation").hidden = !manager;
+    $("host-shortcut").hidden = !manager;
+    $('gallery-grid').querySelectorAll('[data-disqualify-entry]').forEach(button=>{button.hidden=!manager;button.disabled=writing;});
+    $('confirm-disqualify').disabled=writing;
+    $('close-disqualify').disabled=writing;
+    if (!manager) { if($('disqualify-dialog').open)$('disqualify-dialog').close(); return; }
     $("host-shortcut").textContent = state.review_queue.length ? `审核投稿 · ${state.review_queue.length} 条待审` : '管理活动';
     const votingLocked = Date.now() + clockOffset >= Number(state.event.voting_opens_ms);
+    const builtin = state.voting?.mode === 'builtin';
+    $('voting-form').hidden = builtin;
+    $('settlement-export').hidden = !builtin;
+    $('settlement-export').disabled = writing || state.voting?.phase !== 'closed';
     $("voting-url").disabled = votingLocked;
     $("voting-form").querySelector('button[type="submit"]').disabled = votingLocked || writing;
     $("voting-preview").disabled = votingLocked || writing;
     $("voting-config-note").hidden = !votingLocked;
+    $('voting-config-note').textContent = builtin ? '投票名单已锁定，投票结束后可导出结算快照。' : '投票已开始，投票入口和批准名单已锁定。';
     $("record-award").disabled = writing || Date.now() + clockOffset < Number(state.event.voting_closes_ms) || !state.gallery.length;
     $("publish-results").disabled = writing || Date.now() + clockOffset < Number(state.event.awards_ms) || state.award_drafts?.length !== 3 || Boolean(state.awards?.length);
     $("review-queue").querySelectorAll('[data-review-action]').forEach(button => {
@@ -346,6 +440,7 @@ function init() {
       if (epoch === identityEpoch) render(value);
     } catch (error) {
       notice(error.message, true);
+      if(!state)$('phase').textContent='活动暂未载入';
     } finally {
       refreshing = false;
     }
@@ -362,6 +457,7 @@ function init() {
     if (action === 'generate') $("generate").textContent = '正在提交灵感…';
     $("generate").setAttribute("aria-busy", "true");
     renderHostControls();
+    renderVoting();
     $("submit-entry").disabled = true;
     if (dialog.open) $("submit-entry").textContent = "正在提交…";
     try {
@@ -369,11 +465,12 @@ function init() {
       writing = false;
       if (action === "set-voting-url") votingDirty = false;
       render(value);
-      notice(action === "generate" ? "灵感已加入队列，可以留在这里等它画好。" : action === "submit" ? "投稿已收到。审核通过后，就能在作品墙见到它。" : "已保存。", false, target);
+      notice(action === "generate" ? "灵感已加入队列，可以留在这里等它画好。" : action === "submit" ? "投稿已收到。审核通过后，就能在作品墙见到它。" : action === 'vote' ? '选票已保存，截止前可以改投。' : action === 'cancel-vote' ? '选票已撤回。' : "已保存。", false, target);
       return true;
     } catch (error) {
       notice(error.message, true, target);
       if (error.code === "identity_changed" || error.status === 401) {
+        identityEpoch += 1;
         clearPrivate();
         actor = "";
         state = null;
@@ -424,6 +521,13 @@ function init() {
   $("choose").onclick = () => openSubmission();
   $("close-dialog").onclick = () => $("submit-dialog").close();
   $("close-artwork").onclick = () => $("artwork-dialog").close();
+  $('close-disqualify').onclick=()=>$('disqualify-dialog').close();
+  $('disqualify-dialog').addEventListener('cancel',event=>{if(writing)event.preventDefault();});
+  $('disqualify-form').onsubmit=async event=>{
+    event.preventDefault();const reason=$('disqualify-reason').value.trim();
+    if(!reason){notice('请填写撤下作品的原因。',true,'disqualify-notice');$('disqualify-reason').focus();return;}
+    if(await perform('disqualify',{entry_id:disqualifyEntry,reason},'disqualify-notice')){$('disqualify-dialog').close();notice('作品已撤下。',false,'vote-feedback');}
+  };
   $("submit-form").onsubmit = async (event) => {
     event.preventDefault();
     if (await perform("submit", { generation_id: selected, title: $("entry-title").value, display_name: $("display-name").value, consent: $("consent").checked }, "submit-notice")) {
@@ -444,6 +548,18 @@ function init() {
     perform("award", { entry_id: $("award-entry").value, prize: $("prize").value, reason: $("award-reason").value });
   };
   $("publish-results").onclick = () => perform("publish-results", {});
+  $('cancel-vote').onclick = () => perform('cancel-vote',{intent:crypto.randomUUID()},'vote-feedback');
+  $('settlement-export').onclick = async () => {
+    if (writing || !actor) return;
+    writing = true; renderHostControls();
+    try {
+      const value = await request('actions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'settlement',payload:{},expected_actor_id:actor})});
+      if (!value.settlement) throw new Error('结算尚未完成，请刷新后重试。');
+      saveBlob(new Blob([JSON.stringify(value.settlement,null,2)],{type:'application/json'}),`活动结算-${value.settlement.version}.json`);
+      notice('已导出服务端结算快照。',false,'host-notice');
+    } catch(error) { notice(error.message,true,'host-notice'); }
+    finally { writing=false; renderHostControls(); }
+  };
   $("refresh").onclick = refresh;
   document.querySelector('a[href="#about"]').addEventListener("click", () => { $("about").open = true; });
   function revealDetailsTarget() {
@@ -489,7 +605,7 @@ function init() {
   async function poll() {
     clearTimeout(timer);
     if (!document.hidden) await refresh();
-    timer = setTimeout(poll, active() ? 4e3 : 15e3);
+    timer = setTimeout(poll, active() || state?.voting?.mode === 'builtin' && state.voting.phase === 'open' ? 4e3 : 15e3);
   }
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) poll();
@@ -499,6 +615,10 @@ function init() {
   poll();
 }
 export {
+  creationPhase,
+  generationCredits,
+  creativeEndpoint,
+  votingRows,
   csvCell,
   jobLabels,
   labelPng

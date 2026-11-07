@@ -10,13 +10,13 @@ import {
 // Values
 pub async fn execute(String, Json, UInt64, String?, Bool, String, String) -> Json
 
-pub async fn image(String, String?, String, String, operator? : Bool) -> Bytes
+pub async fn image(String, String?, String, String, operator? : Bool, manager? : Bool) -> Bytes
 
 pub async fn load_config(String) -> Config
 
 pub fn private_metadata_removed(Bytes) -> Bytes raise
 
-pub async fn process_next(String, String) -> Bool
+pub async fn process_next(String, String, allow_generation? : Bool) -> Bool
 
 // Errors
 pub(all) suberror CreativeError {
@@ -42,13 +42,26 @@ pub struct Config {
   model : String
   manager_account_ids : Array[String]?
   participant_account_ids : Array[String]?
+  voting_mode : String?
 } derive(@json.FromJson)
 
 type Entry derive(ToJson, @json.FromJson)
 
 type Generation derive(ToJson, @json.FromJson)
 
+type ReviewEvent derive(ToJson, @json.FromJson)
+
+type RosterEntry derive(ToJson, @json.FromJson)
+
 type State derive(ToJson, @json.FromJson)
+
+type VoteCount derive(ToJson, @json.FromJson)
+
+type VoteEvent derive(ToJson, @json.FromJson)
+
+type VotingRoster derive(ToJson, @json.FromJson)
+
+type VotingSettlement derive(ToJson, @json.FromJson)
 
 // Type aliases
 

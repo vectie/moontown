@@ -65,6 +65,9 @@ async test "neighborhood HTTP trusts session roles preserves owner isolation and
   let platform : PublicPlatform = {
     creative_path: None,
     creative_config: None,
+    program_root: None,
+    program_template_config: None,
+    program_approver_ids: [],
     identity: {
       flights: {},
       resolve: cookie => client.resolve(identity_cookies(cookie)),

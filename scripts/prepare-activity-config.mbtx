@@ -1,0 +1,107 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, root, mode] &&
+    root.has_prefix("/home/HwHiAiUser/") &&
+    ["qa", "formal"].contains(mode) else {
+    fail("prepare-activity-config.mbtx PRIVATE_RELEASE_DIR qa|formal")
+  }
+  let name = if mode == "qa" {
+    "moontown-coffee-qa"
+  } else {
+    "moontown-coffee-week01"
+  }
+  let result = @shell.Cmd("kubectl", [
+    "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", "-n", "aigc-acceptance-20260915",
+    "get", "configmap", name, "-o", "json",
+  ]).output()
+  result.check()
+  guard @json.parse(result.stdout())
+    is { "data": { "event.json": String(raw), .. }, .. } &&
+    @json.parse(raw) is Object(config) else {
+    fail("Missing trusted creative template")
+  }
+  // Provider address/model/key-file are inherited from the verified deployment.
+  // The programme owns a separate bounded allocation, never a user-selected model.
+  config["program_template"] = {
+    "template_id": "coffee-image-v1",
+    "template_version": "1",
+    "book_id": "banxing-coffee-curator",
+    "book_version": "1.2.0",
+    "curator_profile": "coffee_curator",
+    "workflow_id": "z-image-turbo",
+    "workflow_version": "1",
+    "max_instances": if mode == "qa" {
+      2
+    } else {
+      4
+    },
+    "max_total_quota": if mode == "qa" {
+      6
+    } else {
+      200
+    },
+    "max_event_quota": if mode == "qa" {
+      4
+    } else {
+      100
+    },
+    "max_participant_quota": if mode == "qa" {
+      2
+    } else {
+      5
+    },
+    "max_cash_budget_cny": if mode == "qa" {
+      0
+    } else {
+      1000
+    },
+    "max_grants": if mode == "qa" {
+      2
+    } else {
+      8
+    },
+  }
+  config["manager_account_ids"] = []
+  config["voting_mode"] = "builtin"
+  @fs.write_file(
+    root + "/activity-template-" + mode + ".json",
+    Json::object(config).stringify(indent=2),
+    permission=0o600,
+    create_mode=CreateNew,
+    sync=Full,
+  )
+  let preset : Json = {
+    "template_id": "coffee-image-v1",
+    "template_version": "1",
+    "book_cli": "/opt/moonbook/moonbook",
+    "book_cli_cwd": "/opt/moonbook",
+    "book_cli_sha256": "sha256:5925e3ed2a909a0c273089d97cea57dec10251e217fb67351455029905565181",
+    "bundle_path": "/opt/moonbook/presets/coffee-curator-runtime-1.2.0.moonbook-agent",
+    "bundle_file_sha256": "sha256:55cccaa818a8bf7fc4b6c7d5020339ac90ddcb018d82e76d4bdda9036e50c8bf",
+    "bundle_digest": "sha256:0569dd437ba243510127cec012e929b086934a8560dac3c42b6aad890999983f",
+    "source_book_id": "banxing-coffee-curator",
+    "book_version": "1.2.0",
+    "curator_profile": "coffee_curator",
+    "workflow_id": "z-image-turbo",
+    "workflow_version": "1",
+  }
+  @fs.write_file(
+    root + "/curation-preset-" + mode + ".json",
+    preset.stringify(indent=2),
+    permission=0o600,
+    create_mode=CreateNew,
+    sync=Full,
+  )
+  println(
+    "Prepared bounded " + mode + " programme configuration; no live changes",
+  )
+}

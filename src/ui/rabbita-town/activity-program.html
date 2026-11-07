@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>举办活动｜MoonTown</title>
+<link rel="icon" href="coffee/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="coffee-contest.css">
+<link rel="stylesheet" href="activity-program.css">
+<script type="module" src="activity-program.js"></script>
+</head>
+<body>
+<header class="site-header">
+<a class="town-link" href="./" aria-label="返回 MoonTown"><img src="moontown.svg" width="25" height="25" alt=""> MOONTOWN</a>
+<nav aria-label="活动服务"><a href="coffee-contest.html">参与创作</a><a id="login" href="/user/">登录 ↗</a></nav>
+</header>
+<main class="program-main">
+<section class="program-heading">
+<h1>举办活动</h1>
+<p id="program-description">提交企划，通过后填写活动落地书。</p>
+<div class="actions"><button id="start-application" class="primary" type="button" disabled>正在载入…</button><a id="review-shortcut" class="secondary" href="#owner-review" hidden>审核企划</a><button id="refresh-program" class="text-button" type="button">刷新</button></div>
+<p id="program-notice" class="notice" role="status" aria-live="polite"></p>
+</section>
+<section id="owner-review" class="program-section" hidden aria-labelledby="review-title"><h2 id="review-title">待审企划</h2><div id="review-list" class="program-cards"></div><details id="owner-grants"><summary>已批准的活动授权</summary><div id="grant-list" class="program-cards"></div></details></section>
+<section id="application-editor" class="program-panel" hidden aria-labelledby="application-editor-title">
+<div class="section-heading"><h2 id="application-editor-title">活动想法 · 1/3</h2><button id="close-application" class="text-button" type="button">返回列表</button></div>
+<form id="application-form" novalidate>
+<div data-app-step="0">
+<label for="app-title">活动名称<input id="app-title" maxlength="120" autocomplete="off"></label>
+<label for="app-topic">创作主题<textarea id="app-topic" maxlength="200" rows="2"></textarea></label>
+<label for="app-audience">希望邀请谁参加<textarea id="app-audience" maxlength="1000" rows="2"></textarea></label>
+</div>
+<div data-app-step="1" hidden>
+<label for="app-scope">作品形式与范围<textarea id="app-scope" maxlength="2000" rows="3"></textarea></label>
+<label for="app-proposal">活动企划<textarea id="app-proposal" maxlength="12000" rows="6" placeholder="活动想达成什么，怎样组织，谁负责审核与发奖？"></textarea></label>
+<label for="app-prizes">奖品与兑现安排<textarea id="app-prizes" maxlength="2000" rows="3" placeholder="说明三个奖项的奖品、承担方与兑奖方式。"></textarea></label>
+</div>
+<div data-app-step="2" hidden>
+<label for="app-contact">主办联系方式<input id="app-contact" maxlength="500" autocomplete="off"><small>仅用于企划审核，不在活动页公开。</small></label>
+<label for="app-cash">申请现金预算（元）<input id="app-cash" type="number" min="0" step="1" inputmode="numeric"></label>
+<div class="field-pair"><label for="app-instances">活动期数<input id="app-instances" type="number" min="1" step="1" inputmode="numeric" value="1"></label><label for="app-total">全部活动生成总额<input id="app-total" type="number" min="1" step="1" inputmode="numeric"></label></div>
+<label for="app-person">每人每期生成上限<input id="app-person" type="number" min="1" step="1" inputmode="numeric"></label>
+<p class="fine-print">现金与算力分别审批。通过前不会调用活动算力。</p>
+</div>
+<p id="application-notice" class="notice" role="status" aria-live="polite"></p>
+<div class="actions"><button id="app-back" class="secondary" type="button" hidden>上一步</button><button id="app-next" class="primary" type="button">下一步</button><button id="app-submit" class="primary" type="submit" hidden>提交企划</button><button id="app-save" class="text-button" type="button">保存草稿</button></div>
+</form>
+</section>
+<section id="my-applications" class="program-section" hidden aria-labelledby="applications-title"><h2 id="applications-title">我的企划</h2><div id="application-list" class="program-cards"></div></section>
+<section id="launch-editor" class="program-panel" hidden aria-labelledby="launch-title">
+<div class="section-heading"><h2 id="launch-title">活动落地书</h2><button id="close-launch" class="text-button" type="button">返回列表</button></div>
+<p id="grant-summary" class="fine-print"></p>
+<form id="launch-form" novalidate>
+<div data-launch-step="0">
+<label for="launch-name">本期名称<input id="launch-name" maxlength="120"></label>
+<label for="launch-topic">本期主题<textarea id="launch-topic" maxlength="200" rows="2"></textarea></label>
+<label for="launch-scope">作品要求<textarea id="launch-scope" maxlength="2000" rows="3"></textarea></label>
+<label for="launch-solution">参与者怎么玩<textarea id="launch-solution" maxlength="2000" rows="3"></textarea></label>
+<label for="launch-prizes">奖品和兑奖说明<textarea id="launch-prizes" maxlength="2000" rows="3"></textarea></label>
+</div>
+<div data-launch-step="1" hidden>
+<p class="fine-print">所有时间为北京时间。</p>
+<label for="launch-opens">征集开始<input id="launch-opens" type="datetime-local"></label>
+<label for="launch-deadline">投稿截止<input id="launch-deadline" type="datetime-local"></label>
+<label for="launch-voting">投票开始<input id="launch-voting" type="datetime-local"></label>
+<label for="launch-close">投票截止<input id="launch-close" type="datetime-local"></label>
+<label for="launch-awards">公布结果<input id="launch-awards" type="datetime-local"></label>
+<div class="field-pair"><label for="launch-quota">本期生成总额<input id="launch-quota" type="number" min="1" step="1" inputmode="numeric"></label><label for="launch-person">每人生成上限<input id="launch-person" type="number" min="1" step="1" inputmode="numeric"></label></div>
+<label for="launch-cash">本期现金预算（元）<input id="launch-cash" type="number" min="0" step="1" inputmode="numeric" value="0"></label>
+</div>
+<div id="launch-preview" data-launch-step="2" hidden></div>
+<p id="launch-notice" class="notice" role="status" aria-live="polite"></p>
+<div class="actions"><button id="launch-back" class="secondary" type="button" hidden>上一步</button><button id="launch-next" class="primary" type="button">下一步</button><button id="launch-create" class="primary" type="submit" hidden>确认生成活动</button></div>
+</form>
+</section>
+<section id="activities-section" class="program-section" hidden aria-labelledby="activities-title"><h2 id="activities-title">活动</h2><div id="activity-list" class="program-cards"></div></section>
+</main>
+<footer><a href="./">MoonTown</a><a href="coffee-contest.html">返回创作</a></footer>
+<dialog id="review-dialog" aria-labelledby="review-dialog-title">
+<form id="review-form">
+<div class="dialog-heading"><h2 id="review-dialog-title">审核企划</h2><button id="close-review" class="dialog-close text-button" type="button" aria-label="关闭审核">×</button></div>
+<div id="review-brief"></div>
+<label for="review-note">审核意见<textarea id="review-note" maxlength="2000" rows="3"></textarea></label>
+<details open><summary>本次授权范围</summary>
+<label for="grant-start">授权开始（北京时间）<input id="grant-start" type="datetime-local" required></label>
+<label for="grant-end">授权结束（北京时间）<input id="grant-end" type="datetime-local" required></label>
+<div class="field-pair"><label for="grant-instances">最多活动期数<input id="grant-instances" type="number" min="1" step="1" required></label><label for="grant-total">总生成额度<input id="grant-total" type="number" min="1" step="1" required></label></div>
+<div class="field-pair"><label for="grant-event">单期生成上限<input id="grant-event" type="number" min="1" step="1" required></label><label for="grant-person">每人每期上限<input id="grant-person" type="number" min="1" step="1" required></label></div>
+<label for="grant-cash">现金预算上限（元）<input id="grant-cash" type="number" min="0" step="1" required></label>
+<label class="consent"><input id="grant-publish" type="checkbox"><span>允许主办在授权额度内自行发布活动</span></label>
+<p class="fine-print">主办可在落地书中调整公开主题、作品要求与奖品说明。不勾选时，由你核对发布预览后发布；勾选后，资源就绪即自动发布。</p>
+<p class="fine-print">只授予本企划下的活动管理权，不增加平台管理员权限。</p>
+</details>
+<p id="review-notice" class="notice" role="status" aria-live="polite"></p>
+<button id="approve-plan" class="primary" type="submit">批准企划并授权</button>
+<div class="actions"><button id="request-changes" class="secondary" type="button">退回补充</button><button id="reject-plan" class="text-button" type="button">不予批准</button></div>
+</form>
+</dialog>
+<dialog id="publish-dialog" aria-labelledby="publish-title"><form id="publish-form"><div class="dialog-heading"><h2 id="publish-title">核对活动后发布</h2><button id="close-publish" class="dialog-close text-button" type="button" aria-label="关闭发布预览">×</button></div><div id="publish-preview"></div><p class="fine-print">确认后公开活动，主办可以管理本期投稿。以这里的主题、奖品与赛程为准。</p><p id="publish-notice" class="notice" role="status" aria-live="polite"></p><button id="confirm-publish" class="primary" type="submit">确认发布活动</button></form></dialog>
+<dialog id="revoke-dialog" aria-labelledby="revoke-title"><form id="revoke-form"><div class="dialog-heading"><h2 id="revoke-title">撤销活动授权</h2><button id="close-revoke" class="dialog-close text-button" type="button" aria-label="关闭撤销授权">×</button></div><p id="revoke-summary"></p><label for="revoke-reason">原因<textarea id="revoke-reason" maxlength="2000" required></textarea></label><p class="fine-print">该授权下的活动将停止接受新操作，作品与审计记录保留。</p><p id="revoke-notice" class="notice" role="status"></p><button id="confirm-revoke" class="primary" type="submit">确认撤销授权</button></form></dialog>
+<dialog id="auth-dialog" aria-labelledby="auth-title"><form id="auth-form"><div class="dialog-heading"><h2 id="auth-title">登录，继续参与</h2><button id="close-auth" class="dialog-close text-button" type="button" aria-label="关闭登录">×</button></div><label for="auth-email">登录邮箱</label><input id="auth-email" type="email" inputmode="email" autocomplete="username" maxlength="256" required><div id="auth-name-field" hidden><label for="auth-name">展示昵称</label><input id="auth-name" autocomplete="nickname" maxlength="128"></div><label for="auth-password">密码</label><input id="auth-password" type="password" autocomplete="current-password" maxlength="1024" required><p id="auth-password-hint" class="fine-print" hidden>至少 12 位，包含大小写字母、数字和符号。</p><p id="auth-notice" class="notice" role="status" aria-live="polite"></p><button id="auth-submit" class="primary" type="submit">登录并继续</button><button id="auth-mode" class="text-button" type="button">还没有账户？创建账户</button><p class="fine-print">使用平台统一账户，登录后留在本页。</p></form></dialog>
+</body>
+</html>

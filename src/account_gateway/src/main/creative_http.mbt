@@ -7,8 +7,7 @@ fn creative_route(relative : String) -> Bool {
 }
 
 ///|
-/// Both published ports may be configured explicitly. Neither Host nor
-/// forwarded headers can expand the write origins.
+/// Both published ports are explicit; request headers cannot expand origins.
 fn creative_origin_allowed(origin : String, primary : String) -> Bool {
   if origin == primary && !primary.is_empty() {
     return true
@@ -25,41 +24,61 @@ fn creative_origin_allowed(origin : String, primary : String) -> Bool {
 }
 
 ///|
+fn creative_error_reply(error : Error) -> (Int32, String) {
+  match error {
+    @creative_contest.CreativeError::Denied =>
+      (403, "当前账户不能进行这项操作。")
+    @creative_contest.CreativeError::Invalid(message) => (400, message)
+    @creative_contest.CreativeError::Conflict(message) => (409, message)
+    @activity_program.ProgramError::Denied =>
+      (403, "当前活动权限不允许这项操作。")
+    @activity_program.ProgramError::Invalid(message) => (400, message)
+    @activity_program.ProgramError::Conflict(message) => (409, message)
+    _ => (503, "创作服务暂时不可用，请稍后重试。")
+  }
+}
+
+///|
 async fn PublicPlatform::creative(
   self : PublicPlatform,
   request : @http.Request,
   body : &@io.Reader,
   conn : @http.ServerConnection,
   relative : String,
+  activity_id~ : String? = None,
 ) -> Unit {
   let write = relative == "api/creative/actions"
+  let image_request = relative.has_prefix("api/creative/images/")
   if (write && request.meth != Post) || (!write && request.meth != Get) {
     return reply_json(conn, 405, { "error": "method_not_allowed" })
   }
-  if request.headers.get("sec-fetch-site") == Some("cross-site") {
-    return reply_json(conn, 403, { "error": "same_origin_required" })
-  }
-  if write {
-    if !creative_origin_allowed(
+  if request.headers.get("sec-fetch-site") == Some("cross-site") ||
+    (
+      write &&
+      !creative_origin_allowed(
         request.headers.get("origin").unwrap_or(""),
         self.public_origin,
-      ) {
-      return reply_json(conn, 403, { "error": "same_origin_required" })
-    }
-    if request.headers
-      .get("content-type")
-      .unwrap_or("")
-      .split(";")
-      .next()
-      .unwrap_or("")
-      .trim()
-      .to_lower() !=
-      "application/json" {
-      return reply_json(conn, 415, { "error": "json_required" })
-    }
+      )
+    ) {
+    return reply_json(conn, 403, { "error": "same_origin_required" })
   }
-  guard self.creative_path is Some(path) &&
-    self.creative_config is Some(config_path) else {
+  if write &&
+    request.headers
+    .get("content-type")
+    .unwrap_or("")
+    .split(";")
+    .next()
+    .unwrap_or("")
+    .trim()
+    .to_lower() !=
+    "application/json" {
+    return reply_json(conn, 415, { "error": "json_required" })
+  }
+  if (activity_id is Some(_) && self.program_root is None) ||
+    (
+      activity_id is None &&
+      (self.creative_path is None || self.creative_config is None)
+    ) {
     return reply_json(conn, 503, {
       "error": "creative_unavailable",
       "message": "创作活动正在准备，请稍后再来。",
@@ -79,7 +98,7 @@ async fn PublicPlatform::creative(
     }
     match resolution {
       Authenticated(session) => Some(session)
-      SignedOut if relative.has_prefix("api/creative/images/") => None
+      SignedOut if image_request => None
       SignedOut =>
         return reply_json(conn, 401, {
           "error": "sign_in_required",
@@ -91,9 +110,40 @@ async fn PublicPlatform::creative(
   }
   let actor = session.map(s => s.context().user_id)
   let operator = session.map(s => s.is_platform_operator()).unwrap_or(false)
-  if relative.has_prefix("api/creative/images/") {
+  let now = @async.now().reinterpret_as_uint64()
+  if image_request {
     let id = relative["api/creative/images/".length():].to_owned()
-    let bytes = @creative_contest.image(id, actor, path, config_path, operator~) catch {
+    let bytes = try {
+      match activity_id {
+        Some(activity) =>
+          @activity_program.with_activity(
+            activity,
+            now,
+            actor,
+            self.program_owner(session),
+            "image",
+            self.program_root.unwrap(),
+            binding => {
+              @creative_contest.image(
+                id,
+                actor,
+                binding.state_path,
+                binding.config_path,
+                operator~,
+                manager=binding.may_manage,
+              )
+            },
+          )
+        None =>
+          @creative_contest.image(
+            id,
+            actor,
+            self.creative_path.unwrap(),
+            self.creative_config.unwrap(),
+            operator~,
+          )
+      }
+    } catch {
       _ => return reply_json(conn, 404, { "error": "image_not_available" })
     }
     conn.send_response(200, "OK", extra_headers={
@@ -125,23 +175,47 @@ async fn PublicPlatform::creative(
   } else {
     ("snapshot", Json::object({}))
   }
-  let value = @creative_contest.execute(
-    action,
-    payload,
-    @async.now().reinterpret_as_uint64(),
-    actor,
-    operator,
-    path,
-    config_path,
-  ) catch {
+  let value = try {
+    match activity_id {
+      Some(activity) =>
+        @activity_program.with_activity(
+          activity,
+          @async.now().reinterpret_as_uint64(),
+          actor,
+          self.program_owner(session),
+          if relative == "api/creative/public" {
+            "public"
+          } else {
+            action
+          },
+          self.program_root.unwrap(),
+          binding => {
+            let value = @creative_contest.execute(
+              action,
+              payload,
+              @async.now().reinterpret_as_uint64(),
+              actor,
+              operator || binding.may_manage,
+              binding.state_path,
+              binding.config_path,
+            )
+            activity_snapshot(value, binding)
+          },
+        )
+      None =>
+        @creative_contest.execute(
+          action,
+          payload,
+          @async.now().reinterpret_as_uint64(),
+          actor,
+          operator,
+          self.creative_path.unwrap(),
+          self.creative_config.unwrap(),
+        )
+    }
+  } catch {
     error => {
-      let (status, message) = match error {
-        @creative_contest.CreativeError::Denied =>
-          (403, "当前账户不能进行这项操作。")
-        @creative_contest.CreativeError::Invalid(message) => (400, message)
-        @creative_contest.CreativeError::Conflict(message) => (409, message)
-        _ => (503, "创作服务暂时不可用，请稍后重试。")
-      }
+      let (status, message) = creative_error_reply(error)
       return reply_json(conn, status, {
         "error": "creative_request_failed",
         "message": message,

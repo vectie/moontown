@@ -23,6 +23,7 @@ pub struct Config {
   // Deployment-owned delegation for this event only; absent in older configs.
   manager_account_ids : Array[String]?
   participant_account_ids : Array[String]?
+  voting_mode : String?
 } derive(FromJson)
 
 ///|
@@ -64,6 +65,18 @@ struct Award {
 } derive(ToJson, FromJson)
 
 ///|
+struct ReviewEvent {
+  entry_id : String
+  actor : String
+  action : String
+  reason : String
+  previous_state : String
+  resulting_state : String
+  revision : Int32
+  created_ms : UInt64
+} derive(ToJson, FromJson)
+
+///|
 struct State {
   challenge_id : String
   revision : Int32
@@ -72,6 +85,10 @@ struct State {
   voting_url : String
   awards : Array[Award]
   results_published : Bool
+  vote_events : Array[VoteEvent]
+  voting_rosters : Array[VotingRoster]
+  voting_settlements : Array[VotingSettlement]
+  review_events : Array[ReviewEvent]
 } derive(ToJson, FromJson)
 
 ///|
@@ -116,6 +133,7 @@ pub async fn load_config(path : String) -> Config {
   let managers = config.manager_account_ids.unwrap_or([])
   let participants = config.participant_account_ids.unwrap_or([])
   guard config.brief.published &&
+    ["external", "builtin"].contains(config.voting_mode.unwrap_or("external")) &&
     managers.length() <= 20 &&
     managers.all(id => {
       !id.trim().is_empty() &&
@@ -171,6 +189,10 @@ fn empty(config : Config) -> State {
     voting_url: "preview",
     awards: [],
     results_published: false,
+    vote_events: [],
+    voting_rosters: [],
+    voting_settlements: [],
+    review_events: [],
   }
 }
 
@@ -199,8 +221,19 @@ async fn read(path : String, config : Config) -> State {
   guard @fs.kind(path, follow_symlink=false) is Regular else {
     raise Unavailable
   }
-  let state : State = @json.from_json(@json.parse(@fs.read_file(path).text()))
+  let encoded = @json.parse(@fs.read_file(path).text())
+  guard encoded is Object(values) else { raise Unavailable }
+  for
+    key in [
+      "vote_events", "voting_rosters", "voting_settlements", "review_events",
+    ] {
+    if values.get(key) is None {
+      values[key] = Json::array([])
+    }
+  }
+  let state : State = @json.from_json(encoded)
   guard state.challenge_id == config.brief.id else { raise Unavailable }
+  validate_voting_state(state, config)
   state
 }
 
