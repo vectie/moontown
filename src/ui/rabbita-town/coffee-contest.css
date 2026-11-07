@@ -373,6 +373,12 @@ nav a, .town-link, footer a {
   display: block;
   cursor: zoom-in;
 }
+.hero-action { display: flex; width: fit-content; max-width: 100%; margin-top: 12px; }
+.create-section.is-closed .studio { display: block; max-width: 560px; }
+.create-section.is-closed .result-panel { border-left: 0; }
+#host-settings { margin-top: 24px; }
+#host-settings > summary { min-height: 44px; padding: 10px 0; cursor: pointer; }
+#host-settings form { margin-top: 16px; }
 .artwork-dialog { width: min(760px, calc(100dvh - 100px)); }
 .artwork-dialog .image-wrap { height: auto; aspect-ratio: 1; }
 .artwork-dialog h2 { overflow-wrap: anywhere; }

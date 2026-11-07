@@ -40,6 +40,8 @@ pub struct Config {
   provider_origin : String
   provider_key_file : String
   model : String
+  manager_account_ids : Array[String]?
+  participant_account_ids : Array[String]?
 } derive(@json.FromJson)
 
 type Entry derive(ToJson, @json.FromJson)

@@ -1,0 +1,46 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+/// Only prepares a fresh browser-registration regression identity; no API call.
+async fn main {
+  guard @env.args() is [_, root] && root.has_prefix("/") else {
+    fail("prepare-coffee-qa-signup.mbtx PRIVATE_ACCOUNTS")
+  }
+  guard @env.rand(12) is Some(bytes) else { fail("Secure entropy unavailable") }
+  let username = "moontown.coffee.qa.signup.20261107@example.test"
+  let password = "Moon!7-" + @crypto.bytes_to_hex_string(bytes)
+  let body : Json = {
+    "email": username,
+    "display_name": "手机验收 · 注册",
+    "password": password,
+    "audience": "enterprise",
+  }
+  @fs.write_file(
+    root + "/signup-register.json",
+    body.stringify(),
+    create_mode=CreateNew,
+    permission=0o600,
+  )
+  guard @json.parse(@fs.read_file(root + "/credentials.json").text())
+    is Array(accounts) else {
+    fail("Missing QA account catalog")
+  }
+  accounts.push({
+    "role": "registration",
+    "username": username,
+    "password": password,
+  })
+  @fs.write_file(
+    root + "/credentials.json",
+    Json::array(accounts).stringify(indent=2),
+    permission=0o600,
+  )
+  println("Prepared a fresh browser registration regression account")
+}

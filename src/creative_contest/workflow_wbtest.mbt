@@ -24,6 +24,8 @@ fn fixture_config() -> Config {
     provider_origin: "http://127.0.0.1:9999",
     provider_key_file: "/unconfigured",
     model: "z-image-turbo",
+    manager_account_ids: None,
+    participant_account_ids: None,
   }
 }
 
@@ -40,7 +42,43 @@ fn fixture_config_json(config : Config) -> Json {
     "provider_origin": config.provider_origin,
     "provider_key_file": config.provider_key_file,
     "model": config.model,
+    "manager_account_ids": config.manager_account_ids.unwrap_or([]).to_json(),
   }
+}
+
+///|
+test "an invitation-only rehearsal rejects strangers before spending its budget" {
+  let config = { ..fixture_config(), participant_account_ids: Some(["alice"]), }
+  let state = empty(config)
+  assert_true(
+    try {
+      ignore(
+        transition(
+          state,
+          config,
+          "generate",
+          { "prompt": "coffee", "intent": "outsider" },
+          500UL,
+          "bob",
+          false,
+        ),
+      )
+      false
+    } catch {
+      Denied => true
+      _ => false
+    },
+  )
+  let accepted = transition(
+    state,
+    config,
+    "generate",
+    { "prompt": "coffee", "intent": "member" },
+    500UL,
+    "alice",
+    false,
+  )
+  assert_eq(accepted.generations.length(), 1)
 }
 
 ///|

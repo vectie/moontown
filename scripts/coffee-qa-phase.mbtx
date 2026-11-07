@@ -1,0 +1,74 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  let result = @shell.Cmd(
+    "kubectl",
+    [
+      "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", "-n", "aigc-acceptance-20260915",
+      ..args,
+    ],
+  ).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+/// Rehearsal clock only. Never changes the production week-one schedule.
+async fn main {
+  guard @env.args() is [_, phase] && ["creation", "voting"].contains(phase) else {
+    fail("coffee-qa-phase.mbtx creation|voting")
+  }
+  let name = "moontown-coffee-qa"
+  guard @json.parse(kube(["get", "configmap", name, "-o", "json"]))
+    is {
+      "metadata": { "resourceVersion": String(version), .. },
+      "data": { "event.json": String(raw), .. },
+      ..
+    } else {
+    fail("Missing rehearsal config")
+  }
+  guard @json.parse(raw) is Object(config) &&
+    config.get("brief") is Some(Object(brief)) &&
+    brief.get("id") == Some(Json::string("coffee-mobile-qa-20261107")) else {
+    fail("Not the dedicated rehearsal")
+  }
+  let now = @async.now().reinterpret_as_uint64()
+  brief["deadline_ms"] = Json::string(
+    (if phase == "creation" { now + 86400000UL } else { now - 30000UL }).to_string(),
+  )
+  config["voting_opens_ms"] = Json::string(
+    (if phase == "creation" { now + 90000000UL } else { now - 10000UL }).to_string(),
+  )
+  config["voting_closes_ms"] = Json::string((now + 172800000UL).to_string())
+  config["awards_ms"] = Json::string((now + 176400000UL).to_string())
+  let patch : Json = [
+    { "op": "test", "path": "/metadata/resourceVersion", "value": version },
+    {
+      "op": "replace",
+      "path": "/data/event.json",
+      "value": Json::object(config).stringify(),
+    },
+  ]
+  println(
+    kube([
+      "patch",
+      "configmap",
+      name,
+      "--type=json",
+      "--patch",
+      patch.stringify(),
+    ]),
+  )
+  println(
+    "Rehearsal phase requested: " +
+    phase +
+    "; wait for projected config and verify the public phase",
+  )
+}

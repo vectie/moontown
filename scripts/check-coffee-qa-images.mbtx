@@ -1,0 +1,57 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+/// Read-only proof using the owner's real, ordinary QA sessions.
+async fn main {
+  guard @env.args() is [_, root, source, phase] &&
+    root.has_prefix("/") &&
+    ["a", "b"].contains(source) &&
+    ["pending", "approved", "withdrawn"].contains(phase) else {
+    fail(
+      "check-coffee-qa-images.mbtx PRIVATE_ACCOUNTS a|b pending|approved|withdrawn",
+    )
+  }
+  guard @json.parse(@fs.read_file(root + "/" + source + "-lab.json").text())
+    is { "generations": Array([{ "id": String(id), .. }]), .. } else {
+    fail("Refresh the source QA snapshot first")
+  }
+  let other = if source == "a" { "b" } else { "a" }
+  for who in [source, other, "host"] {
+    let output = root + "/image-probe-" + source + "-" + who + ".body"
+    @fs.write_file(output, "", permission=0o600)
+    let result = @shell.Cmd("curl", [
+      "--silent",
+      "--show-error",
+      "--max-time",
+      "20",
+      "--cookie",
+      root + "/" + who + "-cookies.txt",
+      "--output",
+      output,
+      "--write-out",
+      "%{http_code}",
+      "https://suanli.kechuangfuwu.com:8443/coffee-qa/api/creative/images/" + id,
+    ]).output()
+    result.check()
+    let expected = if who == source ||
+      phase == "approved" ||
+      (who == "host" && phase == "pending") {
+      "200"
+    } else {
+      "404"
+    }
+    guard result.stdout().trim() == expected else {
+      fail("Unexpected image access for " + who + ": " + result.stdout())
+    }
+    println(
+      source + " image / " + who + " viewer / " + phase + " = HTTP " + expected,
+    )
+  }
+}

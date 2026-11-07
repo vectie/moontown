@@ -25,7 +25,7 @@
 ## 已实现
 
 - 自有 `coffee-contest.html`：提示词起点、单图生成、私人预览与历史、主动投稿确认、
-  过审作品墙、腾讯文档入口、主办审核/退回、固定版本导出、奖项记录与人工公布。
+  过审作品墙、腾讯文档入口、主办审核/退回、过审名单导出、奖项记录与人工公布。
 - Challenge/RubricCriterion 提取为轻量 `competition_brief`，原 hackathon 路径继续 re-export，
   每周创作沿用 Contest Express 的赛题概念；原数值评分赛事仍保留原有路径。
 - `creative_contest`：持久文件锁与原子提交、用户配额/全场配额、一人一件有效投稿、

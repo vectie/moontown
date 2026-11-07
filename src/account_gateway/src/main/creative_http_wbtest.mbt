@@ -88,6 +88,14 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
     "awards_ms": (now + 3900000L).to_string(),
     "participant_quota": 10,
     "event_quota": 50,
+    "manager_account_ids": [
+      "lunanexa:" +
+      @account_system.account_token_digest(
+        (["isolated-creative-fixture", "mayor"] : Array[String])
+        .to_json()
+        .stringify(),
+      ),
+    ],
     "provider_origin": real_provider.unwrap_or("http://\{provider.addr}"),
     "provider_key_file": if real_provider is Some(_) {
       @env.get_env_var("MOONTOWN_CREATIVE_UI_PROVIDER_KEY_FILE").unwrap()
@@ -139,11 +147,7 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
               "identity_issuer": "isolated-creative-fixture",
               "display_name": principal,
               "state": "Active",
-              "roles": if principal == "mayor" {
-                ["PlatformOperator"]
-              } else {
-                []
-              },
+              "roles": ["EnterpriseUser"],
             })
           _ => reply_json(conn, 404, {})
         }
@@ -277,6 +281,7 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
     }
     assert_false(read("b", "mine").1.text().contains("private-a-prompt"))
     assert_eq(read("b", "images/" + id).0.code, 404)
+    assert_eq(read("mayor", "images/" + id).0.code, 404)
     assert_eq(
       write("a", "submit", {
         "generation_id": id,
@@ -291,6 +296,11 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
       fail("missing entry")
     }
     assert_eq(write("b", "approve", { "entry_id": entry }).0.code, 403)
+    assert_eq(read("mayor", "images/" + id).0.code, 200)
+    match identity.resolve("lunanexa_http_enterprise_oidc_8443=mayor") {
+      Authenticated(session) => assert_false(session.is_platform_operator())
+      _ => fail("delegated host must have an ordinary verified session")
+    }
     assert_false(read("", "public").1.text().contains("接口测试作品"))
     assert_eq(write("mayor", "approve", { "entry_id": entry }).0.code, 200)
     assert_true(read("", "public").1.text().contains("接口测试作品"))
@@ -298,5 +308,16 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
     assert_eq(read("b", "images/" + id).0.code, 200)
     assert_eq(write("a", "withdraw", { "entry_id": entry }).0.code, 200)
     assert_eq(read("b", "images/" + id).0.code, 404)
+    assert_eq(read("mayor", "images/" + id).0.code, 404)
+    guard config is Object(config_fields) else {
+      fail("invalid fixture config")
+    }
+    config_fields["manager_account_ids"] = Json::array([])
+    @fs.write_file(config_path, config.stringify())
+    assert_true(
+      @json.parse(read("mayor", "mine").1.text())
+      is { "viewer": { "operator": False, .. }, .. },
+    )
+    assert_eq(write("mayor", "approve", { "entry_id": entry }).0.code, 403)
   })
 }

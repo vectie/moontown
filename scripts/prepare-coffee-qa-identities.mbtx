@@ -1,0 +1,45 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, root] && root.has_prefix("/") else {
+    fail("prepare-coffee-qa-identities.mbtx PRIVATE_ACCOUNT_DIRECTORY")
+  }
+  let members : Array[Json] = []
+  for key in ["a", "b", "host"] {
+    let path = root + "/" + key + "-mine.json"
+    @fs.write_file(path, "", permission=0o600)
+    let response = @shell.Cmd("curl", [
+      "--silent",
+      "--show-error",
+      "--fail",
+      "--max-time",
+      "20",
+      "--cookie",
+      root + "/" + key + "-cookies.txt",
+      "--output",
+      path,
+      "https://suanli.kechuangfuwu.com:8443/moontown/api/creative/mine",
+    ]).output()
+    response.check()
+    guard @json.parse(@fs.read_file(path).text())
+      is { "viewer": { "account_id": String(id), "operator": False, .. }, .. } &&
+      id.has_prefix("lunanexa:") else {
+      fail("QA account must be an ordinary verified identity")
+    }
+    members.push({ "role": key, "account_id": id })
+    println("Verified ordinary account: " + key)
+  }
+  @fs.write_file(
+    root + "/members.json",
+    Json::array(members).stringify(indent=2),
+    permission=0o600,
+  )
+}

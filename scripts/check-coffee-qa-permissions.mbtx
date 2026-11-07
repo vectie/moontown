@@ -1,0 +1,79 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, root] && root.has_prefix("/") else {
+    fail("check-coffee-qa-permissions.mbtx PRIVATE_ACCOUNTS")
+  }
+  guard @json.parse(@fs.read_file(root + "/b-lab.json").text())
+    is { "viewer": { "account_id": String(b), .. }, .. } &&
+    @json.parse(@fs.read_file(root + "/host-lab.json").text())
+    is {
+      "viewer": { "account_id": String(host), .. },
+      "review_queue": Array(queue),
+      ..
+    } &&
+    queue.get(0) is Some({ "entry": { "id": String(entry), .. }, .. }) else {
+    fail("Refresh the QA snapshots with at least one submitted work first")
+  }
+  let origin = "https://suanli.kechuangfuwu.com:8443"
+  let probes : Array[(String, String, Json)] = [
+    (
+      "b",
+      "/coffee-qa/",
+      {
+        "expected_actor_id": b,
+        "action": "approve",
+        "payload": { "entry_id": entry },
+      },
+    ),
+    (
+      "host",
+      "/moontown/",
+      {
+        "expected_actor_id": host,
+        "action": "set-voting-url",
+        "payload": { "url": "preview" },
+      },
+    ),
+  ]
+  for (who, prefix, body) in probes {
+    let request = root + "/denied-" + who + ".json"
+    let response = root + "/denied-" + who + "-response.json"
+    @fs.write_file(request, body.stringify(), permission=0o600)
+    @fs.write_file(response, "", permission=0o600)
+    let result = @shell.Cmd("curl", [
+      "--silent",
+      "--show-error",
+      "--max-time",
+      "20",
+      "--cookie",
+      root + "/" + who + "-cookies.txt",
+      "--header",
+      "Origin: " + origin,
+      "--header",
+      "Sec-Fetch-Site: same-origin",
+      "--header",
+      "Content-Type: application/json",
+      "--data-binary",
+      "@" + request,
+      "--output",
+      response,
+      "--write-out",
+      "%{http_code}",
+      origin + prefix + "api/creative/actions",
+    ]).output()
+    result.check()
+    guard result.stdout().trim() == "403" else {
+      fail("Expected scoped denial for " + who + ": HTTP " + result.stdout())
+    }
+    println(who + " cannot manage " + prefix + ": HTTP 403")
+  }
+}

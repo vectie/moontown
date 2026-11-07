@@ -1,3 +1,4 @@
+import { coffeeAuth } from './coffee-auth.js';
 const jobLabels = Object.freeze({
   queued: "已经排好队，轮到你就开始画。",
   running: "正在把想象画出来，请稍等。离开页面也不会丢失任务。",
@@ -39,15 +40,23 @@ function init() {
   const url = (path) => new URL(path, endpoint).href;
   let state = null, selected = "", actor = "", pendingIntent = null, writing = false, refreshing = false, timer, clockOffset = 0;
   const reviewDrafts = /* @__PURE__ */ new Map();
-  let votingDirty = false, followGeneration = false;
+  let votingDirty = false, followGeneration = false, identityEpoch = 0;
   const dialog = $("submit-dialog");
   function fitDialog() {
-    if (!dialog.open) return;
     const viewport = window.visualViewport;
     const height = viewport?.height || window.innerHeight;
-    dialog.style.setProperty("--dialog-height", `${height}px`);
-    dialog.style.setProperty("--dialog-center", `${(viewport?.offsetTop || 0) + height / 2}px`);
+    document.querySelectorAll('dialog[open]').forEach(openDialog => {
+      openDialog.style.setProperty("--dialog-height", `${height}px`);
+      openDialog.style.setProperty("--dialog-center", `${(viewport?.offsetTop || 0) + height / 2}px`);
+    });
   }
+  const auth = coffeeAuth({ loginUrl: $("login").href, fitDialog, onSignedIn: async () => {
+    identityEpoch += 1;
+    render(await request('mine'));
+    if (!actor) throw new Error('登录状态尚未确认，请重试。');
+    notice('已登录，点击生成一张图继续。');
+  } });
+  $("login").addEventListener('click', event => { if (!actor) { event.preventDefault(); auth.open(); } });
   window.visualViewport?.addEventListener("resize", fitDialog);
   window.visualViewport?.addEventListener("scroll", fitDialog);
   window.addEventListener("resize", fitDialog);
@@ -80,6 +89,7 @@ function init() {
     $("empty-preview").hidden = false;
     $("result-panel").classList.add("is-empty");
     $("moderation").hidden = true;
+    $("host-shortcut").hidden = true;
     $("my-entry").hidden = true;
     $("history").replaceChildren();
     reviewDrafts.clear();
@@ -139,6 +149,9 @@ function init() {
     $("submit-entry").textContent = writing && dialog.open ? "正在提交…" : "提交审核";
     $("credits").textContent = actor ? `本期还可生成 ${state.remaining} 张 · 投稿前仅自己可见` : `每人本期 ${state.event.participant_quota} 张 · 投稿前仅自己可见`;
     const now = Date.now() + clockOffset, ev = state.event;
+    const closed = now >= Number(ev.deadline_ms);
+    $("create-form").hidden = closed;
+    document.querySelector('.create-section').classList.toggle('is-closed', closed);
     if(ev.name)$("event-name").textContent=ev.name;
     if(ev.topic)$("event-topic").textContent=`本期主题：${ev.topic}`;
     if(ev.scope)$("event-scope").textContent=ev.scope;
@@ -150,6 +163,7 @@ function init() {
     $("awards-time").textContent=date(ev.awards_ms);
     $("phase").textContent = now < Number(ev.deadline_ms) && !ev.provider_ready ? "创作即将开放" : now < Number(ev.opens_ms) ? "即将开始" : now < Number(ev.deadline_ms) ? "正在征集灵感" : now < Number(ev.voting_opens_ms) ? "投稿结束 · 正在审核" : now < Number(ev.voting_closes_ms) ? "一起为灵感投票" : "本期已结束";
     const jobs = state.generations || [], completed = jobs.filter((j) => j.state === "completed");
+    $("studio").hidden = closed && !jobs.length;
     const job = jobs.find((j) => ["queued", "running", "needs_reconcile"].includes(j.state)) || jobs.at(-1);
     if (followGeneration && job?.state === "completed") selected = job.id;
     if (!completed.some((j) => j.id === selected)) selected = completed.at(-1)?.id || "";
@@ -159,6 +173,7 @@ function init() {
       $("result-image").dataset.job = selected;
     }
     $("choose").disabled = writing || !open();
+    $("choose").firstChild.textContent = closed ? '投稿已截止 ' : '用这张参赛 ';
     $("empty-preview").hidden = Boolean(selected || job);
     $("result-panel").classList.toggle("is-empty", !selected && !job);
     $("job-status").hidden = !job || job.state === "completed";
@@ -198,6 +213,13 @@ function init() {
       const info = node("div", `${entryLabels[entry.state] || entry.state} · ${entry.title}`);
       if (entry.reason) info.append(node("small", entry.reason));
       $("my-entry").append(info);
+      if (entry.state === 'rejected') {
+        const revise = node('button', '修改后重新投稿', 'secondary');
+        revise.type = 'button';
+        revise.disabled = writing || !open();
+        revise.onclick = () => openSubmission(entry);
+        $("my-entry").append(revise);
+      }
       if (["pending", "approved"].includes(entry.state)) {
         const withdraw = node("button", "撤回投稿", "text-button");
         withdraw.type = "button";
@@ -228,9 +250,25 @@ function init() {
       return node("p", `${prizeLabels[award.prize]}：${entry2?.title || "作品已撤回"}${entry2 ? ` / ${entry2.display_name}` : ""} · ${award.reason}`);
     }));
     if (changed) renderHost();
+    renderHostControls();
+  }
+  function renderHostControls() {
+    $("moderation").hidden = !state.viewer.operator;
+    $("host-shortcut").hidden = !state.viewer.operator;
+    if (!state.viewer.operator) return;
+    $("host-shortcut").textContent = state.review_queue.length ? `审核投稿 · ${state.review_queue.length} 条待审` : '管理活动';
+    const votingLocked = Date.now() + clockOffset >= Number(state.event.voting_opens_ms);
+    $("voting-url").disabled = votingLocked;
+    $("voting-form").querySelector('button[type="submit"]').disabled = votingLocked || writing;
+    $("voting-preview").disabled = votingLocked || writing;
+    $("voting-config-note").hidden = !votingLocked;
+    $("record-award").disabled = writing || Date.now() + clockOffset < Number(state.event.voting_closes_ms) || !state.gallery.length;
+    $("publish-results").disabled = writing || Date.now() + clockOffset < Number(state.event.awards_ms) || state.award_drafts?.length !== 3 || Boolean(state.awards?.length);
+    $("review-queue").querySelectorAll('[data-review-action]').forEach(button => {
+      button.disabled = writing || button.dataset.reviewAction === 'approve' && (button.dataset.author === actor || votingLocked);
+    });
   }
   function renderHost() {
-    $("moderation").hidden = !state.viewer.operator;
     if (!state.viewer.operator) return;
     if (!votingDirty) $("voting-url").value = state.configured_voting_url === "preview" ? "" : state.configured_voting_url || "";
     const pending = new Set(state.review_queue.map((item) => item.entry.id));
@@ -251,6 +289,8 @@ function init() {
       for (const [action, label] of [["approve", "批准展示"], ["reject", "退回修改"]]) {
         const button = node("button", label, "secondary");
         button.type = "button";
+        button.dataset.reviewAction = action;
+        button.dataset.author = entry.actor;
         button.disabled = writing || action === "approve" && (entry.actor === actor || Date.now() + clockOffset >= Number(state.event.voting_opens_ms));
         button.onclick = () => perform(action, { entry_id: entry.id, reason: reason.value });
         card.append(button);
@@ -293,6 +333,7 @@ function init() {
   }
   async function refresh() {
     if (refreshing || writing) return;
+    const epoch = identityEpoch;
     refreshing = true;
     try {
       let value;
@@ -302,7 +343,7 @@ function init() {
         if (error.status !== 401) throw error;
         value = await request("public");
       }
-      render(value);
+      if (epoch === identityEpoch) render(value);
     } catch (error) {
       notice(error.message, true);
     } finally {
@@ -313,12 +354,14 @@ function init() {
     if (target === "notice" && ["approve","reject","set-voting-url","award","publish-results","resolve-failed"].includes(action)) target="host-notice";
     if (writing) return false;
     if (!actor) {
-      location.href = $("login").href;
+      auth.open();
       return false;
     }
     writing = true;
     $("generate").disabled = true;
+    if (action === 'generate') $("generate").textContent = '正在提交灵感…';
     $("generate").setAttribute("aria-busy", "true");
+    renderHostControls();
     $("submit-entry").disabled = true;
     if (dialog.open) $("submit-entry").textContent = "正在提交…";
     try {
@@ -354,7 +397,7 @@ function init() {
   $("create-form").onsubmit = async (event) => {
     event.preventDefault();
     if (!actor) {
-      location.href = $("login").href;
+      auth.open();
       return;
     }
     const prompt = $("prompt").value.trim();
@@ -365,12 +408,20 @@ function init() {
     if (await perform("generate", pendingIntent)) pendingIntent = null;
     else followGeneration = false;
   };
-  $("choose").onclick = () => {
+  function openSubmission(entry = null) {
+    if (entry) {
+      selected = entry.generation_id;
+      render(state);
+      $("entry-title").value = entry.title;
+      $("display-name").value = entry.display_name;
+    }
+    $("consent").checked = false;
     notice("", false, "submit-notice");
     $("submit-dialog").showModal();
     fitDialog();
     $("entry-title").focus();
-  };
+  }
+  $("choose").onclick = () => openSubmission();
   $("close-dialog").onclick = () => $("submit-dialog").close();
   $("close-artwork").onclick = () => $("artwork-dialog").close();
   $("submit-form").onsubmit = async (event) => {

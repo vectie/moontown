@@ -20,11 +20,17 @@ async fn kube(args : Array[String]) -> String {
 ///|
 /// Publish static resources without changing application, identity or compute.
 async fn main {
-  guard @env.args() is [_, root, previous, next] &&
-    root.has_prefix("/home/HwHiAiUser/") else {
-    fail(
-      "deploy-account-ui.mbtx PRIVATE_RELEASE_DIR PREVIOUS_DIGEST NEXT_DIGEST",
-    )
+  let (root, previous, next, deployment) = match @env.args() {
+    [_, root, previous, next] => (root, previous, next, "moontown-platform")
+    [_, root, previous, next, "moontown-coffee-qa"] =>
+      (root, previous, next, "moontown-coffee-qa")
+    _ =>
+      fail(
+        "deploy-account-ui.mbtx PRIVATE_RELEASE_DIR PREVIOUS_DIGEST NEXT_DIGEST [moontown-coffee-qa]",
+      )
+  }
+  guard root.has_prefix("/home/HwHiAiUser/") else {
+    fail("Use a private release directory")
   }
   for digest in [previous, next] {
     guard digest.has_prefix("sha256:") &&
@@ -39,7 +45,7 @@ async fn main {
   guard previous != next else { fail("UI image has not changed") }
   let ns = "aigc-acceptance-20260915"
   let current = @json.parse(
-    kube(["-n", ns, "get", "deployment", "moontown-platform", "-o", "json"]),
+    kube(["-n", ns, "get", "deployment", deployment, "-o", "json"]),
   )
   let image = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-ui@"
   guard current
@@ -100,7 +106,7 @@ async fn main {
       ns,
       "patch",
       "deployment",
-      "moontown-platform",
+      deployment,
       "--type=json",
       "--patch",
       patch.stringify(),

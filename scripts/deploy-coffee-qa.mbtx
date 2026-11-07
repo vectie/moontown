@@ -1,0 +1,305 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  let result = @shell.Cmd(
+    "kubectl",
+    ["--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", ..args],
+  ).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+fn object(value : Json) -> Map[String, Json] raise {
+  guard value is Object(fields) else { fail("Expected an object") }
+  fields
+}
+
+///|
+fn field(value : Json, key : String) -> Json raise {
+  object(value).get(key).unwrap()
+}
+
+///|
+/// Dedicated owner-authorized rehearsal. No platform role or production state.
+async fn main {
+  guard @env.args() is [_, root, runtime_digest, ui_digest] &&
+    root.has_prefix("/home/HwHiAiUser/") else {
+    fail(
+      "deploy-coffee-qa.mbtx NEW_PRIVATE_RELEASE_DIR RUNTIME_DIGEST UI_DIGEST",
+    )
+  }
+  for digest in [runtime_digest, ui_digest] {
+    guard digest.has_prefix("sha256:") &&
+      digest.length() == 71 &&
+      digest
+      .strip_prefix("sha256:")
+      .unwrap()
+      .all(c => c is ('0'..<='9' | 'a'..<='f')) else {
+      fail("Use immutable digests")
+    }
+  }
+  let ns = "aigc-acceptance-20260915"
+  let name = "moontown-coffee-qa"
+  guard kube([
+      "-n", ns, "get", "deployment", name, "--ignore-not-found", "-o", "name",
+    ])
+    .trim()
+    .is_empty() else {
+    fail("The rehearsal already exists; inspect it instead of overwriting")
+  }
+  @fs.mkdir(root, permission=0o700)
+  let current = @json.parse(
+    kube(["-n", ns, "get", "deployment", "moontown-platform", "-o", "json"]),
+  )
+  @fs.write_file(
+    root + "/production-reference.json",
+    current.stringify(),
+    create_mode=CreateNew,
+    permission=0o600,
+  )
+  let spec = field(current, "spec")
+  let template = field(spec, "template")
+  let pod = field(template, "spec")
+  guard field(pod, "containers") is Array([Object(container)]) &&
+    field(pod, "initContainers") is Array([Object(init)]) &&
+    field(pod, "volumes") is Array(volumes) else {
+    fail("Unexpected public deployment shape")
+  }
+  let registry = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/"
+  guard container.get("image") ==
+    Some(
+      Json::string(
+        registry +
+        "moontown-account-gateway@sha256:fdb14e92ae6544cb8b61a2d065724c6c8e179587c7ab5c587ee4c50fefcb9fdb",
+      ),
+    ) else {
+    fail("Production runtime drift; inspect before cloning")
+  }
+  container["image"] = Json::string(
+    registry + "moontown-account-gateway@" + runtime_digest,
+  )
+  init["image"] = Json::string(registry + "moontown-account-ui@" + ui_digest)
+  guard container.get("env") is Some(Array(environment)) else {
+    fail("Missing environment")
+  }
+  for setting in environment {
+    if setting is Object(values) &&
+      values.get("name") == Some(Json::string("MOONTOWN_CREATIVE_STATE_FILE")) {
+      values["value"] = Json::string(
+        "/creative/coffee-mobile-qa-20261107/state.json",
+      )
+    }
+  }
+  object(pod)["automountServiceAccountToken"] = Json::boolean(false)
+  for volume in volumes {
+    let fields = object(volume)
+    if fields.get("name") == Some(Json::string("creative-state")) {
+      fields["persistentVolumeClaim"] = { "claimName": name + "-state" }
+    }
+    if fields.get("name") == Some(Json::string("creative-config")) {
+      fields["configMap"] = { "name": name, "defaultMode": 292 }
+    }
+  }
+  let config_map = @json.parse(
+    kube(["-n", ns, "get", "configmap", "moontown-coffee-week01", "-o", "json"]),
+  )
+  guard field(field(config_map, "data"), "event.json") is String(raw) else {
+    fail("Missing event template")
+  }
+  let config = @json.parse(raw)
+  let brief = object(field(config, "brief"))
+  let now = @async.now().reinterpret_as_uint64()
+  brief["id"] = Json::string("coffee-mobile-qa-20261107")
+  brief["name"] = Json::string("手机验收 · 非正式活动")
+  brief["scope"] = Json::string(
+    "两位测试参赛者与一位定向授权主办；不进入首期作品墙",
+  )
+  brief["deadline_ms"] = Json::string((now + 86400000UL).to_string())
+  let settings = object(config)
+  settings["opens_ms"] = Json::string((now - 300000UL).to_string())
+  settings["voting_opens_ms"] = Json::string((now + 90000000UL).to_string())
+  settings["voting_closes_ms"] = Json::string((now + 172800000UL).to_string())
+  settings["awards_ms"] = Json::string((now + 176400000UL).to_string())
+  settings["event_quota"] = Json::number(6)
+  settings["participant_quota"] = Json::number(3)
+  guard @json.parse(
+      @fs.read_file("/home/HwHiAiUser/image-runtime-20261107/members.json").text(),
+    )
+    is Array(members) &&
+    members.length() == 3 else {
+    fail("Expected three ordinary QA identities")
+  }
+  let participants : Array[Json] = []
+  let managers : Array[Json] = []
+  for participant in members {
+    guard participant is { "role": String(role), "account_id": String(id), .. } &&
+      id.has_prefix("lunanexa:") else {
+      fail("Invalid verified member")
+    }
+    participants.push(Json::string(id))
+    if role == "host" {
+      managers.push(Json::string(id))
+    }
+  }
+  guard managers.length() == 1 else { fail("Expected one scoped host") }
+  settings["manager_account_ids"] = Json::array(managers)
+  settings["participant_account_ids"] = Json::array(participants)
+  let resources : Array[(String, Json)] = [
+    (
+      "config",
+      {
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": { "name": name, "namespace": ns },
+        "data": { "event.json": config.stringify() },
+      },
+    ),
+    (
+      "state",
+      {
+        "apiVersion": "v1",
+        "kind": "PersistentVolumeClaim",
+        "metadata": { "name": name + "-state", "namespace": ns },
+        "spec": {
+          "storageClassName": "lunanexa-workspaces-rwx",
+          "accessModes": ["ReadWriteMany"],
+          "resources": { "requests": { "storage": "1Gi" } },
+        },
+      },
+    ),
+    (
+      "deployment",
+      {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": { "name": name, "namespace": ns },
+        "spec": {
+          "replicas": 1,
+          "strategy": {
+            "type": "RollingUpdate",
+            "rollingUpdate": { "maxSurge": 0, "maxUnavailable": 1 },
+          },
+          "selector": { "matchLabels": { "app": name } },
+          "template": { "metadata": { "labels": { "app": name } }, "spec": pod },
+        },
+      },
+    ),
+    (
+      "service",
+      {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": { "name": name, "namespace": ns },
+        "spec": {
+          "selector": { "app": name },
+          "ports": [{ "port": 8082, "targetPort": 8082 }],
+        },
+      },
+    ),
+    (
+      "rewrite",
+      {
+        "apiVersion": "traefik.io/v1alpha1",
+        "kind": "Middleware",
+        "metadata": { "name": name, "namespace": ns },
+        "spec": {
+          "replacePathRegex": {
+            "regex": "^/coffee-qa/(.*)",
+            "replacement": "/moontown/${1}",
+          },
+        },
+      },
+    ),
+    (
+      "route",
+      {
+        "apiVersion": "traefik.io/v1alpha1",
+        "kind": "IngressRoute",
+        "metadata": { "name": name, "namespace": ns },
+        "spec": {
+          "entryPoints": ["websecure"],
+          "tls": { "secretName": "lunanexa-public-suanli-tls" },
+          "routes": [
+            {
+              "kind": "Rule",
+              "match": "Host(`suanli.kechuangfuwu.com`) && PathPrefix(`/coffee-qa/`)",
+              "priority": 200,
+              "middlewares": [{ "name": name }],
+              "services": [{ "name": name, "port": 8082 }],
+            },
+          ],
+        },
+      },
+    ),
+    (
+      "provider-access",
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": { "name": name, "namespace": "lunanexa" },
+        "spec": {
+          "podSelector": { "matchLabels": { "app": "image-adapter" } },
+          "policyTypes": ["Ingress"],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": { "kubernetes.io/metadata.name": ns },
+                  },
+                  "podSelector": { "matchLabels": { "app": name } },
+                },
+              ],
+              "ports": [{ "protocol": "TCP", "port": 18991 }],
+            },
+          ],
+        },
+      },
+    ),
+  ]
+  // Copy only the production gateway's egress/ingress rules to the isolated label.
+  guard @json.parse(kube(["-n", ns, "get", "networkpolicy", "-o", "json"]))
+    is { "items": Array(policies), .. } else {
+    fail("Missing network policies")
+  }
+  for policy in policies {
+    let policy_spec = field(policy, "spec")
+    if field(policy_spec, "podSelector")
+      is { "matchLabels": { "app": "moontown-platform", .. }, .. } {
+      object(policy_spec)["podSelector"] = { "matchLabels": { "app": name } }
+      guard field(field(policy, "metadata"), "name") is String(original) else {
+        fail("Invalid policy name")
+      }
+      resources.push(
+        (
+          "network-" + original,
+          {
+            "apiVersion": "networking.k8s.io/v1",
+            "kind": "NetworkPolicy",
+            "metadata": { "name": "qa-" + original, "namespace": ns },
+            "spec": policy_spec,
+          },
+        ),
+      )
+    }
+  }
+  for (label, value) in resources {
+    let path = root + "/" + label + ".json"
+    @fs.write_file(
+      path,
+      value.stringify(),
+      create_mode=CreateNew,
+      permission=0o600,
+    )
+    println(kube(["apply", "-f", path]))
+  }
+}

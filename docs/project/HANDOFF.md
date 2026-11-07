@@ -77,3 +77,34 @@ existing documentation and record concrete pitfalls here.
   dependency closure; the shared workspace info command encounters unrelated
   in-progress dependency errors. Do not rewrite neighbouring projects to fix
   those while making this UI change.
+
+## 2026-11-07 · 真实账户三方手机验收
+
+- Read `COFFEE_MOBILE_JOURNEY_2026-11-07.md` and `ORGANIZER_ACTIVITY_PROPOSAL.md`.
+  QA lives under `/coffee-qa/` with an independent state PVC, three invited
+  ordinary accounts and an event-only manager. Never grant PlatformOperator
+  merely to test organizing; the QA host's formal-event mutation returned 403.
+- Registration can create the identity then return TrialProvisioningPending.
+  The coffee page now uses the existing same-origin identity gateway in a
+  dialog and tries one normal login after registration 503; never blindly
+  register again. A fresh real signup verified this recovery. The general
+  portal's trial initialization remains a LunaNexa issue.
+- A/B each generated one real image (7.7 / 8.6 seconds), submitted, and the host
+  approved A, rejected B, then approved B's revised title without a new image.
+  Exported CSV contained exactly those two approved entries. Preview selections
+  did not change revision 13; there is still no real counting or live leaderboard.
+- UI now prioritizes pending reviews for hosts and voting after the deadline.
+  State-dependent controls must update even when the data revision is unchanged.
+  Preserve private drafts, but hide unusable prompt forms after closure.
+- Verify the actual DOM viewport dimensions when using browser overrides; the
+  capability targets the selected tab. A request to resize another tab is not
+  evidence that it changed. This pass checked real 375×400 DOM bounds, not a
+  physical mobile keyboard.
+- Static UI digest is `4e95f7cc5e51f5ab628c8253c51e1ad85a64134d346a06bce3640789e9814655`.
+  The formal native service remains fdb14e92…; scoped delegation is active only
+  in QA runtime 98e8924e…. GPU services were unchanged. Focused gateway closure
+  187/187, browser JS 180/180, 800 static files verified.
+- For Linux builds, export a fresh dependency closure without AppleDouble or
+  caches and target `src/main`; building every package in the reduced workspace
+  can attempt to link dependency libraries as executables. Keep sources and
+  credentials out of the UI layer and use the existing web base for its copier.

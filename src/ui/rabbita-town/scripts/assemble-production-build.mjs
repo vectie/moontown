@@ -30,6 +30,7 @@ const compiledMainPath = path.join(
 const BROWSER_FILES = [
   'coffee-contest.html',
   'coffee-contest.js',
+  'coffee-auth.js',
   'coffee-contest.css',
   'coffee-vote-preview.html',
   'coffee-vote-preview.js',

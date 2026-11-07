@@ -1,0 +1,128 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+/// Owner-authorized ordinary QA accounts. Never grants platform roles.
+async fn main {
+  guard @env.args() is [_, root] && root.has_prefix("/") else {
+    fail("create-coffee-qa-accounts.mbtx NEW_PRIVATE_DIRECTORY")
+  }
+  if !@fs.exists(root) {
+    @fs.mkdir(root, permission=0o700)
+  }
+  let origin = "https://suanli.kechuangfuwu.com:8443"
+  let credentials : Array[Json] = []
+  for key in ["a", "b", "host"] {
+    guard @env.rand(12) is Some(bytes) else {
+      fail("Secure entropy unavailable")
+    }
+    let username = "moontown.coffee.qa." + key + ".20261107@example.test"
+    let display_name = "手机验收 · " + key
+    let request_file = root + "/" + key + "-register.json"
+    let request : Json = if @fs.exists(request_file) {
+      @json.parse(@fs.read_file(request_file).text())
+    } else {
+      let request : Json = {
+        "email": username,
+        "display_name": display_name,
+        "password": "Moon!7-" + @crypto.bytes_to_hex_string(bytes),
+        "audience": "enterprise",
+      }
+      @fs.write_file(
+        request_file,
+        request.stringify(),
+        create_mode=CreateNew,
+        permission=0o600,
+      )
+      request
+    }
+    guard request
+      is { "email": String(email), "password": String(password), .. } &&
+      email == username else {
+      fail("QA registration file does not match the expected identity")
+    }
+    let response_file = root + "/" + key + "-registration.json"
+    @fs.write_file(response_file, "", permission=0o600)
+    let cookie_file = root + "/" + key + "-cookies.txt"
+    @fs.write_file(cookie_file, "", permission=0o600)
+    // Secrets travel via files, not process arguments or stdout.
+    let response = @shell.Cmd("curl", [
+      "--silent",
+      "--show-error",
+      "--max-time",
+      "45",
+      "--header",
+      "Origin: " + origin,
+      "--header",
+      "Content-Type: application/json",
+      "--header",
+      "Sec-Fetch-Site: same-origin",
+      "--data-binary",
+      "@" + request_file,
+      "--cookie-jar",
+      cookie_file,
+      "--output",
+      response_file,
+      "--write-out",
+      "%{http_code}",
+      origin + "/user/auth/register",
+    ]).output()
+    response.check()
+    let status = response.stdout().trim()
+    if status == "409" {
+      let login_file = root + "/" + key + "-login.json"
+      let login : Json = {
+        "username": username,
+        "password": password,
+        "audience": "enterprise",
+      }
+      @fs.write_file(login_file, login.stringify(), permission=0o600)
+      let signed_in = @shell.Cmd("curl", [
+        "--silent",
+        "--show-error",
+        "--max-time",
+        "45",
+        "--header",
+        "Origin: " + origin,
+        "--header",
+        "Content-Type: application/json",
+        "--header",
+        "Sec-Fetch-Site: same-origin",
+        "--data-binary",
+        "@" + login_file,
+        "--cookie-jar",
+        cookie_file,
+        "--output",
+        response_file,
+        "--write-out",
+        "%{http_code}",
+        origin + "/user/auth/password",
+      ]).output()
+      signed_in.check()
+      guard signed_in.stdout().trim() == "200" else {
+        fail(
+          "The existing " +
+          key +
+          " account did not sign in: HTTP " +
+          signed_in.stdout(),
+        )
+      }
+    } else if status != "201" {
+      fail("Registration for " + key + " returned HTTP " + response.stdout())
+    }
+    credentials.push({ "role": key, "username": username, "password": password })
+    @fs.write_file(
+      root + "/credentials.json",
+      Json::array(credentials).stringify(indent=2),
+      permission=0o600,
+    )
+    println("Created ordinary QA account: " + key)
+  }
+}

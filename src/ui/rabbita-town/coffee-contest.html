@@ -36,6 +36,8 @@
 <span id="phase">征集中</span>
 <span id="deadline-note">11 月 12 日 18:00 截稿</span>
 </div>
+<a id="host-shortcut" class="secondary hero-action" href="#moderation" hidden>审核投稿</a>
+<a id="vote" class="secondary hero-action" href="#" target="_blank" rel="noopener noreferrer" hidden>为喜欢的作品投一票 ↗</a>
       </div>
       <div class="hero-art" aria-label="主办提供的半醒工坊咖啡杯参考素材">
         <img src="coffee/cup.png" width="1040" height="1400" alt="主办参考杯型，非参赛作品" fetchpriority="high">
@@ -43,7 +45,7 @@
     </section>
 
     <section class="create-section" aria-labelledby="create-title">
-      <div class="studio">
+      <div id="studio" class="studio">
         <form id="create-form" class="composer">
           <label id="create-title" for="prompt">描述你的半醒时刻</label>
           <textarea id="prompt" name="prompt" maxlength="2000" rows="4" placeholder="例：咖啡杯里住着一座还没醒来的小城，暖奶油色，手绘插画。" required>
@@ -57,7 +59,7 @@
 <button type="button" aria-pressed="false" data-prompt="半醒咖啡的奇妙早晨，一只打哈欠的小云朵坐在咖啡杯边，纸质拼贴与柔软的剪纸层次，温暖阳光，简洁构图，不要文字和商标">云朵打盹</button>
 <button type="button" aria-pressed="false" data-prompt="半醒时刻的咖啡想象，咖啡香气化成一片会生长的小森林，黏土微缩世界，圆润可爱，暖奶油底色与自然绿，不要文字和商标">一口森林</button>
 </div>
-          <button id="generate" class="primary" type="submit" formnovalidate>登录后生成</button>
+          <button id="generate" class="primary" type="submit" formnovalidate disabled>正在载入活动…</button>
           <p id="credits" class="fine-print">投稿前仅自己可见。</p>
           <p id="notice" class="notice" role="status" aria-live="polite"></p>
         </form>
@@ -91,7 +93,6 @@
 <div>
 <h2 id="gallery-title">作品墙</h2>
 </div>
-<a id="vote" class="secondary" href="#" target="_blank" rel="noopener noreferrer" hidden>为喜欢的作品投一票 ↗</a>
 </div>
 <p id="vote-note" class="section-description">过审作品会出现在这里。投票开放后，可以为喜欢的作品加油。</p>
 <div id="gallery-grid" class="gallery-grid">
@@ -149,6 +150,11 @@
 <button id="refresh" class="text-button" type="button">刷新状态 ↻</button>
 </div>
 <p id="host-notice" class="notice" role="status" aria-live="polite"></p>
+<p class="fine-print">只展示主动投稿的作品。自己的作品需另一位主办审核。</p>
+<div id="review-queue" class="review-queue">
+</div>
+<details id="host-settings">
+<summary>投票与奖项设置</summary>
 <form id="voting-form">
 <label for="voting-url">腾讯文档投票链接</label>
 <div class="inline-form">
@@ -158,9 +164,7 @@
 <button id="export" class="text-button" type="button">导出过审名单 ↓</button>
 </div>
 </form>
-<p class="fine-print">只展示正式投稿。投票开始后冻结批准名单；自己的作品需另一位主办审核。</p>
-<div id="review-queue" class="review-queue">
-</div>
+<p id="voting-config-note" class="fine-print" hidden>投票已开始，投票入口和批准名单已锁定。</p>
 <form id="award-form">
 <h3>本期小惊喜</h3>
 <div class="award-fields">
@@ -176,9 +180,10 @@
 <label>选择理由<input id="award-reason" maxlength="1000" required>
 </label>
 </div>
-<button class="secondary" type="submit">记录获奖建议</button> <button id="publish-results" class="text-button" type="button">确认公布三个奖项</button>
+<button id="record-award" class="secondary" type="submit">记录获奖建议</button> <button id="publish-results" class="text-button" type="button">确认公布三个奖项</button>
 <p class="fine-print">投票结束后才能记录；到开奖时间，核对三个不同作品后再公布。人气奖需先核对原始投票结果。</p>
 </form>
+</details>
 </section>
   </main>
   <footer>
@@ -202,6 +207,27 @@
 <p class="fine-print">每人一张有效投稿；新投稿会替换旧版并重新审核。</p>
 <button id="submit-entry" class="primary" type="submit">提交审核</button>
 <p id="submit-notice" class="notice" role="status"></p>
+</form>
+</dialog>
+<dialog id="auth-dialog" aria-labelledby="auth-title">
+<form id="auth-form">
+<div class="dialog-heading">
+<h2 id="auth-title">登录后继续创作</h2>
+<button id="close-auth" class="dialog-close text-button" type="button" aria-label="关闭登录">×</button>
+</div>
+<label for="auth-email">登录邮箱</label>
+<input id="auth-email" type="email" inputmode="email" autocomplete="username" maxlength="256" required>
+<div id="auth-name-field" hidden>
+<label for="auth-name">展示昵称</label>
+<input id="auth-name" autocomplete="nickname" maxlength="128">
+</div>
+<label for="auth-password">密码</label>
+<input id="auth-password" type="password" autocomplete="current-password" maxlength="1024" required>
+<p id="auth-password-hint" class="fine-print" hidden>至少 12 位，包含大小写字母、数字和符号。</p>
+<p id="auth-notice" class="notice" role="status" aria-live="polite"></p>
+<button id="auth-submit" class="primary" type="submit">登录并继续</button>
+<button id="auth-mode" class="text-button" type="button">还没有账户？创建账户</button>
+<p class="fine-print">使用平台统一账户，登录后留在本页。</p>
 </form>
 </dialog>
 <dialog id="artwork-dialog" class="artwork-dialog" aria-labelledby="artwork-title">

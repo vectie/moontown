@@ -164,6 +164,11 @@ fn transition(
       }
     }
     "generate" => {
+      guard config.participant_account_ids
+        .map(ids => ids.contains(actor))
+        .unwrap_or(true) else {
+        raise Denied
+      }
       guard now >= config.opens_ms && now < config.brief.deadline_ms else {
         raise Conflict("本期创作已截止。")
       }
@@ -371,6 +376,7 @@ pub async fn execute(
   config_path : String,
 ) -> Json {
   let config = load_config(config_path)
+  let operator = event_manager(config, actor, operator)
   let file = lock(path)
   defer file.close()
   defer file.unlock()
@@ -413,6 +419,13 @@ pub async fn image(
     (
       operator ||
       actor == Some(job.actor) ||
+      (
+        event_manager(config, actor, false) &&
+        state.entries.any(entry => {
+          entry.generation_id == id &&
+          ["pending", "rejected", "approved"].contains(entry.state)
+        })
+      ) ||
       state.entries.any(entry => {
         entry.generation_id == id && entry.state == "approved"
       })

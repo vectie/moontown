@@ -20,6 +20,9 @@ pub struct Config {
   provider_origin : String
   provider_key_file : String
   model : String
+  // Deployment-owned delegation for this event only; absent in older configs.
+  manager_account_ids : Array[String]?
+  participant_account_ids : Array[String]?
 } derive(FromJson)
 
 ///|
@@ -110,7 +113,23 @@ fn text(
 ///|
 pub async fn load_config(path : String) -> Config {
   let config : Config = @json.from_json(@json.parse(@fs.read_file(path).text()))
+  let managers = config.manager_account_ids.unwrap_or([])
+  let participants = config.participant_account_ids.unwrap_or([])
   guard config.brief.published &&
+    managers.length() <= 20 &&
+    managers.all(id => {
+      !id.trim().is_empty() &&
+      id.length() <= 256 &&
+      id.all(c => c.is_printable()) &&
+      managers.count(id) == 1
+    }) &&
+    participants.length() <= 1000 &&
+    participants.all(id => {
+      !id.trim().is_empty() &&
+      id.length() <= 256 &&
+      id.all(c => c.is_printable()) &&
+      participants.count(id) == 1
+    }) &&
     config.brief.id.length() > 0 &&
     config.participant_quota > 0 &&
     config.event_quota > 0 &&
@@ -132,6 +151,14 @@ pub async fn load_config(path : String) -> Config {
     }
   }
   config
+}
+
+///|
+fn event_manager(config : Config, actor : String?, operator : Bool) -> Bool {
+  operator ||
+  actor
+  .map(id => config.manager_account_ids.unwrap_or([]).contains(id))
+  .unwrap_or(false)
 }
 
 ///|
