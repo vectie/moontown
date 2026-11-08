@@ -24,6 +24,7 @@ pub struct Config {
   manager_account_ids : Array[String]?
   participant_account_ids : Array[String]?
   voting_mode : String?
+  guest_generation : Bool?
 } derive(FromJson)
 
 ///|

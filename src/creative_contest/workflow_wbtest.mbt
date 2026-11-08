@@ -27,6 +27,7 @@ fn fixture_config() -> Config {
     manager_account_ids: None,
     participant_account_ids: None,
     voting_mode: None,
+    guest_generation: None,
   }
 }
 
@@ -45,6 +46,7 @@ fn fixture_config_json(config : Config) -> Json {
     "model": config.model,
     "manager_account_ids": config.manager_account_ids.unwrap_or([]).to_json(),
     "voting_mode": config.voting_mode.unwrap_or("external"),
+    "guest_generation": config.guest_generation.unwrap_or(false),
   }
 }
 

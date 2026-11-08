@@ -59,7 +59,7 @@ async fn PublicPlatform::activity_program(
   let parts = relative.split("/").map(part => part.to_owned()).to_array()
   match parts {
     ["api", "activities", id, route] if @activity_program.valid_activity_id(id) &&
-      ["public", "mine", "actions"].contains(route) => {
+      ["public", "mine", "guest", "actions", "uploads"].contains(route) => {
       self.creative(
         request,
         body,
@@ -77,6 +77,19 @@ async fn PublicPlatform::activity_program(
         body,
         conn,
         "api/creative/images/" + image_id,
+        activity_id=Some(id),
+      )
+      return
+    }
+    ["api", "activities", id, "images", image_id, variant] if @activity_program.valid_activity_id(
+        id,
+      ) &&
+      ["thumb", "preview"].contains(variant) => {
+      self.creative(
+        request,
+        body,
+        conn,
+        "api/creative/images/" + image_id + "/" + variant,
         activity_id=Some(id),
       )
       return

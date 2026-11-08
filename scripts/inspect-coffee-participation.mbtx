@@ -1,0 +1,50 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  for name in ["moontown-coffee-qa", "moontown-platform"] {
+    let r = @shell.Cmd("kubectl", [
+      "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", "-n", "aigc-acceptance-20260915",
+      "get", "deployment", name, "-o", "json",
+    ]).output()
+    r.check()
+    guard @json.parse(r.stdout())
+      is {
+        "metadata": { "resourceVersion": String(version), .. },
+        "spec": {
+          "template": {
+            "spec": {
+              "containers": [{ "image": String(runtime), .. }],
+              "initContainers": [{ "image": String(ui), .. }],
+              "volumes": Array(volumes),
+              ..
+            },
+            ..
+          },
+          ..
+        },
+        ..
+      } else {
+      fail("Unexpected deployment")
+    }
+    let cm = volumes
+      .iter()
+      .find_first(v => v is { "name": "creative-config", .. })
+      .unwrap()
+    println(
+      (
+        {
+          "name": name,
+          "version": version,
+          "runtime": runtime,
+          "ui": ui,
+          "config": cm,
+        } : Json).stringify(),
+    )
+  }
+}

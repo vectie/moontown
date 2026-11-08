@@ -1,0 +1,50 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  let parent = "/home/HwHiAiUser/coffee-auth-queue-20261107"
+  let root = parent + "/participation-20261109"
+  let moon = "/home/HwHiAiUser/.moon-new/bin/moon"
+  let binary = root +
+    "/source/moontown/src/account_gateway/_build/native/release/build/vectie/moontown-account-gateway/main/main.exe"
+  @shell.Cmd(moon, [
+    "run",
+    parent + "/gateway-source/lunanexa/scripts/package-webide-gateway.mbtx",
+    "--",
+    root + "/runtime-oci.oci.tar",
+    binary,
+    root + "/runtime-final-oci",
+    "account-binding-coffee-participation-final-20261109",
+  ]).run()
+  guard @json.parse(
+      @fs.read_file(root + "/runtime-final-oci/index.json").text(),
+    )
+    is { "manifests": [{ "digest": String(runtime), .. }], .. } &&
+    @json.parse(@fs.read_file(root + "/release.json").text())
+    is { "ui": String(ui), .. } else {
+    fail("Missing verified manifests")
+  }
+  @shell.Cmd(moon, [
+    "run",
+    "/home/HwHiAiUser/image-runtime-20261107/publish-account-gateway.mbtx",
+    "--",
+    root + "/runtime-final-oci",
+    "https://lunanexa-registry.lunanexa-registry.svc.cluster.local:5000",
+    "moon/moontown-account-gateway",
+    "account-binding-coffee-participation-final-20261109",
+    "/etc/ssl/certs/ca-certificates.crt",
+  ]).run()
+  @fs.write_file(
+    root + "/release-final.json",
+    ({ "runtime": runtime, "ui": ui } : Json).stringify(indent=2),
+    create_mode=CreateNew,
+    permission=0o600,
+  )
+  println(({ "runtime": runtime, "ui": ui } : Json).stringify())
+}

@@ -1,0 +1,113 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/x@0.5.5/crypto",
+  "moonbitlang/core/env",
+}
+
+///|
+async fn main {
+  let parent = "/home/HwHiAiUser/coffee-auth-queue-20261107"
+  let root = parent + "/participation-20261109"
+  let town = root + "/source/moontown"
+  let deps = parent + "/image-deps/unpack"
+  let jpeg = root + "/jpeg/opt/libjpeg-turbo"
+  let archive = parent + "/libjpeg-turbo-official_3.2.1_amd64.deb"
+  guard @crypto.bytes_to_hex_string(
+      @crypto.sha256(@fs.read_file(archive).binary()),
+    ) ==
+    "21c7af6e505386dda0fa05e9eab5a8d288947f2e09ade8d7a48ff393ed08182d" else {
+    fail("Official JPEG package mismatch")
+  }
+  let rebuild = @env.args().contains("--rebuild")
+  if !rebuild {
+    guard !@fs.exists(town) else { fail("Use a fresh source candidate") }
+    @fs.mkdir(root + "/source", recursive=true, permission=0o700)
+    @shell.Cmd("cp", ["-a", parent + "/preview-source/moontown", town]).run()
+    for sibling in ["lunanexa", "moonchat", "moonleaf"] {
+      @shell.Cmd("ln", [
+        "-s",
+        parent + "/preview-source/" + sibling,
+        root + "/source/" + sibling,
+      ]).run()
+    }
+  }
+  @shell.Cmd("tar", ["-xzf", root + "/source.tgz", "-C", town]).run()
+  @shell.Cmd("dpkg-deb", ["-x", archive, root + "/jpeg"]).run()
+  for
+    path in [
+      "src/creative_contest/moon.pkg", "src/account_gateway/src/main/moon.pkg", "src/image_preview/moon.pkg",
+      "src/activity_curation/moon.pkg",
+    ] {
+    let filename = town + "/" + path
+    let raw = @fs.read_file(filename).text()
+    let flags = raw
+      .replace(
+        old="-L/opt/homebrew/lib",
+        new="-L" +
+          jpeg +
+          "/lib64 -L" +
+          deps +
+          "/usr/lib/x86_64-linux-gnu -L" +
+          deps +
+          "/lib/x86_64-linux-gnu",
+      )
+      .replace(
+        old="-I/opt/homebrew/include",
+        new="-I" +
+          jpeg +
+          "/include -I" +
+          deps +
+          "/usr/include -I" +
+          deps +
+          "/usr/include/libpng16",
+      )
+    @fs.write_file(filename, flags, create_mode=CreateOrTruncate)
+  }
+  let result = @shell.Cmd("/home/HwHiAiUser/.moon-new/bin/moon", [
+    "-C",
+    town + "/src/account_gateway",
+    "build",
+    "src/main",
+    "--target",
+    "native",
+    "--release",
+    "--jobs",
+    "2",
+  ]).output()
+  @fs.write_file(
+    root + "/build.log",
+    result.stdout() + result.stderr(),
+    create_mode=CreateOrTruncate,
+    permission=0o600,
+  )
+  result.check()
+  let binary = town +
+    "/src/account_gateway/_build/native/release/build/vectie/moontown-account-gateway/main/main.exe"
+  let receipt = @shell.Cmd("sha256sum", [
+    binary,
+    town + "/src/creative_contest/store.mbt",
+    town + "/src/creative_contest/worker.mbt",
+    town + "/src/image_preview/upload.c",
+    town + "/src/account_gateway/src/main/creative_guest.mbt",
+    town + "/src/account_gateway/src/main/creative_http.mbt",
+    town + "/src/account_gateway/src/main/activity_program_http.mbt",
+  ]).output()
+  receipt.check()
+  @fs.write_file(
+    root +
+    (if @env.args().contains("--final") {
+      "/native-source-final.sha256"
+    } else if rebuild {
+      "/native-source-v2.sha256"
+    } else {
+      "/native-source.sha256"
+    }),
+    receipt.stdout(),
+    create_mode=CreateNew,
+    permission=0o600,
+  )
+  println("Built new participation runtime with pinned JPEG 3.2.1.")
+}

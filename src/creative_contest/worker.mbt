@@ -158,11 +158,17 @@ async fn finish(
   defer file.close()
   defer file.unlock()
   let state = read(path, config)
-  guard state.generations.any(item => {
-    item.id == job.id && ["running", "needs_reconcile"].contains(item.state)
-  }) else {
+  guard state.generations
+    .iter()
+    .find_first(item => {
+      item.id == job.id && ["running", "needs_reconcile"].contains(item.state)
+    })
+    is Some(current) else {
     return
   }
+  // Login may have claimed a running visitor job while the provider was busy.
+  // Finish from the current durable record, never the dispatch-time owner.
+  let job = current
   let completed = match result {
     Some((provider_id, bytes)) => {
       let directory = path + ".images"

@@ -90,15 +90,22 @@ async fn reply_json(
   conn : @http.ServerConnection,
   code : Int32,
   value : Json,
+  cookie~ : @http.Cookie? = None,
 ) -> Unit {
-  conn.send_response(code, "Account", extra_headers={
+  let headers : Map[@http.CaseInsensitiveString, String] = {
     "content-type": "application/json; charset=utf-8",
     "cache-control": "no-store",
     "x-content-type-options": "nosniff",
     "referrer-policy": "no-referrer",
     "cross-origin-resource-policy": "same-origin",
     "vary": "Cookie",
-  })
+  }
+  conn.send_response(
+    code,
+    "Account",
+    extra_headers=headers,
+    cookies=cookie.map(c => [c]).unwrap_or([]),
+  )
   conn.write_string(value.stringify())
   conn.end_response()
 }

@@ -12,6 +12,21 @@
 * {
   box-sizing: border-box;
 }
+.upload-option { margin: 24px 0 0; padding-top: 8px; text-align: center; }
+.creation-or { display: flex; align-items: center; gap: 16px; margin: 0 0 16px; color: var(--muted); font-size: 14px; }
+.creation-or::before, .creation-or::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.upload-option > button { min-height: 48px; }
+.upload-option .fine-print { margin: 12px 0 0; }
+.wall-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.wall-tabs button { min-height: 44px; border-radius: 8px; padding: 8px 12px; }
+.wall-tabs button[aria-pressed=true] { background: var(--ink); color: var(--paper); }
+.entry-status { display: inline-block; margin-top: 12px; padding: 3px 9px; border-radius: 5px; font-size: 13px; background: var(--sage); }
+.state-pending { background: #f6e7ba; }
+.state-rejected, .state-disqualified { background: #f8dfd7; }
+.state-approved { background: #dbead4; }
+.own-work-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.own-work-actions button { min-height: 44px; }
+.review-reason { overflow-wrap: anywhere; font-size: 14px; }
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 32px;
@@ -153,8 +168,10 @@ footer {
   letter-spacing: 0;
 }
 .moon-mark {
-  font-size: 27px;
-  line-height: 1;
+  display: block;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 .divider {
   opacity: .3;

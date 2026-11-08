@@ -40,7 +40,10 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
   let app = @http.Server(
     @socket.Addr::parse(
       if rehearsal is Some(_) {
-        "127.0.0.1:4393"
+        "127.0.0.1:" +
+        @env.get_env_var("MOONTOWN_CREATIVE_UI_REHEARSAL_PORT").unwrap_or(
+          "4393",
+        )
       } else {
         "127.0.0.1:0"
       },
@@ -55,17 +58,31 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
     origin=identity_origin,
     prefix="/user",
   ).unwrap()
-  let root = @fs.tmpdir(prefix="creative-http-")
-  defer @fs.rmdir(root, recursive=true)
+  let retained = @env.get_env_var("MOONTOWN_CREATIVE_UI_STATE_ROOT")
+  let root = match retained {
+    Some(path) => {
+      guard path.has_prefix("/private/tmp/coffee-participation-") else {
+        fail("Private fixture state only")
+      }
+      if !@fs.exists(path) {
+        @fs.mkdir(path, permission=0o700)
+      }
+      path
+    }
+    None => @fs.tmpdir(prefix="creative-http-")
+  }
+  defer (if retained is None { @fs.rmdir(root, recursive=true) })
   let path = root + "/state.json"
   let config_path = root + "/event.json"
   let now = @async.now()
-  @fs.write_file(
-    root + "/fixture-key",
-    "local-interface-fixture-not-a-production-key",
-    create_mode=CreateNew,
-    permission=0o600,
-  )
+  if !@fs.exists(root + "/fixture-key") {
+    @fs.write_file(
+      root + "/fixture-key",
+      "local-interface-fixture-not-a-production-key",
+      create_mode=CreateNew,
+      permission=0o600,
+    )
+  }
   let config : Json = {
     "brief": {
       "id": "creative-http-fixture",
@@ -91,6 +108,7 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
     "awards_ms": (now + 3900000L).to_string(),
     "participant_quota": 10,
     "event_quota": 50,
+    "guest_generation": true,
     "manager_account_ids": [
       "lunanexa:" +
       @account_system.account_token_digest(
@@ -111,7 +129,26 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
       "interface-fixture"
     },
   }
-  @fs.write_file(config_path, config.stringify(), create_mode=CreateNew)
+  let config = if retained is Some(_) && @fs.exists(config_path) {
+    guard @json.parse(@fs.read_file(config_path).text()) is Object(previous) &&
+      config is Object(current) else {
+      fail("Invalid retained fixture")
+    }
+    for
+      key in [
+        "provider_origin", "provider_key_file", "model", "guest_generation",
+      ] {
+      previous[key] = current[key]
+    }
+    Json::object(previous)
+  } else {
+    config
+  }
+  @fs.write_file(
+    config_path,
+    config.stringify(),
+    create_mode=if retained is Some(_) { CreateOrTruncate } else { CreateNew },
+  )
   let unavailable = Ref(false)
   let identity_reads = Ref(0)
   let platform : PublicPlatform = {
@@ -181,6 +218,53 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
     })
     group.spawn_bg(no_wait=true, allow_failure=true, () => {
       app.run_forever((request, body, conn) => {
+        if rehearsal is Some(_) && request.path == "/test/logout" {
+          conn.send_response(
+            303,
+            "See Other",
+            extra_headers={ "location": "/moontown/coffee-contest.html" },
+            cookies=[
+              @http.Cookie(
+                "lunanexa_http_enterprise_oidc_8443",
+                "",
+                path="/",
+                max_age=0L,
+                http_only=true,
+              ),
+            ],
+          )
+          conn.end_response()
+          return
+        }
+        if rehearsal is Some(_) && request.path == "/user/auth/password" {
+          guard neighborhood_body(body) is Some(text) &&
+            @json.parse(text) is { "username": String(username), .. } else {
+            return reply_json(conn, 400, {})
+          }
+          let who = if username == "a@fixture.test" {
+            "a"
+          } else if username == "b@fixture.test" {
+            "b"
+          } else if username == "mayor@fixture.test" {
+            "mayor"
+          } else {
+            return reply_json(conn, 401, {})
+          }
+          return reply_json(
+            conn,
+            200,
+            { "ok": true },
+            cookie=Some(
+              @http.Cookie(
+                "lunanexa_http_enterprise_oidc_8443",
+                who,
+                path="/",
+                http_only=true,
+                extensions=["SameSite=Lax"],
+              ),
+            ),
+          )
+        }
         // These login routes exist only in this test binary on a loopback socket.
         if rehearsal is Some(_) && request.path.has_prefix("/test/login/") {
           let who = request.path["/test/login/".length():].to_owned()
@@ -202,7 +286,7 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
             "content-type": "text/html; charset=utf-8",
           })
           conn.write(
-            "<h1>私有联调测试账户</h1><p>只使用隔离测试身份，不连接生产账户；出图模式以创作页提示为准。</p><a href='/test/login/a'>创作者 A</a><br><a href='/test/login/b'>创作者 B</a><br><a href='/test/login/mayor'>主办</a>",
+            "<h1>私有联调测试账户</h1><p>只使用隔离测试身份，不连接生产账户；出图模式以创作页提示为准。</p><a href='/test/logout'>访客</a><br><a href='/test/login/a'>创作者 A</a><br><a href='/test/login/b'>创作者 B</a><br><a href='/test/login/mayor'>主办</a>",
           )
           conn.end_response()
           return
@@ -241,9 +325,7 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
           @async.sleep(1000)
         }
       })
-      println(
-        "Isolated UI rehearsal: http://127.0.0.1:4393/user/ and http://localhost:4393/user/",
-      )
+      println("Isolated UI rehearsal: " + origin + "/user/")
       while true {
         @async.sleep(1000)
       }
@@ -308,6 +390,141 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
     assert_eq(read("a", "images/" + id + "/thumb").0.code, 503)
     unavailable.val = false
     assert_eq(read("mayor", "images/" + id).0.code, 404)
+    // Anonymous generation has a separate opaque capability, never an account.
+    let visitor = @http.get(base + "guest")
+    assert_eq(visitor.0.code, 200)
+    let visitor_cookie = visitor.0.cookies[0].name +
+      "=" +
+      visitor.0.cookies[0].value
+    assert_true(visitor.0.cookies[0].http_only)
+    let other = @http.get(base + "guest").0.cookies[0]
+    let other_visitor = other.name + "=" + other.value
+    let anonymous_write = async fn(action : String, payload : Json) {
+      @http.post(
+        base + "actions",
+        (
+          { "action": action, "payload": payload, "expected_actor_id": "" } :
+          Json).stringify(),
+        headers={
+          "cookie": visitor_cookie,
+          "origin": origin,
+          "content-type": "application/json",
+        },
+      )
+    }
+    assert_eq(
+      anonymous_write("generate", {
+        "prompt": "anonymous-private",
+        "intent": "stable-retry",
+      }).0.code,
+      200,
+    )
+    assert_eq(
+      anonymous_write("generate", {
+        "prompt": "anonymous-private",
+        "intent": "stable-retry",
+      }).0.code,
+      200,
+    )
+    assert_eq(anonymous_write("submit", { "consent": true }).0.code, 401)
+    assert_true(@creative_contest.process_next(path, config_path))
+    let visitor_mine = @http.get(base + "guest", headers={
+      "cookie": visitor_cookie,
+    })
+    guard @json.parse(visitor_mine.1.text())
+      is {
+        "viewer": { "account_id": String(""), .. },
+        "generations": [{ "id": String(visitor_id), .. }],
+        ..
+      } else {
+      fail("Anonymous job was lost or duplicated")
+    }
+    assert_eq(
+      @http.get(base + "images/" + visitor_id, headers={
+        "cookie": other_visitor,
+      }).0.code,
+      404,
+    )
+    let claimed = @http.get(base + "mine", headers={
+      "cookie": "lunanexa_http_enterprise_oidc_8443=a; " + visitor_cookie,
+    })
+    assert_eq(claimed.0.code, 200)
+    assert_eq(claimed.0.cookies[0].max_age, Some(0L))
+    assert_true(claimed.1.text().contains(visitor_id))
+    let recovered = write("a", "generate", {
+      "prompt": "anonymous-private",
+      "intent": "stable-retry",
+    })
+    assert_eq(recovered.0.code, 200)
+    guard @json.parse(recovered.1.text())
+      is { "generations": Array(recovered_jobs), .. } else {
+      fail("Missing recovered jobs")
+    }
+    assert_eq(recovered_jobs.length(), 2)
+    assert_false(
+      @http.get(base + "guest", headers={ "cookie": visitor_cookie }).1
+      .text()
+      .contains(visitor_id),
+    )
+    assert_eq(
+      @http.get(base + "images/" + visitor_id, headers={
+        "cookie": visitor_cookie,
+      }).0.code,
+      404,
+    )
+    assert_false(read("b", "mine").1.text().contains(visitor_id))
+    assert_eq(
+      @http.post(base + "uploads", "{}", headers={
+        "cookie": visitor_cookie,
+        "origin": origin,
+        "content-type": "application/json",
+      }).0.code,
+      401,
+    )
+    guard @json.parse(read("a", "mine").1.text())
+      is { "viewer": { "account_id": String(account_a), .. }, .. } else {
+      fail("Missing account")
+    }
+    let upload = @http.post(
+      base + "uploads",
+      (
+        {
+          "expected_actor_id": account_a,
+          "filename": "outside.png",
+          "content_type": "image/png",
+          "intent": "upload-retry",
+          "data_base64": fixture_image,
+        } : Json).stringify(),
+      headers={
+        "cookie": "lunanexa_http_enterprise_oidc_8443=a",
+        "origin": origin,
+        "content-type": "application/json",
+      },
+    )
+    assert_eq(upload.0.code, 200)
+    assert_true(upload.1.text().contains("\"source\":\"upload\""))
+    assert_false(read("b", "mine").1.text().contains("upload-retry"))
+    assert_eq(
+      @http.post(
+        base + "uploads",
+        (
+          {
+            "expected_actor_id": account_a,
+            "filename": "script.png",
+            "content_type": "image/png",
+            "intent": "bad-upload",
+            "data_base64": @base64.encode(
+              b"<svg xmlns='http://www.w3.org/2000/svg'><script>bad()</script></svg>",
+            ),
+          } : Json).stringify(),
+        headers={
+          "cookie": "lunanexa_http_enterprise_oidc_8443=a",
+          "origin": origin,
+          "content-type": "application/json",
+        },
+      ).0.code,
+      400,
+    )
     assert_eq(
       write("a", "submit", {
         "generation_id": id,
@@ -354,4 +571,29 @@ async test "creative HTTP isolates two accounts and publishes only the approved 
     )
     assert_eq(write("mayor", "approve", { "entry_id": entry }).0.code, 403)
   })
+}
+
+///|
+test "creator capabilities are event scoped and do not enter account identity cookies" {
+  let a = guest_cookie_name("https://town.example", "event-a")
+  let b = guest_cookie_name("https://town.example", "event-b")
+  assert_true(a != b && a.has_prefix("__Host-"))
+  let token = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  assert_eq(
+    guest_token(a + "=" + token, "https://town.example", "event-a"),
+    Some(token),
+  )
+  assert_eq(
+    guest_token(a + "=" + token, "https://town.example", "event-b"),
+    None,
+  )
+  assert_eq(
+    guest_token(
+      a + "=" + token + "; " + a + "=" + token,
+      "https://town.example",
+      "event-a",
+    ),
+    None,
+  )
+  assert_eq(identity_cookies(a + "=" + token), "")
 }

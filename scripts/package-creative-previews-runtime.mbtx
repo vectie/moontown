@@ -92,6 +92,10 @@ async fn main {
       (deps + "/usr/lib/x86_64-linux-gnu/libwebp.so.6.0.2", "libwebp.so.6"),
       ("/lib/x86_64-linux-gnu/libz.so.1", "libz.so.1"),
       ("/lib/x86_64-linux-gnu/libm.so.6", "libm.so.6"),
+      (
+        "/home/HwHiAiUser/coffee-auth-queue-20261107/participation-20261109/jpeg/opt/libjpeg-turbo/lib64/libjpeg.so.62.4.0",
+        "libjpeg.so.62",
+      ),
     ] {
     let real = @fs.realpath(source)
     guard @fs.kind(real, follow_symlink=false) is Regular else {
@@ -108,6 +112,10 @@ async fn main {
       (deps + "/usr/share/doc/libwebp6/copyright", "libwebp.COPYRIGHT"),
       ("/usr/share/doc/zlib1g/copyright", "zlib.COPYRIGHT"),
       ("/usr/share/doc/libc6/copyright", "glibc.COPYRIGHT"),
+      (
+        "/home/HwHiAiUser/coffee-auth-queue-20261107/participation-20261109/jpeg/usr/share/doc/libjpeg-turbo-official-3.2.1/LICENSE.md",
+        "libjpeg-turbo.COPYRIGHT",
+      ),
     ] {
     @shell.Cmd("install", ["-m", "644", source, licenses + "/" + name]).run()
   }

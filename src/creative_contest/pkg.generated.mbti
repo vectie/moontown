@@ -8,9 +8,11 @@ import {
 }
 
 // Values
-pub async fn execute(String, Json, UInt64, String?, Bool, String, String) -> Json
+pub async fn execute(String, Json, UInt64, String?, Bool, String, String, guest_actor? : String?) -> Json
 
 pub async fn image(String, String?, String, String, operator? : Bool, manager? : Bool, variant? : ImageVariant) -> Bytes
+
+pub async fn import_image(Json, UInt64, String, Bool, String, String) -> Json
 
 pub async fn load_config(String) -> Config
 
@@ -45,6 +47,7 @@ pub struct Config {
   manager_account_ids : Array[String]?
   participant_account_ids : Array[String]?
   voting_mode : String?
+  guest_generation : Bool?
 } derive(@json.FromJson)
 
 type Entry derive(ToJson, @json.FromJson)

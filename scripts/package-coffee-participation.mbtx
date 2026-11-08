@@ -1,0 +1,63 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, root] &&
+    root.has_prefix("/tmp/coffee-participation-") &&
+    !@fs.exists(root) else {
+    fail("Use a new private package directory")
+  }
+  @fs.mkdir(root, permission=0o700)
+  @fs.mkdir(root + "/ui/coffee", recursive=true)
+  for
+    name in [
+      "coffee-contest.html", "coffee-contest.js", "coffee-auth.js", "coffee-drafts.js",
+      "coffee-contest.css", "coffee-vote-preview.html", "coffee-vote-preview.js",
+      "activity-program.html", "activity-program.js", "activity-program.css", "platform-scope.js",
+      "platform-base.js",
+    ] {
+    @fs.write_file(
+      root + "/ui/" + name,
+      @fs.read_file("src/ui/rabbita-town/" + name).binary(),
+      permission=0o644,
+    )
+  }
+  for name in @fs.readdir("src/ui/assets/coffee") {
+    if name == "community-star.png" {
+      continue
+    }
+    @fs.write_file(
+      root + "/ui/coffee/" + name,
+      @fs.read_file("src/ui/assets/coffee/" + name).binary(),
+      permission=0o644,
+    )
+  }
+  @shell.Cmd("env", [
+    "COPYFILE_DISABLE=1",
+    "tar",
+    "--no-xattrs",
+    "-czf",
+    root + "/ui.tgz",
+    "-C",
+    root + "/ui",
+    ".",
+  ]).run()
+  @shell.Cmd("env", [
+    "COPYFILE_DISABLE=1",
+    "tar",
+    "--no-xattrs",
+    "-czf",
+    root + "/source.tgz",
+    "src/creative_contest",
+    "src/image_preview",
+    "src/activity_curation/moon.pkg",
+    "src/account_gateway/src/main",
+  ]).run()
+  println(root)
+}

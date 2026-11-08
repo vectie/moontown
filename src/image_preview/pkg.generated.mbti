@@ -6,6 +6,8 @@ pub fn dimensions(Bytes) -> (Int, Int)?
 
 pub fn make(Bytes, Int) -> Bytes?
 
+pub fn sanitize_upload(Bytes, String) -> Bytes?
+
 // Errors
 
 // Types and methods

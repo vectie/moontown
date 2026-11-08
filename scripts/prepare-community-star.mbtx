@@ -1,0 +1,15 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/shell",
+}
+
+///|
+async fn main {
+  let source = "src/ui/assets/coffee/community-star.png"
+  @shell.Cmd("cwebp", [
+    "-quiet", "-resize", "128", "128", "-q", "90", "-alpha_q", "100", source, "-o",
+    "src/ui/assets/coffee/community-star.webp",
+  ]).run()
+  println("Prepared community star for the existing web asset pipeline.")
+}

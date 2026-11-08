@@ -1,0 +1,146 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  let r = @shell.Cmd(
+    "kubectl",
+    [
+      "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", "-n", "aigc-acceptance-20260915",
+      ..args,
+    ],
+  ).output()
+  r.check()
+  r.stdout()
+}
+
+///|
+async fn main {
+  guard @env.args() is ([_, target] | [_, target, "--final"]) &&
+    ["qa", "formal"].contains(target) else {
+    fail("qa | formal")
+  }
+  let root = "/home/HwHiAiUser/coffee-auth-queue-20261107/participation-20261109"
+  let qualified = @env.args().contains("--final")
+  let release = target + (if qualified { "-final" } else { "" })
+  let moon = "/home/HwHiAiUser/.moon-new/bin/moon"
+  let name = if target == "qa" {
+    "moontown-coffee-qa"
+  } else {
+    "moontown-platform"
+  }
+  let cm = if target == "qa" {
+    "moontown-coffee-qa"
+  } else {
+    "moontown-coffee-week01"
+  }
+  let previous_runtime = if target == "qa" && qualified {
+    "sha256:bdf5424694910751dbf30cdacda234cc612aaef7069b214c6a9c6ed7c6d2bac2"
+  } else if target == "qa" {
+    "sha256:1c409d85c7b45914491e5b69a2faafd807bcc20238e1f8b77a4641d98c980b47"
+  } else {
+    "sha256:b760272cdac808f232d468873add989dbfe374cef0d2ddf19ce7d538caa7e743"
+  }
+  let previous_ui = if target == "qa" && qualified {
+    "sha256:d6176e2d7396ab89dedb41e07cddf4f24adc35b5d35ce52a1fdb3f9e70cb4389"
+  } else if target == "qa" {
+    "sha256:73170424513909685ce2852af57b3651b22578adaa26b9625cff46bb6e2786d8"
+  } else {
+    "sha256:7dccb07f24d9dde7bcb446a74c19a5f0ee2adcca7d2cb5059cf7ccc8dac2c1bc"
+  }
+  guard @json.parse(
+      @fs.read_file(
+        root + (if qualified { "/release-final.json" } else { "/release.json" }),
+      ).text(),
+    )
+    is { "runtime": String(runtime), "ui": String(ui), .. } else {
+    fail("Missing qualified candidate")
+  }
+  let before = @json.parse(kube(["get", "configmap", cm, "-o", "json"]))
+  guard before
+    is {
+      "metadata": { "resourceVersion": String(cm_version), .. },
+      "data": { "event.json": String(event), .. },
+      ..
+    } &&
+    @json.parse(event) is Object(config) else {
+    fail("Unexpected event configuration")
+  }
+  @fs.write_file(
+    root + "/" + release + "-config-before.json",
+    before.stringify(indent=2),
+    create_mode=CreateNew,
+    permission=0o600,
+    sync=Full,
+  )
+  config["guest_generation"] = Json::boolean(true)
+  let patch : Json = [
+    { "op": "test", "path": "/metadata/resourceVersion", "value": cm_version },
+    {
+      "op": "replace",
+      "path": "/data/event.json",
+      "value": Json::object(config).stringify(),
+    },
+  ]
+  let config_patch = root + "/" + release + "-config-patch.json"
+  @fs.write_file(
+    config_patch,
+    patch.stringify(),
+    create_mode=CreateNew,
+    permission=0o600,
+  )
+  ignore(
+    kube(["patch", "configmap", cm, "--type=json", "--patch-file", config_patch]),
+  )
+  guard @json.parse(kube(["get", "deployment", name, "-o", "json"]))
+    is { "metadata": { "resourceVersion": String(version), .. }, .. } else {
+    fail("Deployment unavailable")
+  }
+  let args = [
+    "run",
+    root + "/update-activity-qa-runtime.mbtx",
+    "--",
+    root + "/" + release + "-runtime",
+    version,
+    "--participation",
+    previous_runtime,
+    previous_ui,
+    runtime,
+  ]
+  if target == "formal" {
+    args.push("--formal")
+  }
+  args.push("--apply")
+  @shell.Cmd(moon, args).run()
+  if previous_ui != ui {
+    let ui_root = root + "/" + release + "-ui"
+    @fs.mkdir(ui_root, permission=0o700)
+    @shell.Cmd(
+      moon,
+      [
+        "run",
+        "/home/HwHiAiUser/coffee-auth-queue-20261107/deploy-account-ui.mbtx",
+        "--",
+        ui_root,
+        previous_ui,
+        ui,
+        ..if target == "qa" {
+          [name]
+        } else {
+          []
+        },
+      ],
+    ).run()
+  }
+  println(
+    "Released " +
+    target +
+    ": guest generation, authenticated uploads and submissions.",
+  )
+}

@@ -1,0 +1,106 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/x@0.5.5/crypto",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn digest(root : String) -> String {
+  guard @json.parse(@fs.read_file(root + "/index.json").text())
+    is { "manifests": [{ "digest": String(digest), .. }], .. } else {
+    fail("Missing immutable manifest")
+  }
+  digest
+}
+
+///|
+async fn main {
+  let parent = "/home/HwHiAiUser/coffee-auth-queue-20261107"
+  let root = parent + "/participation-20261109"
+  let moon = "/home/HwHiAiUser/.moon-new/bin/moon"
+  guard !@fs.exists(root + "/ui") else { fail("Use a fresh package candidate") }
+  @shell.Cmd("cp", ["-a", parent + "/ui-mobile-review-final", root + "/ui"]).run()
+  @shell.Cmd("tar", ["-xzf", root + "/ui.tgz", "-C", root + "/ui"]).run()
+  let files = [
+    "coffee-contest.html", "coffee-contest.js", "coffee-auth.js", "coffee-drafts.js",
+    "coffee-contest.css", "coffee-vote-preview.html", "coffee-vote-preview.js", "activity-program.html",
+    "activity-program.js", "activity-program.css", "platform-scope.js", "platform-base.js",
+  ]
+  for name in files {
+    let path = root + "/ui/" + name
+    if @fs.exists(path + ".gz") {
+      @fs.remove(path + ".gz")
+    }
+    @fs.write_file(
+      path + ".etag",
+      "\"" +
+      @crypto.bytes_to_hex_string(@crypto.sha256(@fs.read_file(path).binary())) +
+      "\"",
+      create_mode=CreateOrTruncate,
+    )
+    @shell.Cmd("gzip", ["-n", "-9", "-k", "-f", path]).run()
+  }
+  let binary = root +
+    "/source/moontown/src/account_gateway/_build/native/release/build/vectie/moontown-account-gateway/main/main.exe"
+  @shell.Cmd(moon, [
+    "run",
+    parent + "/gateway-source/lunanexa/scripts/package-webide-gateway.mbtx",
+    "--",
+    parent + "/preview-final-runtime-oci.oci.tar",
+    binary,
+    root + "/native-oci",
+    "account-binding-coffee-participation-native-20261109",
+  ]).run()
+  @shell.Cmd(moon, [
+    "run",
+    root + "/package-creative-previews-runtime.mbtx",
+    "--",
+    root + "/native-oci.oci.tar",
+    digest(root + "/native-oci"),
+    root + "/runtime-oci",
+    "account-binding-coffee-participation-20261109",
+  ]).run()
+  @shell.Cmd(moon, [
+    "run",
+    parent + "/package-account-ui.mbtx",
+    "--",
+    parent + "/ui-original-recovery-oci.oci.tar",
+    root + "/ui",
+    root + "/ui-oci",
+    "account-binding-coffee-participation-ui-20261109",
+  ]).run()
+  let receipt : Map[String, Json] = Map([])
+  for
+    (directory, repository, tag, key) in [
+      (
+        "runtime-oci", "moontown-account-gateway", "account-binding-coffee-participation-20261109",
+        "runtime",
+      ),
+      (
+        "ui-oci", "moontown-account-ui", "account-binding-coffee-participation-ui-20261109",
+        "ui",
+      ),
+    ] {
+    receipt[key] = Json::string(digest(root + "/" + directory))
+    @shell.Cmd(moon, [
+      "run",
+      "/home/HwHiAiUser/image-runtime-20261107/publish-account-gateway.mbtx",
+      "--",
+      root + "/" + directory,
+      "https://lunanexa-registry.lunanexa-registry.svc.cluster.local:5000",
+      "moon/" + repository,
+      tag,
+      "/etc/ssl/certs/ca-certificates.crt",
+    ]).run()
+  }
+  @fs.write_file(
+    root + "/release.json",
+    Json::object(receipt).stringify(indent=2),
+    create_mode=CreateNew,
+    permission=0o600,
+  )
+  println(Json::object(receipt).stringify())
+}

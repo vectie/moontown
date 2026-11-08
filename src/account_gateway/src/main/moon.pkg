@@ -15,6 +15,7 @@ import {
   "moonbitlang/async/socket",
   "moonbitlang/core/env",
   "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/encoding/base64",
   "moonbitlang/core/json",
   "moonbitlang/core/string",
   "moonbitlang/x/sys",
@@ -22,10 +23,12 @@ import {
 
 supported_targets = "native"
 
-import { "moonbitlang/core/encoding/base64" } for "wbtest"
-
 pkgtype(kind: "executable")
 
 options(
-  link: { "native": { "cc-link-flags": "-pthread -ldl -L/opt/homebrew/lib -lpng16 -lwebp" } },
+  link: {
+    "native": {
+      "cc-link-flags": "-pthread -ldl -L/opt/homebrew/lib -lpng16 -lwebp -ljpeg",
+    },
+  },
 )

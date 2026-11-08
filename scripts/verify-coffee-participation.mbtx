@@ -1,0 +1,92 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+// Read-only smoke checks apart from minting an isolated anonymous capability.
+// Keep capabilities and raw snapshots in the private release directory.
+async fn main {
+  guard @env.args() is [_, target] && ["qa", "formal"].contains(target) else {
+    fail("verify-coffee-participation.mbtx qa | formal")
+  }
+  let root = "/home/HwHiAiUser/coffee-auth-queue-20261107/participation-20261109/" +
+    target +
+    "-smoke"
+  @fs.mkdir(root, permission=0o700)
+  let origin = "https://suanli.kechuangfuwu.com:8443"
+  let base = origin + (if target == "qa" { "/coffee-qa" } else { "/moontown" })
+  let cookie = root + "/guest.cookies"
+  @fs.write_file(cookie, "", create_mode=CreateNew, permission=0o600)
+  for (path, status) in [("public", "200"), ("guest", "200"), ("mine", "401")] {
+    let output = root + "/" + path + ".json"
+    @fs.write_file(output, "", permission=0o600)
+    let result = @shell.Cmd("curl", [
+      "--silent",
+      "--show-error",
+      "--max-time",
+      "25",
+      "--cookie",
+      cookie,
+      "--cookie-jar",
+      cookie,
+      "--output",
+      output,
+      "--write-out",
+      "%{http_code}",
+      base + "/api/creative/" + path,
+    ]).output()
+    result.check()
+    guard result.stdout().trim() == status else {
+      fail(path + " returned HTTP " + result.stdout())
+    }
+    if path == "guest" {
+      guard @json.parse(@fs.read_file(output).text())
+        is {
+          "event": { "guest_generation": True, .. },
+          "viewer": { "account_id": "", "guest_id": String(id), .. },
+          ..
+        } &&
+        id.has_prefix("guest:") else {
+        fail("Guest must be separate from a verified account")
+      }
+    }
+    println(target + " " + path + " HTTP " + status)
+  }
+  for
+    (name, origin_header, status) in [
+      ("upload-unauthenticated", origin, "401"),
+      ("upload-cross-origin", "https://example.invalid", "403"),
+    ] {
+    let output = root + "/" + name + ".json"
+    @fs.write_file(output, "", permission=0o600)
+    let result = @shell.Cmd("curl", [
+      "--silent",
+      "--show-error",
+      "--max-time",
+      "25",
+      "--cookie",
+      cookie,
+      "--header",
+      "Origin: " + origin_header,
+      "--header",
+      "Content-Type: application/json",
+      "--data-binary",
+      "{}",
+      "--output",
+      output,
+      "--write-out",
+      "%{http_code}",
+      base + "/api/creative/uploads",
+    ]).output()
+    result.check()
+    guard result.stdout().trim() == status else {
+      fail(name + " returned HTTP " + result.stdout())
+    }
+    println(target + " " + name + " HTTP " + status)
+  }
+}

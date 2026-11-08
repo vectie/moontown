@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light">
-  <title>半醒咖啡 · 每周创作｜MoonTown</title>
+  <title>半醒咖啡 · 每周创作｜未来社区</title>
   <meta name="description" content="写下一点想象，让半醒咖啡长出新的样子。生成、投稿、一起看作品。">
-  <link rel="icon" href="coffee/logo.svg" type="image/svg+xml">
+  <link rel="icon" href="coffee/community-star.webp" type="image/webp">
   <link rel="stylesheet" href="coffee-contest.css">
   <script src="platform-scope.js">
 </script>
@@ -17,8 +17,8 @@
 </head>
 <body>
   <header class="site-header">
-    <a class="town-link" href="./" aria-label="返回 MoonTown">
-<img class="moon-mark" src="moontown.svg" width="25" height="25" alt=""> MOONTOWN<span class="divider">/</span>
+    <a class="town-link" href="./" aria-label="返回未来社区">
+<img class="moon-mark" src="coffee/community-star.webp" width="32" height="32" alt=""> 未来社区<span class="divider">/</span>
 <span>每周创作</span>
 </a>
     <nav aria-label="活动导航">
@@ -85,6 +85,15 @@
           <div id="history" class="history" aria-label="本期生成记录"></div>
         </div>
       </div>
+      <div class="upload-option">
+        <span class="creation-or">或</span>
+        <button id="choose-upload" class="secondary" type="button">上传其他 AI 创作的作品</button>
+        <button id="replace-upload" class="text-button" type="button" hidden>重新选图</button>
+        <input id="upload-file" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+        <p class="fine-print">登录后上传 · PNG / JPG / 静态 WebP · 8 MB 内，最长边 2048 像素</p>
+        <p id="upload-notice" class="notice" role="status" aria-live="polite"></p>
+        <p id="draft-notice" class="notice" role="status" aria-live="polite"></p>
+      </div>
       <section id="my-entry" class="my-entry" aria-label="我的投稿" hidden>
 </section>
     </section>
@@ -94,6 +103,7 @@
 <div>
 <h2 id="gallery-title">作品墙</h2>
 </div>
+<div class="wall-tabs" role="group" aria-label="作品范围"><button id="wall-public" class="text-button" type="button" aria-pressed="true">大家的作品</button><button id="wall-mine" class="text-button" type="button" aria-pressed="false">我的作品</button></div>
 </div>
 <p id="vote-note" class="section-description">过审作品会出现在这里。投票开放后，可以为喜欢的作品加油。</p>
 <p id="vote-feedback" class="notice" role="status" aria-live="polite"></p>
@@ -101,6 +111,8 @@
 <div id="gallery-grid" class="gallery-grid">
 </div>
 <p id="gallery-empty" class="gallery-empty">还没有过审作品。</p>
+<div id="own-wall" class="gallery-grid" hidden></div>
+<p id="own-wall-empty" class="gallery-empty" hidden></p>
 <section id="leaderboard" class="leaderboard" aria-labelledby="leaderboard-title" hidden>
 <div class="section-heading"><h3 id="leaderboard-title">人气榜</h3><span id="tally-status" class="fine-print"></span></div>
 <ol id="leaderboard-list"></ol>
@@ -205,7 +217,7 @@
 </section>
   </main>
   <footer>
-<a href="./">MoonTown</a>
+<a href="./">未来社区</a>
 <a href="activity-program.html">举办活动</a>
 <a href="#create-title">回到创作 ↑</a>
 </footer>
@@ -231,7 +243,7 @@
 <dialog id="auth-dialog" aria-labelledby="auth-title">
 <form id="auth-form">
 <div class="dialog-heading">
-<h2 id="auth-title">登录后继续创作</h2>
+<h2 id="auth-title">登录后参与活动</h2>
 <button id="close-auth" class="dialog-close text-button" type="button" aria-label="关闭登录">×</button>
 </div>
 <label for="auth-email">登录邮箱</label>

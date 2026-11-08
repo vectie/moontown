@@ -46,10 +46,14 @@ fn snapshot(
       "awards_ms": config.awards_ms,
       "participant_quota": config.participant_quota,
       "provider_ready": !config.provider_origin.is_empty(),
+      "guest_generation": config.guest_generation.unwrap_or(false),
+      "upload_max_bytes": 8388608,
+      "upload_max_edge": 2048,
     },
     "revision": state.revision,
     "voting": voting_projection(state, config, now, actor),
-    "event_remaining": (config.event_quota - state.generations.length()).max(0),
+    "event_remaining": (config.event_quota -
+    state.generations.filter(job => !external_image(job)).length()).max(0),
     "viewer": { "account_id": actor.unwrap_or(""), "operator": operator },
     "gallery": approved.map(entry => public_entry(entry, state)),
     "generations": own.map(job => {
@@ -57,10 +61,16 @@ fn snapshot(
         {
           "id": job.id,
           "prompt": job.prompt,
+          "intent": job.intent,
           "state": job.state,
           "created_ms": job.created_ms,
           "sha256": job.sha256,
           "reason": job.reason,
+          "source": if external_image(job) {
+            "upload"
+          } else {
+            "generated"
+          },
           "queue": generation_queue(job, state, config, now),
         } : Json)
     }),
@@ -98,7 +108,9 @@ fn snapshot(
       Json::null()
     },
     "remaining": (config.participant_quota -
-    own.filter(job => job.state != "failed").length()).max(0),
+    own.filter(job => job.state != "failed" && !external_image(job)).length()).max(
+      0,
+    ),
     "voting_url": if !builtin(config) &&
       now >= config.voting_opens_ms &&
       now < config.voting_closes_ms {
@@ -142,6 +154,11 @@ fn transition(
   operator : Bool,
 ) -> State raise {
   guard !actor.is_empty() else { raise Denied }
+  if actor.has_prefix("guest:") {
+    guard action == "generate" && config.guest_generation == Some(true) else {
+      raise Denied
+    }
+  }
   let next = { ..state, revision: state.revision + 1, }
   match action {
     "vote" | "cancel-vote" =>
@@ -174,7 +191,10 @@ fn transition(
       }
     }
     "generate" => {
-      guard config.participant_account_ids
+      guard (
+          actor.has_prefix("guest:") && config.guest_generation == Some(true)
+        ) ||
+        config.participant_account_ids
         .map(ids => ids.contains(actor))
         .unwrap_or(true) else {
         raise Denied
@@ -188,17 +208,24 @@ fn transition(
       let prompt = text(payload, "prompt", 2000)
       let intent = text(payload, "intent", 128)
       let id = hash(config.brief.id + ":" + actor + ":" + intent)
-      if state.generations.iter().find_first(job => job.id == id) is Some(job) {
+      if state.generations
+        .iter()
+        .find_first(job => {
+          job.id == id ||
+          (job.actor == actor && job.intent == intent && !external_image(job))
+        })
+        is Some(job) {
         guard job.prompt == prompt else {
           raise Conflict("这次请求已保存，请刷新查看。")
         }
         return state
       }
-      guard state.generations.length() < config.event_quota else {
+      guard state.generations.filter(job => !external_image(job)).length() <
+        config.event_quota else {
         raise Conflict("本期创作名额已用完。")
       }
       let own = state.generations.filter(job => {
-        job.actor == actor && job.state != "failed"
+        job.actor == actor && job.state != "failed" && !external_image(job)
       })
       guard own.length() < config.participant_quota else {
         raise Conflict("你的本期生成次数已用完。")
@@ -425,6 +452,7 @@ pub async fn execute(
   operator : Bool,
   path : String,
   config_path : String,
+  guest_actor~ : String? = None,
 ) -> Json {
   let started = @async.now()
   let config = load_config(config_path)
@@ -436,6 +464,28 @@ pub async fn execute(
   // the transaction lock. Reconcile boundaries before applying the action.
   let now = now + (@async.now() - started).max(0L).reinterpret_as_uint64()
   let original = read(path, config)
+  let original = if actor is Some(account) &&
+    !account.has_prefix("guest:") &&
+    guest_actor is Some(guest) &&
+    guest.has_prefix("guest:") &&
+    guest.length() == 70 &&
+    original.generations.any(job => job.actor == guest) {
+    let claimed = {
+      ..original,
+      revision: original.revision + 1,
+      generations: original.generations.map(job => {
+        if job.actor == guest {
+          { ..job, actor: account, }
+        } else {
+          job
+        }
+      }),
+    }
+    save(path, claimed)
+    claimed
+  } else {
+    original
+  }
   let state = advance_voting(original, config, now)
   if state.revision != original.revision {
     save(path, state)

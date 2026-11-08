@@ -5,11 +5,11 @@ import {
 supported_targets = "native"
 
 options(
-  "native-stub": [ "preview.c" ],
+  "native-stub": [ "preview.c", "upload.c" ],
   link: {
     "native": {
       "stub-cc-flags": "-I/opt/homebrew/include",
-      "cc-link-flags": "-pthread -ldl -L/opt/homebrew/lib -lpng16 -lwebp",
+      "cc-link-flags": "-pthread -ldl -L/opt/homebrew/lib -lpng16 -lwebp -ljpeg",
     },
   },
 )

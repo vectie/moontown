@@ -3,6 +3,42 @@
 Read this with `AGENTS.md` before starting work. Keep task evidence in its
 existing documentation and record concrete pitfalls here.
 
+## 2026-11-09 · Guest creation and authenticated participation
+
+- See `COFFEE_PARTICIPATION_2026-11-09.md` for actual acceptance and immutable
+  deployed digests. Root native 2,072/2,072, gateway 10/10, browser 192/192.
+- platform-base scopes localStorage by identity. Use IndexedDB as canonical
+  draft text storage plus synchronous localStorage backup; localStorage alone
+  loses the guest-to-account handoff after reload. Never delete the old account
+  draft when switching. Pending uploads remain private IndexedDB Blobs until a
+  confirmed response; stable intents survive uncertain network outcomes.
+- Guest capabilities must be event-scoped Secure/HttpOnly cookies and expire
+  after an atomic claim. Worker completion must use the CURRENT durable job,
+  not its dispatch-time actor: login can claim a running job before it finishes.
+- Rebuild allowlisted uploaded image pixels before persistence. Bound bytes,
+  decoded pixels and concurrent bodies; do not serve original uploads or claim
+  this is an antivirus engine. Public visibility still requires explicit review.
+  JPEG requires `-ljpeg` in every native executable consumer, not only the FFI
+  package. Production uses private official libjpeg-turbo 3.2.1 libs and license.
+- Native HTTP cookies live in Response.cookies, not its raw headers map. Use
+  send_response(cookies=...) and test parsed cookies. Dynamic activity routing
+  must forward thumb/preview paths as well as original images.
+- A sparse worktree without tilemap breaks the editor movement contract test;
+  the full browser asset suite also needs existing ignored landmark-studio
+  runtime assets. Restore those inputs before interpreting broad failures.
+  A new compiler's root fmt/info can touch hundreds of unrelated files; retain
+  only changed-package outputs and inspect all generated interfaces.
+- GUI fixture public roots must use canonical `/private/tmp/...` paths: the
+  strict immutable-root guard correctly rejects a `/tmp` symlink. Rehearsal
+  state retention is limited to `/private/tmp/coffee-participation-*`. Verify
+  actual innerWidth before labeling screenshots mobile; viewport overrides
+  affect the currently selected browser tab. Allow smooth anchor scrolling to
+  settle before capture. Retained fixture screenshots are not real GPU evidence.
+- Production UI deploy defaults to formal when its optional deployment argument
+  is omitted; it deliberately rejects an explicit formal name. Preserve stale
+  gzip/ETag invalidation when overlaying UI assets. Runtime upgrades require
+  stopping writers and verifying both complete PVC backups before resuming.
+
 ## 2026-11-07 · 20-user coffee load test
 
 - Read `COFFEE_LOAD20_2026-11-07.md`. Twenty real ordinary sessions submitted
