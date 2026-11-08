@@ -1,0 +1,154 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/x@0.5.5/crypto",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn curl(args : Array[String]) -> String {
+  let result = @shell.Cmd(
+    "curl",
+    [
+      "--noproxy", "*", "--cacert", "/etc/ssl/certs/ca-certificates.crt", "--silent",
+      "--show-error", "--fail", ..args,
+    ],
+  ).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+async fn verified(directory : String, digest : String) -> String {
+  guard digest.has_prefix("sha256:") &&
+    digest.length() == 71 &&
+    digest[7:].all(c => c is ('0'..<='9' | 'a'..<='f')) else {
+    fail("Invalid digest")
+  }
+  let path = directory + "/blobs/sha256/" + digest[7:].to_owned()
+  guard "sha256:" +
+    @crypto.bytes_to_hex_string(@crypto.sha256(@fs.read_file(path).binary())) ==
+    digest else {
+    fail("Transferred OCI blob mismatch")
+  }
+  path
+}
+
+///|
+async fn main {
+  let directory = "/home/HwHiAiUser/coffee-disp-nginx-oci"
+  let digest = "sha256:7b5016a10b41639c79df145998c67da5e51ca0aaf80083e836f5168c1858a1da"
+  let registry = "https://lunanexa-registry.lunanexa-registry.svc.cluster.local:5000"
+  let base = registry + "/v2/moon/coffee-display-static"
+  let tag = "coffee-display-20261108"
+  guard @json.parse(@fs.read_file(directory + "/index.json").text())
+    is {
+      "manifests": [
+        {
+          "digest": String(actual),
+          "platform": { "architecture": "amd64", "os": "linux", .. },
+          ..
+        },
+      ],
+      ..
+    } &&
+    actual == digest else {
+    fail("Expected reviewed official NGINX amd64 manifest")
+  }
+  let manifest = verified(directory, digest)
+  guard @json.parse(@fs.read_file(manifest).text())
+    is {
+      "config": { "digest": String(config), .. },
+      "layers": Array(layers),
+      ..
+    } else {
+    fail("Invalid manifest")
+  }
+  let digests = [config]
+  for layer in layers {
+    guard layer is { "digest": String(hash), .. } else { fail("Invalid layer") }
+    digests.push(hash)
+  }
+  let existing = @shell.Cmd("curl", [
+    "--noproxy",
+    "*",
+    "--cacert",
+    "/etc/ssl/certs/ca-certificates.crt",
+    "--silent",
+    "--fail",
+    "--head",
+    base + "/manifests/" + tag,
+  ]).output()
+  guard existing.exit_code() != 0 else {
+    fail("Do not overwrite the release tag")
+  }
+  for hash in digests {
+    let blob = verified(directory, hash)
+    let exists = @shell.Cmd("curl", [
+      "--noproxy",
+      "*",
+      "--cacert",
+      "/etc/ssl/certs/ca-certificates.crt",
+      "--silent",
+      "--fail",
+      "--head",
+      base + "/blobs/" + hash,
+    ]).output()
+    if exists.exit_code() == 0 {
+      continue
+    }
+    let headers = curl([
+      "--request",
+      "POST",
+      "--dump-header",
+      "-",
+      "--output",
+      "/dev/null",
+      base + "/blobs/uploads/",
+    ])
+    let locations = headers
+      .split("\n")
+      .filter(line => {
+        line.has_prefix("location:") || line.has_prefix("Location:")
+      })
+      .to_array()
+    guard locations.length() == 1 else {
+      fail("Expected one registry upload destination")
+    }
+    let location = locations[0][9:].trim().to_owned()
+    let location = if location.has_prefix("/") {
+      registry + location
+    } else {
+      location
+    }
+    guard location.has_prefix(base + "/blobs/uploads/") else {
+      fail("Unexpected upload destination")
+    }
+    let separator = if location.contains("?") { "&" } else { "?" }
+    ignore(
+      curl([
+        "--request",
+        "PUT",
+        "--header",
+        "Content-Type: application/octet-stream",
+        "--data-binary",
+        "@" + blob,
+        location + separator + "digest=" + hash,
+      ]),
+    )
+  }
+  ignore(
+    curl([
+      "--request",
+      "PUT",
+      "--header",
+      "Content-Type: application/vnd.oci.image.manifest.v1+json",
+      "--data-binary",
+      "@" + manifest,
+      base + "/manifests/" + tag,
+    ]),
+  )
+  println("moon/coffee-display-static@" + digest)
+}

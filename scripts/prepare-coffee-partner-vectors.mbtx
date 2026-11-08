@@ -1,0 +1,81 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+async fn main {
+  let target = "src/ui/coffee-display/assets"
+  let source = "/Users/kq/Workspace/lunanexa/output/marketing/nexai-rollup-vector-20261021/assets/official-group-mark-vector.svg"
+  let group = @fs.read_file(source).text()
+  guard @crypto.bytes_to_hex_string(
+      @crypto.sha256(@fs.read_file(source).binary()),
+    ) ==
+    "395701abf26c564006803d066f08fb721f0a937198189eb67324df0c9ea2e977" else {
+    fail("Unexpected official vector source")
+  }
+  guard group.has_prefix(
+    "<ns0:svg xmlns:ns0=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"1080\" height=\"464\">",
+  ) else {
+    fail("Unexpected official vector artwork")
+  }
+  @fs.write_file(
+    target + "/group-mark.svg",
+    group.replace(
+      old="width=\"1080\" height=\"464\"",
+      new="viewBox=\"686 76 196 218\" width=\"196\" height=\"218\"",
+    ),
+    create_mode=CreateOrTruncate,
+  )
+  let original = @fs.read_file(target + "/banxing-workshop.svg").text()
+  guard @crypto.bytes_to_hex_string(
+      @crypto.sha256(@fs.read_file(target + "/banxing-workshop.svg").binary()),
+    ) ==
+    "c77d4c9d73a9ebf507beb77f8c3a82e17555cd00cb9cb73d5b6f78fa4ac92f2c" else {
+    fail("Unexpected cup contours")
+  }
+  let opening = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 287 234\" width=\"287\" height=\"234\">"
+  guard original.has_prefix(opening) else {
+    fail("Unexpected original cup mark")
+  }
+  let data = original.split(" d=\"").to_array()[1].split("\"").to_array()[0]
+  let cup : Array[String] = []
+  let half : Array[String] = []
+  let letters : Array[String] = []
+  let workshop : Array[String] = []
+  // Move complete, reviewed contour groups, retaining even-odd counterforms.
+  for index, contour in data.split("M").to_array() {
+    if contour.is_empty() {
+      continue
+    }
+    let path = "M" + contour.to_owned()
+    if index <= 10 {
+      cup.push(path)
+    } else if index == 11 || index == 12 || index == 13 {
+      half.push(path)
+    } else if index == 15 || index == 18 {
+      workshop.push(path)
+    } else {
+      letters.push(path)
+    }
+  }
+  let cup_path = cup.join("")
+  let half_path = half.join("")
+  let letters_path = letters.join("")
+  let workshop_path = workshop.join("")
+  let horizontal = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 260 72\" width=\"260\" height=\"72\"><g fill=\"#000\" fill-rule=\"evenodd\"><path transform=\"translate(0 7) scale(.35)\" d=\"\{cup_path}\"/><g transform=\"translate(106 -65) scale(.5)\"><path transform=\"translate(0 31)\" d=\"\{half_path}\"/><path d=\"\{letters_path}\"/><path transform=\"translate(0 3)\" d=\"\{workshop_path}\"/></g></g></svg>"
+  @fs.write_file(
+    target + "/banxing-horizontal.svg",
+    horizontal,
+    create_mode=CreateOrTruncate,
+  )
+  let sticker = @fs.read_file(target + "/vector-sticker-wordmark.svg").text()
+  @fs.write_file(
+    target + "/vector-sticker-wordmark-v2.svg",
+    sticker.replace(old="fill=\"#f1eee6\"", new="fill=\"none\""),
+    create_mode=CreateOrTruncate,
+  )
+  println("Prepared transparent vector marks without changing their contours.")
+}

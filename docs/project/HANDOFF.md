@@ -268,3 +268,95 @@ existing documentation and record concrete pitfalls here.
   with COPYFILE_DISABLE=1 and tar --no-xattrs. Build gateway src/main explicitly;
   building all workspace library packages can try to link executables without
   main. Use qualified Linux PNG/WebP include/link directories. See the report.
+## 2026-11-08 · Coffee rotation display at /disp
+
+- Source `src/ui/coffee-display`; original 17-style, 9+8 opposed-row 12-second
+  animation is preserved. Desktop gets the exact original 4K MP4; phones get a
+  1,039,830-byte 1080p rendition. QR SVG and both visible links point to the
+  formal `https://suanli.kechuangfuwu.com:8443/moontown/coffee-contest.html`.
+- Live backend is the unprivileged user service `moontown-coffee-display.service`
+  on 175:18089. User linger is enabled. Its official NGINX runtime is verified
+  from OCI manifest 7b5016a1…; files/config live in the private management release
+  `/home/HwHiAiUser/moontown-display-20261108`. It uses no GPU or account token.
+- Existing Traefik TLS exposes `/disp` and `/disp/`. The display Service has no
+  selector and mirrors a single explicit Endpoints address, 192.168.2.175:18089.
+  Never replace the missing selector with `{}` (which could select other Pods).
+  The failed container candidate is scaled to zero; manifests/evidence retained.
+- Direct external image pulls hung and serialized the node's pull queue. Do not
+  restart the shared runtime to serve this display. The official amd64 image was
+  fetched with crane, blob hashes verified and mirrored in the internal registry;
+  rootless NGINX avoids the unavailable container pull path. Runtime limits are
+  declared, but this user's legacy cgroup did not report MemoryCurrent; do not
+  claim that those limits were measured or enforced.
+- Under systemd's journal socket, `/dev/stderr` and `/dev/stdout` cannot be
+  reopened as ordinary log files. Host config uses `error_log stderr` and
+  `access_log off`, with `-e stderr` during startup. Read UTF-8 manifests through
+  fs Data.text(), not Bytes.to_unchecked_string(). Check before mkdir on an
+  existing directory even with recursive=true.
+- Verified from 175: HTTPS 443/8443 both return 200, `/disp` redirects to `/disp/`,
+  SVG matches exactly and video byte requests return 206/1024 bytes. The local
+  external 443 probe failed TLS, while the actual browser verified 8443; retain
+  the explicit 8443 public link and do not infer global 443 reachability from
+  the management probe alone. No TLS validation was bypassed.
+- Actual browser acceptance: 320/375px without overflow, 48px phone CTA, phone
+  HD and desktop 4K playback, pause/resume, QR visibility and navigation into the
+  formal first event. Captures are in output/coffee-disp-20261108. Browser access
+  recovered for this display; the separate mobile moderation branch a9f8aa12 is
+  still pending its own complete phone journey and is not part of this release.
+- Display copy follow-up: HTML now supplies the requested Chinese event title,
+  masks the video's baked-in English heading/footer and adds three partner marks.
+  Mobile crops only those video text bands; both poster rows remain. Official
+  company assets are byte copies from LunaNexa; the new group mark uses the same
+  CSS crop as its public site (the source JPG is an old/new comparison, not a
+  standalone logo). Half-awake keeps the cup's existing extracted SVG contours;
+  Vector Sticker is a new editable SVG wordmark draft. Avoid font substitution
+  for the cup logo. Explicit `left: 0` is required on the absolutely positioned
+  company wordmark image; centered inline static positioning otherwise clips it.
+- `update-coffee-display-copy.mbtx` validates a pinned 11-file manifest and old
+  HTML/CSS hashes, preserves private rollback copies and publishes four new brand
+  assets, CSS, then HTML. It changes no GPU, routing, login or service runtime.
+  Verification now compares served branding and stylesheet bytes on both TLS
+  ports in addition to QR, Range and participation checks.
+- This copy/brand release passed management-side 443/8443 byte comparisons and
+  actual public 8443 desktop/mobile acceptance. Checked 320/375px without horizontal
+  overflow, all five images loaded, 48px mobile CTA and pause/play. New captures:
+  output/coffee-disp-20261108/{desktop,mobile}-title-brands-v2.jpg.
+- User correction: preserve the original orange invitation banner and its two
+  English lines. The previous full-width brand overlay incorrectly replaced
+  that content. The event-series heading is now 1.75cqw (was 3cqw), and the
+  partner marks are compact and right-aligned inside the orange area. Desktop
+  exposes the original video footer without a masking background; mobile
+  reflows the same invitation in HTML, with small right-aligned partners below.
+  Keep the top English subtitle removed. Publish only HTML/CSS; original video,
+  QR, brand files and display runtime remain unchanged. The pinned copy updater
+  now targets copy-footer-v3 and preserves the preceding v2 HTML/CSS for rollback.
+- Footer v3 acceptance: checked desktop 1920×1080 plus mobile 320/375px;
+  no overflow, all images loaded, mobile CTA remains 48px. Management 443/8443
+  checks pass for exact HTML/CSS/brand/QR bytes, video 206 and participant 200.
+  Public browser needed a normal reload to invalidate its cached v2 document;
+  stylesheet URL is display.css?v=20261108-footer-3. Captures:
+  output/coffee-disp-20261108/{desktop,mobile}-orange-footer-v3.jpg.
+- Partner/community follow-up: use the existing LunaNexa official vector sheet
+  (pinned SHA395701ab…) with a viewBox around its newer mark. This provides true
+  transparent blue paths without changing hue through CSS multiplication. The
+  sticker SVG's cream fill is now none, and the extra partnership label is gone.
+  Company, coffee and sticker text now have matching optical heights. Coffee's
+  complete original contour groups are arranged horizontally with their counters
+  intact; do not split the original curved lettering with a rectangular crop.
+  `prepare-coffee-partner-vectors.mbtx` pins source hashes and regenerates SVGs.
+- Community QR is an exact copy of the user's supplied PNG, SHA8911f1e3…;
+  CSS crops its caption, preserving the complete code and at least four modules
+  of white margin. Display labels distinguish participation from community.
+  Mobile shows two equal QR frames above the full-width 48px entry button.
+  Never remove white quiet margins from QR images while removing logo backgrounds.
+- Copy updater targets copy-partners-v4, pinned 12-file manifest, and v3 source
+  hashes. It adds three SVGs and the QR, then CSS and HTML; private backups remain
+  in the release folder. Media, login, routing and service processes are unchanged.
+- V4 acceptance: actual desktop 1920×1080 and phone 320/375px have no horizontal
+  overflow; all six images load, CTA is 48px, both QR captions are distinct.
+  Public 8443 displays transparent blue group paths, unfilled sticker interior,
+  complete coffee lettering and no partnership label. Management 443/8443 passed
+  exact served HTML/CSS/brand/community/participation QR comparisons, video Range
+  206 and participant page 200. Captures are
+  output/coffee-disp-20261108/{desktop,mobile}-community-transparent-v4.jpg.
+  QR source and deployed bytes match; no physical WeChat scan was performed.
