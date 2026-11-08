@@ -3,20 +3,24 @@
 入口：`https://suanli.kechuangfuwu.com/disp/`；当前外网浏览器验收入口使用
 `https://suanli.kechuangfuwu.com:8443/disp/`。
 
-原版视频与参赛二维码作为独立图层，保留原始 17 杯排版与旋转。手机显示 HD 视频、二维码与
+原版视频、活动标题、联名区与参赛二维码作为独立图层，保留原始 17 杯排版与旋转。手机显示 HD 视频、二维码与
 48px 的直接参赛按钮；桌面显示原版 4K 视频和右上留白处的二维码。所有依赖均在站内。
 
 当前正式参赛地址统一写入 HTML、SVG 及包清单。更换活动时要同时更新 HTML 的两条链接并重新
 生成 `assets/participate.svg`，保持 M 级纠错和四模块留白。二维码必须经过独立核对，不应交给
 图像生成模型绘制。
 
-`scripts/package-coffee-display.mbtx` 导出七个公开文件与散列清单，原稿说明不会公开到站点。
+`scripts/package-coffee-display.mbtx` 导出十一个公开文件与散列清单，原稿说明不会公开到站点。
 `scripts/publish-coffee-display-runtime.mbtx` 镜像经校验的官方运行时到内网仓库。
 `scripts/deploy-coffee-display.mbtx` 创建专用入口、静态资源及容器候选。
 本次节点外部镜像拉取被阻塞，最终使用 `scripts/release-coffee-display-host.mbtx` 的独立用户
 服务，保留入口并将容器候选缩为零。`scripts/verify-coffee-display.mbtx` 验证两个 TLS 入口、
 二维码文件、正式参赛页和视频 Range 响应。固定发布路径和镜像散列是本次发布的审计边界，
 后续发布要使用新的目录并核对当前入口，不能覆盖已有发布。
+
+标题与联名更新使用 `scripts/update-coffee-display-copy.mbtx`，核对固定清单和原版散列，备份
+旧 HTML/CSS 后按新素材、CSS、HTML 顺序原子替换，无需重启服务。公司字标沿用官方素材；
+半醒工坊沿用杯身提取轮廓；向量贴贴为本次 SVG 草案。手机端裁去视频已嵌入的英文文字区。
 
 当前用户服务设置了自动重启和开机启动（已确认 linger=yes）。可用管理机用户执行：
 

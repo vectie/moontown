@@ -36,6 +36,27 @@ async fn main {
       @fs.read_file(root + "/site/disp/index.html").binary() else {
       fail("Published page mismatch")
     }
+    for
+      index, path in [
+        "display.css", "assets/company-wordmark.png", "assets/group-logo.jpg", "assets/banxing-workshop.svg",
+        "assets/vector-sticker-wordmark.svg",
+      ] {
+      let copy = stem + "-brand-\{index}.bin"
+      @shell.Cmd("curl", [
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--max-time",
+        "20",
+        "--output",
+        copy,
+        prefix + "/disp/" + path,
+      ]).run()
+      guard @fs.read_file(copy).binary() ==
+        @fs.read_file(root + "/site/disp/" + path).binary() else {
+        fail("Published brand or stylesheet mismatch: " + path)
+      }
+    }
     let qr = @shell.Cmd("curl", [
       "--fail",
       "--silent",
@@ -92,6 +113,7 @@ async fn main {
       "url": prefix + "/disp",
       "html": 200,
       "qr_exact_match": true,
+      "brand_assets_and_css_exact_match": true,
       "video_range": 206,
       "participate_page": 200,
     })

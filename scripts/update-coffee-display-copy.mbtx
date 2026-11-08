@@ -1,0 +1,75 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/x@0.5.5/crypto",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/moontown-display-20261108"
+  let incoming = root + "/copy-title-v2"
+  let manifest = @fs.read_file(incoming + "/manifest.json")
+  guard @crypto.bytes_to_hex_string(@crypto.sha256(manifest.binary())) ==
+    "baab72f279034c3c74f4b56695adb162e59d4e3c2cdfbd81f4b91fa8505184de" &&
+    @json.parse(manifest.text()) is { "files": Array(files), .. } else {
+    fail("Unexpected reviewed release manifest")
+  }
+  // Validate every incoming asset before any live mutation.
+  for file in files {
+    guard file is { "path": String(path), "sha256": String(hash), .. } &&
+      !path.contains("..") &&
+      !path.has_prefix("/") else {
+      fail("Invalid asset")
+    }
+    guard @crypto.bytes_to_hex_string(
+        @crypto.sha256(
+          @fs.read_file(incoming + "/webroot/disp/" + path).binary(),
+        ),
+      ) ==
+      hash else {
+      fail("Incoming asset mismatch: " + path)
+    }
+  }
+  for
+    (name, hash) in [
+      (
+        "index.html", "97a2e4eb61564d6a0dec6b3799434cc15c940d350e44012645e8ed9761bef372",
+      ),
+      (
+        "display.css", "05d0088a3ea0ac5aa8c78c1711df7511a526722b0ff01db04ee1af49a64cc9b8",
+      ),
+    ] {
+    let current = @fs.read_file(root + "/site/disp/" + name).binary()
+    guard @crypto.bytes_to_hex_string(@crypto.sha256(current)) == hash else {
+      fail("Unexpected live version: " + name)
+    }
+    @fs.write_file(
+      incoming + "/before-" + name,
+      current,
+      create_mode=CreateNew,
+      permission=0o600,
+    )
+  }
+  // Assets first, CSS next, HTML last. No runtime or routing changes.
+  for
+    name in [
+      "assets/company-wordmark.png", "assets/group-logo.jpg", "assets/banxing-workshop.svg",
+      "assets/vector-sticker-wordmark.svg", "display.css", "index.html",
+    ] {
+    let target = root + "/site/disp/" + name
+    guard !@fs.exists(target + ".next") else {
+      fail("Staged file already exists")
+    }
+    @fs.write_file(
+      target + ".next",
+      @fs.read_file(incoming + "/webroot/disp/" + name).binary(),
+      create_mode=CreateNew,
+      permission=0o644,
+    )
+    @shell.Cmd("mv", [target + ".next", target]).run()
+  }
+  println("Published event title and three partner marks; runtime unchanged.")
+}

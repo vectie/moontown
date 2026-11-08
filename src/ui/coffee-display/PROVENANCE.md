@@ -8,6 +8,11 @@
 - 二维码为本地 `qrcode` CLI 生成的 SVG，M 级纠错，四模块留白。其内容是正式参赛页
   `https://suanli.kechuangfuwu.com:8443/moontown/coffee-contest.html`，不含测试活动、账户或密钥。
 - 二维码作为网页元素叠放，不改变原稿视频；手机版另有直接参赛链接。
+- 联名区使用用户指定的 LunaNexa `public-site/assets/company-wordmark.png` 与
+  `group-logo.jpg` 原文件；沿用现有官网 CSS 的新版集团图标裁切，避免显示新旧标志对照图。
+- 活动标题与联名文案由 HTML 覆盖原视频英文区；手机版裁去视频文字区，保留两排咖啡杯。
+- 半醒工坊沿用项目已从原杯身提取的 `src/ui/assets/coffee/logo.svg` 原轮廓及中文字样。
+  向量贴贴为本次设计的 SVG 字标草案：矢量箭头、叠贴便签和橙色衬底；中文文字保留可编辑。
 - 原画为主办提供的灵感参考，不是参赛作品、获奖证据或商品售价与奖品承诺。
 
 页面使用浏览器硬件视频解码，避免每帧渲染 17 个 WebGL 场景。支持暂停、减少动态效果与后台暂停。

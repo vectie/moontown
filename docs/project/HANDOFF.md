@@ -286,3 +286,21 @@ existing documentation and record concrete pitfalls here.
   formal first event. Captures are in output/coffee-disp-20261108. Browser access
   recovered for this display; the separate mobile moderation branch a9f8aa12 is
   still pending its own complete phone journey and is not part of this release.
+- Display copy follow-up: HTML now supplies the requested Chinese event title,
+  masks the video's baked-in English heading/footer and adds three partner marks.
+  Mobile crops only those video text bands; both poster rows remain. Official
+  company assets are byte copies from LunaNexa; the new group mark uses the same
+  CSS crop as its public site (the source JPG is an old/new comparison, not a
+  standalone logo). Half-awake keeps the cup's existing extracted SVG contours;
+  Vector Sticker is a new editable SVG wordmark draft. Avoid font substitution
+  for the cup logo. Explicit `left: 0` is required on the absolutely positioned
+  company wordmark image; centered inline static positioning otherwise clips it.
+- `update-coffee-display-copy.mbtx` validates a pinned 11-file manifest and old
+  HTML/CSS hashes, preserves private rollback copies and publishes four new brand
+  assets, CSS, then HTML. It changes no GPU, routing, login or service runtime.
+  Verification now compares served branding and stylesheet bytes on both TLS
+  ports in addition to QR, Range and participation checks.
+- This copy/brand release passed management-side 443/8443 byte comparisons and
+  actual public 8443 desktop/mobile acceptance. Checked 320/375px without horizontal
+  overflow, all five images loaded, 48px mobile CTA and pause/play. New captures:
+  output/coffee-disp-20261108/{desktop,mobile}-title-brands-v2.jpg.
