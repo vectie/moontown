@@ -304,3 +304,18 @@ existing documentation and record concrete pitfalls here.
   actual public 8443 desktop/mobile acceptance. Checked 320/375px without horizontal
   overflow, all five images loaded, 48px mobile CTA and pause/play. New captures:
   output/coffee-disp-20261108/{desktop,mobile}-title-brands-v2.jpg.
+- User correction: preserve the original orange invitation banner and its two
+  English lines. The previous full-width brand overlay incorrectly replaced
+  that content. The event-series heading is now 1.75cqw (was 3cqw), and the
+  partner marks are compact and right-aligned inside the orange area. Desktop
+  exposes the original video footer without a masking background; mobile
+  reflows the same invitation in HTML, with small right-aligned partners below.
+  Keep the top English subtitle removed. Publish only HTML/CSS; original video,
+  QR, brand files and display runtime remain unchanged. The pinned copy updater
+  now targets copy-footer-v3 and preserves the preceding v2 HTML/CSS for rollback.
+- Footer v3 acceptance: checked desktop 1920×1080 plus mobile 320/375px;
+  no overflow, all images loaded, mobile CTA remains 48px. Management 443/8443
+  checks pass for exact HTML/CSS/brand/QR bytes, video 206 and participant 200.
+  Public browser needed a normal reload to invalidate its cached v2 document;
+  stylesheet URL is display.css?v=20261108-footer-3. Captures:
+  output/coffee-disp-20261108/{desktop,mobile}-orange-footer-v3.jpg.

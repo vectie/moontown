@@ -10,10 +10,10 @@ import {
 ///|
 async fn main {
   let root = "/home/HwHiAiUser/moontown-display-20261108"
-  let incoming = root + "/copy-title-v2"
+  let incoming = root + "/copy-footer-v3"
   let manifest = @fs.read_file(incoming + "/manifest.json")
   guard @crypto.bytes_to_hex_string(@crypto.sha256(manifest.binary())) ==
-    "baab72f279034c3c74f4b56695adb162e59d4e3c2cdfbd81f4b91fa8505184de" &&
+    "f0ca093b528bf77911eeaffb737f03b84aaf2f48f052a28ccc8a3cb71e05eb2d" &&
     @json.parse(manifest.text()) is { "files": Array(files), .. } else {
     fail("Unexpected reviewed release manifest")
   }
@@ -36,10 +36,10 @@ async fn main {
   for
     (name, hash) in [
       (
-        "index.html", "97a2e4eb61564d6a0dec6b3799434cc15c940d350e44012645e8ed9761bef372",
+        "index.html", "c897e142f82ee25eba45734f7cf3ae354880a00fdfb583ee84e26ca78643f4eb",
       ),
       (
-        "display.css", "05d0088a3ea0ac5aa8c78c1711df7511a526722b0ff01db04ee1af49a64cc9b8",
+        "display.css", "83dbc7bf9076dd18cc9432f2032fa5988dc1bc50f70c443bac2b91bac3a85d1b",
       ),
     ] {
     let current = @fs.read_file(root + "/site/disp/" + name).binary()
@@ -53,12 +53,8 @@ async fn main {
       permission=0o600,
     )
   }
-  // Assets first, CSS next, HTML last. No runtime or routing changes.
-  for
-    name in [
-      "assets/company-wordmark.png", "assets/group-logo.jpg", "assets/banxing-workshop.svg",
-      "assets/vector-sticker-wordmark.svg", "display.css", "index.html",
-    ] {
+  // Existing assets are unchanged. CSS first, HTML last; no runtime changes.
+  for name in ["display.css", "index.html"] {
     let target = root + "/site/disp/" + name
     guard !@fs.exists(target + ".next") else {
       fail("Staged file already exists")
@@ -71,5 +67,7 @@ async fn main {
     )
     @shell.Cmd("mv", [target + ".next", target]).run()
   }
-  println("Published event title and three partner marks; runtime unchanged.")
+  println(
+    "Restored orange invitation footer and compact right-aligned partners.",
+  )
 }

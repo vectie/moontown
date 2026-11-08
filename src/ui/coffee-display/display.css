@@ -2,25 +2,26 @@
 * { box-sizing: border-box; }
 body { margin: 0; min-height: 100svh; display: grid; place-items: center; }
 .display { position: relative; container-type: inline-size; width: min(100%, calc(100svh * 16 / 9)); }
-.event-heading { position: absolute; z-index: 1; inset: 0 0 auto; height: 17.5%; padding: 1.2% 15% 1% 2.8%; background: #f1eee6; border-bottom: 1px solid #243e3240; }
+.event-heading { position: absolute; z-index: 1; inset: 0 0 auto; height: 17.5%; padding: 2.2% 15% 1% 2.8%; background: #f1eee6; border-bottom: 1px solid #243e3240; }
 .event-heading h1 { display: grid; gap: .4cqw; margin: 0; font-weight: 650; line-height: 1.2; }
-.event-series { font-size: 3cqw; }
+.event-series { font-size: 1.75cqw; }
 .event-theme { font-size: 2.15cqw; }
 .stage { position: relative; aspect-ratio: 16 / 9; background: #f1eee6; }
 video { display: block; width: 100%; height: 100%; object-fit: contain; }
 .join { position: absolute; z-index: 3; top: 1%; right: 2.8%; width: 8.5%; padding: .3%; color-scheme: light; background: #f1eee6; text-align: center; }
 .join-direct { display: none; }
-.partnership { position: absolute; z-index: 1; inset: 80% 0 0; padding: 1.3% 2.8% 3.2%; background: #f1eee6; }
-.partners { display: flex; height: 100%; align-items: center; justify-content: center; gap: 1cqw; margin: 0; padding: 1%; color: #243e32; border-top: 1px solid #243e3240; font-size: 1.8cqw; font-weight: 600; }
-.partner-company { display: flex; align-items: center; justify-content: center; gap: .7cqw; }
-.group-mark { position: relative; flex-shrink: 0; width: 1.9cqw; height: 2.1cqw; overflow: hidden; mix-blend-mode: multiply; }
+.partnership { position: absolute; z-index: 1; top: 82.4%; right: 4.2%; width: 45%; height: 12%; }
+.invitation { display: none; }
+.partners { display: flex; height: 100%; align-items: center; justify-content: flex-end; gap: .6cqw; margin: 0; color: #243e32; font-size: 1.2cqw; font-weight: 600; }
+.partner-company { display: flex; align-items: center; justify-content: center; gap: .4cqw; }
+.group-mark { position: relative; flex-shrink: 0; width: 1.1cqw; height: 1.25cqw; overflow: hidden; mix-blend-mode: multiply; }
 .group-mark img { position: absolute; width: 566.667%; height: auto; max-width: none; left: -360.74%; top: -36.667%; }
-.company-word { position: relative; display: block; width: 29cqw; height: 2.5cqw; overflow: hidden; }
+.company-word { position: relative; display: block; width: 18cqw; height: 1.7cqw; overflow: hidden; }
 .company-word img { position: absolute; left: 0; width: 100%; height: auto; top: 50%; transform: translateY(-50%); }
-.partner-pair { display: flex; align-items: center; gap: 1cqw; white-space: nowrap; }
-.banxing-wordmark { display: block; width: auto; height: 4.4cqw; }
-.vector-wordmark { display: block; width: 15cqw; height: auto; }
-.partner-label { font-size: 1.25cqw; font-weight: 500; }
+.partner-pair { display: flex; align-items: center; gap: .6cqw; white-space: nowrap; }
+.banxing-wordmark { display: block; width: auto; height: 2.8cqw; }
+.vector-wordmark { display: block; width: 10cqw; height: auto; }
+.partner-label { font-size: .7cqw; font-weight: 500; white-space: nowrap; }
 .qr-link { display: block; color: #243e32; text-decoration: none; }
 .qr-link img { display: block; width: 100%; height: auto; background: white; }
 .qr-link span { display: block; margin-top: 3px; font-size: clamp(12px, 1.1vw, 22px); font-weight: 600; line-height: 1.2; }
@@ -34,7 +35,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid #357347; outline-offs
   .display { width: 100%; background: #f1eee6; }
   .event-heading { position: static; height: auto; padding: 24px 20px 16px; border: 0; }
   .event-heading h1 { gap: 8px; line-height: 1.4; }
-  .event-series { font-size: 22px; }
+  .event-series { font-size: 16px; }
   .event-theme { font-size: 18px; }
   .stage { aspect-ratio: 16 / 5.4; overflow: hidden; }
   video { height: auto; transform: translateY(-17.5%); }
@@ -42,17 +43,20 @@ a:focus-visible, button:focus-visible { outline: 3px solid #357347; outline-offs
   .qr-link { grid-column: 1; grid-row: 1; }
   .qr-link span { display: none; }
   .join-direct { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 48px; padding: 10px 12px; border-radius: 8px; background: #243e32; color: #f7f4e9; font-size: 16px; font-weight: 500; text-decoration: none; }
-  .partnership { position: static; padding: 8px 20px 24px; }
-  .partners { flex-wrap: wrap; gap: 4px 8px; padding: 0; background: transparent; font-size: 14px; line-height: 1.5; }
-  .partner-company, .partner-label { flex-basis: 100%; text-align: center; }
-  .partner-company { gap: 8px; margin-bottom: 6px; }
-  .group-mark { width: 27px; height: 30px; }
-  .company-word { width: 250px; height: 23px; }
-  .partner-pair { gap: 8px; }
-  .banxing-wordmark { height: 62px; }
-  .vector-wordmark { width: 156px; }
-  .partner-label { margin-top: 4px; font-size: 12px; }
-  .motion { position: static; display: block; margin: -12px 20px 8px auto; min-width: 80px; padding: 8px; font-size: 12px; }
+  .partnership { position: static; width: auto; height: auto; margin: 0 16px 16px; padding: 16px; background: #f74f29; }
+  .invitation { display: block; color: #171716; }
+  .invitation strong { font-size: 16px; font-weight: 800; }
+  .invitation p { max-width: 290px; margin: 8px 0 0; font-size: 13px; line-height: 1.4; }
+  .partners { max-width: 230px; height: auto; flex-wrap: wrap; gap: 4px 6px; margin: 16px 0 0 auto; font-size: 12px; line-height: 1.5; }
+  .partner-company, .partner-label { flex-basis: 100%; justify-content: flex-end; text-align: right; }
+  .partner-company { gap: 6px; margin-bottom: 2px; }
+  .group-mark { width: 20px; height: 22px; }
+  .company-word { width: 190px; height: 18px; }
+  .partner-pair { gap: 6px; }
+  .banxing-wordmark { height: 42px; }
+  .vector-wordmark { width: 112px; }
+  .partner-label { margin-top: 2px; font-size: 10px; }
+  .motion { position: static; display: block; margin: 0 20px 8px auto; min-width: 80px; padding: 8px; font-size: 12px; }
   .playback-message { bottom: 48px; max-width: calc(100% - 24px); font-size: 14px; }
 }
 @media (max-width: 360px) {
