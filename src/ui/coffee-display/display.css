@@ -19,7 +19,7 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; }
 .company-word { position: relative; display: block; width: 18cqw; height: 1.7cqw; overflow: hidden; }
 .company-word img { position: absolute; left: 0; width: 100%; height: auto; top: 50%; transform: translateY(-50%); }
 .partner-pair { display: flex; align-items: center; gap: .6cqw; white-space: nowrap; }
-.banxing-wordmark { display: block; width: auto; height: 2.4cqw; }
+.banxing-wordmark { display: block; flex-shrink: 0; width: auto; height: 1.7cqw; }
 .vector-wordmark { display: block; width: 7.1cqw; height: auto; }
 .qr-link { display: block; color: #243e32; text-decoration: none; }
 .qr-link img { display: block; width: 100%; height: auto; background: white; }
@@ -56,7 +56,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid #357347; outline-offs
   .group-mark { width: 20px; height: 22px; }
   .company-word { width: 205px; height: 18px; }
   .partner-pair { gap: 6px; }
-  .banxing-wordmark { height: 32px; }
+  .banxing-wordmark { height: 22px; }
   .vector-wordmark { width: 85px; }
   .motion { position: static; display: block; margin: 0 20px 8px auto; min-width: 80px; padding: 8px; font-size: 12px; }
   .playback-message { bottom: 48px; max-width: calc(100% - 24px); font-size: 14px; }

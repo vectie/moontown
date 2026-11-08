@@ -19,8 +19,8 @@ async fn main {
   let files = [
     "index.html", "display.css", "display.js", "assets/participate.svg", "assets/coffee-opposed-rows-v1.jpg",
     "assets/coffee-opposed-rows-hd-v1.mp4", "assets/coffee-opposed-rows-4k-v1.mp4",
-    "assets/company-wordmark.png", "assets/group-mark.svg", "assets/banxing-horizontal.svg",
-    "assets/vector-sticker-wordmark-v2.svg", "assets/community-qr.png",
+    "assets/company-wordmark.png", "assets/group-mark-raster-v5.png", "assets/banxing-single-line-v5.png",
+    "assets/vector-sticker-wordmark.svg", "assets/community-qr.png",
   ]
   @fs.mkdir(root, permission=0o700)
   @fs.mkdir(root + "/webroot/disp/assets", recursive=true, permission=0o755)

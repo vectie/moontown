@@ -3,6 +3,29 @@
 Read this with `AGENTS.md` before starting work. Keep task evidence in its
 existing documentation and record concrete pitfalls here.
 
+## 2026-11-09 · Display partner correction v5
+
+- This supersedes the v4 partner treatment recorded below. The group mark must
+  come from the user's original group-logo.jpg raster, cropping the newer mark
+  and detecting near-white pixels for alpha; do not substitute vector tracing.
+  group-mark-raster-v5.png is 196×218 with alpha=0 at its background corner.
+- Coffee contour indexes are not glyph IDs: a later contour may be a counter
+  inside the preceding letter. Group complete glyphs by spatial bounds, align
+  all four to one baseline, then rasterize; banxing-single-line-v5.png retains
+  the original cup/letter contours. The sticker uses its original filled SVG,
+  not the unfilled v2. The two PNGs total about 70 KiB.
+- prepare-coffee-partner-rasters.mbtx pins both source hashes. Packaged manifest
+  SHA256 is d31e9a1c7a6c5b668918d0e5bc74c33c31c8a3302ed72650447d9a7ec4d755cd.
+  New assets, CSS, then HTML were published atomically; old HTML/CSS are kept in
+  /home/HwHiAiUser/moontown-display-20261108/copy-partners-v5/. No service restart,
+  video replacement, account/contest change or QR modification was needed.
+- Live desktop 1920×1080 and phone 375×812 render all six images, no overflow;
+  local 320×740 also has no overflow and retains its 48px CTA. Phone selects HD,
+  desktop 4K. Both 443/8443 checks passed exact HTML/CSS/logo/QR byte comparison,
+  video Range 206 and participant page 200 (verification-v5.json on management).
+  Screenshots: output/coffee-disp-20261109/{desktop,mobile}-raster-partners-v5.png
+  and partner-detail-v5.png. CSS cache key is 20261109-partners-5.
+
 ## 2026-11-09 · Guest creation and authenticated participation
 
 - See `COFFEE_PARTICIPATION_2026-11-09.md` for actual acceptance and immutable
