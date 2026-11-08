@@ -1,0 +1,308 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn command(program : String, args : Array[String]) -> String {
+  let result = @shell.Cmd(program, args).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  command(
+    "kubectl",
+    [
+      "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", "-n", "aigc-acceptance-20260915",
+      ..args,
+    ],
+  )
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, root, expected] &&
+    root == "/home/HwHiAiUser/moontown-display-20261108" &&
+    expected.length() == 64 &&
+    !@fs.exists(root) &&
+    command("uname", ["-s"]).trim() == "Linux" else {
+    fail(
+      "New display release root and archive SHA256 required on management host",
+    )
+  }
+  let archive = "/home/HwHiAiUser/moontown-disp-site-20261108.tgz"
+  guard command("sha256sum", [archive]).has_prefix(expected + " ") else {
+    fail("Transferred archive digest mismatch")
+  }
+  let name = "moontown-coffee-display"
+  let ns = "aigc-acceptance-20260915"
+  for
+    kind in [
+      "deployment", "service", "configmap", "networkpolicy", "ingressroute",
+    ] {
+    guard kube(["get", kind, name, "--ignore-not-found", "-o", "name"])
+      .trim()
+      .is_empty() else {
+      fail("Existing display resource; inspect before replacing")
+    }
+  }
+  guard @json.parse(
+      kube(["get", "deployment", "moontown-platform", "-o", "json"]),
+    )
+    is {
+      "spec": {
+        "template": { "spec": { "nodeSelector": Object(selector), .. }, .. },
+        ..
+      },
+      ..
+    } else {
+    fail("Missing qualified management node selector")
+  }
+  @fs.mkdir(root, permission=0o700)
+  @fs.mkdir(root + "/site", permission=0o755)
+  @shell.Cmd("tar", ["-xzf", archive, "-C", root + "/site"]).run()
+  for path in [root + "/site", root + "/site/disp", root + "/site/disp/assets"] {
+    @fs.chmod(path, 0o755)
+  }
+  for
+    file in [
+      "index.html", "display.css", "display.js", "assets/participate.svg", "assets/coffee-opposed-rows-v1.jpg",
+      "assets/coffee-opposed-rows-hd-v1.mp4", "assets/coffee-opposed-rows-4k-v1.mp4",
+    ] {
+    let path = root + "/site/disp/" + file
+    guard @fs.kind(path, follow_symlink=false) is Regular else {
+      fail("Missing regular site asset")
+    }
+    @fs.chmod(path, 0o644)
+  }
+  let config =
+    #|worker_processes 1;
+    #|pid /tmp/nginx.pid;
+    #|error_log /dev/stderr warn;
+    #|events { worker_connections 256; }
+    #|http {
+    #|  include /etc/nginx/mime.types;
+    #|  default_type application/octet-stream;
+    #|  access_log /dev/stdout;
+    #|  sendfile on;
+    #|  tcp_nopush on;
+    #|  server_tokens off;
+    #|  client_body_temp_path /tmp/client;
+    #|  proxy_temp_path /tmp/proxy;
+    #|  fastcgi_temp_path /tmp/fastcgi;
+    #|  uwsgi_temp_path /tmp/uwsgi;
+    #|  scgi_temp_path /tmp/scgi;
+    #|  gzip on;
+    #|  gzip_types text/css application/javascript image/svg+xml;
+    #|  server {
+    #|    listen 8080;
+    #|    root /site;
+    #|    absolute_redirect off;
+    #|    add_header X-Content-Type-Options nosniff always;
+    #|    add_header Cache-Control 'public, max-age=300';
+    #|    add_header Referrer-Policy strict-origin-when-cross-origin always;
+    #|    add_header Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; media-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'self'; form-action 'none'" always;
+    #|    location = /health { access_log off; return 200 'ok'; }
+    #|    location = /disp { return 308 /disp/; }
+    #|    location /disp/ { try_files $uri $uri/ =404; }
+    #|    location / { return 404; }
+    #|  }
+    #|}
+  let image = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/coffee-display-static@sha256:7b5016a10b41639c79df145998c67da5e51ca0aaf80083e836f5168c1858a1da"
+  let metadata : Json = { "name": name, "namespace": ns }
+  let labels : Json = { "app": name }
+  let resources : Array[(String, Json)] = [
+    (
+      "config",
+      {
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": metadata,
+        "data": { "nginx.conf": config },
+      },
+    ),
+    (
+      "network",
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": metadata,
+        "spec": {
+          "podSelector": { "matchLabels": labels },
+          "policyTypes": ["Ingress", "Egress"],
+          "egress": [],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "kube-system",
+                    },
+                  },
+                  "podSelector": {
+                    "matchLabels": { "app.kubernetes.io/name": "traefik" },
+                  },
+                },
+              ],
+              "ports": [{ "protocol": "TCP", "port": 8080 }],
+            },
+          ],
+        },
+      },
+    ),
+    (
+      "deployment",
+      {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": metadata,
+        "spec": {
+          "replicas": 1,
+          "selector": { "matchLabels": labels },
+          "template": {
+            "metadata": { "labels": labels },
+            "spec": {
+              "nodeSelector": Json::object(selector),
+              "automountServiceAccountToken": false,
+              "securityContext": {
+                "runAsNonRoot": true,
+                "runAsUser": 101,
+                "runAsGroup": 101,
+                "fsGroup": 101,
+                "seccompProfile": { "type": "RuntimeDefault" },
+              },
+              "containers": [
+                {
+                  "name": "display",
+                  "image": image,
+                  "command": [
+                    "nginx", "-g", "daemon off;", "-c", "/etc/nginx/nginx.conf",
+                  ],
+                  "securityContext": {
+                    "allowPrivilegeEscalation": false,
+                    "readOnlyRootFilesystem": true,
+                    "capabilities": { "drop": ["ALL"] },
+                  },
+                  "ports": [{ "containerPort": 8080 }],
+                  "resources": {
+                    "requests": { "cpu": "10m", "memory": "16Mi" },
+                    "limits": { "cpu": "250m", "memory": "64Mi" },
+                  },
+                  "readinessProbe": {
+                    "httpGet": { "path": "/health", "port": 8080 },
+                    "periodSeconds": 2,
+                  },
+                  "livenessProbe": {
+                    "httpGet": { "path": "/health", "port": 8080 },
+                    "periodSeconds": 15,
+                  },
+                  "volumeMounts": [
+                    { "name": "site", "mountPath": "/site", "readOnly": true },
+                    {
+                      "name": "config",
+                      "mountPath": "/etc/nginx/nginx.conf",
+                      "subPath": "nginx.conf",
+                      "readOnly": true,
+                    },
+                    { "name": "tmp", "mountPath": "/tmp" },
+                  ],
+                },
+              ],
+              "volumes": [
+                {
+                  "name": "site",
+                  "hostPath": { "path": root + "/site", "type": "Directory" },
+                },
+                {
+                  "name": "config",
+                  "configMap": { "name": name, "defaultMode": 292 },
+                },
+                { "name": "tmp", "emptyDir": { "sizeLimit": "16Mi" } },
+              ],
+            },
+          },
+        },
+      },
+    ),
+    (
+      "service",
+      {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": metadata,
+        "spec": {
+          "selector": labels,
+          "ports": [{ "port": 8080, "targetPort": 8080, "protocol": "TCP" }],
+        },
+      },
+    ),
+    (
+      "route",
+      {
+        "apiVersion": "traefik.io/v1alpha1",
+        "kind": "IngressRoute",
+        "metadata": metadata,
+        "spec": {
+          "entryPoints": ["websecure"],
+          "tls": { "secretName": "lunanexa-public-suanli-tls" },
+          "routes": [
+            {
+              "kind": "Rule",
+              "match": "Host(`suanli.kechuangfuwu.com`) && (Path(`/disp`) || PathPrefix(`/disp/`))",
+              "priority": 250,
+              "services": [{ "name": name, "port": 8080 }],
+            },
+          ],
+        },
+      },
+    ),
+  ]
+  for (label, value) in resources {
+    let path = root + "/" + label + ".json"
+    @fs.write_file(path, value.stringify(indent=2), permission=0o600)
+    println(kube(["apply", "-f", path]))
+  }
+  println(kube(["rollout", "status", "deployment", name, "--timeout=180s"]))
+  let pods = @json.parse(
+    kube(["get", "pods", "-l", "app=" + name, "-o", "json"]),
+  )
+  guard pods is { "items": Array(items), .. } &&
+    items
+    .iter()
+    .find_first(p => {
+      p
+      is { "status": { "containerStatuses": [{ "ready": True, .. }], .. }, .. }
+    })
+    is Some(
+      {
+        "status": { "containerStatuses": [{ "imageID": String(id), .. }], .. },
+        ..
+      }
+    ) else {
+    fail("Missing ready resolved image")
+  }
+  let pinned = id.strip_prefix("docker-pullable://").unwrap_or(id[:]).to_owned()
+  guard pinned == image else { fail("Inspect resolved image before pinning") }
+  println(kube(["set", "image", "deployment/" + name, "display=" + pinned]))
+  println(kube(["rollout", "status", "deployment", name, "--timeout=120s"]))
+  @fs.write_file(
+    root + "/receipt.json",
+    (
+      {
+        "archive_sha256": expected,
+        "image": pinned,
+        "url": "https://suanli.kechuangfuwu.com/disp/",
+      } : Json).stringify(indent=2),
+    permission=0o600,
+  )
+  println(
+    "Coffee display published; contest, identities and GPU workloads unchanged",
+  )
+}

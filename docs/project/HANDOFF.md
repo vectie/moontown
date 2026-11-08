@@ -250,3 +250,39 @@ existing documentation and record concrete pitfalls here.
   are always-visible review textareas, equal approve/reject styling and ranking
   titles without a way to inspect their artwork. Details/captures are in the
   existing report. These are findings, not implemented changes.
+
+## 2026-11-08 · Coffee rotation display at /disp
+
+- Source `src/ui/coffee-display`; original 17-style, 9+8 opposed-row 12-second
+  animation is preserved. Desktop gets the exact original 4K MP4; phones get a
+  1,039,830-byte 1080p rendition. QR SVG and both visible links point to the
+  formal `https://suanli.kechuangfuwu.com:8443/moontown/coffee-contest.html`.
+- Live backend is the unprivileged user service `moontown-coffee-display.service`
+  on 175:18089. User linger is enabled. Its official NGINX runtime is verified
+  from OCI manifest 7b5016a1…; files/config live in the private management release
+  `/home/HwHiAiUser/moontown-display-20261108`. It uses no GPU or account token.
+- Existing Traefik TLS exposes `/disp` and `/disp/`. The display Service has no
+  selector and mirrors a single explicit Endpoints address, 192.168.2.175:18089.
+  Never replace the missing selector with `{}` (which could select other Pods).
+  The failed container candidate is scaled to zero; manifests/evidence retained.
+- Direct external image pulls hung and serialized the node's pull queue. Do not
+  restart the shared runtime to serve this display. The official amd64 image was
+  fetched with crane, blob hashes verified and mirrored in the internal registry;
+  rootless NGINX avoids the unavailable container pull path. Runtime limits are
+  declared, but this user's legacy cgroup did not report MemoryCurrent; do not
+  claim that those limits were measured or enforced.
+- Under systemd's journal socket, `/dev/stderr` and `/dev/stdout` cannot be
+  reopened as ordinary log files. Host config uses `error_log stderr` and
+  `access_log off`, with `-e stderr` during startup. Read UTF-8 manifests through
+  fs Data.text(), not Bytes.to_unchecked_string(). Check before mkdir on an
+  existing directory even with recursive=true.
+- Verified from 175: HTTPS 443/8443 both return 200, `/disp` redirects to `/disp/`,
+  SVG matches exactly and video byte requests return 206/1024 bytes. The local
+  external 443 probe failed TLS, while the actual browser verified 8443; retain
+  the explicit 8443 public link and do not infer global 443 reachability from
+  the management probe alone. No TLS validation was bypassed.
+- Actual browser acceptance: 320/375px without overflow, 48px phone CTA, phone
+  HD and desktop 4K playback, pause/resume, QR visibility and navigation into the
+  formal first event. Captures are in output/coffee-disp-20261108. Browser access
+  recovered for this display; the separate mobile moderation branch a9f8aa12 is
+  still pending its own complete phone journey and is not part of this release.

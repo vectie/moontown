@@ -1,0 +1,234 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/x@0.5.5/crypto",
+  "moonbitlang/core/json",
+  "moonbitlang/core/env",
+}
+
+///|
+async fn command(program : String, args : Array[String]) -> String {
+  let r = @shell.Cmd(program, args).output()
+  r.check()
+  r.stdout()
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  command(
+    "kubectl",
+    [
+      "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", "-n", "aigc-acceptance-20260915",
+      ..args,
+    ],
+  )
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/moontown-display-20261108"
+  let image = "/home/HwHiAiUser/coffee-disp-nginx-oci"
+  let name = "moontown-coffee-display"
+  let unit = "/home/HwHiAiUser/.config/systemd/user/" + name + ".service"
+  let resume = @env.args().contains("--resume")
+  guard (!@fs.exists(unit) || resume) &&
+    command("systemctl", ["--user", "is-active", "default.target"]).trim() ==
+    "active" else {
+    fail("Inspect existing display user service before changing it")
+  }
+  guard command("ss", ["-ltnH", "sport = :18089"]).trim().is_empty() else {
+    fail("Display port is occupied")
+  }
+  if resume {
+    let previous = @fs.read_file(unit).text()
+    guard previous.contains(root + "/runtime/usr/sbin/nginx") &&
+      previous.contains(root + "/native-nginx.conf") else {
+      fail("Unexpected user unit")
+    }
+    @fs.write_file(
+      root + "/unit-before-host-recovery.txt",
+      previous,
+      create_mode=CreateNew,
+      permission=0o600,
+    )
+    @shell.Cmd("systemctl", ["--user", "stop", name + ".service"]).run()
+  }
+  let hash = "7b5016a10b41639c79df145998c67da5e51ca0aaf80083e836f5168c1858a1da"
+  let raw = @fs.read_file(image + "/blobs/sha256/" + hash).binary()
+  guard @crypto.bytes_to_hex_string(@crypto.sha256(raw)) == hash &&
+    @json.parse(@fs.read_file(image + "/blobs/sha256/" + hash).text())
+    is { "layers": Array(layers), .. } else {
+    fail("Reviewed official NGINX image required")
+  }
+  if !@fs.exists(root + "/runtime") {
+    @fs.mkdir(root + "/runtime", permission=0o700)
+  }
+  for layer in layers {
+    guard layer is { "digest": String(digest), .. } &&
+      digest.has_prefix("sha256:") &&
+      digest.length() == 71 else {
+      fail("Bad layer")
+    }
+    let path = image + "/blobs/sha256/" + digest[7:].to_owned()
+    guard "sha256:" +
+      @crypto.bytes_to_hex_string(@crypto.sha256(@fs.read_file(path).binary())) ==
+      digest else {
+      fail("OCI layer digest mismatch")
+    }
+    @shell.Cmd("tar", [
+      "--no-same-owner",
+      "--no-same-permissions",
+      "-xf",
+      path,
+      "-C",
+      root + "/runtime",
+    ]).run()
+  }
+  if !@fs.exists(root + "/tmp") {
+    @fs.mkdir(root + "/tmp", permission=0o700)
+  }
+  guard @json.parse(kube(["get", "configmap", name, "-o", "json"]))
+    is { "data": { "nginx.conf": String(original), .. }, .. } else {
+    fail("Missing display-only NGINX config")
+  }
+  let config = original
+    .replace(
+      old="/etc/nginx/mime.types",
+      new=root + "/runtime/etc/nginx/mime.types",
+    )
+    .replace(old="/tmp/", new=root + "/tmp/")
+    .replace(old="root /site;", new="root " + root + "/site;")
+    .replace(old="listen 8080;", new="listen 192.168.2.175:18089;")
+    .replace(old="error_log /dev/stderr warn;", new="error_log stderr warn;")
+    .replace(old="access_log /dev/stdout;", new="access_log off;")
+  @fs.write_file(root + "/native-nginx.conf", config, permission=0o600)
+  let loader = root + "/runtime/lib/ld-musl-x86_64.so.1"
+  let libraries = root + "/runtime/lib:" + root + "/runtime/usr/lib"
+  let binary = root + "/runtime/usr/sbin/nginx"
+  @shell.Cmd(loader, [
+    "--library-path",
+    libraries,
+    binary,
+    "-e",
+    "stderr",
+    "-t",
+    "-p",
+    root + "/",
+    "-c",
+    root + "/native-nginx.conf",
+  ]).run()
+  if !@fs.exists("/home/HwHiAiUser/.config/systemd/user") {
+    @fs.mkdir(
+      "/home/HwHiAiUser/.config/systemd/user",
+      recursive=true,
+      permission=0o700,
+    )
+  }
+  let service = "[Unit]\nDescription=MoonTown coffee display\nAfter=network.target\n\n[Service]\nType=simple\nWorkingDirectory=" +
+    root +
+    "\nExecStart=" +
+    loader +
+    " --library-path " +
+    libraries +
+    " " +
+    binary +
+    " -p " +
+    root +
+    "/ -c " +
+    root +
+    "/native-nginx.conf -g 'daemon off;'\nRestart=always\nRestartSec=2\nNoNewPrivileges=true\nUMask=0077\nMemoryMax=64M\nCPUQuota=25%\n\n[Install]\nWantedBy=default.target\n"
+  let service = service.replace(
+    old=binary + " -p ",
+    new=binary + " -e stderr -p ",
+  )
+  @fs.write_file(
+    unit,
+    service,
+    create_mode=if resume { CreateOrTruncate } else { CreateNew },
+    permission=0o600,
+  )
+  @shell.Cmd("systemctl", ["--user", "daemon-reload"]).run()
+  @shell.Cmd("systemctl", ["--user", "enable", "--now", name + ".service"]).run()
+  let mut healthy = false
+  for _ in 0..<20 {
+    let probe = @shell.Cmd("curl", [
+      "--fail", "--silent", "--max-time", "2", "http://192.168.2.175:18089/health",
+    ]).output()
+    if probe.exit_code() == 0 && probe.stdout() == "ok" {
+      healthy = true
+      break
+    }
+    @async.sleep(100)
+  }
+  guard healthy else { fail("Display host health failed") }
+  let current = @json.parse(kube(["get", "service", name, "-o", "json"]))
+  guard current
+    is {
+      "metadata": { "resourceVersion": String(version), .. },
+      "spec": { "selector": { "app": String(app), .. }, .. },
+      ..
+    } &&
+    app == name else {
+    fail("Display service drift")
+  }
+  @fs.write_file(
+    root + "/service-before-host.json",
+    current.stringify(indent=2),
+    create_mode=CreateNew,
+    permission=0o600,
+  )
+  let patch : Json = [
+    { "op": "test", "path": "/metadata/resourceVersion", "value": version },
+    { "op": "remove", "path": "/spec/selector" },
+  ]
+  @fs.write_file(
+    root + "/host-service-patch.json",
+    patch.stringify(),
+    permission=0o600,
+  )
+  println(
+    kube([
+      "patch",
+      "service",
+      name,
+      "--type=json",
+      "--patch-file",
+      root + "/host-service-patch.json",
+    ]),
+  )
+  let endpoints : Json = {
+    "apiVersion": "v1",
+    "kind": "Endpoints",
+    "metadata": { "name": name, "namespace": "aigc-acceptance-20260915" },
+    "subsets": [
+      {
+        "addresses": [{ "ip": "192.168.2.175" }],
+        "ports": [{ "port": 18089, "protocol": "TCP" }],
+      },
+    ],
+  }
+  @fs.write_file(
+    root + "/host-endpoints.json",
+    endpoints.stringify(),
+    permission=0o600,
+  )
+  println(kube(["apply", "-f", root + "/host-endpoints.json"]))
+  println(kube(["scale", "deployment", name, "--replicas=0"]))
+  @fs.write_file(
+    root + "/receipt.json",
+    (
+      {
+        "runtime_source": "ghcr.io/nginx/nginx-unprivileged@sha256:" + hash,
+        "service": name + ".service",
+        "url": "https://suanli.kechuangfuwu.com/disp/",
+        "backend": "192.168.2.175:18089",
+        "privileged": false,
+      } : Json).stringify(indent=2),
+    permission=0o600,
+  )
+  println(
+    "Rootless display user service ready; existing ingress preserved and container candidate stopped",
+  )
+}

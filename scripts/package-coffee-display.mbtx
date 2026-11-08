@@ -1,0 +1,57 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/x@0.5.5/crypto",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, root] &&
+    root.has_prefix("/tmp/coffee-disp-release-") &&
+    !@fs.exists(root) else {
+    fail("Use a new /tmp/coffee-disp-release-* directory")
+  }
+  let source = "src/ui/coffee-display"
+  let files = [
+    "index.html", "display.css", "display.js", "assets/participate.svg", "assets/coffee-opposed-rows-v1.jpg",
+    "assets/coffee-opposed-rows-hd-v1.mp4", "assets/coffee-opposed-rows-4k-v1.mp4",
+  ]
+  @fs.mkdir(root, permission=0o700)
+  @fs.mkdir(root + "/webroot/disp/assets", recursive=true, permission=0o755)
+  let rows : Array[Json] = []
+  for file in files {
+    let bytes = @fs.read_file(source + "/" + file).binary()
+    @fs.write_file(root + "/webroot/disp/" + file, bytes, permission=0o644)
+    rows.push({
+      "path": file,
+      "bytes": bytes.length(),
+      "sha256": @crypto.bytes_to_hex_string(@crypto.sha256(bytes)),
+    })
+  }
+  @fs.write_file(
+    root + "/manifest.json",
+    (
+      {
+        "participate_url": "https://suanli.kechuangfuwu.com:8443/moontown/coffee-contest.html",
+        "files": rows,
+      } : Json).stringify(indent=2),
+    permission=0o600,
+  )
+  @shell.Cmd("env", [
+    "COPYFILE_DISABLE=1",
+    "tar",
+    "--no-xattrs",
+    "-czf",
+    root + "/site.tgz",
+    "-C",
+    root + "/webroot",
+    ".",
+  ]).run()
+  let digest = @shell.Cmd("shasum", ["-a", "256", root + "/site.tgz"]).output()
+  digest.check()
+  println(digest.stdout())
+}
