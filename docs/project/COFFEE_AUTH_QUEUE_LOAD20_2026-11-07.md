@@ -247,3 +247,33 @@ saved PNG is 1024×1084, retaining all artwork pixels plus the existing AI foote
 The sealed example shows twenty votes, with 9/6/5 on the top three works.
 
 The previous load test is documented in `COFFEE_LOAD20_2026-11-07.md`.
+
+## 2026-11-08 · Mobile review and ranking inspection
+
+Reopened the R5 example using the existing host account. The current review
+queue is empty because all twenty submissions were already approved; no votes,
+approvals, awards or event dates were changed during this inspection. The
+twenty-pending reference remains the actual earlier capture
+`mobile-host-review-card.png`, not a recreated current pending queue.
+
+The live ranking has twenty rows and twenty sealed votes (9/6/5 at the top).
+At 320px and 375px the document has no horizontal overflow. Gallery voting
+controls measure approximately 45px high. An original decoded at 1024px and
+closed normally. The host shortcut reaches the review section; refresh works
+and voting/award settings stay collapsed. New captures are
+`mobile-review-check-leaderboard-320.jpg`,
+`mobile-review-check-leaderboard-375.jpg` and
+`mobile-review-check-host-empty-375.jpg` in the same output directory.
+
+Remaining UX findings, not implemented in this inspection:
+
+- Every pending card exposes an 88px opinion textarea even when approving.
+  Reveal it when returning a work; keep the actionable rejection requirement.
+- Approve and reject currently share secondary styling. Give approval a clear
+  primary treatment while retaining a separate return action.
+- Ranking titles are plain text with no image or gallery navigation. Let a
+  ranking entry open the corresponding work with a clear return to the ranking.
+
+Fresh approve/reject and live vote mutations were not repeated against this
+already sealed example. Their earlier journey evidence remains separate from
+this read-only inspection. Physical phone keyboard behavior is still unverified.

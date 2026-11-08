@@ -244,3 +244,9 @@ existing documentation and record concrete pitfalls here.
   differently from gateway 0.22.4: explicitly select creation modes in preview
   writes and fixtures. Production's effective CreateOrTruncate behavior is the
   same. Generated .mbti changes are the new image variants/preview API only.
+- Mobile review/ranking inspection: R5 now has zero pending entries; distinguish
+  its archived real twenty-pending screenshot from the current sealed activity.
+  Do not reopen votes or reverse approvals for screenshots. Remaining UX gaps
+  are always-visible review textareas, equal approve/reject styling and ranking
+  titles without a way to inspect their artwork. Details/captures are in the
+  existing report. These are findings, not implemented changes.
