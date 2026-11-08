@@ -319,3 +319,27 @@ existing documentation and record concrete pitfalls here.
   Public browser needed a normal reload to invalidate its cached v2 document;
   stylesheet URL is display.css?v=20261108-footer-3. Captures:
   output/coffee-disp-20261108/{desktop,mobile}-orange-footer-v3.jpg.
+- Partner/community follow-up: use the existing LunaNexa official vector sheet
+  (pinned SHA395701ab…) with a viewBox around its newer mark. This provides true
+  transparent blue paths without changing hue through CSS multiplication. The
+  sticker SVG's cream fill is now none, and the extra partnership label is gone.
+  Company, coffee and sticker text now have matching optical heights. Coffee's
+  complete original contour groups are arranged horizontally with their counters
+  intact; do not split the original curved lettering with a rectangular crop.
+  `prepare-coffee-partner-vectors.mbtx` pins source hashes and regenerates SVGs.
+- Community QR is an exact copy of the user's supplied PNG, SHA8911f1e3…;
+  CSS crops its caption, preserving the complete code and at least four modules
+  of white margin. Display labels distinguish participation from community.
+  Mobile shows two equal QR frames above the full-width 48px entry button.
+  Never remove white quiet margins from QR images while removing logo backgrounds.
+- Copy updater targets copy-partners-v4, pinned 12-file manifest, and v3 source
+  hashes. It adds three SVGs and the QR, then CSS and HTML; private backups remain
+  in the release folder. Media, login, routing and service processes are unchanged.
+- V4 acceptance: actual desktop 1920×1080 and phone 320/375px have no horizontal
+  overflow; all six images load, CTA is 48px, both QR captions are distinct.
+  Public 8443 displays transparent blue group paths, unfilled sticker interior,
+  complete coffee lettering and no partnership label. Management 443/8443 passed
+  exact served HTML/CSS/brand/community/participation QR comparisons, video Range
+  206 and participant page 200. Captures are
+  output/coffee-disp-20261108/{desktop,mobile}-community-transparent-v4.jpg.
+  QR source and deployed bytes match; no physical WeChat scan was performed.

@@ -10,7 +10,7 @@
 生成 `assets/participate.svg`，保持 M 级纠错和四模块留白。二维码必须经过独立核对，不应交给
 图像生成模型绘制。
 
-`scripts/package-coffee-display.mbtx` 导出十一个公开文件与散列清单，原稿说明不会公开到站点。
+`scripts/package-coffee-display.mbtx` 导出十二个公开文件与散列清单，原稿说明不会公开到站点。
 `scripts/publish-coffee-display-runtime.mbtx` 镜像经校验的官方运行时到内网仓库。
 `scripts/deploy-coffee-display.mbtx` 创建专用入口、静态资源及容器候选。
 本次节点外部镜像拉取被阻塞，最终使用 `scripts/release-coffee-display-host.mbtx` 的独立用户
@@ -19,9 +19,12 @@
 后续发布要使用新的目录并核对当前入口，不能覆盖已有发布。
 
 标题与联名更新使用 `scripts/update-coffee-display-copy.mbtx`，核对固定清单和原版散列，备份
-旧 HTML/CSS 后按 CSS、HTML 顺序原子替换，无需重启服务。公司字标沿用官方素材；
+旧 HTML/CSS 后按新增素材、CSS、HTML 顺序原子替换，无需重启服务。公司字标沿用官方素材；
 半醒工坊沿用杯身提取轮廓；向量贴贴为本次 SVG 草案。保留原橙色条和英文邀请语，联名
 缩小置右。手机端裁去视频文字区后，以 HTML 恢复橙条和英文，避免跟随视频缩成无法阅读的小字。
+
+右上方并排显示“扫码参赛”和“关注社区”，手机端两码下方提供 48px 的直接参赛按钮。
+社区二维码原图逐字节保存，CSS 裁切保留四模块以上留白；其微信扫码识别需在现场设备上核对。
 
 当前用户服务设置了自动重启和开机启动（已确认 linger=yes）。可用管理机用户执行：
 

@@ -10,10 +10,10 @@ import {
 ///|
 async fn main {
   let root = "/home/HwHiAiUser/moontown-display-20261108"
-  let incoming = root + "/copy-footer-v3"
+  let incoming = root + "/copy-partners-v4"
   let manifest = @fs.read_file(incoming + "/manifest.json")
   guard @crypto.bytes_to_hex_string(@crypto.sha256(manifest.binary())) ==
-    "f0ca093b528bf77911eeaffb737f03b84aaf2f48f052a28ccc8a3cb71e05eb2d" &&
+    "8a63d8fdf1b587dbd910ec945f24b02bd7619f96a4cc0461011d1993184c7ea1" &&
     @json.parse(manifest.text()) is { "files": Array(files), .. } else {
     fail("Unexpected reviewed release manifest")
   }
@@ -36,10 +36,10 @@ async fn main {
   for
     (name, hash) in [
       (
-        "index.html", "c897e142f82ee25eba45734f7cf3ae354880a00fdfb583ee84e26ca78643f4eb",
+        "index.html", "e362ced7b72ab03b80f95b5e4ade2505a99f4a85a3c2293dfccbe18aa40d7277",
       ),
       (
-        "display.css", "83dbc7bf9076dd18cc9432f2032fa5988dc1bc50f70c443bac2b91bac3a85d1b",
+        "display.css", "ef2aa67fa011eff27d7a4df52df4c9727d35aef8fbae0b19cad6b6b6938197e9",
       ),
     ] {
     let current = @fs.read_file(root + "/site/disp/" + name).binary()
@@ -53,8 +53,12 @@ async fn main {
       permission=0o600,
     )
   }
-  // Existing assets are unchanged. CSS first, HTML last; no runtime changes.
-  for name in ["display.css", "index.html"] {
+  // Publish new versioned assets before CSS and HTML; no runtime changes.
+  for
+    name in [
+      "assets/group-mark.svg", "assets/banxing-horizontal.svg", "assets/vector-sticker-wordmark-v2.svg",
+      "assets/community-qr.png", "display.css", "index.html",
+    ] {
     let target = root + "/site/disp/" + name
     guard !@fs.exists(target + ".next") else {
       fail("Staged file already exists")
@@ -67,7 +71,5 @@ async fn main {
     )
     @shell.Cmd("mv", [target + ".next", target]).run()
   }
-  println(
-    "Restored orange invitation footer and compact right-aligned partners.",
-  )
+  println("Published transparent partner marks and the original community QR.")
 }

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 88" width="330" height="88" role="img" aria-labelledby="name">
+  <title id="name">向量贴贴</title>
+  <g stroke="#243e32" stroke-width="3.5" stroke-linejoin="round">
+    <rect x="10" y="21" width="43" height="43" rx="9" fill="#ed8053" transform="rotate(-10 31.5 42.5)"/>
+    <path d="M23 20h32a8 8 0 0 1 8 8v24L49 67H23a8 8 0 0 1-8-8V28a8 8 0 0 1 8-8Z" fill="none"/>
+    <path d="M49 67V56a4 4 0 0 1 4-4h10" fill="none"/>
+    <path d="m29 47 15-15m-8 0h8v8" fill="none" stroke-linecap="round"/>
+  </g>
+  <rect x="202" y="24" width="120" height="47" rx="11" fill="#ed8053" transform="rotate(-3 262 47.5)"/>
+  <text x="77" y="62" fill="#243e32" font-family="Yuanti SC, Hiragino Sans GB, PingFang SC, Microsoft YaHei, sans-serif" font-size="51" font-weight="900" letter-spacing="2">向量贴贴</text>
+</svg>

@@ -38,8 +38,8 @@ async fn main {
     }
     for
       index, path in [
-        "display.css", "assets/company-wordmark.png", "assets/group-logo.jpg", "assets/banxing-workshop.svg",
-        "assets/vector-sticker-wordmark.svg",
+        "display.css", "assets/company-wordmark.png", "assets/group-mark.svg", "assets/banxing-horizontal.svg",
+        "assets/vector-sticker-wordmark-v2.svg", "assets/community-qr.png",
       ] {
       let copy = stem + "-brand-\{index}.bin"
       @shell.Cmd("curl", [
