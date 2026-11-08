@@ -1,0 +1,79 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/coffee-auth-queue-20261107"
+  let town = root + "/preview-source/moontown"
+  let deps = root + "/image-deps/unpack"
+  let moon = "/home/HwHiAiUser/.moon-new/bin/moon"
+  // Remove only AppleDouble metadata emitted by the earlier macOS tar export.
+  for name in @fs.readdir(town + "/src/creative_contest", include_hidden=true) {
+    if name.has_prefix("._") {
+      let path = town + "/src/creative_contest/" + name
+      guard @fs.kind(path, follow_symlink=false) is Regular else {
+        fail("Unexpected metadata entry")
+      }
+      @fs.remove(path)
+    }
+  }
+  for
+    path in [
+      town + "/src/creative_contest/moon.pkg",
+      town + "/src/account_gateway/src/main/moon.pkg",
+      town + "/src/image_preview/moon.pkg",
+    ] {
+    let raw = @fs.read_file(path).text()
+    let flags = raw
+      .replace(
+        old="-L/opt/homebrew/lib",
+        new="-L" +
+          deps +
+          "/usr/lib/x86_64-linux-gnu -L" +
+          deps +
+          "/lib/x86_64-linux-gnu",
+      )
+      .replace(
+        old="-I/opt/homebrew/include",
+        new="-I" + deps + "/usr/include -I" + deps + "/usr/include/libpng16",
+      )
+    @fs.write_file(path, flags, create_mode=CreateOrTruncate)
+  }
+  let result = @shell.Cmd(moon, [
+    "-C",
+    town + "/src/account_gateway",
+    "build",
+    "src/main",
+    "--target",
+    "native",
+    "--release",
+  ]).output()
+  @fs.write_file(
+    root + "/mobile-gateway-build-final.log",
+    result.stdout() + result.stderr(),
+    create_mode=CreateOrTruncate,
+    permission=0o600,
+  )
+  result.check()
+  let binary = town +
+    "/src/account_gateway/_build/native/release/build/vectie/moontown-account-gateway/main/main.exe"
+  let receipt = @shell.Cmd("sha256sum", [
+    binary,
+    town + "/src/creative_contest/store.mbt",
+    town + "/src/creative_contest/ranked_awards.mbt",
+    town + "/src/creative_contest/voting.mbt",
+  ]).output()
+  receipt.check()
+  @fs.write_file(
+    root + "/mobile-native-source.sha256",
+    receipt.stdout(),
+    permission=0o600,
+  )
+  println(
+    "Native mobile review/voting release built; source/binary receipt saved",
+  )
+}

@@ -1,0 +1,84 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, target] &&
+    ["qa", "formal", "rehearsal"].contains(target) else {
+    fail("qa | formal | rehearsal")
+  }
+  let root = "/home/HwHiAiUser/coffee-auth-queue-20261107"
+  let moon = "/home/HwHiAiUser/.moon-new/bin/moon"
+  guard @json.parse(@fs.read_file(root + "/mobile-release.json").text())
+    is { "runtime": String(runtime), "ui": String(ui), .. } else {
+    fail("Missing qualified release")
+  }
+  let name = if target == "formal" {
+    "moontown-platform"
+  } else {
+    "moontown-coffee-qa"
+  }
+  if target == "rehearsal" {
+    let ui_root = root + "/mobile-rehearsal-ui-final"
+    @fs.mkdir(ui_root, permission=0o700)
+    @shell.Cmd(moon, [
+      "run",
+      root + "/deploy-account-ui.mbtx",
+      "--",
+      ui_root,
+      "sha256:26125105cdf48a644a41fbea21342a5323c61242e61ae5a8737a1d218024a35a",
+      ui,
+      "moontown-coffee-mobile-20261108-v2",
+    ]).run()
+    println(
+      "Final rehearsal UI deployed; native runtime, sealed votes and awards preserved",
+    )
+    return
+  }
+  let command = @shell.Cmd("kubectl", [
+    "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", "-n", "aigc-acceptance-20260915",
+    "get", "deployment", name, "-o", "json",
+  ]).output()
+  command.check()
+  guard @json.parse(command.stdout())
+    is { "metadata": { "resourceVersion": String(version), .. }, .. } else {
+    fail("Missing deployment version")
+  }
+  let args = [
+    "run",
+    root + "/update-activity-qa-runtime.mbtx",
+    "--",
+    root + "/mobile-" + target + "-runtime",
+    version,
+    "--mobile",
+    runtime,
+  ]
+  if target == "formal" {
+    args.push("--formal")
+  }
+  args.push("--apply")
+  // The existing upgrader stops writers and verifies both complete PVC backups.
+  @shell.Cmd(moon, args).run()
+  let ui_root = root + "/mobile-" + target + "-ui"
+  @fs.mkdir(ui_root, permission=0o700)
+  @shell.Cmd(moon, [
+    "run",
+    root + "/deploy-account-ui.mbtx",
+    "--",
+    ui_root,
+    "sha256:7dccb07f24d9dde7bcb446a74c19a5f0ee2adcca7d2cb5059cf7ccc8dac2c1bc",
+    ui,
+    name,
+  ]).run()
+  println(
+    "Mobile review and vote-based awards deployed to " +
+    target +
+    "; verified backups retained",
+  )
+}

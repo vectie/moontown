@@ -5,6 +5,7 @@ import {
   "moonbitlang/async@0.22.4/shell",
   "moonbitlang/core/env",
   "moonbitlang/core/json",
+  "moonbitlang/core/string",
 }
 
 ///|
@@ -14,7 +15,9 @@ let origin = "https://suanli.kechuangfuwu.com:8443"
 async fn base(root : String) -> String {
   guard @json.parse(@fs.read_file(root + "/run.json").text())
     is { "route": String(route), .. } &&
-    ["coffee-load20-r2", "coffee-load20-r5"].contains(route) else {
+    [
+      "coffee-load20-r2", "coffee-load20-r5", "coffee-mobile-20261108", "coffee-mobile-20261108-v2",
+    ].contains(route) else {
     fail("Isolated journey only")
   }
   origin + "/" + route + "/api/creative/"
@@ -36,6 +39,7 @@ async fn request(
   label : String,
   path : String,
   body~ : Json? = None,
+  expected~ : String = "200",
 ) -> Json {
   let output = root + "/journey-" + key + "-" + label + ".json"
   let args = [
@@ -67,7 +71,7 @@ async fn request(
   args.push(base(root) + path)
   let result = @shell.Cmd("curl", args).output()
   result.check()
-  guard result.stdout() == "200" else {
+  guard result.stdout() == expected else {
     fail(
       "Journey " +
       label +
@@ -86,6 +90,7 @@ async fn action(
   actor : String,
   name : String,
   payload : Json,
+  expected~ : String = "200",
 ) -> Json {
   request(
     root,
@@ -93,6 +98,7 @@ async fn action(
     name,
     "actions",
     body=Some({ "expected_actor_id": actor, "action": name, "payload": payload }),
+    expected~,
   )
 }
 
@@ -103,12 +109,126 @@ async fn main {
       "coffee-load20-journey.mbtx submit19|host|approve|vote19|inspect PRIVATE_R2_EVIDENCE",
     )
   }
+  if phase == "init-mobile" {
+    guard [
+        "/Users/kq/.codex/coffee-mobile-20261108", "/Users/kq/.codex/coffee-mobile-20261108-v2",
+      ].contains(root) &&
+      !@fs.exists(root) else {
+      fail("Use a fresh private mobile rehearsal")
+    }
+    @fs.mkdir(root, permission=0o700)
+    let source = "/Users/kq/.codex/coffee-load20-r6-20261107"
+    for file in ["members.json", "jobs.json"] {
+      @fs.write_file(
+        root + "/" + file,
+        @fs.read_file(source + "/" + file).binary(),
+        permission=0o600,
+      )
+    }
+    for i in 1..<=20 {
+      let key = (if i < 10 { "0" } else { "" }) + i.to_string()
+      @fs.write_file(
+        root + "/" + key + "-cookies.txt",
+        @fs.read_file(source + "/" + key + "-cookies.txt").binary(),
+        permission=0o600,
+      )
+    }
+    @fs.write_file(
+      root + "/run.json",
+      (
+        {
+          "route": if root.has_suffix("-v2") {
+            "coffee-mobile-20261108-v2"
+          } else {
+            "coffee-mobile-20261108"
+          },
+        } : Json).stringify(),
+      permission=0o600,
+    )
+    println(
+      "Private rehearsal identity evidence initialized; no new accounts or generations",
+    )
+    return
+  }
+  if phase == "refresh-identities" {
+    guard [
+      "/Users/kq/.codex/coffee-mobile-20261108", "/Users/kq/.codex/coffee-mobile-20261108-v2",
+    ].contains(root) else {
+      fail("Mobile rehearsal identities only")
+    }
+    let identities : Array[(String, String, String)] = []
+    for i in 1..<=20 {
+      let key = (if i < 10 { "0" } else { "" }) + i.to_string()
+      guard @json.parse(
+          @fs.read_file(
+            "/Users/kq/.codex/coffee-load20-20261107/" + key + "-register.json",
+          ).text(),
+        )
+        is { "email": String(email), "password": String(password), .. } else {
+        fail("Missing test identity")
+      }
+      identities.push((key, email, password))
+    }
+    guard @json.parse(
+        @fs.read_file(
+          "/Users/kq/.codex/coffee-qa-accounts-real-20261107/credentials.json",
+        ).text(),
+      )
+      is Array(credentials) &&
+      credentials.iter().find_first(item => item is { "role": "host", .. })
+      is Some({ "username": String(host), "password": String(password), .. }) else {
+      fail("Missing existing scoped host")
+    }
+    identities.push(("host", host, password))
+    for (key, username, password) in identities {
+      let input = root + "/login-" + key + "-input.json"
+      @fs.write_file(
+        input,
+        (
+          {
+            "username": username,
+            "password": password,
+            "audience": "enterprise",
+          } : Json).stringify(),
+        permission=0o600,
+      )
+      let result = @shell.Cmd("curl", [
+        "--silent",
+        "--show-error",
+        "--max-time",
+        "30",
+        "--header",
+        "Origin: " + origin,
+        "--header",
+        "Sec-Fetch-Site: same-origin",
+        "--header",
+        "Content-Type: application/json",
+        "--data-binary",
+        "@" + input,
+        "--cookie-jar",
+        root + "/" + key + "-cookies.txt",
+        "--output",
+        root + "/login-" + key + "-response.json",
+        "--write-out",
+        "%{http_code}",
+        origin + "/user/auth/password",
+      ]).output()
+      result.check()
+      guard result.stdout() == "200" else {
+        fail("Test sign-in failed; response retained privately")
+      }
+    }
+    println(
+      "Refreshed twenty ordinary test sessions and the existing scoped host",
+    )
+    return
+  }
   guard @json.parse(@fs.read_file(root + "/members.json").text())
     is Array(members) &&
     members.length() == 20 else {
     fail("Need 20 ordinary identities")
   }
-  if ["submit19", "submit20"].contains(phase) {
+  if ["submit19", "submit20", "submit-last"].contains(phase) {
     guard @json.parse(@fs.read_file(root + "/jobs.json").text()) is Array(jobs) &&
       jobs.length() == 20 &&
       jobs.all(job => job is { "state": "completed", .. }) else {
@@ -120,6 +240,9 @@ async fn main {
           fail("Bad member")
         }
         if key == "20" && phase == "submit19" {
+          continue
+        }
+        if key != "20" && phase == "submit-last" {
           continue
         }
         guard jobs
@@ -143,6 +266,8 @@ async fn main {
     println(
       if phase == "submit20" {
         "Submitted all 20 real images"
+      } else if phase == "submit-last" {
+        "Resubmitted user20's real image after review return"
       } else {
         "Submitted 19 real images; user 20 remains for the mobile UI submission"
       },
@@ -165,6 +290,91 @@ async fn main {
   }
   if phase == "host" {
     println("Verified existing scoped host")
+    return
+  }
+  if phase == "review-mobile" {
+    guard [
+        "/Users/kq/.codex/coffee-mobile-20261108", "/Users/kq/.codex/coffee-mobile-20261108-v2",
+      ].contains(root) &&
+      host is { "review_queue": Array(queue), .. } &&
+      queue.length() == 20 else {
+      fail("Only the fresh twenty-pending rehearsal")
+    }
+    guard queue
+      .iter()
+      .find_first(item => {
+        item is { "entry": { "display_name": "体验者 20", .. }, .. }
+      })
+      is Some({ "entry": { "id": String(id), .. }, .. }) &&
+      members.iter().find_first(item => item is { "role": "01", .. })
+      is Some({ "account_id": String(member_id), .. }) else {
+      fail("Missing test entries")
+    }
+    ignore(
+      action(
+        root,
+        "01",
+        member_id,
+        "approve",
+        { "entry_id": id },
+        expected="403",
+      ),
+    )
+    ignore(
+      action(
+        root,
+        "01",
+        member_id,
+        "vote",
+        { "entry_id": id, "intent": "before-approval" },
+        expected="409",
+      ),
+    )
+    ignore(
+      action(
+        root,
+        "host",
+        host_id,
+        "reject",
+        { "entry_id": id },
+        expected="400",
+      ),
+    )
+    let rejected = action(root, "host", host_id, "reject", {
+      "entry_id": id,
+      "reason": "请在标题中表达半醒咖啡的主题，再提交审核。",
+    })
+    guard rejected
+      is { "review_queue": Array(pending), "gallery": Array([]), .. } &&
+      pending.length() == 19 else {
+      fail("Rejection did not leave nineteen pending and no public entries")
+    }
+    println(
+      "Permission, early vote and missing-opinion checks passed; returned user20 for resubmission",
+    )
+    return
+  }
+  if phase == "publish-mobile" {
+    guard [
+      "/Users/kq/.codex/coffee-mobile-20261108", "/Users/kq/.codex/coffee-mobile-20261108-v2",
+    ].contains(root) else {
+      fail("Rehearsal only")
+    }
+    ignore(action(root, "host", host_id, "award", {}, expected="409"))
+    let published = action(root, "host", host_id, "publish-results", {})
+    guard published
+      is {
+        "awards": Array(awards),
+        "voting": { "settled": True, "total_votes": Number(20, ..), .. },
+        ..
+      } &&
+      awards.length() == 3 else {
+      fail("Expected three vote-based test awards")
+    }
+    save(root, "published-results", published)
+    println(
+      "Published three rehearsal prizes from the naturally sealed twenty votes",
+    )
     return
   }
   if phase == "settlement" {
@@ -200,6 +410,104 @@ async fn main {
     return
   }
   let public = request(root, "01", "public", "public")
+  if ["wait-open", "wait-awards"].contains(phase) {
+    for _ in 0..<360 {
+      let current = request(root, "01", "clock-poll", "public")
+      guard current
+        is {
+          "server_ms": String(now),
+          "event": { "awards_ms": String(awards), .. },
+          "voting": { "phase": String(status), .. },
+          ..
+        } else {
+        fail("Missing authoritative event clock")
+      }
+      if phase == "wait-open" && status == "open" {
+        println("Live server voting window is open")
+        return
+      }
+      if phase == "wait-open" && status == "closed" {
+        fail("The vote has already closed; never reopen a frozen event")
+      }
+      if phase == "wait-awards" &&
+        status == "closed" &&
+        @string.parse_uint64(now) >= @string.parse_uint64(awards) {
+        println("Live server sealed the vote and reached awards time")
+        return
+      }
+      @async.sleep(1000)
+    }
+    fail("Timed out waiting for the live event clock")
+  }
+  if phase == "vote-mobile-last" {
+    guard [
+        "/Users/kq/.codex/coffee-mobile-20261108", "/Users/kq/.codex/coffee-mobile-20261108-v2",
+      ].contains(root) &&
+      members.iter().find_first(item => item is { "role": "20", .. })
+      is Some({ "account_id": String(voter), .. }) &&
+      public
+      is {
+        "gallery": Array(gallery),
+        "voting": { "phase": "open", "total_votes": Number(19, ..), .. },
+        ..
+      } else {
+      fail("Need nineteen real votes in the open rehearsal")
+    }
+    let targets = ["03", "02", "20"].map(key => {
+      guard gallery
+        .iter()
+        .find_first(item => {
+          item is { "display_name": String(display), .. } &&
+          display == "体验者 " + key
+        })
+        is Some({ "id": String(id), .. }) else {
+        fail("Missing work")
+      }
+      id
+    })
+    ignore(action(root, "host", host_id, "publish-results", {}, expected="403"))
+    ignore(
+      action(root, "20", voter, "vote", {
+        "entry_id": targets[0],
+        "intent": "mobile-cast",
+      }),
+    )
+    let changed = action(root, "20", voter, "vote", {
+      "entry_id": targets[1],
+      "intent": "mobile-change",
+    })
+    guard changed is { "voting": { "total_votes": Number(20, ..), .. }, .. } else {
+      fail("Changing a vote must not add a ballot")
+    }
+    let cancelled = action(root, "20", voter, "cancel-vote", {
+      "intent": "mobile-cancel",
+    })
+    guard cancelled is { "voting": { "total_votes": Number(19, ..), .. }, .. } else {
+      fail("Cancelling a vote must remove exactly one ballot")
+    }
+    ignore(
+      action(
+        root,
+        "20",
+        voter,
+        "vote",
+        { "entry_id": targets[2], "intent": "mobile-own" },
+        expected="409",
+      ),
+    )
+    let restored = action(root, "20", voter, "vote", {
+      "entry_id": targets[0],
+      "intent": "mobile-restore",
+    })
+    guard restored is { "voting": { "total_votes": Number(20, ..), .. }, .. } else {
+      fail("Need twenty votes after restoration")
+    }
+    save(root, "vote-change-cancel", restored)
+    println(
+      "Real voter20 cast, changed, cancelled and restored one ballot; own-vote and early awards blocked",
+    )
+    return
+  }
   if ["vote19", "vote20"].contains(phase) {
     guard public
       is { "gallery": Array(gallery), "voting": { "phase": "open", .. }, .. } &&

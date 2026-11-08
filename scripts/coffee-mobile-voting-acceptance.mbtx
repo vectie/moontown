@@ -1,0 +1,39 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+}
+
+///|
+async fn main {
+  let root = "/Users/kq/.codex/coffee-mobile-20261108-v2"
+  let open = @shell.Cmd("ssh", [
+    "-n", "-o", "BatchMode=yes", "lunanexa-management", "/home/HwHiAiUser/.moon-new/bin/moon run /home/HwHiAiUser/coffee-auth-queue-20261107/coffee-mobile-rehearsal.mbtx -- open-vote --v2",
+  ]).output()
+  @fs.write_file(
+    root + "/open-voting.log",
+    open.stdout() + open.stderr(),
+    permission=0o600,
+  )
+  open.check()
+  for
+    phase in [
+      "wait-open", "vote19", "vote-mobile-last", "wait-awards", "publish-mobile",
+      "inspect",
+    ] {
+    println("Acceptance phase: " + phase)
+    let result = @shell.Cmd("moon", [
+      "run", "scripts/coffee-load20-journey.mbtx", "--", phase, root,
+    ]).output()
+    @fs.write_file(
+      root + "/acceptance-" + phase + ".log",
+      result.stdout() + result.stderr(),
+      permission=0o600,
+    )
+    result.check()
+  }
+  println(
+    "Twenty real test voters, return/resubmit and ranked prize publication completed",
+  )
+}

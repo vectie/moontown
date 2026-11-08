@@ -437,7 +437,12 @@ async test "legacy state migration and real concurrent callers retain a single d
   defer @fs.rmdir(root, recursive=true)
   let path = root + "/state.json"
   let config_path = root + "/config.json"
-  let config = builtin_config()
+  // Real lock/disk scheduling must not accidentally cross a 90ms fixture window.
+  let config = {
+    ..builtin_config(),
+    voting_closes_ms: 120000UL,
+    awards_ms: 130000UL,
+  }
   @fs.write_file(
     config_path,
     fixture_config_json(config).stringify(),
@@ -492,7 +497,7 @@ async test "legacy state migration and real concurrent callers retain a single d
         execute(
           "settlement",
           {},
-          1200UL,
+          120000UL,
           Some("visitor"),
           false,
           path,
@@ -508,7 +513,7 @@ async test "legacy state migration and real concurrent callers retain a single d
   let exported = execute(
     "settlement",
     {},
-    1200UL,
+    120000UL,
     Some("host"),
     true,
     path,
@@ -519,7 +524,7 @@ async test "legacy state migration and real concurrent callers retain a single d
   )
   let before = read(path, config)
   assert_eq(
-    execute("settlement", {}, 1300UL, Some("host"), true, path, config_path),
+    execute("settlement", {}, 130000UL, Some("host"), true, path, config_path),
     exported,
   )
   assert_eq(read(path, config).to_json(), before.to_json())

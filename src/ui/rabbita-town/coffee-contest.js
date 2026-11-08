@@ -75,7 +75,7 @@ function generationStatus(job, now, activity) {
   if (job.state === 'running') return seconds === 0 ? '正在收尾，请稍等。' : `正在生成 · 预计还需约 ${duration}`;
   return ahead ? `前面还有 ${ahead} 人 · 预计约 ${duration}开始` : `马上轮到你 · 预计约 ${duration}完成`;
 }
-const prizeLabels = Object.freeze({ creative: "创意惊喜 · 手办", popular: "人气灵感 · 帆布包", coffee: "咖啡共鸣 · 特调" });
+const prizeLabels = Object.freeze({ creative: "一等奖 · 手办", popular: "二等奖 · 帆布包", coffee: "三等奖 · 特调咖啡" });
 function csvCell(value) {
   const text = String(value ?? "");
   return `"${(/^[\s]*[=+@\-\t\r]/.test(text) ? "'" : "") + text.replaceAll('"', '""')}"`;
@@ -111,11 +111,14 @@ function init() {
   const url = (path) => new URL(path, endpoint).href;
   let state = null, selected = "", actor = "", pendingIntent = null, writing = false, refreshing = false, timer, clockOffset = 0;
   const reviewDrafts = /* @__PURE__ */ new Map();
+  const reviewReturns = new Set();
+  let reviewKey = '';
   let votingDirty = false, followGeneration = false, identityEpoch = 0;
   let rankingKey = '', historyKey = '';
   let refreshError = '';
   let artworkRequest = 0, artworkUrl = '';
   let artworkController = null, downloadController = null;
+  let artworkReturn = null;
   let disqualifyEntry = '';
   const dialog = $("submit-dialog");
   function fitDialog() {
@@ -144,8 +147,10 @@ function init() {
   };
   const notice = (message, error = false, target = "notice") => {
     if (target === 'notice') refreshError = '';
-    $(target).textContent = message;
-    $(target).dataset.error = String(error);
+    const surface=$(target);
+    if(!surface) return;
+    surface.textContent = message;
+    surface.dataset.error = String(error);
   };
   const active = () => state?.generations?.some((job) => ["queued", "running", "needs_reconcile"].includes(job.state));
   const open = () => state && Date.now() + clockOffset >= Number(state.event.opens_ms) && Date.now() + clockOffset < Number(state.event.deadline_ms);
@@ -178,6 +183,8 @@ function init() {
     $("history").replaceChildren();
     historyKey = '';
     reviewDrafts.clear();
+    reviewReturns.clear();
+    reviewKey = '';
     votingDirty = false;
     $("voting-form").reset();
     $("award-form").reset();
@@ -223,6 +230,7 @@ function init() {
     }
   }
   function openArtwork(jobId, title) {
+    artworkReturn = document.activeElement;
     $('artwork-title').textContent = title;
     $('artwork-image').dataset.job = jobId;
     $('artwork-image').alt = title;
@@ -430,9 +438,21 @@ function init() {
     if (key !== rankingKey) {
       rankingKey = key;
       $('leaderboard-list').replaceChildren(...rows.map(row => {
-        const li=node('li',undefined,'ranking-row'), title=node('span',row.title);
+        const li=node('li',undefined,'ranking-row'), work=node('button',undefined,'ranking-work'), title=node('span',row.title);
+        const entry=state.gallery.find(entry=>entry.id===row.entry_id);
+        work.type='button';
+        work.dataset.rankingEntry=row.entry_id;
+        work.setAttribute('aria-label',`查看榜单作品：${row.title}`);
+        if (entry) {
+          const thumb=node('img',undefined,'ranking-thumb');
+          thumb.src=url(`images/${entry.generation_id}/thumb`);
+          thumb.alt=''; thumb.width=48; thumb.height=48; thumb.loading='lazy'; thumb.decoding='async';
+          work.append(thumb);
+          work.onclick=()=>openArtwork(entry.generation_id,row.title);
+        }
         if (row.display_name) title.append(node('small',row.display_name));
-        li.append(node('strong',String(row.rank)),title,node('strong',`${row.votes} 票`));
+        work.append(title);
+        li.append(node('strong',String(row.rank)),work,node('strong',`${row.votes} 票`));
         return li;
       }));
     }
@@ -448,6 +468,15 @@ function init() {
     $("host-shortcut").textContent = state.review_queue.length ? `审核投稿 · ${state.review_queue.length} 条待审` : '管理活动';
     const votingLocked = Date.now() + clockOffset >= Number(state.event.voting_opens_ms);
     const builtin = state.voting?.mode === 'builtin';
+    $('award-form').hidden = builtin;
+    $('ranked-awards').hidden = !builtin;
+    $('ranked-awards-note').textContent = state.ranked_awards?.message || '投票截止后，按有效票数确定一、二、三等奖。';
+    $('publish-ranked-results').disabled = writing || !state.ranked_awards?.ready;
+    $('publish-ranked-results').hidden = Boolean(state.awards?.length);
+    $('ranked-awards-list').replaceChildren(...(state.ranked_awards?.candidates || []).map(award=>{
+      const entry=state.gallery.find(entry=>entry.id===award.entry_id);
+      return node('p',`${prizeLabels[award.prize]}：${entry?.title || '作品状态已变化'} · ${award.reason}`);
+    }));
     $('voting-form').hidden = builtin;
     $('settlement-export').hidden = !builtin;
     $('settlement-export').disabled = writing || state.voting?.phase !== 'closed';
@@ -467,8 +496,16 @@ function init() {
     if (!votingDirty) $("voting-url").value = state.configured_voting_url === "preview" ? "" : state.configured_voting_url || "";
     const pending = new Set(state.review_queue.map((item) => item.entry.id));
     for (const id of reviewDrafts.keys()) if (!pending.has(id)) reviewDrafts.delete(id);
+    for (const id of reviewReturns) if (!pending.has(id)) reviewReturns.delete(id);
+    const key=JSON.stringify([state.review_queue,state.reconcile_queue,state.award_drafts,state.gallery]);
+    if (key === reviewKey) return;
+    reviewKey=key;
+    const focused=document.activeElement, focusedCard=focused?.closest('[data-review-entry]');
+    const focusedId=focusedCard?.dataset.reviewEntry;
+    const focusReason=focused?.tagName==='TEXTAREA', caret=focusReason ? [focused.selectionStart,focused.selectionEnd] : null;
     $("review-queue").replaceChildren(...state.review_queue.map(({ entry, generation }) => {
       const card = node("article", void 0, "review-card");
+      card.dataset.reviewEntry=entry.id;
       card.append(image(generation.id, entry.title, 'preview'), node("h3", entry.title), node("p", entry.display_name));
       const details = node("details");
       details.append(node("summary", "查看提示词"), node("p", generation.prompt));
@@ -477,18 +514,60 @@ function init() {
       reason.placeholder = "退回时，请写一句可操作的修改建议";
       reason.maxLength = 1e3;
       reason.setAttribute("aria-label", `${entry.title} 的审核意见`);
-      card.append(reason);
       reason.value = reviewDrafts.get(entry.id) || "";
       reason.oninput = () => reviewDrafts.set(entry.id, reason.value);
+      const returnForm=node('form',undefined,'review-return');
+      returnForm.hidden=!reviewReturns.has(entry.id);
+      returnForm.id=`review-return-${entry.id}`;
+      reason.required=true;
+      const reasonLabel=node('label','修改建议');
+      reason.id=`review-reason-${entry.id}`;
+      reasonLabel.htmlFor=reason.id;
+      const localNotice=node('p',undefined,'notice');
+      localNotice.id=`review-notice-${entry.id}`;
+      localNotice.setAttribute('role','status');
+      const controls=node('div',undefined,'review-actions');
       for (const [action, label] of [["approve", "批准展示"], ["reject", "退回修改"]]) {
-        const button = node("button", label, "secondary");
+        const button = node("button", action==='approve' ? '批准参赛' : label, action==='approve' ? 'primary' : 'secondary');
         button.type = "button";
         button.dataset.reviewAction = action;
         button.dataset.author = entry.actor;
         button.disabled = writing || action === "approve" && (entry.actor === actor || Date.now() + clockOffset >= Number(state.event.voting_opens_ms));
-        button.onclick = () => perform(action, { entry_id: entry.id, reason: reason.value });
-        card.append(button);
+        button.onclick = async () => {
+          if(action==='reject') {
+            reviewReturns.add(entry.id); returnForm.hidden=false;
+            button.setAttribute('aria-expanded','true'); reason.focus(); return;
+          }
+          const next=card.nextElementSibling?.dataset.reviewEntry;
+          button.textContent='正在批准…';
+          if(await perform(action,{entry_id:entry.id},localNotice.id)) focusNextReview(next);
+          else if(button.isConnected) button.textContent='批准参赛';
+        };
+        if(action==='reject') {
+          button.setAttribute('aria-expanded',String(!returnForm.hidden));
+          button.setAttribute('aria-controls',returnForm.id);
+        }
+        controls.append(button);
       }
+      const confirm=node('button','确认退回','secondary'), cancel=node('button','取消','text-button');
+      confirm.type='submit'; confirm.dataset.reviewAction='reject';
+      cancel.type='button'; cancel.onclick=()=>{
+        reviewReturns.delete(entry.id); returnForm.hidden=true;
+        const toggle=controls.querySelector('[data-review-action="reject"]');
+        toggle.setAttribute('aria-expanded','false'); toggle.focus({preventScroll:true});
+      };
+      returnForm.onsubmit=async event=>{
+        event.preventDefault();
+        if(!reason.value.trim()) { reason.setCustomValidity('请写一句可操作的修改建议。'); reason.reportValidity(); return; }
+        reason.setCustomValidity('');
+        const next=card.nextElementSibling?.dataset.reviewEntry;
+        confirm.textContent='正在退回…';
+        if(await perform('reject',{entry_id:entry.id,reason:reason.value},localNotice.id)) focusNextReview(next);
+        else if(confirm.isConnected) confirm.textContent='确认退回';
+      };
+      reason.addEventListener('input',()=>reason.setCustomValidity(''));
+      returnForm.append(reasonLabel,reason,confirm,cancel);
+      card.append(controls,returnForm,localNotice);
       return card;
     }));
     if (!state.review_queue.length) $("review-queue").append(node("p", "暂时没有待审投稿。", "fine-print"));
@@ -524,6 +603,21 @@ function init() {
       return option;
     }));
     if (state.gallery.some((e) => e.id === previous)) $("award-entry").value = previous;
+    if(focusedId) {
+      const card=document.querySelector(`[data-review-entry="${focusedId}"]`);
+      const target=card?.querySelector(focusReason ? 'textarea' : '[data-review-action="approve"]');
+      target?.focus({preventScroll:true});
+      if(caret) target?.setSelectionRange(...caret);
+    }
+  }
+  function focusNextReview(id) {
+    const card=(id && document.querySelector(`[data-review-entry="${id}"]`)) || $('review-queue').querySelector('[data-review-entry]');
+    const next=card?.querySelector('[data-review-action="approve"]') || $('refresh');
+    next.focus({preventScroll:true});
+    if(card) {
+      const rect=card.getBoundingClientRect();
+      if(rect.top<0 || rect.top>innerHeight-100) card.scrollIntoView({block:'start',behavior:'instant'});
+    }
   }
   async function refresh() {
     if (refreshing || writing) return;
@@ -632,6 +726,9 @@ function init() {
     if (artworkUrl) URL.revokeObjectURL(artworkUrl);
     artworkUrl = '';
     $('artwork-image').removeAttribute('src');
+    const target=artworkReturn?.isConnected ? artworkReturn : artworkReturn?.dataset.rankingEntry ? document.querySelector(`[data-ranking-entry="${artworkReturn.dataset.rankingEntry}"]`) : null;
+    if(target?.getClientRects().length) target.focus({preventScroll:true});
+    artworkReturn=null;
   });
   $('close-disqualify').onclick=()=>$('disqualify-dialog').close();
   $('disqualify-dialog').addEventListener('cancel',event=>{if(writing)event.preventDefault();});
@@ -660,6 +757,7 @@ function init() {
     perform("award", { entry_id: $("award-entry").value, prize: $("prize").value, reason: $("award-reason").value });
   };
   $("publish-results").onclick = () => perform("publish-results", {});
+  $('publish-ranked-results').onclick = () => perform('publish-results',{});
   $('cancel-vote').onclick = () => perform('cancel-vote',{intent:crypto.randomUUID()},'vote-feedback');
   $('settlement-export').onclick = async () => {
     if (writing || !actor) return;

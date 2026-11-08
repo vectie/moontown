@@ -1,0 +1,314 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+}
+
+///|
+let ns = "aigc-acceptance-20260915"
+
+///|
+let name : String = "moontown-coffee-mobile-20261108" +
+  (if @env.args().contains("--v2") { "-v2" } else { "" })
+
+///|
+let route : String = "coffee-mobile-20261108" +
+  (if @env.args().contains("--v2") { "-v2" } else { "" })
+
+///|
+let root : String = "/home/HwHiAiUser/coffee-auth-queue-20261107/mobile-review-20261108" +
+  (if @env.args().contains("--v2") { "-v2" } else { "" })
+
+///|
+async fn command(program : String, args : Array[String]) -> String {
+  let result = @shell.Cmd(program, args).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  command(
+    "kubectl",
+    [
+      "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", "-n", ns, ..args,
+    ],
+  )
+}
+
+///|
+fn rewrite(value : Json) -> Json {
+  match value {
+    String(text) =>
+      Json::string(
+        text
+        .replace(old="moontown-coffee-load20-r6", new=name)
+        .replace(old="coffee-load20-r6-20261107", new=route)
+        .replace(old="coffee-load20-r6", new=route)
+        .replace(old="load20-r6", new=route),
+      )
+    Array(items) => Json::array(items.map(rewrite))
+    Object(fields) => Json::object(fields.map((_, item) => rewrite(item)))
+    other => other
+  }
+}
+
+///|
+async fn save(path : String, value : Json) -> Unit {
+  @fs.write_file(
+    path,
+    value.stringify(indent=2),
+    create_mode=CreateNew,
+    permission=0o600,
+    sync=Full,
+  )
+}
+
+///|
+async fn apply(value : Json, label : String) -> Unit {
+  let path = root + "/" + label + ".json"
+  save(path, value)
+  ignore(kube(["apply", "-f", path]))
+}
+
+///|
+async fn storage(claim : String) -> String {
+  guard @json.parse(kube(["get", "pvc", claim, "-o", "json"]))
+    is { "spec": { "volumeName": String(pv), .. }, .. } else {
+    fail("PVC not bound")
+  }
+  guard @json.parse(kube(["get", "pv", pv, "-o", "json"]))
+    is {
+      "spec": {
+        "csi": {
+          "volumeAttributes": {
+            "server": "192.168.2.175",
+            "share": "/data/lunanexa-workspaces",
+            "subDir": String(subdir),
+            ..
+          },
+          ..
+        },
+        ..
+      },
+      ..
+    } &&
+    subdir.has_prefix(ns + "/" + claim + "/") &&
+    !subdir.contains("..") else {
+    fail("Unexpected test storage")
+  }
+  "/data/lunanexa-workspaces/" + subdir
+}
+
+///|
+async fn main {
+  let args = @env.args().filter(arg => arg != "--v2")
+  if args is [_, "stop"] {
+    ignore(kube(["scale", "deployment", name, "--replicas=0"]))
+    for label in ["route", "rewrite", "network-moontown-platform"] {
+      ignore(
+        kube(["delete", "-f", root + "/" + label + ".json", "--wait=true"]),
+      )
+    }
+    println(
+      "Stopped this isolated rehearsal; all original images and state retained",
+    )
+    return
+  }
+  if args is [_, "open-vote"] {
+    let directory = storage(name + "-state")
+    guard @json.parse(
+        @fs.read_file(directory + "/" + route + "/state.json").text(),
+      )
+      is {
+        "entries": Array(entries),
+        "voting_rosters": Array([]),
+        "vote_events": Array([]),
+        ..
+      } &&
+      entries.filter(entry => entry is { "state": "approved", .. }).length() ==
+      20 else {
+      fail("Need twenty approved works before first freeze")
+    }
+    let cm = @json.parse(kube(["get", "configmap", name, "-o", "json"]))
+    guard cm
+      is {
+        "metadata": { "resourceVersion": String(version), .. },
+        "data": { "event.json": String(raw), .. },
+        ..
+      } &&
+      @json.parse(raw) is Object(config) &&
+      config.get("brief") is Some(Object(brief)) else {
+      fail("Missing config")
+    }
+    save(root + "/config-before-voting.json", cm)
+    let now = @string.parse_uint64(command("date", ["+%s%3N"]).trim())
+    brief["deadline_ms"] = Json::string((now - 1000UL).to_string())
+    config["voting_opens_ms"] = Json::string((now + 20000UL).to_string())
+    config["voting_closes_ms"] = Json::string((now + 240000UL).to_string())
+    config["awards_ms"] = Json::string((now + 245000UL).to_string())
+    let patch : Json = [
+      { "op": "test", "path": "/metadata/resourceVersion", "value": version },
+      {
+        "op": "replace",
+        "path": "/data/event.json",
+        "value": Json::object(config).stringify(),
+      },
+    ]
+    let path = root + "/voting-patch.json"
+    save(path, patch)
+    ignore(
+      kube(["patch", "configmap", name, "--type=json", "--patch-file", path]),
+    )
+    // Reload the projected ConfigMap; no pending generation exists.
+    ignore(kube(["rollout", "restart", "deployment", name]))
+    ignore(kube(["rollout", "status", "deployment", name, "--timeout=120s"]))
+    println(
+      "Voting scheduled once, before the first freeze; four-minute real clock window",
+    )
+    return
+  }
+  guard args is [_, "create", runtime, ui] &&
+    [runtime, ui].all(d => d.has_prefix("sha256:") && d.length() == 71) else {
+    fail("create RUNTIME_DIGEST UI_DIGEST | open-vote")
+  }
+  guard !@fs.exists(root) else { fail("Never overwrite a rehearsal") }
+  @fs.mkdir(root, permission=0o700)
+  guard @json.parse(
+      kube(["get", "deployment", "moontown-coffee-load20-r6", "-o", "json"]),
+    )
+    is { "spec": Object(spec), .. } &&
+    spec.get("replicas") == Some(Json::number(0)) else {
+    fail("Source must remain stopped")
+  }
+  let oldroot = "/home/HwHiAiUser/coffee-auth-queue-20261107/load-r6"
+  let oldroute = "coffee-load20-r6-20261107"
+  guard @json.parse(@fs.read_file(oldroot + "/server-state.json").text())
+    is Object(state) &&
+    state.get("challenge_id") == Some(Json::string(oldroute)) &&
+    state.get("generations") is Some(Array(jobs)) &&
+    jobs.length() == 20 &&
+    jobs.all(job => job is { "state": "completed", .. }) &&
+    state.get("entries") == Some(Json::array([])) &&
+    state.get("vote_events") == Some(Json::array([])) else {
+    fail("Only reuse twenty real unsubmitted images")
+  }
+  state["challenge_id"] = Json::string(route)
+  state["revision"] = 0
+  for
+    kind in [
+      "deployment", "service", "configmap", "pvc", "ingressroute", "middleware",
+    ] {
+    guard kube([
+        "get",
+        kind,
+        if kind == "pvc" {
+          name + "-state"
+        } else {
+          name
+        },
+        "--ignore-not-found",
+        "-o",
+        "name",
+      ])
+      .trim()
+      .is_empty() else {
+      fail("Test resources already exist")
+    }
+  }
+  let pvc = @json.parse(@fs.read_file(oldroot + "/pvc.json").text())
+  apply(rewrite(pvc), "pvc")
+  ignore(
+    kube([
+      "wait",
+      "pvc",
+      name + "-state",
+      "--for=jsonpath={.status.phase}=Bound",
+      "--timeout=90s",
+    ]),
+  )
+  let target = storage(name + "-state") + "/" + route
+  let source = storage("moontown-coffee-load20-r6-state") + "/" + oldroute
+  @fs.mkdir(target, permission=0o700)
+  for job in jobs {
+    guard job is { "id": String(id), .. } &&
+      id.length() == 64 &&
+      id.all(c => c is ('0'..<='9' | 'a'..<='f')) else {
+      fail("Bad generation")
+    }
+    for suffix in [".png", ".thumb.webp", ".preview.webp"] {
+      let path = source + "/state.json.images/" + id + suffix
+      guard @fs.kind(path, follow_symlink=false) is Regular else {
+        fail("Missing real image")
+      }
+    }
+  }
+  @shell.Cmd("cp", [
+    "-a",
+    source + "/state.json.images",
+    target + "/state.json.images",
+  ]).run()
+  save(target + "/state.json", Json::object(state))
+  guard @json.parse(@fs.read_file(oldroot + "/config.json").text())
+    is { "data": { "event.json": String(raw), .. }, .. } &&
+    @json.parse(raw) is Object(config) &&
+    config.get("brief") is Some(Object(brief)) else {
+    fail("Missing source config")
+  }
+  let now = @string.parse_uint64(command("date", ["+%s%3N"]).trim())
+  brief["id"] = Json::string(route)
+  brief["name"] = "20 人审核投票验收 · 非正式活动"
+  brief["scope"] = "复用上一轮真实生成作品，验收手机审核和投票，不发放真实奖品。"
+  brief["deadline_ms"] = Json::string((now + 3600000UL).to_string())
+  config["opens_ms"] = Json::string((now - 60000UL).to_string())
+  config["voting_opens_ms"] = Json::string((now + 3660000UL).to_string())
+  config["voting_closes_ms"] = Json::string((now + 3900000UL).to_string())
+  config["awards_ms"] = Json::string((now + 3905000UL).to_string())
+  config["provider_origin"] = ""
+  apply(
+    {
+      "apiVersion": "v1",
+      "kind": "ConfigMap",
+      "metadata": { "name": name, "namespace": ns },
+      "data": { "event.json": Json::object(config).stringify() },
+    },
+    "config",
+  )
+  let deployment = rewrite(
+    @json.parse(@fs.read_file(oldroot + "/deployment.json").text()),
+  )
+  guard deployment is Object(dep) &&
+    dep.get("spec") is Some(Object(ds)) &&
+    ds.get("template") is Some(Object(template)) &&
+    template.get("spec") is Some(Object(pod)) &&
+    pod.get("containers") is Some(Array([Object(container)])) &&
+    pod.get("initContainers") is Some(Array([Object(init)])) else {
+    fail("Bad deployment")
+  }
+  container["image"] = Json::string(
+    "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@" +
+    runtime,
+  )
+  init["image"] = Json::string(
+    "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-ui@" +
+    ui,
+  )
+  ds["replicas"] = 1
+  apply(deployment, "deployment")
+  for label in ["service", "rewrite", "route", "network-moontown-platform"] {
+    apply(
+      rewrite(
+        @json.parse(@fs.read_file(oldroot + "/" + label + ".json").text()),
+      ),
+      label,
+    )
+  }
+  ignore(kube(["rollout", "status", "deployment", name, "--timeout=180s"]))
+  println(
+    "Isolated twenty-image rehearsal ready; generation disabled, original runs untouched",
+  )
+}

@@ -1,0 +1,60 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/coffee-auth-queue-20261107"
+  let moon = "/home/HwHiAiUser/.moon-new/bin/moon"
+  let ui = root + "/ui-mobile-review-final"
+  guard !@fs.exists(ui) else { fail("Use a fresh candidate") }
+  @fs.mkdir(ui, permission=0o700)
+  @shell.Cmd("tar", ["-xzf", root + "/coffee-mobile-ui-final.tgz", "-C", ui]).run()
+  guard @fs.read_file(ui + "/coffee-contest.js")
+    .text()
+    .contains("state.award_drafts,state.gallery") &&
+    @fs.exists(ui + "/main.js") else {
+    fail("Missing final UI content")
+  }
+  @shell.Cmd(moon, [
+    "run",
+    root + "/package-account-ui.mbtx",
+    "--",
+    root + "/ui-original-recovery-oci.oci.tar",
+    ui,
+    root + "/ui-mobile-review-final-oci",
+    "account-binding-coffee-mobile-review-final-20261108",
+  ]).run()
+  guard @json.parse(
+      @fs.read_file(root + "/ui-mobile-review-final-oci/index.json").text(),
+    )
+    is { "manifests": [{ "digest": String(digest), .. }], .. } else {
+    fail("Missing UI digest")
+  }
+  @shell.Cmd(moon, [
+    "run",
+    "/home/HwHiAiUser/image-runtime-20261107/publish-account-gateway.mbtx",
+    "--",
+    root + "/ui-mobile-review-final-oci",
+    "https://lunanexa-registry.lunanexa-registry.svc.cluster.local:5000",
+    "moon/moontown-account-ui",
+    "account-binding-coffee-mobile-review-final-20261108",
+    "/etc/ssl/certs/ca-certificates.crt",
+  ]).run()
+  guard @json.parse(@fs.read_file(root + "/mobile-release.json").text())
+    is Object(receipt) else {
+    fail("Missing native receipt")
+  }
+  receipt["ui"] = Json::string(digest)
+  @fs.write_file(
+    root + "/mobile-release.json",
+    Json::object(receipt).stringify(indent=2),
+    create_mode=CreateOrTruncate,
+    permission=0o600,
+  )
+  println(Json::object(receipt).stringify())
+}

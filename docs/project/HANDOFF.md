@@ -250,3 +250,21 @@ existing documentation and record concrete pitfalls here.
   are always-visible review textareas, equal approve/reject styling and ranking
   titles without a way to inspect their artwork. Details/captures are in the
   existing report. These are findings, not implemented changes.
+
+## 2026-11-08 · Mobile review and vote-based prizes
+
+- Work branch `codex/coffee-mobile-review-voting`; QA and the v2 rehearsal have
+  runtime 1c409d85… / UI 73170424…. Formal and main remain unchanged until
+  phone acceptance. Browser transport is closed; no new screenshots exist.
+- Review opinions are disclosed on return, approval is primary, ranking rows
+  open artwork. Built-in prizes derive from sealed ranks; ties, insufficient
+  votes and withdrawn sealed winners block publication. External voting keeps
+  manual verification. Native 2070/2070 and frontend source 192/192 passed.
+- The v2 real API journey completed twenty submissions/approvals/voters and
+  naturally sealed 9/6/5, then published three test prizes. Reused real R6 images,
+  no inference. The earlier zero-vote rehearsal is stopped with evidence kept.
+- Derive rehearsal schedules from a fresh host clock and wait on HTTP server
+  time; script clock drift closed the first window. Exclude AppleDouble files
+  with COPYFILE_DISABLE=1 and tar --no-xattrs. Build gateway src/main explicitly;
+  building all workspace library packages can try to link executables without
+  main. Use qualified Linux PNG/WebP include/link directories. See the report.

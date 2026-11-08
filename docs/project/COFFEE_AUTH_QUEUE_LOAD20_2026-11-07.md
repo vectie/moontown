@@ -277,3 +277,61 @@ Remaining UX findings, not implemented in this inspection:
 Fresh approve/reject and live vote mutations were not repeated against this
 already sealed example. Their earlier journey evidence remains separate from
 this read-only inspection. Physical phone keyboard behavior is still unverified.
+
+## 2026-11-08 · Mobile review changes and vote-based prizes
+
+Implemented on `codex/coffee-mobile-review-voting`:
+
+- Review cards show a primary “批准参赛” action. “退回修改” reveals a labeled
+  opinion field, explicit confirm/cancel, and card-local failure feedback.
+  Unchanged polling preserves the draft and focus; successful review advances
+  to the next pending work. Gallery changes still update external award pickers.
+- Ranking rows include 48px thumbnails and named buttons opening their artwork.
+  Closing the original restores focus without intentionally resetting scroll.
+- Built-in voting now determines first/second/third prizes from the sealed
+  tally. A host confirms publication after awards time; direct manual assignment
+  is rejected. Ties affecting a prize, fewer than three positively voted works,
+  and withdrawn sealed winners block publication rather than choose arbitrarily.
+  External voting retains its existing manual verification path.
+
+Qualification: complete native suite **2,070/2,070**, frontend source tests
+**192/192**, static artifact **809 files / 72.2 MiB**. Generated public interfaces
+are unchanged. The native concurrency fixture formerly allowed only 90ms for
+24 real disk-backed voters; its clock window now leaves scheduling headroom.
+
+QA and the new rehearsal use runtime
+`sha256:1c409d85c7b45914491e5b69a2faafd807bcc20238e1f8b77a4641d98c980b47`
+and final UI
+`sha256:73170424513909685ce2852af57b3651b22578adaa26b9625cff46bb6e2786d8`.
+Final public JS SHA256 is
+`cd75cdc097ba6458e7fe5e53f06911c9b22d14aae0889c685aa5a208ec0e7cac`.
+QA's two complete PVC backups were restored and verified before the runtime
+upgrade. Formal deployment and main merging remain pending phone acceptance.
+
+The rehearsal reuses twenty genuine R6 generated PNGs and their derivatives,
+on a fresh PVC and fresh activity, with inference disabled. Actual API checks:
+twenty submissions were private before approval; an ordinary participant's
+approval returned 403; early voting returned 409; rejection without a reason
+returned 400; user20 received a reason and resubmitted; all twenty were approved.
+Twenty real test identities then voted. User20 changed, cancelled and restored
+one ballot; own voting and early award publication were rejected. The real
+server clock naturally sealed twenty votes, **9/6/5** on the top three works,
+and host publication produced the corresponding three rehearsal prizes.
+There are no real awards or additional GPU generations in this run.
+
+The initial rehearsal's script schedule was behind the live HTTP server; it
+closed with zero votes. It was stopped and its public route/policy removed,
+retaining its PVC and evidence. The fresh v2 schedule uses host `date` and the
+acceptance waits on the actual HTTP server clock; no frozen vote was reopened.
+Private evidence: `~/.codex/coffee-mobile-20261108[-v2]`, management release root
+`/home/HwHiAiUser/coffee-auth-queue-20261107/mobile-review-20261108[-v2]`.
+
+Live example:
+`https://suanli.kechuangfuwu.com:8443/coffee-mobile-20261108-v2/coffee-contest.html#leaderboard`.
+
+**Outstanding:** the browser automation transport was closed throughout this
+turn. Reconnecting, resetting its session and opening through Codex did not
+restore it. There are no new phone UI screenshots or successful phone interaction
+claims for these changes. Do not substitute the previous pending-review capture.
+Phone review, rejection keyboard behavior and ranking open/return must be checked
+before merging main or releasing formally, as requested by the user.

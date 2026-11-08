@@ -29,7 +29,9 @@ let creative_claim : String = if deployment_name == "moontown-platform" {
 
 ///|
 let old_image : String = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@" +
-  (if @env.args().contains("--queue") {
+  (if @env.args().contains("--mobile") {
+    "sha256:b760272cdac808f232d468873add989dbfe374cef0d2ddf19ce7d538caa7e743"
+  } else if @env.args().contains("--queue") {
     "sha256:62213c1b44971cb81730fb288dcab73477b855833e2572272d4b7dabea2bfff4"
   } else {
     "sha256:fd234d60ed4be54d55ceb927713a2bf49f960120143870b300ff3780957e2716"
@@ -37,14 +39,21 @@ let old_image : String = "lunanexa-registry.lunanexa-registry.svc.cluster.local:
 
 ///|
 let new_image : String = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@" +
-  (if @env.args().contains("--queue") {
+  (if @env.args().contains("--mobile") {
+    @env.args()[4]
+  } else if @env.args().contains("--queue") {
     "sha256:b760272cdac808f232d468873add989dbfe374cef0d2ddf19ce7d538caa7e743"
   } else {
     "sha256:62213c1b44971cb81730fb288dcab73477b855833e2572272d4b7dabea2bfff4"
   })
 
 ///|
-let ui_image = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-ui@sha256:4914aeaf173eee31c3729f6499814ad4c8ebe42582c98164beb5e95581c9dcc8"
+let ui_image : String = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-ui@" +
+  (if @env.args().contains("--mobile") {
+    "sha256:7dccb07f24d9dde7bcb446a74c19a5f0ee2adcca7d2cb5059cf7ccc8dac2c1bc"
+  } else {
+    "sha256:4914aeaf173eee31c3729f6499814ad4c8ebe42582c98164beb5e95581c9dcc8"
+  })
 
 ///|
 async fn command(program : String, args : Array[String]) -> String {
@@ -177,6 +186,14 @@ async fn main {
     [_, root, version, "--queue", "--formal"] => (root, version, false)
     [_, root, version, "--queue", "--formal", "--apply"] =>
       (root, version, true)
+    [_, root, version, "--mobile", digest, "--apply"] if digest.has_prefix(
+        "sha256:",
+      ) &&
+      digest.length() == 71 => (root, version, true)
+    [_, root, version, "--mobile", digest, "--formal", "--apply"] if digest.has_prefix(
+        "sha256:",
+      ) &&
+      digest.length() == 71 => (root, version, true)
     _ =>
       fail(
         "update-activity-qa-runtime.mbtx NEW_PRIVATE_DIR EXPECTED_RESOURCE_VERSION [--apply]",

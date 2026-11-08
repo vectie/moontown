@@ -177,12 +177,13 @@
 </div>
 <p id="voting-config-note" class="fine-print" hidden>投票已开始，投票入口和批准名单已锁定。</p>
 <form id="award-form">
+<!-- External voting keeps its manual verification path. -->
 <h3>本期小惊喜</h3>
 <div class="award-fields">
 <label>奖项<select id="prize">
-<option value="creative">创意惊喜 · 手办</option>
-<option value="popular">人气灵感 · 帆布包</option>
-<option value="coffee">咖啡共鸣 · 特调</option>
+<option value="creative">一等奖 · 手办</option>
+<option value="popular">二等奖 · 帆布包</option>
+<option value="coffee">三等奖 · 特调咖啡</option>
 </select>
 </label>
 <label>过审作品<select id="award-entry" required>
@@ -194,6 +195,12 @@
 <button id="record-award" class="secondary" type="submit">记录获奖建议</button> <button id="publish-results" class="text-button" type="button">确认公布三个奖项</button>
 <p class="fine-print">投票结束后才能记录；到开奖时间，核对三个不同作品后再公布。人气奖需先核对原始投票结果。</p>
 </form>
+<section id="ranked-awards" hidden aria-labelledby="ranked-awards-title">
+<h3 id="ranked-awards-title">投票获奖结果</h3>
+<p id="ranked-awards-note" class="fine-print"></p>
+<div id="ranked-awards-list"></div>
+<button id="publish-ranked-results" class="primary" type="button">确认公布一、二、三等奖</button>
+</section>
 </details>
 </section>
   </main>

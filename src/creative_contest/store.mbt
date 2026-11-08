@@ -92,6 +92,11 @@ fn snapshot(
     } else {
       []
     },
+    "ranked_awards": if operator {
+      ranked_award_projection(state, config, now)
+    } else {
+      Json::null()
+    },
     "remaining": (config.participant_quota -
     own.filter(job => job.state != "failed").length()).max(0),
     "voting_url": if !builtin(config) &&
@@ -358,6 +363,11 @@ fn transition(
       { ..next, voting_url: url, }
     }
     "award" => {
+      guard !builtin(config) else {
+        raise Conflict(
+          "站内投票按封榜票数确定一、二、三等奖，不能手动指定。",
+        )
+      }
       guard operator &&
         now >= config.voting_closes_ms &&
         !state.results_published else {
@@ -383,6 +393,13 @@ fn transition(
       { ..next, awards, }
     }
     "publish-results" => {
+      if builtin(config) {
+        guard operator && now >= config.awards_ms && !state.results_published else {
+          raise Denied
+        }
+        let awards = ranked_awards(state, actor, now)
+        return { ..next, awards, results_published: true, }
+      }
       guard operator && now >= config.awards_ms && state.awards.length() == 3 else {
         raise Denied
       }

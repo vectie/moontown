@@ -1,0 +1,82 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/coffee-auth-queue-20261107"
+  let moon = "/home/HwHiAiUser/.moon-new/bin/moon"
+  let ui = root + "/ui-mobile-review"
+  guard !@fs.exists(ui) else {
+    fail("Never reuse a candidate package directory")
+  }
+  @fs.mkdir(ui, permission=0o700)
+  @shell.Cmd("tar", ["-xzf", root + "/coffee-mobile-ui-v2.tgz", "-C", ui]).run()
+  let js = @fs.read_file(ui + "/coffee-contest.js").text()
+  guard js.contains("ranking-work") &&
+    js.contains("review-return") &&
+    js.contains("publish-ranked-results") &&
+    @fs.exists(ui + "/main.js") else {
+    fail("UI archive is incomplete or stale")
+  }
+  @shell.Cmd(moon, [
+    "run",
+    root + "/gateway-source/lunanexa/scripts/package-webide-gateway.mbtx",
+    "--",
+    root + "/preview-final-runtime-oci.oci.tar",
+    root +
+    "/preview-source/moontown/src/account_gateway/_build/native/release/build/vectie/moontown-account-gateway/main/main.exe",
+    root + "/mobile-ranked-runtime-oci",
+    "account-binding-coffee-ranked-20261108",
+  ]).run()
+  @shell.Cmd(moon, [
+    "run",
+    root + "/package-account-ui.mbtx",
+    "--",
+    root + "/ui-original-recovery-oci.oci.tar",
+    ui,
+    root + "/ui-mobile-review-oci",
+    "account-binding-coffee-mobile-review-20261108",
+  ]).run()
+  let receipt : Map[String, Json] = Map([])
+  for
+    (directory, repository, tag, key) in [
+      (
+        "mobile-ranked-runtime-oci", "moontown-account-gateway", "account-binding-coffee-ranked-20261108",
+        "runtime",
+      ),
+      (
+        "ui-mobile-review-oci", "moontown-account-ui", "account-binding-coffee-mobile-review-20261108",
+        "ui",
+      ),
+    ] {
+    guard @json.parse(
+        @fs.read_file(root + "/" + directory + "/index.json").text(),
+      )
+      is { "manifests": [{ "digest": String(digest), .. }], .. } else {
+      fail("Missing digest")
+    }
+    receipt[key] = Json::string(digest)
+    @shell.Cmd(moon, [
+      "run",
+      "/home/HwHiAiUser/image-runtime-20261107/publish-account-gateway.mbtx",
+      "--",
+      root + "/" + directory,
+      "https://lunanexa-registry.lunanexa-registry.svc.cluster.local:5000",
+      "moon/" + repository,
+      tag,
+      "/etc/ssl/certs/ca-certificates.crt",
+    ]).run()
+  }
+  @fs.write_file(
+    root + "/mobile-release.json",
+    Json::object(receipt).stringify(indent=2),
+    create_mode=CreateNew,
+    permission=0o600,
+  )
+  println(Json::object(receipt).stringify())
+}
