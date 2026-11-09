@@ -145,7 +145,7 @@
 <strong>公布惊喜，下一期见</strong>
 </div>
 </div>
-<div class="prize-preview" aria-label="奖品示意"><span><i class="prize-mini prize-figure" aria-hidden="true"></i>一等奖 · 手办</span><span><i class="prize-mini prize-tote" aria-hidden="true"></i>二等奖 · 帆布包</span><span><i class="prize-mini prize-coffee" aria-hidden="true"></i>三等奖 · 咖啡券</span></div>
+<div class="prize-preview" aria-label="奖品示意"><div><i class="prize-mini prize-figure" aria-hidden="true"></i><span>一等奖</span><strong>惊喜手办</strong></div><div><i class="prize-mini prize-tote" aria-hidden="true"></i><span>二等奖</span><strong>日常帆布包</strong></div><div><i class="prize-mini prize-coffee" aria-hidden="true"></i><span>三等奖</span><strong>半醒咖啡券</strong></div></div>
 <p id="prize-description">咖啡券可兑换半醒咖啡一杯。图片仅为奖品示意，实际款式和兑奖安排由主办公布。</p>
 <details id="inspiration">
 <summary>主题与创作提示</summary>
@@ -229,7 +229,7 @@
 <h2 id="submit-title">用这张参赛</h2>
 <button class="dialog-close text-button" type="button" id="close-dialog" aria-label="关闭投稿">×</button>
 </div>
-<label for="entry-title">作品名</label>
+<div class="field-heading"><label for="entry-title">作品名</label><button id="suggest-title" class="text-button" type="button">换个建议</button></div>
 <input id="entry-title" maxlength="60" placeholder="比如：小城还没醒" enterkeyhint="next" required>
 <label for="display-name">展示昵称</label>
 <input id="display-name" maxlength="40" placeholder="希望大家怎么称呼你？" autocomplete="nickname" enterkeyhint="done" required>
@@ -241,6 +241,14 @@
 <button id="submit-entry" class="primary" type="submit">提交审核</button>
 <p id="submit-notice" class="notice" role="status"></p>
 </form>
+</dialog>
+<dialog id="share-dialog" class="share-dialog" aria-labelledby="share-title">
+<div class="dialog-heading"><h2 id="share-title">分享我的半醒时刻</h2><button id="close-share" class="dialog-close text-button" type="button" aria-label="关闭分享">×</button></div>
+<img id="share-preview" class="share-preview" width="1080" height="1560" alt="过审作品分享卡片，含作品名、昵称和作品二维码" hidden>
+<p id="share-status" class="notice" role="status" aria-live="polite"></p>
+<button id="share-retry" class="text-button" type="button" hidden>重新制作卡片</button>
+<div class="share-actions"><a id="share-save" class="secondary" href="#" download aria-disabled="true">保存卡片</a><button id="share-copy" class="secondary" type="button">复制链接</button><button id="share-native" class="primary" type="button" hidden>分享卡片</button></div>
+<div id="share-link-field" hidden><label for="share-link">作品链接</label><input id="share-link" type="url" readonly></div>
 </dialog>
 <dialog id="claim-dialog" class="claim-dialog" aria-labelledby="claim-title" aria-describedby="claim-description">
 <div class="dialog-heading"><h2 id="claim-title">投稿成功</h2><button id="close-claim" class="dialog-close text-button" type="button" aria-label="关闭领奖群">×</button></div>

@@ -1,0 +1,66 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+fn hash(bytes : Bytes) -> String {
+  @crypto.bytes_to_hex_string(@crypto.sha256(bytes))
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/moontown-display-20261108"
+  let incoming = root + "/copy-prizes-v8"
+  let manifest = @fs.read_file(incoming + "/manifest.json")
+  guard hash(manifest.binary()) ==
+    "a2067cbbfeaa7d817b03c08fe0910eb03972e755b3fc82b9b67e53c04669cc07" &&
+    @json.parse(manifest.text()) is { "files": Array(files), .. } else {
+    fail("Unreviewed display manifest")
+  }
+  for row in files {
+    guard row is { "path": String(path), "sha256": String(expected), .. } &&
+      !path.contains("..") &&
+      !path.has_prefix("/") else {
+      fail("Invalid manifest path")
+    }
+    guard hash(@fs.read_file(incoming + "/webroot/disp/" + path).binary()) ==
+      expected else {
+      fail("Asset mismatch")
+    }
+  }
+  for
+    (name, expected) in [
+      (
+        "index.html", "e7fc392aadddb03d0c5691b11b07c0b6637f643622858911b3af80e005e12a38",
+      ),
+      (
+        "display.css", "daebd7e11679666b6e817f0b009e68d867b586c93d06edd30839a5ba331e6b63",
+      ),
+    ] {
+    let bytes = @fs.read_file(root + "/site/disp/" + name).binary()
+    guard hash(bytes) == expected else { fail("Live display version changed") }
+    @fs.write_file(
+      incoming + "/before-" + name,
+      bytes,
+      permission=0o600,
+      create_mode=CreateNew,
+    )
+  }
+  for name in ["display.css", "index.html"] {
+    let target = root + "/site/disp/" + name
+    @fs.write_file(
+      target + ".next",
+      @fs.read_file(incoming + "/webroot/disp/" + name).binary(),
+      permission=0o644,
+      create_mode=CreateNew,
+    )
+    @fs.rename(target + ".next", target, replace=true)
+  }
+  println(
+    "Published aligned prize cards; video, QR payload and partner marks retained",
+  )
+}

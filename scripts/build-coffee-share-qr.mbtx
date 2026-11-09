@@ -1,0 +1,22 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+}
+
+///|
+async fn main {
+  let esbuild = match @env.args() {
+    [_, binary] => binary
+    _ => "src/ui/rabbita-town/node_modules/.bin/esbuild"
+  }
+  @shell.Cmd("moon", [
+    "-C", "src/ui/coffee-share-qr", "build", "--target", "js", "--release",
+  ]).run()
+  @shell.Cmd(esbuild, [
+    "src/ui/coffee-share-qr/_build/js/release/build/moontown-coffee-share-qr.js",
+    "--minify", "--format=esm", "--banner:js=// Generated from coffee-share-qr; PaiGack/moonbitqrcode 0.1.0, Apache-2.0. See ../coffee-share-qr/LICENSE.qrcode.",
+    "--outfile=src/ui/rabbita-town/coffee-qr.js",
+  ]).run()
+}

@@ -1,0 +1,56 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, mode] && ["qa", "formal"].contains(mode) else {
+    fail("verify-coffee-sharing.mbtx qa|formal")
+  }
+  let root = "/home/HwHiAiUser/coffee-sharing-20261109"
+  let results : Array[Json] = []
+  for suffix in ["", ":8443"] {
+    let prefix = "https://suanli.kechuangfuwu.com" +
+      suffix +
+      (if mode == "qa" { "/coffee-qa/" } else { "/moontown/" })
+    for
+      index, name in [
+        "coffee-contest.html", "coffee-contest.js", "coffee-contest.css", "coffee-drafts.js",
+        "coffee-share.js", "coffee-qr.js",
+      ] {
+      let path = root +
+        "/verify-" +
+        mode +
+        (if suffix.is_empty() { "443" } else { "8443" }) +
+        "-\{index}"
+      @shell.Cmd("curl", [
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--compressed",
+        "--max-time",
+        "20",
+        "--output",
+        path,
+        prefix + name,
+      ]).run()
+      guard @fs.read_file(path).binary() ==
+        @fs.read_file(root + "/ui-v1/ui/" + name).binary() else {
+        fail("Compressed deployed asset mismatch: " + prefix + name)
+      }
+    }
+    results.push({ "url": prefix, "compressed_assets_exact": 6 })
+  }
+  @fs.write_file(
+    root + "/verification-" + mode + ".json",
+    Json::array(results).stringify(indent=2),
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  println(Json::array(results).stringify(indent=2))
+}

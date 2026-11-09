@@ -1,6 +1,7 @@
 import { coffeeAuth } from './coffee-auth.js';
 import { draftStore } from './coffee-drafts.js';
 import { coffeeClaim, claimGroup } from './coffee-claim.js';
+import { coffeeShare, suggestedTitle, shareableEntry } from './coffee-share.js';
 export const DEFAULT_PROMPT = '一只装着清晨的咖啡杯，杯中是一座还没有醒来的微缩小城，奶油色和森林绿，温暖的手绘插画，安静而奇妙，不要文字和商标';
 export function generationPrompt(value) { return value.trim() || DEFAULT_PROMPT; }
 export function personalWorks(value) {
@@ -82,7 +83,7 @@ function generationStatus(job, now, activity) {
   if (job.state === 'running') return seconds === 0 ? '正在收尾，请稍等。' : `正在生成 · 预计还需约 ${duration}`;
   return ahead ? `前面还有 ${ahead} 人 · 预计约 ${duration}开始` : `马上轮到你 · 预计约 ${duration}完成`;
 }
-const prizeLabels = Object.freeze({ creative: "一等奖 · 手办", popular: "二等奖 · 帆布包", coffee: "三等奖 · 特调咖啡" });
+const prizeLabels = Object.freeze({ creative: "一等奖 · 手办", popular: "二等奖 · 帆布包", coffee: "三等奖 · 咖啡券" });
 function csvCell(value) {
   const text = String(value ?? "");
   return `"${(/^[\s]*[=+@\-\t\r]/.test(text) ? "'" : "") + text.replaceAll('"', '""')}"`;
@@ -128,9 +129,10 @@ function init() {
   let artworkReturn = null;
   let disqualifyEntry = '';
   let draftOwner = 'visitor', afterAuth = '', uploadDraft = null, ownWallKey = '', wall = 'auto';
+  let titleJob='',titleAuto=false;
   const drafts = draftStore(endpoint.href, message => notice(message,true,'draft-notice'));
   function currentDraft() {
-    return {prompt:$('prompt').value,selected,pendingIntent,following:followGeneration,title:$('entry-title').value,name:$('display-name').value};
+    return {prompt:$('prompt').value,selected,pendingIntent,following:followGeneration,title:$('entry-title').value,name:$('display-name').value,titleJob,titleAuto};
   }
   function saveDraft() { drafts.write(draftOwner,currentDraft()); }
   async function restoreDraft(owner, inherited) {
@@ -144,6 +146,7 @@ function init() {
       pendingIntent=value.pendingIntent || null;
       followGeneration=Boolean(value.following);
       $('entry-title').value=value.title || ''; $('display-name').value=value.name || '';
+      titleJob=value.titleJob || '';titleAuto=Boolean(value.titleAuto);
       if(inherited)saveDraft();
     }
     uploadDraft=null;
@@ -168,6 +171,10 @@ function init() {
   const claim = coffeeClaim({fitDialog, now:() => Date.now() + clockOffset, onDone:() => {
     showWall('mine'); $('own-wall').querySelector('button')?.focus({preventScroll:true});
   }});
+  const sharing=coffeeShare({getState:()=>state,fitDialog,now:()=>Date.now()+clockOffset,
+    imageUrl:id=>url(`images/${id}/preview`),loadImage:(path,signal)=>originalImage(path,fetch,()=>{},signal),labelPng});
+  let titleVariant=0,sharedTargetHandled=false;
+  const sharedTarget=new URL(location.href).searchParams.get('entry');
   $('claim-group').onclick = () => claim.open(state?.event);
   $('my-works-link').onclick = () => showWall('mine');
   const auth = coffeeAuth({ loginUrl: $("login").href, fitDialog, onSignedIn: async () => {
@@ -203,6 +210,7 @@ function init() {
     $('download').disabled = false;
     $('download').textContent = '保存图片 ↓';
     selected = "";
+    titleJob='';titleAuto=false;
     pendingIntent = null;
     followGeneration = false;
     $("create-form").reset();
@@ -213,6 +221,7 @@ function init() {
     $("artwork-dialog").close();
     $('disqualify-dialog').close();disqualifyEntry='';
     claim.close(); wall='auto'; ownWallKey='';
+    sharing.close();
     $("artwork-image").removeAttribute("src");
     $("result-image").removeAttribute("src");
     $("result-image").removeAttribute("data-job");
@@ -436,11 +445,13 @@ function init() {
     $("vote-note").hidden = !gallery.length && !state.voting_url;
     if (galleryChanged) $("gallery-grid").replaceChildren(...gallery.map((entry2) => {
       const card = node("article", void 0, "gallery-card");
+      card.dataset.entryId=entry2.id;card.tabIndex=-1;
       card.append(image(entry2.generation_id, entry2.title), node("h3", entry2.title), node("p", `${entry2.display_name} · 作品 ${entry2.id.slice(0, 8)}`));
       const cast = node('button', '', 'secondary gallery-vote');
       cast.type = 'button'; cast.dataset.voteEntry = entry2.id; cast.hidden = true;
       cast.onclick = () => perform('vote', {entry_id:entry2.id,intent:crypto.randomUUID()}, 'vote-feedback');
       card.append(cast);
+      const share=node('button','分享作品','text-button');share.type='button';share.onclick=()=>sharing.open(entry2.id);card.append(share);
       const remove = node('button','撤下作品','text-button');
       remove.type='button';remove.dataset.disqualifyEntry=entry2.id;remove.hidden=true;
       remove.onclick=()=>{
@@ -460,11 +471,22 @@ function init() {
     $("awards").hidden = !state.awards?.length;
     $("awards").replaceChildren(...(state.awards || []).map((award) => {
       const entry2 = gallery.find((e) => e.id === award.entry_id);
-      return node("p", `${prizeLabels[award.prize]}：${entry2?.title || "作品已撤回"}${entry2 ? ` / ${entry2.display_name}` : ""} · ${award.reason}`);
+      const card=node('article',undefined,`award-card award-${award.prize}`);
+      const art=node('i',undefined,`prize-mini prize-${({creative:'figure',popular:'tote',coffee:'coffee'})[award.prize] || 'coffee'}`);art.setAttribute('aria-hidden','true');
+      const text=node('div');text.append(node('span',prizeLabels[award.prize],'fine-print'),node('h3',entry2?.title || '作品已撤回'));
+      if(entry2)text.append(node('p',entry2.display_name));
+      text.append(node('p',award.reason));card.append(art,text);return card;
     }));
     if (changed) renderHost();
     renderHostControls();
     renderOwnWall();
+    sharing.update();
+    if(sharedTarget && !sharedTargetHandled){
+      sharedTargetHandled=true;showWall('public');
+      const target=[...$('gallery-grid').children].find(card=>card.dataset.entryId===sharedTarget);
+      if(target){target.scrollIntoView({block:'center',behavior:'instant'});target.focus({preventScroll:true});}
+      else notice('这件作品暂不可公开展示，可以看看其他作品。',false,'vote-feedback');
+    }
   }
   function showWall(value){wall=value;if(state)renderOwnWall();}
   $('wall-public').onclick=()=>showWall('public');
@@ -480,7 +502,7 @@ function init() {
     const works=personalWorks(state), jobs=works.map(item=>item.job);
     $('own-wall-empty').hidden=!mine || jobs.length>0;
     $('own-wall-empty').textContent='生成或上传的作品会保存在这里，投稿后可以查看审核状态。';
-    const key=JSON.stringify([jobs,state.entries,writing,open(),actor]);
+    const key=JSON.stringify([jobs,state.entries,state.gallery,writing,open(),actor]);
     if(key===ownWallKey)return;ownWallKey=key;
     $('own-wall').replaceChildren(...works.map(({job,entry})=>{
       const card=node('article',undefined,'gallery-card own-work');
@@ -493,6 +515,9 @@ function init() {
       card.append(node('h3',entry?.title || (job.source==='upload'?'上传的作品':'未命名作品')));
       if(entry?.reason)card.append(node('p',entry.reason,'review-reason'));
       const controls=node('div',undefined,'own-work-actions');
+      if(entry && shareableEntry(state,entry.id)){
+        const share=node('button','分享作品','secondary');share.type='button';share.onclick=()=>sharing.open(entry.id);controls.append(share);
+      }
       if(!entry || !['pending','approved','disqualified'].includes(entry.state)){
         const submit=node('button',entry?.state==='rejected'?'修改后重新投稿':'用这张参赛','secondary');submit.type='button';submit.disabled=writing || !open();
         submit.onclick=()=>{selected=job.id;saveDraft();if(!actor){afterAuth='submit';auth.open();}else openSubmission(entry || null);};controls.append(submit);
@@ -810,7 +835,18 @@ function init() {
       render(state);
       $("entry-title").value = entry.title;
       $("display-name").value = entry.display_name;
+      titleJob=selected;titleAuto=false;
     }
+    if(!$('entry-title').value.trim() || titleAuto && titleJob!==selected){
+      $('entry-title').value=suggestedTitle(state.generations.find(job=>job.id===selected)?.prompt || '',0);
+      titleAuto=true;
+    }
+    titleJob=selected;
+    const owner=actor,epoch=identityEpoch,before=$('display-name').value;
+    if(!before)drafts.readNickname(owner).then(name=>{
+      if(owner===actor && epoch===identityEpoch && !$('display-name').value && name){$('display-name').value=name;saveDraft();}
+    });
+    saveDraft();
     $("consent").checked = false;
     notice("", false, "submit-notice");
     $("submit-dialog").showModal();
@@ -818,7 +854,11 @@ function init() {
     $("entry-title").focus();
   }
   $("choose").onclick = () => {saveDraft();if(!actor){afterAuth='submit';auth.open();}else openSubmission();};
-  for(const id of ['entry-title','display-name'])$(id).addEventListener('input',saveDraft);
+  $('entry-title').addEventListener('input',()=>{titleAuto=false;saveDraft();});
+  $('display-name').addEventListener('input',()=>{drafts.writeNickname(actor,$('display-name').value);saveDraft();});
+  $('suggest-title').onclick=()=>{
+    $('entry-title').value=suggestedTitle(state.generations.find(job=>job.id===selected)?.prompt || '',++titleVariant);titleAuto=true;titleJob=selected;saveDraft();
+  };
   async function sendUpload(){
     if(!uploadDraft || writing)return;
     if(!actor){afterAuth='upload';auth.open();return;}
@@ -874,6 +914,7 @@ function init() {
   $("submit-form").onsubmit = async (event) => {
     event.preventDefault();
     if (await perform("submit", { generation_id: selected, title: $("entry-title").value, display_name: $("display-name").value, consent: $("consent").checked }, "submit-notice")) {
+      drafts.writeNickname(actor,$('display-name').value);saveDraft();
       $("submit-dialog").close();
       showWall('mine');
       notice("投稿成功，可在“我的作品”查看审核状态。",false,'vote-feedback');

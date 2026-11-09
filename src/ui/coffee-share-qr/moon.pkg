@@ -1,0 +1,11 @@
+import {
+  "PaiGack/moonbitqrcode/src/lib",
+}
+
+import {
+  "vectie/moontown-coffee-share-qr" @qr,
+} for "test"
+
+options(
+  link: { "js": { "exports": [ "matrix" ], "format": "esm" } },
+)

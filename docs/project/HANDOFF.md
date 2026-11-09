@@ -1,5 +1,11 @@
 # MoonTown handoff notes
 
+## 2026-11-09 · Suggested titles and approved sharing
+
+- See `COFFEE_TITLES_SHARING_2026-11-09.md` for release, role walkthrough and checks. Gate sharing on membership in the current public gallery, not a stale private `approved` state. A withdrawn saved card cannot be recalled; its link must handle removal without revealing private content.
+- Nickname memory is account-scoped across events; existing drafts remain event/account-scoped. Async nickname restoration must not overwrite new typing or another identity. Suggested titles must use the selected generation's prompt; ignore color words such as 森林绿 when detecting themes.
+- Load QR encoding on demand and render integer modules with a four-module quiet zone. Keep sharing on an explicit click after PNG preparation for mobile user activation, with download/link fallbacks. Inspect actual GET responses after rollout; this server's HEAD probes returned empty replies/502 and were not useful availability evidence.
+
 ## 2026-11-09 · Prizes, default creation and claim-group flow
 
 - See `COFFEE_PRIZES_CLAIM_2026-11-09.md` for assets, exact release and acceptance. Keep group QR bytes intact; CSS cropping and downloading the full original are separate concerns. This invitation says valid before Nov16, so expiry is conservative at Nov16 00:00 CST.

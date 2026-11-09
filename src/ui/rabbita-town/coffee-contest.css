@@ -31,9 +31,24 @@
 .own-work .state-approved { background: #dbead4; }
 #own-wall-tools { margin-top: 16px; }
 #claim-group { min-height: 44px; }
-.prize-preview { display: flex; flex-wrap: wrap; gap: 16px; }
-.prize-preview > span { display: flex; align-items: center; gap: 8px; font-size: 13px; }
-.prize-mini { display: inline-block; flex: 0 0 48px; width: 48px; height: 48px; background-image: url('coffee/prizes-v1.webp'); background-size: 300% 100%; background-repeat: no-repeat; }
+.prize-preview { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }
+.prize-preview > div { display: flex; align-items: center; flex-direction: column; gap: 5px; padding: 14px 4px; border: 1px solid #dcded0; border-radius: 14px; background: #fffdf6; text-align: center; }
+.prize-preview > div:first-child { border-color: #e8b49b; background: #f9e8da; }
+.prize-preview > div:nth-child(2) { background: #e6ebda; }
+.prize-preview span { font-size: 12px; color: var(--muted); }
+.prize-preview strong { font-size: 14px; font-weight: 600; }
+.prize-mini { display: inline-block; flex: 0 0 72px; width: 72px; height: 72px; background-image: url('coffee/prizes-v1.webp'); background-size: 300% 100%; background-repeat: no-repeat; }
+.field-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.field-heading label { margin: 0; }
+.field-heading button { font-size: 13px; min-height: 44px; }
+.share-dialog { width: 420px; }
+.share-preview { display: block; width: auto; max-width: 100%; height: auto; max-height: min(54dvh,510px); margin: 0 auto; border-radius: 12px; box-shadow: 0 4px 16px #243e3212; object-fit: contain; }
+.share-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.share-actions > * { display: flex; flex: 1; align-items: center; justify-content: center; min-height: 48px; padding: 8px 12px; margin: 0 !important; font-size: 15px; white-space: nowrap; }
+.share-actions > .primary { flex-basis: 100%; }
+.share-dialog .notice { min-height: 24px; margin: 12px 0; }
+.share-dialog #share-link-field { margin-top: 16px; }
+.gallery-card:focus { outline: 2px solid var(--ink); outline-offset: 6px; border-radius: 8px; }
 .prize-figure { background-position: 0 50%; }
 .prize-tote { background-position: 50% 50%; }
 .prize-coffee { background-position: 100% 50%; }
@@ -554,14 +569,15 @@ nav a, .town-link, footer a {
 }
 .awards {
   margin-top: 25px;
-  padding: 24px;
-  background: var(--sage);
-  border-radius: 12px;
+  display: grid;
+  gap: 12px;
 }
-.awards p {
-  margin-top: 12px;
-  font-size: 13px;
-}
+.award-card { display: flex; align-items: center; gap: 16px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--paper); }
+.award-card.award-creative { background: #f9e8da; border-color: #e8b49b; }
+.award-card.award-popular { background: var(--sage); }
+.award-card > div { min-width: 0; }
+.award-card h3 { margin: 4px 0; font-size: 18px; overflow-wrap: anywhere; }
+.award-card p { margin: 4px 0 0; font-size: 13px; }
 .about-section {
   margin: 0 0 16px;
   border-top: 1px solid var(--line);

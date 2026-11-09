@@ -3,6 +3,50 @@ import assert from 'node:assert/strict'
 import {labelPng,csvCell,creativeEndpoint,votingRows,creationPhase,generationCredits,generationStatus,originalImage} from './coffee-contest.js'
 import {generationPrompt,DEFAULT_PROMPT,personalWorks} from './coffee-contest.js'
 import {claimGroup} from './coffee-claim.js'
+import {suggestedTitle,publicShareLink,shareableEntry,shareCaption} from './coffee-share.js'
+import {draftStore,nicknameKey} from './coffee-drafts.js'
+import {matrix} from './coffee-qr.js'
+
+test('sharing exposes only an approved public snapshot and strips private URL data',()=>{
+  const id='a'.repeat(64),entry={id,title:'我的作品'};
+  assert.equal(shareableEntry({entries:[{...entry,state:'approved'}],gallery:[]},id),null);
+  assert.equal(shareableEntry({gallery:[entry]},id),entry);
+  const link=new URL(publicShareLink('https://example.test/moontown/coffee-contest.html?activity=coffee_2&token=secret&prompt=private#moderation',id,'coffee_2'));
+  assert.equal(link.searchParams.get('activity'),'coffee_2');
+  assert.equal(link.searchParams.get('entry'),id);
+  assert.equal(link.searchParams.get('source'),'work-share');
+  assert.equal(link.searchParams.has('token'),false);assert.equal(link.searchParams.has('prompt'),false);
+  assert.equal(link.hash,'#gallery');
+  assert.throws(()=>publicShareLink(link.href,'bad','coffee'));
+  const event={voting_opens_ms:'10',voting_closes_ms:'20'};
+  assert.match(shareCaption(event,9),/即将/);assert.match(shareCaption(event,10),/投票/);assert.match(shareCaption(event,20),/结果/);
+});
+test('suggestions follow the selected artwork theme, including a blank upload prompt',()=>{
+  assert.equal(suggestedTitle('咖啡里的森林'),'一口小森林');
+  assert.equal(suggestedTitle('杯里小城'),'小城还没醒');
+  assert.equal(suggestedTitle(DEFAULT_PROMPT),'小城还没醒');
+  assert.notEqual(suggestedTitle('杯里小城',1),suggestedTitle('杯里小城'));
+  assert.ok(suggestedTitle('').length<60);
+});
+test('nickname memory follows the account across events and never crosses accounts',async()=>{
+  const previous=globalThis.localStorage,storage=new Map();
+  globalThis.localStorage={getItem:key=>storage.get(key) || null,setItem:(key,value)=>storage.set(key,value)};
+  try{
+    const a=draftStore('event-a'),b=draftStore('event-b');
+    a.writeNickname('creator-a','清晨小城');
+    assert.equal(await b.readNickname('creator-a'),'清晨小城');
+    assert.equal(await b.readNickname('creator-b'),'');
+    a.writeNickname('', '访客');assert.equal(storage.has(nicknameKey('')),false);
+  }finally{globalThis.localStorage=previous;}
+});
+test('the lazy MoonBit QR encoder emits a bounded square with intact finder patterns',()=>{
+  const link=publicShareLink('https://example.test/moontown/coffee-contest.html','a'.repeat(64),'coffee');
+  const code=matrix(link),size=code[0];
+  assert.equal(code.length,1+size*size);assert.ok(size>=21 && size<=177);
+  for(const [x,y] of [[0,0],[size-7,0],[0,size-7]]){
+    for(let row=0;row<7;row++)for(let col=0;col<7;col++)assert.equal(code[1+(y+row)*size+x+col],row===0||row===6||col===0||col===6||row>=2&&row<=4&&col>=2&&col<=4?1:0);
+  }
+});
 
 test('empty or whitespace prompts use the visible default; custom prompts remain unchanged',()=>{
   assert.equal(generationPrompt(''),DEFAULT_PROMPT);

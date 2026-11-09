@@ -2,7 +2,7 @@
 * { box-sizing: border-box; }
 body { margin: 0; min-height: 100svh; display: grid; place-items: center; }
 .display { position: relative; container-type: inline-size; width: min(100%, calc(100svh * 16 / 9)); }
-.event-heading { position: absolute; z-index: 1; inset: 0 0 auto; height: 17.5%; padding: 2.2% 15% 1% 2.8%; background: #f1eee6; border-bottom: 1px solid #243e3240; }
+.event-heading { position: absolute; z-index: 1; inset: 0 0 auto; height: 17.5%; padding: 1.5% 15% .6% 2.8%; background: #f1eee6; border-bottom: 1px solid #243e3240; }
 .event-heading h1 { display: grid; gap: .4cqw; margin: 0; font-weight: 650; line-height: 1.2; }
 .event-series { font-size: 1.75cqw; }
 .event-theme { font-size: 2.15cqw; }
@@ -24,11 +24,13 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; }
 .qr-link { display: block; color: #243e32; text-decoration: none; }
 .qr-link img { display: block; width: 100%; height: auto; background: white; }
 .qr-highlight { display: block; padding: 5px; border: 3px solid #f74f29; border-radius: 18px; background: white; box-shadow: 0 0 0 3px #f74f2918; }
-.prizes-preview { display: flex; align-items: center; gap: 1.6cqw; margin-top: .35cqw; }
-.prizes-preview > span { display: flex; align-items: center; gap: .35cqw; font-size: .75cqw; line-height: 1.2; }
+.prizes-preview { display: flex; align-items: center; gap: .65cqw; margin-top: .5cqw; }
+.prizes-preview > span { display: flex; align-items: center; gap: .4cqw; padding: .1cqw .6cqw .1cqw .15cqw; min-width: 8.2cqw; border: 1px solid #d8dccf; border-radius: .7cqw; background: #faf7ef; font-size: .65cqw; line-height: 1.2; }
+.prizes-preview > span:first-child { border-color: #e8b49b; background: #f9e8da; }
+.prizes-preview > span:nth-child(2) { background: #e6ebda; }
 .prizes-preview strong { display: block; margin-top: 2px; font-size: .95cqw; }
 .prizes-preview small { align-self: end; font-size: .65cqw; color: #5d695b; }
-.prize-mini { display: inline-block; width: 2.1cqw; height: 2.1cqw; background: url('assets/prizes-v1.webp') no-repeat; background-size: 300% 100%; }
+.prize-mini { display: inline-block; width: 2.8cqw; height: 2.8cqw; background: url('assets/prizes-v1.webp') no-repeat; background-size: 300% 100%; }
 .prize-figure { background-position: 0 50%; }
 .prize-tote { background-position: 50% 50%; }
 .prize-coffee { background-position: 100% 50%; }
@@ -49,7 +51,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid #357347; outline-offs
   .event-series { font-size: 16px; }
   .event-theme { font-size: 18px; }
   .prizes-preview { gap: 10px; margin-top: 14px; flex-wrap: wrap; }
-  .prizes-preview > span { flex: 1; gap: 4px; font-size: 11px; white-space: nowrap; }
+  .prizes-preview > span { flex: 1; gap: 4px; padding: 5px 4px; min-width: 0; border-radius: 10px; font-size: 11px; white-space: nowrap; }
   .prizes-preview strong { font-size: 13px; }
   .prizes-preview small { flex-basis: 100%; font-size: 11px; }
   .prize-mini { width: 38px; height: 38px; flex-shrink: 0; }

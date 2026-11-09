@@ -21,13 +21,26 @@ export function draftStore(scope, report = () => {}) {
     return new Promise((resolve, reject) => {
       const transaction = database.transaction('drafts', write ? 'readwrite' : 'readonly');
       const store = transaction.objectStore('drafts');
-      const key=`${draftKey(scope,creator)}:${kind}`;
+      const key=kind==='nickname' ? nicknameKey(creator) : `${draftKey(scope,creator)}:${kind}`;
       const request = write ? store.put(value, key) : store.get(key);
       transaction.oncomplete = () => resolve(write ? value : request.result);
       transaction.onerror = transaction.onabort = () => reject(transaction.error || new Error('草稿未能保存'));
     });
   }
   return {
+    async readNickname(creator) {
+      if(!creator)return '';
+      let backup;
+      try { backup=JSON.parse(localStorage.getItem(nicknameKey(creator)) || 'null'); } catch {}
+      try { const durable=await image(creator,undefined,false,'nickname');return ((backup?.updated || 0)>(durable?.updated || 0)?backup:durable || backup)?.name || ''; }
+      catch { return backup?.name || ''; }
+    },
+    writeNickname(creator, name) {
+      if(!creator)return;
+      const record={name:name.trim().slice(0,40),updated:Date.now()};
+      image(creator,record,true,'nickname').catch(()=>{});
+      try { localStorage.setItem(nicknameKey(creator),JSON.stringify(record)); } catch {}
+    },
     async read(creator) {
       let backup;
       try { backup=JSON.parse(localStorage.getItem(draftKey(scope, creator)) || 'null'); } catch {}
@@ -47,3 +60,4 @@ export function draftStore(scope, report = () => {}) {
     },
   };
 }
+export function nicknameKey(creator) { return `future-community.nickname.v1:${creator}`; }
