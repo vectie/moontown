@@ -18,7 +18,7 @@ async fn main {
   for
     name in [
       "coffee-contest.html", "coffee-contest.js", "coffee-auth.js", "coffee-drafts.js",
-      "coffee-acquisition.js", "coffee-contest.css", "coffee-vote-preview.html",
+      "coffee-acquisition.js", "coffee-claim.js", "coffee-contest.css", "coffee-vote-preview.html",
       "coffee-vote-preview.js", "activity-program.html", "activity-program.js", "activity-program.css",
       "platform-scope.js", "platform-base.js",
     ] {

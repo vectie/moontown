@@ -13,7 +13,7 @@ async fn main {
   for suffix in ["", ":8443"] {
     let prefix = "https://suanli.kechuangfuwu.com" + suffix
     let stem = root +
-      "/verify-v6-" +
+      "/verify-v7-" +
       (if suffix.is_empty() { "443" } else { "8443" })
     let page = @shell.Cmd("curl", [
       "--fail",
@@ -40,6 +40,7 @@ async fn main {
       index, path in [
         "display.css", "assets/company-wordmark.png", "assets/group-mark-raster-v5.png",
         "assets/banxing-stacked-v6.png", "assets/vector-sticker-wordmark.svg", "assets/community-qr.png",
+        "assets/prizes-v1.webp",
       ] {
       let copy = stem + "-brand-\{index}.bin"
       @shell.Cmd("curl", [
@@ -119,7 +120,7 @@ async fn main {
     })
   }
   @fs.write_file(
-    root + "/verification-v6.json",
+    root + "/verification-v7.json",
     Json::array(results).stringify(indent=2),
     permission=0o600,
   )

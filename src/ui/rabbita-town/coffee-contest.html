@@ -22,7 +22,7 @@
 <span>每周创作</span>
 </a>
     <nav aria-label="活动导航">
-<a href="#gallery">作品墙</a>
+<a id="my-works-link" href="#gallery">我的作品</a>
 <a href="#about">活动说明</a>
 <a id="login" href="/user/">登录 <span aria-hidden="true">↗</span>
 </a>
@@ -49,10 +49,10 @@
       <div id="studio" class="studio">
         <form id="create-form" class="composer">
           <label id="create-title" for="prompt">描述你的半醒时刻</label>
-          <textarea id="prompt" name="prompt" maxlength="2000" rows="4" placeholder="例：咖啡杯里住着一座还没醒来的小城，暖奶油色，手绘插画。" required>
+          <textarea id="prompt" name="prompt" maxlength="2000" rows="4" placeholder="不填也可以：我们会画一座住在咖啡杯里的清晨小城。">
 </textarea>
           <div class="prompt-meta">
-<span>点一个灵感，也可以自己写</span>
+<span>留空用默认灵感，也可以自己写</span>
 <span id="prompt-count">0 / 2000</span>
 </div>
           <div class="prompt-chips" aria-label="提示词灵感">
@@ -113,6 +113,7 @@
 <p id="gallery-empty" class="gallery-empty">还没有过审作品。</p>
 <div id="own-wall" class="gallery-grid" hidden></div>
 <p id="own-wall-empty" class="gallery-empty" hidden></p>
+<div id="own-wall-tools" hidden><button id="claim-group" class="text-button" type="button">开奖与领奖群</button></div>
 <section id="leaderboard" class="leaderboard" aria-labelledby="leaderboard-title" hidden>
 <div class="section-heading"><h3 id="leaderboard-title">人气榜</h3><span id="tally-status" class="fine-print"></span></div>
 <ol id="leaderboard-list"></ol>
@@ -144,7 +145,8 @@
 <strong>公布惊喜，下一期见</strong>
 </div>
 </div>
-<p id="prize-description">手办、帆布包、半醒特调咖啡，等三个好点子。实际款式和兑奖安排由主办公布。</p>
+<div class="prize-preview" aria-label="奖品示意"><span><i class="prize-mini prize-figure" aria-hidden="true"></i>一等奖 · 手办</span><span><i class="prize-mini prize-tote" aria-hidden="true"></i>二等奖 · 帆布包</span><span><i class="prize-mini prize-coffee" aria-hidden="true"></i>三等奖 · 咖啡券</span></div>
+<p id="prize-description">咖啡券可兑换半醒咖啡一杯。图片仅为奖品示意，实际款式和兑奖安排由主办公布。</p>
 <details id="inspiration">
 <summary>主题与创作提示</summary>
 <p id="event-topic">给半醒的日常，加一点想象。</p>
@@ -195,7 +197,7 @@
 <label>奖项<select id="prize">
 <option value="creative">一等奖 · 手办</option>
 <option value="popular">二等奖 · 帆布包</option>
-<option value="coffee">三等奖 · 特调咖啡</option>
+<option value="coffee">三等奖 · 咖啡券</option>
 </select>
 </label>
 <label>过审作品<select id="award-entry" required>
@@ -239,6 +241,14 @@
 <button id="submit-entry" class="primary" type="submit">提交审核</button>
 <p id="submit-notice" class="notice" role="status"></p>
 </form>
+</dialog>
+<dialog id="claim-dialog" class="claim-dialog" aria-labelledby="claim-title" aria-describedby="claim-description">
+<div class="dialog-heading"><h2 id="claim-title">投稿成功</h2><button id="close-claim" class="dialog-close text-button" type="button" aria-label="关闭领奖群">×</button></div>
+<p id="claim-description">扫码加入领奖群，留意开奖和领奖安排。</p>
+<span id="claim-code" class="claim-code"><img id="claim-code-image" width="1031" height="1495" alt="能源谷“创未来”生态街区欢迎群二维码"></span>
+<p id="claim-instructions" class="fine-print">微信中长按识别；其他浏览器长按保存到相册，再用微信扫一扫。<br>二维码有效至11月16日前。</p>
+<div class="claim-actions"><a id="save-claim-code" class="secondary" href="coffee/claim-group-20261109.jpg" download="半醒咖啡-领奖群二维码.jpg">下载群二维码</a><button id="claim-done" class="primary" type="button">查看作品</button></div>
+<p class="fine-print">稍后也可从“我的作品”再次打开，入群不影响审核结果。</p>
 </dialog>
 <dialog id="auth-dialog" aria-labelledby="auth-title">
 <form id="auth-form">

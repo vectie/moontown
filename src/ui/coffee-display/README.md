@@ -10,7 +10,7 @@
 生成 `assets/participate-v6.svg`，保持 M 级纠错和四模块留白。当前链接带 `source=display-qr&campaign=banxing-01`，直接参赛按钮使用 `display-direct`。二维码必须经过独立核对，不应交给
 图像生成模型绘制。
 
-`scripts/package-coffee-display.mbtx` 导出十二个公开文件与散列清单，原稿说明不会公开到站点。
+`scripts/package-coffee-display.mbtx` 导出十三个公开文件与散列清单，原稿说明不会公开到站点。
 `scripts/publish-coffee-display-runtime.mbtx` 镜像经校验的官方运行时到内网仓库。
 `scripts/deploy-coffee-display.mbtx` 创建专用入口、静态资源及容器候选。
 本次节点外部镜像拉取被阻塞，最终使用 `scripts/release-coffee-display-host.mbtx` 的独立用户
@@ -37,3 +37,7 @@ systemctl --user restart moontown-coffee-display.service
 
 浏览器已验证 320px、375px、1920×1080，包含播放、暂停、正确视频源与正式参赛跳转。
 二维码文件已与部署包逐字节核对；物理手机扫码仍建议在现场距离下检查。
+
+v7将参赛码加橙色高亮圈，文案改为“一键参赛有奖”。标题下方的手办、帆布包和咖啡券
+由一张约40KiB的三格WebP插画显示，标注奖品示意；实际样式以主办公布为准。
+`scripts/publish-coffee-prizes-display.mbtx` 固定清单和v6来源散列发布，不修改视频与二维码内容。

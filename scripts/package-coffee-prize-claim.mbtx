@@ -1,0 +1,77 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/coffee-prize-claim-20261109/ui-v2"
+  let parent = "/home/HwHiAiUser/coffee-auth-queue-20261107"
+  let moon = "/home/HwHiAiUser/.moon-new/bin/moon"
+  guard !@fs.exists(root + "/ui") else {
+    fail("Use a new immutable UI release directory")
+  }
+  @shell.Cmd("cp", [
+    "-a",
+    "/home/HwHiAiUser/coffee-contact-20261109/ui",
+    root + "/ui",
+  ]).run()
+  @shell.Cmd("tar", ["-xzf", root + "/ui.tgz", "-C", root + "/ui"]).run()
+  for
+    name in [
+      "coffee-contest.html", "coffee-contest.js", "coffee-contest.css", "coffee-claim.js",
+      "coffee/prizes-v1.webp", "coffee/claim-group-20261109.jpg",
+    ] {
+    let path = root + "/ui/" + name
+    if @fs.exists(path + ".gz") {
+      @fs.remove(path + ".gz")
+    }
+    @fs.write_file(
+      path + ".etag",
+      "\"" +
+      @crypto.bytes_to_hex_string(@crypto.sha256(@fs.read_file(path).binary())) +
+      "\"",
+      create_mode=CreateOrTruncate,
+    )
+    @shell.Cmd("gzip", ["-n", "-9", "-k", path]).run()
+  }
+  guard @fs.read_file(root + "/ui/coffee-contest.html")
+    .text()
+    .contains("claim-dialog") else {
+    fail("Unexpected staged UI")
+  }
+  @shell.Cmd(moon, [
+    "run",
+    parent + "/package-account-ui.mbtx",
+    "--",
+    parent + "/ui-original-recovery-oci.oci.tar",
+    root + "/ui",
+    root + "/ui-oci",
+    "account-binding-coffee-prize-claim-20261109-v2",
+  ]).run()
+  @shell.Cmd(moon, [
+    "run",
+    "/home/HwHiAiUser/image-runtime-20261107/publish-account-gateway.mbtx",
+    "--",
+    root + "/ui-oci",
+    "https://lunanexa-registry.lunanexa-registry.svc.cluster.local:5000",
+    "moon/moontown-account-ui",
+    "account-binding-coffee-prize-claim-20261109-v2",
+    "/etc/ssl/certs/ca-certificates.crt",
+  ]).run()
+  guard @json.parse(@fs.read_file(root + "/ui-oci/index.json").text())
+    is { "manifests": [{ "digest": String(digest), .. }], .. } else {
+    fail("Missing UI digest")
+  }
+  @fs.write_file(
+    root + "/ui-release.json",
+    ({ "ui": digest } : Json).stringify(),
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  println("Qualified UI " + digest + "; no deployment changed")
+}

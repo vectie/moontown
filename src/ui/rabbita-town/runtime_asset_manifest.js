@@ -5,6 +5,9 @@ import path from 'node:path'
 const FIXED_RUNTIME_ASSETS = [
   'coffee/cup.png',
   'coffee/logo.svg',
+  'coffee/community-star.webp',
+  'coffee/claim-group-20261109.jpg',
+  'coffee/prizes-v1.webp',
   'moontown.svg',
   'moonsuite-i18n.js',
   'effects/anomaly-signal.svg',

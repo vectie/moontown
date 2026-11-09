@@ -24,6 +24,28 @@
 .state-pending { background: #f6e7ba; }
 .state-rejected, .state-disqualified { background: #f8dfd7; }
 .state-approved { background: #dbead4; }
+.own-work .image-open { position: relative; }
+.own-work .entry-status { position: absolute; right: 8px; top: 8px; margin: 0; color: var(--ink); background: var(--cream); box-shadow: 0 1px 6px #243e3220; }
+.own-work .state-pending { background: #f6e7ba; }
+.own-work .state-rejected, .own-work .state-disqualified { background: #f8dfd7; }
+.own-work .state-approved { background: #dbead4; }
+#own-wall-tools { margin-top: 16px; }
+#claim-group { min-height: 44px; }
+.prize-preview { display: flex; flex-wrap: wrap; gap: 16px; }
+.prize-preview > span { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.prize-mini { display: inline-block; flex: 0 0 48px; width: 48px; height: 48px; background-image: url('coffee/prizes-v1.webp'); background-size: 300% 100%; background-repeat: no-repeat; }
+.prize-figure { background-position: 0 50%; }
+.prize-tote { background-position: 50% 50%; }
+.prize-coffee { background-position: 100% 50%; }
+.claim-dialog { text-align: center; width: 420px; }
+.claim-dialog .dialog-heading { text-align: left; }
+.claim-code { position: relative; display: block; width: min(240px,100%); aspect-ratio: 1; margin: 16px auto; overflow: hidden; background: white; }
+.claim-code img { position: absolute; display: block; width: 132.861%; max-width: none; height: auto; left: -16.495%; top: -64.691%; }
+.claim-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 16px; }
+.claim-actions > a, .claim-actions > button { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; margin: 0; text-decoration: none; }
+.claim-dialog .claim-actions > .primary { width: auto; flex: 1; margin: 0; }
+.claim-actions > a { flex: 1; font-size: 14px; }
+@media (max-height: 650px) { .claim-code { width: min(192px,100%); margin-block: 10px; } }
 .own-work-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .own-work-actions button { min-height: 44px; }
 .review-reason { overflow-wrap: anywhere; font-size: 14px; }

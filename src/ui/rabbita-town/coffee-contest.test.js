@@ -1,6 +1,29 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {labelPng,csvCell,creativeEndpoint,votingRows,creationPhase,generationCredits,generationStatus,originalImage} from './coffee-contest.js'
+import {generationPrompt,DEFAULT_PROMPT,personalWorks} from './coffee-contest.js'
+import {claimGroup} from './coffee-claim.js'
+
+test('empty or whitespace prompts use the visible default; custom prompts remain unchanged',()=>{
+  assert.equal(generationPrompt(''),DEFAULT_PROMPT);
+  assert.equal(generationPrompt('  \n '),DEFAULT_PROMPT);
+  assert.equal(generationPrompt('  我想画蓝色咖啡海洋  '),'我想画蓝色咖啡海洋');
+});
+
+test('personal wall retains pending, rejected, approved, withdrawn and draft works with their latest state',()=>{
+  const generations=['pending','rejected','approved','withdrawn','draft'].map(id=>({id,state:'completed'}));
+  const entries=[{id:'old',generation_id:'rejected',state:'approved'},...generations.filter(g=>g.id!=='draft').map(g=>({generation_id:g.id,state:g.id}))];
+  const rows=personalWorks({generations,entries});
+  assert.equal(rows.length,5);
+  assert.equal(rows.find(row=>row.job.id==='rejected').entry.state,'rejected');
+  assert.equal(rows.find(row=>row.job.id==='draft').entry,undefined);
+});
+
+test('the supplied claim QR has an explicit expiry and is scoped to the coffee event',()=>{
+  assert.equal(claimGroup({id:'other-organizer-event'}),null);
+  assert.equal(claimGroup({id:'banxing-coffee-20261106'},Date.parse('2026-11-15T23:59:59+08:00')).expired,false);
+  assert.equal(claimGroup({id:'banxing-coffee-20261106'},Date.parse('2026-11-16T00:00:00+08:00')).expired,true);
+});
 
 test('original downloads recover once from a broken body without retrying authorization failures',async()=>{
   const image = new Blob([new Uint8Array(64)],{type:'image/png'});

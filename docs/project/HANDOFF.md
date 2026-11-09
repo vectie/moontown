@@ -1,5 +1,12 @@
 # MoonTown handoff notes
 
+## 2026-11-09 · Prizes, default creation and claim-group flow
+
+- See `COFFEE_PRIZES_CLAIM_2026-11-09.md` for assets, exact release and acceptance. Keep group QR bytes intact; CSS cropping and downloading the full original are separate concerns. This invitation says valid before Nov16, so expiry is conservative at Nov16 00:00 CST.
+- Never hide a creator's own work because public gallery approval is pending or rejected. Default to the personal wall when private records exist, and place the latest review state on each image. Only public gallery exposure remains approval-gated.
+- A local HTTP preview must strip query strings before filesystem resolution: versioned CSS otherwise 404s and shows an unstyled video. On macOS a stopped test listener can briefly remain unavailable; inspect listeners rather than repeatedly retrying the same port.
+- Package only after final small-screen button checks. Long primary labels can wrap in a two-button QR dialog on 320px screens; “查看作品” keeps the next action concise. Formal asset-only updates preserve creative state; verified revision35 and all prior IDs after rollout.
+
 ## 2026-11-09 · Contact registration and stacked display mark
 
 - The user's final choice is the original stacked 半醒工坊 logo. v6 rasterizes the entire original SVG without rearranging glyphs; it supersedes the single-line v5 note below.

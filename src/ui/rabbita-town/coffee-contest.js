@@ -1,5 +1,11 @@
 import { coffeeAuth } from './coffee-auth.js';
 import { draftStore } from './coffee-drafts.js';
+import { coffeeClaim, claimGroup } from './coffee-claim.js';
+export const DEFAULT_PROMPT = '一只装着清晨的咖啡杯，杯中是一座还没有醒来的微缩小城，奶油色和森林绿，温暖的手绘插画，安静而奇妙，不要文字和商标';
+export function generationPrompt(value) { return value.trim() || DEFAULT_PROMPT; }
+export function personalWorks(value) {
+  return (value.generations || []).filter(job => job.state === 'completed').toReversed().map(job => ({job,entry:(value.entries || []).toReversed().find(entry => entry.generation_id === job.id)}));
+}
 function creativeEndpoint(href) {
   const page = new URL(href);
   const id = page.searchParams.get('activity');
@@ -121,7 +127,7 @@ function init() {
   let artworkController = null, downloadController = null;
   let artworkReturn = null;
   let disqualifyEntry = '';
-  let draftOwner = 'visitor', afterAuth = '', uploadDraft = null, ownWallKey = '', wall = 'public';
+  let draftOwner = 'visitor', afterAuth = '', uploadDraft = null, ownWallKey = '', wall = 'auto';
   const drafts = draftStore(endpoint.href, message => notice(message,true,'draft-notice'));
   function currentDraft() {
     return {prompt:$('prompt').value,selected,pendingIntent,following:followGeneration,title:$('entry-title').value,name:$('display-name').value};
@@ -159,6 +165,11 @@ function init() {
       openDialog.style.setProperty("--dialog-center", `${(viewport?.offsetTop || 0) + height / 2}px`);
     });
   }
+  const claim = coffeeClaim({fitDialog, now:() => Date.now() + clockOffset, onDone:() => {
+    showWall('mine'); $('own-wall').querySelector('button')?.focus({preventScroll:true});
+  }});
+  $('claim-group').onclick = () => claim.open(state?.event);
+  $('my-works-link').onclick = () => showWall('mine');
   const auth = coffeeAuth({ loginUrl: $("login").href, fitDialog, onSignedIn: async () => {
     identityEpoch += 1;
     render(await request('mine'));
@@ -201,6 +212,7 @@ function init() {
     $("submit-dialog").close();
     $("artwork-dialog").close();
     $('disqualify-dialog').close();disqualifyEntry='';
+    claim.close(); wall='auto'; ownWallKey='';
     $("artwork-image").removeAttribute("src");
     $("result-image").removeAttribute("src");
     $("result-image").removeAttribute("data-job");
@@ -458,22 +470,26 @@ function init() {
   $('wall-public').onclick=()=>showWall('public');
   $('wall-mine').onclick=()=>showWall('mine');
   function renderOwnWall(){
-    const mine=wall==='mine';
+    const mine=wall==='mine' || wall==='auto' && Boolean(state.generations?.length);
     $('wall-public').setAttribute('aria-pressed',String(!mine));$('wall-mine').setAttribute('aria-pressed',String(mine));
     $('gallery-grid').hidden=mine;$('gallery-empty').hidden=mine || Boolean(state.gallery.length);
     $('own-wall').hidden=!mine;
+    $('own-wall-tools').hidden=!mine || !actor || !state.entries?.length || !claimGroup(state.event,Date.now()+clockOffset);
     $('vote-note').hidden=mine || !state.gallery.length && !state.voting_url;
     if(mine)$('my-entry').hidden=true;
-    const jobs=(state.generations || []).filter(job=>job.state==='completed').toReversed();
+    const works=personalWorks(state), jobs=works.map(item=>item.job);
     $('own-wall-empty').hidden=!mine || jobs.length>0;
     $('own-wall-empty').textContent='生成或上传的作品会保存在这里，投稿后可以查看审核状态。';
     const key=JSON.stringify([jobs,state.entries,writing,open(),actor]);
     if(key===ownWallKey)return;ownWallKey=key;
-    $('own-wall').replaceChildren(...jobs.map(job=>{
-      const entry=(state.entries || []).toReversed().find(e=>e.generation_id===job.id);
+    $('own-wall').replaceChildren(...works.map(({job,entry})=>{
       const card=node('article',undefined,'gallery-card own-work');
-      card.append(image(job.id,entry?.title || (job.source==='upload'?'上传的作品':'我的创作')));
-      card.append(node('span',entry?entryLabels[entry.state] || entry.state:'未投稿',`entry-status state-${entry?.state || 'draft'}`));
+      const title=entry?.title || (job.source==='upload'?'上传的作品':'我的创作');
+      const status=entry?entryLabels[entry.state] || entry.state:'未投稿';
+      const preview=image(job.id,title);
+      preview.setAttribute('aria-label',`查看${title}原图，状态：${status}`);
+      preview.append(node('span',status,`entry-status state-${entry?.state || 'draft'}`));
+      card.append(preview);
       card.append(node('h3',entry?.title || (job.source==='upload'?'上传的作品':'未命名作品')));
       if(entry?.reason)card.append(node('p',entry.reason,'review-reason'));
       const controls=node('div',undefined,'own-work-actions');
@@ -745,7 +761,7 @@ function init() {
       writing = false;
       if (action === "set-voting-url") votingDirty = false;
       render(value);
-      notice(action === "generate" ? "灵感已加入队列，可以留在这里等它画好。" : action === "submit" ? "投稿已收到。审核通过后，就能在作品墙见到它。" : action === 'vote' ? '选票已保存，截止前可以改投。' : action === 'cancel-vote' ? '选票已撤回。' : "已保存。", false, target);
+      notice(action === "generate" ? "灵感已加入队列，可以留在这里等它画好。" : action === "submit" ? "投稿已收到，可在“我的作品”查看审核状态。" : action === 'vote' ? '选票已保存，截止前可以改投。' : action === 'cancel-vote' ? '选票已撤回。' : "已保存。", false, target);
       return true;
     } catch (error) {
       notice(error.message, true, target);
@@ -775,8 +791,11 @@ function init() {
   });
   $("create-form").onsubmit = async (event) => {
     event.preventDefault();
-    const prompt = $("prompt").value.trim();
-    if (!prompt) return;
+    const prompt = generationPrompt($("prompt").value);
+    if (!$("prompt").value.trim()) {
+      $('prompt').value=prompt;
+      $('prompt').dispatchEvent(new Event('input'));
+    }
     $("prompt").blur();
     followGeneration = true;
     if (!pendingIntent || pendingIntent.prompt !== prompt) pendingIntent = { prompt, intent: crypto.randomUUID() };
@@ -856,7 +875,10 @@ function init() {
     event.preventDefault();
     if (await perform("submit", { generation_id: selected, title: $("entry-title").value, display_name: $("display-name").value, consent: $("consent").checked }, "submit-notice")) {
       $("submit-dialog").close();
-      notice("投稿已收到，审核通过后会进入作品墙。");
+      showWall('mine');
+      notice("投稿成功，可在“我的作品”查看审核状态。",false,'vote-feedback');
+      $('gallery').scrollIntoView({block:'start',behavior:'instant'});
+      claim.open(state.event,true);
     }
   };
   $("voting-form").onsubmit = (event) => {

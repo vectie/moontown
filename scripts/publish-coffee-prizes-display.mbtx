@@ -1,0 +1,66 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+fn hash(bytes : Bytes) -> String {
+  @crypto.bytes_to_hex_string(@crypto.sha256(bytes))
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/moontown-display-20261108"
+  let incoming = root + "/copy-prizes-v7"
+  let manifest = @fs.read_file(incoming + "/manifest.json")
+  guard hash(manifest.binary()) ==
+    "d61c6cbe29a54900450c91915aa4b0948f1025e7536086954dac34621b113537" &&
+    @json.parse(manifest.text()) is { "files": Array(files), .. } else {
+    fail("Unreviewed display manifest")
+  }
+  for row in files {
+    guard row is { "path": String(path), "sha256": String(expected), .. } &&
+      !path.contains("..") &&
+      !path.has_prefix("/") else {
+      fail("Invalid manifest path")
+    }
+    guard hash(@fs.read_file(incoming + "/webroot/disp/" + path).binary()) ==
+      expected else {
+      fail("Asset mismatch")
+    }
+  }
+  for
+    (name, expected) in [
+      (
+        "index.html", "500518bd179cf3dacf66522aebab0140bf2c20f8fc1990ef441e02211987c92b",
+      ),
+      (
+        "display.css", "3e661de2373ed25c8e4d00df4b56439edbcd74ef2ae178fd0f3654d3257813dc",
+      ),
+    ] {
+    let bytes = @fs.read_file(root + "/site/disp/" + name).binary()
+    guard hash(bytes) == expected else { fail("Live display version changed") }
+    @fs.write_file(
+      incoming + "/before-" + name,
+      bytes,
+      permission=0o600,
+      create_mode=CreateNew,
+    )
+  }
+  for name in ["assets/prizes-v1.webp", "display.css", "index.html"] {
+    let target = root + "/site/disp/" + name
+    @fs.write_file(
+      target + ".next",
+      @fs.read_file(incoming + "/webroot/disp/" + name).binary(),
+      permission=0o644,
+      create_mode=CreateNew,
+    )
+    @fs.rename(target + ".next", target, replace=true)
+  }
+  println(
+    "Published prize illustrations, highlighted participation QR and prize call to action; video, QR payload and partner marks retained",
+  )
+}
