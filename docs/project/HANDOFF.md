@@ -1,5 +1,12 @@
 # MoonTown handoff notes
 
+## 2026-11-09 · Contact registration and stacked display mark
+
+- The user's final choice is the original stacked 半醒工坊 logo. v6 rasterizes the entire original SVG without rearranging glyphs; it supersedes the single-line v5 note below.
+- See `COFFEE_CONTACT_REGISTRATION_2026-11-09.md`. Attribution uses its own first-touch cookie, never draft or image-cache keys; it is untrusted marketing metadata, not authorization.
+- Management kubelet has 5% eviction thresholds plus 10% minimum reclaim and a five-minute transition period. DiskPressure recovery needs roughly 15% free, not just the 5% threshold. Remove only reviewed inactive image export caches; retain source, executable/venv symlinks, PVCs, models and rollback releases.
+- Check standalone release scripts with `moon check path.mbtx` before upload. Source overlays exported from macOS need `COPYFILE_DISABLE=1` and `--no-xattrs`; AppleDouble `._*.mbt` files break Linux package compilation. Native Linux builds must use the current moonleaf sibling containing CSV, not an older release sibling.
+
 Read this with `AGENTS.md` before starting work. Keep task evidence in its
 existing documentation and record concrete pitfalls here.
 

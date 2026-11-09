@@ -1,0 +1,71 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "PaiGack/moonbitqrcode@0.1.0/src/lib",
+}
+
+///|
+async fn main {
+  let root = "src/ui/coffee-display/assets"
+  let html = "src/ui/coffee-display/index.html"
+  let page = @fs.read_file(html)
+    .text()
+    .replace(
+      old="assets/banxing-single-line-v5.png",
+      new="assets/banxing-stacked-v6.png",
+    )
+    .replace(
+      old="width=\"1312\" height=\"320\"",
+      new="width=\"1148\" height=\"936\"",
+    )
+    .replace(
+      old="href=\"https://suanli.kechuangfuwu.com:8443/moontown/coffee-contest.html\" aria-label=",
+      new="href=\"https://suanli.kechuangfuwu.com:8443/moontown/coffee-contest.html?source=display-qr&amp;campaign=banxing-01\" aria-label=",
+    )
+    .replace(
+      old="class=\"join-direct\" href=\"https://suanli.kechuangfuwu.com:8443/moontown/coffee-contest.html\"",
+      new="class=\"join-direct\" href=\"https://suanli.kechuangfuwu.com:8443/moontown/coffee-contest.html?source=display-direct&amp;campaign=banxing-01\"",
+    )
+  @fs.write_file(html, page, create_mode=CreateOrTruncate)
+  let temporary = @fs.tmpdir(prefix="coffee-stacked-")
+  defer @shell.Cmd("rm", ["-r", temporary]).run()
+  let original = @fs.read_file(root + "/banxing-workshop.svg").text()
+  @fs.write_file(
+    temporary + "/stacked.svg",
+    original.replace(
+      old="width=\"287\" height=\"234\"",
+      new="width=\"1148\" height=\"936\"",
+    ),
+    create_mode=CreateNew,
+  )
+  @shell.Cmd("sips", [
+    "-s",
+    "format",
+    "png",
+    temporary + "/stacked.svg",
+    "--out",
+    root + "/banxing-stacked-v6.png",
+  ]).run()
+  let url = "https://suanli.kechuangfuwu.com:8443/moontown/coffee-contest.html?source=display-qr&campaign=banxing-01"
+  let code = @lib.encode_medium(url)
+  let size = code.size() + 8
+  let parts : Array[String] = []
+  for y in 0..<code.size() {
+    for x in 0..<code.size() {
+      if code.is_black(x, y) {
+        parts.push("M\{x+4} \{y+4}h1v1h-1z")
+      }
+    }
+  }
+  @fs.write_file(
+    root + "/participate-v6.svg",
+    "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 \{size} \{size}\" width=\"512\" height=\"512\" shape-rendering=\"crispEdges\"><title>" +
+    url.replace(old="&", new="&amp;") +
+    "</title><rect width=\"100%\" height=\"100%\" fill=\"white\"/><path fill=\"black\" d=\"" +
+    parts.join("") +
+    "\"/></svg>",
+    create_mode=CreateOrTruncate,
+  )
+}

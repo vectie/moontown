@@ -7,7 +7,7 @@
 48px 的直接参赛按钮；桌面显示原版 4K 视频和右上留白处的二维码。所有依赖均在站内。
 
 当前正式参赛地址统一写入 HTML、SVG 及包清单。更换活动时要同时更新 HTML 的两条链接并重新
-生成 `assets/participate.svg`，保持 M 级纠错和四模块留白。二维码必须经过独立核对，不应交给
+生成 `assets/participate-v6.svg`，保持 M 级纠错和四模块留白。当前链接带 `source=display-qr&campaign=banxing-01`，直接参赛按钮使用 `display-direct`。二维码必须经过独立核对，不应交给
 图像生成模型绘制。
 
 `scripts/package-coffee-display.mbtx` 导出十二个公开文件与散列清单，原稿说明不会公开到站点。
@@ -20,8 +20,8 @@
 
 标题与联名更新使用 `scripts/update-coffee-display-copy.mbtx`，核对固定清单和原版散列，备份
 旧 HTML/CSS 后按新增素材、CSS、HTML 顺序原子替换，无需重启服务。公司字标沿用官方素材，
-集团标志只对原 JPEG 近白色转透明并输出 PNG；半醒工坊的四字完整归组为单行 PNG，
-向量贴贴恢复有填充的原版 SVG 草案。`prepare-coffee-partner-rasters.mbtx` 可重建两份位图。
+集团标志只对原 JPEG 近白色转透明并输出 PNG；半醒工坊恢复原稿上下排结构，完整栅格化为 `banxing-stacked-v6.png`，
+向量贴贴恢复有填充的原版 SVG 草案。`prepare-coffee-entry-v6.mbtx` 重建原结构位图及带来源的二维码，v5 准备脚本仅保留为历史。
 保留原橙色条和英文邀请语，联名
 缩小置右。手机端裁去视频文字区后，以 HTML 恢复橙条和英文，避免跟随视频缩成无法阅读的小字。
 

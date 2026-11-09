@@ -246,15 +246,15 @@
 <h2 id="auth-title">登录后参与活动</h2>
 <button id="close-auth" class="dialog-close text-button" type="button" aria-label="关闭登录">×</button>
 </div>
-<label for="auth-email">登录邮箱</label>
-<input id="auth-email" type="email" inputmode="email" autocomplete="username" maxlength="256" required>
+<label for="auth-email">手机号或邮箱</label>
+<input id="auth-email" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="256" required>
 <div id="auth-name-field" hidden>
 <label for="auth-name">展示昵称</label>
 <input id="auth-name" autocomplete="nickname" maxlength="128">
 </div>
 <label for="auth-password">密码</label>
 <input id="auth-password" type="password" autocomplete="current-password" maxlength="1024" required>
-<p id="auth-password-hint" class="fine-print" hidden>至少 12 位，包含大小写字母、数字和符号。</p>
+<p id="auth-password-hint" class="fine-print" hidden>至少 6 位，不要求字母、数字或符号组合。</p>
 <p id="auth-notice" class="notice" role="status" aria-live="polite"></p>
 <button id="auth-submit" class="primary" type="submit">登录并继续</button>
 <button id="auth-mode" class="text-button" type="button">还没有账户？创建账户</button>

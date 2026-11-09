@@ -10,10 +10,10 @@ import {
 ///|
 async fn main {
   let root = "/home/HwHiAiUser/moontown-display-20261108"
-  let incoming = root + "/copy-partners-v5"
+  let incoming = root + "/copy-entry-v6"
   let manifest = @fs.read_file(incoming + "/manifest.json")
   guard @crypto.bytes_to_hex_string(@crypto.sha256(manifest.binary())) ==
-    "d31e9a1c7a6c5b668918d0e5bc74c33c31c8a3302ed72650447d9a7ec4d755cd" &&
+    "a4d45ec6b140f5c37212b23355ab285a3e7a8776033ae02c11fc1a1af22847dd" &&
     @json.parse(manifest.text()) is { "files": Array(files), .. } else {
     fail("Unexpected reviewed release manifest")
   }
@@ -36,10 +36,10 @@ async fn main {
   for
     (name, hash) in [
       (
-        "index.html", "4bd07762655ca5c43b5fc68a7d96e50a579ab33b0f5791ea3e47d07519164317",
+        "index.html", "55f4bc28e5e203349a1af1f977ac77f1072250bfeae9b1b5db613a3f9c3b0b3f",
       ),
       (
-        "display.css", "365fa86143957d966c48c7f3ba3e68800c7c8b5b4429847a7496aea2e4e26180",
+        "display.css", "ae21c3ca00701d1350a7cdf60d9c8c71ee9216e2cfc3dc8b43c5ec7a98957f0a",
       ),
     ] {
     let current = @fs.read_file(root + "/site/disp/" + name).binary()
@@ -56,8 +56,8 @@ async fn main {
   // Publish new versioned assets before CSS and HTML; no runtime changes.
   for
     name in [
-      "assets/group-mark-raster-v5.png", "assets/banxing-single-line-v5.png", "assets/vector-sticker-wordmark.svg",
-      "display.css", "index.html",
+      "assets/group-mark-raster-v5.png", "assets/banxing-stacked-v6.png", "assets/participate-v6.svg",
+      "assets/vector-sticker-wordmark.svg", "display.css", "index.html",
     ] {
     let target = root + "/site/disp/" + name
     guard !@fs.exists(target + ".next") else {
@@ -72,6 +72,6 @@ async fn main {
     @shell.Cmd("mv", [target + ".next", target]).run()
   }
   println(
-    "Published white-to-alpha raster mark, single-line coffee lettering and filled sticker logo.",
+    "Published original stacked coffee logo and attributed participation QR.",
   )
 }

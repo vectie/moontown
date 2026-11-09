@@ -17,9 +17,9 @@ async fn main {
   }
   let source = "src/ui/coffee-display"
   let files = [
-    "index.html", "display.css", "display.js", "assets/participate.svg", "assets/coffee-opposed-rows-v1.jpg",
+    "index.html", "display.css", "display.js", "assets/participate-v6.svg", "assets/coffee-opposed-rows-v1.jpg",
     "assets/coffee-opposed-rows-hd-v1.mp4", "assets/coffee-opposed-rows-4k-v1.mp4",
-    "assets/company-wordmark.png", "assets/group-mark-raster-v5.png", "assets/banxing-single-line-v5.png",
+    "assets/company-wordmark.png", "assets/group-mark-raster-v5.png", "assets/banxing-stacked-v6.png",
     "assets/vector-sticker-wordmark.svg", "assets/community-qr.png",
   ]
   @fs.mkdir(root, permission=0o700)
@@ -38,7 +38,7 @@ async fn main {
     root + "/manifest.json",
     (
       {
-        "participate_url": "https://suanli.kechuangfuwu.com:8443/moontown/coffee-contest.html",
+        "participate_url": "https://suanli.kechuangfuwu.com:8443/moontown/coffee-contest.html?source=display-qr&campaign=banxing-01",
         "files": rows,
       } : Json).stringify(indent=2),
     permission=0o600,

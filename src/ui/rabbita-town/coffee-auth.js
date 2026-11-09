@@ -1,5 +1,7 @@
 // The existing same-origin identity gateway owns passwords and browser sessions.
+import {firstAcquisition,loginContact} from './coffee-acquisition.js';
 export function coffeeAuth({ loginUrl, onSignedIn, fitDialog }) {
+  const acquisition=firstAcquisition();
   const $ = id => document.getElementById(id);
   const dialog = $('auth-dialog');
   const prefix = new URL(loginUrl);
@@ -11,11 +13,11 @@ export function coffeeAuth({ loginUrl, onSignedIn, fitDialog }) {
   }
   function render() {
     $('auth-title').textContent = registering ? '创建账户，继续参与' : '登录，继续参与';
-    $('auth-name-field').hidden = !registering;
-    $('auth-name').required = registering;
+    $('auth-name-field').hidden = true;
+    $('auth-name').required = false;
     $('auth-password-hint').hidden = !registering;
     $('auth-password').autocomplete = registering ? 'new-password' : 'current-password';
-    $('auth-password').minLength = registering ? 12 : 1;
+    $('auth-password').minLength = registering ? 6 : 1;
     $('auth-mode').textContent = registering ? '已有账户？直接登录' : '还没有账户？创建账户';
     $('auth-submit').textContent = busy ? '正在连接…' : registering ? '创建账户并继续' : '登录并继续';
     for (const control of $('auth-form').querySelectorAll('input,button')) control.disabled = busy;
@@ -43,13 +45,16 @@ export function coffeeAuth({ loginUrl, onSignedIn, fitDialog }) {
   $('auth-form').onsubmit = async event => {
     event.preventDefault();
     if (busy) return;
-    const username = $('auth-email').value.trim(), password = $('auth-password').value;
+    const entered = $('auth-email').value.trim(), password = $('auth-password').value;
+    let contact;
+    try {contact=loginContact(entered);} catch(error){message(error.message,true);return;}
+    const username=contact.phone || contact.email;
     busy = true;
     message('');
     render();
     try {
       let response = await post(registering ? 'register' : 'password', registering ? {
-        email: username, display_name: $('auth-name').value.trim(), password, audience: 'enterprise'
+        ...contact, display_name: $('auth-name').value.trim() || '创作者', password, audience: 'enterprise', acquisition
       } : { username, password, audience: 'enterprise' });
       // Account creation can succeed before the optional trial workspace is ready.
       // One normal login recovers that case without another account or GPU task.
@@ -57,9 +62,9 @@ export function coffeeAuth({ loginUrl, onSignedIn, fitDialog }) {
         response = await post('password', { username, password, audience: 'enterprise' });
       }
       if (!response.ok) {
-        const errors = { 400: '请确认邮箱格式和密码要求。', 401: '邮箱或密码不正确，请重新输入。', 409: '该邮箱已有账户，请切换到登录。',
+        const errors = { 400: '请检查手机号或邮箱，密码至少 6 位。', 401: '账号或密码不正确，请重新输入。', 409: '该账号已注册，请切换到登录。',
           429: '尝试较多，请稍后再试。', 403: '登录请求未被接受，请刷新页面后重试。',
-          503: registering ? '账户可能已创建，请稍后用相同邮箱和密码登录。' : '登录服务暂时不可用，请稍后重试。' };
+          503: registering ? '账户可能已创建，请稍后用相同账号和密码登录。' : '登录服务暂时不可用，请稍后重试。' };
         throw new Error(errors[response.status] || '暂时无法登录，请稍后再试。');
       }
       await onSignedIn();

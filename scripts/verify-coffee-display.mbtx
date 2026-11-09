@@ -13,7 +13,7 @@ async fn main {
   for suffix in ["", ":8443"] {
     let prefix = "https://suanli.kechuangfuwu.com" + suffix
     let stem = root +
-      "/verify-v5-" +
+      "/verify-v6-" +
       (if suffix.is_empty() { "443" } else { "8443" })
     let page = @shell.Cmd("curl", [
       "--fail",
@@ -39,8 +39,7 @@ async fn main {
     for
       index, path in [
         "display.css", "assets/company-wordmark.png", "assets/group-mark-raster-v5.png",
-        "assets/banxing-single-line-v5.png", "assets/vector-sticker-wordmark.svg",
-        "assets/community-qr.png",
+        "assets/banxing-stacked-v6.png", "assets/vector-sticker-wordmark.svg", "assets/community-qr.png",
       ] {
       let copy = stem + "-brand-\{index}.bin"
       @shell.Cmd("curl", [
@@ -66,11 +65,11 @@ async fn main {
       "20",
       "--output",
       stem + "-qr.svg",
-      prefix + "/disp/assets/participate.svg",
+      prefix + "/disp/assets/participate-v6.svg",
     ]).output()
     qr.check()
     guard @fs.read_file(stem + "-qr.svg").binary() ==
-      @fs.read_file(root + "/site/disp/assets/participate.svg").binary() else {
+      @fs.read_file(root + "/site/disp/assets/participate-v6.svg").binary() else {
       fail("QR asset mismatch")
     }
     let video = @shell.Cmd("curl", [
@@ -120,7 +119,7 @@ async fn main {
     })
   }
   @fs.write_file(
-    root + "/verification-v5.json",
+    root + "/verification-v6.json",
     Json::array(results).stringify(indent=2),
     permission=0o600,
   )
