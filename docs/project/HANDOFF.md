@@ -1,5 +1,10 @@
 # MoonTown handoff notes
 
+## 2026-11-10 · Unified coffee invitation band
+
+- `COFFEE_INVITATION_DESIGN_2026-11-10.md` supersedes the v9 surrounding-prize design below, which the user rejected. Use one orange footer with equal-size prize illustrations in a row and primary/secondary QR hierarchy; keep partners upper right. The mobile direct action precedes the QR row.
+- Clip the baked-in video footer and render the invitation in HTML; do not force new controls into the original video footer's fixed space. Preserve every poster caption. QR/prize artwork keeps its native proportions; compare complete desktop composition and phone action placement before publication.
+
 ## 2026-11-10 · Display QR and partner swap
 
 - See `COFFEE_DISPLAY_SWAP_2026-11-10.md`. Partners occupy the upper right; prize illustrations surround the participation QR in the lower right. Mobile partners precede the posters in DOM order. Keep the QR area transparent on desktop so the native orange stripe and English remain intact.

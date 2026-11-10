@@ -1,0 +1,66 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+fn hash(bytes : Bytes) -> String {
+  @crypto.bytes_to_hex_string(@crypto.sha256(bytes))
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/moontown-display-20261108"
+  let incoming = root + "/copy-invitation-v10"
+  let manifest = @fs.read_file(incoming + "/manifest.json")
+  guard hash(manifest.binary()) ==
+    "b6297af4f9446c12d9d5d3fa44a55d30a0a8a81436fa96910f38aa57132f163e" &&
+    @json.parse(manifest.text()) is { "files": Array(files), .. } else {
+    fail("Unreviewed display manifest")
+  }
+  for row in files {
+    guard row is { "path": String(path), "sha256": String(expected), .. } &&
+      !path.contains("..") &&
+      !path.has_prefix("/") else {
+      fail("Invalid manifest path")
+    }
+    guard hash(@fs.read_file(incoming + "/webroot/disp/" + path).binary()) ==
+      expected else {
+      fail("Asset mismatch")
+    }
+  }
+  for
+    (name, expected) in [
+      (
+        "index.html", "049974a945adcda0b44ef106df7235dab4c60ef8ff60a41c2b3c3792c755bc04",
+      ),
+      (
+        "display.css", "94786a08b5d4bad9cb05ecce6639f2ad8bf2b62bf3dd590a251e5b8d8ce0fbf8",
+      ),
+    ] {
+    let bytes = @fs.read_file(root + "/site/disp/" + name).binary()
+    guard hash(bytes) == expected else { fail("Live display version changed") }
+    @fs.write_file(
+      incoming + "/before-" + name,
+      bytes,
+      permission=0o600,
+      create_mode=CreateNew,
+    )
+  }
+  for name in ["display.css", "index.html"] {
+    let target = root + "/site/disp/" + name
+    @fs.write_file(
+      target + ".next",
+      @fs.read_file(incoming + "/webroot/disp/" + name).binary(),
+      permission=0o644,
+      create_mode=CreateNew,
+    )
+    @fs.rename(target + ".next", target, replace=true)
+  }
+  println(
+    "Published a unified invitation band with proportional prize illustrations, primary entry QR and secondary community QR",
+  )
+}

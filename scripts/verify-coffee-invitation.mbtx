@@ -1,0 +1,128 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/moontown-display-20261108"
+  let results : Array[Json] = []
+  for suffix in ["", ":8443"] {
+    let prefix = "https://suanli.kechuangfuwu.com" + suffix
+    let stem = root +
+      "/verify-invitation-v10-" +
+      (if suffix.is_empty() { "443" } else { "8443" })
+    let page = @shell.Cmd("curl", [
+      "--fail",
+      "--silent",
+      "--show-error",
+      "--location",
+      "--max-time",
+      "20",
+      "--dump-header",
+      stem + ".headers",
+      "--output",
+      stem + ".html",
+      "--write-out",
+      "%{http_code}",
+      prefix + "/disp",
+    ]).output()
+    page.check()
+    guard page.stdout() == "200" &&
+      @fs.read_file(stem + ".html").binary() ==
+      @fs.read_file(root + "/site/disp/index.html").binary() else {
+      fail("Published page mismatch")
+    }
+    for
+      index, path in [
+        "display.css", "assets/company-wordmark.png", "assets/group-mark-raster-v5.png",
+        "assets/banxing-stacked-v6.png", "assets/vector-sticker-wordmark.svg", "assets/community-qr.png",
+        "assets/prizes-v1.webp",
+      ] {
+      let copy = stem + "-brand-\{index}.bin"
+      @shell.Cmd("curl", [
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--max-time",
+        "20",
+        "--output",
+        copy,
+        prefix + "/disp/" + path,
+      ]).run()
+      guard @fs.read_file(copy).binary() ==
+        @fs.read_file(root + "/site/disp/" + path).binary() else {
+        fail("Published brand or stylesheet mismatch: " + path)
+      }
+    }
+    let qr = @shell.Cmd("curl", [
+      "--fail",
+      "--silent",
+      "--show-error",
+      "--max-time",
+      "20",
+      "--output",
+      stem + "-qr.svg",
+      prefix + "/disp/assets/participate-v6.svg",
+    ]).output()
+    qr.check()
+    guard @fs.read_file(stem + "-qr.svg").binary() ==
+      @fs.read_file(root + "/site/disp/assets/participate-v6.svg").binary() else {
+      fail("QR asset mismatch")
+    }
+    let video = @shell.Cmd("curl", [
+      "--silent",
+      "--show-error",
+      "--max-time",
+      "20",
+      "--range",
+      "0-1023",
+      "--dump-header",
+      stem + "-range.headers",
+      "--output",
+      stem + "-range.bin",
+      "--write-out",
+      "%{http_code}",
+      prefix + "/disp/assets/coffee-opposed-rows-hd-v1.mp4",
+    ]).output()
+    video.check()
+    guard video.stdout() == "206" &&
+      @fs.read_file(stem + "-range.bin").binary().length() == 1024 else {
+      fail("Video byte ranges must work")
+    }
+    let entry = @shell.Cmd("curl", [
+      "--fail",
+      "--silent",
+      "--show-error",
+      "--max-time",
+      "20",
+      "--output",
+      stem + "-entry.html",
+      "--write-out",
+      "%{http_code}",
+      "https://suanli.kechuangfuwu.com:8443/moontown/coffee-contest.html",
+    ]).output()
+    entry.check()
+    guard entry.stdout() == "200" &&
+      @fs.read_file(stem + "-entry.html").text().contains("半醒咖啡") else {
+      fail("Formal participation page unavailable")
+    }
+    results.push({
+      "url": prefix + "/disp",
+      "html": 200,
+      "qr_exact_match": true,
+      "brand_assets_and_css_exact_match": true,
+      "video_range": 206,
+      "participate_page": 200,
+    })
+  }
+  @fs.write_file(
+    root + "/verification-invitation-v10.json",
+    Json::array(results).stringify(indent=2),
+    permission=0o600,
+  )
+  println(Json::array(results).stringify(indent=2))
+}
