@@ -1,5 +1,10 @@
 # MoonTown handoff notes
 
+## 2026-11-10 · Equal QR codes, vertical prizes and subtle motion
+
+- `COFFEE_EQUAL_QR_2026-11-10.md` supersedes v10's unequal QR sizes and horizontal prizes. Both QR frames and captions must match; prizes are vertical beside the participation code. Phones stack the equal codes with prizes alongside. Keep the prize stack close on both desktop and phone.
+- Measure visible label edges, not only container bounds: fixed trailing text widths can hide a large visual gap. Right-align the whole phone prize stack inside its grid column. Only illustrations wiggle; pause/play and reduced-motion preferences control them along with the original video.
+
 ## 2026-11-10 · Unified coffee invitation band
 
 - `COFFEE_INVITATION_DESIGN_2026-11-10.md` supersedes the v9 surrounding-prize design below, which the user rejected. Use one orange footer with equal-size prize illustrations in a row and primary/secondary QR hierarchy; keep partners upper right. The mobile direct action precedes the QR row.

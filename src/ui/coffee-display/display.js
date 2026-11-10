@@ -7,6 +7,7 @@ let requested = !reduced.matches && !navigator.connection?.saveData;
 function reflect() {
   motion.textContent = video.paused ? '播放动画' : '暂停动画';
   motion.setAttribute('aria-label', motion.textContent);
+  document.querySelector('.display').classList.toggle('motion-paused', video.paused);
 }
 
 async function play() {

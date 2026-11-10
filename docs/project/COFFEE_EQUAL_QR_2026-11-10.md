@@ -1,0 +1,12 @@
+# Equal QR frames and adjacent vertical prizes
+
+This supersedes the unequal participation/community QR hierarchy and horizontal prize row in v10. The user explicitly requested equal QR sizes, three prizes vertically beside the participation QR, closer spacing, and gentle prize motion.
+
+- Both QR codes share the same square white frame, padding, corners, caption size and weight. Desktop at1920px:180.48×180.48px, identical top829.20px; mobile:144×144px, stacked in the right column. Existing payloads and source image bytes remain unchanged.
+- Prizes form one vertical column with aligned illustration positions. Remove fixed trailing label width, which made a small container gap look much larger than the actual text gap. Desktop long-name text ends about15px before the participation frame. Mobile prize stack is right-aligned within its column to avoid the same empty-space problem on wider phones.
+- Only the three prize illustrations wiggle:1px lift, up to3° rotation, roughly0.72s of movement per6s, staggered by0/.7/1.4s. Text and QR codes stay still. `prefers-reduced-motion` disables it; the existing pause/play button pauses/resumes video and prizes together, verified through actual UI clicks and computed play states.
+- Verified1920px desktop,1024×768 compact desktop,320px and375px phones; no horizontal or prize-label overflow. Phone direct participation remains before the QR column. Animation adds no timers, assets or dependencies; transforms affect only three tiny illustrations.
+- Source JS syntax, release scripts, scoped info/fmt and whitespace checks passed. Both443/8443 verify HTML200, exact CSS/JS/brand/prize/QR bytes, video Range206 and participant page200.
+- Final CSS cache key `20261110-equal-qr-13`, JS key `20261110-equal-qr-11`. Earlier v11/v12 releases were refined to remove internal desktop/mobile label-column gaps.
+- Final manifest SHA256 `7ce19de9c02bcfa2b587a542b9cd671de98fee759411693e3b6fafbb6bef3bbd`. Backups/staging `/home/HwHiAiUser/moontown-display-20261108/copy-equal-qr-v13/`; verification receipt `verification-equal-qr-v13.json` in its parent. JS then CSS then HTML are published with immutable prior-version checks.
+- Evidence: `/Users/kq/Workspace/moontown/output/coffee-equal-qr-20261110/live-detail.jpg`, `live-desktop.jpg`, `live-mobile.jpg`. The detail capture makes QR equality and prize spacing readable; the website shows the actual motion.
