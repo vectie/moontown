@@ -1,5 +1,10 @@
 # MoonTown handoff notes
 
+## 2026-11-10 · Display QR and partner swap
+
+- See `COFFEE_DISPLAY_SWAP_2026-11-10.md`. Partners occupy the upper right; prize illustrations surround the participation QR in the lower right. Mobile partners precede the posters in DOM order. Keep the QR area transparent on desktop so the native orange stripe and English remain intact.
+- Validate the entire fixed16:9 composition, especially the bottom QR caption and artwork captions, plus320px prize/QR gaps. Keep QR module quiet space inside the original image and its white frame; surrounding prizes must never cover it.
+
 ## 2026-11-09 · Suggested titles and approved sharing
 
 - See `COFFEE_TITLES_SHARING_2026-11-09.md` for release, role walkthrough and checks. Gate sharing on membership in the current public gallery, not a stale private `approved` state. A withdrawn saved card cannot be recalled; its link must handle removal without revealing private content.

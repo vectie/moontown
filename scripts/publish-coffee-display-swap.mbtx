@@ -1,0 +1,66 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+fn hash(bytes : Bytes) -> String {
+  @crypto.bytes_to_hex_string(@crypto.sha256(bytes))
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/moontown-display-20261108"
+  let incoming = root + "/copy-swap-v9"
+  let manifest = @fs.read_file(incoming + "/manifest.json")
+  guard hash(manifest.binary()) ==
+    "ba0622ede08b10bc2b8f0200eef42df7d5299f53f59a093a405b009f27c11caa" &&
+    @json.parse(manifest.text()) is { "files": Array(files), .. } else {
+    fail("Unreviewed display manifest")
+  }
+  for row in files {
+    guard row is { "path": String(path), "sha256": String(expected), .. } &&
+      !path.contains("..") &&
+      !path.has_prefix("/") else {
+      fail("Invalid manifest path")
+    }
+    guard hash(@fs.read_file(incoming + "/webroot/disp/" + path).binary()) ==
+      expected else {
+      fail("Asset mismatch")
+    }
+  }
+  for
+    (name, expected) in [
+      (
+        "index.html", "f18221db41fa1b719413443e220c572537e316aa32ae99d37d7b41d8b9311b36",
+      ),
+      (
+        "display.css", "25c7bed6ab0f3067662fe30acabf32334c0ff61f73986f552e45cc398faecb8e",
+      ),
+    ] {
+    let bytes = @fs.read_file(root + "/site/disp/" + name).binary()
+    guard hash(bytes) == expected else { fail("Live display version changed") }
+    @fs.write_file(
+      incoming + "/before-" + name,
+      bytes,
+      permission=0o600,
+      create_mode=CreateNew,
+    )
+  }
+  for name in ["display.css", "index.html"] {
+    let target = root + "/site/disp/" + name
+    @fs.write_file(
+      target + ".next",
+      @fs.read_file(incoming + "/webroot/disp/" + name).binary(),
+      permission=0o644,
+      create_mode=CreateNew,
+    )
+    @fs.rename(target + ".next", target, replace=true)
+  }
+  println(
+    "Published partner and QR placement swap with prizes around the participation QR; video and original asset bytes retained",
+  )
+}
