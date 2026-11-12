@@ -37,6 +37,8 @@ const BROWSER_FILES = [
   'coffee-acquisition.js',
   'coffee-drafts.js',
   'coffee-claim.js',
+  'coffee-share.js',
+  'coffee-qr.js',
   'coffee-contest.css',
   'coffee-vote-preview.html',
   'coffee-vote-preview.js',

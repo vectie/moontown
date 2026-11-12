@@ -1,0 +1,58 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+async fn main {
+  let root = "src/ui/coffee-display/assets"
+  let source = root + "/banxing-original-20261112.png"
+  guard @crypto.bytes_to_hex_string(
+      @crypto.sha256(@fs.read_file(source).binary()),
+    ) ==
+    "97378d193b9603eaeef97e6db8cb8bdcbe0614144d9ab1ea10b216a81cb27887" else {
+    fail("Unexpected supplied logo")
+  }
+  let target = root + "/banxing-logo-20261112.png"
+  // Retain the supplied raster glyphs and brush edges. The alpha-only bbox is
+  // 3318:3227:355:375; add20 original pixels of quiet space on every side.
+  @shell.Cmd("ffmpeg", [
+    "-hide_banner", "-loglevel", "error", "-y", "-i", source, "-vf", "format=rgba,colorkey=0xffffff:0.08:0.05,crop=3358:3267:335:355,scale=960:-1:flags=lanczos,setsar=1",
+    "-frames:v", "1", "-c:v", "png", "-compression_level", "9", target,
+  ]).run()
+  let temporary = @fs.tmpdir(prefix="banxing-alpha-")
+  defer @shell.Cmd("rm", ["-r", temporary]).run()
+  @shell.Cmd("ffmpeg", [
+    "-hide_banner",
+    "-loglevel",
+    "error",
+    "-y",
+    "-i",
+    target,
+    "-vf",
+    "format=rgba,crop=1:1:0:0,alphaextract",
+    "-frames:v",
+    "1",
+    "-f",
+    "rawvideo",
+    "-pix_fmt",
+    "gray",
+    temporary + "/corner",
+  ]).run()
+  guard @fs.read_file(temporary + "/corner").binary() == b"\x00" else {
+    fail("Logo background is not transparent")
+  }
+  let image = @fs.read_file(target).binary()
+  guard image.length() < 500000 else { fail("Unexpected logo payload size") }
+  @fs.write_file(
+    "src/ui/assets/coffee/banxing-logo-20261112.png",
+    image,
+    create_mode=CreateOrTruncate,
+  )
+  println(
+    "Prepared supplied logo, transparent corner verified; \{image.length()} bytes",
+  )
+}

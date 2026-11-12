@@ -1,0 +1,108 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, mode] && ["qa", "formal"].contains(mode) else {
+    fail("qa|formal")
+  }
+  let root = "/home/HwHiAiUser/coffee-logo-20261112/final"
+  let rows : Array[Json] = []
+  for suffix in ["", ":8443"] {
+    let base = "https://suanli.kechuangfuwu.com" +
+      suffix +
+      (if mode == "qa" { "/coffee-qa/" } else { "/moontown/" })
+    for
+      index, name in [
+        "coffee-contest.html", "coffee-contest.css", "coffee/banxing-logo-20261112.png",
+        "coffee-share.js", "coffee-qr.js",
+      ] {
+      let copy = root +
+        "/verified-" +
+        mode +
+        (if suffix.is_empty() { "443" } else { "8443" }) +
+        "-\{index}"
+      @shell.Cmd("curl", [
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--compressed",
+        "--retry",
+        "3",
+        "--retry-delay",
+        "2",
+        "--retry-connrefused",
+        "--max-time",
+        "15",
+        "--output",
+        copy,
+        base + name,
+      ]).run()
+      guard @fs.read_file(copy).binary() ==
+        @fs.read_file(root + "/input/" + name).binary() else {
+        fail("Deployed asset mismatch: " + base + name)
+      }
+    }
+    rows.push({ "url": base, "compressed_exact_assets": 5 })
+  }
+  let deployment = if mode == "qa" {
+    "moontown-coffee-qa"
+  } else {
+    "moontown-platform"
+  }
+  let response = @shell.Cmd("kubectl", [
+    "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", "-n", "aigc-acceptance-20260915",
+    "get", "deployment", deployment, "-o", "json",
+  ]).output()
+  response.check()
+  let now = @json.parse(response.stdout())
+  let before = @json.parse(
+    @fs.read_file(root + "/before-" + mode + ".json").text(),
+  )
+  guard now
+    is {
+      "spec": {
+        "template": {
+          "spec": {
+            "containers": current_containers,
+            "volumes": current_volumes,
+            ..
+          },
+          ..
+        },
+        ..
+      },
+      ..
+    } &&
+    before
+    is {
+      "spec": {
+        "template": {
+          "spec": { "containers": old_containers, "volumes": old_volumes, .. },
+          ..
+        },
+        ..
+      },
+      ..
+    } &&
+    current_containers == old_containers &&
+    current_volumes == old_volumes else {
+    fail("Runtime or persistence changed")
+  }
+  @fs.write_file(
+    root + "/verification-" + mode + ".json",
+    Json::array(rows).stringify(indent=2),
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  println(
+    Json::array(rows).stringify(indent=2) +
+    "\nRuntime and volume specifications preserved",
+  )
+}

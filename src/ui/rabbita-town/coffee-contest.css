@@ -603,12 +603,11 @@ nav a, .town-link, footer a {
   line-height: 1.9;
 }
 .brand-logo {
-  width: 92px;
-  height: 74px;
+  width: 108px;
+  height: 106px;
   object-fit: contain;
   object-position: left;
   margin-top: 24px;
-  mix-blend-mode: multiply;
 }
 .schedule {
   display: grid;
@@ -875,8 +874,8 @@ dialog .primary {
     align-items: flex-start;
     flex-wrap: wrap;
   }
-  .about-content > div:first-child { position: relative; padding-right: 80px; }
-  .brand-logo { width: 64px; height: 64px; position: absolute; right: 0; top: 0; margin: 0; }
+  .about-content > div:first-child { position: relative; min-height: 80px; padding-right: 96px; }
+  .brand-logo { width: 80px; height: 78px; position: absolute; right: 0; top: 0; margin: 0; }
   .schedule > div { font-size: 12px; gap: 12px; }
   .review-queue { grid-template-columns: 1fr; }
   .my-entry { padding: 12px; flex-wrap: wrap; }

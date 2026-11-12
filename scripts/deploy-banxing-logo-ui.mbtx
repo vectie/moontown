@@ -1,0 +1,113 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  let result = @shell.Cmd(
+    "kubectl",
+    ["--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", ..args],
+  ).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, mode] && ["qa", "formal"].contains(mode) else {
+    fail("qa|formal")
+  }
+  let root = "/home/HwHiAiUser/coffee-logo-20261112/final"
+  guard @json.parse(@fs.read_file(root + "/image.json").text())
+    is { "image": String(digest), .. } &&
+    digest.has_prefix("sha256:") &&
+    digest.length() == 71 else {
+    fail("Missing qualified image")
+  }
+  let prefix = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/"
+  let (deployment, previous, runtime) = if mode == "formal" {
+    (
+      "moontown-platform",
+      prefix +
+      "hosted-apps@sha256:a09d209b53070e5d6a03d1a38d895d65f9d5536daf2c059a38a1f4edc8e40d53",
+      prefix +
+      "moontown-account-gateway@sha256:5baf6c9c2c930abf41ab2a4ba839adedf7cc80ee624145ccc64954928803325e",
+    )
+  } else {
+    (
+      "moontown-coffee-qa",
+      prefix +
+      "hosted-apps@sha256:a09d209b53070e5d6a03d1a38d895d65f9d5536daf2c059a38a1f4edc8e40d53",
+      prefix +
+      "moontown-account-gateway@sha256:dfc9d4d371874dc3348e8139bd5e0a09ea70c907ff0bf8afd6a6ed8adf90278e",
+    )
+  }
+  let ns = "aigc-acceptance-20260915"
+  let current = @json.parse(
+    kube(["-n", ns, "get", "deployment", deployment, "-o", "json"]),
+  )
+  guard current
+    is {
+      "metadata": { "resourceVersion": String(version), .. },
+      "spec": {
+        "replicas": 1,
+        "template": {
+          "spec": {
+            "initContainers": [
+              { "name": "public-assets", "image": String(old), .. },
+            ],
+            "containers": [{ "name": "platform", "image": String(active), .. }],
+            ..
+          },
+          ..
+        },
+        ..
+      },
+      ..
+    } &&
+    old == previous &&
+    active == runtime else {
+    fail("Deployment changed; inspect before rollout")
+  }
+  @fs.write_file(
+    root + "/before-" + mode + ".json",
+    current.stringify(indent=2),
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  let patch : Json = [
+    { "op": "test", "path": "/metadata/resourceVersion", "value": version },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/initContainers/0/image",
+      "value": previous,
+    },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/containers/0/image",
+      "value": runtime,
+    },
+    {
+      "op": "replace",
+      "path": "/spec/template/spec/initContainers/0/image",
+      "value": prefix + "hosted-apps@" + digest,
+    },
+  ]
+  println(
+    kube([
+      "-n",
+      ns,
+      "patch",
+      "deployment",
+      deployment,
+      "--type=json",
+      "--patch",
+      patch.stringify(),
+    ]),
+  )
+}

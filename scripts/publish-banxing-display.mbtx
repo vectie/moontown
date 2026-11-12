@@ -1,0 +1,69 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+fn hash(bytes : Bytes) -> String {
+  @crypto.bytes_to_hex_string(@crypto.sha256(bytes))
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/moontown-display-20261108"
+  let incoming = root + "/copy-banxing-v14"
+  let manifest = @fs.read_file(incoming + "/manifest.json")
+  guard hash(manifest.binary()) ==
+    "9f32d9f139287a1622fcbdbf6d93bf585660d9c1dfe99861db5672926be3e5d3" &&
+    @json.parse(manifest.text()) is { "files": Array(files), .. } else {
+    fail("Unreviewed display manifest")
+  }
+  for row in files {
+    guard row is { "path": String(path), "sha256": String(expected), .. } &&
+      !path.contains("..") &&
+      !path.has_prefix("/") else {
+      fail("Invalid manifest path")
+    }
+    guard hash(@fs.read_file(incoming + "/webroot/disp/" + path).binary()) ==
+      expected else {
+      fail("Asset mismatch")
+    }
+  }
+  for
+    (name, expected) in [
+      (
+        "index.html", "e4b8d0cf0effcc001752a84f7ffd7ef6faf2403475c6b60b864ce703fac535b1",
+      ),
+      (
+        "display.css", "e33166ba81fcb33fdfc7983f4f59b2af0044229763e7461e50bf04cb92902c65",
+      ),
+      (
+        "display.js", "1f9cdec7fa6672b7175b4b49c5d2e8d9e28a36d2102903411274d9460b0e17ee",
+      ),
+    ] {
+    let bytes = @fs.read_file(root + "/site/disp/" + name).binary()
+    guard hash(bytes) == expected else { fail("Live display version changed") }
+    @fs.write_file(
+      incoming + "/before-" + name,
+      bytes,
+      permission=0o600,
+      create_mode=CreateNew,
+    )
+  }
+  for name in ["assets/banxing-logo-20261112.png", "display.css", "index.html"] {
+    let target = root + "/site/disp/" + name
+    @fs.write_file(
+      target + ".next",
+      @fs.read_file(incoming + "/webroot/disp/" + name).binary(),
+      permission=0o644,
+      create_mode=CreateNew,
+    )
+    @fs.rename(target + ".next", target, replace=true)
+  }
+  println(
+    "Published the supplied new Banxing logo with native lettering and transparent raster background",
+  )
+}

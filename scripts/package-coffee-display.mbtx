@@ -19,7 +19,7 @@ async fn main {
   let files = [
     "index.html", "display.css", "display.js", "assets/participate-v6.svg", "assets/coffee-opposed-rows-v1.jpg",
     "assets/coffee-opposed-rows-hd-v1.mp4", "assets/coffee-opposed-rows-4k-v1.mp4",
-    "assets/company-wordmark.png", "assets/group-mark-raster-v5.png", "assets/banxing-stacked-v6.png",
+    "assets/company-wordmark.png", "assets/group-mark-raster-v5.png", "assets/banxing-logo-20261112.png",
     "assets/vector-sticker-wordmark.svg", "assets/community-qr.png", "assets/prizes-v1.webp",
   ]
   @fs.mkdir(root, permission=0o700)

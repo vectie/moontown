@@ -1,0 +1,166 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+async fn digest(path : String) -> String {
+  @crypto.bytes_to_hex_string(@crypto.sha256(@fs.read_file(path).binary()))
+}
+
+///|
+async fn blob(root : String, name : String, value : Json) -> Json {
+  let path = root + "/" + name
+  @fs.write_file(path, value.stringify(), create_mode=CreateNew)
+  let hash = digest(path)
+  let size = @fs.read_file(path).binary().length()
+  @fs.rename(path, root + "/blobs/sha256/" + hash)
+  { "digest": "sha256:" + hash, "size": size }
+}
+
+///|
+async fn main {
+  let release = "/home/HwHiAiUser/coffee-logo-20261112/final"
+  let root = release + "/ui-oci"
+  let previous = "sha256:a09d209b53070e5d6a03d1a38d895d65f9d5536daf2c059a38a1f4edc8e40d53"
+  let base = "https://lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/v2/moon/hosted-apps"
+  guard !@fs.exists(root) else { fail("Use a new immutable release") }
+  @fs.mkdir(root + "/blobs/sha256", recursive=true, permission=0o700)
+  let curl = [
+    "--noproxy", "*", "--cacert", "/etc/ssl/certs/ca-certificates.crt", "--fail",
+    "--silent", "--show-error",
+  ]
+  @shell.Cmd(
+    "curl",
+    [
+      ..curl,
+      "-H",
+      "Accept: application/vnd.oci.image.manifest.v1+json",
+      "-o",
+      root + "/base-manifest.json",
+      base + "/manifests/" + previous,
+    ],
+  ).run()
+  guard "sha256:" + digest(root + "/base-manifest.json") == previous else {
+    fail("Current base digest mismatch")
+  }
+  let manifest = @json.parse(@fs.read_file(root + "/base-manifest.json").text())
+  guard manifest is Object(fields) &&
+    manifest
+    is {
+      "config": { "digest": String(config_digest), .. },
+      "layers": Array(layers),
+      ..
+    } else {
+    fail("Invalid base manifest")
+  }
+  @shell.Cmd(
+    "curl",
+    [..curl, "-o", root + "/base-config.json", base + "/blobs/" + config_digest],
+  ).run()
+  guard "sha256:" + digest(root + "/base-config.json") == config_digest else {
+    fail("Base config mismatch")
+  }
+  let config = @json.parse(@fs.read_file(root + "/base-config.json").text())
+  guard config is Object(config_fields) &&
+    config
+    is {
+      "architecture": "amd64",
+      "os": "linux",
+      "rootfs": { "diff_ids": Array(diffs), .. },
+      ..
+    } else {
+    fail("Unexpected base platform")
+  }
+  let qualified = "/home/HwHiAiUser/moon-public/work/products-20261111-r1/moontown-oci-r4/layer/opt/moontown/ui"
+  for
+    (name, expected) in [
+      (
+        "coffee-contest.js", "c29e359a247e4fec82e4662a32579440580ffc8bf73f1d8ed26590cc926412da",
+      ),
+    ] {
+    guard digest(qualified + "/" + name) == expected else {
+      fail("Current qualified UI changed")
+    }
+  }
+  let layer = root + "/layer/opt/moontown/ui"
+  @fs.mkdir(layer + "/coffee", recursive=true, permission=0o755)
+  for name in ["coffee-share.js", "coffee-qr.js"] {
+    let path = layer + "/" + name
+    @fs.write_file(
+      path,
+      @fs.read_file(release + "/input/" + name).binary(),
+      permission=0o644,
+    )
+    @fs.write_file(path + ".etag", "\"" + digest(path) + "\"", permission=0o644)
+    @shell.Cmd("gzip", ["-n", "-9", "-k", path]).run()
+  }
+  let archive = root + "/payload.tar"
+  @shell.Cmd("tar", [
+    "--owner=0",
+    "--group=0",
+    "--mode=u+rwX,go+rX",
+    "-C",
+    root + "/layer",
+    "-cf",
+    archive,
+    ".",
+  ]).run()
+  let diff = digest(archive)
+  @shell.Cmd("gzip", ["-n", "-k", archive]).run()
+  let compressed = digest(archive + ".gz")
+  let bytes = @fs.read_file(archive + ".gz").binary().length()
+  @fs.rename(archive + ".gz", root + "/blobs/sha256/" + compressed)
+  diffs.push(Json("sha256:" + diff))
+  layers.push({
+    "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+    "digest": "sha256:" + compressed,
+    "size": bytes,
+  })
+  if config_fields.get("history") is Some(Array(history)) {
+    history.push({
+      "created_by": "Update supplied Banxing logo; preserve current runtime and all other UI",
+      "empty_layer": false,
+    })
+  }
+  guard blob(root, "new-config.json", config) is Object(new_config) else {
+    fail("Config descriptor")
+  }
+  new_config["mediaType"] = Json("application/vnd.oci.image.config.v1+json")
+  fields["config"] = Json::object(new_config)
+  fields["mediaType"] = Json("application/vnd.oci.image.manifest.v1+json")
+  guard blob(root, "new-manifest.json", manifest) is Object(descriptor) else {
+    fail("Manifest descriptor")
+  }
+  descriptor["mediaType"] = Json("application/vnd.oci.image.manifest.v1+json")
+  descriptor["platform"] = { "architecture": "amd64", "os": "linux" }
+  @fs.write_file(
+    root + "/index.json",
+    ({ "schemaVersion": 2, "manifests": [Json::object(descriptor)] } : Json).stringify(),
+  )
+  @fs.write_file(
+    root + "/oci-layout",
+    ({ "imageLayoutVersion": "1.0.0" } : Json).stringify(),
+  )
+  @fs.write_file(
+    release + "/image.json",
+    (
+      {
+        "base": previous,
+        "image": descriptor.get("digest").unwrap(),
+        "overlay_bytes": bytes,
+      } : Json).stringify(),
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  @shell.Cmd("/home/HwHiAiUser/.moon-new/bin/moon", [
+    "run", "/home/HwHiAiUser/moon-public/work/products-20261111-r1/publish-account-gateway.mbtx",
+    "--", root, "https://lunanexa-registry.lunanexa-registry.svc.cluster.local:5000",
+    "moon/hosted-apps", "account-binding-banxing-logo-final-20261112", "/etc/ssl/certs/ca-certificates.crt",
+  ]).run()
+  println(@fs.read_file(release + "/image.json").text())
+}

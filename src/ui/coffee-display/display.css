@@ -16,7 +16,7 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; }
 .company-word { position: relative; display: block; width: 18cqw; height: 1.7cqw; overflow: hidden; }
 .company-word img { position: absolute; left: 0; width: 100%; height: auto; top: 50%; transform: translateY(-50%); }
 .partner-pair { display: flex; align-items: center; gap: .6cqw; white-space: nowrap; }
-.banxing-wordmark { display: block; flex-shrink: 0; width: auto; height: 4.2cqw; }
+.banxing-wordmark { display: block; flex-shrink: 0; width: auto; height: 6cqw; }
 .vector-wordmark { display: block; width: 7.1cqw; height: auto; }
 .invitation-band { position: absolute; z-index: 3; left: 2.8%; right: 2.8%; bottom: 2.8%; height: 21.4%; display: grid; grid-template-columns: minmax(0,1fr) 36cqw; align-items: center; gap: 2cqw; padding: .55cqw 1.5cqw; background: #f36b39; color: #162c20; }
 .invitation strong { font-size: 1.9cqw; line-height: 1.15; font-weight: 800; color: #171716; }
@@ -69,7 +69,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid #243e32; outline-offs
   .company-word { width: 205px; height: 18px; }
   .partner-pair { gap: 8px; }
   .partner-company + .partner-pair > span { display: none; }
-  .banxing-wordmark { height: 38px; }
+  .banxing-wordmark { height: 64px; }
   .vector-wordmark { width: 85px; }
   .stage { aspect-ratio: 16 / 5.4; overflow: hidden; clip-path: none; }
   video { height: auto; transform: translateY(-17.5%); }

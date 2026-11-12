@@ -1,5 +1,12 @@
 # MoonTown handoff notes
 
+## 2026-11-12 · Supplied Banxing raster and production coffee imports
+
+- See `BANXING_LOGO_2026-11-12.md`. The supplied new logo supersedes v6: keep its complete cup, Chinese lettering and English line; remove white by pixel alpha detection, never redraw. The optimized PNG is960×934 and282734 bytes. Original is retained outside production allowlists.
+- Nov11 moved management to192.168.2.173 and deployed an account-storage-scope runtime fix. UI releases must inherit the current qualified hosted-apps image and preserve the formal runtime `sha256:5baf6c9c2c930abf41ab2a4ba839adedf7cc80ee624145ccc64954928803325e`; do not deploy an older checkout's runtime during a brand change.
+- Nov11's production assembly omitted `coffee-share.js` and `coffee-qr.js`, leaving the activity loading forever. Both assembly and required-file validation now include them. `coffee-package.test.js` follows the actual coffee ESM dependency graph and checks referenced image assets so a normal build cannot silently omit these files again. HTTP200 on HTML alone is insufficient: verify rendered event name and schedule.
+- The local ffmpeg has no libwebp encoder. Use its lossless PNG encoder for this raster workflow. Browser viewport overrides affect the selected tab; inspect actual innerWidth and reset after acceptance.
+
 ## 2026-11-10 · Equal QR codes, vertical prizes and subtle motion
 
 - `COFFEE_EQUAL_QR_2026-11-10.md` supersedes v10's unequal QR sizes and horizontal prizes. Both QR frames and captions must match; prizes are vertical beside the participation code. Phones stack the equal codes with prizes alongside. Keep the prize stack close on both desktop and phone.
