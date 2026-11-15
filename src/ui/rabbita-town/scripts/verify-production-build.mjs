@@ -15,8 +15,10 @@ const distRoot = path.join(frontendRoot, 'dist')
 // Keep their release cost inside a narrow, explicit ceiling.
 // Add the preserved offline Three.js studio and its pinned vendor modules.
 // Complete studio + six lossless projections + gzip sidecars total 70.2 MiB.
-// Keep the existing release ceiling; minification pays for the new projections.
-const MAX_DIST_BYTES = 73 * 1024 * 1024
+// Minification pays for the existing projections within the original 73 MiB.
+// Round 2 adds a compressed theme reference, two real prize cutouts and the
+// exact new claim QR. Include their sidecars inside a further 1 MiB ceiling.
+const MAX_DIST_BYTES = 74 * 1024 * 1024
 const REQUIRED_BROWSER_FILES = [
   'index.html',
   'viewport.html',
@@ -29,6 +31,7 @@ const REQUIRED_BROWSER_FILES = [
   'coffee-drafts.js',
   'coffee-claim.js',
   'coffee-share.js',
+  'coffee-themes.js',
   'coffee-qr.js',
   'coffee-contest.css',
   'coffee-vote-preview.html',

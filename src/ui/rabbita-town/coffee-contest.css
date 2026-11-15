@@ -887,3 +887,5 @@ dialog .primary {
   html { scroll-behavior: auto; }
   *, *:before, *:after { animation: none !important; transition: none !important; }
 }
+.prize-mini.prize-figure{background-image:url('coffee/prize-figure-real.webp');background-size:contain;background-position:center}
+.prize-mini.prize-tote{background-image:url('coffee/prize-tote-real.webp');background-size:contain;background-position:center}

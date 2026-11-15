@@ -61,3 +61,31 @@ export function draftStore(scope, report = () => {}) {
   };
 }
 export function nicknameKey(creator) { return `future-community.nickname.v1:${creator}`; }
+
+// A stable page URL can host a new round. Keep its drafts distinct, and copy
+// legacy first-round data only into that same round without deleting sources.
+export function scopedDraftStore(scope,eventId,report=()=>{}) {
+  if(!eventId)return draftStore(scope,report);
+  const current=draftStore(`${scope}|event=${eventId}`,report),migrations=new Map();
+  const page=new URL(scope),legacyScopes=new Set();
+  if(eventId==='banxing-coffee-20261106'){
+    legacyScopes.add(scope);
+    for(const prefix of ['town','moontown'])legacyScopes.add(new URL(`/${prefix}/api/creative/`,page.origin).href);
+  }else if(page.pathname.includes('/api/activities/'))legacyScopes.add(scope);
+  const legacy=[...legacyScopes].map(value=>draftStore(value));
+  function migrate(creator){
+    if(!migrations.has(creator))migrations.set(creator,(async()=>{
+      if(await current.read(creator))return;
+      for(const old of legacy){
+        const value=await old.read(creator);if(!value)continue;
+        const file=await old.readFile(creator);
+        if(await current.read(creator))return;
+        current.write(creator,value);
+        if(file)await current.writeFile(creator,file);
+        return;
+      }
+    })());
+    return migrations.get(creator);
+  }
+  return {...current,async read(creator){await migrate(creator);return current.read(creator);},async readFile(creator){await migrate(creator);return current.readFile(creator);}};
+}

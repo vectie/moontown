@@ -1,6 +1,11 @@
 // Only public gallery entries may be shared. No prompt or account identifier
 // goes into the card or URL. The QR encoder is loaded only when requested.
-export function suggestedTitle(prompt='', variant=0) {
+import { creationGuide } from './coffee-themes.js';
+export function suggestedTitle(prompt='', variant=0,event) {
+  if(creationGuide(event).key==='transformation'){
+    const names=/蝶|茧/.test(prompt)?['破茧的一杯','自我成蝶','把希望捧在手心']:/风雨|闪电|蜕变/.test(prompt)?['风雨之后的我','向光蜕变','不熄的半醒时刻']:['光穿过我','一杯光的变身','折射出新的自己'];
+    return names[((variant%names.length)+names.length)%names.length];
+  }
   const themes=[[/森林(?!绿)|树|花|植物/,['一口小森林','咖啡长出了一片森林','把春天装进杯子']], [/云|天空|打哈欠/,['云朵还没醒','一杯云的早晨','今天的云有咖啡香']], [/城|街|房子/,['小城还没醒','杯里住着一个早晨','把清晨捧在手心']], [/海|浪|蓝色/,['一杯小小的海','咖啡海岸的早晨','醒在一朵浪花里']], [/猫|狗|动物/,['陪你慢慢醒来','一杯咖啡的好朋友','今天也想赖一会儿']], [/星|月|宇宙/,['星星也喝咖啡','月亮的第一杯美式','宇宙还在打盹']]];
   const names=themes.find(([pattern])=>pattern.test(prompt))?.[1] || ['半醒，刚刚好','让灵感醒一会儿','今天的美式有点奇妙'];
   return names[((variant%names.length)+names.length)%names.length];

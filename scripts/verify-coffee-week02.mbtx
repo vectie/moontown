@@ -1,0 +1,135 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+fn hash(bytes : Bytes) -> String {
+  @crypto.bytes_to_hex_string(@crypto.sha256(bytes))
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, mode] && ["internal", "external"].contains(mode) else {
+    fail("internal|external")
+  }
+  let external = mode == "external"
+  let root = if external {
+    "output/coffee-week02-20261116"
+  } else {
+    "/home/HwHiAiUser/coffee-week02-20261116"
+  }
+  let origin = "https://suanli.kechuangfuwu.com" +
+    (if external { ":8443" } else { "" })
+  let mut checked = 0
+  async fn fetch(path : String) -> Bytes {
+    let output = root + "/verify-" + mode + "-response.bin"
+    let args = [
+      "--fail", "--silent", "--show-error", "--max-time", "30", "--output", output,
+    ]
+    if !external {
+      args.append(["--resolve", "suanli.kechuangfuwu.com:443:192.168.2.173"])
+    }
+    args.push(origin + path)
+    let response = @shell.Cmd("curl", args).output()
+    response.check()
+    checked += 1
+    @fs.read_file(output).binary()
+  }
+  let public = @json.parse(@utf8.decode(fetch("/town/api/creative/public")))
+  guard public
+    is {
+      "event": {
+        "id": "banxing-coffee-20261116",
+        "topic": "变身",
+        "deadline_ms": "1795089600000",
+        "voting_opens_ms": "1795096800000",
+        "voting_closes_ms": "1795168800000",
+        "awards_ms": "1795176000000",
+        "guest_generation": true,
+        "provider_ready": true,
+        ..
+      },
+      "gallery": [],
+      "voting": { "mode": "builtin", "total_votes": 0, .. },
+      ..
+    } else {
+    fail("Formal event or privacy/vote state mismatch")
+  }
+  let archive = @json.parse(
+    @utf8.decode(fetch("/coffee-week01/api/creative/public")),
+  )
+  guard archive
+    is { "event": { "id": "banxing-coffee-20261106", .. }, "revision": 54, .. } else {
+    fail("First round changed")
+  }
+  let qa = @json.parse(
+    @utf8.decode(fetch("/coffee-week02-qa/api/creative/public")),
+  )
+  guard qa
+    is {
+      "event": { "id": "banxing-coffee-week02-qa-20261116", .. },
+      "gallery": Array(entries),
+      "voting": { "total_votes": 6, "settled": true, .. },
+      "awards": Array(awards),
+      ..
+    } &&
+    entries.length() == 3 &&
+    awards.length() == 3 else {
+    fail("QA settlement drifted")
+  }
+  let display_html = @utf8.decode(fetch("/disp/"))
+  guard display_html.has_prefix("<!doctype html>") &&
+    display_html.contains("第二期：变身") &&
+    display_html.contains("campaign=banxing-02") else {
+    fail("Display document is not valid second-round UTF-8 HTML")
+  }
+  for
+    (prefix, directory) in [
+      ("/town/", if external { root + "/input" } else { root + "/ui-v3/input" }),
+      (
+        "/disp/",
+        if external {
+          root + "/display-input"
+        } else {
+          root + "/display-v2"
+        },
+      ),
+    ] {
+    guard @json.parse(@fs.read_file(directory + "/manifest.json").text())
+      is { "files": Array(files), .. } else {
+      fail("Missing release manifest")
+    }
+    for row in files {
+      guard row is { "path": String(path), "sha256": String(expected), .. } &&
+        hash(fetch(prefix + path)) == expected else {
+        fail("Served asset differs from release")
+      }
+    }
+  }
+  let receipt : Json = {
+    "mode": mode,
+    "tls_validated": true,
+    "http_checks": checked,
+    "formal_round": 2,
+    "formal_public_entries": 0,
+    "formal_votes": 0,
+    "first_round_revision": 54,
+    "qa_entries": 3,
+    "qa_votes": 6,
+    "qa_awards": 3,
+    "ui_and_display_asset_hashes_match": true,
+  }
+  @fs.write_file(
+    root + "/" + mode + "-verification.json",
+    receipt.stringify(indent=2),
+    permission=0o600,
+  )
+  println(receipt.stringify())
+}

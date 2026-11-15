@@ -1,5 +1,29 @@
 # MoonTown handoff notes
 
+## 2026-11-16 · Second-round transformation release
+
+- See `COFFEE_WEEK02_2026-11-16.md` for approved dates, immutable image pins,
+  preserved first-round history, QA evidence and rollback locations. Canonical
+  live route is `/town/`; legacy `/moontown/` redirects preserve acquisition query
+  parameters. Public HTTPS uses 8443; only internal 443 was verified.
+- New event IDs require event-scoped browser drafts/file caches. Preserve legacy
+  first-round keys and migrate non-destructively only into that same event.
+  Snapshot revisions may reset across events: reject stale revisions only within
+  the same event, and invalidate older asynchronous restoration callbacks.
+- `participant_account_ids: []` means deny every registered participant; omit the
+  field for open admission. Explicit manager IDs are scoped to the QA event,
+  never promoted into global organizer roles.
+- Use explicit UTF-8 encoding for HTML bytes: String.to_bytes() yields raw UTF-16
+  here. Hash equality alone cannot prove valid HTML. Check UTF-8 document content
+  and actual browser rendering before considering publication complete.
+- Standalone scripts are formatted with explicit `.mbtx` paths. A whole-workspace
+  `moon fmt` can introduce unrelated formatting churn in local sibling projects.
+  Production assembly requires npm dependencies plus built/assembled Landmark
+  Studio models; do not bypass these checks or remove the preserved studio.
+- Group QR `claim-group-20261116.jpg` is the user's latest supplied image, valid
+  before Nov23, superseding the temporary community-account fallback. The group
+  code and public community-account code have distinct purposes.
+
 ## 2026-11-12 · Supplied Banxing raster and production coffee imports
 
 - See `BANXING_LOGO_2026-11-12.md`. The supplied new logo supersedes v6: keep its complete cup, Chinese lettering and English line; remove white by pixel alpha detection, never redraw. The optimized PNG is960×934 and282734 bytes. Original is retained outside production allowlists.

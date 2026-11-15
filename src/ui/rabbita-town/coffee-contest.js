@@ -1,9 +1,11 @@
 import { coffeeAuth } from './coffee-auth.js';
-import { draftStore } from './coffee-drafts.js';
+import { scopedDraftStore } from './coffee-drafts.js';
 import { coffeeClaim, claimGroup } from './coffee-claim.js';
 import { coffeeShare, suggestedTitle, shareableEntry } from './coffee-share.js';
-export const DEFAULT_PROMPT = '一只装着清晨的咖啡杯，杯中是一座还没有醒来的微缩小城，奶油色和森林绿，温暖的手绘插画，安静而奇妙，不要文字和商标';
-export function generationPrompt(value) { return value.trim() || DEFAULT_PROMPT; }
+import { creationGuide } from './coffee-themes.js';
+export const DEFAULT_PROMPT = creationGuide().prompts[0][1];
+export function generationPrompt(value,event) { return value.trim() || creationGuide(event).prompts[0][1]; }
+export function staleSnapshot(previous,next,actor) { return Boolean(previous && next.event.id===previous.event.id && next.viewer.account_id===actor && next.revision<previous.revision); }
 export function personalWorks(value) {
   return (value.generations || []).filter(job => job.state === 'completed').toReversed().map(job => ({job,entry:(value.entries || []).toReversed().find(entry => entry.generation_id === job.id)}));
 }
@@ -83,7 +85,7 @@ function generationStatus(job, now, activity) {
   if (job.state === 'running') return seconds === 0 ? '正在收尾，请稍等。' : `正在生成 · 预计还需约 ${duration}`;
   return ahead ? `前面还有 ${ahead} 人 · 预计约 ${duration}开始` : `马上轮到你 · 预计约 ${duration}完成`;
 }
-const prizeLabels = Object.freeze({ creative: "一等奖 · 手办", popular: "二等奖 · 帆布包", coffee: "三等奖 · 咖啡券" });
+const prizeLabels = Object.freeze({ creative: "一等奖 · 公仔", popular: "二等奖 · 帆布包", coffee: "三等奖 · 咖啡券" });
 function csvCell(value) {
   const text = String(value ?? "");
   return `"${(/^[\s]*[=+@\-\t\r]/.test(text) ? "'" : "") + text.replaceAll('"', '""')}"`;
@@ -130,7 +132,9 @@ function init() {
   let disqualifyEntry = '';
   let draftOwner = 'visitor', afterAuth = '', uploadDraft = null, ownWallKey = '', wall = 'auto';
   let titleJob='',titleAuto=false;
-  const drafts = draftStore(endpoint.href, message => notice(message,true,'draft-notice'));
+  let presentationKey='';
+  let draftEventId=document.body.dataset.eventId || '';
+  let drafts = scopedDraftStore(endpoint.href,draftEventId,message => notice(message,true,'draft-notice'));
   function currentDraft() {
     return {prompt:$('prompt').value,selected,pendingIntent,following:followGeneration,title:$('entry-title').value,name:$('display-name').value,titleJob,titleAuto};
   }
@@ -142,6 +146,7 @@ function init() {
     if (value) {
       $('prompt').value=typeof value.prompt==='string'?value.prompt.slice(0,2000):'';
       $('prompt-count').textContent=`${$('prompt').value.length} / 2000`;
+      document.querySelectorAll('[data-prompt]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.prompt===$('prompt').value)));
       selected=typeof value.selected==='string'?value.selected:'';
       pendingIntent=value.pendingIntent || null;
       followGeneration=Boolean(value.following);
@@ -318,7 +323,16 @@ function init() {
     return wrap;
   }
   function render(value) {
-    if (state && value.viewer.account_id === actor && value.revision < state.revision) return;
+    if (staleSnapshot(state,value,actor)) return;
+    if(value.event.id!==draftEventId){
+      const inherited=!state?currentDraft():null;
+      saveDraft();identityEpoch++;
+      draftEventId=value.event.id;
+      drafts=scopedDraftStore(endpoint.href,draftEventId,message=>notice(message,true,'draft-notice'));
+      if(state)clearPrivate();
+      restoreDraft(draftOwner,inherited && (inherited.prompt || inherited.selected || inherited.title)?inherited:null);
+      ownWallKey='';historyKey='';rankingKey='';
+    }
     const nextActor = value.viewer.account_id;
     const galleryChanged = !state || JSON.stringify(value.gallery) !== JSON.stringify(state.gallery);
     const changed = !state || value.revision !== state.revision || nextActor !== actor || value.viewer.operator !== state.viewer.operator || value.awards?.length !== state.awards?.length;
@@ -335,6 +349,23 @@ function init() {
     actor = nextActor;
     state = value;
     const now = Date.now() + clockOffset, ev = state.event, phase=creationPhase(ev,now);
+    const guide=creationGuide(ev);
+    document.querySelector('.prompt-chips').hidden=false;
+    $('previous-round').hidden=ev.id==='banxing-coffee-20261106';
+    if(presentationKey!==guide.key){
+      presentationKey=guide.key;
+      $('create-title').textContent=guide.label;
+      $('prompt').placeholder=guide.placeholder;
+      document.querySelectorAll('[data-prompt]').forEach((button,index)=>{
+        const item=guide.prompts[index];if(!item)return;
+        button.textContent=item[0];button.dataset.prompt=item[1];
+        button.setAttribute('aria-pressed',String($('prompt').value===item[1]));
+      });
+      const reference=document.querySelector('.hero img');
+      reference.src=guide.reference;reference.alt=guide.referenceAlt;
+      $('share-title').textContent=guide.key==='transformation'?'分享我的变身作品':'分享我的半醒时刻';
+      $('theme-inspiration-copy').textContent=guide.key==='transformation'?'可以从折光变身、自我成蝶、风雨蜕变开始。自由发挥，不必照着示例画。':'可以从清晨的小城、打盹的云朵、杯里的森林开始。准确中文、logo 和价格使用主办原稿，不要求模型重新绘制。';
+    }
     $("login").textContent = actor ? "账户 ↗" : "登录 ↗";
     const activityAllowed = state.activity?.generation_allowed !== false;
     $('activity-message').hidden = !state.activity?.message;
@@ -363,7 +394,8 @@ function init() {
     $("start-time").textContent=date(ev.opens_ms);
     $("deadline-time").textContent=date(ev.deadline_ms,true);
     $("deadline-note").textContent = `${new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(Number(ev.deadline_ms))} 截稿`;
-    $("awards-time").textContent=date(ev.awards_ms);
+    $("awards-time").textContent=date(ev.awards_ms,true);
+    $('voting-window').textContent=`大众投票：${date(ev.voting_opens_ms,true)} 至 ${date(ev.voting_closes_ms,true)}（北京时间）`;
     $("phase").textContent = phase==='waiting' ? "即将开始" : phase==='open' && !ev.provider_ready ? "创作即将开放" : phase==='open' ? "正在征集灵感" : now < Number(ev.voting_opens_ms) ? "投稿结束 · 正在审核" : now < Number(ev.voting_closes_ms) ? "一起为灵感投票" : "本期已结束";
     const jobs = state.generations || [], completed = jobs.filter((j) => j.state === "completed");
     $("studio").hidden = closed && !jobs.length;
@@ -816,7 +848,7 @@ function init() {
   });
   $("create-form").onsubmit = async (event) => {
     event.preventDefault();
-    const prompt = generationPrompt($("prompt").value);
+    const prompt = generationPrompt($("prompt").value,state.event);
     if (!$("prompt").value.trim()) {
       $('prompt').value=prompt;
       $('prompt').dispatchEvent(new Event('input'));
@@ -838,7 +870,7 @@ function init() {
       titleJob=selected;titleAuto=false;
     }
     if(!$('entry-title').value.trim() || titleAuto && titleJob!==selected){
-      $('entry-title').value=suggestedTitle(state.generations.find(job=>job.id===selected)?.prompt || '',0);
+      $('entry-title').value=suggestedTitle(state.generations.find(job=>job.id===selected)?.prompt || '',0,state.event);
       titleAuto=true;
     }
     titleJob=selected;
@@ -857,7 +889,7 @@ function init() {
   $('entry-title').addEventListener('input',()=>{titleAuto=false;saveDraft();});
   $('display-name').addEventListener('input',()=>{drafts.writeNickname(actor,$('display-name').value);saveDraft();});
   $('suggest-title').onclick=()=>{
-    $('entry-title').value=suggestedTitle(state.generations.find(job=>job.id===selected)?.prompt || '',++titleVariant);titleAuto=true;titleJob=selected;saveDraft();
+    $('entry-title').value=suggestedTitle(state.generations.find(job=>job.id===selected)?.prompt || '',++titleVariant,state.event);titleAuto=true;titleJob=selected;saveDraft();
   };
   async function sendUpload(){
     if(!uploadDraft || writing)return;
