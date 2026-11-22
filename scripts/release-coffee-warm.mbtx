@@ -13,11 +13,11 @@ import {
 async fn main {
   guard @env.args() is [_, mode] else { fail("assets|stage|ship|apply|verify") }
   let source = "src/ui/coffee-display"
-  let staging = "output/coffee-warm-20261122"
-  let remote = "/home/HwHiAiUser/coffee-warm-20261122"
+  let staging = "output/coffee-warm-fluffy-20261122"
+  let remote = "/home/HwHiAiUser/coffee-warm-fluffy-20261122"
   let live = "/home/HwHiAiUser/moontown-display-20261108/site/disp"
   let files = [
-    "assets/warm-cover-v1.webp", "assets/warm-cover-mobile-v1.webp", "index.html",
+    "assets/warm-cover-v2.webp", "assets/warm-cover-mobile-v2.webp", "index.html",
   ]
   let ssh = [
     "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-J", "HwHiAiUser@106.39.18.146:32123",
@@ -30,14 +30,14 @@ async fn main {
   }
   match mode {
     "assets" => {
-      let original = source + "/assets/warm-cover-original-v1.png"
+      let original = source + "/assets/warm-cover-original-v2.png"
       run("cwebp", [
         "-quiet",
         "-q",
         "94",
         original,
         "-o",
-        source + "/assets/warm-cover-v1.webp",
+        source + "/assets/warm-cover-v2.webp",
       ])
       run("cwebp", [
         "-quiet",
@@ -48,7 +48,7 @@ async fn main {
         "0",
         original,
         "-o",
-        source + "/assets/warm-cover-mobile-v1.webp",
+        source + "/assets/warm-cover-mobile-v2.webp",
       ])
     }
     "stage" => {
@@ -85,7 +85,7 @@ async fn main {
         })
       }
       let manifest : Json = {
-        "previous_html": "12d502991b84f7c45a1e2a38c11a11ef98f0059b699ed0ff243b394961ba0fdf",
+        "previous_html": "ce029fec779f7b38c1e10ab0afdf63f804fc194be0327d4f88320af2c80272db",
         "only_display": true,
         "title": "暖暖",
         "files": rows,
@@ -112,8 +112,8 @@ async fn main {
         "scp",
         ssh +
         [
-          staging + "/assets/warm-cover-v1.webp",
-          staging + "/assets/warm-cover-mobile-v1.webp",
+          staging + "/assets/warm-cover-v2.webp",
+          staging + "/assets/warm-cover-mobile-v2.webp",
           "lunanexa-management:" + remote + "/assets/",
         ],
       )

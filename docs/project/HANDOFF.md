@@ -1,5 +1,17 @@
 # MoonTown handoff notes
 
+## 2026-11-22 · 暖暖 fluffy fur and tucked tail
+
+- The user rejected the first tail correction: repeated editing lost the original
+  fluffy brushwork and produced a tail longer than the cat. Current v2 edits the
+  ORIGINAL `siamese-cover-original.png` directly, preserving the original face,
+  separated dry-brush fur and feathered edges. Tail is tucked beside the rear
+  haunch; do not reintroduce the foreground ribbon or wrap it around the cup.
+- Current assets are `warm-cover-{original-,mobile-,}v2.{png,webp}` (see the exact
+  paths and built-in prompt in `WARM_COVER_EDIT_2026-11-22.md`). CSS/JS layout-v4,
+  暖暖 title, QR bytes and award data are unchanged. Release backup/receipt is
+  management `coffee-warm-fluffy-20261122`; old versions remain for rollback.
+
 ## 2026-11-22 · 暖暖 name and tail correction
 
 - The user renamed the third theme to 暖暖. This supersedes 杯中暹罗 in visible

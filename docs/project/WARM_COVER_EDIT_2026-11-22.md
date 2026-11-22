@@ -1,5 +1,35 @@
 # Third cover: 暖暖
 
+## Current v2: restore fluffy original and tuck the tail
+
+The user rejected v1's lost fluffy brushwork and excessively long tail. Do not
+use the multi-pass v1 image as a new edit target. The current v2 edits the original
+`siamese-cover-original.png` directly with built-in ImageGen (precise-object-edit),
+preserving its layered cream/chocolate dry-brush fur, feathered edges and face.
+The foreground ribbon is removed; only a modest tucked tail section is visible
+beside the rear haunch, above the saucer. It no longer encircles the cup or scene.
+
+Selected built-in output: `exec-a54eb5a6-0f76-4b72-8972-2ab68779a1ca.png`.
+Saved master: `src/ui/coffee-display/assets/warm-cover-original-v2.png`.
+Public derivatives: `warm-cover-v2.webp` (379864 bytes),
+`warm-cover-mobile-v2.webp` (80938 bytes). Layout-v4 CSS/JS, theme 暖暖,
+QR codes, partner marks and all12 work cards are preserved.
+Release backup/receipt: management `coffee-warm-fluffy-20261122`.
+
+V2 acceptance:9/9 focused tests, standalone release script check/format, three
+published file hashes matched over validated public HTTPS. Actual390px browser
+loads the960px v2 derivative and retains all12 works without horizontal overflow.
+Actual3840×2160 browser loads v2 desktop WebP without overflow. Saved screenshots:
+`output/coffee-warm-fluffy-20261122/{live-desktop,live-mobile,live-4k}.jpg`.
+V2 HTML SHA-256:
+`f14cb537353194b2bd4ace77cf48eabcc06d563647ef253afbb042d449c71b7d`.
+
+Final v2 prompt (verbatim):
+
+> Use case: precise-object-edit. EDIT THIS ORIGINAL illustration, not a new redraw. The user likes the original soft fluffy fur, lively separated dry-brush strokes and feathered fur edges. Preserve the original cat face, blue eyes, head shape, expressive ears, cream chest, coat texture, single front paw on saucer, latte face, cup/saucer, overhead composition, warm paper, sunlight and window shadows. Absolutely preserve its fluffy painterly touch: soft wispy tufts and broad layered brush strokes, NOT smooth plastic, NOT engraved squiggles, NOT embossed uniform texture, NOT outlines around every hair. Only correct the tail and tiny necessary rear-hip connection. REMOVE the entire existing huge dark-brown ribbon looping along the bottom from left to right. Restore warm tabletop in its former space, with the natural cream chest/front-leg contour at lower left. Draw ONE modest normal-sized Siamese tail, only a SHORT VISIBLE SECTION, tucked close to the actual rounded REAR HAUNCH at the upper right of the curled cream body. The visible tail should be roughly 200–250 pixels long in this 1672x941 frame, about one quarter the cream torso's outer arc; soft fluffy chocolate-brown fur, natural taper, a small relaxed curve close beside the hip. Most of the tail may be tucked naturally behind its haunch. Root clearly at the rear pelvis, away from the head/neck. DO NOT wrap the tail around the cup, do not loop across the foreground, do not encircle cat or scene, do not make it longer than the cat. Keep the cat the main visual subject, cozy and soft. Wide 16:9 original framing and composition, no text, no logos, no QR. The result must look like the SAME original fluffy painting with one small tail correction, not a newly stylized version.
+
+## Previous v1 (superseded visual)
+
 The user renamed the third theme to 暖暖 and identified the tail as appearing to
 grow from the head. This supersedes 杯中暹罗 as the current display name. The page
 title, description, visible h1 and accessible section name are updated together.
