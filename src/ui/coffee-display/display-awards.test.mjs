@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile,stat} from 'node:fs/promises';
-import {createHash} from 'node:crypto';
 import {awardGroups,workCaption,tickerDuration} from './display-awards.js';
 const here=new URL('./',import.meta.url);
 test('phone ticker completes both issues in about one minute',()=>{const seconds=tickerDuration(2942,390);assert.ok(seconds>45&&seconds<70);assert.ok(tickerDuration(2942,320)<70);assert.ok(tickerDuration(500,390)>=45)});
@@ -25,19 +24,19 @@ test('all preview and enlargement images exist with safe local paths',async()=>{
 });
 test('thumbnails and cover derivatives have bounded eager-loading cost',async()=>{
  for(const g of awardGroups)for(const w of g.works)assert.ok((await stat(new URL(w.thumb,here))).size<100*1024,w.thumb);
- assert.ok((await stat(new URL('assets/siamese-cover.webp',here))).size<700*1024);
- assert.ok((await stat(new URL('assets/siamese-cover-mobile.webp',here))).size<250*1024);
+ assert.ok((await stat(new URL('assets/warm-cover-v1.webp',here))).size<700*1024);
+ assert.ok((await stat(new URL('assets/warm-cover-mobile-v1.webp',here))).size<250*1024);
 });
 test('third cover does not advertise entry into the closed previous contest',async()=>{
- const html=await readFile(new URL('index.html',here),'utf8');assert.match(html,/<h1>杯中暹罗<\/h1>/);assert.match(html,/第三期预告/);assert.match(html,/查看历届作品/);assert.doesNotMatch(html,/参加第二期|开始创作|一键参赛有奖/);assert.match(html,/type="module"/);
+ const html=await readFile(new URL('index.html',here),'utf8');assert.match(html,/<h1>暖暖<\/h1>/);assert.match(html,/<title>未来社区创意活动 第三期：暖暖<\/title>/);assert.doesNotMatch(html,/杯中暹罗/);assert.match(html,/第三期预告/);assert.match(html,/查看历届作品/);assert.doesNotMatch(html,/参加第二期|开始创作|一键参赛有奖/);assert.match(html,/type="module"/);
 });
 test('participation QR keeps its quiet zone and third-cover acquisition campaign',async()=>{
  const svg=await readFile(new URL('assets/participate-week03.svg',here),'utf8');assert.match(svg,/campaign=coffee-03/);assert.match(svg,/source=display-qr/);assert.match(svg,/fill="white"/);assert.match(svg,/M4 4h1v1h-1z/);
 });
-test('production manifest is exact UTF-8 and covers all published modules',async()=>{
- const root=new URL('../../../output/coffee-third-cover-20261122/input/',import.meta.url),manifest=JSON.parse(await readFile(new URL('manifest.json',root),'utf8'));
- assert.equal(manifest.files.length,41);assert.equal(manifest.only_display,true);
- for(const f of manifest.files){const bytes=await readFile(new URL(f.path,root));assert.equal(bytes.length,f.bytes);assert.equal(createHash('sha256').update(bytes).digest('hex'),f.sha256)}
- const html=new TextDecoder('utf-8',{fatal:true}).decode(await readFile(new URL('index.html',root)));assert.ok(html.startsWith('<!doctype html>'));assert.match(html,/杯中暹罗/);
- const js=await readFile(new URL('display-week03.js',root),'utf8');assert.match(js,/display-awards-week03\.js/);
+test('current cover UTF-8, local assets and module dependencies resolve from a clean checkout',async()=>{
+ const html=new TextDecoder('utf-8',{fatal:true}).decode(await readFile(new URL('index.html',here)));assert.ok(html.startsWith('<!doctype html>'));
+ const local=[...html.matchAll(/(?:src|srcset|href)="((?:assets\/|display\.)[^"?]+)(?:\?[^" ]*)?"/g)].map(m=>m[1]);
+ assert.ok(local.includes('assets/warm-cover-v1.webp'));assert.ok(local.includes('assets/warm-cover-mobile-v1.webp'));
+ for(const path of local)assert.ok((await stat(new URL(path,here))).size>0,path);
+ const js=await readFile(new URL('display.js',here),'utf8');assert.match(js,/from '\.\/display-awards\.js\?v=2'/);
 });

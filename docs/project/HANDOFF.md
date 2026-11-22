@@ -1,5 +1,18 @@
 # MoonTown handoff notes
 
+## 2026-11-22 · 暖暖 name and tail correction
+
+- The user renamed the third theme to 暖暖. This supersedes 杯中暹罗 in visible
+  copy, metadata and accessibility names. Keep the preview status and existing
+  accepted layout; only the HTML and two new immutable WebP paths are published.
+- `WARM_COVER_EDIT_2026-11-22.md` records built-in ImageGen lineage, saved master
+  and final prompt. The tail has one visible root at the rear haunch and a free
+  lower-center tip, separated from the head/neck and foreleg. Inspect anatomy in
+  the whole illustration and in the actual page: the footer overlays its bottom.
+- Release backup: management `coffee-warm-20261122`. Previous layout-v4 CSS/JS,
+  logos, QR bytes and all two-issue award data remain unchanged. Formal event
+  state still refers to issue2; this name edit does not open issue3 registration.
+
 ## 2026-11-22 · Third-cover layout correction
 
 - The user rejected the third cover's changed layout. Preserve the previous
