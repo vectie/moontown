@@ -12,3 +12,59 @@
 @media(min-width:701px){[data-theme=crystal] .partners{background:transparent;padding:0;border-radius:0}}
 .qr-frame{display:block}.join-direct{display:none}
 @media(max-width:700px){.join-direct{display:flex;order:3;align-items:center;justify-content:center;margin:0 20px 16px;min-height:48px;padding:10px 16px;border-radius:8px;background:#294979;color:#fff;font-size:16px;font-weight:600;text-decoration:none}.qr-pair{order:4}}
+/* Third cover: one intact master illustration, with the existing single ticker. */
+body[data-theme=siamese]{--paper:#f3e3cb;--ink:#573c2b;--line:#7252352b;color:var(--ink);background:#eee0ca}
+[data-theme=siamese] .display{background:var(--paper)}
+[data-theme=siamese] .hero{inset:0 0 max(9.5%,90px)}
+[data-theme=siamese] .hero-image img{object-fit:contain;object-position:center}
+[data-theme=siamese] .copy{left:5.1%;right:auto;top:27%;width:auto;color:#593b29;text-shadow:none}
+[data-theme=siamese] .copy h1{writing-mode:vertical-rl;text-orientation:upright;font-size:5.1cqw;line-height:1;letter-spacing:.12em;margin:0;color:#593b29;text-shadow:none}
+[data-theme=siamese] .series{position:absolute;left:0;top:-11cqw;font-size:clamp(10px,.72cqw,32px);letter-spacing:.08em;white-space:nowrap;color:#654a34}
+[data-theme=siamese] .partners{left:auto;right:3%;top:2%;transform:scale(.72);transform-origin:right top;color:#5c4331}
+[data-theme=siamese] .qr-pair{bottom:3%;right:2.5%}
+[data-theme=siamese] figcaption{background:#f6ead9ed}
+[data-theme=siamese] .bottom-banner{height:max(9.5%,90px);background:#f9f2e6f7;padding:.22cqw .5cqw}
+[data-theme=siamese] .band-heading{width:5.2cqw;min-width:56px;gap:.12cqw}
+[data-theme=siamese] .band-heading h2{font-size:clamp(10px,.64cqw,26px)}
+[data-theme=siamese] .controls #motion{height:44px;min-height:44px;min-width:44px;font-size:clamp(10px,.43cqw,18px);border-color:#76533455}
+[data-theme=siamese] .carousel-cycle{gap:.65cqw;padding-right:.65cqw}
+[data-theme=siamese] .award-group{gap:.3cqw;padding-right:.65cqw}
+[data-theme=siamese] .award-lead{width:4.2cqw;min-width:60px;gap:.12cqw}
+[data-theme=siamese] .group-issue{font-size:clamp(10px,.43cqw,18px);line-height:1.2;color:#82674c}
+[data-theme=siamese] .group-rank{font-size:clamp(12px,.65cqw,28px)}
+[data-theme=siamese] .group-prize{width:2cqw;height:2cqw;min-width:44px;min-height:44px}
+[data-theme=siamese] .slide{min-width:7.5cqw;max-width:13cqw;gap:.3cqw;min-height:44px}
+[data-theme=siamese] .slide-copy{flex:1;max-width:9.5cqw}
+[data-theme=siamese] .slide-title{overflow-wrap:anywhere}
+[data-theme=siamese] .slide-image{width:3.2cqw;height:3.2cqw;object-fit:contain}
+[data-theme=siamese] .slide-kicker{font-size:clamp(10px,.43cqw,18px);color:#8e653e}
+[data-theme=siamese] .slide-title{font-size:clamp(12px,.68cqw,28px)}
+[data-theme=siamese] .slide-author{font-size:clamp(10px,.42cqw,18px)}
+[data-theme=siamese] button:focus-visible{outline-color:#5a8198}
+@media(max-width:700px){
+ [data-theme=siamese] .hero{inset:auto;position:relative}
+ [data-theme=siamese] .hero-image{aspect-ratio:4/3;background:var(--paper)}
+ [data-theme=siamese] .hero-image img{object-fit:contain}
+ [data-theme=siamese] .copy{left:18px;right:auto;top:72px;width:auto;text-align:left}
+ [data-theme=siamese] .copy h1{font-size:29px;letter-spacing:.14em;margin:0}
+ [data-theme=siamese] .series{top:-48px;font-size:10px;letter-spacing:.03em}
+ [data-theme=siamese] .partners{position:static;left:auto;right:auto;top:auto;transform:none;height:auto;padding:14px 20px 16px;background:var(--paper)}
+ [data-theme=siamese] .join-direct{background:#74533a}
+ [data-theme=siamese] .qr-pair{position:static;bottom:auto;right:auto}
+ [data-theme=siamese] .bottom-banner{height:166px;padding:10px;gap:8px}
+ [data-theme=siamese] .band-heading{width:60px;min-width:60px;gap:8px}
+ [data-theme=siamese] .band-heading h2{font-size:12px}
+ [data-theme=siamese] .controls #motion{font-size:12px}
+ [data-theme=siamese] .carousel-cycle{gap:14px;padding-right:14px}
+ [data-theme=siamese] .award-group{gap:8px;padding-right:14px}
+ [data-theme=siamese] .award-lead{width:64px;min-width:64px;gap:4px}
+ [data-theme=siamese] .group-issue{font-size:11px}
+ [data-theme=siamese] .group-rank{font-size:14px}
+ [data-theme=siamese] .group-prize{width:52px;height:52px}
+ [data-theme=siamese] .slide{min-width:186px;max-width:285px;gap:8px}
+ [data-theme=siamese] .slide-copy{max-width:174px}
+ [data-theme=siamese] .slide-image{width:90px;height:106px}
+ [data-theme=siamese] .slide-kicker{font-size:10px}
+ [data-theme=siamese] .slide-title{font-size:14px}
+ [data-theme=siamese] .slide-author{font-size:10px}
+}

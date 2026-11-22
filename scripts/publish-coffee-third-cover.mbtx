@@ -1,0 +1,125 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+fn hash(bytes : Bytes) -> String {
+  @crypto.bytes_to_hex_string(@crypto.sha256(bytes))
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/coffee-third-cover-20261122-final"
+  let input = root + "/input"
+  let target = "/home/HwHiAiUser/moontown-display-20261108/site/disp"
+  guard @json.parse(@fs.read_file(input + "/manifest.json").text())
+    is {
+      "files": Array(files),
+      "expected_previous_html": String(previous),
+      "only_display": True,
+      ..
+    } &&
+    files.length() == 41 &&
+    previous ==
+    "60bdd0dd0235ff3751101d8208a7e279361853dd9f33c12cc181363c1808db00" &&
+    hash(@fs.read_file(target + "/index.html").binary()) == previous else {
+    fail("Live display drifted; inspect before publication")
+  }
+  for row in files {
+    guard row is { "path": String(path), "sha256": String(expected), .. } &&
+      !path.contains("..") &&
+      !path.has_prefix("/") &&
+      (
+        path.has_prefix("assets/") ||
+        [
+          "index.html", "display-week03.js", "display-week03.css", "display-awards-week03.js",
+        ].contains(path)
+      ) &&
+      @fs.kind(input + "/" + path, follow_symlink=false) is Regular &&
+      hash(@fs.read_file(input + "/" + path).binary()) == expected else {
+      fail("Invalid release asset")
+    }
+  }
+  let html = @fs.read_file(input + "/index.html").text()
+  guard html.has_prefix("<!doctype html>") &&
+    html.contains("杯中暹罗") &&
+    html.contains("第三期预告") else {
+    fail("Invalid UTF-8 cover")
+  }
+  @fs.mkdir(root + "/before/assets", recursive=true, permission=0o700)
+  @fs.write_file(
+    root + "/before/index.html",
+    @fs.read_file(target + "/index.html").binary(),
+    permission=0o600,
+    create_mode=CreateNew,
+    sync=Full,
+  )
+  let paths : Array[String] = []
+  for row in files {
+    guard row is { "path": String(path), .. } else { fail("Invalid manifest") }
+    if path != "index.html" {
+      paths.push(path)
+    }
+  }
+  paths.push("index.html")
+  let changed : Array[String] = []
+  for path in paths {
+    let data = @fs.read_file(input + "/" + path).binary()
+    if @fs.exists(target + "/" + path) {
+      guard @fs.kind(target + "/" + path, follow_symlink=false) is Regular else {
+        fail("Unexpected live file type")
+      }
+      let old = @fs.read_file(target + "/" + path).binary()
+      if old == data {
+        continue
+      }
+      if path != "index.html" {
+        @fs.write_file(
+          root + "/before/" + path,
+          old,
+          permission=0o600,
+          create_mode=CreateNew,
+          sync=Full,
+        )
+      }
+    }
+    @fs.write_file(
+      target + "/" + path + ".week03-next",
+      data,
+      permission=0o644,
+      create_mode=CreateNew,
+      sync=Full,
+    )
+    @fs.rename(
+      target + "/" + path + ".week03-next",
+      target + "/" + path,
+      replace=true,
+    )
+    changed.push(path)
+  }
+  let receipt : Json = {
+    "published": true,
+    "title": "杯中暹罗",
+    "issue": 3,
+    "previous_html": previous,
+    "new_html": hash(@fs.read_file(target + "/index.html").binary()),
+    "verified_files": files.length(),
+    "changed": changed,
+    "old_display_scripts_retained": true,
+    "contest_state_or_roles_changed": false,
+    "second_winner": "魔法使 · 执豆为杖 予你醇香 · 主办方确认一等奖",
+    "ai_supplements": 8,
+  }
+  @fs.write_file(
+    root + "/receipt.json",
+    receipt.stringify(indent=2),
+    permission=0o600,
+    create_mode=CreateNew,
+    sync=Full,
+  )
+  println(receipt.stringify())
+}
