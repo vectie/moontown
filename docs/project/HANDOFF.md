@@ -1,5 +1,30 @@
 # MoonTown handoff notes
 
+## 2026-11-22 · Third-cover layout correction
+
+- The user rejected the third cover's changed layout. Preserve the previous
+  issue's full-screen artwork and single bottom ticker structure; do not shrink
+  the full artwork into a shorter frame with internal side gutters.
+- Restore the footer's8% desktop proportion, with a108px floor for normal
+  browser widths. Give work images, captions and prize leads independent widths;
+  percentage-only thumbnail sizing plus a squeezed flex caption made titles
+  break into tiny fragments. Each caption now has a bounded width, at most two
+  title lines, and full text in its accessible button name and enlargement.
+- Portrait tablets up to1100px need the existing phone flow. The old700px-only
+  breakpoint left a centered miniature landscape canvas with large blank areas
+  at977×1044. All matching responsive blocks must use the same breakpoint,
+  including theme overrides and the direct action.
+- `fix-coffee-third-layout.mbtx` publishes only new versioned CSS/JS and HTML,
+  with a previous-HTML hash guard and retained old resources. No art, award,
+  contest state or QR bytes change. Browser acceptance covers320px,977px and4K.
+  Final live modules are `display-week03-layout-v4.{css,js}`; final HTML hash is
+  `12d502991b84f7c45a1e2a38c11a11ef98f0059b699ed0ff243b394961ba0fdf`.
+  Both layout release roots on management retain their own previous HTML;
+  screenshots are in `output/coffee-third-layout-20261122`. Live4K footer height
+  is172.8px, prize lead149.5px, with no card image/text overlap. Live390px keeps
+  two132px QR frames and a48px CTA. Live977px starts at the page top and shows
+  the direct action instead of a centered miniature TV canvas.
+
 ## 2026-11-22 · Third cover and previous-issue award display
 
 - `COFFEE_THIRD_COVER_2026-11-22.md` records the 杯中暹罗 cover, organizer-confirmed
