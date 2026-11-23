@@ -1,0 +1,149 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, mode] else { fail("stage|ship|apply|verify") }
+  let staging = "output/coffee-week03-20261123/display"
+  let remote = "/home/HwHiAiUser/coffee-week03-20261123/display"
+  let live = "/home/HwHiAiUser/moontown-display-20261108/site/disp/index.html"
+  let previous = "271d3b8775032ce65386a804097b2502b523150cf88597ecfdc3aca1e7dff7e6"
+  fn digest(bytes : Bytes) -> String {
+    @crypto.bytes_to_hex_string(@crypto.sha256(bytes))
+  }
+  async fn run(command : String, args : Array[String]) -> String {
+    let result = @shell.Cmd(command, args).output()
+    result.check()
+    result.stdout()
+  }
+  let ssh = [
+    "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-J", "HwHiAiUser@106.39.18.146:32123",
+  ]
+  match mode {
+    "stage" => {
+      @fs.mkdir(staging, recursive=true, permission=0o700)
+      let source = @fs.read_file("src/ui/coffee-display/index.html").text()
+      let bytes = @utf8.encode(
+        source
+        .replace(
+          old="display.css?v=week03-20261122",
+          new="display-week03-layout-v4.css",
+        )
+        .replace(
+          old="display.js?v=week03-20261122",
+          new="display-week03-prize-v1.js",
+        ),
+      )
+      @fs.write_file(staging + "/index.html", bytes)
+      @fs.write_file(
+        staging + "/manifest.json",
+        ({ "previous_html": previous, "html": digest(bytes) } : Json).stringify(),
+      )
+      println(
+        "Staged active invitation, preserving accepted art, layout and winner modules",
+      )
+    }
+    "ship" => {
+      ignore(run("ssh", ssh + ["lunanexa-management", "mkdir -p " + remote]))
+      ignore(
+        run(
+          "scp",
+          ssh +
+          [
+            staging + "/index.html",
+            staging + "/manifest.json",
+            "scripts/activate-coffee-week03-display.mbtx",
+            "lunanexa-management:" + remote + "/",
+          ],
+        ),
+      )
+    }
+    "apply" => {
+      guard @json.parse(@fs.read_file(remote + "/manifest.json").text())
+        is { "previous_html": String(old), "html": String(next), .. } &&
+        old == previous else {
+        fail("Manifest")
+      }
+      guard digest(@fs.read_file(live).binary()) == old else {
+        fail("Display changed; inspect before replacing")
+      }
+      let bytes = @fs.read_file(remote + "/index.html").binary()
+      guard digest(bytes) == next &&
+        @utf8.decode(bytes).contains("一键参赛有奖") else {
+        fail("Invalid staged UTF-8 HTML")
+      }
+      // Do not invite submissions while the canonical backend still runs a prior issue.
+      let response = run("curl", [
+        "--fail", "--silent", "--show-error", "--max-time", "20", "--noproxy", "*",
+        "--resolve", "suanli.kechuangfuwu.com:443:192.168.2.173", "https://suanli.kechuangfuwu.com/town/api/creative/public",
+      ])
+      guard @json.parse(response)
+        is {
+          "event": {
+            "id": "banxing-coffee-20261123",
+            "topic": "暖暖",
+            "deadline_ms": "1795694400000",
+            "provider_ready": true,
+            ..
+          },
+          ..
+        } else {
+        fail("Formal third event is not ready")
+      }
+      @fs.write_file(
+        remote + "/before-index.html",
+        @fs.read_file(live).binary(),
+        permission=0o600,
+        create_mode=CreateNew,
+        sync=Full,
+      )
+      @fs.write_file(live + ".next", bytes, permission=0o644, sync=Full)
+      @fs.rename(live + ".next", live)
+      @fs.write_file(
+        remote + "/receipt.json",
+        (
+          {
+            "published": true,
+            "html": next,
+            "formal_event": "banxing-coffee-20261123",
+          } : Json).stringify(),
+        permission=0o600,
+        create_mode=CreateNew,
+      )
+      println(
+        "Activated third competition invitation after formal backend verification",
+      )
+    }
+    "verify" => {
+      guard @json.parse(@fs.read_file(staging + "/manifest.json").text())
+        is { "html": String(expected), .. } else {
+        fail("Manifest")
+      }
+      ignore(
+        run("curl", [
+          "--fail",
+          "--silent",
+          "--show-error",
+          "--max-time",
+          "20",
+          "--output",
+          staging + "/served.html",
+          "https://suanli.kechuangfuwu.com:8443/disp/",
+        ]),
+      )
+      guard digest(@fs.read_file(staging + "/served.html").binary()) == expected else {
+        fail("Public display hash differs")
+      }
+      println("Public HTTPS display matches the reviewed activation HTML")
+    }
+    _ => fail("Unknown mode")
+  }
+}

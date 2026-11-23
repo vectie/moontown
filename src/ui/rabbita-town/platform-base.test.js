@@ -59,6 +59,19 @@ test('standalone MoonTown keeps its existing root paths', () => {
   assert.equal(app.fetch('/miniapp/me'), '/miniapp/me')
 })
 
+test('weekly archive links stay on their own public route from town and QA mounts', () => {
+  for (const script of ['/town/platform-base.js', '/coffee-week03-qa/platform-base.js', '/coffee-week02/platform-base.js']) {
+    const app = load(script)
+    for (const route of ['/coffee-week01/coffee-contest.html', '/coffee-week02/coffee-contest.html?entry=old']) {
+      const link = new app.Element()
+      link.setAttribute('href', route)
+      assert.equal(link.getAttribute('href'), route)
+    }
+    assert.match(app.fetch('/account/self.json'), /\/account\/self\.json$/)
+    assert.notEqual(app.fetch('/coffee-week02-private/state'), '/coffee-week02-private/state')
+  }
+})
+
 test('personal workspace uses the shared neighborhood without unscoping private APIs', () => {
   const app = load('/moontown/workspace/platform-base.js')
   for (const route of ['public', 'mine', 'actions']) {

@@ -13,6 +13,8 @@ const FIXED_RUNTIME_ASSETS = [
   'coffee/prize-figure-real.webp',
   'coffee/prize-tote-real.webp',
   'coffee/claim-group-20261116.jpg',
+  'coffee/warm-reference.webp',
+  'coffee/claim-group-20261123.jpg',
   'moontown.svg',
   'moonsuite-i18n.js',
   'effects/anomaly-signal.svg',

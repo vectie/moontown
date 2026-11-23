@@ -1,7 +1,7 @@
 import { coffeeAuth } from './coffee-auth.js';
 import { scopedDraftStore } from './coffee-drafts.js';
 import { coffeeClaim, claimGroup } from './coffee-claim.js';
-import { coffeeShare, suggestedTitle, shareableEntry } from './coffee-share.js';
+import { coffeeShare, suggestedTitle, shareableEntry, archivedShareHref } from './coffee-share.js';
 import { creationGuide } from './coffee-themes.js';
 export const DEFAULT_PROMPT = creationGuide().prompts[0][1];
 export function generationPrompt(value,event) { return value.trim() || creationGuide(event).prompts[0][1]; }
@@ -114,6 +114,7 @@ function labelPng(bytes, produceId = "") {
 }
 if (typeof document !== "undefined") init();
 function init() {
+  const archived=archivedShareHref(location.href);if(archived){location.replace(archived);return;}
   const $ = (id) => document.getElementById(id);
   let endpoint;
   try { endpoint = creativeEndpoint(location.href); }
@@ -352,6 +353,8 @@ function init() {
     const guide=creationGuide(ev);
     document.querySelector('.prompt-chips').hidden=false;
     $('previous-round').hidden=ev.id==='banxing-coffee-20261106';
+    $('previous-round').href=guide.key==='warm'?'/coffee-week02/coffee-contest.html':'/coffee-week01/coffee-contest.html';
+    $('previous-round').textContent=guide.key==='warm'?'第二期作品':'第一期作品';
     if(presentationKey!==guide.key){
       presentationKey=guide.key;
       $('create-title').textContent=guide.label;
@@ -363,8 +366,8 @@ function init() {
       });
       const reference=document.querySelector('.hero img');
       reference.src=guide.reference;reference.alt=guide.referenceAlt;
-      $('share-title').textContent=guide.key==='transformation'?'分享我的变身作品':'分享我的半醒时刻';
-      $('theme-inspiration-copy').textContent=guide.key==='transformation'?'可以从折光变身、自我成蝶、风雨蜕变开始。自由发挥，不必照着示例画。':'可以从清晨的小城、打盹的云朵、杯里的森林开始。准确中文、logo 和价格使用主办原稿，不要求模型重新绘制。';
+      $('share-title').textContent=guide.shareTitle || (guide.key==='transformation'?'分享我的变身作品':'分享我的半醒时刻');
+      $('theme-inspiration-copy').textContent=guide.inspirationCopy || (guide.key==='transformation'?'可以从折光变身、自我成蝶、风雨蜕变开始。自由发挥，不必照着示例画。':'可以从清晨的小城、打盹的云朵、杯里的森林开始。准确中文、logo 和价格使用主办原稿，不要求模型重新绘制。');
     }
     $("login").textContent = actor ? "账户 ↗" : "登录 ↗";
     const activityAllowed = state.activity?.generation_allowed !== false;

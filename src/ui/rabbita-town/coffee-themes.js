@@ -8,7 +8,14 @@ const transformationPrompts=[
  ['自我成蝶','变身主题，一位成年女子跪坐在地上，双手捧着咖啡，坚毅而充满希望。一侧虹彩蝶翼已从纱中展开，另一侧仍在挣脱茧丝，蝶翼里映出过去低头的自己。成熟平面艺术插画，流动线条，宝石般的光色，粉紫晨光，简洁有力，不要文字、水印和商标'],
  ['风雨蜕变','变身主题，一位成年人端坐于台上，手捧一杯咖啡，周围是风雨交加的蓝紫夜空与闪电。衣角正在蜕变为发光的晶体，身后留下过去低头的影子，咖啡蒸汽平静上升。成熟平面艺术插画，强烈明暗，清晰色块，有力量和希望，不要文字、水印和商标'],
 ];
+const warmPrompts=[
+ ['暖暖相伴','暖暖主题，90度俯视，一只毛茸茸的暹罗猫蜷在奶油色桌面上，蓝色眼睛望向镜头，前爪轻搭咖啡杯碟，杯中的奶泡拉花也是一张暹罗猫脸，两个咖啡色小脸相映成趣。一条尾巴从后臀自然伸出，不遮挡猫脸。晨光与柔和窗影，温暖的平面手绘插画，松软绒毛笔触，简洁构图，不要文字、水印和商标'],
+ ['一束晨光','暖暖主题，窗边的暹罗猫依偎着一杯热咖啡，阳光落在绒毛和杯沿，蒸汽像一条柔软的围巾，把安静的陪伴画出来。暖奶油色与咖啡棕，成熟的平面艺术插画，细腻而松软的笔触，不要文字、水印和商标'],
+ ['慢半拍','暖暖主题，正俯视的咖啡桌，一只暹罗猫好奇地歪头，咖啡里的猫脸拉花像是慢半拍回应它，两个小脸有相似的咖啡色面罩和不同的小表情。温暖幽默的静态手绘插画，蓬松绒毛、柔和晨光、克制留白，不要文字、水印和商标'],
+];
+export function isWarmEvent(event={}) {return /暖暖/.test(event.topic || '') || /^banxing-coffee-(?:20261123|week03-qa)/.test(event.id || '')}
 export function creationGuide(event={}) {
+ if(isWarmEvent(event))return {key:'warm',label:'描述你的暖暖灵感',placeholder:'不填也可以：暹罗猫与咖啡里的猫脸，在晨光里暖暖相伴。',prompts:warmPrompts,reference:'coffee/warm-reference.webp',referenceAlt:'第三期暖暖灵感示例，非参赛作品',shareTitle:'分享我的暖暖作品',inspirationCopy:'可以从暹罗猫与咖啡、晨光和陪伴开始。自由发挥，不必照着示例画；本期提交静态图片。'};
  const transformation=/(?:变身|蜕变)/.test(event.topic || '') || /^banxing-coffee-(?:20261116|week02-qa)/.test(event.id || '');
  return transformation?{key:'transformation',label:'描述你的变身灵感',placeholder:'不填也可以：阳光穿过水晶咖啡杯，在少女身上映出彩色折光。',prompts:transformationPrompts,reference:'coffee/transformation-reference.webp',referenceAlt:'本期变身灵感示例，非参赛作品'}:{key:'first',label:'描述你的半醒时刻',placeholder:'不填也可以：我们会画一座住在咖啡杯里的清晨小城。',prompts:firstPrompts,reference:'coffee/cup.png',referenceAlt:'主办参考杯型，非参赛作品'};
 }

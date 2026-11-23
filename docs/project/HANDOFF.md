@@ -1,5 +1,35 @@
 # MoonTown handoff notes
 
+## 2026-11-23 · Third 暖暖 event and fresh group invitation
+
+- `COFFEE_WEEK03_2026-11-23.md` records the approved Nov26/27 schedule, new
+  group QR (valid before Nov30), qualified images, private backups and real
+  generation/upload/review/voting acceptance. The third submission format is
+  static PNG/JPG/WebP; do not imply animated uploads are connected.
+- Keep old event state and draft scopes separate. A canonical shared entry
+  link must route to its archived event before draft restoration. Historical
+  pages read canonical same-event draft aliases without deleting originals.
+- `platform-base.js` prefixes arbitrary same-origin root links with the active
+  app mount. Explicitly preserve the two known public archive routes or
+  `/coffee-week02/` becomes `/town/coffee-week02/`. Private APIs stay scoped.
+- The current hosted-apps base was2bbbb394, not the older documented0e08 image.
+  New third UI digest49c3c989 and second-history digestb0d04c5d preserve that
+  qualified platform and native runtime5baf6c9c. Do not rebuild an older runtime.
+- Formal acceptance data belongs in the isolated third QA event. Its natural
+  windows are closed after two real generations, one external upload, review
+  return/resubmit and six-ballot ranked settlement. Never copy those into formal.
+- The display has a five-minute HTML cache. A newly opened tab may reuse the
+  earlier preview within that window; ordinary Reload revalidates it. Management
+  cannot hairpin the external8443 route reliably; deployment guards use validated
+  internal443 and final verification uses public8443 from the local machine.
+- The owner requested icon-only play/pause controls and fixed random aliases
+  for the eight generated display works, then explicitly replaced the AI补位
+  wording with ordinary 获奖作品/主办方确认获奖. Preserve internal provenance
+  and every existing participant author; these display selections do not create
+  backend contestants or ballots. This supersedes earlier display badge notes.
+  Shared icon geometry comes from MoonVis's play/paused SVGs; touch target
+  remains at least44px. Final display release is coffee-display-controls-20261123-v2.
+
 ## 2026-11-23 · Second first-prize Judy product photo
 
 - The latest Downloads photo is the second issue's prize: 朱迪侦探手办. Keep the

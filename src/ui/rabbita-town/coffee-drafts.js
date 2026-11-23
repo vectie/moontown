@@ -72,6 +72,9 @@ export function scopedDraftStore(scope,eventId,report=()=>{}) {
     legacyScopes.add(scope);
     for(const prefix of ['town','moontown'])legacyScopes.add(new URL(`/${prefix}/api/creative/`,page.origin).href);
   }else if(page.pathname.includes('/api/activities/'))legacyScopes.add(scope);
+  if((eventId==='banxing-coffee-20261106' || eventId==='banxing-coffee-20261116') && /^\/coffee-week0[12]\/api\/creative\/$/.test(page.pathname)){
+    for(const prefix of ['town','moontown'])legacyScopes.add(`${new URL(`/${prefix}/api/creative/`,page.origin).href}|event=${eventId}`);
+  }
   const legacy=[...legacyScopes].map(value=>draftStore(value));
   function migrate(creator){
     if(!migrations.has(creator))migrations.set(creator,(async()=>{

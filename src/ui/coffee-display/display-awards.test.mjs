@@ -10,9 +10,10 @@ test('both previous issues have 1/2/3 display slots and distinct real winners',(
  assert.deepEqual(winners.map(w=>w.author),['小王','魔法使']);assert.ok(winners.every(w=>!w.ai));
  assert.equal(winners[1].confirmedOn,'2026-11-22');
 });
-test('every AI supplement has explicit attribution and never impersonates a participant',()=>{
+test('generated display winners retain internal provenance and organizer selection without creating participant records',()=>{
  const ai=awardGroups.flatMap(g=>g.works.map(w=>[g,w])).filter(([,w])=>w.ai);assert.equal(ai.length,8);
- for(const [g,w] of ai){assert.equal(w.author,'主办方 AI 创作');assert.equal(w.selection,'display-supplement');assert.match(workCaption(g,w),/AI 补位展示/);assert.equal(w.entryId,undefined)}
+ assert.equal(new Set(ai.map(([,w])=>w.author)).size,8);
+ for(const [g,w] of ai){assert.ok(w.author);assert.notEqual(w.author,'主办方 AI 创作');assert.equal(w.selection,'organizer-display');assert.match(workCaption(g,w),/主办方确认获奖/);assert.equal(w.entryId,undefined)}
 });
 test('second issue uses the supplied Judy prize while first issue keeps Stitch',async()=>{
  const first=awardGroups.find(g=>g.issue===1&&g.rank==='一等奖'),second=awardGroups.find(g=>g.issue===2&&g.rank==='一等奖');
@@ -33,8 +34,8 @@ test('thumbnails and cover derivatives have bounded eager-loading cost',async()=
  assert.ok((await stat(new URL('assets/warm-cover-v4.webp',here))).size<700*1024);
  assert.ok((await stat(new URL('assets/warm-cover-mobile-v4.webp',here))).size<250*1024);
 });
-test('third cover does not advertise entry into the closed previous contest',async()=>{
- const html=await readFile(new URL('index.html',here),'utf8');assert.match(html,/<h1>暖暖<\/h1>/);assert.match(html,/<title>未来社区创意活动 第三期：暖暖<\/title>/);assert.doesNotMatch(html,/杯中暹罗/);assert.match(html,/第三期预告/);assert.match(html,/查看历届作品/);assert.doesNotMatch(html,/参加第二期|开始创作|一键参赛有奖/);assert.match(html,/type="module"/);
+test('third cover entry is labelled for the newly opened third contest',async()=>{
+ const html=await readFile(new URL('index.html',here),'utf8');assert.match(html,/<h1>暖暖<\/h1>/);assert.match(html,/<title>未来社区创意活动 第三期：暖暖<\/title>/);assert.doesNotMatch(html,/杯中暹罗|第三期预告|参加第二期/);assert.match(html,/创作参赛/);assert.match(html,/进入第三期暖暖活动/);assert.match(html,/type="module"/);
 });
 test('participation QR keeps its quiet zone and third-cover acquisition campaign',async()=>{
  const svg=await readFile(new URL('assets/participate-week03.svg',here),'utf8');assert.match(svg,/campaign=coffee-03/);assert.match(svg,/source=display-qr/);assert.match(svg,/fill="white"/);assert.match(svg,/M4 4h1v1h-1z/);

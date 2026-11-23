@@ -1,6 +1,7 @@
 // Event-specific public group invitation, never an admission requirement.
 const eventIds = new Set(['banxing-coffee-20261106', 'coffee-mobile-qa-20261107', 'creative-http-fixture']);
 export function claimGroup(event, now = Date.now()) {
+  if(['banxing-coffee-20261123','banxing-coffee-week03-qa-20261123'].includes(event?.id))return {src:'coffee/claim-group-20261123.jpg',expired:now>=Date.parse('2026-11-30T00:00:00+08:00'),validUntil:'11月30日'};
   if(['banxing-coffee-20261116','banxing-coffee-week02-qa-20261116'].includes(event?.id))return {src:'coffee/claim-group-20261116.jpg',expired:now>=Date.parse('2026-11-23T00:00:00+08:00'),validUntil:'11月23日'};
   if (!eventIds.has(event?.id)) return null;
   return {src:'coffee/claim-group-20261109.jpg', expired:now >= Date.parse('2026-11-16T00:00:00+08:00')};
