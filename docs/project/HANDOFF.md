@@ -4,14 +4,17 @@
 
 - The owner removed the square frame around play/pause. Keep the control
   transparent and borderless in normal/hover states, with the44px touch target
-  and keyboard focus indication retained. The circle inside the pause glyph is
-  part of the existing shared icon.
+  and keyboard focus indication retained. The later instruction also removes
+  the circle inside the pause glyph: use two16-unit vertical strokes, sharing
+  the play glyph's24px viewBox,1.65 stroke width and round caps.
 - `publish-coffee-borderless-control.mbtx` publishes only versioned CSS and
   HTML, retaining the v2 main/data modules. Private display backup/receipt root:
   management `coffee-borderless-control-20261123`.
 - Actual390px acceptance confirmed zero border, transparent background, no
   shadow,44×44px hit area and working pause/resume. Both public file hashes
   matched; ten display tests passed. Temporary viewport override was reset.
+- The publisher's `plain-pause` option changes only HTML and retains the v3
+  CSS/v2 modules. Its private backup root adds the `-plain-pause` suffix.
 
 ## 2026-11-23 · Third 暖暖 event and fresh group invitation
 
