@@ -1,5 +1,18 @@
 # MoonTown handoff notes
 
+## 2026-11-23 · Borderless motion control
+
+- The owner removed the square frame around play/pause. Keep the control
+  transparent and borderless in normal/hover states, with the44px touch target
+  and keyboard focus indication retained. The circle inside the pause glyph is
+  part of the existing shared icon.
+- `publish-coffee-borderless-control.mbtx` publishes only versioned CSS and
+  HTML, retaining the v2 main/data modules. Private display backup/receipt root:
+  management `coffee-borderless-control-20261123`.
+- Actual390px acceptance confirmed zero border, transparent background, no
+  shadow,44×44px hit area and working pause/resume. Both public file hashes
+  matched; ten display tests passed. Temporary viewport override was reset.
+
 ## 2026-11-23 · Third 暖暖 event and fresh group invitation
 
 - `COFFEE_WEEK03_2026-11-23.md` records the approved Nov26/27 schedule, new

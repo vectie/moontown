@@ -1,0 +1,140 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, mode] else { fail("stage|ship|apply|verify") }
+  let staging = "output/coffee-borderless-control-20261123"
+  let remote = "/home/HwHiAiUser/coffee-borderless-control-20261123"
+  let live = "/home/HwHiAiUser/moontown-display-20261108/site/disp"
+  let previous = "8de0e5b2505a8c03e55ba7fbc1fc1a50e13fbcae3651da01aee0f04581ec8073"
+  let css = "display-week03-controls-v3.css"
+  fn digest(bytes : Bytes) -> String {
+    @crypto.bytes_to_hex_string(@crypto.sha256(bytes))
+  }
+  async fn run(command : String, args : Array[String]) -> Unit {
+    @shell.Cmd(command, args).output().check()
+  }
+  let ssh = [
+    "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-J", "HwHiAiUser@106.39.18.146:32123",
+  ]
+  match mode {
+    "stage" => {
+      @fs.mkdir(staging, recursive=true, permission=0o700)
+      let rows : Array[Json] = []
+      for
+        (source, target) in [("display.css", css), ("index.html", "index.html")] {
+        let content = @fs.read_file("src/ui/coffee-display/" + source).text()
+        let rendered = if source == "index.html" {
+          content
+          .replace(old="display.css?v=week03-20261122", new=css)
+          .replace(
+            old="display.js?v=week03-20261122",
+            new="display-week03-controls-v2.js",
+          )
+        } else {
+          content
+        }
+        let bytes = @utf8.encode(rendered)
+        @fs.write_file(staging + "/" + target, bytes)
+        rows.push({ "path": target, "sha256": digest(bytes) })
+      }
+      @fs.write_file(
+        staging + "/manifest.json",
+        ({ "previous_html": previous, "files": rows } : Json).stringify(),
+      )
+      println("Staged borderless motion control")
+    }
+    "ship" => {
+      run("ssh", ssh + ["lunanexa-management", "mkdir -p " + remote])
+      run(
+        "scp",
+        ssh +
+        [
+          staging + "/" + css,
+          staging + "/index.html",
+          staging + "/manifest.json",
+          "scripts/publish-coffee-borderless-control.mbtx",
+          "lunanexa-management:" + remote + "/",
+        ],
+      )
+    }
+    "apply" => {
+      guard @json.parse(@fs.read_file(remote + "/manifest.json").text())
+        is { "previous_html": String(old), "files": Array(files), .. } &&
+        old == previous &&
+        files.length() == 2 else {
+        fail("Manifest")
+      }
+      guard digest(@fs.read_file(live + "/index.html").binary()) == old &&
+        !@fs.exists(live + "/" + css) else {
+        fail("Live display changed")
+      }
+      for row in files {
+        guard row is { "path": String(path), "sha256": String(expected), .. } &&
+          [css, "index.html"].contains(path) &&
+          digest(@fs.read_file(remote + "/" + path).binary()) == expected else {
+          fail("Invalid file")
+        }
+      }
+      @fs.write_file(
+        remote + "/before-index.html",
+        @fs.read_file(live + "/index.html").binary(),
+        permission=0o600,
+        create_mode=CreateNew,
+        sync=Full,
+      )
+      for path in [css, "index.html"] {
+        @fs.write_file(
+          live + "/" + path + ".next",
+          @fs.read_file(remote + "/" + path).binary(),
+          permission=0o644,
+          sync=Full,
+        )
+        @fs.rename(live + "/" + path + ".next", live + "/" + path)
+      }
+      @fs.write_file(
+        remote + "/receipt.json",
+        "{\"published\":true,\"borderless_control\":true}",
+        permission=0o600,
+        create_mode=CreateNew,
+      )
+      println("Published borderless motion control")
+    }
+    "verify" => {
+      guard @json.parse(@fs.read_file(staging + "/manifest.json").text())
+        is { "files": Array(files), .. } else {
+        fail("Manifest")
+      }
+      for row in files {
+        guard row is { "path": String(path), "sha256": String(expected), .. } else {
+          fail("Row")
+        }
+        run("curl", [
+          "--fail",
+          "--silent",
+          "--show-error",
+          "--max-time",
+          "20",
+          "--output",
+          staging + "/served.bin",
+          "https://suanli.kechuangfuwu.com:8443/disp/" + path,
+        ])
+        guard digest(@fs.read_file(staging + "/served.bin").binary()) ==
+          expected else {
+          fail("Public file differs")
+        }
+      }
+      println("Both public files match reviewed hashes")
+    }
+    _ => fail("Unknown mode")
+  }
+}

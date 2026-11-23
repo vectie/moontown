@@ -69,7 +69,8 @@ body[data-theme=siamese]{--paper:#f3e3cb;--ink:#573c2b;--line:#7252352b;color:va
  [data-theme=siamese] .slide-title{font-size:14px}
  [data-theme=siamese] .slide-author{font-size:10px}
 }
-.controls #motion{display:grid;place-items:center;width:clamp(44px,1.45cqw,56px);height:clamp(44px,1.45cqw,56px);min-width:44px;min-height:44px;padding:0;border-radius:6px}
+.controls #motion{display:grid;place-items:center;width:clamp(44px,1.45cqw,56px);height:clamp(44px,1.45cqw,56px);min-width:44px;min-height:44px;padding:0;border:0;background:transparent;box-shadow:none;border-radius:6px}
+.controls #motion:hover{background:transparent}
 .motion-icon{display:block;width:clamp(20px,.7cqw,28px);height:clamp(20px,.7cqw,28px);pointer-events:none}
 /* Portrait tablets follow the same flow as phones instead of centering a tiny TV canvas. */
 @media(min-width:701px) and (max-width:1100px) and (max-aspect-ratio:4/3){
