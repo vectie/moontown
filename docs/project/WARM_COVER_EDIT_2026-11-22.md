@@ -1,6 +1,42 @@
 # Third cover: 暖暖
 
-## Current v2: restore fluffy original and tuck the tail
+## Current v4 · Nov23 annotated cleanup and intermediate rear tail
+
+The user circled the pale furry crescent at lower left: it was an OLD TAIL
+REMNANT, not acceptable torso contour. V2 mistakenly left this appendage in
+place. A precise built-in ImageGen edit removed its entire cream footprint and
+restored open tabletop plus a compact rounded abdomen behind the real forearm.
+The user supplied the cleaned result `exec-6b53efda-0ee0-46c9-bef6-27b6807da57c.png`
+and requested a slightly longer real rear tail, then another small extension.
+Two local tail-tip edits extended the one rear tail downward beside the saucer.
+The user then requested a length BETWEEN those last two versions and explicitly
+approved putting that result on site. V4 trims the latest tip to that intermediate
+length, above the handle. The lower-left tabletop stays clear.
+Do not confuse the removed pale appendage with the real diagonal forearm.
+
+Selected built-in output: `exec-980cd1a7-b8ea-46e5-9940-cf73c5e0ea8e.png`.
+Saved master: `src/ui/coffee-display/assets/warm-cover-original-v4.png`.
+Public derivatives: `warm-cover-v4.webp` (237200 bytes),
+`warm-cover-mobile-v4.webp` (62878 bytes).
+Release backup: management `coffee-warm-tail-mid-20261123`.
+The earlier Nov23 release `coffee-warm-tail-clean-20261123` is also retained.
+Theme 暖暖, layout-v4 CSS/JS, partner marks, QR codes and award data are unchanged.
+
+V4 acceptance:9/9 source checks, standalone script check/format, all three public
+file hashes matched with validated TLS. Actual desktop browser loads v4 and keeps
+all12 work cards;390px uses the960px mobile derivative. Desktop,390px and3840×2160
+browser checks show no horizontal overflow. Screenshots:
+`output/coffee-warm-tail-mid-20261123/{live-desktop,live-mobile,live-4k}.jpg`.
+Final HTML hash:
+`45323adbc855371012591ed1c3449c307826719b726edb7cfc73c1815a6f1970`.
+
+Final precise-object-edit prompt (built-in tool, verbatim):
+
+> Precise tail-length interpolation. Image 1 is the edit target, the latest version with a slightly-too-long brown tail beside the upper-right of the saucer. Image 2 is the previous version with a slightly-too-short tail. Make the visible length of the SINGLE rear tail EXACTLY BETWEEN those two versions, keeping the root/hip position unchanged. Shorten Image 1's free tail-tip section modestly so the final tail endpoint is approximately midway between the endpoints in the two references: around x=1430,y=375 on this 1672x941 composition. Smoothly taper to that intermediate endpoint, with the same relaxed downward curve alongside the saucer's UPPER RIGHT, above the cup handle. This is a very small local trim to the tip only. Keep Image 1's head, face, blue eyes, ears, body contour and fluffy painterly fur, front arm/paw, latte face, cup/saucer, colors, paper and lighting exactly unchanged. The clean lower-left tabletop stays empty; do not restore any pale crescent or false-tail remnant. One real tail only from rear hip, no new tail, no long foreground loop. Same wide framing. No text. Goal: intermediate tail length, visibly longer than Image 2 and visibly shorter than Image 1, no other visual change.
+
+## Previous v2 (superseded)
+
+### Restore fluffy original and tuck the tail
 
 The user rejected v1's lost fluffy brushwork and excessively long tail. Do not
 use the multi-pass v1 image as a new edit target. The current v2 edits the original

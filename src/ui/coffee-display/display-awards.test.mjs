@@ -24,8 +24,8 @@ test('all preview and enlargement images exist with safe local paths',async()=>{
 });
 test('thumbnails and cover derivatives have bounded eager-loading cost',async()=>{
  for(const g of awardGroups)for(const w of g.works)assert.ok((await stat(new URL(w.thumb,here))).size<100*1024,w.thumb);
- assert.ok((await stat(new URL('assets/warm-cover-v2.webp',here))).size<700*1024);
- assert.ok((await stat(new URL('assets/warm-cover-mobile-v2.webp',here))).size<250*1024);
+ assert.ok((await stat(new URL('assets/warm-cover-v4.webp',here))).size<700*1024);
+ assert.ok((await stat(new URL('assets/warm-cover-mobile-v4.webp',here))).size<250*1024);
 });
 test('third cover does not advertise entry into the closed previous contest',async()=>{
  const html=await readFile(new URL('index.html',here),'utf8');assert.match(html,/<h1>暖暖<\/h1>/);assert.match(html,/<title>未来社区创意活动 第三期：暖暖<\/title>/);assert.doesNotMatch(html,/杯中暹罗/);assert.match(html,/第三期预告/);assert.match(html,/查看历届作品/);assert.doesNotMatch(html,/参加第二期|开始创作|一键参赛有奖/);assert.match(html,/type="module"/);
@@ -36,7 +36,7 @@ test('participation QR keeps its quiet zone and third-cover acquisition campaign
 test('current cover UTF-8, local assets and module dependencies resolve from a clean checkout',async()=>{
  const html=new TextDecoder('utf-8',{fatal:true}).decode(await readFile(new URL('index.html',here)));assert.ok(html.startsWith('<!doctype html>'));
  const local=[...html.matchAll(/(?:src|srcset|href)="((?:assets\/|display\.)[^"?]+)(?:\?[^" ]*)?"/g)].map(m=>m[1]);
- assert.ok(local.includes('assets/warm-cover-v2.webp'));assert.ok(local.includes('assets/warm-cover-mobile-v2.webp'));
+ assert.ok(local.includes('assets/warm-cover-v4.webp'));assert.ok(local.includes('assets/warm-cover-mobile-v4.webp'));
  for(const path of local)assert.ok((await stat(new URL(path,here))).size>0,path);
  const js=await readFile(new URL('display.js',here),'utf8');assert.match(js,/from '\.\/display-awards\.js\?v=2'/);
 });

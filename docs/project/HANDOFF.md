@@ -1,5 +1,21 @@
 # MoonTown handoff notes
 
+## 2026-11-23 · Annotated pale-tail removal and medium rear tail
+
+- The user marked the lower-left PALE furry crescent as an old tail remnant.
+  V2's supposed torso contour was wrong: remove the whole pointed pale appendage
+  and fill with tabletop, leaving a compact round abdomen and the actual diagonal
+  forearm to the saucer. Do not preserve that crescent as body fur in later edits.
+- The real rear tail was then too short. User requested two modest extensions,
+  then an intermediate length between those two, and explicitly asked to put it
+  on site. Current v4 has one tail at the rear haunch, curving down beside the
+  upper-right saucer above the handle. Do not make a full cup/foreground loop.
+- Current master/derivatives use `warm-cover-original-v4.png`, `warm-cover-v4.webp`
+  and `warm-cover-mobile-v4.webp`. Prompt/lineage: `WARM_COVER_EDIT_2026-11-22.md`.
+  Layout-v4, 暖暖 title, QR bytes, partners and award data stay unchanged.
+  Release backup: management `coffee-warm-tail-mid-20261123`, with the earlier
+  `coffee-warm-tail-clean-20261123` release also retained.
+
 ## 2026-11-22 · 暖暖 fluffy fur and tucked tail
 
 - The user rejected the first tail correction: repeated editing lost the original
