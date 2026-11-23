@@ -1,5 +1,17 @@
 # MoonTown handoff notes
 
+## 2026-11-23 · Second first-prize Judy product photo
+
+- The latest Downloads photo is the second issue's prize: 朱迪侦探手办. Keep the
+  first issue's 史迪奇公仔 and 魔法使's winning artwork unchanged. Use an issue-
+  specific prize key, not a global replacement of the shared figure sprite.
+- `COFFEE_WEEK02_PRIZE_2026-11-23.md` records the transparent cutout, built-in
+  extraction prompt, PNG and small alpha WebP. The renderer reads the per-prize
+  thumb when present and keeps the existing click-to-enlarge behavior.
+- Publish both new main/data module filenames together, then HTML; preserve
+  warm-cover-v4 and accepted layout-v4 CSS. Release backup/receipt: management
+  `coffee-week02-prize-20261123`. No formal contest state or prize voting changes.
+
 ## 2026-11-23 · Annotated pale-tail removal and medium rear tail
 
 - The user marked the lower-left PALE furry crescent as an old tail remnant.

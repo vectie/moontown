@@ -1,0 +1,175 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, mode] else { fail("stage|ship|apply|verify") }
+  let source = "src/ui/coffee-display"
+  let staging = "output/coffee-week02-prize-20261123"
+  let remote = "/home/HwHiAiUser/coffee-week02-prize-20261123"
+  let live = "/home/HwHiAiUser/moontown-display-20261108/site/disp"
+  let mapping = [
+    ("assets/prize-judy-v1.png", "assets/prize-judy-v1.png"),
+    ("assets/prize-judy-v1.webp", "assets/prize-judy-v1.webp"),
+    ("display-awards.js", "display-awards-week02-prize-v1.js"),
+    ("display.js", "display-week03-prize-v1.js"),
+    ("index.html", "index.html"),
+  ]
+  let targets = mapping.map(pair => pair.1)
+  let ssh = [
+    "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-J", "HwHiAiUser@106.39.18.146:32123",
+  ]
+  async fn run(cmd : String, args : Array[String]) {
+    @shell.Cmd(cmd, args).output().check()
+  }
+  fn digest(bytes : Bytes) -> String {
+    @crypto.bytes_to_hex_string(@crypto.sha256(bytes))
+  }
+  match mode {
+    "stage" => {
+      if !@fs.exists(staging + "/assets") {
+        @fs.mkdir(staging + "/assets", recursive=true)
+      }
+      let rows : Array[Json] = []
+      for (origin, target) in mapping {
+        let data = @fs.read_file(source + "/" + origin)
+        let bytes = if origin == "index.html" {
+          let html = data
+            .text()
+            .replace(
+              old="display.css?v=week03-20261122",
+              new="display-week03-layout-v4.css",
+            )
+            .replace(
+              old="display.js?v=week03-20261122",
+              new="display-week03-prize-v1.js",
+            )
+          guard html.contains("<h1>暖暖</h1>") &&
+            html.contains("warm-cover-v4.webp") else {
+            fail("Wrong cover")
+          }
+          @utf8.encode(html)
+        } else if origin == "display.js" {
+          let js = data
+            .text()
+            .replace(
+              old="./display-awards.js?v=3",
+              new="./display-awards-week02-prize-v1.js",
+            )
+          guard js.contains("./display-awards-week02-prize-v1.js") else {
+            fail("Module graph")
+          }
+          @utf8.encode(js)
+        } else {
+          data.binary()
+        }
+        @fs.write_file(staging + "/" + target, bytes)
+        rows.push({
+          "path": target,
+          "bytes": bytes.length(),
+          "sha256": digest(bytes),
+        })
+      }
+      let manifest : Json = {
+        "previous_html": "45323adbc855371012591ed1c3449c307826719b726edb7cfc73c1815a6f1970",
+        "only_display": true,
+        "second_prize": "朱迪侦探手办",
+        "files": rows,
+      }
+      @fs.write_file(staging + "/manifest.json", manifest.stringify(indent=2))
+      println(manifest.stringify())
+    }
+    "ship" => {
+      run(
+        "ssh",
+        ssh + ["lunanexa-management", "mkdir -p " + remote + "/assets"],
+      )
+      run(
+        "scp",
+        ssh +
+        [
+          staging + "/manifest.json",
+          staging + "/index.html",
+          staging + "/display-week03-prize-v1.js",
+          staging + "/display-awards-week02-prize-v1.js",
+          "scripts/release-coffee-week02-prize.mbtx",
+          "lunanexa-management:" + remote + "/",
+        ],
+      )
+      run(
+        "scp",
+        ssh +
+        [
+          staging + "/assets/prize-judy-v1.png",
+          staging + "/assets/prize-judy-v1.webp",
+          "lunanexa-management:" + remote + "/assets/",
+        ],
+      )
+    }
+    "apply" => {
+      guard @json.parse(@fs.read_file(remote + "/manifest.json").text())
+        is { "previous_html": String(previous), "files": Array(rows), .. } &&
+        rows.length() == targets.length() else {
+        fail("Manifest")
+      }
+      guard digest(@fs.read_file(live + "/index.html").binary()) == previous else {
+        fail("Live HTML changed")
+      }
+      for row in rows {
+        guard row is { "path": String(path), "sha256": String(hash), .. } &&
+          targets.contains(path) else {
+          fail("Path")
+        }
+        guard digest(@fs.read_file(remote + "/" + path).binary()) == hash else {
+          fail("Hash")
+        }
+      }
+      run("cp", ["-n", live + "/index.html", remote + "/before-index.html"])
+      // Publish assets and BOTH linked modules before HTML. Old issue1 resources remain.
+      for path in targets {
+        run("cp", [remote + "/" + path, live + "/" + path + ".next"])
+        run("mv", [live + "/" + path + ".next", live + "/" + path])
+      }
+      @fs.write_file(
+        remote + "/receipt.json",
+        "{\"published\":true,\"second_prize\":\"朱迪侦探手办\",\"first_prize\":\"史迪奇公仔\",\"contest_state_changed\":false}",
+      )
+      println("Published second-issue Judy prize; first issue retains Stitch")
+    }
+    "verify" => {
+      guard @json.parse(@fs.read_file(staging + "/manifest.json").text())
+        is { "files": Array(rows), .. } else {
+        fail("Manifest")
+      }
+      for row in rows {
+        guard row is { "path": String(path), "sha256": String(hash), .. } else {
+          fail("Row")
+        }
+        let output = staging + "/verify-response.bin"
+        run("curl", [
+          "--fail",
+          "--silent",
+          "--show-error",
+          "--max-time",
+          "30",
+          "--output",
+          output,
+          "https://suanli.kechuangfuwu.com:8443/disp/" + path,
+        ])
+        guard digest(@fs.read_file(output).binary()) == hash else {
+          fail("Served file differs")
+        }
+      }
+      println("All five release files match over validated public HTTPS")
+    }
+    _ => fail("Unknown mode")
+  }
+}

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile,stat} from 'node:fs/promises';
-import {awardGroups,workCaption,tickerDuration} from './display-awards.js';
+import {awardGroups,prizeItems,workCaption,tickerDuration} from './display-awards.js';
 const here=new URL('./',import.meta.url);
 test('phone ticker completes both issues in about one minute',()=>{const seconds=tickerDuration(2942,390);assert.ok(seconds>45&&seconds<70);assert.ok(tickerDuration(2942,320)<70);assert.ok(tickerDuration(500,390)>=45)});
 test('both previous issues have 1/2/3 display slots and distinct real winners',()=>{
@@ -13,6 +13,12 @@ test('both previous issues have 1/2/3 display slots and distinct real winners',(
 test('every AI supplement has explicit attribution and never impersonates a participant',()=>{
  const ai=awardGroups.flatMap(g=>g.works.map(w=>[g,w])).filter(([,w])=>w.ai);assert.equal(ai.length,8);
  for(const [g,w] of ai){assert.equal(w.author,'主办方 AI 创作');assert.equal(w.selection,'display-supplement');assert.match(workCaption(g,w),/AI 补位展示/);assert.equal(w.entryId,undefined)}
+});
+test('second issue uses the supplied Judy prize while first issue keeps Stitch',async()=>{
+ const first=awardGroups.find(g=>g.issue===1&&g.rank==='一等奖'),second=awardGroups.find(g=>g.issue===2&&g.rank==='一等奖');
+ assert.equal(first.prize,'figure');assert.equal(prizeItems[first.prize].title,'史迪奇公仔');
+ assert.equal(second.prize,'judy');assert.equal(prizeItems[second.prize].title,'朱迪侦探手办');
+ const prize=prizeItems[second.prize];assert.ok((await stat(new URL(prize.full,here))).size>0);assert.ok((await stat(new URL(prize.thumb,here))).size<100*1024);
 });
 test('real second winner keeps the exact approved entry and organizer selection',()=>{
  const g=awardGroups.find(g=>g.issue===2&&g.rank==='一等奖'),w=g.works[0];
@@ -38,5 +44,5 @@ test('current cover UTF-8, local assets and module dependencies resolve from a c
  const local=[...html.matchAll(/(?:src|srcset|href)="((?:assets\/|display\.)[^"?]+)(?:\?[^" ]*)?"/g)].map(m=>m[1]);
  assert.ok(local.includes('assets/warm-cover-v4.webp'));assert.ok(local.includes('assets/warm-cover-mobile-v4.webp'));
  for(const path of local)assert.ok((await stat(new URL(path,here))).size>0,path);
- const js=await readFile(new URL('display.js',here),'utf8');assert.match(js,/from '\.\/display-awards\.js\?v=2'/);
+ const js=await readFile(new URL('display.js',here),'utf8');assert.match(js,/from '\.\/display-awards\.js\?v=3'/);
 });
