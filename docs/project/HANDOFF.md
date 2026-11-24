@@ -1,6 +1,45 @@
 # MoonTown handoff notes
 
+## 2026-11-22 · Siamese coffee visual direction
+
+- The user explicitly rejected animating two isolated cutouts before establishing
+  the artwork. First finish one beautiful, cohesive full-scene master illustration;
+  then develop motion from that scene. Preserve the direct overhead perspective
+  and the two coffee-colored faces. Current still-v2 uses a curled full Siamese
+  cat, paw/saucer contact, latte-art face and a shared morning window shadow.
+- Preview-only image/prompt live in
+  `output/double-half-awake-20261122/still-v2` of the original MoonTown checkout.
+  Current source image is1672×941; do not label it as a finished native4K render.
+  The old local animation preview server was stopped. Formal competition content,
+  permissions and schedule were not changed.
+
 ## 2026-11-16 · Second-round transformation release
+
+- Nov19 read-only participation audit: `gallery: []` means no approved public
+  entries, not no submissions. The ordinary QA host has no formal-event manager
+  permission, so its empty review queue cannot answer an all-submissions request.
+  Read the authorized durable event state or an actual formal organizer snapshot;
+  preserve superseded submissions when exporting the complete history.
+- For unsubmitted-work attribution, join generation.actor to an entry.actor and
+  label the result with that submission nickname; do not guess a profile name.
+  Guest actors identify browser histories, not real people. Nov19 export excluded
+  both historical submitted generation IDs and separated the known Nov16 acceptance
+  image: 8 unsubmitted images share the 魔法使 submission account, 4 belong to one
+  unclaimed guest identity, plus 1 assistant acceptance image. All originals were
+  SHA-256 checked against the durable state before delivery.
+- Nov19 the owner explicitly approved the current 魔法使 submission
+  `c14d65aa…` (generation `87796696…`). The existing ordinary QA login correctly
+  lacks formal organizer rights. Owner-authorized maintenance instead used the
+  same exclusive state lock, approval guards, atomic save and review-event fields
+  as the application, with an explicit `operations:owner-confirmed:20261119`
+  audit actor. Backup/receipt: management `coffee-review-20261119-c14d65aa`.
+  Revision46 became47; only this pending entry, its audit event and revision
+  changed. Public API verified one visible approved entry; no account roles,
+  contest times, older entry, generations or votes changed.
+- Nov19 the configured `lunanexa-access` jump at port32122 closed connections.
+  The pre-existing authenticated management jump on port32123 worked with an
+  explicit SSH `-J` override, retaining the destination's existing host-key check.
+  No SSH config, access role, approval state or network protection was changed.
 
 - See `COFFEE_WEEK02_2026-11-16.md` for approved dates, immutable image pins,
   preserved first-round history, QA evidence and rollback locations. Canonical
