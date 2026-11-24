@@ -121,63 +121,89 @@ fn town_bearing_facade(
   span : Double,
   block : TownBearingBlock,
   side : Int32,
+  style : String,
+  archetype : String,
 ) -> Unit {
-  let south = side == 0
-  let along : WenyuScenePoint = if south { bearing.east } else { bearing.north }
-  if along.x - along.y <= 0.0 {
+  let longitudinal = side % 2 == 0
+  let front = side == 0
+  let along = if longitudinal { bearing.east } else { bearing.north }
+  let sign = if side < 2 { 1.0 } else { -1.0 }
+  if (along.x - along.y) * sign <= 0.0 {
     return
   }
-  let panels = if south { 4 } else { 2 }
-  let length = if south { block.width } else { block.depth }
+  let length = if longitudinal { block.width } else { block.depth }
   let make = fn(a : Double, z : Double) -> TownBearingVertex {
-    if south {
-      { u: block.u + a, v: block.v - block.depth / 2.0 - 0.001, z, }
+    if longitudinal {
+      { u: block.u + a, v: block.v - sign * (block.depth / 2 + 0.001), z, }
     } else {
-      { u: block.u + block.width / 2.0 + 0.001, v: block.v + a, z, }
+      { u: block.u + sign * (block.width / 2 + 0.001), v: block.v + a, z, }
     }
   }
+  let rect = fn(
+    left : Double,
+    right : Double,
+    bottom : Double,
+    top : Double,
+    color : String,
+  ) {
+    town_bearing_quad(
+      mesh,
+      bearing,
+      span,
+      [
+        make(left, bottom),
+        make(right, bottom),
+        make(right, top),
+        make(left, top),
+      ],
+      color,
+    )
+  }
+  let industrial = style == "industrial"
+  let glazed = style == "campus" ||
+    style == "civic" ||
+    archetype == "market-arcade" ||
+    (style == "tower" && archetype != "slender-residential")
+  let bays = (length /
+    (if industrial { 0.28 } else if glazed { 0.16 } else { 0.19 }))
+    .round()
+    .to_int()
+    .max(1)
+  let pitch = length / bays.to_double()
   for floor in 0..<block.floors {
-    for panel in 0..<panels {
-      let a = -length / 2.0 +
-        length * (panel.to_double() + 0.16) / panels.to_double()
-      let b = -length / 2.0 +
-        length * (panel.to_double() + 0.82) / panels.to_double()
-      let z = 0.065 + floor.to_double() * 0.22
-      town_bearing_quad(
-        mesh,
-        bearing,
-        span,
-        [make(a, z), make(b, z), make(b, z + 0.145), make(a, z + 0.145)],
-        "#3c686e",
-      )
-      town_bearing_quad(
-        mesh,
-        bearing,
-        span,
-        [
-          make(a + 0.008, z + 0.014),
-          make(b - 0.008, z + 0.014),
-          make(b - 0.008, z + 0.137),
-          make(a + 0.008, z + 0.137),
-        ],
-        if south {
-          "#75bbc5"
+    let z = 0.035 + floor.to_double() * 0.22
+    for i in 0..<bays {
+      let center = -length / 2 + (i.to_double() + 0.5) * pitch
+      let half = pitch *
+        (if glazed || industrial { 0.42 } else if front { 0.34 } else { 0.22 })
+      let sill = z +
+        (if industrial { 0.117 } else if glazed { 0.026 } else { 0.048 })
+      let head = z + 0.185
+      rect(
+        center - half,
+        center + half,
+        sill,
+        head,
+        if front {
+          "#79a4a4"
         } else {
-          "#4d8e9b"
+          "#637f88"
         },
       )
-      town_bearing_quad(
-        mesh,
-        bearing,
-        span,
-        [
-          make(a, z + 0.015),
-          make(b, z + 0.015),
-          make(b, z + 0.05),
-          make(a, z + 0.05),
-        ],
-        "#c6a77e",
-      )
+      if glazed && longitudinal {
+        rect(center - 0.003, center + 0.003, sill, head, "#b4c0b8")
+      } else if front && !industrial && floor > 0 {
+        rect(
+          center - half - 0.007,
+          center + half + 0.007,
+          sill - 0.017,
+          sill + 0.012,
+          "#d4c7aa",
+        )
+      }
+    }
+    if front && glazed && floor == 0 {
+      rect(-length * 0.46, length * 0.46, z + 0.193, z + 0.211, "#e2d8bd")
     }
   }
 }
@@ -229,21 +255,24 @@ fn town_bearing_make_mesh(
       archetype.wall,
       "#fbf5e7",
     )
-    town_bearing_facade(mesh, b, span, block, 0)
-    town_bearing_facade(mesh, b, span, block, 1)
+    for side in 0..<4 {
+      town_bearing_facade(mesh, b, span, block, side, style, archetype.name)
+    }
     let front = block.v - block.depth / 2.0 - 0.002
-    town_bearing_quad(
-      mesh,
-      b,
-      span,
-      [
-        { u: block.u - 0.035, v: front, z: 0.025, },
-        { u: block.u + 0.035, v: front, z: 0.025, },
-        { u: block.u + 0.035, v: front, z: 0.185, },
-        { u: block.u - 0.035, v: front, z: 0.185, },
-      ],
-      "#527f83",
-    )
+    if b.east.x > b.east.y {
+      town_bearing_quad(
+        mesh,
+        b,
+        span,
+        [
+          { u: block.u - 0.035, v: front, z: 0.025, },
+          { u: block.u + 0.035, v: front, z: 0.025, },
+          { u: block.u + 0.035, v: front, z: 0.185, },
+          { u: block.u - 0.035, v: front, z: 0.185, },
+        ],
+        "#527f83",
+      )
+    }
     town_bearing_box(
       mesh,
       b,
@@ -432,7 +461,8 @@ extern "js" fn town_bearing_paint_mesh(
   #|     let left=Infinity,top=Infinity,right=-Infinity,bottom=-Infinity;
   #|     for(let i=0;i<ps.length;i+=3){const x=(ps[i]-ps[i+1])*32,y=(ps[i]+ps[i+1])*16-ps[i+2]*32;left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}
   #|     left-=2;top-=2;right+=2;bottom+=2;const width=right-left,height=bottom-top;if(!(width>0&&height>0))return;
-  #|     const ratio=Math.min(2,768/Math.max(width,height)),canvas=document.createElement('canvas');canvas.width=Math.ceil(width*ratio);canvas.height=Math.ceil(height*ratio);
+  #|     const compact=globalThis.__townDisplay?.compact;
+  #|     const ratio=Math.min(compact?1:2,768/Math.max(width,height)),canvas=document.createElement('canvas');canvas.width=Math.ceil(width*ratio);canvas.height=Math.ceil(height*ratio);
   #|     const out=canvas.getContext('2d');out.scale(ratio,ratio);out.translate(-left,-top);out.lineJoin='round';
   #|   for(let f=0;f<colors.length;f++){
   #|     out.beginPath();
@@ -445,7 +475,7 @@ extern "js" fn town_bearing_paint_mesh(
   #|   }
   #|     tile={canvas,left,top,width:canvas.width/ratio,height:canvas.height/ratio,bytes:canvas.width*canvas.height*4};
   #|     cache.entries.set(ps,tile);cache.bytes+=tile.bytes;
-  #|     while(cache.entries.size>512||cache.bytes>96*1024*1024){const key=cache.entries.keys().next().value;cache.bytes-=cache.entries.get(key).bytes;cache.entries.delete(key);}
+  #|     while(cache.entries.size>512||cache.bytes>(compact?20:96)*1024*1024){const key=cache.entries.keys().next().value;cache.bytes-=cache.entries.get(key).bytes;cache.entries.delete(key);}
   #|   }else{cache.entries.delete(ps);cache.entries.set(ps,tile);}
   #|   c.drawImage(tile.canvas,sx+tile.left*z,sy+tile.top*z,tile.width*z,tile.height*z);
   #| }

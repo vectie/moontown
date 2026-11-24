@@ -1,0 +1,259 @@
+///|
+import {
+  "moonbitlang/x@0.4.50/fs",
+  "moonbitlang/core/json",
+}
+
+///|
+struct Mask {
+  groundRoad : Array[String]
+  unresolvedShore : Array[String]
+} derive(FromJson)
+
+///|
+struct Terrain {
+  rows : Array[String]
+} derive(FromJson)
+
+///|
+fn neighbors(i : Int32, width : Int32, height : Int32) -> Array[Int32] {
+  let ns = []
+  if i % width > 0 {
+    ns.push(i - 1)
+  }
+  if i % width + 1 < width {
+    ns.push(i + 1)
+  }
+  if i >= width {
+    ns.push(i - width)
+  }
+  if i + width < width * height {
+    ns.push(i + width)
+  }
+  ns
+}
+
+// Cell unions, not bounding boxes. A real shoreline or a ground-level street
+// is a barrier; bridge decks and tunnels do not create spurious inland blocks.
+
+///|
+fn partition(
+  mask : Mask,
+  land : Array[String],
+) -> (Array[Json], Array[Int32], Int32, Int32) raise {
+  let h = land.length()
+  let w = land[0].length()
+  let seen = Array::make(w * h, false)
+  let owners = Array::make(w * h, 0)
+  let blocks : Array[Json] = []
+  let mut lots = 0
+  let mut deferred = 0
+  for y, row in land {
+    assert_eq(row.length(), w)
+    assert_eq(mask.groundRoad[y].length(), w)
+    assert_eq(mask.unresolvedShore[y].length(), w)
+    for x in 0..<w {
+      seen[y * w + x] = row[x] is ('r' | 'l' | 'b' | 'w') ||
+        mask.groundRoad[y][x] == 'R'
+    }
+  }
+  for start in 0..<(w * h) {
+    if seen[start] {
+      continue
+    }
+    let q = [start]
+    seen[start] = true
+    let front = []
+    let mut open = false
+    let mut conflict = false
+    let mut at = 0
+    while at < q.length() {
+      let i = q[at]
+      at += 1
+      let x = i % w
+      let y = i / w
+      if x == 0 || y == 0 || x + 1 == w || y + 1 == h {
+        open = true
+      }
+      if mask.unresolvedShore[y][x] == '?' {
+        conflict = true
+      }
+      let ns = neighbors(i, w, h)
+      if ns.any(n => mask.groundRoad[n / w][n % w] == 'R') {
+        front.push(i)
+      }
+      for n in ns {
+        if !seen[n] {
+          seen[n] = true
+          q.push(n)
+        }
+      }
+    }
+    if open || q.length() < 6 || front.is_empty() {
+      continue
+    }
+    if conflict {
+      deferred += 1
+      continue
+    }
+    front.sort()
+    let seeds = [front[0]]
+    let goal = (q.length() / 40).clamp(min=1, max=96)
+    while seeds.length() < goal {
+      let mut far = 0
+      let mut next = front[0]
+      for f in front {
+        let mut min = 1000000
+        for s in seeds {
+          let dx = f % w - s % w
+          let dy = f / w - s / w
+          min = min.min(dx * dx + dy * dy)
+        }
+        if min > far {
+          far = min
+          next = f
+        }
+      }
+      if far < 25 {
+        break
+      }
+      seeds.push(next)
+    }
+    let cells = Set::from_array(q)
+    let queue = seeds.copy()
+    for s in seeds {
+      owners[s] = s + 1
+    }
+    at = 0
+    while at < queue.length() {
+      let i = queue[at]
+      at += 1
+      for n in neighbors(i, w, h) {
+        if cells.contains(n) && owners[n] == 0 {
+          owners[n] = owners[i]
+          queue.push(n)
+        }
+      }
+    }
+    assert_eq(queue.length(), q.length())
+    // Stable keys refer to a canonical grid cell, not iteration order.
+    let pieces = seeds.map(s => {
+      let p = q.filter(i => owners[i] == s + 1)
+      p.sort()
+      let runs = []
+      let mut k = 0
+      while k < p.length() {
+        let begin = p[k]
+        let mut end = k + 1
+        while end < p.length() &&
+              p[end] == p[end - 1] + 1 &&
+              p[end] / w == begin / w {
+          end += 1
+        }
+        runs.push([begin / w, begin % w, p[end - 1] % w + 1])
+        k = end
+      }
+      let item : Json = {
+        "id": s + 1,
+        "frontage": [s % w, s / w],
+        "areaCells": p.length(),
+        "runs": Json(runs),
+      }
+      item
+    })
+    lots += seeds.length()
+    blocks.push({
+      "id": start + 1,
+      "areaCells": q.length(),
+      "parcels": Json(pieces),
+    })
+  }
+  (blocks, owners, lots, deferred)
+}
+
+///|
+fn main raise {
+  let small = [
+    ".......", ".......", ".......", ".......", ".......", ".......", ".......",
+  ]
+  let ring = [
+    ".......", ".RRRRR.", ".R...R.", ".R...R.", ".R...R.", ".RRRRR.", ".......",
+  ]
+  let (_, ids, lots, deferred) = partition(
+    { groundRoad: ring, unresolvedShore: small, },
+    small,
+  )
+  assert_eq(lots, 1)
+  assert_eq(deferred, 0)
+  assert_eq(ids.filter(i => i > 0).length(), 9)
+  let flagged = small.copy()
+  flagged[3] = "...?..."
+  let (_, _, n, d) = partition(
+    { groundRoad: ring, unresolvedShore: flagged, },
+    small,
+  )
+  assert_eq(n, 0)
+  assert_eq(d, 1)
+  let mask : Mask = @json.from_json(
+    @json.parse(
+      @fs.read_file_to_string("docs/project/wenyu-bank-partition-input.json"),
+    ),
+  )
+  let base = "src/ui/assets/tilemap/"
+  let labels : Terrain = @json.from_json(
+    @json.parse(@fs.read_file_to_string(base + "wenyu_reference_labels.json")),
+  )
+  let (blocks, owners, total, pending) = partition(mask, labels.rows)
+  let mut count = 0
+  for i, id in owners {
+    if id == 0 {
+      continue
+    }
+    count += 1
+    let x = i % 256
+    let y = i / 256
+    assert_false(labels.rows[y][x] is ('r' | 'l' | 'b' | 'w'))
+    assert_true(
+      mask.groundRoad[y][x] != 'R' && mask.unresolvedShore[y][x] != '?',
+    )
+  }
+  assert_true(blocks.length() > 0 && total > blocks.length())
+  let result : Json = {
+    "schema": "moontown.wenyu_display_land.v2",
+    "grid": [256, 144],
+    "source": "bank-registered ground roads + design shoreline",
+    "deferredShoreBlocks": pending,
+    "landCells": count,
+    "parcelCount": total,
+    "blocks": Json(blocks),
+  }
+  // Keep the established operations/planning IDs independent of display land.
+  // A compact run index travels in the existing scene response: no extra request.
+  let runs = []
+  for y in 0..<144 {
+    let mut x = 0
+    while x < 256 {
+      let id = owners[y * 256 + x]
+      let begin = x
+      x += 1
+      while x < 256 && owners[y * 256 + x] == id {
+        x += 1
+      }
+      if id != 0 {
+        runs.push([y, begin, x, id])
+      }
+    }
+  }
+  let path = base + "wenyu-bank-scene-v2.json"
+  let scene = @json.parse(@fs.read_file_to_string(path))
+  guard scene is Object(fields) else { fail("invalid bank scene") }
+  fields["parcelRuns"] = Json(runs)
+  @fs.write_string_to_file(path, scene.stringify())
+  @fs.write_string_to_file(
+    "docs/project/wenyu-bank-land.json",
+    result.stringify(),
+  )
+  println(
+    "\{blocks.length()} bounded blocks, \{total} frontage parcels, \{pending} shoreline blocks deferred",
+  )
+}

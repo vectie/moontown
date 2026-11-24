@@ -1,0 +1,452 @@
+///|
+import {
+  "moonbitlang/x@0.4.50/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/core/env",
+}
+
+///|
+struct Point {
+  x : Double
+  y : Double
+} derive(FromJson)
+
+///|
+struct Geo {
+  lon : Double
+  lat : Double
+} derive(FromJson)
+
+///|
+struct Way {
+  tags : Map[String, String]
+  osmWayId : Double
+  nodes : Array[Double]
+  geometryWgs84 : Array[Geo]
+  ground : Array[Point]
+} derive(FromJson)
+
+///|
+struct Roads {
+  ways : Array[Way]
+} derive(FromJson)
+
+///|
+struct Imagery {
+  bbox : Array[Double]
+  size : Array[Double]
+} derive(FromJson)
+
+///|
+struct Building {
+  model : Int32
+  position : String
+  center : Array[Double]
+  east : Array[Double]
+  south : Array[Double]
+  halfWidth : Double
+  halfDepth : Double
+  arrival : Double
+} derive(FromJson)
+
+///|
+struct Block {
+  id : String
+  group : String
+  boundary : Array[Array[Double]]
+  buildings : Array[Building]
+} derive(FromJson)
+
+///|
+struct Court {
+  block : String
+  center : Array[Double]
+  east : Array[Double]
+  south : Array[Double]
+  arrival : Double
+} derive(FromJson)
+
+///|
+struct Site {
+  imagery : Imagery
+  blocks : Array[Block]
+  forecourt : Court
+} derive(FromJson)
+
+///|
+fn minus(a : Point, b : Point) -> Point {
+  { x: a.x - b.x, y: a.y - b.y, }
+}
+
+///|
+fn offset(p : Point, e : Point, s : Point, u : Double, v : Double) -> Point {
+  { x: p.x + e.x * u + s.x * v, y: p.y + e.y * u + s.y * v, }
+}
+
+///|
+fn cross(a : Point, b : Point) -> Double {
+  a.x * b.y - a.y * b.x
+}
+
+///|
+fn mean(ps : Array[Point]) -> Point {
+  let mut x = 0.0
+  let mut y = 0.0
+  for p in ps {
+    x += p.x
+    y += p.y
+  }
+  { x: x / ps.length().to_double(), y: y / ps.length().to_double(), }
+}
+
+///|
+fn inside(p : Point, ring : Array[Point]) -> Bool {
+  let mut hit = false
+  for i, a in ring {
+    let b = ring[(i + 1) % ring.length()]
+    if (a.y > p.y) != (b.y > p.y) &&
+      p.x < (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x {
+      hit = !hit
+    }
+  }
+  hit
+}
+
+///|
+fn point_segment(p : Point, a : Point, b : Point) -> Double {
+  let d = minus(b, a)
+  let length = d.x * d.x + d.y * d.y
+  let v = minus(p, a)
+  let t = if length > 0 {
+    ((v.x * d.x + v.y * d.y) / length).clamp(min=0, max=1)
+  } else {
+    0
+  }
+  ((v.x - t * d.x) * (v.x - t * d.x) + (v.y - t * d.y) * (v.y - t * d.y)).sqrt()
+}
+
+///|
+fn separation(a : Array[Point], b : Array[Point]) -> Double {
+  let mut best = 1.0e9
+  for i, p in a {
+    let q = a[(i + 1) % a.length()]
+    for j, r in b {
+      let s = b[(j + 1) % b.length()]
+      let pq = minus(q, p)
+      let rs = minus(s, r)
+      if cross(pq, minus(r, p)) * cross(pq, minus(s, p)) < 0 &&
+        cross(rs, minus(p, r)) * cross(rs, minus(q, r)) < 0 {
+        return 0
+      }
+      best = best
+        .min(point_segment(p, r, s))
+        .min(point_segment(q, r, s))
+        .min(point_segment(r, p, q))
+        .min(point_segment(s, p, q))
+    }
+  }
+  best
+}
+
+///|
+// Register the image to the calibrated junctions of its own street enclosure.
+// Use one local affine basis for the complete building, including its canopy.
+fn project(
+  p : Point,
+  photo : Array[Point],
+  grid : Array[Point],
+  basis : Array[Double],
+  side : Array[Double],
+) -> (Point, Point, Point) raise {
+  let center = mean(photo)
+  let ground = mean(grid)
+  for i, a in photo {
+    let j = (i + 1) % photo.length()
+    let e = minus(a, center)
+    let s = minus(photo[j], center)
+    let det = cross(e, s)
+    if det.abs() < 1.0e-8 {
+      continue
+    }
+    fn uv(d : Point) -> (Double, Double) {
+      (cross(d, s) / det, cross(e, d) / det)
+    }
+    let (u, v) = uv(minus(p, center))
+    if u < -1.0e-8 || v < -1.0e-8 || u + v > 1.00000001 {
+      continue
+    }
+    let ge = minus(grid[i], ground)
+    let gs = minus(grid[j], ground)
+    fn axis(raw : Array[Double]) -> Point {
+      let (u, v) = uv({ x: raw[0], y: raw[1], })
+      offset({ x: 0, y: 0, }, ge, gs, u, v)
+    }
+    return (offset(ground, ge, gs, u, v), axis(basis), axis(side))
+  }
+  fail("Anchor outside its registered street enclosure")
+}
+
+///|
+fn literal(p : Point) -> String {
+  "{ x: \{p.x}, y: \{p.y}, }"
+}
+
+///|
+struct Projection {
+  id : String
+  east : Array[Double]
+  south : Array[Double]
+  elevation : Double
+} derive(FromJson)
+
+///|
+fn main raise {
+  let checking = @env.args().contains("--check-pack")
+  let pack : Array[Projection] = if checking {
+    guard @json.parse(
+        @fs.read_file_to_string(
+          "src/ui/rabbita-town/dist/landmark-studio/town-projections/manifest.json",
+        ),
+      )
+      is { "registration": String(registration), .. } else {
+      fail("Missing packaged registration")
+    }
+    @json.from_json(@json.parse(registration))
+  } else {
+    []
+  }
+  let site : Site = @json.from_json(
+    @json.parse(
+      @fs.read_file_to_string("docs/project/wenyu-future-center-site.json"),
+    ),
+  )
+  let roads : Roads = @json.from_json(
+    @json.parse(
+      @fs.read_file_to_string("output/wenyu-road-town/roads.json"),
+    ),
+  )
+  let result = StringBuilder()
+  result.write_string(
+    "///|\n// Generated by scripts/compile-future-center-site.mbtx from verified street enclosures.\nlet future_center_buildings : Array[TownLandmark] = [\n",
+  )
+  let review = StringBuilder()
+  review.write_string(
+    "///|\nlet future_center_review_blocks : Array[(String, Array[WenyuScenePoint])] = [\n",
+  )
+  let footprints : Array[Array[Point]] = []
+  let used : Map[Int32, Bool] = Map([])
+  let mut minimum = 1.0e9
+  let mut court = ""
+  let mut door_count = 0
+  for block in site.blocks {
+    let photo : Array[Point] = []
+    let grid : Array[Point] = []
+    let nodes : Map[Double, Point] = Map([])
+    let mut previous = block.boundary.last().unwrap()[2]
+    for edge in block.boundary {
+      guard edge[1] == previous &&
+        roads.ways.search_by(w => w.osmWayId == edge[0]) is Some(wi) else {
+        fail("Broken boundary " + block.id)
+      }
+      let way = roads.ways[wi]
+      let start = way.nodes.search_by(n => n == edge[1]).unwrap()
+      let end = way.nodes.search_by(n => n == edge[2]).unwrap()
+      previous = edge[2]
+      for j in 0..<(end - start).abs() {
+        let i = if end > start { start + j } else { start - j }
+        let node = way.nodes[i]
+        let loc = way.ground[i]
+        nodes[node] = loc
+        grid.push(loc)
+        let g = way.geometryWgs84[i]
+        let bb = site.imagery.bbox
+        photo.push({
+          x: (g.lon - bb[0]) / (bb[2] - bb[0]) * site.imagery.size[0],
+          y: (bb[3] - g.lat) / (bb[3] - bb[1]) * site.imagery.size[1],
+        })
+      }
+    }
+    review.write_string("  (\"\{block.id}\", [\n")
+    for p in grid {
+      review.write_string("    \{literal(p)},\n")
+    }
+    review.write_string("  ]),\n")
+    if block.buildings.is_empty() {
+      continue
+    }
+    let local_roads : Array[(Point, Point)] = []
+    let min_x = grid.fold(init=1.0e9, (v, p) => v.min(p.x)) - 0.25
+    let max_x = grid.fold(init=0.0, (v, p) => v.max(p.x)) + 0.25
+    let min_y = grid.fold(init=1.0e9, (v, p) => v.min(p.y)) - 0.25
+    let max_y = grid.fold(init=0.0, (v, p) => v.max(p.y)) + 0.25
+    for way in roads.ways {
+      if !way.tags.contains("highway") ||
+        way.tags.get("tunnel") == Some("yes") ||
+        way.tags.get("bridge") == Some("yes") {
+        continue
+      }
+      let mut last : Point? = None
+      for p in way.ground {
+        if last is Some(q) &&
+          !(p.x.max(q.x) < min_x ||
+          p.x.min(q.x) > max_x ||
+          p.y.max(q.y) < min_y ||
+          p.y.min(q.y) > max_y) {
+          local_roads.push((p, q))
+        }
+        last = Some(p)
+      }
+    }
+    for b in block.buildings {
+      let (p, evidence_e, evidence_s) = project(
+        { x: b.center[0], y: b.center[1], },
+        photo,
+        grid,
+        b.east,
+        b.south,
+      )
+      let hw = b.halfWidth
+      let hd = b.halfDepth
+      fn corners(scale : Double) -> Array[Point] {
+        let e : Point = { x: evidence_e.x * scale, y: evidence_e.y * scale, }
+        let s : Point = { x: evidence_s.x * scale, y: evidence_s.y * scale, }
+        [
+          offset(p, e, s, -hw, -hd),
+          offset(p, e, s, hw, -hd),
+          offset(p, e, s, hw, hd),
+          offset(p, e, s, -hw, hd),
+        ]
+      }
+      fn fits(f : Array[Point]) -> Bool {
+        f.all(c => inside(c, grid)) &&
+        separation(f, grid) > 0.22 &&
+        local_roads.all(line => {
+          !inside(line.0, f) &&
+          !inside(line.1, f) &&
+          separation(f, [line.0, line.1]) > 0.12
+        }) &&
+        footprints.all(other => {
+          separation(f, other) > 0.05 &&
+          !inside(p, other) &&
+          !inside(other[0], f)
+        })
+      }
+      let mut scale = 1.0
+      if !fits(corners(scale)) {
+        let mut lo = 0.70
+        let mut hi = 1.0
+        guard fits(corners(lo)) else {
+          fail(
+            "Building " + b.model.to_string() + " needs a revised site anchor",
+          )
+        }
+        for _ in 0..<20 {
+          let mid = (lo + hi) / 2
+          if fits(corners(mid)) {
+            lo = mid
+          } else {
+            hi = mid
+          }
+        }
+        scale = lo
+      }
+      let e : Point = { x: evidence_e.x * scale, y: evidence_e.y * scale, }
+      let s : Point = { x: evidence_s.x * scale, y: evidence_s.y * scale, }
+      if checking {
+        let id = "center-" + b.model.to_string()
+        let up = ((e.x * e.x + e.y * e.y + s.x * s.x + s.y * s.y) / 2).sqrt() *
+          32
+        guard pack.search_by(row => row.id == id) is Some(i) &&
+          pack[i].east == [e.x, e.y] &&
+          pack[i].south == [s.x, s.y] &&
+          (pack[i].elevation - up).abs() < 0.0000000001 else {
+          fail(
+            "Rebake the town projection for " + id + " and import the new pack",
+          )
+        }
+      }
+      let footprint = corners(scale)
+      let clearance = separation(footprint, grid)
+      println(
+        "Building " +
+        b.model.to_string() +
+        " · " +
+        block.id +
+        " · scale " +
+        scale.to_string(),
+      )
+      guard !used.contains(b.model) &&
+        cross(e, s) > 0 &&
+        footprint.all(c => inside(c, grid)) &&
+        clearance > 0.12 else {
+        fail(
+          "Building \{b.model} crosses \{block.id} street setback (clearance \{clearance})",
+        )
+      }
+      for other in footprints {
+        guard separation(footprint, other) > 0.05 &&
+          !inside(p, other) &&
+          !inside(other[0], footprint) else {
+          fail("Building overlap at \{b.model}")
+        }
+      }
+      minimum = minimum.min(clearance)
+      footprints.push(footprint)
+      used[b.model] = true
+      guard nodes.get(b.arrival) is Some(door) else {
+        fail("Entry is off the registered boundary")
+      }
+      door_count += 1
+      result.write_string(
+        "  future_center_building(\n    \{b.model}, \"\{block.group} · \{b.position}\", \{literal(p)},\n    \{literal(e)}, \{literal(s)},\n    \{hw}, \{hd}, \{literal(door)}, \"\{b.arrival}\",\n  ),\n",
+      )
+    }
+    let f = site.forecourt
+    if block.id == f.block {
+      let (p, e, s) = project(
+        { x: f.center[0], y: f.center[1], },
+        photo,
+        grid,
+        f.east,
+        f.south,
+      )
+      let pad = [
+        offset(p, e, s, -115, -36),
+        offset(p, e, s, 125, -36),
+        offset(p, e, s, 125, 42),
+        offset(p, e, s, -115, 42),
+      ]
+      guard pad.all(c => inside(c, grid)) &&
+        separation(pad, grid) > 0.12 &&
+        footprints.all(b => separation(pad, b) > 0 && !inside(p, b)) else {
+        fail("Forecourt overlaps street or building")
+      }
+      // Existing furniture is authored around local z=130. Keep that local origin.
+      let origin = offset(p, e, s, 0, -130)
+      let door = nodes[f.arrival]
+      let seat = offset(p, e, s, -15, 10)
+      guard footprints.all(building => separation([door, seat], building) > 0.05) else {
+        fail(
+          "The path from the public street to the forecourt crosses a building",
+        )
+      }
+      court = "///|\nlet future_center_court : TownLandmark = future_center_building(\n  0, \"未来中心\", \{literal(origin)},\n  \{literal(e)}, \{literal(s)},\n  0, 0, \{literal(door)}, \"\{f.arrival}\",\n)\n"
+    }
+  }
+  assert_true(
+    [1, 2, 3, 4, 5, 6, 7].all(i => used.contains(i)) && used.length() == 7,
+  )
+  assert_true(court.length() > 0)
+  review.write_string("]\n")
+  result.write_string("]\n\n" + court + "\n" + review.to_string())
+  if !checking {
+    @fs.write_string_to_file("docs/project/wenyu-protected-footprints.json", footprints.map(r => r.map(p => [p.x, p.y])).to_json().stringify())
+    @fs.write_string_to_file(
+      "src/ui/rabbita-town/main/future_center_registration.mbt",
+      result.to_string(),
+    )
+  }
+  println(
+    "Verified \{used.length()} distinct model footprints and \{door_count} street arrivals. Minimum street centerline clearance: \{minimum} grid units.",
+  )
+}

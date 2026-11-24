@@ -1207,6 +1207,22 @@ fn ecosystem_contract_world_for_model(
   match ecosystem_contract_world_cache.get(key) {
     Some(world) => world
     None => {
+      if model.energy_world_delta.operations.is_empty() &&
+        packaged_public_world(seed) is Some(base) &&
+        town_life_world_projection_for_states(
+          model.town_life_world_states,
+          seed,
+        ).rejected.is_empty() {
+        let issues = packaged_public_world_issues()
+        ecosystem_contract_publish_world_cache(
+          key,
+          base,
+          false,
+          ecosystem_contract_issue_summary(issues),
+          issues,
+        )
+        return base
+      }
       let snapshot = ecosystem_cached_world_snapshot(model, seed)
       let candidate = ecosystem_contract_world_from_snapshot(snapshot, seed)
       let issues = @energy_valley_contract.validate_world(candidate)

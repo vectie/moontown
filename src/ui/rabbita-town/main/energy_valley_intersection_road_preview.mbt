@@ -111,7 +111,7 @@ fn intersection_road_preview_retain_semantic_cache_key(
 ///|
 fn intersection_road_preview_graph_identity() -> String {
   if wenyu_rigid_scene_active() {
-    return "wenyu-unshifted-scene-v2:\{wenyu_scene_prefix.length()}"
+    return "wenyu-bank-scene-v2:\{wenyu_scene_prefix.length()}"
   }
   if reference_osm_block_graph_ready() &&
     reference_osm_cartoon_road_graph_prepare() {
@@ -762,12 +762,12 @@ fn intersection_road_preview_user_buildings(
 fn intersection_road_preview_building_counts(
   buildings : Map[Int32, Array[IntersectionRoadPreviewBuilding]],
 ) -> (Int32, Int32) {
+  let all_vector = wenyu_rigid_scene_active() && town_bearing_render_enabled()
   let mut image_count = 0
   let mut vector_count = 0
   for _, items in buildings {
     for building in items {
-      if building.asset_path.is_empty() ||
-        (wenyu_rigid_scene_active() && town_bearing_render_enabled()) {
+      if building.asset_path.is_empty() || all_vector {
         vector_count += 1
       } else {
         image_count += 1

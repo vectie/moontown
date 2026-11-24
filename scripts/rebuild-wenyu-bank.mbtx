@@ -1,0 +1,19 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/shell",
+}
+
+///|
+// Offline authoring only. Do not do a partial rebuild of the road SVG without
+// its occupancy, parcel runs and two route graphs. Requires the built studio.
+async fn main {
+  @shell.Cmd("moon",["run","--target","native","--release","scripts/trial-wenyu-outer-roads.mbtx","--","--town-source","docs/project/wenyu-major-road-fit.json"]).run()
+  for
+    script in [
+      "compile-wenyu-bank-surface", "compile-wenyu-bank-parcels", "compile-future-center-site", "compile-science-city-sites", "package-town-landmarks",
+      "compile-frontier-exits", "review-wenyu-road-surface",
+    ] {
+    @shell.Cmd("moon", ["run", "scripts/" + script + ".mbtx"]).run()
+  }
+}

@@ -338,7 +338,7 @@ test('the single map view replaces stale presentation after graph validation', a
 
   assert.ok(compile >= 0)
   assert.doesNotMatch(page, /return render_energy_valley_intersection_reference_page/)
-  assert.match(page, /render_golden_valley_canvas\(dispatch, snapshot, town_canvas_view\)/)
+  assert.match(page, /render_golden_valley_canvas\(\s*dispatch,\s*snapshot,\s*town_canvas_view,\s*tool=model\.energy_tool,?\s*\)/)
   assert.match(page, /render_energy_valley_tool_dock\(dispatch, model\)/)
   assert.match(page, /follow_enabled: model\.player_follow && !intersection_preview/)
   assert.match(
@@ -360,7 +360,7 @@ test('the single map view replaces stale presentation after graph validation', a
   assert.ok(overlay < acceptedFrame)
   assert.match(canvas, /energy_valley_intersection_reference_requested\(\)/)
   assert.match(canvas, /cameraOnly/)
-  assert.match(canvas, /lifecycle\.cameraOnly \|\| moved/)
+  assert.match(canvas, /lifecycle\.cameraOnly\s*\|\|\s*moved/)
   assert.match(canvas, /const updateCoordinateReadout = event =>/)
   assert.match(
     canvas,

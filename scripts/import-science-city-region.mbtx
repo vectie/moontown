@@ -1,0 +1,40 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+}
+
+///|
+// Bake a bounded regional context from one local Geofabrik OSM extract.
+// Coordinates are metres east and south of (116.2 E, 40.2 N), quantized to 1 m.
+async fn main {
+  guard @env.args().get(1) is Some(path) else {
+    fail("Pass the Beijing OSM PBF path")
+  }
+  let sql =
+    #|LOAD spatial;
+    #|CREATE TEMP TABLE src AS SELECT * FROM ST_ReadOSM(getvariable('pbf')) WHERE
+    #| (kind='node' AND lon BETWEEN 116.07 AND 116.62 AND lat BETWEEN 39.95 AND 40.30) OR
+    #| (kind='way' AND (tags['landuse'] IS NOT NULL OR tags['natural'] IS NOT NULL OR tags['leisure']='park' OR tags['waterway'] IS NOT NULL OR tags['highway'] IS NOT NULL OR tags['building'] IS NOT NULL));
+    #|CREATE TEMP TABLE ways AS SELECT id, refs, CASE WHEN tags['oneway']='-1' THEN -1 WHEN tags['oneway'] IN ('yes','true','1') OR tags['highway']='motorway' THEN 1 ELSE 0 END dir, CASE
+    #| WHEN tags['natural']='water' OR tags['waterway']='riverbank' THEN 'water'
+    #| WHEN tags['waterway'] IN ('river','canal','stream') THEN tags['waterway']
+    #| WHEN tags['highway'] IN ('motorway','trunk','primary','secondary','tertiary','residential','unclassified','living_street','service','motorway_link','trunk_link','primary_link','secondary_link') AND coalesce(tags['tunnel'],'no')='no'
+    #| THEN CASE WHEN tags['highway'] IN ('motorway','trunk','primary') THEN 'artery' WHEN tags['highway'] IN ('secondary','tertiary') THEN 'street' ELSE 'lane' END || CASE WHEN coalesce(tags['bridge'],'no')<>'no' THEN '-bridge' ELSE '' END
+    #| WHEN tags['landuse'] IN ('forest','orchard','grass','meadow','farmland','industrial','residential','commercial','retail') THEN tags['landuse']
+    #| WHEN tags['leisure']='park' OR tags['natural'] IN ('wood','wetland','grassland') THEN 'park'
+    #| WHEN tags['building'] IS NOT NULL THEN 'roof' END AS k FROM src WHERE kind='way';
+    #|CREATE TEMP TABLE lines AS SELECT w.id,w.k,w.dir,ST_MakeLine(list(ST_Point((n.lon-116.2)*85130,(40.2-n.lat)*111045) ORDER BY r.ord)) line FROM (SELECT * FROM ways WHERE k IS NOT NULL) w,unnest(w.refs) WITH ORDINALITY r(node,ord),(SELECT id,lat,lon FROM src WHERE kind='node') n WHERE n.id=r.node GROUP BY w.id,w.k,w.dir HAVING count(*)>=2 AND count(*)=any_value(len(w.refs));
+    #|SET VARIABLE bounds=ST_MakeEnvelope(-8500,-8100,33500,25600);
+    #|CREATE TEMP TABLE geometry AS SELECT id,k,dir,ST_Intersects(line,ST_MakeEnvelope(-750,3200,26300,15000)) core,CASE WHEN k IN ('water','park','forest','orchard','grass','meadow','farmland','industrial','residential','commercial','retail','roof') THEN CASE WHEN ST_IsClosed(line) AND ST_NPoints(line)>=4 THEN ST_MakePolygon(line) END ELSE line END g FROM lines WHERE ST_Intersects(line,getvariable('bounds')) OR ST_Contains(ST_Envelope(line),getvariable('bounds'));
+    #|COPY (SELECT k,dir,list_transform(ST_Dump(ST_Points(CASE WHEN ST_GeometryType(shape)='POLYGON' THEN ST_ExteriorRing(shape) ELSE shape END)),lambda p:[round(ST_X(p.geom))::INTEGER,round(ST_Y(p.geom))::INTEGER]) p FROM (SELECT id,k,dir,core, part.geom AS shape, part.path AS seq FROM geometry, unnest(ST_Dump(ST_SimplifyPreserveTopology(ST_Intersection(ST_MakeValid(g),getvariable('bounds')),CASE WHEN NOT core THEN 13 WHEN k='roof' THEN 1 ELSE 2.5 END))) q(part) WHERE g IS NOT NULL) WHERE ST_GeometryType(shape) IN ('LINESTRING','POLYGON') AND (k!='roof' OR ST_Area(shape)>65) AND (core OR (k NOT IN ('lane','lane-bridge','roof') AND (ST_GeometryType(shape)!='POLYGON' OR ST_Area(shape)>3500))) ORDER BY k,id,seq) TO 'output/science-city/region-context.json' (FORMAT JSON,ARRAY TRUE);
+  @shell.Cmd("duckdb", [
+    "-bail",
+    "-c",
+    "SET VARIABLE pbf='" + path.replace(old="'", new="''") + "';\n" + sql,
+  ]).run()
+  @shell.Cmd("sh", [
+    "-ec", "gzip -n -9 -c output/science-city/region-context.json > src/ui/landmark-studio/web/region-context.bin",
+  ]).run()
+}

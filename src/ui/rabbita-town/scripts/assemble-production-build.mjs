@@ -51,6 +51,7 @@ const BROWSER_FILES = [
   'competition-ui.js',
   'hackathon.css',
   'bootstrap.js',
+  'public-world.js',
   'platform-base.js',
   'platform-scope.js',
   'pack_bridge_panel.js',
@@ -159,6 +160,10 @@ async function assemble() {
     KNOWLEDGE_DOMAIN_CATALOG_TARGET,
   )
 
+  execFileSync('moon', ['run', 'scripts/pack-wenyu-browser-geometry.mbtx', stagingRoot], {
+    cwd: path.resolve(frontendRoot, '../../..'), stdio: 'inherit',
+  })
+  execFileSync(process.execPath, [path.join(frontendRoot,'scripts/bake-public-world.mjs'), stagingRoot], {stdio:'inherit'})
   execFileSync('moon', ['run', 'scripts/optimize-town-ui.mbtx', stagingRoot], {
     cwd: path.resolve(frontendRoot, '../../..'), stdio: 'inherit',
   })

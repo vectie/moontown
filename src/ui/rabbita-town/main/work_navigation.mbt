@@ -19,7 +19,9 @@ fn open_work_workspace(
   if parse_bootstrap_account_experience().kind() == AdminExperience {
     replace_browser_query_param(
       "view",
-      if model.street_living_room {
+      if model.street_overview {
+        "overview"
+      } else if model.street_living_room {
         "living-room"
       } else {
         "town"

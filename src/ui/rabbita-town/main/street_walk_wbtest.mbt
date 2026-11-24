@@ -106,7 +106,10 @@ test "reduced-motion overview restores the exact close camera without waiting fo
     golden_valley_camera_zoom(),
   )
   prepare_street_living_room_camera(true, overview=true)
-  assert_true(golden_valley_camera_zoom() < close.2)
+  let overview_zoom = golden_valley_camera_zoom()
+  assert_true(overview_zoom < close.2)
+  install_golden_valley_canvas_input(() => (), () => (), false, "inspect")
+  assert_eq(golden_valley_camera_zoom(), overview_zoom)
   prepare_street_living_room_camera(true, overview=false)
   assert_eq(
     (

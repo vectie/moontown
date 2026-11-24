@@ -36,6 +36,17 @@ async fn main {
     "--outfile=" + root + "/main.js",
     "--allow-overwrite",
   ]).run()
+  // The offline projection signature uses the canonical compiler output below.
+  // Minify only the shipped ES module; retain all geometry and public exports.
+  let models = root + "/landmark-studio/models.js"
+  @shell.Cmd(esbuild, [
+    models, "--minify", "--format=esm", "--target=es2022",
+    "--outfile=" + models, "--allow-overwrite",
+  ]).run()
+  // Keep all Three.js exports, class names and geometry; compact the shipped
+  // source whitespace while retaining the pinned upstream files and MIT notice.
+  let three_core = root + "/landmark-studio/vendor/three.core.js"
+  @shell.Cmd(esbuild, [three_core, "--minify-whitespace", "--legal-comments=inline", "--format=esm", "--target=es2022", "--outfile=" + three_core, "--allow-overwrite"]).run()
   // Bundle CSS without changing rule order. Existing asset URLs are absolute.
   @shell.Cmd(esbuild, [
     ui + "/styles.css",

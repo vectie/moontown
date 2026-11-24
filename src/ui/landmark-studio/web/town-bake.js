@@ -20,6 +20,7 @@ function bake(renderer,materials,study,p,frontOnly=false) {
   const parts=study.parts.filter(part=>{
     if(frontOnly)return part.layer!=='context'&&frontPart(part,p);
     if(part.layer!=='context')return true;
+    if(p.id==='vision'&&part.kind==='profile')return false;
     const courtyard=part.kind==='round'&&part.material==='paving'&&part.scale[0]===263&&part.scale[2]===151;
     return !bridge(p)&&(courtyard||(Math.abs(part.position[0])<128&&Math.abs(part.position[2])<73&&part.scale[0]<140&&part.scale[2]<140&&part.material!=='asphalt'));
   });
@@ -63,7 +64,7 @@ export async function bakeTiles(places) {
   // Diffuse blue-green glass keeps the facade readable without a black/white
   // window checkerboard. No model parts, roof details or bridge ribs are removed.
   const palette={ivory:'#fff2d7',stone:'#c3d2bc',concrete:'#d9dfc7',paving:'#ede2c6',paving2:'#d8d7b6',
-    glass:'#5296a5',glassLight:'#83c4cb',glassAmber:'#77a79a',silver:'#a9c1b2',roof:'#789f8d',metal:'#467b84',
+    glass:'#5296a5',glassLight:'#83c4cb',glassAmber:'#77a79a',glassSmoke:'#49646a',glassAzure:'#669ab0',silver:'#a9c1b2',roof:'#789f8d',metal:'#467b84',
     copper:'#d68d57',amber:'#f0c270',grass:'#abd85e',earth:'#67894f',sand:'#eeddb8',leaf:'#347c4d',lime:'#a6cf60',sage:'#6fa052',pine:'#286147',shrub:'#70aa4f',bark:'#967a55',blossom:'#f2a7ae',flower:'#c8ace5',wood:'#c7a475',asphalt:'#a2b299',water:'#319fc8'};
   for(const [key,m] of Object.entries(materials)){
     if(palette[key])m.color.set(palette[key]);m.metalness=0;m.roughness=.92;
@@ -73,7 +74,9 @@ export async function bakeTiles(places) {
     renderer.setClearColor(0,0);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
     renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
     for(const p of places){
-      const study=globalThis.wenyuLandmarkStudies.find(s=>s.id===p.id);
+      const study=p.component
+        ? {id:p.id,parts:globalThis.moonTownCenterBlock(p.component)}
+        : globalThis.wenyuLandmarkStudies.find(s=>s.id===p.id);
       records.push({id:p.id,...bake(renderer,materials,study,p),front:bridge(p)?bake(renderer,materials,study,p,true):null});
       await new Promise(resolve=>requestAnimationFrame(resolve));
     }

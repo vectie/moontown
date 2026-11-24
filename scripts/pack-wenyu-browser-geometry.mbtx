@@ -1,0 +1,135 @@
+///|
+import {
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.4.50/fs",
+  "moonbitlang/core/string",
+}
+
+///|
+fn delta(writer : StringBuilder, value : Int32) -> Unit {
+  let mut bits = (value << 1) ^ (value >> 31)
+  while bits >= 32 {
+    writer.write_char((95 + (bits & 31)).unsafe_to_char())
+    bits = bits >> 5
+  }
+  writer.write_char((63 + bits).unsafe_to_char())
+}
+
+///|
+fn encode(points : Array[(Double, Double)]) -> String raise {
+  let result = StringBuilder()
+  let mut x = 0
+  let mut y = 0
+  for (px, py) in points {
+    let nx = (px * 10000).round().to_int()
+    let ny = (py * 10000).round().to_int()
+    assert_eq(nx.to_double() / 10000, px)
+    assert_eq(ny.to_double() / 10000, py)
+    delta(result, nx - x)
+    delta(result, ny - y)
+    x = nx
+    y = ny
+  }
+  result.to_string()
+}
+
+///|
+struct Edge {
+  a : String
+  b : String
+  way : Double
+  bridge : Bool
+} derive(FromJson)
+
+///|
+fn pack_graph(path : String) -> Unit raise {
+  let doc = @json.parse(@fs.read_file_to_string(path))
+  guard doc is Object(fields) &&
+    doc is { "nodes": Array(nodes), "edges": Array(raw), .. } else {
+    fail("missing navigation graph")
+  }
+  let shape_nodes : Map[String, (Double, Double)] = Map([])
+  let kept : Array[Json] = []
+  for node in nodes {
+    guard node
+      is { "id": String(id), "x": Number(x, ..), "y": Number(y, ..), .. } else {
+      fail("invalid graph vertex")
+    }
+    if id.has_prefix("-") && @string.parse_double(id) <= -5000000000.0 {
+      shape_nodes[id] = (x, y)
+    } else {
+      kept.push(node)
+    }
+  }
+  let edges : Array[Edge] = @json.from_json(Json::array(raw))
+  let packed : Array[Json] = []
+  let mut i = 0
+  let mut expanded = 0
+  while i < edges.length() {
+    let edge = edges[i]
+    let mut b = edge.b
+    let shape : Array[(Double, Double)] = []
+    let mut first = 0.0
+    while shape_nodes.get(b) is Some(p) {
+      let n = @string.parse_double(b)
+      if shape.is_empty() {
+        first = n
+      }
+      assert_eq(n, first - shape.length().to_double())
+      shape.push(p)
+      i += 1
+      guard i < edges.length() &&
+        edges[i].a == b &&
+        edges[i].way == edge.way &&
+        edge.bridge == edges[i].bridge else {
+        fail("disconnected shape chain")
+      }
+      b = edges[i].b
+    }
+    if shape.is_empty() {
+      packed.push(raw[i])
+    } else {
+      packed.push({
+        "a": edge.a,
+        "b": b,
+        "way": edge.way,
+        "bridge": edge.bridge,
+        "shape": [first, encode(shape)],
+      })
+    }
+    expanded += shape.length()
+    i += 1
+  }
+  assert_eq(expanded, shape_nodes.length())
+  assert_eq(edges.length(), packed.length() + expanded)
+  fields["nodes"] = Json(kept)
+  fields["edges"] = Json(packed)
+  fields["schema"] = "moontown.landmark-navigation.v2"
+  @fs.write_string_to_file(path, doc.stringify())
+}
+
+///|
+fn pack_scene(path : String) -> Unit raise {
+  let doc = @json.parse(@fs.read_file_to_string(path))
+  guard doc is Object(fields) && doc is { "paths": Array(paths), .. } else {
+    fail("missing Wenyu paths")
+  }
+  for way in paths {
+    guard way is Object(values) && way is { "points": Array(raw), .. } else {
+      fail("invalid scene path")
+    }
+    let points : Array[(Double, Double)] = @json.from_json(Json::array(raw))
+    values["polyline"] = Json(encode(points))
+    values.remove("points")
+  }
+  fields["schema"] = "moontown.wenyu_bank_scene.v3"
+  @fs.write_string_to_file(path, doc.stringify())
+}
+
+///|
+fn main raise {
+  let root = @env.args().last().unwrap()
+  pack_graph(root + "/landmark-studio/navigation.json")
+  pack_scene(root + "/tilemap/wenyu-bank-scene-v2.json")
+}

@@ -1,0 +1,134 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/core/env",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+fn change(source : String, old : String, new : String) -> String raise {
+  guard source.split(old).to_array().length() == 2 else { fail("Expected one repair anchor: " + old[:80].to_owned()) }
+  source.replace(old~, new~)
+}
+
+///|
+fn section(source : String, start : String, end : String, replacement : String) -> String raise {
+  guard source.split(start).to_array() is [before, rest] else { fail("Repair start mismatch: " + start) }
+  let parts = rest.split(end).to_array()
+  guard parts.length() >= 2 else { fail("Repair end mismatch: " + end) }
+  before.to_owned() + replacement + end + parts[1:].to_owned().join(end)
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, source, destination] else { fail("repair-wlxk-client.mbtx ORIGINAL_HTML OUTPUT_HTML") }
+  let bytes = @fs.read_file(source).binary()
+  guard @crypto.bytes_to_hex_string(@crypto.sha256(bytes)) == "2bfe3a311a6531ad5253c778b8d4876a8dec9122d092f186f7e78cae943e63a1" else { fail("Unexpected source release; review the repair against the new HTML") }
+  let mut html = @fs.read_file(source).text()
+  html = section(html, "// ---- 高德卫星影像贴地层", "// ---- 公园步道已取消", "// The upload omitted its satellite JPG. Keep the author's built-in ground, roads and water.\n// Do not substitute unregistered imagery or request an absent relative file.\n\n")
+  html = section(html, "      <label>联机账号 · 密码", "    <div class=\"field\" id=\"netUser\">",
+    #|      <div class="btnrow">
+    #|        <button class="btn ghost" id="btnLogin">平台账户</button>
+    #|      </div>
+    #|      <div class="hint" id="netMsg"></div>
+    #|    </div>
+    #|
+  )
+  html = change(html, "const passInputEl = document.getElementById('passInput');", "")
+  html = change(html, "online: false, token: null,", "online: false, saving: false, ready: null,")
+  html = change(html, "return fetch(path, {", "return fetch('/wlxk' + path, {\n    credentials: 'same-origin',\n    signal: keepalive ? undefined : AbortSignal.timeout(8000),")
+  html = change(html, "function applyUser(p, token){\n  NET.user = p;\n  NET.token = token;\n  try{ localStorage.setItem('fcv_token', token); }catch(e){}", "function applyUser(p){\n  NET.user = p;")
+  html = change(html, "netStatusEl.textContent = p.pos ? '云存档已读取 · 开始漫游将回到上次位置' : '新角色 · 云存档已启用';", "netUserEl.querySelector('label').textContent = p.kind === 'account' ? '平台账户' : '访客';\n  document.getElementById('btnLogout').textContent = p.kind === 'account' ? '账户' : '退出';\n  netStatusEl.textContent = p.kind === 'account' ? '账户云存档' : '访客存档 · 清除浏览器数据后无法恢复';")
+  html = section(html, "/* ---- 注册 / 登录 ---- */", "/* ---- 开始漫游:",
+    #|/* ---- Shared platform identity; no second password system ---- */
+    #|function openAccount(){ window.open('/user/', '_blank', 'noopener'); }
+    #|document.getElementById('btnLogin').onclick = openAccount;
+    #|document.getElementById('btnLogout').onclick = async ()=>{
+    #|  if(NET.user && NET.user.kind === 'account'){ openAccount(); return; }
+    #|  try {
+    #|    await apiCall('/api/leave', {});
+    #|    NET.user = null; NET.kick = true;
+    #|    location.reload();
+    #|  } catch(e){ toast('退出失败，请重试'); }
+    #|};
+    #|async function refreshSession(){
+    #|  const j = await apiCall('/api/session');
+    #|  if(NET.user && (!j.player || NET.user.id !== j.player.id)){
+    #|    NET.kick = true; NET.user = null;
+    #|    if(NET.ws) NET.ws.close();
+    #|    location.reload(); return;
+    #|  }
+    #|  if(j.player && !NET.user) applyUser(j.player);
+    #|  if(!j.player) netMsgEl.textContent = j.kind === 'account' ? '账户云存档' : '';
+    #|}
+    #|NET.ready = (async ()=>{
+    #|  if(location.protocol === 'file:') return;
+    #|  netAuthEl.style.display = 'block';
+    #|  document.getElementById('saveList').style.display = 'none';
+    #|  try{
+    #|    await apiCall('/api/health');
+    #|    await refreshSession();
+    #|    NET.online = true;
+    #|    if(saveDestEl) saveDestEl.textContent = '云存档';
+    #|  }catch(e){
+    #|    netMsgEl.textContent = '联机暂不可用 · 可漫游，本次不保存';
+    #|    if(saveDestEl) saveDestEl.textContent = '未保存';
+    #|  }
+    #|})();
+    #|addEventListener('focus', ()=>{ if(NET.online) refreshSession().catch(()=>{}); });
+    #|function savePayload(){
+    #|  return {session: NET.user.id, look: player.look,
+    #|    pos: player.state === 'walk' ? {x:player.x,z:player.z,yaw:player.yaw} : NET.user.pos,
+    #|    visited:[...player.visited].slice(0,50), metGuide:!!player.metGuide};
+    #|}
+    #|async function cloudSave(){
+    #|  if(!NET.online || !NET.user || NET.saving || NET.kick) return;
+    #|  NET.saving = true;
+    #|  try {
+    #|    await apiCall('/api/save', savePayload());
+    #|    if(saveDestEl) saveDestEl.textContent = '已保存';
+    #|    NET.saveFailed = false;
+    #|  } catch(e){
+    #|    if(saveDestEl) saveDestEl.textContent = '保存失败';
+    #|    if(!NET.saveFailed) toast('保存失败，请检查网络或重新进入漫游');
+    #|    NET.saveFailed = true;
+    #|  } finally { NET.saving = false; }
+    #|}
+    #|
+  )
+  html = change(html, "startBtnEl.onclick = function(){\n  if(!NET.online){ origStartFn(); return; }\n  if(!NET.user){ toast('请先输入密码并登录或注册联机账号'); passInputEl.focus(); return; }",
+    #|startBtnEl.onclick = async function(){
+    #|  if(startBtnEl.disabled) return;
+    #|  startBtnEl.disabled = true;
+    #|  try{
+    #|    await NET.ready;
+    #|    if(!NET.online){ origStartFn(); return; }
+    #|    await refreshSession();
+    #|    if(!NET.user){
+    #|      const j = await apiCall('/api/visit', {name:nameInputEl.value.trim(),look:{...curLook}});
+    #|      applyUser(j.player);
+    #|    }
+    #|  }catch(e){ toast(e.message); return; }
+    #|  finally{ startBtnEl.disabled = false; }
+  )
+  html = change(html, "if(!NET.online || !NET.token || NET.kick || !NET.user) return;", "if(!NET.online || NET.kick || !NET.user) return;")
+  html = change(html, "'/ws?token=' + encodeURIComponent(NET.token)", "'/wlxk/ws?session=' + encodeURIComponent(NET.user.id)")
+  html = section(html, "  if(NET.wsOpen && NET.user && now - NET.lastSave > 10000){", "  if(netBoxEl){", "\n")
+  html = section(html, "/* ---- 关闭页面时兜底存档 ---- */", "</script>",
+    #|/* Save when leaving or backgrounding; cookie + expected session prevent cross-account writes. */
+    #|function saveOnExit(){
+    #|  if(!NET.online || !NET.user || NET.kick || player.state !== 'walk') return;
+    #|  navigator.sendBeacon('/wlxk/api/save', new Blob([JSON.stringify(savePayload())], {type:'application/json'}));
+    #|}
+    #|addEventListener('pagehide', saveOnExit);
+    #|document.addEventListener('visibilitychange', ()=>{if(document.hidden) saveOnExit();});
+    #|
+  )
+  // The original local save is indexed only by nickname. Never use it for online users.
+  html = change(html, "function saveGame(){\n  if(!player.name) return;", "function saveGame(){\n  if(location.protocol !== 'file:'){ cloudSave(); return; }\n  if(!player.name) return;")
+  html = change(html, "function renderSaves(){\n  const list = document.getElementById('saveList');", "function renderSaves(){\n  const list = document.getElementById('saveList');\n  if(location.protocol !== 'file:'){ list.style.display='none'; return; }")
+  html = section(html, "  try{\n    navigator.sendBeacon('/api/clienterr'", "  }catch(_){}", "  try{ /* Browser console retains the original error; no absent telemetry endpoint. */\n")
+  @fs.write_file(destination, html)
+  println("Repaired client: " + destination)
+}

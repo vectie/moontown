@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: wlxk-saves, namespace: aigc-acceptance-20260915}
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources: {requests: {storage: 1Gi}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: wlxk-realtime, namespace: aigc-acceptance-20260915}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector: {matchLabels: {app: wlxk-realtime}}
+  template:
+    metadata: {labels: {app: wlxk-realtime}}
+    spec:
+      automountServiceAccountToken: false
+      nodeSelector: {kubernetes.io/hostname: ubuntu}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: realtime
+          image: WLXK_SERVER_IMAGE
+          command: [/opt/wlxk/server]
+          env:
+            - {name: WLXK_BIND, value: '0.0.0.0:8084'}
+            - {name: WLXK_ORIGIN, value: 'https://suanli.kechuangfuwu.com:8443'}
+            - {name: WLXK_IDENTITY_URL, value: 'http://moontown-platform:8082/moontown/account/self.json'}
+            - {name: WLXK_STATE_DIR, value: /state/profiles}
+          ports: [{containerPort: 8084}]
+          readinessProbe:
+            httpGet: {path: /wlxk/api/health, port: 8084}
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: {path: /wlxk/api/health, port: 8084}
+            periodSeconds: 20
+          resources:
+            requests: {cpu: 50m, memory: 32Mi}
+            limits: {cpu: '1', memory: 256Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          volumeMounts: [{name: saves, mountPath: /state}]
+      volumes:
+        - name: saves
+          persistentVolumeClaim: {claimName: wlxk-saves}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: wlxk-realtime, namespace: aigc-acceptance-20260915}
+spec:
+  selector: {app: wlxk-realtime}
+  ports: [{port: 8084, targetPort: 8084}]
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata: {name: wlxk-realtime, namespace: aigc-acceptance-20260915}
+spec:
+  entryPoints: [websecure]
+  tls: {secretName: lunanexa-public-suanli-tls}
+  routes:
+    - kind: Rule
+      match: 'Host(`suanli.kechuangfuwu.com`) && (PathPrefix(`/wlxk/api/`) || Path(`/wlxk/ws`))'
+      priority: 121
+      services: [{name: wlxk-realtime, port: 8084}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: wlxk-realtime, namespace: aigc-acceptance-20260915}
+spec:
+  podSelector: {matchLabels: {app: wlxk-realtime}}
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - namespaceSelector: {matchLabels: {kubernetes.io/metadata.name: kube-system}}
+          podSelector: {matchLabels: {app.kubernetes.io/name: traefik}}
+      ports: [{port: 8084, protocol: TCP}]
+  egress:
+    - to:
+        - podSelector: {matchLabels: {app: moontown-platform}}
+      ports: [{port: 8082, protocol: TCP}]
+    - to:
+        - namespaceSelector: {matchLabels: {kubernetes.io/metadata.name: kube-system}}
+          podSelector: {matchLabels: {k8s-app: kube-dns}}
+      ports: [{port: 53, protocol: TCP}, {port: 53, protocol: UDP}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: moontown-wlxk-identity, namespace: aigc-acceptance-20260915}
+spec:
+  podSelector: {matchLabels: {app: moontown-platform}}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector: {matchLabels: {app: wlxk-realtime}}
+      ports: [{port: 8082, protocol: TCP}]

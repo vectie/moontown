@@ -114,3 +114,14 @@ test('public, two personal accounts and workspace use separate storage', () => {
   assert.equal(a.localStorage.getItem('world'), 'personal-a')
   assert.equal(load('/moontown/platform-base.js', 'public').__MOONTOWN_SCOPE_READY, false)
 })
+
+test('public /town uses the same isolated account storage and the new API base', () => {
+  const shared = storage()
+  const a = load('/town/platform-base.js', 'account-' + 'a'.repeat(64), shared, true)
+  const b = load('/town/platform-base.js', 'account-' + 'b'.repeat(64), shared, true)
+  a.localStorage.setItem('avatar', 'alice')
+  assert.equal(b.localStorage.getItem('avatar'), null)
+  assert.equal(a.fetch('/account/self.json'), 'https://example.test/town/account/self.json')
+  assert.equal(a.fetch('/town/api/neighborhood/mine'), '/town/api/neighborhood/mine')
+  assert.equal(load('/town/platform-base.js', '').__MOONTOWN_SCOPE_READY, false)
+})

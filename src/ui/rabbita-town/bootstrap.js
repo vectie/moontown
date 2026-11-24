@@ -10,11 +10,12 @@ import {
   startRuntimeSnapshotRefresh,
 } from './runtime_snapshots.js'
 import './viewport_drag_pan.js'
+import { loadPublicWorld } from './public-world.js'
 import { ACCOUNT_DEMO_FIXTURES } from './account_demo_fixtures.js'
 import { loadUnifiedAccount } from './account_identity.js'
 
 const app = document.getElementById('app')
-if (globalThis.location?.pathname?.startsWith('/moontown/') &&
+if (/^\/(?:town|moontown)\//.test(globalThis.location?.pathname || '') &&
     globalThis.__MOONTOWN_SCOPE_READY !== true) {
   app.textContent = '账户连接暂时不可用，请刷新重试。'
   throw new Error('Hosted MoonTown account scope is unavailable')
@@ -186,7 +187,8 @@ async function prepareRuntimeBridge() {
 }
 
 async function startMoontown() {
-  await prepareRuntimeBridge()
+  const references = prepareRuntimeBridge()
+  await Promise.all([references, loadPublicWorld(references)])
   await import('./main.js?landmarks-v3')
   // Identity and map registration are still critical. Operational reports are
   // versioned inputs consumed by the normal MoonBit tick, not a mount barrier.

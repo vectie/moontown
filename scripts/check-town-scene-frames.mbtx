@@ -1,0 +1,52 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/shell",
+}
+
+///|
+/// Damped OrbitControls emits change during update. More than one camera write
+/// between consecutive animation frames means an extra render loop escaped.
+async fn main {
+  let script =
+    #|const assert = require('node:assert/strict');
+    #|const {chromium} = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+    #|(async () => {
+    #|  const browser = await chromium.launch({channel:'chrome'});
+    #|  const base = process.env.MOONTOWN_URL || 'http://127.0.0.1:17881/';
+    #|  try {
+    #|    for (const path of ['landmark-studio/index.html#center','landmark-studio/interior.html','landmark-studio/datacenter.html#board','?layer=indoor&building=policy-hall']) {
+    #|      const page = await browser.newPage({viewport:{width:1152,height:720}});
+    #|      await page.addInitScript(() => Object.defineProperty(navigator,'deviceMemory',{get:()=>4}));
+    #|      await page.goto(new URL(path,base).href);
+    #|      const view = page.locator('[data-camera]').first();
+    #|      await view.waitFor();
+    #|      const box = await page.locator('canvas:visible').first().boundingBox();
+    #|      const x=box.x+box.width*.47,y=box.y+box.height*.56;
+    #|      await page.mouse.move(x,y);
+    #|      await page.mouse.down();
+    #|      const metering = view.evaluate(el => new Promise(resolve => {
+    #|        let writes=0,maximum=0,last=el.dataset.camera,changes=0,frames=0;
+    #|        const observer=new MutationObserver(records=>{writes+=records.length});
+    #|        observer.observe(el,{attributes:true,attributeFilter:['data-camera']});
+    #|        function tick(){
+    #|          maximum=Math.max(maximum,writes);writes=0;
+    #|          if(last!==el.dataset.camera)changes++;
+    #|          last=el.dataset.camera;
+    #|          if(++frames<32){requestAnimationFrame(tick);return}
+    #|          observer.disconnect();resolve({maximum,changes});
+    #|        }
+    #|        requestAnimationFrame(tick);
+    #|      }));
+    #|      await page.mouse.move(x+110,y+20,{steps:25});
+    #|      await page.mouse.up();
+    #|      const result=await metering;
+    #|      assert.equal(result.maximum,1,path+' '+JSON.stringify(result));
+    #|      assert.ok(result.changes>=2,path+' camera did not move');
+    #|      console.log(path,result);
+    #|      await page.close();
+    #|    }
+    #|  } finally { await browser.close() }
+    #|})().catch(error=>{console.error(error);process.exitCode=1});
+  @shell.Cmd("node", ["-e", script]).run()
+}

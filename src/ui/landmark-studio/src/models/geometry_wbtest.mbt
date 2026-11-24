@@ -45,10 +45,10 @@ test "arch ribs lean inward without crossing and return to deck at ends" {
 test "all scene commands have finite geometry and supported materials" {
   let materials = [
     "ivory", "stone", "concrete", "paving", "paving2", "glass", "glassLight", "glassAmber",
-    "silver", "copper", "amber", "roof", "metal", "grass", "earth", "sand", "leaf",
-    "lime", "sage", "pine", "shrub", "bark", "blossom", "flower", "wood", "asphalt",
-    "mark", "water", "ripple", "coral", "navy", "skin", "rubber", "cable", "lamp",
-    "trimLight",
+    "glassSmoke", "glassAzure", "silver", "copper", "amber", "roof", "metal", "grass",
+    "earth", "sand", "leaf", "lime", "sage", "pine", "shrub", "bark", "blossom",
+    "flower", "wood", "asphalt", "mark", "water", "ripple", "coral", "navy", "skin",
+    "rubber", "cable", "lamp", "trimLight",
   ]
   for study in [future_center(), future_vision(), east_bridge(), arch_bridge()] {
     assert_eq(study.detail_focus.length(), 3)
@@ -116,5 +116,27 @@ test "bridge fittings include an underside and retain clear walkway surfaces" {
   for part in tactile {
     assert_eq(part.position[2].abs(), 20.5)
     assert_true(part.position[1] > 10.4)
+  }
+}
+
+///|
+test "A21 keeps the western hotel, eastern headquarters and three paired southern buildings" {
+  let parts = future_vision().parts
+  let towers = parts.filter(v => {
+    v.kind == "profile" && v.material == "glassAzure"
+  })
+  assert_eq(towers.map(v => (v.position[0], v.position[2], v.scale[1])), [
+    (-44.0, -55.0, 96.0),
+    (57.0, -32.0, 64.0),
+    (75.0, 73.0, 47.0),
+  ])
+  let wings = parts.filter(v => {
+    v.kind == "profile" && v.material == "glassSmoke" && v.position[2] > 0
+  })
+  assert_eq(wings.length(), 6)
+  let links = parts.filter(v => v.kind == "girder" && v.material == "glassSmoke")
+  assert_eq(links.length(), 6)
+  for v in links {
+    assert_true(v.position[1] > 10 && v.position[1] < 20)
   }
 }

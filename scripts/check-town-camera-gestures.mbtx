@@ -1,0 +1,93 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/shell",
+}
+
+///|
+// Against a running preview. Set PLAYWRIGHT_MODULE to an installed module path
+// when Playwright is not on the project module search path.
+async fn main {
+  let check =
+    #|const assert=require('node:assert/strict');
+    #|const {chromium}=require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+    #|(async()=>{
+    #| const b=await chromium.launch({channel:process.env.BROWSER_CHANNEL||'chrome',args:['--enable-unsafe-swiftshader']});
+    #| try{
+    #|  const p=await b.newPage({viewport:{width:1060,height:680},hasTouch:true});const base=process.env.MOONTOWN_URL||'http://127.0.0.1:17881/';
+    #|  const open=url=>p.goto(url,{waitUntil:'commit',timeout:60000});
+    #|  const errors=[];p.on('pageerror',e=>errors.push(e.message));await open(new URL('?landmarks=review&district=guoxian',base).href);
+    #|  await p.waitForFunction(()=>window.__townLandmarkPainter?.districtReady()&&document.querySelector('#energy-valley-canvas')?.dataset.townTool);
+    #|  await p.waitForFunction(()=>document.querySelector('.town-landmark-inspector h2')?.textContent.includes('国贤')&&!window.__moontownGoldenValleyCamera.streetTransition);
+    #|  assert.equal(await p.locator('.avatar-wizard').count(),0);const rect=await p.locator('#energy-valley-canvas').boundingBox();
+    #|  const cam=()=>p.evaluate(()=>{const c=window.__moontownGoldenValleyCamera;return [c.x,c.y,c.z]});
+    #|  const nativeAngle=()=>p.evaluate(()=>{const canvas=document.querySelector('#energy-valley-canvas'),v=globalThis.__townDisplay.forCanvas(canvas);return v.h===canvas.clientHeight&&v.shear===0&&v.offset===0&&v.screenY(32,16)-v.screenY(0,0)===16&&v.localY(32,16)===16});
+    #|  assert.ok(await nativeAngle(),'Street view must use the registered isometric projection');
+    #|  const world=(v,x,y)=>[v[0]+(x-rect.x-rect.width/2)/v[2],v[1]+(y-rect.y-rect.height/2)/v[2]];
+    #|  const client=await p.context().newCDPSession(p),touch=(type,coords)=>client.send('Input.dispatchTouchEvent',{type,touchPoints:coords.map(([x,y],i)=>({id:i+1,x,y}))});
+    #|  const before=await cam();await p.mouse.move(505,401);await p.mouse.down();await p.mouse.move(529,427,{steps:30});await p.mouse.up();
+    #|  const drag=await cam();assert.ok(Math.abs((before[0]-drag[0])*drag[2]-24)<.01);
+    #|  const anchor=world(drag,480,380);
+    #|  await touch('touchStart',[[420,380],[540,380]]);
+    #|  for(let i=1;i<=5;i++)await touch('touchMove',[[420-i*4,380+i],[540+i*4,380+i]]);
+    #|  await p.waitForFunction(z=>Math.abs(window.__moontownGoldenValleyCamera.z/z-4/3)<.005,drag[2]);
+    #|  const point=world(await cam(),480,385);assert.ok(Math.hypot(point[0]-anchor[0],point[1]-anchor[1])<.01);
+    #|  for(let i=1;i<=6;i++)await touch('touchMove',[[400+i*7,385],[560-i*7,385]]);
+    #|  await p.waitForFunction(z=>window.__moontownGoldenValleyCamera.z<z*.7,drag[2]);await touch('touchEnd',[]);
+    #|  assert.equal(await p.locator('dialog[open]').count(),0);assert.deepEqual(errors,[]);
+    #|  await open(new URL('viewport.html?view=region&district=robotics',base).href);
+    #|  await p.waitForFunction(()=>document.querySelector('.town-landmark-inspector h2')?.textContent.includes('机器人'));
+    #|  const surface=await p.locator('#energy-valley-canvas').elementHandle();
+    #|  assert.equal(new URL(p.url()).searchParams.get('view'),'overview');
+    #|  assert.ok(await nativeAngle(),'Overview must use the same isometric projection');
+    #|  assert.equal(await p.locator('.region-map').count(),0);
+    #|  await p.locator('#street-project-distribution').click();
+    #|  await p.getByLabel('定位项目').selectOption('vision');
+    #|  await p.waitForFunction(()=>new URL(location.href).searchParams.get('district')==='vision');
+    #|  const focused=await cam();await p.mouse.move(300,330);await p.mouse.wheel(0,180);await p.waitForFunction(z=>window.__moontownGoldenValleyCamera.z<z,focused[2]);
+    #|  const zoomed=await cam();await p.goBack();
+    #|  await p.waitForFunction(()=>!document.getElementById('energy-valley-canvas').ownerDocument.querySelector('.town-project-picker').hidden);
+    #|  await p.goForward();await p.waitForFunction(state=>{const c=window.__moontownGoldenValleyCamera;return c.x===state[0]&&c.y===state[1]&&c.z===state[2]},zoomed);
+    #|  assert.ok(await surface.evaluate(c=>c===document.getElementById('energy-valley-canvas')));
+    #|  await p.locator('[data-action="study"]').click();await p.locator('.town-studio-dialog[open]').waitFor();
+    #|  await p.goBack();await p.locator('.town-studio-dialog').waitFor({state:'detached'});
+    #|  assert.deepEqual(await cam(),zoomed);
+    #|  await p.goForward();await p.locator('.town-studio-dialog[open]').waitFor();
+    #|  await p.getByRole('button',{name:'返回小镇',exact:true}).click();
+    #|  await p.locator('.town-studio-dialog').waitFor({state:'detached'});
+    #|  await p.locator('#street-overview').click();await p.waitForTimeout(400);
+    #|  await p.mouse.move(300,330);
+    #|  for(let i=0;i<8;i++)await p.mouse.wheel(0,210);
+    #|  const out=await cam();assert.ok(out[2]<1);
+    #|  await p.mouse.wheel(0,-240);await p.waitForFunction(z=>window.__moontownGoldenValleyCamera.z>z,out[2]);
+    #|  assert.deepEqual(errors,[]);
+    #|  await open(new URL('?district=center',base).href);
+    #|  const buildings=p.getByLabel('未来中心楼栋');await buildings.waitFor();
+    #|  const unit=await buildings.locator('option').nth(1).getAttribute('value');
+    #|  await buildings.selectOption(unit);await p.waitForFunction(u=>new URL(location).searchParams.get('landmarks')===u,unit);
+    #|  assert.equal(new URL(p.url()).searchParams.get('view'),'living-room');
+    #|  const unitCamera=await cam();await p.locator('[data-action="fit"]').click();
+    #|  await p.waitForFunction(()=>document.getElementById('street-overview')?.getAttribute('aria-pressed')==='true');
+    #|  await p.waitForFunction(()=>!window.__moontownGoldenValleyCamera.streetTransition);
+    #|  await p.goBack();await p.waitForFunction(u=>document.querySelector('select[aria-label="未来中心楼栋"]')?.value===u,unit);
+    #|  await p.waitForFunction(v=>{const c=window.__moontownGoldenValleyCamera;return c.x===v[0]&&c.y===v[1]&&c.z===v[2]},unitCamera);
+    #|  assert.deepEqual(await cam(),unitCamera);await p.goForward();
+    #|  await p.waitForFunction(()=>document.getElementById('street-overview')?.getAttribute('aria-pressed')==='true');
+    #|  assert.deepEqual(errors,[]);
+    #|  await open(base);
+    #|  const marker=p.locator('#street-cafe');
+    #|  await p.waitForFunction(()=>window.__townLandmarkPainter?.districtReady());
+    #|  await p.mouse.move(520,340);
+    #|  for(let i=0;i<5;i++){await p.mouse.wheel(0,120);await p.waitForTimeout(100);}
+    #|  await marker.waitFor();
+    #|  await p.waitForFunction(()=>{const b=document.querySelector('#street-cafe'),r=b.getBoundingClientRect();return r.width && b.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)) && !window.__moontownGoldenValleyCamera.streetTransition});
+    #|  const box=await marker.boundingBox(),start=await cam();
+    #|  await p.mouse.move(box.x+box.width/2,box.y+box.height/2);await p.mouse.wheel(0,140);
+    #|  await p.waitForFunction(z=>window.__moontownGoldenValleyCamera.z<z,start[2]);await marker.click();
+    #|  await p.waitForFunction(()=>document.documentElement.dataset.streetVisit==='cafe'||document.documentElement.dataset.streetMemories?.split(',').includes('cafe'));
+    #|  assert.deepEqual(errors,[]);
+    #|  console.log('Camera pan/pinch/wheel, legacy entry, native districts, exact back/forward, building fit and 3D return passed.');
+    #| }finally{await b.close()}
+    #|})().catch(e=>{console.error(e);process.exitCode=1});
+  @shell.Cmd("node", ["-e", check]).run()
+}

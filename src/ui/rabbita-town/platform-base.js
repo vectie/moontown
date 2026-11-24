@@ -12,7 +12,7 @@
   // MoonTown's synchronous storage API to the authenticated workspace before
   // any account token, avatar or town event is read by the application.
   const scope = globalThis.__MOONTOWN_ACCOUNT_SCOPE
-  if (base === '/moontown' || base === '/moontown/workspace') {
+  if (base === '/town' || base === '/moontown' || base === '/moontown/workspace') {
     const publicScope = globalThis.__MOONTOWN_PUBLIC_PLATFORM === true &&
       (scope === 'public' || /^account-[a-f0-9]{64}$/.test(scope))
     if (typeof scope !== 'string' || (!publicScope && !/^webide-[a-f0-9]{64}$/.test(scope))) {

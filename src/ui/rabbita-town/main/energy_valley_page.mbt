@@ -100,7 +100,12 @@ fn render_energy_valley_page_with_snapshot(
     return div(
       class="energy-valley-golden relative h-screen w-screen overflow-hidden bg-slate-950 select-none",
       [
-        render_golden_valley_canvas(dispatch, snapshot, town_canvas_view),
+        render_golden_valley_canvas(
+          dispatch,
+          snapshot,
+          town_canvas_view,
+          tool=model.energy_tool,
+        ),
         div(
           class="absolute top-4 left-4 z-50 rounded-xl bg-slate-900 p-4 text-white",
           [
@@ -125,7 +130,7 @@ fn render_energy_valley_page_with_snapshot(
               a(
                 href="index.html?road-trial=gentle&shore=1",
                 class="underline",
-                "完整场景（无河岸平移）",
+                "校岸后的镇图",
               ),
             ]),
           ],
@@ -154,7 +159,12 @@ fn render_energy_valley_page_with_snapshot(
     " town-graduated"
   }
   let children : Array[@rabbita.Html] = [
-    render_golden_valley_canvas(dispatch, snapshot, town_canvas_view),
+    render_golden_valley_canvas(
+      dispatch,
+      snapshot,
+      town_canvas_view,
+      tool=model.energy_tool,
+    ),
     button(
       class="street-return",
       on_click=dispatch(SetStreetLivingRoom(true)),

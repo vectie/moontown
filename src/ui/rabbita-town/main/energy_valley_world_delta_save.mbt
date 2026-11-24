@@ -275,6 +275,9 @@ let energy_valley_base_contract_world_cache : Map[
 fn energy_valley_base_contract_world_for_seed(
   seed : Int32,
 ) -> @energy_valley_contract.CompiledTownWorld {
+  if packaged_public_world(seed) is Some(world) {
+    return world
+  }
   match energy_valley_base_contract_world_cache.get(seed) {
     Some(world) => return world
     None => ()

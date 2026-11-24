@@ -1,0 +1,86 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/shell",
+}
+
+///|
+async fn main {
+  let script =
+    #|const {chromium}=require(process.env.PLAYWRIGHT_MODULE || '/Users/kq/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+    #|const fs=require('node:fs'),assert=require('node:assert/strict');
+    #|const crypto=require('node:crypto');
+    #|const base=process.env.WLXK_TEST_URL || 'https://suanli.kechuangfuwu.com:8443';
+    #|const html=fs.readFileSync('src/ui/landmark-studio/web/wlxk.html');
+    #|const expected=crypto.createHash('sha256').update(html).digest('hex');
+    #|(async()=>{
+    #| const browser=await chromium.launch({channel:'chrome'});
+    #| const errors=[],failures=[],townWarnings=[],results=[];
+    #| try{
+    #|   const context=await browser.newContext({viewport:{width:1100,height:760}});
+    #|   if(process.env.WLXK_CANDIDATE==='1') await context.route(/\/wlxk\/?$|\/landmark-studio\/wlxk\.html$/,r=>r.fulfill({contentType:'text/html',body:html}));
+    #|   const page=await context.newPage();page.setDefaultTimeout(90000);
+    #|   page.on('pageerror',e=>{errors.push(e.message);console.error('Page error:',e.message)});
+    #|   page.on('response',r=>{if(r.status()>=400&&!r.url().includes('favicon.ico')){
+    #|     const target=new URL(r.url());
+    #|     (target.pathname.includes('/wlxk')||target.hostname==='cdn.jsdelivr.net'?failures:townWarnings).push([r.status(),r.url()]);
+    #|   }});
+    #|   async function ready(frame){
+    #|     await frame.waitForFunction(()=>window.__fcv?.probe().kids>0);
+    #|     await frame.locator('#loading').waitFor({state:'hidden'});
+    #|     await frame.locator('#nameInput').waitFor({state:'visible'});
+    #|     await frame.waitForFunction(()=>document.querySelector('#netAuth').style.display==='block'||document.querySelector('#netUser').style.display==='block');
+    #|   }
+    #|   let response=await page.goto(base+'/wlxk',{waitUntil:'domcontentloaded'});
+    #|   assert.equal(crypto.createHash('sha256').update(await response.body()).digest('hex'),expected);
+    #|   await ready(page);console.log('3D ready');
+    #|   assert.equal(await page.locator('input[type=password]').count(),0);
+    #|   await page.locator('#nameInput').fill('漫游验收');await page.locator('#btnStart').click();
+    #|   await page.waitForFunction(()=>__fcv.player.state==='heli');
+    #|   await page.locator('#skipBtn').click();
+    #|   await page.waitForFunction(()=>__fcv.player.state==='walk',null,{timeout:90000}).catch(async e=>{console.error('Walk state',await page.evaluate(()=>({p:__fcv.probe(),msg:document.querySelector('#netMsg').textContent,toast:document.querySelector('#toast')?.textContent})));throw e});
+    #|   await page.waitForFunction(()=>Number(document.querySelector('#netCount').textContent)>=1,null,{timeout:20000}).catch(async e=>{console.error('Network state',await page.evaluate(()=>({msg:document.querySelector('#netMsg').textContent,status:document.querySelector('#netStatus').textContent})),failures,errors);throw e});console.log('Online walk ready');
+    #|   const before=await page.evaluate(()=>__fcv.probe());
+    #|   await page.keyboard.down('w');await page.waitForTimeout(1000);await page.keyboard.up('w');
+    #|   const after=await page.evaluate(()=>__fcv.probe());
+    #|   assert.ok(Math.hypot(before.x-after.x,before.z-after.z)>.1);
+    #|   await page.waitForTimeout(5500);
+    #|   const saved=await page.evaluate(async()=>await(await fetch('/wlxk/api/session')).json());
+    #|   assert.ok(saved.player.pos && saved.player.kind==='visitor');
+    #|   await page.screenshot({path:'output/wlxk-repair-20261120/standalone.png'});
+    #|   await page.reload({waitUntil:'domcontentloaded'});await ready(page);console.log('Reloaded',await page.evaluate(()=>({message:document.querySelector('#netMsg').textContent,status:document.querySelector('#netStatus').textContent})));
+    #|   await page.locator('#netUser').waitFor({state:'visible'});
+    #|   assert.equal(await page.locator('#nameInput').inputValue(),'漫游验收');
+    #|   await page.locator('#btnStart').click();await page.waitForFunction(()=>__fcv.player.state==='walk');
+    #|   const restored=await page.evaluate(()=>__fcv.probe());
+    #|   assert.ok(Math.hypot(restored.x-saved.player.pos.x,restored.z-saved.player.pos.z)<8);
+    #|   results.push({entry:'standalone',objects:after.kids,cars:await page.evaluate(()=>__fcv.cars.length),saveRecovered:true,walked:true});
+    #|   await page.goto(base+'/town/?district=xingke',{waitUntil:'domcontentloaded'});
+    #|   const launch=page.locator('.landmark-actions [data-action="wlxk"]');await launch.waitFor();
+    #|   assert.ok(await page.evaluate(()=>!performance.getEntriesByType('resource').some(r=>r.name.endsWith('/wlxk.html'))));
+    #|   await launch.click();
+    #|   const dialog=page.locator('.town-studio-dialog[open]');
+    #|   await dialog.locator('iframe').waitFor();
+    #|   const frame=await(await dialog.locator('iframe').elementHandle()).contentFrame();
+    #|   await ready(frame);await frame.locator('#netUser').waitFor({state:'visible'});
+    #|   assert.equal(await frame.locator('#nameInput').inputValue(),'漫游验收');
+    #|   await frame.locator('#btnStart').click();await frame.waitForFunction(()=>__fcv.player.state==='walk');
+    #|   await frame.waitForFunction(()=>Number(document.querySelector('#netCount').textContent)>=1);
+    #|   await page.screenshot({path:'output/wlxk-repair-20261120/town-embedded.png'});
+    #|   await page.getByRole('button',{name:'返回小镇',exact:true}).click();await dialog.waitFor({state:'detached'});
+    #|   results.push({entry:'town',sameVisitorSave:true,returnToTown:true,onDemand:true});
+    #|   const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:1});
+    #|   if(process.env.WLXK_CANDIDATE==='1') await mobile.route(/\/wlxk\/?$/,r=>r.fulfill({contentType:'text/html',body:html}));
+    #|   const phone=await mobile.newPage();phone.setDefaultTimeout(90000);phone.on('pageerror',e=>errors.push(e.message));
+    #|   await phone.goto(base+'/wlxk/',{waitUntil:'domcontentloaded'});await ready(phone);
+    #|   await phone.screenshot({path:'output/wlxk-repair-20261120/mobile.png'});
+    #|   const overflow=await phone.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
+    #|   const panelClipped=await phone.locator('#menu .panel').evaluate(e=>{const r=e.getBoundingClientRect();return r.left<0||r.right>innerWidth});
+    #|   assert.equal(overflow,false);results.push({entry:'mobileViewport',rendered:true,documentOverflow:false,panelClipped,fullMobileInteractionTested:false});
+    #|   assert.deepEqual(errors,[]);assert.deepEqual(failures,[]);
+    #|   fs.writeFileSync('output/wlxk-repair-20261120/browser-results.json',JSON.stringify({expected,results,errors,failures,townWarnings},null,2));
+    #|   console.log(JSON.stringify({expected,results,errors,failures,townWarnings:townWarnings.length},null,2));
+    #| }finally{await browser.close()}
+    #|})().catch(e=>{console.error(e);process.exitCode=1});
+  @shell.Cmd("node", ["-e", script]).run()
+}

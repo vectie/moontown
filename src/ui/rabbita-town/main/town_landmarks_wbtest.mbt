@@ -18,49 +18,14 @@ test "landmark campus and bridge registration preserves geographic axes" {
 }
 
 ///|
-test "campus setback moves the door and footprint without rotating geographic axes" {
+test "Vision town origin shares the A21 imagery anchor with the regional model" {
   town_landmarks_init()
-  for
-    (id, lon, lat, setback, west) in [
-      ("center", 116.4701, 40.1147, 40.0, 20.0),
-      ("vision", 116.4754, 40.1245, 55.0, 30.0),
-    ] {
-    let fitted = town_landmark_find(id).unwrap()
-    let original = town_landmark_create(id, "", lon, lat, 134, 80, false)
-    assert_eq(
-      (fitted.east.x, fitted.east.y),
-      (original.east.x, original.east.y),
-    )
-    assert_eq(
-      (fitted.south.x, fitted.south.y),
-      (original.south.x, original.south.y),
-    )
-    assert_true(
-      (fitted.origin.x -
-      original.origin.x +
-      original.south.x * setback +
-      original.east.x * west).abs() <
-      0.000001,
-    )
-    assert_true(
-      (fitted.origin.y -
-      original.origin.y +
-      original.south.y * setback +
-      original.east.y * west).abs() <
-      0.000001,
-    )
-    assert_true(
-      (fitted.door.x - original.door.x - fitted.origin.x + original.origin.x).abs() <
-      0.000001,
-    )
-    assert_true(
-      (fitted.door.y - original.door.y - fitted.origin.y + original.origin.y).abs() <
-      0.000001,
-    )
-    // Inner 263 × 151 m courtyard is covered by the legacy-lot reservation.
-    assert_true(
-      fitted.half_width > 263.0 / 2.0 && fitted.half_depth > 151.0 / 2.0,
-    )
+  let vision = town_landmark_find("vision").unwrap()
+  let anchor = town_bearing_geo_to_ground(116.47495692, 40.12507434)
+  assert_eq((vision.origin.x, vision.origin.y), (anchor.x, anchor.y))
+  for (x, z) in [(-116.0, 28.0), (-44.0, -55.0), (57.0, -32.0), (75.0, 73.0)] {
+    let point = town_landmark_at(vision, x, z)
+    assert_true(town_landmark_reserved(point.x, point.y, 0))
   }
 }
 
@@ -79,4 +44,21 @@ test "enlarged bridge preserves main crossing axis and includes approach shoulde
   assert_eq(b.half_width, 204.0)
   assert_true(b.half_depth >= 18.0)
   assert_eq((b.door.x, b.door.y), (b.origin.x, b.origin.y))
+}
+
+///|
+test "compound campus reserves its seven independent volumes and releases the old west block" {
+  town_landmarks_init()
+  assert_eq(town_landmark_volumes.length(), 10)
+  for unit in future_center_buildings {
+    assert_true(town_landmark_reserved(unit.origin.x, unit.origin.y, 0))
+    assert_true(
+      town_landmark_find(unit.id) is Some(found) &&
+      found.component == unit.component,
+    )
+    assert_false(town_landmark_reserved(unit.door.x, unit.door.y, 0))
+  }
+  assert_false(town_landmark_reserved(197.59375, 101.15625, 0))
+  let center = town_landmark_find("center").unwrap()
+  assert_true(town_landmark_arrival({ nodes: [], edges: [], }, center) is None)
 }

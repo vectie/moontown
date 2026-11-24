@@ -128,7 +128,9 @@ fn init_model() -> Model {
     energy_first_agent_open: false,
     town_spatial_layer: initial_town_spatial_layer(),
     street_living_room: initial_street_living_room(),
-    street_overview: false,
+    street_overview: ["overview", "region"].contains(
+      current_browser_query_param("view"),
+    ),
     street_motion: None,
     street_visit: "",
     street_visit_generation: 0,
@@ -215,6 +217,8 @@ fn init_model() -> Model {
     town_life.player is None &&
     !browser_energy_valley_intro_seen() &&
     current_browser_query_param("area").is_empty() &&
+    current_browser_query_param("landmarks").is_empty() &&
+    current_browser_query_param("district").is_empty() &&
     current_browser_query_param("layer").is_empty(),
     energy_request_open: initial_request_composer() != RequestShortcuts,
     resident_explorer_open: false,

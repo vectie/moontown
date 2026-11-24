@@ -22,6 +22,71 @@ let wenyu_scene_prefix : Array[Int32] = []
 let wenyu_scene_road_prefix : Array[Int32] = []
 
 ///|
+// One offline-generated label per cell. Zero denotes unpartitioned land,
+// not a verified parcel and not an operational planning ID.
+let wenyu_scene_parcels : Ref[Array[Int32]] = Ref::new([])
+
+///|
+fn wenyu_scene_read_parcels(runs : Array[Json]) -> Array[Int32]? {
+  let index = Array::make(256 * 144, 0)
+  for run in runs {
+    guard run is [Number(y, ..), Number(x, ..), Number(end, ..), Number(id, ..)] &&
+      y == y.floor() &&
+      x == x.floor() &&
+      end == end.floor() &&
+      id == id.floor() &&
+      y >= 0 &&
+      y < 144 &&
+      x >= 0 &&
+      x < end &&
+      end <= 256 &&
+      id >= 1 &&
+      id <= 36864 else {
+      return None
+    }
+    for k in x.to_int()..<end.to_int() {
+      let i = y.to_int() * 256 + k
+      if index[i] != 0 {
+        return None
+      }
+      index[i] = id.to_int()
+    }
+  }
+  Some(index)
+}
+
+///|
+fn wenyu_scene_single_parcel(
+  index : Array[Int32],
+  x : Int32,
+  y : Int32,
+  w : Int32,
+  h : Int32,
+) -> Bool {
+  if index.is_empty() {
+    return true
+  }
+  if index.length() != 256 * 144 ||
+    x < 0 ||
+    y < 0 ||
+    w <= 0 ||
+    h <= 0 ||
+    x + w > 256 ||
+    y + h > 144 {
+    return false
+  }
+  let id = index[y * 256 + x]
+  for j in y..<(y + h) {
+    for i in x..<(x + w) {
+      if index[j * 256 + i] != id {
+        return false
+      }
+    }
+  }
+  true
+}
+
+///|
 let wenyu_scene_access_cache : Map[String, WenyuScenePoint?] = Map([])
 
 ///|
@@ -47,7 +112,7 @@ extern "js" fn wenyu_scene_input() -> String =
   #|   if (!state) {
   #|     state = { status: 'loading', text: '' };
   #|     globalThis.__wenyuRigidSceneTransport = state;
-  #|     fetch('tilemap/wenyu-unshifted-scene.json').then(response => {
+  #|     fetch('tilemap/wenyu-bank-scene-v2.json').then(response => {
   #|       if (!response.ok) throw new Error('Scene data unavailable');
   #|       return response.text();
   #|     }).then(text => {
@@ -73,8 +138,11 @@ fn wenyu_scene_prepare() -> Bool {
   let parsed = @json.parse(input) catch { _ => Json::null() }
   guard parsed
     is {
-      "schema": String("moontown.wenyu_rigid_scene.v1"),
-      "riversideShiftsApplied": False,
+      "schema": String(
+        "moontown.wenyu_bank_scene.v2"
+        | "moontown.wenyu_bank_scene.v3"
+      ),
+      "parcelRuns": Array(runs),
       "roadCells": Array(rows),
       "paths": Array(paths),
       ..
@@ -83,6 +151,7 @@ fn wenyu_scene_prepare() -> Bool {
     return false
   }
   let prefix = Array::make(257 * 145, 0)
+  guard wenyu_scene_read_parcels(runs) is Some(parcels) else { return false }
   let road_prefix = Array::make(257 * 145, 0)
   for y in 0..<144 {
     guard rows[y] is String(row) && row.length() == 256 else { return false }
@@ -101,17 +170,26 @@ fn wenyu_scene_prepare() -> Bool {
     }
   }
   for raw in paths {
-    guard raw is { "points": Array(points), .. } else { continue }
-    let ps : Array[WenyuScenePoint] = []
+    let ps : Array[WenyuScenePoint] = match raw {
+      { "points": Array(points), .. } =>
+        [
+          for p in points if p is [Number(x, ..), Number(y, ..)] => { x, y, }
+        ]
+      { "polyline": String(data), .. } =>
+        match @landmark_routes.decode_polyline(data) {
+          Some(points) => points.map(p => WenyuScenePoint::{ x: p.x, y: p.y, })
+          None => continue
+        }
+      _ => continue
+    }
     let lengths : Array[Double] = []
     let mut total = 0.0
-    for p in points {
-      guard p is [Number(x, ..), Number(y, ..)] else { continue }
-      if !ps.is_empty() {
-        let prev = ps[ps.length() - 1]
-        total += ((x - prev.x) * (x - prev.x) + (y - prev.y) * (y - prev.y)).sqrt()
+    for i, p in ps {
+      if i > 0 {
+        let prev = ps[i - 1]
+        total += ((p.x - prev.x) * (p.x - prev.x) +
+        (p.y - prev.y) * (p.y - prev.y)).sqrt()
       }
-      ps.push({ x, y, })
       lengths.push(total)
     }
     if ps.length() > 1 && total > 2.0 {
@@ -119,6 +197,7 @@ fn wenyu_scene_prepare() -> Bool {
     }
   }
   wenyu_scene_paths.sort_by((a, b) => b.total.compare(a.total))
+  wenyu_scene_parcels.val = parcels
   for n in prefix {
     wenyu_scene_prefix.push(n)
   }

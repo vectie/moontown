@@ -1,0 +1,137 @@
+///|
+import {
+  "moonbitlang/x@0.4.50/fs",
+  "moonbitlang/core/json",
+}
+
+///|
+struct ElevationSource {
+  id : String
+  ring : String
+  scale : Array[Double]
+} derive(FromJson)
+
+///|
+struct StudyBlock {
+  key : String
+  base : Array[Double]
+  units : Array[(String, Double, String, String)]
+} derive(FromJson)
+
+///|
+struct Study {
+  blocks : Array[StudyBlock]
+} derive(FromJson)
+
+///|
+struct Entry {
+  site : String
+  id : String
+} derive(FromJson)
+
+///|
+struct Audit {
+  placed : Array[Entry]
+  held : Array[Entry]
+} derive(FromJson)
+
+///|
+fn main raise {
+  let dir = "src/ui/rabbita-town/dist/landmark-studio/"
+  let db : Study = @json.from_json(
+    @json.parse(@fs.read_file_to_string(dir + "district-studies.json")),
+  )
+  let ground : Array[
+    (String, String, Double, Array[Array[Double]], ElevationSource),
+  ] = @json.from_json(
+    @json.parse(@fs.read_file_to_string(dir + "district-ground.json")),
+  )
+  let audit : Audit = @json.from_json(
+    @json.parse(
+      @fs.read_file_to_string("docs/project/science-city-placement-audit.json"),
+    ),
+  )
+  assert_eq(ground.length(), audit.placed.length())
+  let admitted : Map[String, Bool] = Map([])
+  let studies : Map[String, ElevationSource] = Map([])
+  for b in db.blocks {
+    for unit in b.units {
+      guard !studies.contains(unit.3) else {
+        fail("Duplicate elevation " + unit.3)
+      }
+      studies[unit.3] = {
+        id: unit.3,
+        ring: unit.2,
+        scale: [b.base[2], b.base[3]],
+      }
+    }
+  }
+  for i, row in ground {
+    let elevation = studies[row.4.id]
+    assert_eq(row.4.ring, elevation.ring)
+    assert_eq(row.4.scale, elevation.scale)
+    guard row.0 == audit.placed[i].site &&
+      row.4.id == audit.placed[i].id &&
+      row.4.scale.length() == 2 &&
+      row.4.scale.all(x => x > 0) &&
+      !row.4.ring.is_empty() &&
+      row.2 > 0 &&
+      row.3.length() >= 3 &&
+      row.3.all(p => {
+        p.length() == 2 && p[0] >= 0 && p[0] < 256 && p[1] >= 0 && p[1] < 144
+      }) else {
+      fail("Broken packaged footprint " + audit.placed[i].id)
+    }
+    admitted[audit.placed[i].id] = true
+  }
+  for entry in audit.held {
+    assert_false(admitted.contains(entry.id))
+  }
+  assert_false(studies.contains("beisi-1002680194-9"))
+  assert_true(studies.contains("cloud-1089060429-1"))
+  assert_true(admitted.contains("cloud-1089060429-1"))
+  fn group_sizes(site : String) -> Array[Int32] {
+    db.blocks.filter(b => b.key == site).map(b => b.units.length())
+  }
+  assert_eq(group_sizes("robotics"), [3, 2])
+  assert_eq(group_sizes("yiyuan"), [14])
+  for b in db.blocks {
+    for (form, height, _, id) in b.units {
+      if b.key == "yiyuan" &&
+        ["yiyuan-962102794-1", "yiyuan-962102794-2"].contains(id) {
+        assert_eq(height, 58.0)
+      }
+      if ["huiyuan", "yanyuan"].contains(b.key) && form == "homes" {
+        assert_true(height >= 24.4)
+      }
+    }
+  }
+  assert_eq(group_sizes("xingyao"), [17])
+  assert_eq(group_sizes("xingke"), [5, 4])
+  assert_eq(ground.filter(u => u.0 == "xingke").length(), 9)
+  let info : Map[String, Array[String]] = @json.from_json(
+    @json.parse(@fs.read_file_to_string(dir + "region-building-info.json")),
+  )
+  assert_eq(info["xingke/东组团/东侧1号厂房"][0], "二期 1 号厂房")
+  assert_eq(info["xingke/东组团/北侧厂房"][0], "")
+  assert_eq(group_sizes("guoyu"), [8, 7])
+  assert_eq(group_sizes("cp1703"), [9, 6])
+  assert_eq(group_sizes("zhuxinzhuang2"), [6])
+  assert_eq(group_sizes("zhuxinzhuang55"), [8])
+  assert_true(
+    group_sizes("beisi").length() == 5 && group_sizes("beisi").all(n => n > 0),
+  )
+  for id in ["vision", "incubator", "bio", "center"] {
+    assert_true(group_sizes(id).is_empty())
+  }
+  for
+    id in [
+      "vision", "bio", "incubator", "center", "cp1703", "xingyao", "guoyu", "huanyu",
+      "robotics", "xiaosha", "zhuxinzhuang2", "zhuxinzhuang55",
+    ] {
+    assert_false(ground.any(u => u.0 == id))
+  }
+  println(
+    "District studies: packaged site / phase / occupancy and ground-placement checks passed.",
+  )
+}

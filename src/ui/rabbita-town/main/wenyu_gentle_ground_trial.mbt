@@ -49,12 +49,13 @@ extern "js" fn wenyu_gentle_ground_overlay(
   #|     };
   #|     image.onload = () => complete('ready');
   #|     image.onerror = () => complete('error');
+  #|     const src=shore?'tilemap/wenyu-bank-road-v2.svg':'tilemap/wenyu-unshifted-road-overlay.svg';
   #|     if(daylight){
-  #|       fetch('tilemap/wenyu-unshifted-road-overlay.svg').then(r=>{if(!r.ok)throw new Error('road palette');return r.text()}).then(svg=>{
+  #|       fetch(src).then(r=>{if(!r.ok)throw new Error('road palette');return r.text()}).then(svg=>{
   #|         const url=URL.createObjectURL(new Blob([svg.replaceAll('#ffc46d','#eeddb8').replaceAll('#86ab70','#96b975')],{type:'image/svg+xml'}));
-  #|         image.onload=()=>{URL.revokeObjectURL(url);complete('ready')};image.onerror=()=>{URL.revokeObjectURL(url);image.onload=()=>complete('ready');image.onerror=()=>complete('error');image.src='tilemap/wenyu-unshifted-road-overlay.svg'};image.src=url;
-  #|       }).catch(()=>{image.src='tilemap/wenyu-unshifted-road-overlay.svg'});
-  #|     }else image.src = 'tilemap/wenyu-unshifted-road-overlay.svg';
+  #|         image.onload=()=>{URL.revokeObjectURL(url);complete('ready')};image.onerror=()=>{URL.revokeObjectURL(url);image.onload=()=>complete('ready');image.onerror=()=>complete('error');image.src=src};image.src=url;
+  #|       }).catch(()=>{image.src=src});
+  #|     }else image.src = src;
   #|   }
   #|   context.save();
   #|   context.transform(32 * zoom, 16 * zoom, -32 * zoom, 16 * zoom,
@@ -64,8 +65,8 @@ extern "js" fn wenyu_gentle_ground_overlay(
   #|   const root = globalThis.document?.documentElement;
   #|   if (root) {
   #|     root.dataset.wenyuGentleGroundTrial = asset.state;
-  #|     root.dataset.wenyuGentleGroundVariant = shore ? 'gentle-unshifted-scene' : 'gentle';
-  #|     root.dataset.wenyuRiversideShiftsApplied = 'false';
+  #|     root.dataset.wenyuGentleGroundVariant = shore ? 'bank-calibrated-v2' : 'gentle';
+  #|     root.dataset.wenyuBankFit = shore?'major-road-fit':'off';
   #|     root.dataset.wenyuGentleGroundRoutingAuthority = 'false';
   #|   }
   #|   if (!params.has('road-trial')) return;
@@ -76,10 +77,85 @@ extern "js" fn wenyu_gentle_ground_overlay(
   #|   context.font = '14px system-ui';
   #|   context.textAlign = 'left'; context.textBaseline = 'alphabetic';
   #|   context.fillText(shore ? '地块与建筑共址 · 绿脊随绿道 · 桥梁 / 水系固定' : '地形投影试验 · gentle 0.01 / 0.01 · 地形不变 · 不用于导航', 28, height - 51);
-  #|   context.fillText(asset.state === 'ready' ? '6,420 OSM ways · 44,343 vertices · shared ground camera' :
+  #|   context.fillText(asset.state === 'ready' ? (shore?'校准路网 · 含路口连接':'原投影') :
   #|     asset.state === 'error' ? 'Road overlay failed to load. Reload to retry.' : 'Loading calibrated road overlay…', 28, height - 29);
   #|   context.restore();
   #| }
+
+///|
+// One immutable network lookup per compiled world. User edits replace world.
+let wenyu_render_roads : Ref[
+  (@energy_valley_contract.CompiledTownWorld, Map[String, TownCanvasRoadCell])?,
+] = Ref::new(None)
+
+///|
+fn wenyu_roads_for_frame(
+  snapshot : @energy_valley_contract.TownSnapshot,
+) -> Map[String, TownCanvasRoadCell] {
+  if wenyu_render_roads.val is Some((world, roads)) &&
+    physical_equal(world, snapshot.world) {
+    return roads
+  }
+  let roads = town_snapshot_canvas_road_lookup(
+    town_snapshot_canvas_roads(snapshot),
+  )
+  wenyu_render_roads.val = Some((snapshot.world, roads))
+  roads
+}
+
+///|
+extern "js" fn town_surrounding_ground(
+  c : @dom.CanvasRenderingContext2D,
+  x : Double,
+  y : Double,
+  z : Double,
+  w : Int32,
+  h : Int32,
+) -> Unit =
+  #| (ctx,x,y,z,w,h)=>globalThis.__townLandmarkPainter?.drawSurroundings?.(ctx,x,y,z,w,h)
+
+///|
+// At this distance a cell covers only a few pixels. Draw the same semantic
+// grid once; its full-resolution shoreline, roads and buildings paint above it.
+extern "js" fn town_distant_meadow(
+  c : @dom.CanvasRenderingContext2D,
+  w : Int32,
+  h : Int32,
+) -> Bool =
+  #| (ctx,w,h)=>{
+  #|   const camera=globalThis.__moontownGoldenValleyCamera, data=globalThis.__wenyuReferenceLabels;
+  #|   const owner=globalThis.__moontownGoldenValleyCanvasLifecycle;
+  #|   // Select ground detail by the size of a tile in the drawing buffer.
+  #|   const scale=globalThis.__townDisplay?.compact ? Math.min(1,owner?.pixelRatio || 1) : 1;
+  #|   if(!camera?.livingRoom || (camera.z*scale>.42 && !(owner?.zoomPreview && camera.z<=1.65)) || !data?.rows?.length)return false;
+  #|   let a=globalThis.__townMeadowAtlas;
+  #|   if(!a || a.source!==data.rows){
+  #|     const tile=document.createElement('canvas');tile.width=256;tile.height=144;
+  #|     const g=tile.getContext('2d'),image=g.createImageData(256,144);
+  #|     for(let y=0;y<144;y++)for(let x=0;x<256;x++){
+  #|       const k=data.legend?.[data.rows[y][x]]?.kind, light=Math.sin(x*.061+y*.029)*3.5+Math.sin(y*.047-x*.019)*2.5;
+  #|       const wet=k==='wetland'?5:0, i=(y*256+x)*4;
+  #|       image.data[i]=171+light-wet;image.data[i+1]=216+light-wet*.4;image.data[i+2]=94+light+wet;image.data[i+3]=255;
+  #|     }
+  #|     g.putImageData(image,0,0);a=globalThis.__townMeadowAtlas={source:data.rows,tile};
+  #|   }
+  #|   const z=camera.z;ctx.save();ctx.transform(32*z,16*z,-32*z,16*z,w/2-camera.x*z,h/2-camera.y*z);
+  #|   ctx.drawImage(a.tile,0,0);ctx.restore();return true;
+  #| }
+
+///|
+extern "js" fn baking_street_zoom_art() -> Bool =
+  #| () => globalThis.__townBakeZoomArt===true
+
+///|
+extern "js" fn wenyu_wheel_paint(
+  context : @dom.CanvasRenderingContext2D,
+  world : @energy_valley_contract.CompiledTownWorld,
+  width : Int32,
+  height : Int32,
+  night : Bool,
+) -> Bool =
+  #| (ctx,world,w,h,night) => globalThis.__townWheel?.paint(ctx,world,w,h,night) === true
 
 ///|
 /// Ground, lots and actors share the corrected display-space road source.
@@ -92,6 +168,30 @@ fn draw_wenyu_gentle_ground_trial(
   street~ : Bool = false,
 ) -> Unit {
   wenyu_gentle_ground_trial_fit_camera(width, height)
+  if street &&
+    wenyu_wheel_paint(
+      context,
+      snapshot.world,
+      width,
+      height,
+      golden_public_realm_is_night(view.hour),
+    ) {
+    return
+  }
+  let walking = match view.player_motion {
+    Some(motion) =>
+      (golden_animation_seconds() - motion.started_seconds) * player_walk_speed <
+      player_path_length(motion.path)
+    None => false
+  }
+  if street &&
+    !walking &&
+    wenyu_scene_default_requested() &&
+    !town_bearing_buildings_requested() &&
+    wenyu_vehicle_frame(context, snapshot.world, width, height, view.hour) {
+    golden_valley_accept_canvas_frame_with_runtime_eligibility(snapshot, false)
+    return
+  }
   golden_valley_clear_canvas_frame()
   context.clear_rect(0.0, 0.0, width.to_double(), height.to_double())
   golden_draw_background(context, width, height, view.hour)
@@ -119,13 +219,12 @@ fn draw_wenyu_gentle_ground_trial(
     buildings,
     intersection_road_preview_cache_key(snapshot),
   )
-  let roads = town_snapshot_canvas_road_lookup(
-    town_snapshot_canvas_roads(snapshot),
-  )
+  let roads = wenyu_roads_for_frame(snapshot)
   if !wenyu_ground_cache_restore(
       context,
       snapshot.world,
       intersection_road_preview_cache_key(snapshot) +
+      (if town_district_ready() { ":districts" } else { "" }) +
       (if exterior { ":exterior-v1" } else { "" }) +
       (if street { ":sunny-diorama-v3" } else { "" }) +
       (if bearing_render { ":street-alignment-v1" } else { "" }),
@@ -142,15 +241,31 @@ fn draw_wenyu_gentle_ground_trial(
     if exterior {
       frontier_draw_ground(context, exterior_chunks, width, height)
     }
-    let chunks = golden_canvas_visible_tile_chunks(
-      town_snapshot_canvas_cols(snapshot),
-      town_snapshot_canvas_rows(snapshot),
-      width,
-      height,
-      golden_valley_camera_x(),
-      golden_valley_camera_y(),
-      golden_valley_camera_zoom(),
-    )
+    if street && !exterior {
+      town_surrounding_ground(
+        context,
+        golden_valley_camera_x(),
+        golden_valley_camera_y(),
+        golden_valley_camera_zoom(),
+        width,
+        height,
+      )
+    }
+    let chunks = if street &&
+      bearing_render &&
+      town_distant_meadow(context, width, height) {
+      []
+    } else {
+      golden_canvas_visible_tile_chunks(
+        town_snapshot_canvas_cols(snapshot),
+        town_snapshot_canvas_rows(snapshot),
+        width,
+        height,
+        golden_valley_camera_x(),
+        golden_valley_camera_y(),
+        golden_valley_camera_zoom(),
+      )
+    }
     for chunk in chunks {
       for y in chunk.min_y..<chunk.max_y {
         for x in chunk.min_x..<chunk.max_x {
@@ -220,7 +335,16 @@ fn draw_wenyu_gentle_ground_trial(
       for _, items in buildings {
         for building in items {
           let (x, y) = intersection_road_preview_building_center(building)
-          if town_landmark_reserved(x, y, building.width.to_double() / 2.0) {
+          if !golden_spring_building_asset_visible(
+              golden_screen_x(x, y, width),
+              golden_screen_y(x, y, height),
+              building.width.to_double(),
+              building.depth.to_double(),
+              golden_valley_camera_zoom(),
+              width,
+              height,
+            ) ||
+            town_landmark_reserved(x, y, building.width.to_double() / 2.0) {
             continue
           }
           if bearing_render {
@@ -291,10 +415,15 @@ fn draw_wenyu_gentle_ground_trial(
     } else {
       Map([])
     }
-    let agents = wenyu_scene_walkers(
-      golden_animation_seconds(),
-      golden_prefers_reduced_motion(),
-    )
+    let districts_ready = town_district_ready()
+    let seconds = golden_animation_seconds()
+    let reduced = golden_prefers_reduced_motion()
+    let static_art = baking_street_zoom_art()
+    let agents = if static_art {
+      []
+    } else {
+      wenyu_scene_walkers(seconds, reduced)
+    }
     let street_position = if street {
       town_canvas_follow_position({ ..view, follow_enabled: true, })
     } else {
@@ -308,13 +437,32 @@ fn draw_wenyu_gentle_ground_trial(
     let street_depth = street_position
       .map(p => (p.0 + p.1).floor().to_int())
       .unwrap_or(-1)
-    let life = if street {
+    let life = if street && !static_art {
       street_life_frame(street_position, width, height)
     } else {
       []
     }
     golden_begin_spring_civic_building_asset_frame()
+    let z = golden_valley_camera_zoom()
+    let cy = golden_valley_camera_y()
+    let first = ((cy - height.to_double() / (2 * z)) / 16).floor().to_int() - 20
+    let last = ((cy + height.to_double() / (2 * z)) / 16).ceil().to_int() + 32
+    if street && production && !bearing_review && !walking {
+      wenyu_vehicle_begin(
+        context,
+        snapshot.world,
+        width,
+        height,
+        seconds,
+        reduced,
+        view.hour,
+      )
+    }
     for depth in 0..<432 {
+      if depth != 0 && depth != 431 && (depth < first || depth > last) {
+        continue
+      }
+      let context = wenyu_vehicle_depth(context, depth)
       town_landmark_draw(
         context,
         depth,
@@ -323,33 +471,51 @@ fn draw_wenyu_gentle_ground_trial(
         golden_valley_camera_zoom(),
         width,
         height,
+        seconds,
+        reduced,
+        view.hour,
       )
       match installations.get(depth) {
         Some(items) =>
-          golden_draw_town_snapshot_installations(
+          wenyu_street_row(
             context,
-            items.filter(i => {
-              if i.provenance.kind is @energy_valley_contract.UserDelta {
-                return true
-              }
-              match town_snapshot_installation_position(i) {
-                Some(p) => !town_landmark_reserved(p.x, p.y, 0.7)
-                None => true
-              }
-            }),
-            true,
+            snapshot.world,
+            depth,
             width,
             height,
-            view.hour,
+            golden_public_realm_is_night(view.hour),
+            row => {
+              golden_draw_town_snapshot_installations(
+                row,
+                wenyu_visible_installations(items, districts_ready, () => {
+                  items.filter(i => {
+                    if i.provenance.kind is @energy_valley_contract.UserDelta {
+                      return true
+                    }
+                    match town_snapshot_installation_position(i) {
+                      Some(p) => !town_landmark_reserved(p.x, p.y, 0.7)
+                      None => true
+                    }
+                  })
+                }),
+                true,
+                width,
+                height,
+                view.hour,
+              )
+            },
           )
         None => ()
       }
       golden_draw_agents_at_depth(context, agents, depth, width, height)
       if street {
         street_courtyard_draw_depth(context, depth, width, height)
-        street_life_draw(context, life, depth, width, height)
+        if !life.is_empty() {
+          street_life_draw(context, life, depth, width, height)
+        }
       }
-      if depth == street_depth &&
+      if !static_art &&
+        depth == street_depth &&
         (
           !exterior ||
           street_position
@@ -362,7 +528,16 @@ fn draw_wenyu_gentle_ground_trial(
         Some(items) =>
           for building in items {
             let (x, y) = intersection_road_preview_building_center(building)
-            if town_landmark_reserved(x, y, building.width.to_double() / 2.0) {
+            if !golden_spring_building_asset_visible(
+                golden_screen_x(x, y, width),
+                golden_screen_y(x, y, height),
+                building.width.to_double(),
+                building.depth.to_double(),
+                golden_valley_camera_zoom(),
+                width,
+                height,
+              ) ||
+              town_landmark_reserved(x, y, building.width.to_double() / 2.0) {
               continue
             }
             golden_draw_intersection_road_preview_building(
@@ -389,7 +564,7 @@ fn draw_wenyu_gentle_ground_trial(
         }
       }
     }
-    town_landmark_draw_walker(context, width, height)
+    town_landmark_draw_walker(wenyu_vehicle_depth(context, 432), width, height)
     let (images, vectors) = intersection_road_preview_building_counts(buildings)
     intersection_road_preview_record_building_counts(images, vectors)
     if bearing_review {
@@ -404,9 +579,16 @@ fn draw_wenyu_gentle_ground_trial(
     }
   }
   if exterior {
-    frontier_draw_props(context, exterior_chunks, view, width, height)
+    frontier_draw_props(
+      wenyu_vehicle_depth(context, 432),
+      exterior_chunks,
+      view,
+      width,
+      height,
+    )
   }
   if scene_ready {
+    wenyu_vehicle_finish(context)
     golden_end_spring_civic_building_asset_frame()
   }
 }

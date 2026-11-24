@@ -23,7 +23,7 @@ test "frontage reads every rendered street group but excludes the decorative spi
 ///|
 test "actual displayed-road index agrees with exhaustive nearest-segment search" {
   let parsed = town_street_parse(
-    town_density_fixture_text("wenyu-unshifted-road-overlay.svg"),
+    town_density_fixture_text("wenyu-bank-road-v2.svg"),
   )
   let saved = town_street_segments.map(s => s)
   town_street_index(parsed)

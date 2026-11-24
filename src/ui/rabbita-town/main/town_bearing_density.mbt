@@ -39,7 +39,8 @@ fn town_bearing_fill_density(
   let span = 3
   for i in 0..<(256 * 144) {
     let (x, y) = town_bearing_density_site(i)
-    if !wenyu_scene_region_clear(wenyu_scene_prefix, x, y, span, span) {
+    if !wenyu_scene_region_clear(wenyu_scene_prefix, x, y, span, span) ||
+      !wenyu_scene_single_parcel(wenyu_scene_parcels.val, x, y, span, span) {
       continue
     }
     // Compact homes and market rows surround the preserved larger landmarks.

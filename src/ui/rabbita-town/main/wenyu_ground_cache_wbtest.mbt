@@ -2,7 +2,7 @@
 extern "js" fn ground_cache_test_context() -> @dom.CanvasRenderingContext2D =
   #| () => {
   #|   globalThis.__groundTestSaved={document:globalThis.document,location:globalThis.location,cache:globalThis.__wenyuGroundCache,active:globalThis.__wenyuGroundCacheActive};
-  #|   const ctx={getTransform:()=>({a:2,b:0}),setTransform(){},drawImage(){}};
+  #|   const ctx={getTransform:()=>({a:2,b:0}),setTransform(){},drawImage(){},clearRect(){}};
   #|   globalThis.document={documentElement:{dataset:{}},createElement:()=>({getContext:()=>ctx})};
   #|   globalThis.location={search:''};delete globalThis.__wenyuGroundCache;
   #|   return ctx;

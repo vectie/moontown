@@ -1,0 +1,70 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+}
+
+///|
+/// Bake public scenery with the live map camera; no HUD, people, or traffic.
+async fn main {
+  guard @env.args().get(1) is Some(origin) &&
+    @env.args().get(2) is Some(library) else {
+    fail("Pass the assembled loopback preview origin and Playwright index.mjs")
+  }
+  let js =
+    #|import fs from 'node:fs';
+    #|import {createHash} from 'node:crypto';
+    #|import {pathToFileURL} from 'node:url';
+    #|const [origin,library,mode='public']=process.argv.slice(1),u=new URL(origin);
+    #|if(!['public','frontier'].includes(mode))throw Error('Expected public or frontier');
+    #|if(!['127.0.0.1','localhost'].includes(u.hostname))throw Error('Bake only the clean public preview');
+    #|const {chromium}=await import(pathToFileURL(library)),browser=await chromium.launch({channel:'chrome'});
+    #|try{
+    #| const p=await browser.newPage({viewport:{width:2048,height:1536},deviceScaleFactor:1,reducedMotion:'reduce'});
+    #| await p.addInitScript(()=>{window.__townBakeZoomArt=true;Object.defineProperty(navigator,'deviceMemory',{get:()=>8})});
+    #| await p.goto(new URL('?view=overview'+(mode==='frontier'?'&frontier=1':''),u).href);
+    #| await p.waitForFunction(()=>document.documentElement.dataset.wenyuGentleGroundTrial==='ready'&&document.documentElement.dataset.landmarkModels==='ready'&&window.__townLandmarkPainter?.districtReady?.(),null,{timeout:90000});
+    #| const out='src/ui/landmark-studio/web/town-projections/';
+    #| async function take(name,x,y,z,w,h){
+    #|   await p.setViewportSize({width:w,height:h+64});
+    #|   const capture=({x,y,z})=>{const c=window.__moontownGoldenValleyCamera;delete c.streetTransition;Object.assign(c,{streetFollow:false,x,y,z});window.__moontownGoldenValleyRender('bake');const a=document.querySelector('#energy-valley-canvas');return [c.x,c.y,c.z,a.width,a.height,a.clientWidth,a.clientHeight,a.toDataURL('image/webp',.87)]};
+    #|   await p.evaluate(capture,{x,y,z});
+    #|   if(name==='overview')await p.waitForFunction(()=>document.documentElement.dataset.regionGround==='ready');
+    #|   const [cx,cy,cz,bw,bh,cw,ch,data]=await p.evaluate(capture,{x,y,z});
+    #|   if(cx!==x||cy!==y||cz!==z||bw!==w||bh!==h||cw!==w||ch!==h)throw Error('Unregistered canvas '+JSON.stringify({name,cx,cy,cz,bw,bh,cw,ch,w,h}));
+    #|   if(!name)return data;
+    #|   save(name,data);
+    #| }
+    #| function save(name,data){
+    #|   const prefix=mode==='frontier'?'frontier-wheel-':'wheel-';
+    #|   fs.writeFileSync(out+prefix+name+'.webp',Buffer.from(data.split(',')[1],'base64'));
+    #|   console.log(name);
+    #| }
+    #| if(mode==='frontier'){
+    #|   await p.waitForFunction(()=>document.documentElement.dataset.frontierVersion==='exterior-city-v3');
+    #|   // The procedural camera enforces a chunk budget. Four legal camera
+    #|   // windows cover the same registered overview as the public atlas.
+    #|   const quadrants=[];
+    #|   for(let y=0;y<2;y++)for(let x=0;x<2;x++){
+    #|     quadrants.push(await take('',-14592+(x+.5)*16384,-9088+(y+.5)*12288,.125,2048,1536));
+    #|   }
+    #|   const overview=await p.evaluate(async quadrants=>{
+    #|     const canvas=document.createElement('canvas');
+    #|     canvas.width=2048;canvas.height=1536;
+    #|     const ctx=canvas.getContext('2d');ctx.imageSmoothingQuality='high';
+    #|     for(const [i,src] of quadrants.entries()){
+    #|       const image=new Image();image.src=src;await image.decode();
+    #|       ctx.drawImage(image,(i%2)*1024,Math.floor(i/2)*768,1024,768);
+    #|     }
+    #|     return canvas.toDataURL('image/webp',.87);
+    #|   },quadrants);
+    #|   save('overview',overview);
+    #| }else await take('overview',1792,3200,.0625,2048,1536);
+    #| for(let y=0;y<4;y++)for(let x=0;x<4;x++)await take(x+'-'+y,-6400+(x+.5)*4096,-4992+(y+.5)*4096,.25,1024,1024);
+    #| const signature='src/ui/landmark-studio/'+(mode==='frontier'?'frontier-wheel-art-sources.json':'wheel-art-sources.json');const inputs=JSON.parse(fs.readFileSync(signature));
+    #| for(const path of Object.keys(inputs))inputs[path]=createHash('sha256').update(fs.readFileSync(path)).digest('hex');
+    #| fs.writeFileSync(signature,JSON.stringify(inputs,null,2)+'\n');
+    #|}finally{await browser.close()}
+  @shell.Cmd("node", ["--input-type=module", "-e", js, origin, library, @env.args().get(3).unwrap_or("public")]).run()
+}

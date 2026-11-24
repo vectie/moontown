@@ -1,0 +1,49 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/shell",
+}
+
+///|
+/// Exercise actual browser layers and registered camera coordinates.
+async fn main {
+  let js =
+    #|const assert=require('node:assert/strict'),{chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+    #|(async()=>{const browser=await chromium.launch({channel:'chrome'});
+    #|try{
+    #| const p=await browser.newPage({viewport:{width:3840,height:2160}}),errors=[];
+    #| p.on('pageerror',e=>errors.push(e.message));await p.addInitScript(()=>Object.defineProperty(navigator,'deviceMemory',{get:()=>4}));
+    #| const base=process.env.MOONTOWN_URL||'http://127.0.0.1:17881/';
+    #| await p.goto(new URL('?landmarks=review&district=guoxian',base).href);
+    #| await p.waitForFunction(()=>document.querySelector('.town-landmark-inspector h2')?.textContent.includes('国贤')&&window.__moontownGoldenValleyCanvasLifecycle?.wheelPlate&&!window.__moontownGoldenValleyCamera.streetTransition);
+    #| const point={x:998,y:1144},before=await p.evaluate(()=>{const c=__moontownGoldenValleyCamera;return [c.x,c.y,c.z]});
+    #| await p.mouse.move(point.x,point.y);
+    #| const samples=await p.evaluate(point=>new Promise(resolve=>{
+    #|   const l=__moontownGoldenValleyCanvasLifecycle,c=__moontownGoldenValleyCamera,el=l.canvas,r=el.getBoundingClientRect(),dx=point.x-r.left-r.width/2,dy=point.y-r.top-r.height/2;
+    #|   const anchor=[c.x+dx/c.z,c.y+dy/c.z],out=[];
+    #|   el.dispatchEvent(new WheelEvent('wheel',{deltaY:140,clientX:point.x,clientY:point.y,bubbles:true,cancelable:true}));
+    #|   const frame=()=>{const s=l.wheelMotion;if(s&&out.length<9){const n=s.last,box=s.img.getBoundingClientRect();
+    #|     out.push({err:Math.hypot(n.x+dx/n.z-anchor[0],n.y+dy/n.z-anchor[1]),left:Math.abs(box.left-(r.left+r.width/2+(s.near[0]-n.x)*n.z)),width:Math.abs(box.width-s.near[2]*n.z),visible:s.pane.checkVisibility?s.pane.checkVisibility():s.pane.isConnected,z:n.z,hit:document.elementFromPoint(point.x,point.y)===el});requestAnimationFrame(frame)}else resolve(out)};
+    #|   requestAnimationFrame(()=>requestAnimationFrame(frame));
+    #| }),point);
+    #| assert.ok(samples.length>=5&&new Set(samples.map(x=>x.z)).size>=4);
+    #| assert.ok(samples.every(x=>x.visible&&x.hit&&x.err<1e-6&&x.left<.05&&x.width<.05),JSON.stringify(samples));
+    #| await p.mouse.wheel(0,-140);
+    #| await p.waitForFunction(()=>!__moontownGoldenValleyCanvasLifecycle.wheelMotion);
+    #| const after=await p.evaluate(()=>{const c=__moontownGoldenValleyCamera;return [c.x,c.y,c.z]});assert.ok(before.every((n,i)=>Math.abs(n-after[i])<1e-6));
+    #| await p.emulateMedia({reducedMotion:'reduce'});await p.mouse.wheel(0,140);await p.waitForTimeout(650);
+    #| assert.ok(await p.evaluate(()=>!__moontownGoldenValleyCanvasLifecycle.wheelMotion));
+    #| await p.goto(new URL('?view=living-room&frontier=1',base).href);
+    #| await p.emulateMedia({reducedMotion:'no-preference'});
+    #| await p.waitForFunction(()=>window.__moontownGoldenValleyCanvasLifecycle?.wheelPlate && document.documentElement.dataset.frontierVersion==='exterior-city-v3');
+    #| await p.mouse.wheel(0,100);
+    #| await p.waitForFunction(()=>!!window.__moontownGoldenValleyCanvasLifecycle?.wheelMotion);
+    #| assert.ok(await p.evaluate(()=>performance.getEntriesByType('resource').some(r=>r.name.includes('/frontier-wheel-overview.webp'))));
+    #| assert.ok(await p.evaluate(()=>!performance.getEntriesByType('resource').some(r=>r.name.endsWith('/wheel-overview.webp'))));
+    #| await p.goto(new URL('?view=living-room&frontier=1&seed=29',base).href);
+    #| await p.waitForFunction(()=>document.documentElement.dataset.wenyuGentleGroundTrial==='ready');
+    #| await p.mouse.wheel(0,80);assert.ok(await p.evaluate(()=>!__moontownGoldenValleyCanvasLifecycle?.wheelMotion));
+    #| assert.deepEqual(errors,[]);console.log('4K wheel: cursor anchor, hit testing, reverse, reduced motion, registered frontier artwork and custom-world fallback passed.');
+    #|}finally{await browser.close()}})().catch(e=>{console.error(e);process.exitCode=1});
+  @shell.Cmd("node", ["-e", js]).run()
+}

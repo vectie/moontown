@@ -7,10 +7,11 @@
 <main><aside class="inspector viewer-inspector">
   <h1 id="title">未来中心</h1>
   <button id="references"><span data-icon="photo"></span>参考图</button>
+  <a href="districts.html" class="viewer-link">住宅与园区</a>
   <div class="viewer-links"><a id="interior-link" href="interior.html" class="viewer-link"><span data-icon="indoor"></span>室内</a><a href="datacenter.html" class="viewer-link"><span data-icon="server"></span>数据中心</a></div>
   <details class="viewer-advanced"><summary>高级</summary><div class="viewer-advanced-body">
     <h2>显示设置</h2><div class="segments" role="group" aria-label="光照"><button data-light="day" aria-pressed="true">日光</button><button data-light="golden" aria-pressed="false">暖光</button><button data-light="blue" aria-pressed="false">夜景</button></div>
-    <div class="toggle-row"><label for="context">周边环境</label><input id="context" type="checkbox" checked></div><div class="toggle-row"><label for="clay">白模</label><input id="clay" type="checkbox"></div><div class="toggle-row"><label for="rotate">自动环视</label><input id="rotate" type="checkbox"></div>
+    <div class="toggle-row"><label for="context">周边环境</label><input id="context" type="checkbox" checked></div><div class="toggle-row"><label for="traffic">模拟车流</label><input id="traffic" type="checkbox" checked></div><div class="toggle-row"><label for="clay">白模</label><input id="clay" type="checkbox"></div><div class="toggle-row"><label for="rotate">自动环视</label><input id="rotate" type="checkbox"></div>
     <h3>更多视角</h3><div class="viewer-links" role="group" aria-label="更多视角"><button data-view="front" aria-pressed="false">正面</button><button data-view="side" aria-pressed="false">侧面</button><button data-view="reverse" aria-pressed="false">背面</button><button id="projection" aria-pressed="false">正交</button></div>
     <h3>模型依据</h3><p><span id="ordinal"></span> · <span id="subtitle"></span></p><p id="description"></p><p id="note"></p><p id="reference-count"></p><p>建筑与环境为参考资料重建，不是测绘或竣工模型。小镇使用对应的二维投影，完整模型在这里保留。</p>
     <h3>操作帮助</h3><p>拖拽旋转，滚轮缩放，右键拖拽平移。方向键旋转，＋／－缩放，Home 复位。</p><p>局部轴向不代表测绘正北。MoonBit 几何 · Three.js 渲染。</p>

@@ -1,6 +1,9 @@
+import {compactGraphics, resizeScene, shadowSize} from './scene-resolution.js';
 import * as THREE from 'three';
 import {OrbitControls} from './vendor/OrbitControls.js';
 import {RoomEnvironment} from './vendor/RoomEnvironment.js';
+import {fixtureLights} from './scene-life.js';
+let taskLights;
 import {createMaterials,buildStudy} from './scene-adapter.js';
 import {initViewerUI} from './viewer-ui.js';
 initViewerUI();
@@ -27,11 +30,11 @@ function render(){
   viewport.dataset.camera=camera.position.toArray().map(v=>v.toFixed(2)).join(',');
   viewport.dataset.drawCalls=renderer.info.render.calls;
   viewport.dataset.view=mode;
-  if(--dirty>0)raf=requestAnimationFrame(render);
+  if(--dirty>0 && !raf)raf=requestAnimationFrame(render);
 }
 function resize(){
   const w=viewport.clientWidth,h=viewport.clientHeight,aspect=w/h;
-  renderer.setSize(w,h,false);
+  resizeScene(renderer,w,h);
   if(camera.isPerspectiveCamera){
     camera.aspect=aspect;
     if(lastAspect){const f=Math.max(1,1.45/aspect)/Math.max(1,1.45/lastAspect);camera.position.sub(controls.target).multiplyScalar(f).add(controls.target);}
@@ -76,6 +79,7 @@ function selectZone(id,focus=false){
   invalidate();
 }
 function setLayers(){
+    if(renderer) renderer.shadowMap.needsUpdate=true;
   if($('ceiling').checked)$('cutaway').checked=false;
   model.layers.get('walls').scale.y=$('cutaway').checked?.36:1;
   model.layers.get('furniture').visible=$('furniture').checked;
@@ -83,28 +87,29 @@ function setLayers(){
   viewport.dataset.cutaway=String($('cutaway').checked);invalidate();
 }
 function setLighting(){
+    if(renderer) renderer.shadowMap.needsUpdate=true;
   scene.background.set(warm?'#ded5c3':'#e1e7dc');
   sun.color.set(warm?'#ffd2a0':'#ffefd4');sun.intensity=warm?2.4:2.7;
   sun.position.set(warm?-25:-42,warm?32:68,30);hemi.intensity=warm?1.15:1.3;
-  materials.lamp.emissiveIntensity=warm?2:.35;
+  materials.lamp.emissiveIntensity=warm?2:.35;taskLights.visible=warm;
   $('light').setAttribute('aria-pressed',String(warm));viewport.dataset.light=warm?'warm':'day';invalidate();
 }
 async function start(){
   await import('./models.js');const data=globalThis.wenyuInteriorStudy;
   if(!data?.study||!data?.zones)throw new Error('Interior data missing — rebuild the MoonBit module.');
   zones=data.zones;
-  renderer=new THREE.WebGLRenderer({canvas:$('scene'),antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));
-  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;
+  renderer=new THREE.WebGLRenderer({canvas:$('scene'),antialias:!compactGraphics});
+  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap; renderer.shadowMap.autoUpdate=!compactGraphics;renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.88;
   scene=new THREE.Scene();scene.background=new THREE.Color('#e1e7dc');materials=createMaterials();
   const pmrem=new THREE.PMREMGenerator(renderer),room=new RoomEnvironment(),env=pmrem.fromScene(room,.04);
   scene.environment=env.texture;scene.environmentIntensity=.28;pmrem.dispose();room.dispose();
   hemi=new THREE.HemisphereLight('#e3eff5','#b2a791',1.3);scene.add(hemi);
-  sun=new THREE.DirectionalLight('#ffefd4',2.7);sun.castShadow=true;sun.shadow.mapSize.set(4096,4096);
+  sun=new THREE.DirectionalLight('#ffefd4',2.7);sun.castShadow=true;sun.shadow.mapSize.set(shadowSize(4096),shadowSize(4096));
   Object.assign(sun.shadow.camera,{left:-66,right:66,top:60,bottom:-60,near:1,far:170});sun.shadow.normalBias=.025;sun.shadow.bias=-.00006;sun.shadow.radius=3;scene.add(sun);
   const fill=new THREE.DirectionalLight('#d9e8f1',.5);fill.position.set(50,35,-20);scene.add(fill);
   const floor=new THREE.Mesh(new THREE.PlaneGeometry(1000,1000),new THREE.MeshStandardMaterial({color:'#d4dbcd',roughness:1}));floor.rotation.x=-Math.PI/2;floor.position.y=-4.3;floor.receiveShadow=true;scene.add(floor);
-  model=buildStudy(data.study,materials);scene.add(model.root);
+  model=buildStudy(data.study,materials);scene.add(model.root);taskLights=fixtureLights(data.study,model);
   viewport.dataset.parts=data.study.parts.length;
   for(const zone of zones){
     const button=document.createElement('button');button.dataset.zone=zone.id;button.setAttribute('aria-pressed','false');

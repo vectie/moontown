@@ -12,10 +12,53 @@ priv struct TownLandmark {
   half_depth : Double
   door : WenyuScenePoint
   note : String
+  component : Int32
+  arrival : String
 }
 
 ///|
 let town_landmark_registry : Array[TownLandmark] = []
+
+///|
+// One destination may own several independently registered physical volumes.
+let town_landmark_volumes : Array[TownLandmark] = []
+
+///|
+fn future_center_building(
+  component : Int32,
+  title : String,
+  origin : WenyuScenePoint,
+  east : WenyuScenePoint,
+  south : WenyuScenePoint,
+  half_width : Double,
+  half_depth : Double,
+  door : WenyuScenePoint,
+  arrival : String,
+) -> TownLandmark {
+  let elevation = ((
+      east.x * east.x + east.y * east.y + south.x * south.x + south.y * south.y
+    ) /
+    2).sqrt() *
+    32
+  {
+    id: if component == 0 {
+      "center"
+    } else {
+      "center-" + component.to_string()
+    },
+    title,
+    origin,
+    east,
+    south,
+    elevation,
+    half_width,
+    half_depth,
+    door,
+    arrival,
+    component,
+    note: "依据楼群影像与街道定位，步行到达街边入口。",
+  }
+}
 
 ///|
 let town_landmark_graph : Map[String, @landmark_routes.Graph] = Map([])
@@ -47,8 +90,6 @@ fn town_landmark_create(
   half_width : Double,
   half_depth : Double,
   bridge : Bool,
-  north_setback~ : Double = 0.0,
-  west_setback~ : Double = 0.0,
 ) -> TownLandmark {
   let p = town_bearing_geo_to_ground(lon, lat)
   let e = town_bearing_geo_to_ground(
@@ -82,12 +123,6 @@ fn town_landmark_create(
     ) /
     2.0).sqrt() *
     32.0
-  // Setbacks are local design adjustments, not edits to the WGS84 evidence or
-  // the accepted OSM-to-terrain registration. Doors and clearance move with it.
-  let p : WenyuScenePoint = {
-    x: p.x - south.x * north_setback - east.x * west_setback,
-    y: p.y - south.y * north_setback - east.y * west_setback,
-  }
   let (east, south, elevation) : (WenyuScenePoint, WenyuScenePoint, Double) = if bridge {
     (
       { x: east.x * 1.14, y: east.y * 1.14, },
@@ -115,10 +150,12 @@ fn town_landmark_create(
     half_width,
     half_depth,
     door,
+    component: 0,
+    arrival: "",
     note: if bridge {
       "沿 OSM 主跨校准 · 地图展示适度放大，非测绘模型"
     } else {
-      "按街区退界微调 · 参考设计体量，非实测建筑红线"
+      "按 A21 验收总平和影像定位，楼高近似"
     },
   }
 }
@@ -131,27 +168,9 @@ fn town_landmarks_init() -> Unit {
   // WGS84 anchors, NOT raw GCJ-02 map-listing coordinates. Building centers
   // are inferred campus anchors (see integration evidence), not surveyed pins.
   town_landmark_registry.append([
+    future_center_court,
     town_landmark_create(
-      "center",
-      "未来中心",
-      116.4701,
-      40.1147,
-      134,
-      80,
-      false,
-      north_setback=40.0,
-      west_setback=20.0,
-    ),
-    town_landmark_create(
-      "vision",
-      "未来视界",
-      116.4754,
-      40.1245,
-      134,
-      80,
-      false,
-      north_setback=55.0,
-      west_setback=30.0,
+      "vision", "未来视界", 116.47495692, 40.12507434, 126, 99, false,
     ),
     town_landmark_create(
       "east-bridge", "未来科学城东路桥", 116.46990605, 40.1217185, 204, 18,
@@ -162,6 +181,12 @@ fn town_landmarks_init() -> Unit {
       true,
     ),
   ])
+  town_landmark_volumes.append(future_center_buildings)
+  for l in town_landmark_registry {
+    if l.id != "center" {
+      town_landmark_volumes.push(l)
+    }
+  }
 }
 
 ///|
@@ -187,6 +212,48 @@ extern "js" fn town_landmark_publish(
   #| }
 
 ///|
+fn town_landmark_record(l : TownLandmark, buildings : Array[Json]) -> Json {
+  let p = if buildings.is_empty() { l.origin } else { l.door }
+  let corners = [
+    town_landmark_at(l, -l.half_width, -l.half_depth),
+    town_landmark_at(l, l.half_width, -l.half_depth),
+    town_landmark_at(l, l.half_width, l.half_depth),
+    town_landmark_at(l, -l.half_width, l.half_depth),
+  ]
+  let j : Json = {
+    "id": l.id,
+    "title": l.title,
+    "x": p.x,
+    "y": p.y,
+    "east": [l.east.x, l.east.y],
+    "south": [l.south.x, l.south.y],
+    "elevation": l.elevation,
+    "halfWidth": l.half_width,
+    "halfDepth": l.half_depth,
+    "door": [l.door.x, l.door.y],
+    "footprint": if buildings.is_empty() {
+      corners.map(p => [p.x, p.y]).to_json()
+    } else {
+      Json::array([])
+    },
+    "note": l.note,
+    "component": l.component,
+    "arrivalNode": l.arrival,
+    "blocks": if buildings.is_empty() {
+      Json::array([])
+    } else {
+      future_center_review_blocks
+      .map(b => {
+        Json::object({ "id": b.0, "ring": b.1.map(p => [p.x, p.y]).to_json() })
+      })
+      .to_json()
+    },
+    "buildings": buildings,
+  }
+  j
+}
+
+///|
 fn town_landmark_prepare() -> Unit {
   town_landmarks_init()
   if town_landmark_graph.contains("active") {
@@ -203,29 +270,9 @@ fn town_landmark_prepare() -> Unit {
     }
   }
   town_landmark_graph["active"] = graph
+  let parts = future_center_buildings.map(l => town_landmark_record(l, []))
   let records = town_landmark_registry.map(l => {
-    let p = l.origin
-    let corners = [
-      town_landmark_at(l, -l.half_width, -l.half_depth),
-      town_landmark_at(l, l.half_width, -l.half_depth),
-      town_landmark_at(l, l.half_width, l.half_depth),
-      town_landmark_at(l, -l.half_width, l.half_depth),
-    ]
-    let j : Json = {
-      "id": l.id,
-      "title": l.title,
-      "x": p.x,
-      "y": p.y,
-      "east": [l.east.x, l.east.y],
-      "south": [l.south.x, l.south.y],
-      "elevation": l.elevation,
-      "halfWidth": l.half_width,
-      "halfDepth": l.half_depth,
-      "door": [l.door.x, l.door.y],
-      "footprint": corners.map(p => [p.x, p.y]).to_json(),
-      "note": l.note,
-    }
-    j
+    town_landmark_record(l, if l.id == "center" { parts } else { [] })
   })
   town_landmark_publish(
     records.to_json().stringify(),
@@ -246,16 +293,31 @@ fn town_landmark_find(id : String) -> TownLandmark? {
       return Some(l)
     }
   }
+  for l in future_center_buildings {
+    if l.id == id {
+      return Some(l)
+    }
+  }
   None
 }
 
 ///|
-fn town_landmark_route(from : String, to : String) -> Array[(Double, Double)]? {
-  guard town_landmark_graph.get("active") is Some(g) &&
-    town_landmark_find(from) is Some(a) &&
-    town_landmark_find(to) is Some(b) else {
-    return None
+fn town_landmark_arrival(
+  g : @landmark_routes.Graph,
+  l : TownLandmark,
+) -> String? {
+  if l.arrival.is_empty() {
+    @landmark_routes.nearest(g, { x: l.door.x, y: l.door.y, }, 4.0)
+  } else if g.nodes.any(n => n.id == l.arrival) {
+    Some(l.arrival)
+  } else {
+    None
   }
+}
+
+///|
+fn town_landmark_route(from : String, to : String) -> Array[(Double, Double)]? {
+  guard town_landmark_graph.get("active") is Some(g) else { return None }
   if from == to && (from == "east-bridge" || from == "arch-bridge") {
     let (s, t) = if from == "east-bridge" {
       ("3983803697", "3983803696")
@@ -266,9 +328,14 @@ fn town_landmark_route(from : String, to : String) -> Array[(Double, Double)]? {
   }
   // A disconnected graph stays disconnected. Never interpolate a town-wide
   // straight line through water or campus buildings when routing fails.
-  guard @landmark_routes.nearest(g, { x: a.door.x, y: a.door.y, }, 4.0)
-    is Some(s) &&
-    @landmark_routes.nearest(g, { x: b.door.x, y: b.door.y, }, 4.0) is Some(t) &&
+  let arrival = (id : String) => {
+    match town_district_arrivals.get(id) {
+      Some(node) => Some(node)
+      None => town_landmark_find(id).bind(l => town_landmark_arrival(g, l))
+    }
+  }
+  guard arrival(from) is Some(s) &&
+    arrival(to) is Some(t) &&
     @landmark_routes.route(g, s, t) is Some(path) else {
     return None
   }
@@ -280,7 +347,12 @@ fn town_landmark_route(from : String, to : String) -> Array[(Double, Double)]? {
 
 ///|
 fn town_landmark_route_json(from : String, to : String) -> String {
-  match town_landmark_route(from, to) {
+  town_landmark_route_result(town_landmark_route(from, to))
+}
+
+///|
+fn town_landmark_route_result(path : Array[(Double, Double)]?) -> String {
+  match path {
     Some(path) =>
       Json::object({
         "ok": true,
@@ -298,16 +370,14 @@ fn town_landmark_route_json(from : String, to : String) -> String {
 
 ///|
 fn town_landmark_walk(from : String, to : String) -> String {
-  match town_landmark_route(from, to) {
-    Some(path) => {
-      town_landmark_route_points.clear()
-      town_landmark_route_points.append(path)
-      town_landmark_motion["started"] = golden_animation_seconds()
-      town_landmark_motion["paused"] = 0.0
-      town_landmark_route_json(from, to)
-    }
-    None => town_landmark_route_json(from, to)
+  let result = town_landmark_route(from, to)
+  town_landmark_route_points.clear()
+  if result is Some(path) {
+    town_landmark_route_points.append(path)
+    town_landmark_motion["started"] = golden_animation_seconds()
+    town_landmark_motion["paused"] = 0.0
   }
+  town_landmark_route_result(result)
 }
 
 ///|
@@ -329,15 +399,11 @@ fn town_landmark_playback(action : String) -> Unit {
 }
 
 ///|
-extern "js" fn town_landmark_ready() -> Bool =
-  #| () => Boolean(globalThis.__townLandmarkPainter?.ready)
-
-///|
 fn town_landmark_reserved(x : Double, y : Double, pad : Double) -> Bool {
-  if !town_landmark_ready() {
-    return false
+  if town_district_reserved(x, y, pad) {
+    return true
   }
-  for l in town_landmark_registry {
+  for l in town_landmark_volumes {
     let dx = x - l.origin.x
     let dy = y - l.origin.y
     let det = l.east.x * l.south.y - l.east.y * l.south.x
@@ -352,6 +418,18 @@ fn town_landmark_reserved(x : Double, y : Double, pad : Double) -> Bool {
 }
 
 ///|
+extern "js" fn town_district_reserved(
+  x : Double,
+  y : Double,
+  pad : Double,
+) -> Bool =
+  #| (x,y,pad)=>globalThis.__townLandmarkPainter?.districtReserved?.(x,y,pad) ?? false
+
+///|
+extern "js" fn town_district_ready() -> Bool =
+  #| ()=>globalThis.__townLandmarkPainter?.districtReady?.() ?? false
+
+///|
 extern "js" fn town_landmark_draw(
   context : @dom.CanvasRenderingContext2D,
   depth : Int32,
@@ -360,8 +438,11 @@ extern "js" fn town_landmark_draw(
   zoom : Double,
   width : Int32,
   height : Int32,
+  seconds : Double,
+  reduced : Bool,
+  hour : Double,
 ) -> Unit =
-  #| (ctx,depth,cx,cy,z,w,h)=>globalThis.__townLandmarkPainter?.draw(ctx,depth,cx,cy,z,w,h)
+  #| (ctx,depth,cx,cy,z,w,h,sec,reduced,hour)=>globalThis.__townLandmarkPainter?.draw(ctx,depth,cx,cy,z,w,h,sec,reduced,hour)
 
 ///|
 extern "js" fn town_landmark_draw_route(

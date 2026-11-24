@@ -1,6 +1,8 @@
+import {compactGraphics, resizeScene, shadowSize} from './scene-resolution.js';
 import * as THREE from 'three';
 import {OrbitControls} from './vendor/OrbitControls.js';
 import {RoomEnvironment} from './vendor/RoomEnvironment.js';
+import {modelRoads,streetLife,runStreet,fixtureLights} from './scene-life.js';
 import {buildStudy, createMaterials} from './scene-adapter.js';
 import {buildFlows} from './datacenter-flows.js';
 import {viewerIcon} from './viewer-ui.js';
@@ -31,7 +33,7 @@ class TownSpace {
   constructor(host, payload, deliver) {
     this.host = host; this.payload = payload; this.deliver = deliver;
     this.key = payload.context.key; this.kind = payload.kind; this.events = new AbortController();
-    this.state = memories.get(this.key) || {view:this.kind === 'compute' ? 'hall' : this.kind === 'g3' ? 'g3' : 'room', rack:'', slot:'', cameras:{}, orbit:false};
+    this.state = memories.get(this.key) || {view:this.kind === 'compute' ? 'hall' : this.kind === 'g3' ? 'g3' : 'room', rack:'', slot:'', cameras:{}, orbit:true};
     this.reduced = matchMedia('(prefers-reduced-motion: reduce)');
     this.labels = new Map(); this.textures = []; this.actorMaterials = [];
     this.family = 'none'; this.playing = false; this.raf = 0; this.dirty = 0;
@@ -112,9 +114,9 @@ class TownSpace {
   }
   async start() {
     await import('./models.js'); if (this.disposed) return;
-    this.renderer = new THREE.WebGLRenderer({canvas:this.canvas, antialias:true});
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
-    this.renderer.shadowMap.enabled = true; this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer = new THREE.WebGLRenderer({canvas:this.canvas, antialias:!compactGraphics});
+
+    this.renderer.shadowMap.enabled = true; this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; this.renderer.shadowMap.autoUpdate=!compactGraphics;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping; this.renderer.toneMappingExposure = 1.02;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.scene = new THREE.Scene(); this.scene.background = new THREE.Color('#e2e8dd');
@@ -123,7 +125,7 @@ class TownSpace {
     this.environment = pmrem.fromScene(room, .04); this.scene.environment = this.environment.texture;
     this.scene.environmentIntensity = .38; pmrem.dispose(); room.dispose();
     this.scene.add(new THREE.HemisphereLight('#e7f2fc', '#adac8e', 2));
-    this.sun = new THREE.DirectionalLight('#fff0d5', 3); this.sun.castShadow = true; this.sun.shadow.mapSize.set(1024,1024);
+    this.sun = new THREE.DirectionalLight('#fff0d5', 3); this.sun.castShadow = true; this.sun.shadow.mapSize.set(shadowSize(1024),shadowSize(1024));
     this.scene.add(this.sun, this.sun.target);
     const fill = new THREE.DirectionalLight('#d9eaf4', 1.1); fill.position.set(1,1,-1); this.scene.add(fill);
     this.camera = new THREE.OrthographicCamera(-20,20,20,-20,.001,10000);
@@ -164,7 +166,10 @@ class TownSpace {
     this.current = this.dataFor(id); if (!this.current) throw new Error('空间模型未构建');
     this.state.view = this.kind === 'g3' ? 'g3' : this.current.study.id;
     this.host.dataset.view = this.state.view;
-    this.model = buildStudy(this.current.study, this.materials); this.scene.add(this.model.root);
+    this.model = buildStudy(this.current.study, this.materials); this.scene.add(this.model.root);fixtureLights(this.current.study,this.model);
+    const roads=modelRoads(this.current.study);
+    if(roads.length){const life=streetLife(roads);this.model.context.add(life.root);
+      this.streetClock=runStreet(life,this.renderer.domElement,()=>{if(!this.raf&&!this.disposed)this.raf=requestAnimationFrame(t=>this.render(t))});}
     this.flows = buildFlows(this.current.flows, this.current.study.span); this.scene.add(this.flows.root);
     this.geometryKey = JSON.stringify([this.payload.title, this.payload.slots?.map(({actors,...slot}) => slot)]);
     this.entity = null; this.clearHighlight(); this.buildObjects(); this.buildBreadcrumb(); this.addActors();
@@ -302,7 +307,11 @@ class TownSpace {
     this.camera.zoom = this.kind === 'g3' ? 2.5 : 1.8; this.camera.updateProjectionMatrix(); this.controls.update(); this.invalidate();
   }
   syncOrbit() {
-    if (this.controls) this.controls.enableRotate = this.state.orbit;
+    if (this.controls) {
+      this.controls.enableRotate=this.state.orbit;
+      this.controls.mouseButtons.LEFT=this.state.orbit?THREE.MOUSE.ROTATE:THREE.MOUSE.PAN;
+      this.controls.touches.ONE=this.state.orbit?THREE.TOUCH.ROTATE:THREE.TOUCH.PAN;
+    }
     this.orbit.setAttribute('aria-pressed', String(this.state.orbit));
     this.orbit.title = this.state.orbit ? '关闭自由环视' : '开启自由环视';
   }
@@ -320,9 +329,10 @@ class TownSpace {
     const span = this.current.study.span * (this.kind === 'g3' ? .36 : this.state.view === 'room' ? .4 : .56);
     const vertical = span * Math.max(1,1.3/aspect);
     Object.assign(this.camera, {left:-vertical*aspect,right:vertical*aspect,top:vertical,bottom:-vertical});
-    this.camera.updateProjectionMatrix(); this.renderer.setSize(w,h,false); this.invalidate();
+    this.camera.updateProjectionMatrix(); resizeScene(this.renderer,w,h,1.5); this.invalidate();
   }
   applyLayers() {
+    if(this.renderer) this.renderer.shadowMap.needsUpdate=true;
     if (!this.model) return;
     for (const id of ['shell','walls','lid']) {
       const layer = this.model.layers.get(id); if (!layer) continue;
@@ -432,7 +442,7 @@ class TownSpace {
     this.host.dataset.drawCalls = this.renderer.info.render.calls;
     this.host.dataset.parts = this.current.study.parts.length;
     this.host.dataset.camera = this.camera.position.toArray().map(n => n.toFixed(3)).join(',');
-    if (--this.dirty > 0 || this.playing && this.family !== 'none' && !this.reduced.matches) this.raf = requestAnimationFrame(t => this.render(t));
+    if ((--this.dirty > 0 || this.playing && this.family !== 'none' && !this.reduced.matches) && !this.raf) this.raf = requestAnimationFrame(t => this.render(t));
   }
   reportContext() {
     const runtimeSelection = this.payload.nodes?.find(item => item.id === this.payload.selected);
@@ -454,6 +464,7 @@ class TownSpace {
     this.objectList.open = true;
   }
   clearModel() {
+    this.streetClock?.dispose();this.streetClock=null;
     this.clearHighlight(); this.clearActors(); this.actorKey = null;
     if (this.model) { this.scene.remove(this.model.root); this.model.dispose(); }
     if (this.flows) { this.scene.remove(this.flows.root); this.flows.dispose(); }

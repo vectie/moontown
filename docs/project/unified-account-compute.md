@@ -7,8 +7,10 @@ host. MoonGate remains the execution boundary, not an identity provider.
 ## Current product decision — public town, four-node admin, owned compute
 
 The user clarified the product on 2026-10-23 and explicitly selected **8443**.
-Do not investigate or migrate 443 as part of this work. The intended entry is
-`https://suanli.kechuangfuwu.com:8443/moontown/`.
+Do not investigate or migrate 443 as part of this work. The public entry is
+`https://suanli.kechuangfuwu.com:8443/town/`. Older public links are redirected
+with their path and query intact. Private execution retains its credential-bound
+`/moontown/workspace/` path.
 
 | Viewer | Compute source | Presentation |
 | --- | --- | --- |

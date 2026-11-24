@@ -1,0 +1,642 @@
+///|
+import {
+  "moonbitlang/x@0.4.50/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/base64",
+}
+
+///|
+struct P {
+  x : Double
+  y : Double
+} derive(FromJson)
+
+///|
+struct Geo {
+  lon : Double
+  lat : Double
+} derive(FromJson)
+
+///|
+struct Way {
+  osmWayId : Double
+  sourceNodes : Array[Double]?
+  tags : Map[String, String]
+  nodes : Array[Double]
+  geometryWgs84 : Array[Geo]
+  ground : Array[P]
+} derive(FromJson)
+
+///|
+struct Roads {
+  ways : Array[Way]
+} derive(FromJson)
+
+///|
+struct Bld {
+  id : String
+  form : String
+  points : Array[Array[Double]]
+  height : Double?
+  court : Array[Array[Double]]?
+  footprintReview : String?
+} derive(FromJson)
+
+///|
+struct Block {
+  key : String
+  block : String
+  controlNodes : Array[String]?
+  bbox : Array[Double]
+  ring : Array[Array[Double]]
+  buildings : Array[Bld]
+} derive(FromJson)
+
+///|
+struct ProjectRef {
+  id : String
+  refs : Array[String]
+  host : String?
+  reuse : String?
+} derive(FromJson)
+
+///|
+struct CatalogRef {
+  projects : Array[ProjectRef]
+  sources : Map[String, String]
+} derive(FromJson)
+
+///|
+struct Source {
+  catalog : Json
+  blocks : Array[Block]
+} derive(FromJson)
+
+///|
+struct Labels {
+  rows : Array[String]
+} derive(FromJson)
+
+///|
+struct Control {
+  geo : P
+  grid : P
+}
+
+///|
+struct Segment {
+  a : P
+  b : P
+}
+
+///|
+fn read(path : String) -> Json raise {
+  @json.parse(@fs.read_file_to_string(path))
+}
+
+///|
+fn cross(a : P, b : P, p : P) -> Double {
+  (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x)
+}
+
+///|
+fn dist(a : P, b : P) -> Double {
+  (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)
+}
+
+///|
+fn inside(p : P, ring : Array[P]) -> Bool {
+  let mut ok = false
+  for i, a in ring {
+    let b = ring[(i + 1) % ring.length()]
+    if (a.y > p.y) != (b.y > p.y) &&
+      p.x < (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x {
+      ok = !ok
+    }
+  }
+  ok
+}
+
+///|
+fn crosses(a : P, b : P, c : P, d : P) -> Bool {
+  let k = cross(a, b, c) * cross(a, b, d)
+  let t = cross(c, d, a) * cross(c, d, b)
+  a.x.min(b.x) <= c.x.max(d.x) &&
+  a.x.max(b.x) >= c.x.min(d.x) &&
+  a.y.min(b.y) <= c.y.max(d.y) &&
+  a.y.max(b.y) >= c.y.min(d.y) &&
+  k <= 0 &&
+  t <= 0
+}
+
+///|
+fn intersects(s : Segment, ring : Array[P]) -> Bool {
+  for i, p in ring {
+    if crosses(s.a, s.b, p, ring[(i + 1) % ring.length()]) {
+      return true
+    }
+  }
+  inside(s.a, ring) || inside(s.b, ring)
+}
+
+///|
+fn ring_hits(a : Array[P], b : Array[P]) -> Bool {
+  for i, p in a {
+    if intersects({ a: p, b: a[(i + 1) % a.length()], }, b) {
+      return true
+    }
+  }
+  false
+}
+
+///|
+fn contained(r : Array[P], bounds : Array[P]) -> Bool {
+  for i, p in bounds {
+    if intersects({ a: p, b: bounds[(i + 1) % bounds.length()], }, r) {
+      return false
+    }
+  }
+  r.all(q => inside(q, bounds))
+}
+
+///|
+fn affine(a : Control, b : Control, c : Control, p : P) -> P {
+  let den = cross(a.geo, b.geo, c.geo)
+  let u = cross(a.geo, p, c.geo) / den
+  let v = cross(a.geo, b.geo, p) / den
+  {
+    x: a.grid.x + u * (b.grid.x - a.grid.x) + v * (c.grid.x - a.grid.x),
+    y: a.grid.y + u * (b.grid.y - a.grid.y) + v * (c.grid.y - a.grid.y),
+  }
+}
+
+///|
+fn wet(r : Array[P], labels : Labels) -> Bool {
+  let mut xl = 256.0
+  let mut xh = 0.0
+  let mut yl = 144.0
+  let mut yh = 0.0
+  for p in r {
+    xl = xl.min(p.x)
+    xh = xh.max(p.x)
+    yl = yl.min(p.y)
+    yh = yh.max(p.y)
+  }
+  if xl < 0 || yl < 0 || xh >= 256 || yh >= 144 {
+    return true
+  }
+  for y in yl.floor().to_int()..<=yh.floor().to_int() {
+    for x in xl.floor().to_int()..<=xh.floor().to_int() {
+      if labels.rows[y].get_char(x) is Some('r' | 'l' | 'b') {
+        let u = x.to_double()
+        let v = y.to_double()
+        let square : Array[P] = [
+          { x: u, y: v, },
+          { x: u + 1, y: v, },
+          { x: u + 1, y: v + 1, },
+          { x: u, y: v + 1, },
+        ]
+        if r.any(p => inside(p, square)) {
+          return true
+        }
+        for i, p in square {
+          if intersects({ a: p, b: square[(i + 1) % 4], }, r) {
+            return true
+          }
+        }
+      }
+    }
+  }
+  false
+}
+
+///|
+fn rounded(x : Double, n : Double) -> Double {
+  (x * n).round() / n
+}
+
+///|
+// The author and placement audits retain full precision; the orbit viewer only
+// needs tenths of a review pixel (or tenths of a metre for unregistered plans).
+fn render_ring(r : Array[Array[Double]]) -> String raise {
+  let bytes : Array[Byte] = []
+  for p in r {
+    for coord in p {
+      let n = (coord * 10).round().to_int()
+      guard n >= -32768 && n <= 32767 else {
+        fail("Study coordinates exceed local metre / pixel envelope")
+      }
+      bytes.push((n & 255).to_byte())
+      bytes.push(((n >> 8) & 255).to_byte())
+    }
+  }
+  @base64.encode(Bytes::from_array(bytes))
+}
+
+///|
+struct RegionalBuildingEvidence {
+  id : String
+  facadeClass : String
+  identity : Map[String, String]?
+  position : Json
+} derive(FromJson)
+
+///|
+struct RegionalEvidence {
+  units : Array[RegionalBuildingEvidence]
+} derive(FromJson)
+
+///|
+struct RegionShapeRevision {
+  id : String
+} derive(FromJson)
+
+///|
+struct RegionShapeRevisions {
+  matches : Array[RegionShapeRevision]
+} derive(FromJson)
+
+///|
+fn write_region_evidence(path : String) -> Unit raise {
+  let evidence : RegionalEvidence = @json.from_json(
+    read("docs/project/science-city-building-evidence.json"),
+  )
+  let changes : RegionShapeRevisions = @json.from_json(
+    read("docs/project/science-city-footprint-revisions.json"),
+  )
+  let info : Map[String, Json] = Map([])
+  for u in evidence.units {
+    let name = match u.identity {
+      Some(v) => v.get("publishedBuilding").unwrap_or("")
+      None => ""
+    }
+    let position = if changes.matches.any(r => r.id == u.id) {
+      "revised"
+    } else if u.id == "cloud-1089060429-1" {
+      "court"
+    } else {
+      match u.position {
+        Object(o) =>
+          match o.get("overlapClass") {
+            Some(String(v)) => v
+            _ => "local"
+          }
+        _ => "local"
+      }
+    }
+    info[u.id] = [Json(name), Json(position), Json(u.facadeClass)]
+  }
+  @fs.write_string_to_file(
+    path + "region-building-info.json",
+    Json(info).stringify(),
+  )
+}
+
+///|
+fn main raise {
+  let source : Source = @json.from_json(
+    read("docs/project/science-city-sites.json"),
+  )
+  let roads : Roads = @json.from_json(
+    read("output/wenyu-road-town/roads.json"),
+  )
+  let labels : Labels = @json.from_json(
+    read("src/ui/assets/tilemap/wenyu_reference_labels.json"),
+  )
+  let controls : Array[Control] = []
+  let requested_controls : Map[String, Control?] = Map([])
+  for block in source.blocks {
+    for node in block.controlNodes.unwrap_or([]) {
+      requested_controls[node] = None
+    }
+  }
+  let segments : Array[Segment] = []
+  let public_nodes : Map[String, P] = Map([])
+  for way in roads.ways {
+    let ps = way.ground
+    let tie=way.tags.contains("moontown:link")
+    let public_street = !tie && way.geometryWgs84.all(g => {
+        g.lon > 116.457 && g.lon < 116.483 && g.lat > 40.108 && g.lat < 40.135
+      }) &&
+      (
+        (
+          way.tags.get("highway")
+          is Some("residential" | "tertiary" | "secondary" | "unclassified") &&
+          way.tags.contains("name")
+        ) ||
+        way.tags.get("footway") == Some("sidewalk")
+      ) &&
+      !(way.tags.get("access") is Some("no" | "private")) &&
+      !(way.tags.get("foot") is Some("no" | "private")) &&
+      way.tags.get("tunnel") != Some("yes") &&
+      way.tags.get("bridge") != Some("yes")
+    for i, n in way.nodes {
+      if public_street {
+        public_nodes[n.to_string()] = ps[i]
+      }
+      let g = way.geometryWgs84[i]
+      if !tie && requested_controls.contains(n.to_string()) {
+        requested_controls[n.to_string()] = Some({ geo: { x: g.lon, y: g.lat }, grid: ps[i] })
+      }
+      if way.sourceNodes is Some(original) {
+        let key = way.osmWayId.to_string() + "/" + original[i].to_string()
+        if requested_controls.contains(key) {
+          requested_controls[key] = Some({ geo: { x: g.lon, y: g.lat }, grid: ps[i] })
+        }
+      }
+      if !tie && g.lon >= 116.425 && g.lon <= 116.495 &&
+        g.lat >= 40.085 && g.lat <= 40.155 &&
+        way.tags.get("highway")
+        is Some(
+          "residential"
+          | "secondary"
+          | "tertiary"
+          | "primary"
+          | "unclassified"
+        ) {
+        controls.push({ geo: { x: g.lon, y: g.lat, }, grid: ps[i], })
+      }
+      if i > 0 &&
+        way.tags.get("highway") is Some(_) &&
+        way.tags.get("tunnel") != Some("yes") {
+        segments.push({ a: ps[i - 1], b: ps[i], })
+      }
+    }
+  }
+  let map : Array[Json] = []
+  let blocks : Array[Json] = []
+  let audit : Array[Json] = []
+  let existing_sites : Array[Array[Array[Double]]] = @json.from_json(
+    read("docs/project/wenyu-protected-footprints.json"),
+  )
+  let occupied : Array[Array[P]] = existing_sites.map(r => {
+    r.map(q => ({ x: q[0], y: q[1], } : P))
+  })
+  let placed : Array[Json] = []
+  let reviews : Array[Json] = []
+  let ids : Map[String, Bool] = Map([])
+  let candidates : Map[String, Map[String, Double]] = Map([])
+  let directory : CatalogRef = @json.from_json(source.catalog)
+  let projects : Map[String, ProjectRef] = Map([])
+  for item in directory.projects {
+    guard item.id != "center" &&
+      !projects.contains(item.id) &&
+      !item.refs.is_empty() &&
+      item.refs.all(k => directory.sources.contains(k)) else {
+      fail("Invalid project or missing source: " + item.id)
+    }
+    projects[item.id] = item
+  }
+  for item in directory.projects {
+    if item.host is Some(k) && !projects.contains(k) {
+      fail("Unknown host: " + k)
+    }
+  }
+  let local_plans : Map[String, Array[Array[P]]] = Map([])
+  for block in source.blocks {
+    guard projects.get(block.key) is Some(item) &&
+      item.host is None &&
+      item.reuse is None &&
+      (block.bbox.is_empty() || block.bbox.length() == 4) &&
+      block.ring.length() >= 3 else {
+      fail("Invalid site or duplicate host: " + block.key)
+    }
+    let bb = block.bbox
+    let ring = block.ring.map(a => ({ x: a[0], y: a[1], } : P))
+    if bb.is_empty() {
+      let siblings = local_plans.get_or_init(block.key, () => [])
+      guard !siblings.any(other => {
+        inside(ring[0], other) ||
+        inside(other[0], ring) ||
+        ring_hits(ring, other)
+      }) else {
+        fail("Overlapping scheme parcels at " + block.key + "/" + block.block)
+      }
+      siblings.push(ring)
+    }
+    let geo = (p : P) => {
+      (
+        {
+          x: bb[0] + p.x * (bb[2] - bb[0]) / 330,
+          y: bb[3] - p.y * (bb[3] - bb[1]) / 330,
+        } : P)
+    }
+    let studied : Array[Json] = []
+    let courts : Map[String, String] = Map([])
+    let before = map.length()
+    let base = if bb.length() == 4 {
+      [
+        bb[0],
+        bb[3],
+        (bb[2] - bb[0]) * 85130 / 330,
+        (bb[3] - bb[1]) * 111045 / 330,
+      ]
+    } else {
+      [0.0, 0, 1, 1]
+    }
+    let near = if bb.length() == 4 {
+      controls.filter(t => {
+        t.geo.x >= bb[0] - 0.0015 &&
+        t.geo.x <= bb[2] + 0.0015 &&
+        t.geo.y >= bb[1] - 0.0015 &&
+        t.geo.y <= bb[3] + 0.0015
+      })
+    } else {
+      []
+    }
+    let corners : Array[Control] = []
+    if block.controlNodes is Some(nodes) {
+      guard bb.length() == 4 && nodes.length() >= 4 else { fail("Invalid control set for " + block.key) }
+      for node in nodes {
+        guard requested_controls.get(node) is Some(Some(control)) else { fail("Missing control node " + node) }
+        corners.push(control)
+      }
+    } else if near.length() >= 4 {
+      for
+        q in [
+          { x: bb[0], y: bb[3], },
+          { x: bb[2], y: bb[3], },
+          { x: bb[0], y: bb[1], },
+          { x: bb[2], y: bb[1], },
+        ] {
+        let mut best = near[0]
+        for c in near {
+          if dist(c.geo, q) < dist(best.geo, q) {
+            best = c
+          }
+        }
+        corners.push(best)
+      }
+    }
+    let calibrated = corners.length() >= 4 &&
+      corners[:3].all(c => dist(c.geo, corners[3].geo) > 0.00000000001) &&
+      cross(corners[0].geo, corners[1].geo, corners[2].geo).abs() >
+      (bb[2] - bb[0]) * (bb[3] - bb[1]) * 0.35 &&
+      corners[3:].all(c => dist(affine(corners[0], corners[1], corners[2], c.geo), c.grid) < 0.35 * 0.35)
+    for b in block.buildings {
+      guard !ids.contains(b.id) else { fail("Duplicate building " + b.id) }
+      ids[b.id] = true
+      guard ["homes", "office", "tower", "hall", "factory"].contains(b.form) &&
+        b.points.length() >= 3 else {
+        fail("Invalid model " + b.id)
+      }
+      if bb.length() == 4 &&
+        b.points.any(p => {
+          p.length() != 2 || p[0] < 0 || p[0] > 330 || p[1] < 0 || p[1] > 330
+        }) {
+        fail("Use the individual 330px review window for " + b.id)
+      }
+      let r = b.points.map(a => ({ x: a[0], y: a[1], } : P))
+      match b.footprintReview {
+        Some("open-ground") => {
+          audit.push({ "id": b.id, "site": block.key, "reason": "open-ground" })
+          continue
+        }
+        None | Some("partial-building") => ()
+        Some(other) => fail("Unknown footprint review " + other + " on " + b.id)
+      }
+      // Reject, never crop or move a model to make an incorrect boundary pass.
+      if !contained(r, ring) {
+        audit.push({
+          "id": b.id,
+          "site": block.key,
+          "reason": "outside-review-enclosure",
+        })
+        continue
+      }
+      let height = b.height.unwrap_or(
+        match b.form {
+          "homes" => 22.0
+          "office" => 31.0
+          "tower" => 40.0
+          "factory" => 19.0
+          _ => 10.0
+        },
+      )
+      let shape = render_ring(b.points)
+      let court = b.court.unwrap_or([])
+      if !court.is_empty() {
+        let inner = court.map(p => ({ x: p[0], y: p[1], } : P))
+        guard inner.length() >= 3 && contained(inner, r) else {
+          fail("Invalid courtyard " + b.id)
+        }
+        courts[b.id] = render_ring(court)
+      }
+      studied.push([Json(b.form), Json(height), Json(shape), Json(b.id)])
+      if b.footprintReview == Some("partial-building") {
+        audit.push({
+          "id": b.id,
+          "site": block.key,
+          "reason": "partial-building",
+        })
+        continue
+      }
+      if !calibrated {
+        continue
+      }
+      let grid = r.map(p => affine(corners[0], corners[1], corners[2], geo(p)))
+      if wet(grid, labels) || segments.any(s => intersects(s, grid)) {
+        audit.push({ "id": b.id, "site": block.key, "reason": "ground-or-road" })
+        continue
+      }
+      if occupied.any(other => {
+          inside(grid[0], other) ||
+          inside(other[0], grid) ||
+          ring_hits(grid, other)
+        }) {
+        audit.push({
+          "id": b.id,
+          "site": block.key,
+          "reason": "overlaps-registered-building",
+        })
+        continue
+      }
+      occupied.push(grid)
+      placed.push({ "id": b.id, "site": block.key, "block": block.block })
+      map.push([
+        Json(block.key),
+        Json(b.form),
+        Json(height),
+        Json(grid.map(p => [rounded(p.x, 10000), rounded(p.y, 10000)])),
+        {
+          "id": b.id,
+          "ring": shape,
+          "scale": [base[2], base[3]],
+          "court": court.map(p => {
+            let q = affine(
+              corners[0],
+              corners[1],
+              corners[2],
+              geo({ x: p[0], y: p[1], }),
+            )
+            [rounded(q.x, 10000), rounded(q.y, 10000)]
+          }),
+        },
+      ])
+    }
+    reviews.push({
+      "site": block.key,
+      "block": block.block,
+      "study": studied.length(),
+      "map": map.length() - before,
+      "controls": if calibrated {
+        corners.map(c => [c.geo.x, c.geo.y, c.grid.x, c.grid.y])
+      } else {
+        []
+      },
+    })
+    blocks.push({
+      "key": block.key,
+      "block": block.block,
+      "base": base,
+      "ring": render_ring(block.ring),
+      "units": studied,
+      "courts": courts,
+    })
+    if map.length() > before {
+      let fence = ring.map(p => {
+        affine(corners[0], corners[1], corners[2], geo(p))
+      })
+      for node, p in public_nodes {
+        let mut closest = 100.0
+        for i, a in fence {
+          let b = fence[(i + 1) % fence.length()]
+          let dx = b.x - a.x
+          let dy = b.y - a.y
+          let k = (((p.x - a.x) * dx + (p.y - a.y) * dy) /
+            (dx * dx + dy * dy).max(0.000001))
+            .max(0)
+            .min(1)
+          closest = closest.min(dist(p, { x: a.x + k * dx, y: a.y + k * dy, }))
+        }
+        if !inside(p, fence) && closest <= 0.75 * 0.75 {
+          let options = candidates.get_or_init(block.key, () => Map([]))
+          options[node] = options.get(node).unwrap_or(1).min(closest)
+        }
+      }
+    }
+  }
+  let path = "src/ui/landmark-studio/web/"
+  write_region_evidence(path)
+  @fs.write_string_to_file(
+    path + "district-studies.json",
+    Json::object({
+      "encoding": "xy-i16le-decimetre-v1",
+      "catalog": source.catalog,
+      "blocks": Json(blocks),
+    }).stringify(),
+  )
+  @fs.write_string_to_file(path + "district-ground.json", Json(map).stringify())
+  @fs.write_string_to_file(
+    "docs/project/science-city-placement-audit.json",
+    Json::object({
+      "held": Json(audit),
+      "placed": Json(placed),
+      "streetCandidates": Json(candidates),
+      "blocks": Json(reviews),
+    }).stringify(),
+  )
+  println(
+    "Map: \{map.length()}, source volumes: \{ids.length()}, withheld entries: \{audit.length()}",
+  )
+}

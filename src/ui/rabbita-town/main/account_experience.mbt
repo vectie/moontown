@@ -336,7 +336,11 @@ fn account_navigation_items(
           href: "./operations.html?admin=audit",
           primary: false,
         },
-        { label: "View town", href: "./index.html?view=town", primary: false, },
+        {
+          label: "View town",
+          href: "./index.html?view=overview",
+          primary: false,
+        },
       ]
   }
 }
@@ -472,7 +476,9 @@ fn account_primary_item_active(
     !current_browser_query_param("panel").is_empty() ||
     (
       kind == AdminExperience &&
-      !["town", "living-room"].contains(current_browser_query_param("view"))
+      !["town", "living-room", "overview", "region"].contains(
+        current_browser_query_param("view"),
+      )
     ) {
     return false
   }
@@ -762,7 +768,9 @@ fn render_account_surface_for_route(
     route,
     model,
     account,
-    ["town", "living-room"].contains(current_browser_query_param("view")),
+    ["town", "living-room", "overview", "region"].contains(
+      current_browser_query_param("view"),
+    ),
   )
   let management_surface = requested_account_management_surface(
     route,

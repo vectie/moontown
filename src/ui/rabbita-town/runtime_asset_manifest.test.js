@@ -16,7 +16,9 @@ test('runtime asset manifest covers modules, residents, and operating art', asyn
   const pathSet = new Set(paths)
   assert.ok(pathSet.has('moonsuite-i18n.js'))
   assert.ok(pathSet.has('landmark-studio/town-projections/manifest.json'))
-  for (const id of ['center','vision','east-bridge','arch-bridge','east-bridge-front','arch-bridge-front']) {
+  assert.equal(pathSet.has('landmark-studio/town-projections/center.png'), false)
+  const offices = Array.from({length: 7}, (_, i) => 'center-' + (i + 1))
+  for (const id of [...offices, 'vision', 'east-bridge', 'arch-bridge', 'east-bridge-front', 'arch-bridge-front']) {
     assert.ok(pathSet.has(`landmark-studio/town-projections/${id}.png`))
   }
   const moduleConfig = JSON.parse(

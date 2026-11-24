@@ -1,0 +1,43 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, release, kind] && ["server","ui"].contains(kind) else { fail("rollout-wlxk-repair.mbtx RELEASE_DIR server|ui") }
+  let kubectl = ["--kubeconfig","/home/HwHiAiUser/.kube/lunanexa-management","-n","aigc-acceptance-20260915"]
+  let image_record = @json.parse(@fs.read_file(release+"/"+kind+"-image.json").text())
+  guard image_record is {"base":String(base),"image":String(image),..} else { fail("Missing release digest") }
+  let prefix = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/"
+  if kind == "server" {
+    let template = @fs.read_file(release+"/wlxk-realtime.yaml").text()
+    guard template.split("WLXK_SERVER_IMAGE").to_array().length() == 2 else { fail("Expected one image placeholder") }
+    let yaml = template.replace(old="WLXK_SERVER_IMAGE",new=prefix+"moon/moontown-account-gateway@"+image)
+    let path = release+"/realtime-applied.yaml"
+    @fs.write_file(path,yaml)
+    @shell.Cmd("kubectl",[..kubectl,"apply","--dry-run=server","-f",path]).run()
+    @shell.Cmd("kubectl",[..kubectl,"apply","-f",path]).run()
+    @shell.Cmd("kubectl",[..kubectl,"rollout","status","deployment/wlxk-realtime","--timeout=180s"]).run()
+  } else {
+    let previous = @shell.Cmd("kubectl",[..kubectl,"get","deployment","moontown-platform","-o","json"]).output()
+    previous.check()
+    let deployment = @json.parse(previous.stdout())
+    guard deployment is {"metadata":{"resourceVersion":String(version),..},"spec":{"template":{"spec":{"initContainers":[{"name":"public-assets","image":String(old),..}],"containers":[{"name":"platform","image":String(runtime),..}],..},..},..},..} else { fail("Unexpected deployment layout") }
+    guard old == prefix+"moon/hosted-apps@"+base else { fail("Public image changed. Rebase delta on the current release.") }
+    @fs.write_file(release+"/before-platform.json",previous.stdout(),create_mode=CreateNew,permission=0o600)
+    let patch : Json = [
+      {"op":"test","path":"/metadata/resourceVersion","value":version},
+      {"op":"test","path":"/spec/template/spec/initContainers/0/image","value":old},
+      {"op":"test","path":"/spec/template/spec/containers/0/image","value":runtime},
+      {"op":"replace","path":"/spec/template/spec/initContainers/0/image","value":prefix+"moon/hosted-apps@"+image},
+    ]
+    @fs.write_file(release+"/platform-patch.json",patch.stringify())
+    @shell.Cmd("kubectl",[..kubectl,"patch","deployment","moontown-platform","--type=json","--patch-file",release+"/platform-patch.json"]).run()
+    @shell.Cmd("kubectl",[..kubectl,"rollout","status","deployment/moontown-platform","--timeout=180s"]).run()
+  }
+}

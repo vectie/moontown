@@ -3,7 +3,8 @@ test "living room is the arrival while explicit overview and calibration stay in
   assert_true(street_living_room_requested("", false))
   assert_true(street_living_room_requested("living-room", false))
   assert_false(street_living_room_requested("town", false))
-  assert_false(street_living_room_requested("overview", false))
+  assert_true(street_living_room_requested("overview", false))
+  assert_true(street_living_room_requested("region", false))
   assert_false(street_living_room_requested("", true))
   assert_true(
     town_spatial_layer_for_route("indoor", "future-center-g3")
@@ -180,6 +181,7 @@ test "map utilities have accessible icon names and closed advanced diagnostics" 
   let overview = disclosure_test_html(render_street_tools(dispatch, true, true))
   assert_true(overview.contains("aria-label=\"返回街区\""))
   assert_true(overview.contains("aria-pressed=\"true\""))
+  assert_true(overview.contains("href=\"?view=overview&amp;projects=1\""))
   assert_true(overview.contains("class=\"street-controls-panel\""))
   assert_true(overview.contains("class=\"frontier-diagnostics\""))
   assert_false(overview.contains(" open"))

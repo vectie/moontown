@@ -39,7 +39,8 @@ extern "js" fn replace_browser_query_param(
   #|     const url = new URL(globalThis.location.href);
   #|     if (value) url.searchParams.set(name, value);
   #|     else url.searchParams.delete(name);
-  #|     globalThis.history.replaceState(null, "", url);
+  #|     if (globalThis.__townDisplay?.writeRoute) globalThis.__townDisplay.writeRoute(url);
+  #|     else globalThis.history.replaceState(globalThis.history.state, "", url);
   #|   } catch (_) {}
   #| }
 

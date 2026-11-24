@@ -1,0 +1,113 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/shell",
+}
+
+///|
+async fn main {
+  let script =
+    #|const assert = require('node:assert/strict');
+    #|const fs = require('node:fs');
+    #|const os = require('node:os');
+    #|const http = require('node:http');
+    #|const {spawn,execFileSync} = require('node:child_process');
+    #|const {chromium} = require(process.env.PLAYWRIGHT_MODULE || '/Users/kq/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+    #|const base = process.env.WLXK_TEST_URL || 'http://127.0.0.1:17888';
+    #|const local = !process.env.WLXK_TEST_URL;
+    #|const dataDir = local ? fs.mkdtempSync(os.tmpdir()+'/wlxk-test-') : null;
+    #|let processHandle, browser, identity, accountActive=true;
+    #|const result = {};
+    #|const sleep = ms=>new Promise(r=>setTimeout(r,ms));
+    #|async function boot(){
+    #|  processHandle=spawn(process.cwd()+'/src/wlxk_server/_build/native/release/build/main/main.exe',[],{env:{...process.env,WLXK_STATE_DIR:dataDir,WLXK_BIND:'127.0.0.1:17888',WLXK_ORIGIN:base,WLXK_IDENTITY_URL:'http://127.0.0.1:17889/self'},stdio:['ignore','pipe','pipe']});
+    #|  processHandle.stderr.on('data', d=>process.stderr.write(d));
+    #|  for(let i=0;i<80;i++){try{if((await fetch(base+'/wlxk/api/health')).ok)return;}catch{}await sleep(100)}
+    #|  throw new Error('server startup failed');
+    #|}
+    #|async function stop(){if(processHandle){const p=processHandle; processHandle=null; if(p.exitCode!==null)return; p.kill('SIGTERM'); await new Promise(r=>p.once('exit',r));}}
+    #|async function tab(cookie){
+    #|  const context = await browser.newContext({ignoreHTTPSErrors:true});
+    #|  if(cookie) await context.addCookies([{name:'lunanexa_http_enterprise_oidc',value:cookie,url:base}]);
+    #|  const page=await context.newPage();
+    #|  page.on('console',m=>{if(m.type()==='error')console.error('browser:',m.text())});
+    #|  page.on('websocket',ws=>ws.on('socketerror',e=>console.error('websocket:',e)));
+    #|  await page.goto(base+'/wlxk/api/health');
+    #|  return page;
+    #|}
+    #|async function api(page,path,body){return page.evaluate(async ({path,body})=>{
+    #|  const r=await fetch('/wlxk/api/'+path,{method:body?'POST':'GET',headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined});
+    #|  return {code:r.status,...await r.json()};
+    #|},{path,body});}
+    #|async function socket(page,id){
+    #|  await page.evaluate(id=>{
+    #|    window.messages=[];window.ws=new WebSocket(location.origin.replace('http','ws')+'/wlxk/ws?session='+id);
+    #|    ws.onmessage=e=>messages.push(JSON.parse(e.data));
+    #|  },id);
+    #|  await page.waitForFunction(()=>messages.some(m=>m.t==='init'));
+    #|}
+    #|async function main(){
+    #|  if(local){
+    #|    identity=http.createServer((req,res)=>{
+    #|      if(req.headers.cookie?.includes('=FAIL')){res.writeHead(503);res.end('{}');return;}
+    #|      const match=req.headers.cookie?.match(/lunanexa_http_enterprise_oidc=([AB])/);
+    #|      res.setHeader('Content-Type','application/json');
+    #|      res.end(JSON.stringify(match && accountActive?{state:'bound',account:{user_id:'fixture-'+match[1]}}:{state:'sign-in-required',account:null}));
+    #|    });
+    #|    await new Promise(r=>identity.listen(17889,'127.0.0.1',r));await boot();
+    #|  }
+    #|  browser=await chromium.launch({channel:'chrome',headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+    #|  const a=await tab(),b=await tab(),none=await tab();
+    #|  const pa=(await api(a,'visit',{name:'ProbeA',look:{shirt:'#ff0000'}})).player;
+    #|  const pb=(await api(b,'visit',{name:'ProbeB',look:{shirt:'#0000ff'}})).player;
+    #|  assert.ok(pa?.id && pb?.id && pa.id!==pb.id);
+    #|  const saved={session:pa.id,pos:{x:123,z:456,yaw:.5},visited:['test-place'],metGuide:true,look:{shirt:'#ff0000'}};
+    #|  assert.equal((await api(a,'save',saved)).code,200);
+    #|  assert.equal((await api(b,'save',saved)).code,409);
+    #|  assert.equal((await api(none,'save',saved)).code,401);
+    #|  assert.equal((await api(b,'session')).player.pos,null);
+    #|  assert.equal((await api(a,'session')).player.pos.x,123);
+    #|  assert.equal((await fetch(base+'/wlxk/api/visit',{method:'POST',headers:{Origin:'https://unrelated.example','Content-Type':'application/json'},body:'{"name":"Nope"}'})).status,403);
+    #|  await socket(a,pa.id);await socket(b,pb.id);
+    #|  await a.waitForFunction(id=>messages.some(m=>m.t==='join'&&m.p.id===id),pb.id);
+    #|  await a.evaluate(()=>ws.send(JSON.stringify({t:'pos',x:321,z:654,y:0,yaw:1,st:'walk',id:'forged'})));
+    #|  await b.waitForFunction(id=>messages.some(m=>m.t==='pos'&&m.id===id&&m.x===321),pa.id);
+    #|  await a.evaluate(()=>ws.send(JSON.stringify({t:'save',visited:['ws-place'],metGuide:true})));
+    #|  await a.waitForFunction(()=>messages.some(m=>m.t==='saved'));
+    #|  assert.equal((await api(a,'session')).player.pos.x,321);
+    #|  result.visitors='two isolated saves, forbidden spoof, origin check, join, position, WS save passed';
+    #|  const duplicate=await a.context().newPage();
+    #|  await duplicate.goto(base+'/wlxk/api/health');
+    #|  await socket(duplicate,pa.id);await a.waitForFunction(()=>messages.some(m=>m.t==='kick'));
+    #|  await duplicate.close();await a.close();await b.close();await none.close();
+    #|  if(!local && process.env.WLXK_RESTART_CHECK==='1'){
+    #|    execFileSync('ssh',['-o','BatchMode=yes','-p','32123','HwHiAiUser@106.39.18.146','kubectl --kubeconfig /home/HwHiAiUser/.kube/lunanexa-management -n aigc-acceptance-20260915 rollout restart deployment/wlxk-realtime'],{stdio:'inherit'});
+    #|    execFileSync('ssh',['-o','BatchMode=yes','-p','32123','HwHiAiUser@106.39.18.146','kubectl --kubeconfig /home/HwHiAiUser/.kube/lunanexa-management -n aigc-acceptance-20260915 rollout status deployment/wlxk-realtime --timeout=180s'],{stdio:'inherit'});
+    #|    const restored=await a.context().newPage();
+    #|    for(let attempt=0;attempt<30;attempt++){const r=await restored.goto(base+'/wlxk/api/session');if(r.ok())break;await sleep(500);}
+    #|    const recovered=JSON.parse(await restored.locator('body').innerText());
+    #|    assert.equal(recovered.player.id,pa.id);assert.equal(recovered.player.pos.x,321);
+    #|    result.persistence='live Kubernetes pod replacement retained the visitor save';
+    #|  }
+    #|  if(local){
+    #|    const ac=await tab('A'),bc=await tab('B'),ac2=await tab('A'),fail=await tab('FAIL');
+    #|    const au=(await api(ac,'visit',{name:'AccountA'})).player;
+    #|    const bu=(await api(bc,'visit',{name:'AccountB'})).player;
+    #|    assert.equal(au.kind,'account');assert.notEqual(au.id,bu.id);
+    #|    assert.equal((await api(ac2,'session')).player.id,au.id);
+    #|    assert.equal((await api(ac,'save',{...saved,session:au.id})).code,200);
+    #|    assert.equal((await api(bc,'save',{...saved,session:au.id})).code,409);
+    #|    assert.equal((await api(fail,'visit',{name:'NoFallback'})).code,503);
+    #|    await stop();await boot();
+    #|    assert.equal((await api(ac2,'session')).player.pos.x,123);
+    #|    assert.equal((await api(bc,'session')).player.pos,null);
+    #|    await socket(ac2,au.id);accountActive=false;
+    #|    assert.equal((await api(ac,'save',{...saved,session:au.id})).code,401);
+    #|    await ac2.waitForFunction(()=>messages.some(m=>m.t==='kick'),null,{timeout:15000});
+    #|    result.accounts='fixture A/B: shared account recovery, separation, failed identity closed, process restart, revocation passed';
+    #|  }
+    #|  console.log(JSON.stringify(result,null,2));
+    #|}
+    #|main().catch(e=>{console.error(e);process.exitCode=1}).finally(async()=>{if(browser)await browser.close();await stop();if(identity)identity.close();});
+  @shell.Cmd("node", ["-e", script]).run()
+}

@@ -22,8 +22,8 @@ The product budget increases from 69 to 72 MiB (measured release: 71.2 MiB).
 | --- | --- | --- |
 | 未来科学城路桥 | Saved OSM way 328596924, south node 3354163950, north node 3354163962 | Road-derived axis; WGS84 center 116.46230, 40.12282 |
 | 未来科学城东路桥 | Saved OSM way 395533857, south node 3983803697, north node 3983803696 | Road-derived axis; WGS84 center 116.46967, 40.12128 |
-| 未来中心 | Official project description and 英才南一街 address; Amap E-building listing | Approximate campus center 116.4701, 40.1147; not a surveyed footprint |
-| 未来视界 | Official project/contact address 滨河大道3号院, Future Science City Group listing | Approximate campus center 116.4754, 40.1245; not a surveyed footprint |
+| 未来中心 | Official project description and 英才南一街 address; Amap E-building listing | Legacy display anchor 116.4701, 40.1147. Use the [siting verification](#future-center-siting-verification) for group membership. |
+| 未来视界 | Official project/contact address 滨河大道3号院, Future Science City Group listing | A21 plan and north-up image origin 116.47495692, 40.12507434. Operational tower identities follow the numbered park diagram. |
 
 Sources:
 
@@ -175,7 +175,7 @@ The source studies remain unchanged. The map-only calibration is now:
 | Asset | Local change | Constraint |
 | --- | --- | --- |
 | Future Center | 40 nominal metres north, 20 west of the inferred campus anchor | Keep geographic bearing; move door and clearance together |
-| Future Vision | 55 nominal metres north, 30 west | Set buildings back within the road block; not a surveyed correction |
+| Future Vision | Superseded | Town and region now use the same A21 image origin and east/south geometry. |
 | East bridge | Center 116.46990605, 40.1217185; bearing from the straight portion of way 395533857 | Center inferred between opposing carriageways; exclude curved southern approach from bearing |
 | Arch bridge | Center 116.46234725, 40.12283585; bearing between the two inner way nodes | Main-span fit rather than approach-to-approach bearing |
 | Both bridges | Length ×1.14, width ×1.28, vertical silhouette ×1.18 | Presentation scale only, deck still on the registered road plane |
@@ -209,3 +209,68 @@ reached arrival; arch bridge paused at 84% on the deck, resumed and reached
 arrival. Original wave study still opens in the map portal. Browser error log was
 empty; model/navigation readiness were `ready`, and `wenyuRiversideShiftsApplied`
 remained `false`. Release assembly verified 303 files / 71.2 MiB. No commit or push.
+
+## Future Center siting verification
+
+The 2019 project description places buildings 1–2 in the west group,
+3–6 in the middle group and building 7 in the east group. The eastern twin
+towers share building number 7. The operator's aerial shows the sequence of
+three office pairs followed by the twin towers. [2019 group and floor descriptions](https://www.sohu.com/a/358608273_100004382) · [Operator's aerial](https://www.kechuangfuwu.com/ueditor/fileupload/file/20240725/1721893738640071636.png)
+
+| Visible group | Street envelope read from imagery and OSM | Previous selection |
+| --- | --- | --- |
+| West, buildings 1–2 | 英康路 to 鲁疃路 | Old B |
+| Middle, buildings 3–6 | 鲁疃路 to 英创东路, with 英创路 between the two pairs | Old C covered only the western pair |
+| East, building 7 | 英创东路 to the bend in 鲁疃东路 | Omitted |
+
+Old A, between 未来科学城东路 and 英康路, shows open ground. The visible
+campus lies south of 鲁疃东路 and north of 英才南一街. The comparison uses
+Esri World Imagery (Vantor, local acquisition metadata dated 2026-01-26),
+WGS84 street centerlines and the three label positions from the bank-v2
+experiment. A point-in-polygon check located all three old labels and seven
+building markers. [Georeferenced satellite image](https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=116.4638%2C40.1121%2C116.4761%2C40.1176&bboxSR=4326&imageSR=4326&size=1845%2C825&format=jpg&f=image) · [North-up street diagram](wenyu-future-center-groups.svg)
+
+The financial disclosures identify Future Center as the A08 group and list
+seven planning parcels (CP07-0600-0008, -0011, -0016, -0017, -0018, -0020,
+-0021). The 2021 report gives the older street names for the certificate
+boundaries on pp. 6–7. No surveyed redline coordinates or parcel-to-building
+schedule were established in this check. The street envelopes above support
+group placement, not individual title boundaries. [2021 report, pp. 6–7](https://website-oss.ccxi.com.cn/public/upload/files/20210630/1625030429.pdf#page=6) · [2026 disclosure, table 12](https://www.chinamoney.com.cn/dqs/cm-s-notice-query/fileDownLoad.do?contentId=3351085&mode=save&priority=0)
+
+### Placing the campus in the town
+
+Edit [the site registration](wenyu-future-center-site.json) before generating art.
+Each street enclosure lists ordered OSM way segments with their start and end
+nodes. A building references a model component, an observed center in the
+registered image, two facade directions, its footprint including the canopy,
+and a public street node for arrival. Middle-west and middle-east share one
+group name. The component numbers select geometry. In the west and middle
+groups the UI identifies buildings by street side because the available
+evidence establishes numbering at group level. The forecourt on the eastern
+plaza is a town design choice.
+
+Run `moon run scripts/compile-future-center-site.mbtx` at the repository root.
+The compiler maps each volume to its own street enclosure, checks its whole
+footprint against the other buildings and intersecting surface streets, and
+tests the forecourt's walking link. It tries full size first, then the largest
+uniform scale that fits at the same anchor and bearing. Below 70% it reports
+which anchor needs review. No road node is moved. The generator prints the fit
+of each building and writes the small MoonBit registration used by the town.
+Road reconstruction and the normal UI build both run this step.
+
+Run `./scripts/build-rabbita-ui.sh` to assemble and verify the town. Packaging
+checks that all eight arrivals are in the same connected component of the
+shipped walking graph. Release verification compares the seven calibrated
+building bases with the baked images and checks the studio model version. If a
+projection is stale, serve the freshly assembled local dist directory, open
+`?landmarks=center&bake-tiles=1`, use the download link and run
+`moon run scripts/import-town-projections.mbtx -- /path/to/town-projections.json`,
+then rebuild. Moving a center without changing the model or its projection
+basis does not require drawing a new image.
+
+Open `?landmarks=center` for the campus or `?landmarks=center-7` for the twin
+tower. Under 高级, 街坊与楼栋占地 overlays the four street enclosures and the
+excluded western field, outlines all seven footprints, and fades their roofs so
+street crossings remain visible. Link directly with `?landmarks=center&site-review=1`. Selecting a visible facade or selecting a building in the inspector
+focuses that building and sets the walk destination to its registered street
+arrival. The 3D button opens the complete campus study.

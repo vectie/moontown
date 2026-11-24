@@ -1,0 +1,85 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/shell",
+}
+
+///|
+async fn main {
+  let check =
+    #|const assert=require('node:assert/strict');
+    #|const {chromium}=require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+    #|(async()=>{
+    #| const browser=await chromium.launch({channel:process.env.BROWSER_CHANNEL || 'chrome'});
+    #| try {
+    #|  const p=await browser.newPage(),base=process.env.MOONTOWN_URL || 'http://127.0.0.1:17881/';
+    #|  await p.route('**/town-motor-streets.json',r=>r.fulfill({json:[[247,1,[[99,100],[105,100]]],[11,1,[[100,99],[100,105]]]]}));
+    #|  await p.goto(new URL('public-world.js',base).href);
+    #|  const result=await p.evaluate(async base=>{
+    #|   const traffic=await import(new URL('landmark-studio/town-traffic.js',base));await traffic.loadTraffic();
+    #|   const f={cx:0,cy:3200,z:.35,w:180,h:140},world={},owner={paintReason:'animation'};
+    #|   Object.assign(window,{__townDisplay:{compact:true},__townLandmarkPainter:{ready:true},
+    #|    __moontownGoldenValleyCanvasLifecycle:owner,__moontownGoldenValleyCamera:{x:f.cx,y:f.cy,z:f.z}});
+    #|   let clock=2800;Object.defineProperty(performance,'now',{value:()=>clock});
+    #|   function canvas(){const c=document.createElement('canvas');c.width=f.w;c.height=f.h;return c.getContext('2d',{willReadFrequently:true})}
+    #|   const a=canvas(),b=canvas();
+    #|   function render(ctx,cached){
+    #|    ctx.fillStyle='#aacb76';ctx.fillRect(0,0,f.w,f.h);
+    #|    if(cached)traffic.layers.begin(ctx,world,f.w,f.h,clock/1000,false,12);
+    #|    else traffic.prepare(f,clock/1000,false,12);
+    #|    for(let d=0;d<=431;d++){
+    #|     const g=cached?traffic.layers.depth(ctx,d):ctx;
+    #|     if(d===0)traffic.draw(g,-1,f);traffic.draw(g,d,f);
+    #|     if(d===300){g.fillStyle='rgba(34,52,31,.4)';g.fillRect(138,91,16,16)}
+    #|     if(d===301){g.fillStyle='#346c42';g.fillRect(90,58,19,15)}
+    #|    }
+    #|    if(cached)traffic.layers.finish(ctx);
+    #|   }
+    #|   const pixels=ctx=>ctx.getImageData(0,0,f.w,f.h).data;
+    #|   const diff=(a,b)=>a.reduce((n,v,i)=>Math.max(n,Math.abs(v-b[i])),0);
+    #|   render(a,true);render(b,false);
+    #|   const before=pixels(a),initial=diff(before,pixels(b));clock+=237;
+    #|   a.fillStyle='#aacb76';a.fillRect(0,0,f.w,f.h);
+    #|   const replay=traffic.layers.replay(a,world,f.w,f.h,12);
+    #|   render(b,false);
+    #|   const after=pixels(a),moving=diff(before,after),ref=pixels(b),error=diff(after,ref);
+    #|   const edgePixels=after.reduce((n,v,i)=>n+Number(i%4===0 && diff(after.subarray(i,i+4),ref.subarray(i,i+4))>2),0);
+    #|   const covered=Array.from(after.slice(4*(65*f.w+97),4*(65*f.w+97)+4));
+    #|   window.__moontownGoldenValleyCamera.x+=1;
+    #|   const stale=traffic.layers.replay(a,world,f.w,f.h,12);
+    #|   return {initial,replay,moving,error,edgePixels,covered,stale,independent:owner.vehicleOnlyFrames};
+    #|  },base);
+    #|  assert.equal(result.replay,true);assert.equal(result.stale,false);assert.equal(result.independent,1);
+    #|  assert.deepEqual(result.covered,[52,108,66,255]);
+    #|  assert.ok(result.edgePixels<=16 && result.error<24 && result.moving>2,JSON.stringify(result));console.log(result);
+    #|  const sparse=await p.evaluate(async base=>{
+    #|    const {makeTrafficPatches}=await import(new URL('landmark-studio/traffic-patches.js',base));
+    #|    const w=150,h=90,frame={z:1},cars=new Map([[5,[{x:50,y:42,adjacent:5,k:'car'}]],[9,[{x:54,y:44,adjacent:9,k:'car'},{x:132,y:18,adjacent:9,k:'car'}]]]);
+    #|    const surface=()=>{const el=document.createElement('canvas');el.width=w;el.height=h;return el.getContext('2d',{willReadFrequently:true})};
+    #|    const reference=surface(),cached=surface(),strips=[-1,5,9].map(d=>({first:Math.max(0,d),depth:d,top:0,bottom:h}));
+    #|    const fill=(g,color,x,y,w,h)=>{g.fillStyle=color;g.fillRect(x,y,w,h)};
+    #|    const fixtures=(g,d)=>{if(d===0)fill(g,'#c8a87a',20,26,20,45);if(d===5)fill(g,'rgba(29,81,44,.55)',47,27,8,39);if(d===9)fill(g,'#546b54',55,37,9,32)};
+    #|    const draw=(g,d,items)=>items.forEach(c=>fill(g,d===5?'#8bb5cb':'#763b44',c.x-3,c.y-2,6,4));
+    #|    fill(cached,'#b6db89',0,0,w,h);
+    #|    const batch=makeTrafficPatches(cached,cars,frame,1,strips);
+    #|    for(const d of [0,5,9])fixtures(batch.depth(d),d);
+    #|    batch.finish();
+    #|    const ground=surface();ground.drawImage(cached.canvas,0,0);
+    #|    let error=0;
+    #|    for(const move of [0,2,3]){
+    #|      cars.get(5)[0].x=50+move;cars.get(9)[0].x=54-move;
+    #|      fill(reference,'#b6db89',0,0,w,h);
+    #|      for(const d of [0,5,9]){draw(reference,d,cars.get(d)||[]);fixtures(reference,d)}
+    #|      cached.drawImage(ground.canvas,0,0);
+    #|      if(!batch.present(cars,(d,items)=>draw(cached,d,items)))throw Error('moving cars rejected');
+    #|      const a=cached.getImageData(0,0,w,h).data,b=reference.getImageData(0,0,w,h).data;
+    #|      for(let i=0;i<a.length;i++)error=Math.max(error,Math.abs(a[i]-b[i]));
+    #|    }
+    #|    cars.get(5)[0].x=98;
+    #|    return {error,rejected:!batch.present(cars,()=>{})};
+    #|  },base);
+    #|  assert.ok(sparse.error<=2 && sparse.rejected,JSON.stringify(sparse));console.log('overlapping street traffic and translucent occluders',sparse);
+    #| }finally{await browser.close()}
+    #|})().catch(e=>{console.error(e);process.exitCode=1});
+  @shell.Cmd("node", ["-e", check]).run()
+}

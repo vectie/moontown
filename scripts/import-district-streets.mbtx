@@ -1,0 +1,25 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+}
+///|
+// Offline authoring only. Reuse the same Beijing Geofabrik OSM extract as the
+// district footprints. The release includes the bounded outline geometry.
+async fn main {
+  guard @env.args().get(1) is Some(path) else { fail("Pass a Beijing OSM PBF file") }
+  let source = path.replace(old="'",new="''")
+  let sql =
+    #|LOAD spatial;
+    #|CREATE TEMP TABLE src AS SELECT * FROM ST_ReadOSM(getvariable('pbf')) WHERE (kind='node' AND lon BETWEEN 116.13 AND 116.60 AND lat BETWEEN 40.04 AND 40.22) OR (kind='way' AND tags['highway'] IN ('residential','living_street','tertiary','secondary','primary','unclassified','service') AND coalesce(tags['access'],'') NOT IN ('no','private','customers','delivery') AND coalesce(tags['motor_vehicle'],'') NOT IN ('no','private') AND coalesce(tags['motorcar'],'') NOT IN ('no','private') AND coalesce(tags['tunnel'],'') NOT IN ('yes','building_passage') AND coalesce(tags['bridge'],'no')='no' AND coalesce(tags['service'],'') NOT IN ('parking_aisle','driveway','alley'));
+    #|CREATE TEMP TABLE geom AS SELECT w.id,any_value(w.tags) tags,ST_MakeLine(list(ST_Point((n.lon-116)*85130,(40.3-n.lat)*111045) ORDER BY r.ord)) line FROM (SELECT * FROM src WHERE kind='way') w, unnest(w.refs) WITH ORDINALITY r(node,ord), (SELECT * FROM src WHERE kind='node') n WHERE n.id=r.node GROUP BY w.id HAVING count(*)>=2 AND count(*)=any_value(len(w.refs));
+    #|CREATE TEMP TABLE windows AS SELECT b.key k, (b.bbox[1]-116)*85130 x,(40.3-b.bbox[4])*111045 z, i, ST_MakePolygon(ST_MakeLine(list_transform(list_append(b.ring,b.ring[1]), lambda p: ST_Point(x+p[1]*(b.bbox[3]-b.bbox[1])*85130/330,z+p[2]*(b.bbox[4]-b.bbox[2])*111045/330)))) land FROM read_json_auto('docs/project/science-city-sites.json'), unnest(blocks) WITH ORDINALITY q(b,i) WHERE len(b.bbox)=4;
+    #|CREATE TEMP TABLE areas AS SELECT k,first(x order by i) x,first(z order by i) z, ST_Union_Agg(ST_MakeValid(land)) land FROM windows GROUP BY k;
+    #|COPY (WITH clips AS (SELECT a.k,a.x,a.z,g.id,g.tags,g.line,
+    #| ST_Intersection(g.line,ST_Difference(ST_Buffer(a.land,35),ST_Buffer(a.land,3.8))) linepart FROM areas a JOIN geom g ON ST_Intersects(g.line,ST_Buffer(a.land,35))),
+    #| fragments AS (SELECT k,x,z,id,tags,CASE WHEN ST_LineLocatePoint(line,ST_StartPoint(q.v.geom)) > ST_LineLocatePoint(line,ST_EndPoint(q.v.geom)) THEN ST_Reverse(q.v.geom) ELSE q.v.geom END path FROM clips,UNNEST(ST_Dump(ST_CollectionExtract(linepart,2))) q(v) WHERE ST_Length(q.v.geom)>14),
+    #| ranked AS (SELECT *,row_number() OVER(PARTITION BY k ORDER BY ST_Length(path) DESC,id,ST_AsText(path)) rank FROM fragments)
+    #| SELECT k, id, coalesce(tags['name'],'') as street,CASE WHEN tags['oneway']='-1' THEN -1 WHEN tags['oneway'] IN ('yes','1','true') THEN 1 ELSE 0 END AS dir, CASE WHEN tags['highway'] IN ('primary','secondary') THEN 8 WHEN tags['highway']='service' THEN 4 ELSE 6 END AS w, list_transform(ST_Points(ST_Simplify(path,0.30)).ST_Dump(), lambda t: [round(ST_X(t.geom)-x,1),round(ST_Y(t.geom)-z,1)]) p FROM ranked WHERE rank<=25 ORDER BY k,rank) TO 'src/ui/landmark-studio/web/district-streets.json' (FORMAT JSON,ARRAY TRUE);
+  @shell.Cmd("duckdb",["-bail","-c","SET VARIABLE pbf='"+source+"';\n"+sql]).run()
+}

@@ -1,0 +1,1169 @@
+///|
+import {
+  "moonbitlang/core/env",
+  "moonbitlang/x@0.4.50/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/core/math",
+}
+
+///|
+struct P {
+  x : Double
+  y : Double
+} derive(ToJson, FromJson, Eq, Debug)
+
+///|
+struct SourceWay {
+  osmWayId : Double
+  nodes : Array[Double]
+  pathGrid : Array[P]
+  tags : Map[String, String]
+} derive(FromJson)
+
+///|
+struct Source {
+  ways : Array[SourceWay]
+} derive(FromJson)
+
+///|
+struct Labels {
+  rows : Array[String]
+} derive(FromJson)
+
+///|
+fn grade(way : SourceWay, key : String) -> Bool {
+  match way.tags.get(key) {
+    None | Some("no" | "false" | "0" | "") => false
+    _ => true
+  }
+}
+
+///|
+fn project(p : P) -> P {
+  let w = 1.0 + 0.01 * ((p.x - 256) / 256 - p.y / 144)
+  { x: 256 + (p.x - 256) / w, y: p.y / w, }
+}
+
+///|
+
+///|
+fn distance(a : P, b : P) -> Double {
+  ((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)).sqrt()
+}
+
+///|
+fn kind(w : SourceWay) -> String {
+  if grade(w, "bridge") {
+    "bridge"
+  } else if grade(w, "tunnel") {
+    "tunnel"
+  } else if grade(w, "ford") {
+    "ford"
+  } else {
+    "surface"
+  }
+}
+
+///|
+fn minor(w : SourceWay) -> Bool {
+  ["footway", "path", "steps", "cycleway", "track", "pedestrian"].contains(
+    w.tags.get("highway").unwrap_or(""),
+  )
+}
+
+///|
+fn rounded(x : Double) -> Double {
+  (x * 10000).round() / 10000
+}
+
+///|
+fn slab(a : Double, d : Double, lo : Double, hi : Double) -> (Double, Double) {
+  if d == 0 {
+    if a >= lo && a < hi {
+      (0, 1)
+    } else {
+      (1, 0)
+    }
+  } else {
+    let t = (lo - a) / d
+    let u = (hi - a) / d
+    (t.min(u).max(0), t.max(u).min(1))
+  }
+}
+
+///|
+// Exact interval union on a segment. pad=0 measures the centerline; half the
+// SVG stroke width is a conservative square envelope for the round-stroked road.
+fn intervals(
+  a : P,
+  b : P,
+  water : Array[Bool],
+  pad : Double,
+) -> Array[(Double, Double)] {
+  let hit : Array[(Double, Double)] = []
+  let x0 = (a.x.min(b.x) - pad).floor().to_int().max(0)
+  let x1 = (a.x.max(b.x) + pad).floor().to_int().min(255)
+  let y0 = (a.y.min(b.y) - pad).floor().to_int().max(0)
+  let y1 = (a.y.max(b.y) + pad).floor().to_int().min(143)
+  for y in y0..<=y1 {
+    let (v, w) = slab(
+      a.y,
+      b.y - a.y,
+      y.to_double() - pad,
+      y.to_double() + 1 + pad,
+    )
+    if w <= v {
+      continue
+    }
+    for x in x0..<=x1 {
+      if !water[y * 256 + x] {
+        continue
+      }
+      let (l, h) = slab(
+        a.x,
+        b.x - a.x,
+        x.to_double() - pad,
+        x.to_double() + 1 + pad,
+      )
+      let lo = l.max(v)
+      let hi = h.min(w)
+      if hi > lo {
+        hit.push((lo, hi))
+      }
+    }
+  }
+  hit.sort_by((a, b) => a.0.compare(b.0))
+  let merged : Array[(Double, Double)] = []
+  for (lo, hi) in hit {
+    let n = merged.length()
+    if n > 0 && lo <= merged[n - 1].1 {
+      merged[n - 1] = (merged[n - 1].0, hi.max(merged[n - 1].1))
+    } else {
+      merged.push((lo, hi))
+    }
+  }
+  merged
+}
+
+///|
+fn measure(a : P, b : P, water : Array[Bool], pad : Double) -> Double {
+  intervals(a, b, water, pad).fold(init=0.0, (v, h) => v + h.1 - h.0) *
+  distance(a, b)
+}
+
+///|
+fn mix(a : P, b : P, t : Double) -> P {
+  { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, }
+}
+
+///|
+struct Fit {
+  mode : String
+  origin : P
+  shift : P
+  axis : P
+  drop : Double
+  isotropic : Double
+  uniform : Bool
+} derive(ToJson, Debug)
+
+///|
+// Both principal scales are positive and at most one. No rotation or shear.
+fn Fit::at(f : Fit, p : P) -> P {
+  let dx = p.x - f.origin.x
+  let dy = p.y - f.origin.y
+  let v = (dx * f.axis.x + dy * f.axis.y) * f.drop
+  {
+    x: p.x +
+    f.shift.x -
+    f.isotropic * dx -
+    (if f.uniform { f.drop * dx } else { v * f.axis.x }),
+    y: p.y +
+    f.shift.y -
+    f.isotropic * dy -
+    (if f.uniform { f.drop * dy } else { v * f.axis.y }),
+  }
+}
+
+///|
+fn snap(p : P) -> P {
+  { x: rounded(p.x), y: rounded(p.y), }
+}
+
+///|
+fn minus(a : P, b : P) -> P {
+  { x: a.x - b.x, y: a.y - b.y, }
+}
+
+///|
+fn dot(a : P, b : P) -> Double {
+  a.x * b.x + a.y * b.y
+}
+
+///|
+fn det(a : P, b : P) -> Double {
+  a.x * b.y - a.y * b.x
+}
+
+///|
+fn unit(v : P) -> P {
+  let d = dot(v, v).sqrt()
+  { x: v.x / d, y: v.y / d, }
+}
+
+///|
+struct Road {
+  id : Double
+  nodes : Array[Double]
+  ps : Array[P]
+  structure : Bool
+  pad : Double
+  steps : Bool
+}
+
+///|
+struct Join {
+  id : Double
+  p : P
+  pad : Double
+  bridge : Bool
+  direction : P
+} derive(ToJson)
+
+///|
+fn wet(ps : Array[P], water : Array[Bool], pad : Double) -> Double {
+  let mut v = 0.0
+  for i in 1..<ps.length() {
+    v += measure(snap(ps[i - 1]), snap(ps[i]), water, pad)
+  }
+  v
+}
+
+///|
+fn main raise {
+  let source : Source = @json.from_json(
+    @json.parse(
+      @fs.read_file_to_string("docs/project/wenyu-lower-perspective.json"),
+    ),
+  )
+  let labels : Labels = @json.from_json(
+    @json.parse(
+      @fs.read_file_to_string(
+        "src/ui/assets/tilemap/wenyu_reference_labels.json",
+      ),
+    ),
+  )
+  let baseline : Map[String, P] = @json.from_json(
+    @json.parse(
+      @fs.read_file_to_string("docs/project/wenyu-bank-node-overrides.json"),
+    ),
+  )
+  let water = Array::makei(256 * 144, i => {
+    labels.rows[i / 256][i % 256] is ('r' | 'l')
+  })
+  let seeds : Set[Double] = Set([])
+  for w in source.ways {
+    if w.osmWayId == 47518902 || w.osmWayId == 417225061 {
+      for n in w.nodes {
+        seeds.add(n)
+      }
+    }
+  }
+  let roads = source.ways.map(w => Road::{
+    id: w.osmWayId,
+    nodes: w.nodes,
+    ps: w.nodes.mapi((i, n) => {
+      baseline.get(n.to_string()).unwrap_or(project(w.pathGrid[i]))
+    }),
+    steps: w.tags.get("highway") == Some("steps"),
+    structure: kind(w) != "surface",
+    pad: if minor(w) {
+      0.045
+    } else {
+      0.12
+    },
+  })
+  let by_id : Map[Double, Road] = Map([])
+  let core : Set[Double] = Set([])
+  let positions : Map[Double, P] = Map([])
+  for r in roads {
+    by_id[r.id] = r
+    for i, n in r.nodes {
+      positions[n] = r.ps[i]
+    }
+    if !r.structure && r.nodes.any(n => seeds.contains(n)) {
+      core.add(r.id)
+    }
+  }
+  let dike = by_id[47518902]
+  let a = positions[605039789]
+  let b = positions[3351127195]
+  let u = unit(minus(a, positions[605039811]))
+  let v = unit(minus(b, positions[605038214]))
+  let cross = det(minus(b, a), v) / det(u, v)
+  let center = P::{ x: a.x + u.x * cross, y: a.y + u.y * cross, }
+  let normal = unit({ x: b.y - a.y, y: a.x - b.x, })
+  let off = P::{ x: 0, y: 0, }
+  let fits : Array[Fit] = []
+  let identity : Fit = {
+    mode: "baseline",
+    origin: a,
+    shift: off,
+    axis: normal,
+    drop: 0,
+    uniform: false,
+    isotropic: 0,
+  }
+  fits.push(identity)
+  for i in 1..<=100 {
+    let k = i.to_double() / 1000
+    fits.push({
+      ..identity,
+      mode: "uniform",
+      origin: center,
+      drop: k,
+      uniform: true,
+    })
+    fits.push({ ..identity, mode: "pin-axis", drop: k, })
+  }
+  // For each axis, solve translation so the two original bridge approaches
+  // continue exactly along their respective deck axes.
+  for degree in 0..<180 {
+    let t = degree.to_double() * 3.141592653589793 / 180
+    let axis = P::{ x: @math.cos(t), y: @math.sin(t), }
+    for i in 1..<=80 {
+      let k = i.to_double() / 400
+      let difference = -k * dot(minus(b, a), axis)
+      let curvature = P::{ x: difference * axis.x, y: difference * axis.y, }
+      let da = -det(curvature, v) / det(u, v)
+      let db = det(u, curvature) / det(u, v)
+      if da < -1.0e-9 || db < -1.0e-9 || da > 5 || db > 5 {
+        continue
+      }
+      fits.push({
+        ..identity,
+        mode: "axis",
+        axis,
+        drop: k,
+        shift: { x: da * u.x, y: da * u.y, },
+      })
+    }
+  }
+  for step in 0..<=180 {
+    let t = step.to_double() * 3.141592653589793 / 180
+    let axis = P::{ x: @math.cos(t), y: @math.sin(t), }
+    for origin in [a, b] {
+      for j in 1..<=100 {
+        let k = j.to_double() / 1000
+        let f = { ..identity, mode: "one-head", origin, axis, drop: k, }
+        let head = if origin == a { b } else { a }
+        let dir = if origin == a { v } else { u }
+        let delta = minus(f.at(head), head)
+        if dot(delta, dir) >= 0.965925826 * dot(delta, delta).sqrt() {
+          fits.push(f)
+        }
+      }
+    }
+  }
+  for i in 1..<=1000 {
+    fits.push({ ..identity, mode: "pin-axis", drop: i.to_double() / 100000, })
+  }
+  for origin in [a, b, positions[3354164102]] {
+    for degree in 0..<180 {
+      let t = degree.to_double() * 3.141592653589793 / 180
+      let axis = P::{ x: @math.cos(t), y: @math.sin(t), }
+      for ratio in [0.025, 0.1, 0.25, 0.5] {
+        let test_fit = {
+          ..identity,
+          mode: "biaxial",
+          origin,
+          axis,
+          drop: 0.1,
+          isotropic: 0.1 * ratio,
+        }
+        let sa = minus(test_fit.at(a), a)
+        let sb = minus(test_fit.at(b), b)
+        if dot(sa, u) + 1.0e-10 < 0.965925826 * dot(sa, sa).sqrt() ||
+          dot(sb, v) + 1.0e-10 < 0.965925826 * dot(sb, sb).sqrt() {
+          continue
+        }
+        for j in 1..<=70 {
+          let drop = j.to_double() / 700
+          fits.push({ ..test_fit, drop, isotropic: drop * ratio, })
+        }
+      }
+    }
+  }
+  // Pivot on actual junctions where the moving streets meet external roads.
+  // Keeping a busy intersection coincident can avoid a second crossing there.
+  let inner : Set[Double] = Set([])
+  for id in core {
+    for n in by_id[id].nodes {
+      inner.add(n)
+    }
+  }
+  let sockets : Set[Double] = Set([])
+  for r in roads {
+    if !core.contains(r.id) {
+      for n in r.nodes {
+        if inner.contains(n) {
+          sockets.add(n)
+        }
+      }
+    }
+  }
+  for id in sockets {
+    let origin = positions[id]
+    for j in -180..<=0 {
+      let angle = j.to_double() * 3.141592653589793 / 360
+      let axis = P::{ x: @math.cos(angle), y: @math.sin(angle), }
+      let unit_fit = {
+        ..identity,
+        mode: "junction-axis",
+        origin,
+        axis,
+        drop: 0.1,
+      }
+      let sa = minus(unit_fit.at(a), a)
+      let sb = minus(unit_fit.at(b), b)
+      if dot(sa, u) + 1.0e-10 < 0.965925826 * dot(sa, sa).sqrt() ||
+        dot(sb, v) + 1.0e-10 < 0.965925826 * dot(sb, sb).sqrt() {
+        continue
+      }
+      for k in 1..<=75 {
+        fits.push({ ..unit_fit, drop: k.to_double() / 500, })
+      }
+    }
+  }
+  for degrees in -90..<=0 {
+    let t = degrees.to_double() * 3.141592653589793 / 180
+    let dir = P::{ x: @math.cos(t), y: @math.sin(t), }
+    if dot(dir, u) < 0.965925826 || dot(dir, v) < 0.965925826 {
+      continue
+    }
+    for i in 1..<=100 {
+      let k = i.to_double() / 20
+      fits.push({
+        ..identity,
+        mode: "translate",
+        shift: { x: k * dir.x, y: k * dir.y, },
+      })
+    }
+  }
+  let scored : Array[(Double, Fit)] = []
+  let bests : Map[String, Double] = Map([])
+  for f in fits {
+    if distance(f.at(a), a) > 5.00001 || distance(f.at(b), b) > 5.00001 {
+      continue
+    }
+    let ps = dike.ps.map(p => f.at(p))
+    if ps.mapi((i, p) => distance(p, dike.ps[i])).any(d => d > 5.00001) {
+      continue
+    }
+    let value = wet(ps, water, 0.12)
+    scored.push((value, f))
+    bests[f.mode] = value.min(bests.get(f.mode).unwrap_or(1.0e10))
+  }
+  scored.sort_by((a, b) => a.0.compare(b.0))
+  println("Samples \{scored.length()} by family \{Json(bests).stringify()}")
+  println("Best dike only \{scored[0].0} \{Json(scored[0].1).stringify()}")
+  inspect_layout(roads, core, by_id, positions, scored, water)
+}
+
+///|
+fn inspect_layout(
+  roads : Array[Road],
+  core : Set[Double],
+  by_id : Map[Double, Road],
+  positions : Map[Double, P],
+  scored : Array[(Double, Fit)],
+  water : Array[Bool],
+) -> Unit raise {
+  let group = core.copy()
+  let inside : Set[Double] = Set([])
+  for id in core {
+    for n in by_id[id].nodes {
+      inside.add(n)
+    }
+  }
+  for ;; {
+    let old = group.length()
+    for r in roads {
+      if !group.contains(r.id) &&
+        !r.structure &&
+        !r.steps &&
+        r.pad < 0.1 &&
+        r.nodes.any(n => inside.contains(n)) &&
+        r.ps.all(p => p.x > 154 && p.x < 236 && p.y > 10 && p.y < 99) {
+        group.add(r.id)
+        for n in r.nodes {
+          inside.add(n)
+        }
+      }
+    }
+    if group.length() == old {
+      break
+    }
+  }
+  let boundary : Map[Double, Join] = Map([])
+  for r in roads {
+    if group.contains(r.id) {
+      continue
+    }
+    for i, n in r.nodes {
+      if !inside.contains(n) {
+        continue
+      }
+      let p = r.ps[i]
+      let dir = if r.structure {
+        unit(minus(p, r.ps[if i == 0 { 1 } else { i - 1 }]))
+      } else {
+        { x: 0, y: 0, }
+      }
+      let prev = boundary
+        .get(n)
+        .unwrap_or({ id: n, p, pad: r.pad, bridge: false, direction: dir, })
+      boundary[n] = {
+        ..prev,
+        pad: prev.pad.max(r.pad),
+        bridge: prev.bridge || r.structure,
+        direction: if r.structure {
+          dir
+        } else {
+          prev.direction
+        },
+      }
+    }
+  }
+  let joins = boundary.values().collect()
+  let heads = joins.filter(j => j.bridge)
+  println(
+    "Scope \{core.length()} + \{group.length()-core.length()} other whole park ways. \{joins.length()} ties / \{heads.length()} bridge heads: \{Json(heads).stringify()}",
+  )
+  evaluate_network(roads, group, joins, by_id, positions, scored, water)
+}
+
+///|
+struct Edge {
+  owner : Double
+  a : Double
+  b : Double
+  p : P
+  q : P
+}
+
+///|
+fn near(a : P, b : P, c : P, d : P, pad : Double) -> Bool {
+  a.x.min(b.x) <= c.x.max(d.x) + pad &&
+  a.x.max(b.x) + pad >= c.x.min(d.x) &&
+  a.y.min(b.y) <= c.y.max(d.y) + pad &&
+  a.y.max(b.y) + pad >= c.y.min(d.y)
+}
+
+///|
+// Quantize at SVG precision first. Ignore genuine endpoint meetings; compare
+// proper crossings per pair of logical ways, including crossings over decks.
+fn crosses(a : P, b : P, c : P, d : P) -> Bool {
+  if !near(a, b, c, d, 0) {
+    return false
+  }
+  let ab = minus(b, a)
+  let cd = minus(d, c)
+  det(ab, minus(c, a)) * det(ab, minus(d, a)) < -1.0e-12 &&
+  det(cd, minus(a, c)) * det(cd, minus(b, c)) < -1.0e-12
+}
+
+///|
+fn evaluate_network(
+  roads : Array[Road],
+  group : Set[Double],
+  joins : Array[Join],
+  by_id : Map[Double, Road],
+  positions : Map[Double, P],
+  scored : Array[(Double, Fit)],
+  water : Array[Bool],
+) -> Unit raise {
+  let moving : Array[Edge] = []
+  let fixed : Array[Edge] = []
+  let bounds : Array[P] = []
+  for id in group {
+    for p in by_id[id].ps {
+      bounds.push(p)
+    }
+  }
+  let xmin = bounds.fold(init=bounds[0].x, (v, p) => v.min(p.x))
+  let ymin = bounds.fold(init=bounds[0].y, (v, p) => v.min(p.y))
+  let xmax = bounds.fold(init=bounds[0].x, (v, p) => v.max(p.x))
+  let ymax = bounds.fold(init=bounds[0].y, (v, p) => v.max(p.y))
+  for r in roads {
+    for i in 1..<r.ps.length() {
+      let a = r.nodes[i - 1]
+      let b = r.nodes[i]
+      let e : Edge = { owner: r.id, a, b, p: r.ps[i - 1], q: r.ps[i], }
+      if group.contains(r.id) {
+        moving.push(e)
+      } else if near(
+          e.p,
+          e.q,
+          { x: xmin, y: ymin, },
+          { x: xmax, y: ymax, },
+          5.1,
+        ) {
+        fixed.push({ ..e, p: snap(e.p), q: snap(e.q), })
+      }
+    }
+  }
+  let possible = moving.map(e => {
+    fixed.filter(s => near(e.p, e.q, s.p, s.q, 5.1))
+  })
+  let original : Map[(Double, Double), Int32] = Map([])
+  for i, e in moving {
+    for s in possible[i] {
+      if crosses(snap(e.p), snap(e.q), s.p, s.q) {
+        let k = (e.owner, s.owner)
+        original[k] = original.get(k).unwrap_or(0) + 1
+      }
+    }
+  }
+  let ties = joins.map(j => {
+    (
+      fixed.filter(e => near(j.p, j.p, e.p, e.q, 5.1)),
+      moving.filter(e => near(j.p, j.p, e.p, e.q, 10.1)),
+    )
+  })
+  let aligned = (f : Fit, j : Join) => {
+    let shift = minus(f.at(j.p), j.p)
+    let d = dot(shift, shift).sqrt()
+    !j.bridge || d < 0.00001 || dot(shift, j.direction) / d >= 0.965925826
+  }
+  let zero = scored[scored.search_by(t => t.1.mode == "baseline").unwrap()].1
+  let base_wet = group
+    .to_array()
+    .fold(init=0.0, (sum, id) => sum + wet(by_id[id].ps, water, by_id[id].pad))
+  let mut best : Choice? = None
+  let mut fit_only : Choice? = None
+  let mut passed = 0
+  let mut tried = 0
+  let get_contact = (f : Fit, j : Join) => {
+    measure(snap(j.p), snap(f.at(j.p)), water, j.pad)
+  }
+  let dike_socket = joins[joins.search_by(j => j.id == 605039789).unwrap()]
+  let group_wet = (f : Fit) => {
+    group
+    .to_array()
+    .fold(init=0.0, (sum, id) => {
+      let r = by_id[id]
+      sum + wet(r.ps.map(p => f.at(p)), water, r.pad)
+    })
+  }
+  let mut raw_stable : Choice? = None
+  for pass in 0..<4 {
+    let batch : Array[(Double, Fit)] = if pass == 0 { scored } else { [] }
+    if pass > 0 {
+      let step = [0.0, 1.0, 0.25, 0.0625][pass]
+      for previous in [best.unwrap(), raw_stable.unwrap()] {
+        let seed = previous.fit
+        for ai in -2..<=2 {
+          for ki in -2..<=2 {
+            for along in 0..<=8 {
+              for bearing in [-39.0, -32.0, -25.0] {
+                let radians = ai.to_double() * step * 3.141592653589793 / 180
+                let u = seed.axis
+                let axis = P::{
+                  x: u.x * @math.cos(radians) - u.y * @math.sin(radians),
+                  y: u.x * @math.sin(radians) + u.y * @math.cos(radians),
+                }
+                let k = seed.drop + ki.to_double() * 0.002 * step
+                if k < 0 || k > 0.2 {
+                  continue
+                }
+                let length = along.to_double() * 0.015 * step
+                let t = bearing * 3.141592653589793 / 180
+                let f : Fit = {
+                  ..seed,
+                  mode: "refined",
+                  drop: k,
+                  axis,
+                  shift: {
+                    x: seed.shift.x + length * @math.cos(t),
+                    y: seed.shift.y + length * @math.sin(t),
+                  },
+                }
+                for di in [-1.0, 0.0, 1.0] {
+                  let g = { ..f, isotropic: f.isotropic + di * 0.0005 * step, }
+                  if g.isotropic >= 0 {
+                    batch.push(
+                      (
+                        wet(by_id[47518902].ps.map(p => g.at(p)), water, 0.12),
+                        g,
+                      ),
+                    )
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    for (value, f) in batch {
+      if joins.any(j => !aligned(f, j)) ||
+        bounds.any(p => distance(f.at(p), p) > 5.00001) {
+        continue
+      }
+      tried += 1
+      let mut conflicts = 0
+      let counts = original.copy()
+      for i, e in moving {
+        let p = snap(f.at(e.p))
+        let q = snap(f.at(e.q))
+        for s in possible[i] {
+          if crosses(p, q, s.p, s.q) {
+            let k = (e.owner, s.owner)
+            counts[k] = counts.get(k).unwrap_or(0) - 1
+          } else if (
+              internal_touch(p, q, s.p, s.q) &&
+              !internal_touch(snap(e.p), snap(e.q), s.p, s.q)
+            ) ||
+            (e.a != s.a && p == s.p && snap(e.p) != s.p) ||
+            (e.a != s.b && p == s.q && snap(e.p) != s.q) ||
+            (e.b != s.a && q == s.p && snap(e.q) != s.p) ||
+            (e.b != s.b && q == s.q && snap(e.q) != s.q) {
+            conflicts += 1
+          }
+        }
+      }
+      let mut losses = 0
+      for _, n in counts {
+        if n < 0 {
+          conflicts -= n
+        } else {
+          losses += n
+        }
+      }
+      for i, j in joins {
+        let a = snap(j.p)
+        let b = snap(f.at(j.p))
+        if a == b {
+          continue
+        }
+        for s in ties[i].0 {
+          if crosses(a, b, s.p, s.q) || internal_touch(a, b, s.p, s.q) {
+            conflicts += 1
+          }
+        }
+        for s in ties[i].1 {
+          let c = snap(f.at(s.p))
+          let d = snap(f.at(s.q))
+          if crosses(a, b, c, d) || internal_touch(a, b, c, d) {
+            conflicts += 1
+          }
+        }
+        for k in 0..<i {
+          let c = snap(joins[k].p)
+          let d = snap(f.at(joins[k].p))
+          if c != d && (crosses(a, b, c, d) || internal_touch(a, b, c, d)) {
+            conflicts += 1
+          }
+        }
+      }
+      let contact = value + get_contact(f, dike_socket)
+      let travel = distance(f.at(positions[605039789]), positions[605039789]) +
+        distance(f.at(positions[3351127195]), positions[3351127195])
+      let choice : Choice = {
+        fit: f,
+        dikeWet: value,
+        withEntry: contact,
+        newConflicts: conflicts,
+        lostCrossings: losses,
+        headTravel: travel,
+      }
+      if better(choice, fit_only) {
+        fit_only = Some(choice)
+      }
+      if conflicts == 0 && losses == 0 {
+        passed += 1
+        if better(choice, raw_stable) {
+          raw_stable = Some(choice)
+        }
+        if better(choice, best) &&
+          group_wet(f) + joins.fold(init=0.0, (v, j) => v + get_contact(f, j)) <=
+          base_wet + 0.00001 {
+          best = Some(choice)
+        }
+      }
+    }
+  }
+  let safe = best.unwrap()
+  let bold = fit_only.unwrap()
+  let before : Choice = {
+    fit: zero,
+    dikeWet: wet(by_id[47518902].ps, water, 0.12),
+    withEntry: wet(by_id[47518902].ps, water, 0.12),
+    newConflicts: 0,
+    lostCrossings: 0,
+    headTravel: 0,
+  }
+  assert_true((before.dikeWet - 84.5380012).abs() < 0.0001)
+  println("Trials \{tried}, crossing checks passed \{passed}")
+  for x in [before, safe, bold] {
+    println(Json(x).stringify())
+  }
+  let out = match @env.args() {
+    [_, path] => path
+    _ => "output/left-dike-group"
+  }
+  if !@fs.path_exists(out) {
+    @fs.create_dir(out)
+  }
+  let variants : Array[Json] = []
+  let totals : Array[Double] = []
+  let marks : Array[Array[Array[P]]] = []
+  for choice in [before, safe, bold] {
+    let f = choice.fit
+    assert_true(f.drop >= 0 && f.isotropic >= 0 && f.drop + f.isotropic < 1)
+    let bridges = joins
+      .filter(j => j.bridge)
+      .map(j => {
+        let q = f.at(j.p)
+        Json::object({
+          "node": Json(j.id),
+          "fixed": Json(j.p),
+          "group": Json(q),
+          "gap": 0,
+          "approachLength": Json(distance(j.p, q)),
+          "approachWet": Json(get_contact(f, j)),
+        })
+      })
+    let line = by_id[47518902].ps.map(p => snap(f.at(p)))
+    let wet_bits : Array[Array[P]] = []
+    for i in 1..<line.length() {
+      let a = line[i - 1]
+      let b = line[i]
+      for (lo, hi) in intervals(a, b, water, 0.12) {
+        wet_bits.push([mix(a, b, lo), mix(a, b, hi)])
+      }
+    }
+    marks.push(wet_bits)
+    assert_eq(line.length(), 63)
+    assert_true(
+      (choice.dikeWet -
+      wet_bits.fold(init=0.0, (n, s) => n + distance(s[0], s[1]))).abs() <
+      0.000001,
+    )
+    let network = group_wet(f)
+    let tie_wet = joins.fold(init=0.0, (v, j) => v + get_contact(f, j))
+    totals.push(network + tie_wet)
+    let checks = verify_graph(roads, group, joins, f)
+    variants.push({
+      "placement": Json(choice),
+      "groupRoadWet": network,
+      "approachesWet": tie_wet,
+      "groupIncludingApproachesWet": network + tie_wet,
+      "bridgeHeads": Json(bridges),
+      "graph": checks,
+    })
+  }
+  let ways = group.to_array()
+  ways.sort()
+  let report : Json = {
+    "schema": "moontown.wenyu-group-fit-trial.v1",
+    "maxDisplacement": 5,
+    "maxApproachAngleDegrees": 15,
+    "beforeSafeExploratory": Json(variants),
+    "ways": Json(ways),
+    "candidateEvaluations": tried,
+    "preserveCrossings": passed,
+    "junctionConnectors": joins.length(),
+  }
+  @fs.write_string_to_file(out + "/result.json", report.stringify(indent=2))
+  let labels : Labels = @json.from_json(
+    @json.parse(
+      @fs.read_file_to_string(
+        "src/ui/assets/tilemap/wenyu_reference_labels.json",
+      ),
+    ),
+  )
+  draw_trial(
+    out,
+    roads,
+    group,
+    joins,
+    labels.rows,
+    [before, safe, bold],
+    marks,
+    totals,
+    water,
+  )
+}
+
+///|
+struct Choice {
+  fit : Fit
+  dikeWet : Double
+  withEntry : Double
+  newConflicts : Int32
+  lostCrossings : Int32
+  headTravel : Double
+} derive(ToJson)
+
+///|
+// Interior hits include collinear overlaps; ordinary endpoint contact is
+// handled by shared node IDs and the explicit boundary edges in the graph.
+fn internal_touch(a : P, b : P, c : P, d : P) -> Bool {
+  if a == b || c == d || !near(a, b, c, d, 0) {
+    return false
+  }
+  let within = (p : P, q : P, r : P) => {
+    det(minus(q, p), minus(r, p)).abs() < 0.000000001 &&
+    dot(minus(r, p), minus(r, q)) < -0.000000001
+  }
+  within(a, b, c) ||
+  within(a, b, d) ||
+  within(c, d, a) ||
+  within(c, d, b) ||
+  (a == c && b == d) ||
+  (a == d && b == c)
+}
+
+///|
+fn better(candidate : Choice, prior : Choice?) -> Bool {
+  guard prior is Some(old) else { return true }
+  if (candidate.withEntry - old.withEntry).abs() > 0.00001 {
+    return candidate.withEntry < old.withEntry
+  }
+  let c = candidate.newConflicts + candidate.lostCrossings
+  let o = old.newConflicts + old.lostCrossings
+  if c != o {
+    return c < o
+  }
+  if (candidate.headTravel - old.headTravel).abs() > 0.00001 {
+    return candidate.headTravel < old.headTravel
+  }
+  candidate.fit.drop < old.fit.drop
+}
+
+///|
+fn verify_graph(
+  roads : Array[Road],
+  group : Set[Double],
+  joins : Array[Join],
+  f : Fit,
+) -> Json raise {
+  let graph : Map[String, Array[String]] = Map([])
+  let coords : Map[String, P] = Map([])
+  let link = (a : String, b : String) => {
+    graph.get_or_init(a, () => []).push(b)
+    graph.get_or_init(b, () => []).push(a)
+  }
+  let key = (n : Double, m : Bool) => {
+    (if m { "g/" } else { "o/" }) + n.to_string()
+  }
+  let mut head_nodes = 0
+  for r in roads {
+    let m = group.contains(r.id)
+    for i, n in r.nodes {
+      let name = key(n, m)
+      let p = snap(if m { f.at(r.ps[i]) } else { r.ps[i] })
+      assert_eq(coords.get_or_init(name, () => p), p)
+      if i > 0 {
+        if m {
+          let a = r.ps[i - 1]
+          let b = r.ps[i]
+          assert_true(distance(f.at(a), f.at(b)) <= distance(a, b) + 1.0e-8)
+          assert_true(
+            distance(f.at(mix(a, b, 0.5)), mix(f.at(a), f.at(b), 0.5)) < 1.0e-8,
+          )
+        }
+        link(key(r.nodes[i - 1], m), name)
+      }
+    }
+  }
+  for j in joins {
+    let fixed = key(j.id, false)
+    let moved = key(j.id, true)
+    assert_eq(coords[fixed], snap(j.p))
+    assert_eq(coords[moved], snap(f.at(j.p)))
+    link(fixed, moved)
+    if j.bridge {
+      head_nodes += 1
+    }
+  }
+  let start = key(605039789, true)
+  let seen : Set[String] = Set([start])
+  let queue = [start]
+  let mut i = 0
+  while i < queue.length() {
+    let n = queue[i]
+    i += 1
+    for k in graph[n] {
+      if k.has_prefix("g/") && !seen.contains(k) {
+        seen.add(k)
+        queue.push(k)
+      }
+    }
+  }
+  for j in joins {
+    assert_true(
+      seen.contains(key(j.id, true)) &&
+      graph[key(j.id, true)].contains(key(j.id, false)),
+    )
+  }
+  for r in roads {
+    if group.contains(r.id) {
+      for n in r.nodes {
+        assert_true(seen.contains(key(n, true)))
+      }
+    }
+  }
+  return {
+    "connectedBoundaryJunctions": joins.length(),
+    "connectedBridgeHeads": head_nodes,
+    "maxEndpointGap": 0,
+  }
+}
+
+///|
+fn svg_path(ps : Array[P]) -> String {
+  let b = StringBuilder()
+  for i, p in ps {
+    b.write_string("\{if i==0 {"M"}else{"L"}}\{rounded(p.x)},\{rounded(p.y)}")
+  }
+  b.to_string()
+}
+
+///|
+fn draw_trial(
+  out : String,
+  roads : Array[Road],
+  group : Set[Double],
+  joins : Array[Join],
+  rows : Array[String],
+  choices : Array[Choice],
+  marks : Array[Array[Array[P]]],
+  totals : Array[Double],
+  water : Array[Bool],
+) -> Unit raise {
+  let dike = roads[roads.search_by(r => r.id == 47518902).unwrap()]
+  let project_view = (p : P) => P::{
+    x: (p.x + p.y) * 0.7071067811865476,
+    y: (p.y - p.x) * 0.7071067811865476,
+  }
+  let original = dike.ps.map(project_view)
+  let x = original.fold(init=original[0].x, (v, p) => v.min(p.x)) - 4
+  let y = original.fold(init=original[0].y, (v, p) => v.min(p.y)) - 6
+  let w = original.fold(init=original[0].x, (v, p) => v.max(p.x)) + 6 - x
+  let h = original.fold(init=original[0].y, (v, p) => v.max(p.y)) + 3 - y
+  let panel = (960.0 * h / w).ceil().to_int()
+  let canvas = 200 + panel * 3 + 170
+  let buf = StringBuilder()
+  buf.write_string(
+    "<svg xmlns='http://www.w3.org/2000/svg' width='1016' height='\{canvas}' viewBox='0 0 1016 \{canvas}'><title>温榆河左堤路 · 整组校岸试验</title><rect width='1016' height='\{canvas}' fill='#faf8f0'/><g font-family='system-ui,sans-serif' fill='#223f35'><text x='28' y='34' font-size='23' font-weight='650'>温榆河左堤路 · 整组校岸试验</text><text x='988' y='32' text-anchor='end' font-size='13'>橙红 压水　深绿 堤路　绿 支路　紫 桥面　金 桥头及外围接线</text><defs><g id='land' shape-rendering='crispEdges'>",
+  )
+  for yy in 0..<144 {
+    let mut xx = 0
+    while xx < 256 {
+      let start = xx
+      let c = rows[yy][xx]
+      xx += 1
+      while xx < 256 && rows[yy][xx] == c {
+        xx += 1
+      }
+      if yy > 5 && yy < 101 && xx >= 148 && start <= 242 {
+        let fill = match c {
+          'r' | 'l' => "#8bc8d6"
+          'w' => "#d4e4d4"
+          'b' => "#c2d6d3"
+          'G' => "#d1dfbf"
+          _ => "#e9ead8"
+        }
+        buf.write_string(
+          "<rect x='\{start}' y='\{yy}' width='\{xx-start}' height='1' fill='\{fill}'/>",
+        )
+      }
+    }
+  }
+  buf.write_string(
+    "</g><g id='fixed' fill='none' stroke-linecap='round' stroke-linejoin='round'>",
+  )
+  for r in roads {
+    if group.contains(r.id) ||
+      !r.ps.any(p => p.x > 153 && p.x < 238 && p.y > 9 && p.y < 102) {
+      continue
+    }
+    let color = if r.structure { "#80608d" } else { "#b8bca9" }
+    let thick = if r.structure {
+      0.29
+    } else if r.pad > 0.1 {
+      0.12
+    } else {
+      0.08
+    }
+    buf.write_string(
+      "<path d='\{svg_path(r.ps)}' stroke='\{color}' stroke-width='\{thick}'/>",
+    )
+  }
+  buf.write_string("</g>")
+  for k, choice in choices {
+    let f = choice.fit
+    buf.write_string(
+      "<g id='roads\{k}' fill='none' stroke-linejoin='round'><use href='#land'/><use href='#fixed'/>",
+    )
+    for r in roads {
+      if group.contains(r.id) && r.id != dike.id {
+        buf.write_string(
+          "<path d='\{svg_path(r.ps.map(p=>f.at(p)))}' stroke='#719381' stroke-width='\{if r.pad>0.1{0.16}else{0.09}}'/>",
+        )
+      }
+    }
+    buf.write_string(
+      "<path d='\{svg_path(dike.ps.map(p=>f.at(p)))}' stroke='#205b49' stroke-width='.36'/>",
+    )
+    for s in marks[k] {
+      buf.write_string(
+        "<path d='\{svg_path(s)}' stroke='#bd5135' stroke-width='.37'/>",
+      )
+    }
+    for j in joins {
+      let q = f.at(j.p)
+      buf.write_string(
+        "<path d='\{svg_path([j.p,q])}' stroke='#ad7527' stroke-width='\{if j.bridge{0.24}else{0.12}}'/>",
+      )
+      if j.bridge {
+        for (lo, hi) in intervals(snap(j.p), snap(q), water, j.pad) {
+          buf.write_string(
+            "<path d='\{svg_path([mix(j.p,q,lo),mix(j.p,q,hi)])}' stroke='#bd5135' stroke-width='.25'/>",
+          )
+        }
+        buf.write_string(
+          "<circle cx='\{j.p.x}' cy='\{j.p.y}' r='.25' fill='#fff6d4' stroke='#624332' stroke-width='.1'/>",
+        )
+      }
+    }
+    buf.write_string("</g>")
+  }
+  buf.write_string("</defs>")
+  let matrix = "matrix(.7071067811865476 -.7071067811865476 .7071067811865476 .7071067811865476 0 0)"
+  let titles = [
+    "原位", "保留外围交叉关系", "堤路压水最低 · 外围交叉待解",
+  ]
+  for k, choice in choices {
+    let top = 72 + k * (panel + 44)
+    let number = (choice.withEntry * 100).round() / 100
+    let group_total = (totals[k] * 100).round() / 100
+    buf.write_string(
+      "<text x='28' y='\{top-10}' font-size='17' font-weight='600'>\{titles[k]}</text><text x='988' y='\{top-10}' text-anchor='end' font-size='15'>堤路　\{number} 格　　 全组含接线　\{group_total} 格</text><svg x='28' y='\{top}' width='960' height='\{panel}' viewBox='\{x} \{y} \{w} \{h}'><g transform='\{matrix}'><use href='#roads\{k}'/></g></svg>",
+    )
+  }
+  let nw = joins[joins.search_by(j => j.id == 605039789).unwrap()].p
+  let zoom = project_view(nw)
+  let oy = 193 + panel * 3
+  for k in 0..<3 {
+    let sx = 28 + k * 323
+    buf.write_string(
+      "<text x='\{sx}' y='\{oy-12}' font-size='14'>\{if k==0{"西北桥头 · 原位"}else if k==1{"同一桥头 · 保留交叉"}else{"同一桥头 · 压水最低"}}</text><svg x='\{sx}' y='\{oy}' width='314' height='152' viewBox='\{zoom.x-4.5} \{zoom.y-3.9} 12 5.81'><g transform='\{matrix}'><use href='#roads\{k}'/></g></svg>",
+    )
+  }
+  buf.write_string("</g></svg>")
+  @fs.write_string_to_file(out + "/comparison.svg", buf.to_string())
+}

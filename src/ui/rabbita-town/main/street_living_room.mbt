@@ -1,16 +1,17 @@
 ///|
 /// A presentation preset, never a second world or a new road registration.
 fn street_living_room_requested(view : String, review : Bool) -> Bool {
-  view == "living-room" || (view != "town" && view != "overview" && !review)
+  ["living-room", "overview", "region"].contains(view) ||
+  (view != "town" && !review)
 }
 
 ///|
 fn initial_street_living_room() -> Bool {
   street_living_room_requested(
     current_browser_query_param("view"),
-    [
-      "road-trial", "scene", "landmarks", "building-bearing", "layer", "area", "panel",
-    ].any(key => !current_browser_query_param(key).is_empty()) ||
+    ["road-trial", "registration-review", "area", "panel", "edit"].any(key => {
+      !current_browser_query_param(key).is_empty()
+    }) ||
     town_design_registration_review_requested() ||
     browser_handoff_requested(),
   )
@@ -54,14 +55,13 @@ extern "js" fn street_living_room_camera(
   #|       camera.livingRoom = false;
   #|       delete camera.livingRoomSize;
   #|       delete camera.streetTransition;
-  #|       delete camera.streetClose;
+  #|       delete camera.streetClose;delete camera.streetWide;
   #|     }
   #|     canvas.dataset.townView = 'overview';
   #|     return;
   #|   }
   #|   const w = canvas.clientWidth || 1280, h = canvas.clientHeight || 720;
   #|   const stamp = `${w}:${h}`;
-  #|   camera.streetMinZoom = w < 700 ? 1.8 : 2.1;
   #|   if (!camera.livingRoom) {
   #|     const mobile = w < 700;
   #|     camera.z = mobile ? 2.6 : Math.min(3.6, Math.max(2.8, w / 340));
@@ -71,16 +71,20 @@ extern "js" fn street_living_room_camera(
   #|     camera.streetOverview = false;
   #|     camera.streetFollow = true;
   #|   }
-  #|   if (overview !== camera.streetOverview) {
+  #|   if (overview !== camera.streetOverview || (overview && camera.streetRefit)) {
   #|     const from = {x:camera.x,y:camera.y,z:camera.z};
   #|     let to;
   #|     if (overview) {
-  #|       camera.streetClose = camera.streetTransition?.to || from;
-  #|       to = {x:1792,y:3200,z:Math.max(.03,Math.min((w-48)/12800,(h-160)/6400))};
+  #|       if (!camera.streetOverview) camera.streetClose = camera.streetTransition?.to || from;
+  #|       const shear=globalThis.__townDisplay?.forCanvas(canvas).shear || 0;
+  #|       const spanY=256*Math.abs(16+32*shear)+144*Math.abs(16-32*shear);
+  #|       to = !camera.streetRefit && camera.streetWide || {x:1792,y:3200,z:Math.max(.025,Math.min(w*.94/12800,h*.9/spanY))};
   #|     } else if (camera.streetClose) {
-  #|       to = {...camera.streetClose,z:Math.max(camera.streetMinZoom,camera.streetClose.z)};
+  #|       camera.streetWide = from;
+  #|       to = {...camera.streetClose};
   #|     }
   #|     camera.streetOverview = overview;
+  #|     delete camera.streetRefit;
   #|     if (to) camera.streetTransition = {from,to,start:performance.now()};
   #|   }
   #|   if (camera.streetTransition) {
@@ -92,7 +96,7 @@ extern "js" fn street_living_room_camera(
   #|     camera.z=Math.exp(Math.log(t.from.z)+(Math.log(t.to.z)-Math.log(t.from.z))*mix);
   #|     if(progress===1) { Object.assign(camera,t.to); delete camera.streetTransition; }
   #|   }
-  #|   if(!overview && !camera.streetTransition) camera.z=Math.max(camera.streetMinZoom,Math.min(3.6,camera.z));
+  #|   // Manual zoom and project focus use the full range in either camera preset.
   #|   camera.livingRoomSize = stamp;
   #|   camera.gentleTrialFramed = true;
   #|   canvas.dataset.townView = overview ? 'street-overview' : 'living-room';
@@ -313,6 +317,10 @@ fn render_street_living_room(
 }
 
 ///|
+extern "js" fn street_shore_review_active() -> Bool =
+  #| () => new URLSearchParams(globalThis.location?.search || '').get('shore-review') === '1'
+
+///|
 /// Conventional utilities share one compact dock. Explanations appear only
 /// inside the control panel; live walking state remains available to readers.
 fn render_street_tools(
@@ -341,6 +349,16 @@ fn render_street_tools(
         on_click=dispatch(StreetRecenter),
         town_ui_icon("pin"),
       ),
+      if overview {
+        a(
+          id="street-project-distribution",
+          href="?view=overview&projects=1",
+          class="street-button street-project-distribution",
+          "项目分布",
+        )
+      } else {
+        @html.nothing
+      },
       span(
         id="street-walk-status",
         class="street-sr-only",
@@ -377,6 +395,22 @@ fn render_street_tools(
             ),
             span("WASD / 方向键 · 拖动环顾"),
           ]),
+          if overview {
+            button(
+              id="street-shore-review",
+              class="street-button street-shore-review",
+              attrs=@html.Attrs::build().aria_pressed(
+                if street_shore_review_active() {
+                  "true"
+                } else {
+                  "false"
+                },
+              ),
+              "路网复核",
+            )
+          } else {
+            @html.nothing
+          },
           if experiment {
             @html.details(class="frontier-diagnostics", [
               @html.summary("高级"),
@@ -423,11 +457,14 @@ extern "js" fn street_place_entries(
   #| (points,w,h) => {
   #|   const nav = document.querySelector('.street-destinations');
   #|   if (nav) nav.style.transform = '';
-  #|   const ps=JSON.parse(points), ids=['street-interior','street-events','street-stories','street-seat','street-cafe'];
+  #|   const display=document.getElementById('energy-valley-canvas')?.townProjection;
+  #|   const ps=JSON.parse(points).map(([x,y])=>[x,display?display.screenY(x,y):y]);h=display?.height??h;
+  #|   const ids=['street-interior','street-events','street-stories','street-seat','street-cafe'];
   #|   const dock=globalThis.__moontownGoldenValleyCamera?.streetOverview;
   #|   const pos=document.getElementById('street-walk-status')?.dataset.position?.split(',').map(Number);
   #|   const camera=globalThis.__moontownGoldenValleyCamera;
   #|   const visitor=pos?[w/2+((pos[0]-pos[1])*32-camera.x)*camera.z,h/2+((pos[0]+pos[1])*16-camera.y)*camera.z]:null;
+  #|   if(visitor&&display) visitor[1]=display.screenY(visitor[0],visitor[1]+(display.h-h)/2);
   #|   for(let i=0;i<ids.length;i++) {
   #|     const el=document.getElementById(ids[i]); if(!el) continue;
   #|     const x=dock?w/2+(i-1)*92:ps[i][0]+(i===3?52:0), y=dock?h-110:ps[i][1]+(i===3?16:-52);

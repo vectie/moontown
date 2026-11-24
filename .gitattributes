@@ -1,3 +1,6 @@
 # Preserve compiler diagnostics and patches verbatim, including diagram spacing.
 evidence/**/*.log -whitespace
 evidence/**/*.patch -whitespace
+
+# Preserve the artist-supplied tour, including mixed line endings.
+src/ui/landmark-studio/web/wlxk.html -text -whitespace

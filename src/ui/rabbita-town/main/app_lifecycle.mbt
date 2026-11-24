@@ -93,9 +93,24 @@ fn update_non_form_message_before_imported_surface_fence(
   model : Model,
 ) -> (Cmd, Model) {
   match msg {
-    StreetOverview =>
-      model_only_update({ ..model, street_overview: !model.street_overview, })
+    StreetOverview => {
+      let overview = !model.street_overview
+      replace_browser_query_param(
+        "view",
+        if overview {
+          "overview"
+        } else {
+          "living-room"
+        },
+      )
+      replace_browser_query_param("district", "")
+      model_only_update({ ..model, street_overview: overview, })
+    }
     StreetRecenter => {
+      if model.street_overview {
+        replace_browser_query_param("view", "living-room")
+        replace_browser_query_param("district", "")
+      }
       street_walk_follow(true)
       model_only_update({ ..model, street_overview: false, })
     }
@@ -104,9 +119,14 @@ fn update_non_form_message_before_imported_surface_fence(
     StreetVisitArrived(generation) =>
       street_visit_arrive(dispatch, model, generation)
     SetStreetLivingRoom(arriving) => {
+      let overview = arriving &&
+        model.street_living_room &&
+        model.street_overview
       replace_browser_query_param(
         "view",
-        if arriving {
+        if overview {
+          "overview"
+        } else if arriving {
           "living-room"
         } else {
           "town"
@@ -120,6 +140,7 @@ fn update_non_form_message_before_imported_surface_fence(
       let next = {
         ..close_town_transient_surfaces(model),
         street_living_room: arriving,
+        street_overview: overview,
         dashboard_section: None,
         map_lab_open: false,
         energy_intro_open: false,
@@ -235,7 +256,9 @@ fn update_non_form_message_before_imported_surface_fence(
       replace_browser_query_param("request", "")
       replace_browser_query_param(
         "view",
-        if model.street_living_room {
+        if model.street_overview {
+          "overview"
+        } else if model.street_living_room {
           "living-room"
         } else {
           "town"

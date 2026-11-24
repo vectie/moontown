@@ -1,0 +1,112 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.5.5/crypto",
+  "moonbitlang/x@0.5.5/fs" @syncfs,
+}
+
+///|
+async fn digest(path : String) -> String { @crypto.bytes_to_hex_string(@crypto.sha256(@fs.read_file(path).binary())) }
+
+///|
+async fn blob(root : String, name : String, value : Json) -> Json {
+  let bytes = value.stringify()
+  let path = root + "/" + name
+  @fs.write_file(path, bytes, create_mode=CreateNew)
+  let hash = digest(path)
+  let size = @fs.read_file(path).binary().length()
+  @fs.rename(path, root + "/blobs/sha256/" + hash)
+  {"digest":"sha256:" + hash, "size":size}
+}
+
+///|
+fn paths(root : String, prefix : String) -> Array[String] raise {
+  let result : Array[String] = []
+  for name in @syncfs.read_dir(root + "/" + prefix) {
+    if name.has_prefix("._") || name == ".DS_Store" { continue }
+    let path = if prefix.is_empty() { name } else { prefix + "/" + name }
+    if @syncfs.is_dir(root + "/" + path) { result.append(paths(root, path)) }
+    else if path != "asset-manifest.json" { result.push(path) }
+  }
+  result
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, release, kind, base_digest, merged_ui] && ["ui","server"].contains(kind) else {
+    fail("package-wlxk-release.mbtx RELEASE_DIR ui|server CURRENT_BASE_DIGEST CURRENT_MERGED_UI")
+  }
+  let repository = if kind == "ui" { "moon/hosted-apps" } else { "moon/moontown-account-gateway" }
+  let root = release + "/" + kind + "-oci"
+  guard !@fs.exists(root) else { fail("Use a fresh immutable release directory") }
+  @fs.mkdir(root + "/blobs/sha256", recursive=true)
+  let layer = root + "/layer"
+  @fs.mkdir(layer)
+  if kind == "server" {
+    @shell.Cmd("/home/HwHiAiUser/.moon-new/bin/moon", ["build", "--release"], cwd=release + "/server").run()
+    @fs.mkdir(layer + "/opt/wlxk", recursive=true)
+    @shell.Cmd("cp", [release + "/server/_build/native/release/build/main/main.exe", layer + "/opt/wlxk/server"]).run()
+    @shell.Cmd("chmod", ["755", layer + "/opt/wlxk/server"]).run()
+  } else {
+    let target = layer + "/opt/moontown/ui"
+    @fs.mkdir(target + "/landmark-studio", recursive=true)
+    @fs.write_file(target + "/landmark-studio/wlxk.html", @fs.read_file(release + "/wlxk.html").binary())
+    @shell.Cmd("gzip", ["-n", "-9", "-k", target + "/landmark-studio/wlxk.html"]).run()
+    @fs.write_file(target + "/landmark-studio/wlxk.html.etag", "\"" + digest(target + "/landmark-studio/wlxk.html") + "\"")
+    let manifest = @json.parse(@fs.read_file(merged_ui + "/asset-manifest.json").text())
+    guard manifest is Object(fields) else { fail("Invalid asset manifest") }
+    let names = paths(merged_ui, "")
+    names.sort()
+    let records : Array[Json] = []
+    for name in names {
+      let file = if @fs.exists(target + "/" + name) { target + "/" + name } else { merged_ui + "/" + name }
+      records.push({"path":name, "bytes":@fs.read_file(file).binary().length(), "sha256":digest(file)})
+    }
+    fields["files"] = Json(records)
+    @fs.write_file(target + "/asset-manifest.json", manifest.stringify())
+  }
+  let registry = "https://lunanexa-registry.lunanexa-registry.svc.cluster.local:5000"
+  let base = registry + "/v2/" + repository
+  let curl = ["--noproxy","*","--cacert","/etc/ssl/certs/ca-certificates.crt","--fail","--silent","--show-error"]
+  @shell.Cmd("curl", [..curl,"-H","Accept: application/vnd.oci.image.manifest.v1+json","-o",root+"/base-manifest.json",base+"/manifests/"+base_digest]).run()
+  guard "sha256:" + digest(root+"/base-manifest.json") == base_digest else { fail("Base manifest mismatch") }
+  let manifest = @json.parse(@fs.read_file(root+"/base-manifest.json").text())
+  guard manifest is Object(fields) && manifest is {"config":{"digest":String(config_digest),..}, "layers":Array(layers),..} else { fail("Invalid base manifest") }
+  @shell.Cmd("curl", [..curl,"-o",root+"/base-config.json",base+"/blobs/"+config_digest]).run()
+  guard "sha256:" + digest(root+"/base-config.json") == config_digest else { fail("Base config mismatch") }
+  let config = @json.parse(@fs.read_file(root+"/base-config.json").text())
+  guard config is Object(config_fields) && config is {"architecture":"amd64","os":"linux","rootfs":{"diff_ids":Array(diffs),..},..} else { fail("Unexpected base platform") }
+  if kind == "server" {
+    guard config_fields.get("config") is Some(Object(runtime)) else { fail("Runtime config missing") }
+    runtime["Entrypoint"] = Json(["/opt/wlxk/server"])
+    runtime["Cmd"] = Json(([] : Array[String]))
+    runtime["WorkingDir"] = Json("/")
+  }
+  let archive = root+"/payload.tar"
+  @shell.Cmd("tar", ["--owner=0","--group=0","--mode=u+rwX,go+rX","-C",layer,"-cf",archive,"."]).run()
+  let diff = digest(archive)
+  @shell.Cmd("gzip", ["-n","-k",archive]).run()
+  let compressed = digest(archive+".gz")
+  let bytes = @fs.read_file(archive+".gz").binary().length()
+  @fs.rename(archive+".gz",root+"/blobs/sha256/"+compressed)
+  diffs.push(Json("sha256:"+diff))
+  layers.push({"mediaType":"application/vnd.oci.image.layer.v1.tar+gzip","digest":"sha256:"+compressed,"size":bytes})
+  if config_fields.get("history") is Some(Array(history)) { history.push({"created_by":"WLXK account-aware realtime repair", "empty_layer":false}) }
+  guard blob(root,"new-config.json",config) is Object(descriptor) else { fail("Descriptor") }
+  descriptor["mediaType"] = Json("application/vnd.oci.image.config.v1+json")
+  fields["config"] = Json::object(descriptor)
+  fields["mediaType"] = Json("application/vnd.oci.image.manifest.v1+json")
+  guard blob(root,"new-manifest.json",manifest) is Object(image) else { fail("Image descriptor") }
+  image["mediaType"] = Json("application/vnd.oci.image.manifest.v1+json")
+  image["platform"] = {"architecture":"amd64","os":"linux"}
+  @fs.write_file(root+"/index.json",({"schemaVersion":2,"manifests":[Json::object(image)]}:Json).stringify())
+  @fs.write_file(root+"/oci-layout",({"imageLayoutVersion":"1.0.0"}:Json).stringify())
+  @fs.write_file(release+"/"+kind+"-image.json",({"base":base_digest,"image":image.get("digest").unwrap(),"overlay_bytes":bytes}:Json).stringify(),create_mode=CreateNew)
+  let tag = "account-binding-" + release.split("/").to_array().last().unwrap().to_owned() + "-" + kind
+  @shell.Cmd("/home/HwHiAiUser/.moon-new/bin/moon", ["run","/home/HwHiAiUser/moon-public/work/products-20261111-r1/publish-account-gateway.mbtx","--",root,registry,repository,tag,"/etc/ssl/certs/ca-certificates.crt"]).run()
+  println(@fs.read_file(release+"/"+kind+"-image.json").text())
+}

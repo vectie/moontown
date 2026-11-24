@@ -1,0 +1,401 @@
+///|
+import {
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.4.50/fs",
+}
+
+///|
+struct P {
+  x : Double
+  y : Double
+} derive(FromJson, ToJson)
+
+///|
+struct Goal {
+  way : Double
+  deck : Double
+  line : Array[P]
+  span : Array[P]
+} derive(FromJson)
+
+///|
+struct Input {
+  water : Array[Bool]
+  line : Array[P]
+  goals : Array[Goal]
+  a : P
+  b : P
+  va : P
+  vb : P
+  plan : P
+} derive(FromJson)
+
+///|
+fn dot(a : P, b : P) -> Double {
+  a.x * b.x + a.y * b.y
+}
+
+///|
+fn minus(a : P, b : P) -> P {
+  { x: a.x - b.x, y: a.y - b.y, }
+}
+
+///|
+fn norm(a : P) -> Double {
+  dot(a, a).sqrt()
+}
+
+///|
+fn mix(a : P, b : P, t : Double) -> P {
+  { x: a.x + t * (b.x - a.x), y: a.y + t * (b.y - a.y), }
+}
+
+///|
+// D is the displacement of a symmetric affine contraction. At anchors A and B
+// it is independently bounded. The last variable is the contraction normal
+// to their chord. Dropping positive-semidefinite coupling enlarges the search.
+struct Form {
+  c : Double
+  k : Array[Double]
+}
+
+///|
+struct Site {
+  x : Form
+  y : Form
+}
+
+///|
+struct Domain {
+  mid : Array[Double]
+  half : Array[Double]
+}
+
+///|
+fn form_value(f : Form, box : Domain) -> (Double, Double) {
+  let mut c = f.c
+  let mut e = 0.0000001
+  for i in 0..<5 {
+    c += f.k[i] * box.mid[i]
+    e += f.k[i].abs() * box.half[i]
+  }
+  (c - e, c + e)
+}
+
+///|
+fn axis(site : Site, n : P, p : P) -> Form {
+  {
+    c: (site.x.c - p.x) * n.x + (site.y.c - p.y) * n.y,
+    k: Array::makei(5, i => n.x * site.x.k[i] + n.y * site.y.k[i]),
+  }
+}
+
+///|
+fn site(p : P, a : P, b : P) -> Site {
+  let h = minus(b, a)
+  let l = norm(h)
+  let u = P::{ x: h.x / l, y: h.y / l, }
+  let v = P::{ x: -u.y, y: u.x, }
+  let q = minus(p, a)
+  let t = dot(q, u) / l
+  let y = dot(q, v)
+  let s = y / l
+  {
+    x: {
+      c: p.x,
+      k: [
+        1 - t - s * u.x * v.x,
+        -s * u.x * v.y,
+        t + s * u.x * v.x,
+        s * u.x * v.y,
+        -y * v.x,
+      ],
+    },
+    y: {
+      c: p.y,
+      k: [
+        -s * u.y * v.x,
+        1 - t - s * u.y * v.y,
+        s * u.y * v.x,
+        t + s * u.y * v.y,
+        -y * v.y,
+      ],
+    },
+  }
+}
+
+///|
+struct Edge {
+  na : Form
+  nb : Form
+  ta : Form
+  tb : Form
+  l : Double
+}
+
+///|
+fn possible(e : Edge, box : Domain) -> Bool {
+  let tol = 0.00008
+  let n = form_value(e.na, box)
+  let m = form_value(e.nb, box)
+  if n.0.min(m.0) > tol || n.1.max(m.1) < -tol {
+    return false
+  }
+  let t = form_value(e.ta, box)
+  let v = form_value(e.tb, box)
+  t.0.min(v.0) <= e.l + tol && t.1.max(v.1) >= -tol
+}
+
+///|
+struct Case {
+  way : Double
+  deck : Double
+  edges : Array[Edge]
+}
+
+///|
+fn goals(input : Input, end : P, cap : Double) -> Array[Case] {
+  let cases : Array[Case] = []
+  for g in input.goals {
+    let edges : Array[Edge] = []
+    for i in 1..<g.line.length() {
+      let p = g.line[i - 1]
+      let q = g.line[i]
+      for j in 1..<g.span.length() {
+        let a = g.span[j - 1]
+        let b = g.span[j]
+        if p.x.min(q.x) > a.x.max(b.x) + cap + 0.001 ||
+          p.x.max(q.x) < a.x.min(b.x) - cap - 0.001 ||
+          p.y.min(q.y) > a.y.max(b.y) + cap + 0.001 ||
+          p.y.max(q.y) < a.y.min(b.y) - cap - 0.001 {
+          continue
+        }
+        let h = minus(b, a)
+        let l = norm(h)
+        if l < 0.00001 {
+          continue
+        }
+        let u = P::{ x: h.x / l, y: h.y / l, }
+        let n = P::{ x: -u.y, y: u.x, }
+        let p = site(p, input.a, end)
+        let q = site(q, input.a, end)
+        edges.push({
+          na: axis(p, n, a),
+          nb: axis(q, n, a),
+          ta: axis(p, u, a),
+          tb: axis(q, u, a),
+          l,
+        })
+      }
+    }
+    cases.push({ way: g.way, deck: g.deck, edges, })
+  }
+  cases
+}
+
+///|
+fn wet(s : Site, box : Domain, sum : Array[Int32]) -> Bool {
+  let x = form_value(s.x, box)
+  let y = form_value(s.y, box)
+  // Test a subset of the strict interior of the full pavement mask. Rounding
+  // the endpoints in the export can move an interpolated point by 0.00005.
+  let eps = 0.1198
+  let lo = (x.0 + eps).floor().to_int()
+  let hi = (x.1 - eps).floor().to_int()
+  let ly = (y.0 + eps).floor().to_int()
+  let hy = (y.1 - eps).floor().to_int()
+  // Between two inflated cells either cell would suffice. Pick the nearer
+  // midpoint cell. This discarded alternative can only leave extra boxes.
+  let l = lo.min(hi)
+  let r = lo.max(hi) + 1
+  let t = ly.min(hy)
+  let b = ly.max(hy) + 1
+  if l < 0 || r > 256 || t < 0 || b > 144 {
+    return false
+  }
+  let count = sum[b * 257 + r] -
+    sum[t * 257 + r] -
+    sum[b * 257 + l] +
+    sum[t * 257 + l]
+  count == (b - t) * (r - l)
+}
+
+///|
+struct Proof {
+  boxes : Int32
+  wet : Int32
+  span : Int32
+  cone : Int32
+  unresolved : Int32
+} derive(ToJson)
+
+///|
+fn certify(
+  input : Input,
+  cases : Array[Case],
+  cap : Double,
+  new_head : Bool,
+  angles : Bool,
+  limit : Int32,
+) -> Proof {
+  let end = input.line.last().unwrap()
+  let sites : Array[Site] = []
+  for i in 1..<input.line.length() {
+    let a = input.line[i - 1]
+    let b = input.line[i]
+    let n = (norm(minus(a, b)) / 0.45).ceil().to_int().max(1)
+    for j in 0..<n {
+      sites.push(
+        site(mix(a, b, (j.to_double() + 0.5) / n.to_double()), input.a, end),
+      )
+    }
+  }
+  let prefix = Array::make(257 * 145, 0)
+  for y in 0..<144 {
+    for x in 0..<256 {
+      let k = (y + 1) * 257 + x + 1
+      prefix[k] = prefix[k - 257] +
+        prefix[k - 1] -
+        prefix[k - 258] +
+        (if input.water[y * 256 + x] { 1 } else { 0 })
+    }
+  }
+  let cone : Array[Form] = []
+  for item in [(input.a, input.va), (input.b, input.vb)] {
+    let p = item.0
+    let v = item.1
+    let anchor = if new_head && p.x == input.b.x {
+      P::{ x: p.x + input.plan.x, y: p.y + input.plan.y, }
+    } else {
+      p
+    }
+    for sign in [-1.0, 1.0] {
+      // A slightly widened 15 degree cone contains every accepted rounded socket.
+      let n = P::{
+        x: 0.258820 * v.x + sign * 0.965925 * v.y,
+        y: 0.258820 * v.y - sign * 0.965925 * v.x,
+      }
+      cone.push(axis(site(p, input.a, end), n, anchor))
+    }
+  }
+  let init : Domain = {
+    mid: [0, 0, 0, 0, 0.5],
+    half: [cap + 0.0001, cap + 0.0001, cap + 0.0001, cap + 0.0001, 0.500001],
+  }
+  let work = [init]
+  let mut boxes = 0
+  let mut clipped = 0
+  let mut water = 0
+  let mut relations = 0
+  let mut unknown = 0
+  while !work.is_empty() && boxes < limit {
+    let box = work.pop().unwrap()
+    boxes += 1
+    if angles && cone.any(f => form_value(f, box).1 < -0.001) {
+      clipped += 1
+      continue
+    }
+    if cases.any(g => !g.edges.any(e => possible(e, box))) {
+      relations += 1
+      continue
+    }
+    if sites.any(s => wet(s, box, prefix)) {
+      water += 1
+      continue
+    }
+    let factors = [1.0, 1, 1, 1, 25]
+    let mut dim = 0
+    for i in 1..<5 {
+      if box.half[i] * factors[i] > box.half[dim] * factors[dim] {
+        dim = i
+      }
+    }
+    if box.half[dim] * factors[dim] < 0.002 {
+      unknown += 1
+      break
+    }
+    let half = box.half.copy()
+    half[dim] *= 0.5
+    for step in [-1.0, 1.0] {
+      let mid = box.mid.copy()
+      mid[dim] += step * half[dim]
+      work.push({ mid, half, })
+    }
+  }
+  {
+    boxes,
+    wet: water,
+    span: relations,
+    cone: clipped,
+    unresolved: unknown + work.length(),
+  }
+}
+
+///|
+fn main raise {
+  check_projection()
+  let input : Input = @json.from_json(
+    @json.parse(
+      @fs.read_file_to_string("output/wenyu-fixed-heads/constraints.json"),
+    ),
+  )
+  let args = @env.args()
+  let cap = if args.length() > 1 {
+    @json.from_json(@json.parse(args[1]))
+  } else {
+    5.0
+  }
+  let all = goals(input, input.line.last().unwrap(), cap)
+  let keys = if args.length() > 2 { args[2] } else { "all" }
+  let cases = all.filter(g => keys == "all" || keys.contains(g.deck.to_string()))
+  let angles = args.length() > 3 && args[3] == "angle"
+  let plan = args.length() > 4 && args[4] == "plan"
+  assert_true(!cases.is_empty())
+  let result = certify(input, cases, cap, plan, angles, 1600000)
+  println(
+    Json::object({
+      "maxTravel": Json(cap),
+      "spans": Json(cases.map(g => (g.way, g.deck))),
+      "fixedBridgeCones": Json(angles),
+      "planQinbei": Json(plan),
+      "coverage": Json(result),
+    }).stringify(),
+  )
+}
+
+///|
+fn check_projection() -> Unit raise {
+  let a = P::{ x: 4, y: 12, }
+  let b = P::{ x: 89, y: 71, }
+  let h = minus(b, a)
+  let l = norm(h)
+  let v = P::{ x: -h.y / l, y: h.x / l, }
+  // Check the five coordinates against a known symmetric compression with a
+  // nonzero off-diagonal term, independently of the interval parameterization.
+  let displacement = (p : P) => P::{
+    x: 2.1 - 0.083 * p.x + 0.021 * p.y,
+    y: 1.2 + 0.021 * p.x - 0.057 * p.y,
+  }
+  let da = displacement(a)
+  let db = displacement(b)
+  let g = 0.083 * v.x * v.x - 2 * 0.021 * v.x * v.y + 0.057 * v.y * v.y
+  let box : Domain = {
+    mid: [da.x, da.y, db.x, db.y, g],
+    half: [0, 0, 0, 0, 0],
+  }
+  for p in [a, b, P::{ x: 15, y: 45, }, { x: 116, y: 93, }] {
+    let s = site(p, a, b)
+    let dx = displacement(p)
+    let rx = form_value(s.x, box)
+    let ry = form_value(s.y, box)
+    assert_true(
+      rx.0 < p.x + dx.x &&
+      rx.1 > p.x + dx.x &&
+      ry.0 < p.y + dx.y &&
+      ry.1 > p.y + dx.y,
+    )
+  }
+  let dry = Array::make(257 * 145, 0)
+  assert_false(wet(site(a, a, b), box, dry))
+}

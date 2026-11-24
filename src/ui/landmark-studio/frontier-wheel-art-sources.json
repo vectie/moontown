@@ -1,0 +1,20 @@
+{
+  "src/ui/assets/tilemap/wenyu-bank-road-v2.svg": "2a0cae5ae5bfcf33130ae794059ae2956fe2cf9bd86224563bded889049398a9",
+  "src/ui/assets/tilemap/wenyu_reference_labels.json": "9b93cc1b9c55aa26ec5e2e21b177aea4cba97940e2a78fea06d36d04d84f6d89",
+  "src/ui/landmark-studio/web/district-ground.json": "714cf4566b8c766cca01eb02d3d531033ade2b1e96a89e04069589566c7d01e0",
+  "src/ui/landmark-studio/web/district-studies.json": "a6c19590ed800007848db0732b8ac379f220cfcd04abe550649bc20b837b4268",
+  "src/ui/landmark-studio/web/region-anchors.json": "9f3fcfc44535552cad13f38dbbb1563ad496f7d0e711578b074b03ba1acfe1fe",
+  "src/ui/landmark-studio/web/region-context.bin": "fb8f62bba3f90a0b96ea678f28e79a24afddc5fe510e8db12286b8468a385297",
+  "src/ui/landmark-studio/web/region-projections.json": "b4b4248eaeea5e255fee1d4c275504cae99ec898b08a313285c1b34e7ab3122f",
+  "src/ui/landmark-studio/web/town-projections/manifest.json": "c0b2e97a1eee8ba5b2136a877491b48dbd5c15f3d9934abf7365607fda3ce2a5",
+  "src/world_frontier/city.mbt": "ff3c4278760668e633760e1412b1717b0fbdd0d0697622e94bea05d60b196473",
+  "src/world_frontier/district.mbt": "3f4ed287db60b80bcde2f65e1f610b8983497442feedfcc44c4e162477dec3ee",
+  "src/world_frontier/exterior.mbt": "d718dca71d29df8dff425b373d9567064ea991a1359b3ea5d834e91a2a072387",
+  "src/world_frontier/frontage.mbt": "029036d396f1691a81a100342a72cd248fb197aecc753d2e409814752ff2114a",
+  "src/world_frontier/stream.mbt": "e44ebbcb9e0f87e363c2e85730fa2e3995c4146422c84015377fa1d8725eb28a",
+  "src/world_frontier/world.mbt": "e2439ffb36f8a4487080bf9dcf817b52f20ac35574281ccab1ca4d9c7d9f6763",
+  "src/ui/assets/tilemap/wenyu-frontier-exits.json": "c07f55ecc20c46d53eda875f9f156c82cb4c68806a338d9ed4c7d00ff0243561",
+  "src/ui/rabbita-town/main/frontier_boundary.mbt": "0c976c01cffbfd89deb51add8aa99eebad03973ff7fe7ca9e097fefd06c5c07b",
+  "src/ui/rabbita-town/main/frontier_navigation.mbt": "3d1a6085732c0d44bb3a6ff91b47e6be67dc000669b274192b9f95be8e42ec9f",
+  "src/ui/rabbita-town/main/frontier_scene.mbt": "7d88afb45315964bbb73ee57bfb24204f8ea9d0e4e95b9213ed9eb3ffdd0fffe"
+}

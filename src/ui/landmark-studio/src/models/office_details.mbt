@@ -175,8 +175,8 @@ fn curved_details(
       let fy = y + level.to_double() * 4.1
       quad(
         spandrels,
-        [ax, fy - 0.65, az],
-        [bx, fy - 0.65, bz],
+        [ax, fy - (if creative { 0.9 } else { 0.55 }), az],
+        [bx, fy - (if creative { 0.9 } else { 0.55 }), bz],
         [bx, fy - 0.06, bz],
         [ax, fy - 0.06, az],
       )
@@ -226,6 +226,7 @@ fn curved_details(
       )
     }
   }
+  // The copper accents are vertical fins. Glazed floor edges remain dark.
   triangles(p, "metal", spandrels)
   triangles(p, "glass", panes)
   if !creative {

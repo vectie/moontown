@@ -98,7 +98,9 @@ fn neighborhood_cmd(
 /// The neighborhood belongs to the shared town, not each user's workspace.
 /// platform-base.js exempts this precise API family from workspace rewriting.
 fn neighborhood_api_path(pathname : String, route : String) -> String {
-  let base = if pathname == "/moontown" || pathname.has_prefix("/moontown/") {
+  let base = if pathname == "/town" || pathname.has_prefix("/town/") {
+    "/town"
+  } else if pathname == "/moontown" || pathname.has_prefix("/moontown/") {
     "/moontown"
   } else {
     ""

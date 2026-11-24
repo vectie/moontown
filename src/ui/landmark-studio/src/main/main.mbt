@@ -5,6 +5,7 @@ extern "js" fn publish(data : String) =
 ///|
 fn main {
   publish(@models.studies().stringify())
+  publish_center_block(n => @models.future_center_map_parts(n).stringify())
   publish_interior(@models.interior_study().stringify())
   publish_town_interior(text => @models.town_interior_study(text).stringify())
   publish_datacenter(
@@ -13,6 +14,10 @@ fn main {
     text => @models.data_center_observation(text).stringify(),
   )
 }
+
+///|
+extern "js" fn publish_center_block(build : (Int32) -> String) =
+  #| build => { globalThis.moonTownCenterBlock = n => JSON.parse(build(n)); }
 
 ///|
 extern "js" fn publish_interior(data : String) =

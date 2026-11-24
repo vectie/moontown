@@ -7,6 +7,8 @@ import {
 }
 
 // Values
+pub fn decode_polyline(String) -> Array[Point]?
+
 pub fn distance(Point, Point) -> Double
 
 pub fn nearest(Graph, Point, Double) -> String?
@@ -25,7 +27,8 @@ pub(all) struct Edge {
 pub(all) struct Graph {
   nodes : Array[Node]
   edges : Array[Edge]
-} derive(@json.FromJson)
+}
+pub impl @json.FromJson for Graph
 
 pub(all) struct Node {
   id : String

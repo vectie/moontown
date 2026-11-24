@@ -39,3 +39,28 @@ test "constant graph route chooses shortest connected journey" {
   assert_true(@landmark_routes.nearest(g, { x: 100, y: 100, }, 4) is None)
   assert_eq(@landmark_routes.nearest(g, { x: 0.1, y: 0, }, 4), Some("a"))
 }
+
+///|
+test "packed geometry keeps every shape point and signed delta in either direction" {
+  // First point (0.0001, 0.0002), second point (0, 0.0005).
+  let data = "AC@E"
+  let pts = @landmark_routes.decode_polyline(data).unwrap()
+  assert_eq(pts.map(p => (p.x, p.y)), [(0.0001, 0.0002), (0.0, 0.0005)])
+  assert_true(@landmark_routes.decode_polyline("A") is None)
+  assert_true(@landmark_routes.decode_polyline("_") is None)
+  let g : @landmark_routes.Graph = @json.from_json({
+    "nodes": [{ "id": "a", "x": 0, "y": 0 }, { "id": "b", "x": 0, "y": 0.001 }],
+    "edges": [
+      { "a": "a", "b": "b", "bridge": false, "shape": [-5000000000.0, data] },
+    ],
+  })
+  assert_eq(g.nodes.length(), 4)
+  assert_eq(g.edges[1].b, "-5000000001")
+  let r = @landmark_routes.route(g, "b", "a").unwrap()
+  assert_eq(r.map(p => (p.x, p.y)), [
+    (0.0, 0.001),
+    (0.0, 0.0005),
+    (0.0001, 0.0002),
+    (0.0, 0.0),
+  ])
+}

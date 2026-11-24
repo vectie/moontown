@@ -1,0 +1,300 @@
+{
+  "source": "Overture / OpenStreetMap; unique nearest overlapping footprint. Input measurements in the dated building audit.",
+  "matches": [
+    {
+      "id": "cr-991390174-4",
+      "project": "cr",
+      "reference": "1b16880a-c22f-4505-839a-4a6801df0a19",
+      "oldIoU": 0.7537,
+      "offsetM": 3.3,
+      "heightM": 15.0
+    },
+    {
+      "id": "cloud-1089060429-5",
+      "project": "cloud",
+      "reference": "0f0c69c9-9758-4ad3-9788-58a9a543f3ca",
+      "oldIoU": 0.6512,
+      "offsetM": 3.2,
+      "heightM": 5.0
+    },
+    {
+      "id": "cloud-1089060429-6",
+      "project": "cloud",
+      "reference": "1517956f-4a48-4775-853b-2c20f6742b39",
+      "oldIoU": 0.5793,
+      "offsetM": 3.4,
+      "heightM": 10.0
+    },
+    {
+      "id": "cloud-1089060429-3",
+      "project": "cloud",
+      "reference": "4dded5df-2738-4bce-8643-5b0e418dd60f",
+      "oldIoU": 0.6021,
+      "offsetM": 3.2,
+      "heightM": 5.0
+    },
+    {
+      "id": "cloud-1089060429-4",
+      "project": "cloud",
+      "reference": "ea056f25-2401-4eb1-a87c-e1a4c65585bb",
+      "oldIoU": 0.771,
+      "offsetM": 2.1,
+      "heightM": 10.0
+    },
+    {
+      "id": "cloud-1089060430-2",
+      "project": "cloud",
+      "reference": "538a8fa2-f460-47be-87a3-a2f0cdb21be1",
+      "oldIoU": 0.6757,
+      "offsetM": 3.2,
+      "heightM": 20.0
+    },
+    {
+      "id": "cloud-1089060429-2",
+      "project": "cloud",
+      "reference": "28096530-b250-408d-8118-0ed237943950",
+      "oldIoU": 0.6143,
+      "offsetM": 1.3,
+      "heightM": 10.0
+    },
+    {
+      "id": "beisi-1002680193-3",
+      "project": "beisi",
+      "reference": "6cc315ad-c1b5-47f1-81ac-ca56a0d6d942",
+      "oldIoU": 0.8076,
+      "offsetM": 1.3
+    },
+    {
+      "id": "beisi-1002680193-9",
+      "project": "beisi",
+      "reference": "5fcedba9-fbd5-49ef-b23e-621510997812",
+      "oldIoU": 0.6584,
+      "offsetM": 4.1
+    },
+    {
+      "id": "beisi-1002680193-8",
+      "project": "beisi",
+      "reference": "f12ecbd9-e1bf-43d7-b8bf-09fc74de8934",
+      "oldIoU": 0.7026,
+      "offsetM": 3.4
+    },
+    {
+      "id": "beisi-1002680193-5",
+      "project": "beisi",
+      "reference": "9d36cd04-d649-49b5-8268-b53b8807e61c",
+      "oldIoU": 0.8648,
+      "offsetM": 0.7
+    },
+    {
+      "id": "beisi-1002680194-1",
+      "project": "beisi",
+      "reference": "cff081fb-4558-4457-8c92-68cfc388c763",
+      "oldIoU": 0.6278,
+      "offsetM": 3.5
+    },
+    {
+      "id": "beisi-1002680194-8",
+      "project": "beisi",
+      "reference": "3bf1cb0c-78be-4b31-85dd-717232e20542",
+      "oldIoU": 0.7155,
+      "offsetM": 4.8
+    },
+    {
+      "id": "beisi-1002680194-6",
+      "project": "beisi",
+      "reference": "fca7854a-ce50-4467-add2-57474f315d69",
+      "oldIoU": 0.551,
+      "offsetM": 3.5
+    },
+    {
+      "id": "beisi-1002680194-4",
+      "project": "beisi",
+      "reference": "e1141c81-2213-433a-a62e-09591b7902a6",
+      "oldIoU": 0.7547,
+      "offsetM": 2.4
+    },
+    {
+      "id": "beisi-1002680194-5",
+      "project": "beisi",
+      "reference": "e560a3b3-3a9e-4033-92f1-6255ae9afc17",
+      "oldIoU": 0.7323,
+      "offsetM": 3
+    },
+    {
+      "id": "haiqing-962102791-1",
+      "project": "haiqing",
+      "reference": "c2dccf5d-262b-4f24-a444-859c5aa92dc7",
+      "oldIoU": 0.8191,
+      "offsetM": 2.4
+    },
+    {
+      "id": "beiqi-679672532-5",
+      "project": "beiqi",
+      "reference": "7811af4a-790a-4dac-aaf2-063cbe6b61f5",
+      "oldIoU": 0.6598,
+      "offsetM": 2.7
+    },
+    {
+      "id": "beiqi-679672532-1",
+      "project": "beiqi",
+      "reference": "02d6c2e9-1653-48ac-b0b2-ae72852087d2",
+      "oldIoU": 0.8064,
+      "offsetM": 1
+    },
+    {
+      "id": "beiqi-679672532-4",
+      "project": "beiqi",
+      "reference": "26e77d42-f051-4694-8dc9-e875790601a9",
+      "oldIoU": 0.6397,
+      "offsetM": 3.1
+    },
+    {
+      "id": "beiqi-679672532-2",
+      "project": "beiqi",
+      "reference": "7c4641c7-b55d-4248-99a7-84a355d15bdc",
+      "oldIoU": 0.822,
+      "offsetM": 1.4
+    },
+    {
+      "id": "beiqi-679672532-9",
+      "project": "beiqi",
+      "reference": "a7a646b3-9b12-4e1d-a7cd-3114c784ffe8",
+      "oldIoU": 0.5509,
+      "offsetM": 4.9
+    },
+    {
+      "id": "chinalco/679672529/3",
+      "project": "chinalco",
+      "reference": "a0647e44-131a-4077-ba04-8b94fe2e0b6c",
+      "oldIoU": 0.9237,
+      "offsetM": 1.1
+    },
+    {
+      "id": "lutuan-447022055-15",
+      "project": "lutuan",
+      "reference": "0f515633-5c51-4584-8dd3-fe4b79ee59c6",
+      "oldIoU": 0.7673,
+      "offsetM": 4.1
+    },
+    {
+      "id": "lutuan-447022055-12",
+      "project": "lutuan",
+      "reference": "3ddd212a-5ebb-4bed-8262-ae591da99dcf",
+      "oldIoU": 0.6736,
+      "offsetM": 2.9
+    },
+    {
+      "id": "lutuan-447022055-11",
+      "project": "lutuan",
+      "reference": "cdceee02-cf82-42fd-a926-a47486fb4c75",
+      "oldIoU": 0.7786,
+      "offsetM": 3.1
+    },
+    {
+      "id": "lutuan-447022055-6",
+      "project": "lutuan",
+      "reference": "8f41990d-57e4-4291-a056-b5902afc5ef2",
+      "oldIoU": 0.7703,
+      "offsetM": 3.3
+    },
+    {
+      "id": "lutuan-447022055-9",
+      "project": "lutuan",
+      "reference": "0dfb57e1-a76f-4428-8601-13b78797dbc9",
+      "oldIoU": 0.7543,
+      "offsetM": 2.5
+    },
+    {
+      "id": "lutuan-447022055-10",
+      "project": "lutuan",
+      "reference": "e639efbb-b0ae-4265-85bc-dad1cc1a68cc",
+      "oldIoU": 0.8156,
+      "offsetM": 1.6
+    },
+    {
+      "id": "lutuan-447022054-11",
+      "project": "lutuan",
+      "reference": "1972ee12-0a83-4251-8b57-652a3dfbca52",
+      "oldIoU": 0.7222,
+      "offsetM": 1.2
+    },
+    {
+      "id": "lutuan-447022054-10",
+      "project": "lutuan",
+      "reference": "6c588b06-b30b-4dc5-8493-ef9915913494",
+      "oldIoU": 0.6757,
+      "offsetM": 5.1
+    },
+    {
+      "id": "lutuan-447022055-4",
+      "project": "lutuan",
+      "reference": "2c49f38b-aeba-4c95-9446-4b67100cc5c3",
+      "oldIoU": 0.9046,
+      "offsetM": 0.8
+    },
+    {
+      "id": "lutuan-447022054-5",
+      "project": "lutuan",
+      "reference": "493a7ba5-84db-467b-9dda-da941855b431",
+      "oldIoU": 0.817,
+      "offsetM": 2.6
+    },
+    {
+      "id": "lutuan-447022054-4",
+      "project": "lutuan",
+      "reference": "7b379b93-6a8f-451b-ae26-9e3a10aaf408",
+      "oldIoU": 0.5867,
+      "offsetM": 3.5
+    },
+    {
+      "id": "lutuan-447022054-1",
+      "project": "lutuan",
+      "reference": "b2dd8d2c-8863-4075-8a97-34f17abf6491",
+      "oldIoU": 0.7917,
+      "offsetM": 3.6
+    },
+    {
+      "id": "lutuan-447022054-8",
+      "project": "lutuan",
+      "reference": "13061ab4-09a3-47bb-9dc0-322b3a56ef0a",
+      "oldIoU": 0.8539,
+      "offsetM": 2.5
+    },
+    {
+      "id": "lutuan-447022054-6",
+      "project": "lutuan",
+      "reference": "1fdfff3a-29b5-4463-a671-5c2932925a89",
+      "oldIoU": 0.5895,
+      "offsetM": 4
+    },
+    {
+      "id": "lutuan-447022055-7",
+      "project": "lutuan",
+      "reference": "05735a73-4b9f-4ac2-b2b9-4c911ed235d1",
+      "oldIoU": 0.6709,
+      "offsetM": 3.5,
+      "enclosedReference": true
+    },
+    {
+      "id": "lutuan-447022055-13",
+      "project": "lutuan",
+      "reference": "551e6b2e-c001-45d2-a896-7c26e49dcc1d",
+      "oldIoU": 0.7014,
+      "offsetM": 2.2,
+      "enclosedReference": true
+    },
+    {
+      "id": "beisi-1002680194-3",
+      "project": "beisi",
+      "reference": "dea8ff57-ccc6-4a1d-af24-5e57bc47ed9e",
+      "oldIoU": 0.4757,
+      "offsetM": 8.2,
+      "enclosedReference": true
+    }
+  ],
+  "courtyard": {
+    "id": "cloud-1089060429-1",
+    "basis": "Esri World Imagery · 1089060429 review window; four roof wings around central void."
+  },
+  "boundaryHold": "lutuan-447022054-9"
+}

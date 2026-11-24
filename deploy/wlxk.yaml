@@ -1,0 +1,19 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata: {name: wlxk-tour-page, namespace: aigc-acceptance-20260915}
+spec:
+  replacePath:
+    path: /moontown/landmark-studio/wlxk.html
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata: {name: wlxk-tour, namespace: aigc-acceptance-20260915}
+spec:
+  entryPoints: [websecure]
+  tls: {secretName: lunanexa-public-suanli-tls}
+  routes:
+    - kind: Rule
+      match: 'Host(`suanli.kechuangfuwu.com`) && (Path(`/wlxk`) || Path(`/wlxk/`)) && (Method(`GET`) || Method(`HEAD`))'
+      priority: 120
+      middlewares: [{name: wlxk-tour-page}]
+      services: [{name: moontown-platform, port: 8082}]

@@ -1,0 +1,248 @@
+{
+  "schema": "moontown.wenyu-group-fit-trial.v1",
+  "maxDisplacement": 5,
+  "maxApproachAngleDegrees": 15,
+  "beforeSafeExploratory": [
+    {
+      "placement": {
+        "fit": {
+          "mode": "baseline",
+          "origin": {
+            "x": 159.72577522740227,
+            "y": 19.253034921483252
+          },
+          "shift": {
+            "x": 0,
+            "y": 0
+          },
+          "axis": {
+            "x": 0.908564174424582,
+            "y": -0.4177453063197451
+          },
+          "drop": 0,
+          "isotropic": 0,
+          "uniform": false
+        },
+        "dikeWet": 84.53800123730458,
+        "withEntry": 84.53800123730458,
+        "newConflicts": 0,
+        "lostCrossings": 0,
+        "headTravel": 0
+      },
+      "groupRoadWet": 146.39019159353234,
+      "approachesWet": 0,
+      "groupIncludingApproachesWet": 146.39019159353234,
+      "bridgeHeads": [
+        {
+          "node": 3351127195,
+          "fixed": {
+            "x": 182.90199018653675,
+            "y": 69.65953450885489
+          },
+          "group": {
+            "x": 182.90199018653675,
+            "y": 69.65953450885489
+          },
+          "gap": 0,
+          "approachLength": 0,
+          "approachWet": 0
+        },
+        {
+          "node": 605039789,
+          "fixed": {
+            "x": 159.72577522740227,
+            "y": 19.253034921483252
+          },
+          "group": {
+            "x": 159.72577522740227,
+            "y": 19.253034921483252
+          },
+          "gap": 0,
+          "approachLength": 0,
+          "approachWet": 0
+        }
+      ],
+      "graph": {
+        "connectedBoundaryJunctions": 9,
+        "connectedBridgeHeads": 2,
+        "maxEndpointGap": 0
+      }
+    },
+    {
+      "placement": {
+        "fit": {
+          "mode": "refined",
+          "origin": {
+            "x": 182.90199018653675,
+            "y": 69.65953450885489
+          },
+          "shift": {
+            "x": 0.06372476627601445,
+            "y": -0.029715346528642928
+          },
+          "axis": {
+            "x": -0.9934477790194444,
+            "y": 0.11428696496684666
+          },
+          "drop": 0.05810714285714286,
+          "isotropic": 0.0019776785714285716,
+          "uniform": false
+        },
+        "dikeWet": 76.24147939862202,
+        "withEntry": 76.24147939862202,
+        "newConflicts": 0,
+        "lostCrossings": 0,
+        "headTravel": 1.1773370981424025
+      },
+      "groupRoadWet": 138.18025143409648,
+      "approachesWet": 0.3534836613810981,
+      "groupIncludingApproachesWet": 138.53373509547757,
+      "bridgeHeads": [
+        {
+          "node": 3351127195,
+          "fixed": {
+            "x": 182.90199018653675,
+            "y": 69.65953450885489
+          },
+          "group": {
+            "x": 182.96571495281276,
+            "y": 69.62981916232624
+          },
+          "gap": 0,
+          "approachLength": 0.07031249999999799,
+          "approachWet": 0.07028356849222249
+        },
+        {
+          "node": 605039789,
+          "fixed": {
+            "x": 159.72577522740227,
+            "y": 19.253034921483252
+          },
+          "group": {
+            "x": 160.83189809523947,
+            "y": 19.20836208700905
+          },
+          "gap": 0,
+          "approachLength": 1.1070245981424045,
+          "approachWet": 0
+        }
+      ],
+      "graph": {
+        "connectedBoundaryJunctions": 9,
+        "connectedBridgeHeads": 2,
+        "maxEndpointGap": 0
+      }
+    },
+    {
+      "placement": {
+        "fit": {
+          "mode": "axis",
+          "origin": {
+            "x": 159.72577522740227,
+            "y": 19.253034921483252
+          },
+          "shift": {
+            "x": 2.9577783293660436,
+            "y": -0.7002783951104732
+          },
+          "axis": {
+            "x": 0.6946583704589974,
+            "y": 0.7193398003386511
+          },
+          "drop": 0.025,
+          "isotropic": 0,
+          "uniform": false
+        },
+        "dikeWet": 0,
+        "withEntry": 0,
+        "newConflicts": 64,
+        "lostCrossings": 10,
+        "headTravel": 5.664819876319559
+      },
+      "groupRoadWet": 0.9441377375557857,
+      "approachesWet": 2.7572407429351222,
+      "groupIncludingApproachesWet": 3.701378480490908,
+      "bridgeHeads": [
+        {
+          "node": 3351127195,
+          "fixed": {
+            "x": 182.90199018653675,
+            "y": 69.65953450885489
+          },
+          "group": {
+            "x": 184.95047889051088,
+            "y": 68.01765914263582
+          },
+          "gap": 0,
+          "approachLength": 2.6252734502345865,
+          "approachWet": 1.5609159818665375
+        },
+        {
+          "node": 605039789,
+          "fixed": {
+            "x": 159.72577522740227,
+            "y": 19.253034921483252
+          },
+          "group": {
+            "x": 162.68355355676832,
+            "y": 18.55275652637278
+          },
+          "gap": 0,
+          "approachLength": 3.039546426084972,
+          "approachWet": 0
+        }
+      ],
+      "graph": {
+        "connectedBoundaryJunctions": 9,
+        "connectedBridgeHeads": 2,
+        "maxEndpointGap": 0
+      }
+    }
+  ],
+  "ways": [
+    47518787,
+    47518902,
+    395531627,
+    417225061,
+    417225065,
+    417225066,
+    419670265,
+    419670266,
+    419670267,
+    419670268,
+    419670269,
+    419670271,
+    419670272,
+    419671811,
+    419671812,
+    419671813,
+    419671814,
+    420509951,
+    420509952,
+    420509953,
+    420509954,
+    420509955,
+    420509956,
+    420509957,
+    420509958,
+    420509959,
+    420509960,
+    420509961,
+    420509962,
+    420509964,
+    420509965,
+    420510854,
+    420545488,
+    420546973,
+    420549935,
+    420549937,
+    420549939,
+    420549940,
+    1059215624,
+    1059215627,
+    1239039189
+  ],
+  "candidateEvaluations": 46213,
+  "preserveCrossings": 8637,
+  "junctionConnectors": 9
+}

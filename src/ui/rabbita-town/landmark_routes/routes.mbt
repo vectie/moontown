@@ -22,7 +22,7 @@ pub(all) struct Edge {
 pub(all) struct Graph {
   nodes : Array[Node]
   edges : Array[Edge]
-} derive(FromJson)
+}
 
 ///|
 pub fn distance(a : Point, b : Point) -> Double {
@@ -47,14 +47,14 @@ pub fn nearest(g : Graph, p : Point, radius : Double) -> String? {
 /// Adjacency comes ONLY from shared OSM node IDs. A picture intersection is
 /// never a junction; bridge edges remain traversable without joining the bank.
 pub fn route(g : Graph, start : String, goal : String) -> Array[Point]? {
-  let index : Map[String, Int] = Map([])
+  let index : Map[String, Int32] = Map([])
   for i, n in g.nodes {
     index[n.id] = i
   }
   guard index.get(start) is Some(s) && index.get(goal) is Some(t) else {
     return None
   }
-  let adj : Array[Array[Int]] = Array::makei(g.nodes.length(), _ => [])
+  let adj : Array[Array[Int32]] = Array::makei(g.nodes.length(), _ => [])
   for e in g.edges {
     if index.get(e.a) is Some(a) && index.get(e.b) is Some(b) {
       adj[a].push(b)
@@ -63,19 +63,12 @@ pub fn route(g : Graph, start : String, goal : String) -> Array[Point]? {
   }
   let ds = Array::make(g.nodes.length(), 1.0e30)
   let prev = Array::make(g.nodes.length(), -1)
-  let seen = Array::make(g.nodes.length(), false)
   ds[s] = 0
-  for _ in 0..<g.nodes.length() {
-    let mut at = -1
-    let mut best = 1.0e30
-    for i, d in ds {
-      if !seen[i] && d < best {
-        at = i
-        best = d
-      }
-    }
-    if at < 0 {
-      return None
+  // Break equal distances by node index as in the original ordered scan.
+  let queue = @priority_queue.from_array([@cmp.Reverse((0.0, s))])
+  while queue.pop() is Some(Reverse((best, at))) {
+    if best != ds[at] {
+      continue
     }
     if at == t {
       let result : Array[Point] = []
@@ -87,7 +80,6 @@ pub fn route(g : Graph, start : String, goal : String) -> Array[Point]? {
       }
       return Some(result.rev())
     }
-    seen[at] = true
     for next in adj[at] {
       let a = g.nodes[at]
       let b = g.nodes[next]
@@ -95,6 +87,7 @@ pub fn route(g : Graph, start : String, goal : String) -> Array[Point]? {
       if d < ds[next] {
         ds[next] = d
         prev[next] = at
+        queue.push(Reverse((d, next)))
       }
     }
   }

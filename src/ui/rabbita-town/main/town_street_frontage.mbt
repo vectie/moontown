@@ -60,7 +60,7 @@ extern "js" fn town_street_svg_input() -> String =
   #| () => {
   #|   let s=globalThis.__townStreetSvgTransport;
   #|   if(!s){s={text:''};globalThis.__townStreetSvgTransport=s;
-  #|     fetch('tilemap/wenyu-unshifted-road-overlay.svg').then(r=>{if(!r.ok)throw Error('Street frontage unavailable');return r.text();})
+  #|     fetch('tilemap/wenyu-bank-road-v2.svg').then(r=>{if(!r.ok)throw Error('Street frontage unavailable');return r.text();})
   #|       .then(t=>{s.text=t;globalThis.__moontownGoldenValleyRender?.('street-frontage');}).catch(()=>{});}
   #|   return s.text;
   #| }

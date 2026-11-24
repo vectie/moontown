@@ -102,8 +102,9 @@ extern "js" fn install_golden_valley_canvas_input(
   render_callback : () -> Unit,
   release_frame_callback : () -> Unit,
   camera_only : Bool,
+  tool_input : String,
 ) -> Unit =
-  #| (renderCallback, releaseFrameCallback, cameraOnly) => {
+  #| (renderCallback, releaseFrameCallback, cameraOnly, toolInput) => {
   #|   const canvas = globalThis.document?.getElementById("energy-valley-canvas");
   #|   const releaseDragCache = (owner, destroy = false) => {
   #|     const cache = owner?.dragCache;
@@ -153,6 +154,7 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     lifecycle.stop(false);
   #|     lifecycle = null;
   #|   }
+  #|   canvas.dataset.townTool = toolInput;
   #|   if (lifecycle) {
   #|     lifecycle.render = renderCallback;
   #|     lifecycle.releaseFrame = releaseFrameCallback;
@@ -186,8 +188,12 @@ extern "js" fn install_golden_valley_canvas_input(
   #|   const invoke = (reason = "external") => {
   #|     if (globalThis.__moontownGoldenValleyCanvasLifecycle === lifecycle &&
   #|         lifecycle.running) {
+  #|       if(reason==="external" && lifecycle.wheelMotion)return;
   #|       const started = globalThis.performance?.now?.() ?? Date.now();
-  #|       lifecycle.render?.();
+  #|       lifecycle.paintReason=reason;
+  #|       lifecycle.zoomPreview=!!globalThis.__townDisplay?.compact && started < (globalThis.__moontownGoldenValleyCamera?.zoomUntil || 0);
+  #|       const cam=globalThis.__moontownGoldenValleyCamera, saved=globalThis.__townWheel?.enter(lifecycle,cam,started,reason);
+  #|       try { lifecycle.render?.(); } finally { if(saved)Object.assign(cam,saved); lifecycle.wheelFrame=false; lifecycle.paintReason=null; lifecycle.zoomPreview=false; }
   #|       const finished = globalThis.performance?.now?.() ?? Date.now();
   #|       // Frame cadence is measured start-to-start, not after work completes.
   #|       lifecycle.lastPaint = started;
@@ -220,6 +226,8 @@ extern "js" fn install_golden_valley_canvas_input(
   #|   ) => {
   #|     if (!lifecycle.running) return;
   #|     lifecycle.running = false;
+  #|     globalThis.__townWheel?.release(lifecycle);
+  #|     globalThis.__townLandmarkPainter?.trafficLayers?.release?.(lifecycle);
   #|     const schedule = globalThis.__moontownGoldenValleyCanvasSchedule;
   #|     if (!preservePendingPaint) {
   #|       if (schedule?.raf) globalThis.cancelAnimationFrame?.(schedule.raf);
@@ -286,13 +294,13 @@ extern "js" fn install_golden_valley_canvas_input(
   #|   const dragMegaTileMinPx = 256;
   #|   const dragMegaTileBudget = 64;
   #|   const dragSemanticRefreshPx = 96;
-  #|   const animationFrameIntervalMs = 33;
+  #|   const animationFrameIntervalMs = globalThis.__townDisplay?.compact ? 15 : 33;
   #|   // Migrate only untouched historical overview presets. Deliberate pans
   #|   // and zooms stay intact while new sessions open on seven civic heroes.
   #|   const artVersion = globalThis.__moontownGoldenValleyCameraArtVersion ?? 0;
   #|   const legacyOverview = camera.z <= 0.101 ||
   #|     (artVersion === 2 && Math.abs(camera.z - 0.25) < 0.001);
-  #|   if (artVersion < 3 && legacyOverview &&
+  #|   if (!camera.livingRoom && artVersion < 3 && legacyOverview &&
   #|       Math.abs(camera.x - 1792) < 0.01 &&
   #|       Math.abs(camera.y - 3200) < 0.01) {
   #|     camera.z = civicZoom;
@@ -336,30 +344,21 @@ extern "js" fn install_golden_valley_canvas_input(
   #|       target.removeEventListener?.(name, handler, options);
   #|     });
   #|   };
-  #|   const inspectSelected = () =>
-  #|     Boolean(globalThis.document?.querySelector(
-  #|       'button[aria-label^="视察"][aria-pressed="true"]',
-  #|     ));
-  #|   const paintSelected = () =>
-  #|     Boolean(globalThis.document?.querySelector(
-  #|       'button[aria-label^="铺路"][aria-pressed="true"],' +
-  #|       'button[aria-label^="造林"][aria-pressed="true"]',
-  #|     ));
   #|   const rememberAction = event => {
   #|     const rect = canvas.getBoundingClientRect();
   #|     const x = Math.floor(event.clientX - rect.left);
-  #|     const y = Math.floor(event.clientY - rect.top);
+  #|     const y = Math.floor(canvas.townProjection?.localY(event.clientX-rect.left,event.clientY-rect.top) ?? (event.clientY - rect.top));
   #|     globalThis.__moontownGoldenValleyActionX = x;
   #|     globalThis.__moontownGoldenValleyActionY = y;
   #|   };
   #|   const updateCoordinateReadout = event => {
   #|     const rect = canvas.getBoundingClientRect();
   #|     const localX = event.clientX - rect.left;
-  #|     const localY = event.clientY - rect.top;
+  #|     const localY = canvas.townProjection?.localY(localX,event.clientY-rect.top) ?? (event.clientY - rect.top);
   #|     const projectedDifference =
   #|       (localX - rect.width / 2) / camera.z + camera.x;
   #|     const projectedSum =
-  #|       (localY - rect.height / 2) / camera.z + camera.y;
+  #|       (localY - (canvas.townProjection?.h ?? rect.height) / 2) / camera.z + camera.y;
   #|     const worldX = (projectedDifference / 32 + projectedSum / 16) / 2;
   #|     const worldY = (projectedSum / 16 - projectedDifference / 32) / 2;
   #|     const inside = worldX >= 0 && worldX <= 256 &&
@@ -381,6 +380,7 @@ extern "js" fn install_golden_valley_canvas_input(
   #|   };
   #|   const captureDragCache = () => {
   #|     releaseDragCache(lifecycle);
+  #|     if(globalThis.__townWheel?.startPan(lifecycle,camera))return;
   #|     const width = canvas.clientWidth || 1;
   #|     const height = canvas.clientHeight || 1;
   #|     const scaleX = canvas.width / width;
@@ -432,12 +432,13 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     publishBenchmark();
   #|   };
   #|   const compositeDragCache = () => {
+  #|     if(globalThis.__townWheel?.pan(lifecycle,camera))return true;
   #|     const cache = lifecycle.dragCache;
   #|     if (!cache || cache.zoom !== camera.z ||
   #|         cache.width !== canvas.clientWidth ||
   #|         cache.height !== canvas.clientHeight) return false;
   #|     const shiftX = (cache.cameraX - camera.x) * camera.z;
-  #|     const shiftY = (cache.cameraY - camera.y) * camera.z;
+  #|     const shiftY = (cache.cameraY - camera.y) * camera.z + (canvas.townProjection?.shear || 0)*shiftX;
   #|     if (camera.livingRoom) {
   #|       const signs = document.querySelector('.street-destinations');
   #|       if (signs && signs.querySelector('[data-anchored="true"]')) signs.style.transform = `translate(${shiftX}px,${shiftY}px)`;
@@ -508,87 +509,95 @@ extern "js" fn install_golden_valley_canvas_input(
   #|     };
   #|     scheduleInteractionFrame();
   #|   };
+  #|   const fingers = new Map();
+  #|   let pinch = null, originX = 0, originY = 0;
+  #|   const point = e => ({x:e.clientX, y:e.clientY});
+  #|   const pair = () => {
+  #|     const [a,b] = fingers.values();
+  #|     return {x:(a.x+b.x)/2,y:(a.y+b.y)/2,d:Math.max(1,Math.hypot(a.x-b.x,a.y-b.y))};
+  #|   };
+  #|   const limitZoom = z => Math.min(3.6, Math.max(camera.frontierMinZoom || .025, z));
+  #|   const detach = () => {camera.streetFollow=false;delete camera.streetTransition;};
+  #|   let zoomSettle;
+  #|   lifecycle.cleanups.push(() => clearTimeout(zoomSettle));
+  #|   const zoomAt = (from,to,z,wheel=false) => {
+  #|     const r=canvas.getBoundingClientRect(), x=r.left+r.width/2, y=r.top+r.height/2;
+  #|     const nextX=camera.x+(from.x-x)/camera.z-(to.x-x)/z;
+  #|     const shear=canvas.townProjection?.shear || 0;
+  #|     const nextY=camera.y+(from.y-y-shear*(from.x-x))/camera.z-(to.y-y-shear*(to.x-x))/z;
+  #|     if(wheel)globalThis.__townWheel?.begin(lifecycle,camera,{x:nextX,y:nextY,z});
+  #|     else globalThis.__townWheel?.cancel(lifecycle);
+  #|     camera.x=nextX;camera.y=nextY;
+  #|     camera.zoomUntil=(globalThis.performance?.now?.() || 0)+360;camera.z=z;
+  #|     clearTimeout(zoomSettle);
+  #|     zoomSettle=setTimeout(() => {if(lifecycle.running && globalThis.__townReducedMotion?.matches)invoke("motion");},390);
+  #|     releaseDragCache(lifecycle);lifecycle.needsFullPaint=true;scheduleInteractionFrame();
+  #|   };
+  #|   const suppressPick = () => { moved=true;canvas.dataset.townGesture='drag'; };
   #|   const onPointerDown = event => {
-  #|     if (camera.livingRoom) { delete camera.streetTransition; canvas.focus({preventScroll:true}); }
+  #|     if(lifecycle.wheelMotion){globalThis.__townWheel?.cancel(lifecycle);camera.zoomUntil=0;invoke("pick");}
+  #|     if(event.pointerType==='touch'){
+  #|       fingers.set(event.pointerId,point(event));canvas.setPointerCapture?.(event.pointerId);
+  #|       if(fingers.size>=2){if(!pinch)pinch=pair();globalThis.__townWheel?.endPan(lifecycle);detach();suppressPick();
+  #|         cameraDragging=lifecycle.cameraDragging=painting=false;releaseDragCache(lifecycle);return;}
+  #|     }
+  #|     moved=false;delete canvas.dataset.townGesture;
+  #|     if (camera.livingRoom) canvas.focus({preventScroll:true});
   #|     updateCoordinateReadout(event);
-  #|     if (event.button === 0 && !lifecycle.cameraOnly) rememberAction(event);
-  #|     if (event.button === 1 || event.button === 2 ||
-  #|         (event.button === 0 &&
-  #|           (lifecycle.cameraOnly || camera.livingRoom || inspectSelected()))) {
-  #|       cameraDragging = true;
-  #|       lifecycle.cameraDragging = true;
-  #|       moved = false;
-  #|       lastX = event.clientX;
-  #|       lastY = event.clientY;
-  #|       activePointerId = event.pointerId;
-  #|       canvas.setPointerCapture?.(event.pointerId);
-  #|       captureDragCache();
-  #|     } else if (event.button === 0) {
-  #|       painting = !lifecycle.cameraOnly && paintSelected();
-  #|       if (painting) {
-  #|         activePointerId = event.pointerId;
-  #|         canvas.setPointerCapture?.(event.pointerId);
-  #|       }
+  #|     if (event.button===0&&!lifecycle.cameraOnly) rememberAction(event);
+  #|     if(event.button===1||event.button===2||(event.button===0&&
+  #|        (lifecycle.cameraOnly||camera.livingRoom||canvas.dataset.townTool==='inspect'))){
+  #|       cameraDragging=lifecycle.cameraDragging=true;activePointerId=event.pointerId;
+  #|       originX=lastX=event.clientX;originY=lastY=event.clientY;canvas.setPointerCapture?.(event.pointerId);
+  #|     } else if(event.button===0&&canvas.dataset.townTool==='paint'){
+  #|       painting=true;activePointerId=event.pointerId;canvas.setPointerCapture?.(event.pointerId);
   #|     }
   #|   };
   #|   const onPointerMove = event => {
-  #|     benchmark().pointerMoves += 1;
-  #|     queueCoordinateReadout(event);
-  #|     if (cameraDragging) {
-  #|       if (Math.abs(event.clientX - lastX) > 2 ||
-  #|           Math.abs(event.clientY - lastY) > 2) moved = true;
-  #|       if (moved && camera.livingRoom) camera.streetFollow = false;
-  #|       camera.x -= (event.clientX - lastX) / camera.z;
-  #|       camera.y -= (event.clientY - lastY) / camera.z;
-  #|       lastX = event.clientX;
-  #|       lastY = event.clientY;
-  #|       scheduleInteractionFrame();
-  #|     } else if (painting) {
-  #|       rememberAction(event);
-  #|       canvas.dispatchEvent(new MouseEvent("click", {
-  #|         bubbles: true,
-  #|         button: 0,
-  #|         clientX: event.clientX,
-  #|         clientY: event.clientY,
-  #|       }));
+  #|     if(fingers.has(event.pointerId))fingers.set(event.pointerId,point(event));
+  #|     if(pinch){if(fingers.size>=2){const next=pair();zoomAt(pinch,next,limitZoom(camera.z*next.d/pinch.d));pinch=next;}return;}
+  #|     benchmark().pointerMoves+=1;queueCoordinateReadout(event);
+  #|     if(event.pointerId!==activePointerId)return;
+  #|     if(cameraDragging){
+  #|       if(!moved){if(Math.hypot(event.clientX-originX,event.clientY-originY)<4)return;
+  #|         detach();suppressPick();captureDragCache();}
+  #|       camera.x-=(event.clientX-lastX)/camera.z;camera.y-=(event.clientY-lastY-(canvas.townProjection?.shear || 0)*(event.clientX-lastX))/camera.z;
+  #|       lastX=event.clientX;lastY=event.clientY;scheduleInteractionFrame();
+  #|     } else if(painting){
+  #|       rememberAction(event);canvas.dispatchEvent(new MouseEvent("click",{bubbles:true,button:0,clientX:event.clientX,clientY:event.clientY}));
   #|     }
   #|   };
   #|   const stopPointer = event => {
-  #|     const wasDragging = cameraDragging;
-  #|     cameraDragging = false;
-  #|     lifecycle.cameraDragging = false;
-  #|     painting = false;
-  #|     canvas.releasePointerCapture?.(event.pointerId);
-  #|     activePointerId = null;
-  #|     releaseDragCache(lifecycle);
-  #|     if (wasDragging) {
-  #|       lifecycle.needsFullPaint = true;
-  #|       scheduleInteractionFrame();
+  #|     fingers.delete(event.pointerId);
+  #|     if(canvas.hasPointerCapture?.(event.pointerId))canvas.releasePointerCapture(event.pointerId);
+  #|     if(pinch){
+  #|       if(fingers.size>=2)pinch=pair();
+  #|       else if(fingers.size===1){pinch=null;const [id,p]=fingers.entries().next().value;
+  #|         activePointerId=id;lastX=p.x;lastY=p.y;cameraDragging=lifecycle.cameraDragging=true;captureDragCache();}
+  #|       else {pinch=null;activePointerId=null;}
+  #|       return;
   #|     }
+  #|     if(event.pointerId!==activePointerId)return;
+  #|     globalThis.__townWheel?.endPan(lifecycle);
+  #|     const wasDragging=cameraDragging;
+  #|     cameraDragging=lifecycle.cameraDragging=painting=false;activePointerId=null;releaseDragCache(lifecycle);
+  #|     if(wasDragging&&moved){lifecycle.needsFullPaint=true;scheduleInteractionFrame();}
   #|   };
-  #|   const onPointerUp = event => stopPointer(event);
-  #|   const onClick = event => {
-  #|     if (lifecycle.cameraOnly || moved) event.stopImmediatePropagation();
-  #|     moved = false;
-  #|   };
+  #|   const onPointerUp = stopPointer;
+  #|   const onClick = event => {if(lifecycle.cameraOnly||moved)event.stopImmediatePropagation();};
   #|   const onContextMenu = event => event.preventDefault();
   #|   const onWheel = event => {
-  #|     if (camera.livingRoom) delete camera.streetTransition;
-  #|     event.preventDefault();
-  #|     const rect = canvas.getBoundingClientRect();
-  #|     const mx = event.clientX - rect.left - rect.width / 2;
-  #|     const my = event.clientY - rect.top - rect.height / 2;
-  #|     const previous = camera.z;
-  #|     const minimum = camera.livingRoom && !camera.streetOverview ? (camera.streetMinZoom || 2.1) : (camera.frontierMinZoom || 0.07);
-  #|     camera.z = Math.min(camera.livingRoom ? 3.6 : 1.8, Math.max(minimum, previous * (
-  #|       event.deltaY < 0 ? 1.12 : 0.89
-  #|     )));
-  #|     camera.x += mx / previous - mx / camera.z;
-  #|     camera.y += my / previous - my / camera.z;
-  #|     releaseDragCache(lifecycle);
-  #|     lifecycle.needsFullPaint = true;
+  #|     event.preventDefault();detach();
+  #|     const unit=event.deltaMode===1?16:event.deltaMode===2?canvas.clientHeight:1;
+  #|     const from=point(event);
+  #|     if(!event.ctrlKey&&(event.shiftKey||Math.abs(event.deltaX)>Math.abs(event.deltaY))){
+  #|       const dx=event.shiftKey&&!event.deltaX?event.deltaY:event.deltaX;
+  #|       zoomAt(from,{x:from.x-dx*unit,y:from.y-(event.shiftKey?0:event.deltaY)*unit},camera.z);
+  #|     }else{
+  #|       const step=Math.max(-.38,Math.min(.38,event.deltaY*unit*(event.ctrlKey ? .009 : .0017)));
+  #|       zoomAt(from,from,limitZoom(camera.z*Math.exp(-step)),true);
+  #|     }
   #|     queueCoordinateReadout(event);
-  #|     scheduleInteractionFrame();
   #|   };
   #|   listen(canvas, "pointerdown", onPointerDown);
   #|   listen(canvas, "pointermove", onPointerMove);
@@ -597,12 +606,18 @@ extern "js" fn install_golden_valley_canvas_input(
   #|   listen(canvas, "click", onClick, true);
   #|   listen(canvas, "contextmenu", onContextMenu);
   #|   listen(canvas, "wheel", onWheel, { passive: false });
+  #|   // Projected pins can move under a stationary mouse during a wheel gesture.
+  #|   listen(globalThis.document, "wheel", event => {
+  #|     if (!event.target?.closest?.(".street-world-entry, .town-landmark-pins button")) return;
+  #|     const r=canvas.getBoundingClientRect();
+  #|     if (event.clientX>=r.left && event.clientX<r.right && event.clientY>=r.top && event.clientY<r.bottom) onWheel(event);
+  #|   }, { passive: false });
   #|   lifecycle.cleanups.push(() => {
   #|     cameraDragging = false;
   #|     lifecycle.cameraDragging = false;
   #|     painting = false;
   #|     if (activePointerId !== null) {
-  #|       canvas.releasePointerCapture?.(activePointerId);
+  #|       if(canvas.hasPointerCapture?.(activePointerId))canvas.releasePointerCapture(activePointerId);
   #|       activePointerId = null;
   #|     }
   #|   });
@@ -715,13 +730,15 @@ extern "js" fn install_golden_valley_canvas_input(
   #|       lifecycle.stop(true, replacementMounted);
   #|       return;
   #|     }
-  #|     // The map remains interactive under reduced motion, but continuous
-  #|     // canvas animation is suppressed. Normal motion is capped at 30fps.
-  #|     if (!motion?.matches && !globalThis.document?.hidden &&
+  #|     // A zoom can reveal several resident sprite sheets in one frame. Fold
+  #|     // their load events into this clock, including a single reduced-motion repaint.
+  #|     const spritesReady=lifecycle.spritesDirty && !lifecycle.wheelMotion;
+  #|     if ((spritesReady || !motion?.matches) && !globalThis.document?.hidden &&
   #|         !globalThis.__moontownStudioOpen &&
   #|         !lifecycle.cameraDragging && !lifecycle.interactionRaf &&
-  #|         timestamp - lifecycle.lastPaint >= animationFrameIntervalMs) {
-  #|       invoke("animation");
+  #|         timestamp - lifecycle.lastPaint >= (lifecycle.wheelMotion ? 0 : animationFrameIntervalMs)) {
+  #|       if(spritesReady)lifecycle.spritesDirty=false;
+  #|       invoke(spritesReady ? "sprites-ready" : "animation");
   #|       // rAF timestamps precede callback execution. Anchor the animation
   #|       // clock to that timestamp so sub-ms callback delay cannot skip the
   #|       // next 30fps slot on a 60Hz display.
@@ -788,14 +805,18 @@ extern "js" fn prepare_golden_valley_canvas(id : String) -> Unit =
   #|   if (!canvas) return;
   #|   const width = canvas.clientWidth || globalThis.innerWidth || 1280;
   #|   const height = canvas.clientHeight || globalThis.innerHeight || 720;
-  #|   const dpr = Math.min(2, globalThis.devicePixelRatio || 1);
+  #|   const projection = id==='energy-valley-canvas' && globalThis.__townDisplay?.forCanvas(canvas);
+  #|   const compact = globalThis.__townDisplay?.compact && projection;
+  #|   const dpr = compact ? Math.min(1,globalThis.devicePixelRatio || 1,Math.sqrt(921600/(width*height))) : Math.min(2, globalThis.devicePixelRatio || 1);
   #|   if (canvas.width !== Math.round(width * dpr) ||
   #|       canvas.height !== Math.round(height * dpr)) {
   #|     canvas.width = Math.round(width * dpr);
   #|     canvas.height = Math.round(height * dpr);
   #|   }
+  #|   const owner = globalThis.__moontownGoldenValleyCanvasLifecycle;
+  #|   if(owner?.canvas===canvas)owner.pixelRatio=dpr;
   #|   const context = canvas.getContext("2d");
-  #|   context?.setTransform(dpr, 0, 0, dpr, 0, 0);
+  #|   context?.setTransform(dpr, (projection?.shear || 0)*dpr, 0, dpr, 0, (projection?.offset || 0)*dpr);
   #| }
 
 ///|
@@ -843,7 +864,7 @@ extern "js" fn golden_valley_canvas_width(id : String) -> Int32 =
 
 ///|
 extern "js" fn golden_valley_canvas_height(id : String) -> Int32 =
-  #| (id) => globalThis.document?.getElementById(id)?.clientHeight || 720
+  #| (id) => {const c=globalThis.document?.getElementById(id);return c?.townProjection?.h || c?.clientHeight || 720}
 
 ///|
 extern "js" fn golden_ctx_fill_style(
@@ -1353,14 +1374,14 @@ extern "js" fn golden_math_sin(value : Double) -> Double =
 
 ///|
 extern "js" fn golden_animation_seconds() -> Double =
-  #| () => globalThis.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches
+  #| () => (globalThis.__townReducedMotion ??= globalThis.matchMedia?.("(prefers-reduced-motion: reduce)"))?.matches
   #|   ? 0
   #|   : globalThis.performance.now() / 1000
 
 ///|
 extern "js" fn golden_prefers_reduced_motion() -> Bool =
   #| () => Boolean(
-  #|   globalThis.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches,
+  #|   (globalThis.__townReducedMotion ??= globalThis.matchMedia?.("(prefers-reduced-motion: reduce)"))?.matches,
   #| )
 
 ///|
@@ -1756,7 +1777,9 @@ extern "js" fn golden_draw_sprite_agent(
   #|     image.decoding = "async";
   #|     image.onload = () => {
   #|       sprite.ready = true;
-  #|       globalThis.__moontownGoldenValleyRender?.();
+  #|       const owner=globalThis.__moontownGoldenValleyCanvasLifecycle;
+  #|       if (owner?.running && globalThis.__moontownGoldenAgentSprites===cache)
+  #|         owner.spritesDirty=true;
   #|     };
   #|     image.onerror = () => {
   #|       sprite.failed = true;
@@ -3122,10 +3145,18 @@ fn draw_golden_valley_canvas(
 }
 
 ///|
+extern "js" fn defer_unchanged_street_canvas(
+  world : @energy_valley_contract.CompiledTownWorld,
+  night : Bool,
+) -> Bool =
+  #| (world,night) => globalThis.__townWheel?.defer(world,night)===true
+
+///|
 fn render_golden_valley_canvas(
   dispatch : Dispatch[Msg],
   snapshot : @energy_valley_contract.TownSnapshot,
   view : TownCanvasViewState,
+  tool~ : EnergyTool = InspectTool,
   living_room~ : Bool = false,
   street_overview~ : Bool = false,
 ) -> @rabbita.Html {
@@ -3133,7 +3164,14 @@ fn render_golden_valley_canvas(
     prepare_street_living_room_camera(living_room, overview=street_overview)
     // Drawing first preserves the accepted-frame contract: input and the
     // continuous animator only adopt this snapshot after a successful paint.
-    if draw_golden_valley_canvas(snapshot, view, street=living_room) {
+    if (
+        living_room &&
+        defer_unchanged_street_canvas(
+          snapshot.world,
+          golden_public_realm_is_night(view.hour),
+        )
+      ) ||
+      draw_golden_valley_canvas(snapshot, view, street=living_room) {
       install_golden_valley_canvas_input(
         () => {
           prepare_street_living_room_camera(
@@ -3149,6 +3187,11 @@ fn render_golden_valley_canvas(
           golden_valley_clear_canvas_frame()
         },
         !living_room && wenyu_gentle_ground_trial_requested(),
+        match tool {
+          InspectTool => "inspect"
+          RoadTool | ParkTool => "paint"
+          _ => "place"
+        },
       )
       if !view.intersection_preview {
         install_player_walk_keys()
@@ -3173,7 +3216,7 @@ fn render_golden_valley_canvas(
         "能源谷可交互等距地图"
       },
     )
-    .tabindex(if living_room { 0 } else { -1 })
+    .tabindex(0)
     .on_click(_ => {
       dispatch(
         EnergyCanvasClick(golden_valley_action_x(), golden_valley_action_y()),

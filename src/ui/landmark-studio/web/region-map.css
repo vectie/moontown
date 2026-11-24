@@ -1,0 +1,238 @@
+dialog.region-map {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  overflow: hidden;
+  background: #d9e4bc;
+  color: #29493a;
+  font: 14px/1.35 system-ui;
+}
+.region-map > canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+  outline: none;
+}
+.region-map > canvas:active {
+  cursor: grabbing;
+}
+.region-map > canvas:focus-visible {
+  outline: 2px solid #60865a;
+  outline-offset: -3px;
+}
+.region-head {
+  position: absolute;
+  top: max(15px, env(safe-area-inset-top));
+  left: max(16px, env(safe-area-inset-left));
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  flex-wrap: wrap;
+}
+.region-tools,
+.region-actions,
+.region-zoom {
+  display: flex;
+  align-items: center;
+  background: #fffdf2f5;
+  border: 1px solid #aabb9c;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px #465b3924;
+  overflow: hidden;
+  pointer-events: auto;
+}
+.region-tools {
+  max-width: calc(100% - 52px);
+}
+.region-actions:has(> button:only-child[hidden]),
+.region-actions:not(:has(button:not([hidden]))) {
+  display: none;
+}
+.region-map button,
+.region-map select {
+  color: inherit;
+  font: inherit;
+  background: transparent;
+  border: 0;
+  min-height: 42px;
+  cursor: pointer;
+}
+.region-map button {
+  min-width: 42px;
+  display: grid;
+  place-items: center;
+  padding: 7px;
+}
+.region-map button:hover,
+.region-map select:hover {
+  background: #e1eccf;
+}
+.region-map button[hidden],
+.region-map [hidden] {
+  display: none;
+}
+.region-map svg {
+  width: 20px;
+  height: 20px;
+}
+.region-map button:focus-visible,
+.region-map select:focus-visible {
+  outline: 2px solid #517e58;
+  outline-offset: -3px;
+}
+.region-map select {
+  min-width: 0;
+  max-width: min(47vw, 285px);
+  font-weight: 650;
+  padding: 0 6px;
+  border-left: 1px solid #ccdac3;
+}
+.region-status {
+  background: #fffbecf0;
+  color: #405940;
+  padding: 5px 8px;
+  border-radius: 6px;
+}
+.region-zoom {
+  position: absolute;
+  bottom: max(28px, env(safe-area-inset-bottom));
+  right: 15px;
+  flex-direction: column;
+}
+.region-zoom button {
+  font-size: 21px;
+}
+.region-zoom button + button {
+  border-top: 1px solid #dce2d0;
+}
+.region-map footer {
+  position: absolute;
+  bottom: max(9px, env(safe-area-inset-bottom));
+  left: 12px;
+  display: flex;
+  align-items: end;
+  gap: 9px;
+  color: #3d5546;
+  font-size: 10px;
+  text-shadow: 0 1px 2px white;
+}
+.region-map footer a {
+  color: inherit;
+}
+.region-scale {
+  border: solid currentColor;
+  border-width: 0 1px 2px;
+  text-align: center;
+}
+@media (max-width: 520px) {
+  .region-head {
+    gap: 5px;
+    left: 9px;
+    right: 9px;
+    top: max(9px, env(safe-area-inset-top));
+  }
+  .region-map button {
+    min-width: 44px;
+  }
+  .region-map select {
+    max-width: 45vw;
+  }
+  .region-status {
+    flex-basis: auto;
+    font-size: 11px;
+  }
+  .region-zoom {
+    right: 9px;
+  }
+}
+
+.region-map .region-plane {
+  pointer-events: none;
+}
+.region-map button,
+.region-map select {
+  min-height: 44px;
+}
+.region-evidence {
+  position: relative;
+  pointer-events: auto;
+}
+.region-evidence summary {
+  list-style: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  background: #fffdf2f5;
+  border: 1px solid #aabb9c;
+  border-radius: 12px;
+}
+.region-evidence summary::-webkit-details-marker {
+  display: none;
+}
+.region-evidence section {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  width: min(265px, 78vw);
+  padding: 13px;
+  background: #fffdf2;
+  border: 1px solid #aabb9c;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px #3c503122;
+}
+.region-evidence section select {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
+  max-width: none;
+  border: 0;
+  border-bottom: 1px solid #cedac6;
+}
+.region-evidence p {
+  margin: 8px 0;
+  font-size: 12px;
+}
+.region-evidence p:empty {
+  display: none;
+}
+.region-evidence nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.region-evidence a {
+  color: #416847;
+  font-size: 12px;
+}
+.region-evidence strong {
+  font-size: 14px;
+}
+
+.region-north {
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.region-north::before {
+  content: '';
+  display: block;
+  border: solid transparent;
+  border-width: 0 3px 12px;
+  border-bottom-color: #426c58;
+  transform: rotate(-19.66deg);
+}

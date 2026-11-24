@@ -54,6 +54,18 @@ fn render_town_surface(
 
 ///|
 fn main {
+  if building_public_baseline() {
+    let world = energy_valley_base_contract_world_for_seed(
+      default_energy_valley_seed,
+    )
+    let issues = @energy_valley_contract.validate_world(world)
+    if !browser_energy_valley_authoritative_reference_ready() ||
+      @energy_valley_contract.has_errors(issues) {
+      abort("Cannot package an unvalidated public baseline")
+    }
+    publish_build_baseline(world, [..issues])
+    return
+  }
   let model = init_model()
   let (dispatch, app) = @rabbita.cell_with_emit(model~, update~, view=(
     dispatch,

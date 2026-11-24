@@ -5,7 +5,7 @@ const paths = {
   sliders:'M4 3v6m0 6v6M12 3v12m0 4v2M20 3v2m0 6v10M1 9h6v6H1zM9 15h6v4H9zM17 5h6v6h-6z',
   reset:'M3 11a9 9 0 1 1 2.6 7M3 4v7h7', fit:'M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5', top:'M3 3h18v18H3zM3 9h18M9 3v18',
   chart:'M4 3v18h17M8 16V9M13 16V5M18 16v-5', close:'M6 6l12 12M18 6 6 18', photo:'M3 3h18v18H3zM3 16l5-5 4 4 3-3 6 6M16 7h.01',
-  play:'m8 4 12 8-12 8z', pause:'M8 4v16M16 4v16', network:'M9 3h6v6H9zM2 15h6v6H2zM16 15h6v6h-6zM12 9v3M5 15v-3h14v3',
+  moon:'M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z', play:'m8 4 12 8-12 8z', pause:'M8 4v16M16 4v16', network:'M9 3h6v6H9zM2 15h6v6H2zM16 15h6v6h-6zM12 9v3M5 15v-3h14v3',
   power:'m13 2-9 12h7l-1 8 10-12h-7z', cooling:'M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 3 3-3M9 20l3-3 3 3',
 };
 export function viewerIcon(name) {

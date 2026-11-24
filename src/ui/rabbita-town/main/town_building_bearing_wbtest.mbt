@@ -154,3 +154,20 @@ test "local geographic north varies across the projective map and mesh verticals
   assert_eq(mesh.points[3], mesh.points[6])
   assert_eq(mesh.points[4], mesh.points[7])
 }
+
+///|
+test "reverse-bearing lots have windows on both exposed walls" {
+  let bearing : TownBuildingBearing = {
+    east: { x: -1, y: 0, },
+    north: { x: 0, y: 1, },
+    deviation: 0,
+  }
+  let block = town_bearing_volume(0, 0, 0.6, 0.5, 3)
+  for side in 0..<4 {
+    let mesh : TownBearingMesh = { points: [], colors: [], }
+    town_bearing_facade(
+      mesh, bearing, 3, block, side, "block", "parallel-apartments",
+    )
+    assert_eq(mesh.colors.is_empty(), side < 2)
+  }
+}

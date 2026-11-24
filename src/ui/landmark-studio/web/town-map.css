@@ -31,6 +31,7 @@
 .town-landmark-inspector .landmark-advanced>summary span{float:none;padding:0;font-size:12px;letter-spacing:0;color:inherit}
 .landmark-advanced .landmark-note,.landmark-advanced small{font-size:12px;line-height:1.6;color:var(--town-ui-muted,#596859)}
 .town-studio-dialog{border-color:var(--town-ui-line,#c7cebc);background:var(--town-ui-paper,#f7f4e9)}
+.landmark-body>select{box-sizing:border-box;width:100%;margin:0 0 10px}
 .town-studio-dialog header{min-height:52px;height:auto;box-sizing:border-box;gap:12px}
 .town-studio-dialog button{display:flex;align-items:center;gap:8px;min-height:44px;background:var(--town-ui-accent,#3f614a)}
 .town-studio-dialog iframe{height:calc(100% - 52px)}

@@ -1,0 +1,383 @@
+///|
+import {
+  "moonbitlang/x@0.4.50/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/core/env",
+}
+
+///|
+struct P {
+  x : Double
+  y : Double
+} derive(ToJson, FromJson, Eq, Debug)
+
+///|
+struct SourceWay {
+  osmWayId : Double
+  nodes : Array[Double]
+  ground : Array[P]
+  tags : Map[String, String]
+} derive(FromJson)
+
+///|
+struct Source {
+  ways : Array[SourceWay]
+} derive(FromJson)
+
+///|
+struct Labels {
+  rows : Array[String]
+} derive(FromJson)
+
+///|
+fn grade(way : SourceWay, key : String) -> Bool {
+  match way.tags.get(key) {
+    None | Some("no" | "false" | "0" | "") => false
+    _ => true
+  }
+}
+
+///|
+fn distance(a : P, b : P) -> Double {
+  ((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)).sqrt()
+}
+
+///|
+struct Node {
+  id : String
+  x : Double
+  y : Double
+} derive(FromJson)
+
+///|
+struct Edge {
+  a : String
+  b : String
+} derive(FromJson)
+
+///|
+struct Graph {
+  edges : Array[Edge]
+  nodes : Array[Node]
+} derive(FromJson)
+
+///|
+fn fmt(x : Double) -> Double {
+  (x * 10000).round() / 10000
+}
+
+///|
+fn path(ps : Array[P]) -> String {
+  let buf = StringBuilder()
+  for i, p in ps {
+    buf.write_string("\{if i==0 {"M"} else {"L"}}\{fmt(p.x)},\{fmt(p.y)}")
+  }
+  buf.to_string()
+}
+
+///|
+struct Walk {
+  id : Double
+  points : Array[Array[Double]]
+} derive(FromJson)
+
+///|
+struct Scene {
+  paths : Array[Walk]
+} derive(FromJson)
+
+///|
+struct BankContact {
+  surfaceWet : Double
+  wetParts : Array[Array[P]]
+  dryJunctions : Array[P]?
+} derive(FromJson)
+
+///|
+struct Audit {
+  leftDike : BankContact
+} derive(FromJson)
+
+///|
+struct PreviousContact {
+  widthAfter : Double
+  wetAfter : Array[Array[P]]
+} derive(FromJson)
+
+///|
+struct PreviousAudit {
+  leftDikeReview : PreviousContact
+} derive(FromJson)
+
+///|
+fn walks(filename : String) -> Map[Double, Array[P]] raise {
+  let scene : Scene = @json.from_json(
+    @json.parse(@fs.read_file_to_string(filename)),
+  )
+  let result : Map[Double, Array[P]] = Map([])
+  for w in scene.paths {
+    assert_false(result.contains(w.id))
+    result[w.id] = w.points.map(p => P::{ x: p[0], y: p[1], })
+  }
+  result
+}
+
+///|
+fn main raise {
+  let dir = "src/ui/assets/tilemap/"
+  let source : Source = @json.from_json(
+    @json.parse(
+      @fs.read_file_to_string("output/wenyu-road-town/roads.json"),
+    ),
+  )
+  let scene = walks(dir + "wenyu-bank-scene-v2.json")
+  let svg = @fs.read_file_to_string(dir + "wenyu-bank-road-v2.svg")
+  let rendered : Set[String] = Set([])
+  for part in svg.split("<path d='").drop(1) {
+    rendered.add(part.split("'").next().unwrap().to_owned())
+  }
+  let positions : Map[String, P] = Map([])
+  let adjacency : Set[(String,String)] = Set([])
+  let mut visible = 0
+  let mut walked = 0
+  for w in source.ways {
+    let ps=w.ground
+    for i, id in w.nodes {
+      if i>0 {
+        let a=w.nodes[i-1].to_string()
+        let b=id.to_string()
+        adjacency.add((a,b))
+        adjacency.add((b,a))
+      }
+      assert_true(
+        distance(positions.get_or_init(id.to_string(), () => ps[i]), ps[i]) <
+        0.000001,
+      )
+    }
+    if ps.any(p => p.x < 256) &&
+      ps.any(p => p.x > 0) &&
+      ps.any(p => p.y < 144) &&
+      ps.any(p => p.y > 0) {
+      assert_true(rendered.contains(path(ps)))
+      visible += 1
+    }
+    let walkable = [
+        "residential", "unclassified", "footway", "path", "steps", "cycleway", "track",
+        "pedestrian",
+      ].contains(w.tags.get("highway").unwrap_or("")) &&
+      ps.all(p => p.x > 1 && p.x < 255 && p.y > 1 && p.y < 143) &&
+      (grade(w, "bridge") || !grade(w, "tunnel")) && (!w.tags.contains("moontown:link") || w.tags.get("foot")!=Some("no"))
+    if walkable {
+      let points = scene[w.osmWayId]
+      assert_eq(points.length(), ps.length())
+      for i, p in ps {
+        assert_eq(points[i], { x: fmt(p.x), y: fmt(p.y), })
+      }
+      walked += 1
+    }
+  }
+  assert_eq(walked, scene.length())
+  for
+    filename in [
+      "src/ui/assets/landmark-studio/navigation.json",
+      dir + "wenyu-frontier-exits.json",
+    ] {
+    let graph : Graph = @json.from_json(
+      @json.parse(@fs.read_file_to_string(filename)),
+    )
+    for edge in graph.edges {
+      if !edge.a.has_prefix("frontier-exit-") && !edge.b.has_prefix("frontier-exit-") {
+        assert_true(adjacency.contains((edge.a,edge.b)))
+      }
+    }
+    for n in graph.nodes {
+      if !n.id.has_prefix("frontier-exit-") {
+        assert_true(distance(positions[n.id], { x: n.x, y: n.y, }) < 0.000001)
+      }
+    }
+  }
+  println(
+    "Verified \{visible} drawn ways, \{walked} walker paths and both navigation graphs.",
+  )
+  if @env.args() is [_, previous, destination] {
+    let old = walks(previous + "/wenyu-bank-scene-v2.json")
+    let prior : PreviousAudit = @json.from_json(
+      @json.parse(
+        @fs.read_file_to_string(previous + "/wenyu-bank-surface-audit.json"),
+      ),
+    )
+    let audit : Audit = @json.from_json(
+      @json.parse(
+        @fs.read_file_to_string("docs/project/wenyu-town-road-audit.json"),
+      ),
+    )
+    let labels : Labels = @json.from_json(
+      @json.parse(@fs.read_file_to_string(dir + "wenyu_reference_labels.json")),
+    )
+    draw_comparison(
+      source,
+      labels,
+      old,
+      scene,
+      prior.leftDikeReview,
+      audit.leftDike,
+      destination,
+    )
+  }
+}
+
+///|
+fn draw_comparison(
+  source : Source,
+  labels : Labels,
+  old : Map[Double, Array[P]],
+  current : Map[Double, Array[P]],
+  prior : PreviousContact,
+  audit : BankContact,
+  destination : String,
+) -> Unit raise {
+  let id = 47518902.0
+  let dike = source.ways[source.ways.search_by(w => w.osmWayId == id).unwrap()]
+  let nearby = source.ways.filter(w => {
+    w.osmWayId != id &&
+    (w.nodes.any(n => dike.nodes.contains(n)) || grade(w, "bridge"))
+  })
+  let before = old[id]
+  let after = current[id]
+  let rotate = (p : P) => P::{
+    x: (p.x + p.y) * 0.7071067811865476,
+    y: (p.y - p.x) * 0.7071067811865476,
+  }
+  let all = (before + after).map(rotate)
+  let xmin = all.fold(init=all[0].x, (v, p) => v.min(p.x)) - 2
+  let xmax = all.fold(init=all[0].x, (v, p) => v.max(p.x)) + 2
+  let ymin = all.fold(init=all[0].y, (v, p) => v.min(p.y)) - 2
+  let ymax = all.fold(init=all[0].y, (v, p) => v.max(p.y)) + 2
+  let w = xmax - xmin
+  let h = ymax - ymin
+  let panel = (960.0 * h / w).ceil().to_int()
+  let canvas = panel * 2 + 154 + 236
+  let svg = StringBuilder()
+  svg.write_string(
+    "<svg xmlns='http://www.w3.org/2000/svg' width='1016' height='\{canvas}' viewBox='0 0 1016 \{canvas}'><rect width='1016' height='\{canvas}' fill='#faf8f0'/><g font-family='system-ui,sans-serif' fill='#243c34'><text x='28' y='34' font-size='23' font-weight='650'>温榆河左堤路</text><text x='988' y='32' text-anchor='end' font-size='14'>深绿 堤路　灰 支路　紫 桥梁　橙红 路面压水　圆点 固定路口</text>",
+  )
+  let terrain = StringBuilder()
+  for y in 0..<144 {
+    let mut x = 0
+    while x < 256 {
+      let start = x
+      let c = labels.rows[y][x]
+      x += 1
+      while x < 256 && labels.rows[y][x] == c {
+        x += 1
+      }
+      let color = match c {
+        'r' | 'l' => "#8cc7d4"
+        'w' => "#d4e3d7"
+        'b' => "#c0d1d1"
+        'G' => "#d1dfbf"
+        _ => "#e8ead6"
+      }
+      terrain.write_string(
+        "<rect x='\{start}' y='\{y}' width='\{x-start}' height='1' fill='\{color}'/>",
+      )
+    }
+  }
+  svg.write_string(
+    "<defs><g id='terrain' shape-rendering='crispEdges'>\{terrain}</g>",
+  )
+  for k in 0..<2 {
+    let snapshot = if k == 0 { old } else { current }
+    let wet = if k == 0 { prior.wetAfter } else { audit.wetParts }
+    let metric = if k == 0 { prior.widthAfter } else { audit.surfaceWet }
+    assert_true(
+      (metric - wet.fold(init=0.0, (n, s) => n + distance(s[0], s[1]))).abs() <
+      0.0002,
+    )
+    svg.write_string("<g id='roads\{k}' fill='none' stroke-linejoin='round'>")
+    for way in nearby {
+      let bridge = grade(way, "bridge")
+      let points = if bridge {
+        way.ground
+      } else if snapshot.get(way.osmWayId) is Some(line) {
+        line
+      } else {
+        continue
+      }
+      if !points.any(p => p.x > 150 && p.x < 245 && p.y > 3 && p.y < 125) {
+        continue
+      }
+      svg.write_string(
+        "<path d='\{path(points)}' stroke='\{if bridge {"#80638a"}else{"#869788"}}' stroke-width='\{if bridge {0.28}else{0.16}}'/>",
+      )
+    }
+    svg.write_string(
+      "<path d='\{path(snapshot[id])}' stroke='#215548' stroke-width='.36'/>",
+    )
+    for s in wet {
+      svg.write_string(
+        "<path d='\{path(s)}' stroke='#be5038' stroke-width='.36'/>",
+      )
+    }
+    for p in audit.dryJunctions.unwrap_or([]) {
+      svg.write_string(
+        "<circle cx='\{p.x}' cy='\{p.y}' r='.26' fill='#fffdf2' stroke='#274d40' stroke-width='.10'/>",
+      )
+    }
+    svg.write_string("</g>")
+  }
+  svg.write_string("</defs>")
+  for k in 0..<2 {
+    let y = 73 + k * (panel + 47)
+    let title = if k == 0 {
+      "上一版 · 分段变形"
+    } else {
+      "本次 · 恢复整路线形"
+    }
+    let count = if k == 0 { before.length() } else { after.length() }
+    let value = if k == 0 { prior.widthAfter } else { audit.surfaceWet }
+    svg.write_string(
+      "<text x='28' y='\{y-10}' font-size='17' font-weight='600'>\{title}</text><text x='988' y='\{y-10}' text-anchor='end' font-size='14'>\{count} 个顶点　路面压水 \{(value*100).round()/100} 格</text><svg x='28' y='\{y}' width='960' height='\{panel}' viewBox='\{xmin} \{ymin} \{w} \{h}'><g transform='matrix(.7071067811865476 -.7071067811865476 .7071067811865476 .7071067811865476 0 0)'><use href='#terrain'/><use href='#roads\{k}'/></g></svg>",
+    )
+  }
+  // Find the old vertex furthest from the restored polyline; both close-ups
+  // show the same area and scale, centered between its old and present position.
+  let mut focus = before[0]
+  let mut largest = 0.0
+  for p in before {
+    let mut nearest = after[0]
+    let mut best = distance(p, nearest)
+    for i in 1..<after.length() {
+      let a = after[i - 1]
+      let b = after[i]
+      let dx = b.x - a.x
+      let dy = b.y - a.y
+      let len = dx * dx + dy * dy
+      if len == 0 {
+        continue
+      }
+      let t = (((p.x - a.x) * dx + (p.y - a.y) * dy) / len).clamp(min=0, max=1)
+      let q = P::{ x: a.x + t * dx, y: a.y + t * dy, }
+      if distance(p, q) < best {
+        nearest = q
+        best = distance(p, q)
+      }
+    }
+    if best > largest {
+      largest = best
+      focus = { x: (nearest.x + p.x) / 2, y: (nearest.y + p.y) / 2, }
+    }
+  }
+  let zoom_y = 148 + panel * 2
+  let v = rotate(focus)
+  let zoom_w = (largest * 3.8).max(13)
+  let zoom_h = zoom_w * 0.44
+  for k in 0..<2 {
+    let x = 28 + k * 490
+    svg.write_string(
+      "<text x='\{x}' y='\{zoom_y-10}' font-size='15'>\{if k==0 {"局部放大 · 上一版"}else{"同一位置 · 本次"}}</text><svg x='\{x}' y='\{zoom_y}' width='470' height='207' viewBox='\{v.x-zoom_w/2} \{v.y-zoom_h/2} \{zoom_w} \{zoom_h}'><g transform='matrix(.7071067811865476 -.7071067811865476 .7071067811865476 .7071067811865476 0 0)'><use href='#terrain'/><use href='#roads\{k}'/></g></svg>",
+    )
+  }
+  svg.write_string("</g></svg>")
+  @fs.write_string_to_file(destination, svg.to_string())
+}

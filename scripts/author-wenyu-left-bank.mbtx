@@ -1,0 +1,394 @@
+///|
+import {
+  "moonbitlang/x@0.4.50/fs",
+  "moonbitlang/core/json",
+}
+
+///|
+struct P {
+  x : Double
+  y : Double
+} derive(ToJson, FromJson, Eq, Debug)
+
+///|
+struct SourceWay {
+  osmWayId : Double
+  nodes : Array[Double]
+  pathGrid : Array[P]
+  tags : Map[String, String]
+} derive(FromJson)
+
+///|
+struct Source {
+  ways : Array[SourceWay]
+  controls : Array[Control]
+} derive(FromJson)
+
+///|
+struct Control {
+  source : P
+  target : P
+} derive(FromJson)
+
+///|
+struct Labels {
+  rows : Array[String]
+} derive(FromJson)
+
+///|
+fn grade(way : SourceWay, key : String) -> Bool {
+  match way.tags.get(key) {
+    None | Some("no" | "false" | "0" | "") => false
+    _ => true
+  }
+}
+
+///|
+fn project(p : P) -> P {
+  let w = 1.0 + 0.01 * ((p.x - 256) / 256 - p.y / 144)
+  { x: 256 + (p.x - 256) / w, y: p.y / w, }
+}
+
+///|
+fn distance(a : P, b : P) -> Double {
+  ((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)).sqrt()
+}
+
+///|
+fn kind(w : SourceWay) -> String {
+  if grade(w, "bridge") {
+    "bridge"
+  } else if grade(w, "tunnel") {
+    "tunnel"
+  } else if grade(w, "ford") {
+    "ford"
+  } else {
+    "surface"
+  }
+}
+
+///|
+fn minor(w : SourceWay) -> Bool {
+  ["footway", "path", "steps", "cycleway", "track", "pedestrian"].contains(
+    w.tags.get("highway").unwrap_or(""),
+  )
+}
+
+///|
+fn rounded(x : Double) -> Double {
+  (x * 10000).round() / 10000
+}
+
+///|
+fn slab(a : Double, d : Double, lo : Double, hi : Double) -> (Double, Double) {
+  if d == 0 {
+    if a >= lo && a < hi {
+      (0, 1)
+    } else {
+      (1, 0)
+    }
+  } else {
+    let t = (lo - a) / d
+    let u = (hi - a) / d
+    (t.min(u).max(0), t.max(u).min(1))
+  }
+}
+
+///|
+// Exact interval union on a segment. pad=0 measures the centerline; half the
+// SVG stroke width is a conservative square envelope for the round-stroked road.
+fn intervals(
+  a : P,
+  b : P,
+  water : Array[Bool],
+  pad : Double,
+) -> Array[(Double, Double)] {
+  let hit : Array[(Double, Double)] = []
+  let x0 = (a.x.min(b.x) - pad).floor().to_int().max(0)
+  let x1 = (a.x.max(b.x) + pad).floor().to_int().min(255)
+  let y0 = (a.y.min(b.y) - pad).floor().to_int().max(0)
+  let y1 = (a.y.max(b.y) + pad).floor().to_int().min(143)
+  for y in y0..<=y1 {
+    let (v, w) = slab(
+      a.y,
+      b.y - a.y,
+      y.to_double() - pad,
+      y.to_double() + 1 + pad,
+    )
+    if w <= v {
+      continue
+    }
+    for x in x0..<=x1 {
+      if !water[y * 256 + x] {
+        continue
+      }
+      let (l, h) = slab(
+        a.x,
+        b.x - a.x,
+        x.to_double() - pad,
+        x.to_double() + 1 + pad,
+      )
+      let lo = l.max(v)
+      let hi = h.min(w)
+      if hi > lo {
+        hit.push((lo, hi))
+      }
+    }
+  }
+  hit.sort_by((a, b) => a.0.compare(b.0))
+  let merged : Array[(Double, Double)] = []
+  for (lo, hi) in hit {
+    let n = merged.length()
+    if n > 0 && lo <= merged[n - 1].1 {
+      merged[n - 1] = (merged[n - 1].0, hi.max(merged[n - 1].1))
+    } else {
+      merged.push((lo, hi))
+    }
+  }
+  merged
+}
+
+///|
+fn measure(a : P, b : P, water : Array[Bool], pad : Double) -> Double {
+  intervals(a, b, water, pad).fold(init=0.0, (v, h) => v + h.1 - h.0) *
+  distance(a, b)
+}
+
+///|
+// Sole design exception: the paired unbridged reach between the two dry
+// junctions. Original OSM IDs remain; negative IDs are local shape vertices,
+// never an intersection or a claim about a new OSM road.
+struct Pilot {
+  way : SourceWay
+  nodes : Array[Double]
+  pathGrid : Array[P]
+  stations : Array[P]
+  from : Int32
+  to : Int32
+  originalIndices : Array[Int32]
+}
+
+///|
+fn lerp(a : P, b : P, t : Double) -> P {
+  { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, }
+}
+
+///|
+fn unproject(q : P) -> P {
+  let w = 1.0 / (1.0 - 0.01 * ((q.x - 256) / 256 - q.y / 144))
+  { x: 256 + (q.x - 256) * w, y: q.y * w, }
+}
+
+///|
+fn prepare(
+  way : SourceWay,
+  refs : Map[Double, Int32],
+  slot : Int32,
+) -> Pilot raise {
+  let lo = way.nodes.search_by(id => id == 4178135388).unwrap()
+  let hi = way.nodes.search_by(id => id == 4178135989).unwrap()
+  assert_true(lo < hi && kind(way) == "surface")
+  for i in (lo + 1)..<hi {
+    assert_eq(refs[way.nodes[i]], 1)
+  }
+  let ps = way.pathGrid.map(project)
+  let nodes = []
+  let stations = []
+  let grid = []
+  let originalIndices = []
+  for i, p in ps {
+    if i > lo && i <= hi {
+      let n = (distance(ps[i - 1], p) / 0.24).ceil().to_int().max(1)
+      for k in 1..<n {
+        let q = lerp(ps[i - 1], p, k.to_double() / n.to_double())
+        let id = -(slot * 1000000 + i * 1000 + k).to_double()
+        assert_true(k < 1000 && !refs.contains(id))
+        nodes.push(id)
+        grid.push(unproject(q))
+        stations.push(q)
+      }
+    }
+    originalIndices.push(nodes.length())
+    nodes.push(way.nodes[i])
+    grid.push(way.pathGrid[i])
+    stations.push(p)
+  }
+  {
+    way,
+    nodes,
+    pathGrid: grid,
+    stations,
+    from: originalIndices[lo],
+    to: originalIndices[hi],
+    originalIndices,
+  }
+}
+
+///|
+fn drawpoint(p : P, a : P, b : P, height : Double, skew : Double) -> P {
+  let len = distance(a, b)
+  let tx = (b.x - a.x) / len
+  let ty = (b.y - a.y) / len
+  let t = (((p.x - a.x) * tx + (p.y - a.y) * ty) / len).clamp(min=0, max=1)
+  // One continuous normal displacement across both lanes: same station,
+  // same offset. Value AND slope vanish at each endpoint.
+  let d = 16.0 * t * t * (1 - t) * (1 - t) * (height + skew * (2 * t - 1))
+  { x: p.x + ty * d, y: p.y - tx * d, }
+}
+
+///|
+fn surface(line : Array[P], mask : Array[Bool], pad : Double) -> Double {
+  let mut w = 0.0
+  for i in 1..<line.length() {
+    w += measure(line[i - 1], line[i], mask, pad)
+  }
+  w
+}
+
+///|
+fn draw(p : Pilot, h : Double, s : Double) -> Array[P] {
+  let a = p.stations[p.from]
+  let b = p.stations[p.to]
+  p.stations[p.from:p.to + 1]
+  .to_owned()
+  .mapi((i, q) => {
+    if i == 0 {
+      a
+    } else if i == p.to - p.from {
+      b
+    } else {
+      drawpoint(q, a, b, h, s)
+    }
+  })
+}
+
+///|
+fn main raise {
+  let src : Source = @json.from_json(
+    @json.parse(
+      @fs.read_file_to_string("docs/project/wenyu-lower-perspective.json"),
+    ),
+  )
+  let land : Labels = @json.from_json(
+    @json.parse(
+      @fs.read_file_to_string(
+        "src/ui/assets/tilemap/wenyu_reference_labels.json",
+      ),
+    ),
+  )
+  let mask = Array::makei(256 * 144, i => {
+    land.rows[i / 256][i % 256] is ('r' | 'l' | 'b' | 'w')
+  })
+  let refs : Map[Double, Int32] = Map([])
+  for w in src.ways {
+    for n in w.nodes {
+      refs[n] = refs.get(n).unwrap_or(0) + 1
+    }
+  }
+  let plans = []
+  for i, id in [47518902.0, 417225061.0] {
+    plans.push(
+      prepare(
+        src.ways[src.ways.search_by(w => w.osmWayId == id).unwrap()],
+        refs,
+        i + 1,
+      ),
+    )
+  }
+  let mut best = 100.0
+  let mut bh = 0.0
+  let mut bs = 0.0
+  for hh in 0..<=110 {
+    let h = hh.to_double() * 0.05
+    for ss in -26..<=26 {
+      let s = ss.to_double() * 0.1
+      if s.abs() > h {
+        continue
+      }
+      let cost = h + 0.12 * s.abs()
+      if cost >= best {
+        continue
+      }
+      let mut ok = true
+      for p in plans {
+        let line = draw(p, h, s)
+        let pad = if minor(p.way) { 0.045 } else { 0.12 }
+        // 0.18 additional clearance beyond the street half-width. Include
+        // ambiguous bridge cells and marsh as no-go; not a sampling test.
+        if surface(line, mask, pad + 0.18) > 0 {
+          ok = false
+          break
+        }
+      }
+      if ok {
+        best = cost
+        bh = h
+        bs = s
+      }
+    }
+  }
+  guard best < 100 else {
+    fail("No continuous same-bank alignment clears both roads")
+  }
+  let result : Map[String, Json] = Map([])
+  for p in plans {
+    let coords = draw(p, bh, bs)
+    let a = coords[0]
+    let b = coords.last().unwrap()
+    assert_eq(a, p.stations[p.from])
+    assert_eq(b, p.stations[p.to])
+    let pad = if minor(p.way) { 0.045 } else { 0.12 }
+    assert_eq(
+      surface(
+        coords.map(q => P::{ x: rounded(q.x), y: rounded(q.y), }),
+        mask,
+        pad + 0.17,
+      ),
+      0,
+    )
+    for i, q in coords {
+      assert_true(distance(q, p.stations[i + p.from]) < 5.5)
+      assert_true(
+        !src.controls.any(c => {
+          distance(q, c.target) < 1 || distance(q, project(c.source)) < 1
+        }),
+      )
+    }
+    // Frozen v2 comparison only: the two accepted cross-chord scale factors
+    // recorded before the design exception. Never fit against a previous run.
+    let prior_scale = if minor(p.way) { 1.18 } else { 1.58 }
+    let nx = (a.y - b.y) / distance(a, b)
+    let ny = (b.x - a.x) / distance(a, b)
+    let prior = p.stations[p.from:p.to + 1]
+      .to_owned()
+      .map(q => {
+        let u = ((q.x - a.x) * nx + (q.y - a.y) * ny) * (prior_scale - 1)
+        P::{ x: q.x + nx * u, y: q.y + ny * u, }
+      })
+    let row : Json = {
+      "priorSurfaceWet": surface(prior, mask, pad),
+      "designSurfaceWet": surface(coords, mask, pad),
+      "nodes": Json(p.nodes),
+      "pathGrid": Json(p.pathGrid),
+      "from": p.from,
+      "to": p.to,
+      "originalIndices": Json(p.originalIndices),
+      "design": Json(coords),
+      "prior": Json(prior),
+      "sourceWay": p.way.osmWayId,
+      "method": "shared skewed quartic bump; zero offset and slope at both junctions",
+      "normalHeight": bh,
+      "normalSkew": bs,
+      "gridWidth": pad * 2,
+      "minimumExtraClearance": 0.17,
+    }
+    result[p.way.osmWayId.to_string()] = row
+  }
+  @fs.write_string_to_file(
+    "docs/project/wenyu-left-bank-design.json",
+    Json(result).stringify(),
+  )
+  println(
+    "Left dike and parallel greenway: h=\{bh}, skew=\{bs}; both clear at full width plus guard",
+  )
+}

@@ -1,0 +1,55 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+}
+
+///|
+// Run against the assembled preview. Playwright drives the browser's existing
+// Three.js renderer, including the pinned MoonBit models and town materials.
+async fn main {
+  guard @env.args().get(1) is Some(preview) &&
+    @env.args().get(2) is Some(playwright) else {
+    fail("Pass the local preview origin and Playwright index.mjs path")
+  }
+  let script =
+    #|import fs from 'node:fs';
+    #|import {createHash} from 'node:crypto';
+    #|import {pathToFileURL} from 'node:url';
+    #|import {bakeAxes} from './src/ui/landmark-studio/web/region-geometry.js';
+    #|const [origin,library]=process.argv.slice(1);
+    #|const {chromium}=await import(pathToFileURL(library));
+    #|const root='src/ui/landmark-studio/web/';
+    #|const inputs=['models.js','town-bake.js','scene-adapter.js','region-geometry.js'];
+    #|const hash=createHash('sha256');
+    #|for(const name of inputs)hash.update(fs.readFileSync(root+name));
+    #|const anchors=JSON.parse(fs.readFileSync(root+'region-anchors.json'));
+    #|hash.update(JSON.stringify(anchors.landmarkAxes));
+    #|const places=Object.entries(anchors.landmarkAxes).map(([id,[e,s]])=>({id,component:id.startsWith('center-')?Number(id.slice(7)):0,...bakeAxes(e,s)}));
+    #|const browser=await chromium.launch({channel:'chrome',args:['--enable-unsafe-swiftshader']});
+    #|try{
+    #| const page=await browser.newPage();
+    #| await page.goto(new URL('landmark-studio/districts.html#incubator',origin).href);
+    #| const tiles=await page.evaluate(async places=>{
+    #|   const {bakeTiles}=await import('./town-bake.js');
+    #|   const records=await bakeTiles(places);
+    #|   for(const tile of records.flatMap(r=>r.front?[r,r.front]:[r])){
+    #|     const image=new Image();image.src=tile.source;await image.decode();
+    #|     const canvas=document.createElement('canvas'),ratio=Math.min(1,850/image.width);
+    #|     canvas.width=Math.round(image.width*ratio);canvas.height=Math.round(image.height*ratio);
+    #|     canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);
+    #|     tile.source=canvas.toDataURL('image/webp',.87);
+    #|   }
+    #|   return records;
+    #| },places);
+    #| for(const tile of tiles){
+    #|   for(const [part,suffix] of tile.front?[[tile,''],[tile.front,'-front']]:[[tile,'']]){
+    #|     const path='town-projections/region-'+tile.id+suffix+'.webp';
+    #|     fs.writeFileSync(root+path,Buffer.from(part.source.split(',')[1],'base64'));part.source=path;
+    #|   }
+    #| }
+    #| fs.writeFileSync(root+'region-projections.json',JSON.stringify({version:hash.digest('hex'),tiles}));
+    #|}finally{await browser.close()}
+  @shell.Cmd("node", ["--input-type=module", "-e", script, preview, playwright]).run()
+}

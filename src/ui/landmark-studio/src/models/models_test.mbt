@@ -16,3 +16,31 @@ test "four stable independently selectable studies" {
   }
   assert_eq(ids, ["center", "vision", "east-bridge", "arch-bridge"])
 }
+
+///|
+test "map volumes retain both towers and their elevated links" {
+  for number in 1..<=7 {
+    guard @models.future_center_map_parts(number) is Array(parts) else {
+      fail("expected parts")
+    }
+    assert_true(parts.length() > 100)
+    if number == 7 {
+      for height in [27.0, 51.0, 73.0] {
+        assert_true(
+          parts.any(p => {
+            p
+            is {
+              "kind": String("box"),
+              "material": String("glass"),
+              "position": [Number(x, ..), Number(y, ..), Number(z, ..)],
+              ..
+            } &&
+            x == 0 &&
+            y == height &&
+            z == 0
+          }),
+        )
+      }
+    }
+  }
+}

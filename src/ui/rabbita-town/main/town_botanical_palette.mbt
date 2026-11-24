@@ -75,6 +75,12 @@ fn town_botanical_draw_tree(
   size : Double,
   seed : Double,
 ) -> Unit {
+  if zoom <= 1.65 &&
+    town_blit_distant_tree(
+      context, sx, sy, zoom, kind, size, seed, town_paint_botanical_tree,
+    ) {
+    return
+  }
   town_paint_botanical_tree(
     context,
     sx,
@@ -90,6 +96,44 @@ fn town_botanical_draw_tree(
     ),
   )
 }
+
+///|
+extern "js" fn town_blit_distant_tree(
+  c : @dom.CanvasRenderingContext2D,
+  x : Double,
+  y : Double,
+  zoom : Double,
+  kind : Int32,
+  size : Double,
+  seed : Double,
+  paint : (
+    @dom.CanvasRenderingContext2D,
+    Double,
+    Double,
+    Double,
+    Int32,
+    Double,
+    Double,
+    Double,
+  ) -> Unit,
+) -> Bool =
+  #| (c,x,y,z,kind,size,seed,paint)=>{
+  #|   const owner=globalThis.__moontownGoldenValleyCanvasLifecycle;
+  #|   if (!globalThis.__townDisplay?.compact || (z*(owner?.pixelRatio||1)>.46 && !owner?.zoomPreview)) return false;
+  #|   const tiles=globalThis.__townTreeTiles ||= new Map();
+  #|   const variant=Math.min(7,Math.max(0,Math.floor(seed*8))), blossom=z>.22;
+  #|   const key=(kind*8+variant)*2+Number(blossom);
+  #|   let tile=tiles.get(key);
+  #|   if(!tile){
+  #|     tile=document.createElement('canvas');tile.width=56;tile.height=59;
+  #|     const g=tile.getContext('2d'), artZoom=blossom ? .28 : .20;
+  #|     paint(g,24,42,artZoom,kind,1/(2.5*artZoom),(variant+.5)/8,0);
+  #|     tiles.set(key,tile);
+  #|   }
+  #|   const s=z*2.5*size;
+  #|   c.drawImage(tile,x-24*s,y-42*s,56*s,59*s);
+  #|   return true;
+  #| }
 
 ///|
 /// One slow canopy displacement; roots and collision/route coordinates never move.

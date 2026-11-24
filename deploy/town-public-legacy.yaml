@@ -1,0 +1,20 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata: {name: town-public-legacy, namespace: aigc-acceptance-20260915}
+spec:
+  redirectRegex:
+    regex: '^https?://([^/]+)/moontown/?([^?]*)(\?.*)?$'
+    replacement: 'https://${1}/town/${2}${3}'
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata: {name: town-public-legacy, namespace: aigc-acceptance-20260915}
+spec:
+  entryPoints: [websecure]
+  tls: {secretName: lunanexa-public-suanli-tls}
+  routes:
+    - kind: Rule
+      match: 'Host(`suanli.kechuangfuwu.com`) && (Path(`/moontown`) || PathPrefix(`/moontown/`)) && !(Path(`/moontown/workspace`) || PathPrefix(`/moontown/workspace/`)) && (Method(`GET`) || Method(`HEAD`))'
+      priority: 121
+      middlewares: [{name: town-public-legacy}]
+      services: [{name: moontown-platform, port: 8082}]

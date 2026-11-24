@@ -1,6 +1,9 @@
+import {compactGraphics, resizeScene, shadowSize} from './scene-resolution.js';
 import * as THREE from 'three';
 import {OrbitControls} from './vendor/OrbitControls.js';
 import {RoomEnvironment} from './vendor/RoomEnvironment.js';
+import {modelRoads,streetLife,runStreet,fixtureLights} from './scene-life.js';
+let streetClock;
 import {buildStudy,createMaterials} from './scene-adapter.js';
 import {buildFlows} from './datacenter-flows.js';
 import {initReports} from './datacenter-reports.js';
@@ -19,7 +22,7 @@ function render(now){
   renderer.render(scene,camera);placeLabels();
   viewport.dataset.view=current.study.id;viewport.dataset.camera=camera.position.toArray().map(v=>v.toFixed(4)).join(',');viewport.dataset.drawCalls=renderer.info.render.calls;
   viewport.dataset.family=family;viewport.dataset.playing=String(playing);viewport.dataset.parts=current.study.parts.length;
-  if(--dirty>0||(playing&&family!=='none'))raf=requestAnimationFrame(render);
+  if((--dirty>0||(playing&&family!=='none')) && !raf)raf=requestAnimationFrame(render);
 }
 function placeLabels(){
   const boxes=[];const entities=[...current.entities].sort((a,b)=>(b.id===selected?.id?1:0)-(a.id===selected?.id?1:0));
@@ -34,7 +37,7 @@ function placeLabels(){
   }
 }
 function resize(){
-  const w=viewport.clientWidth,h=viewport.clientHeight,next=w/h;renderer.setSize(w,h,false);camera.aspect=next;
+  const w=viewport.clientWidth,h=viewport.clientHeight,next=w/h;resizeScene(renderer,w,h);camera.aspect=next;
   if(aspect){const fit=Math.max(1,1.35/next)/Math.max(1,1.35/aspect);camera.position.sub(controls.target).multiplyScalar(fit).add(controls.target);}
   aspect=next;camera.setViewOffset(w,h,0,family==='none'?10:60,w,h);camera.updateProjectionMatrix();invalidate();
 }
@@ -67,6 +70,7 @@ function select(id,focus=false){
 }
 function enter(){if(!selected?.visit)return;if(current.study.id==='hall'&&/^[AB][1-6]$/.test(selected.id))rackId=selected.id;if(current.study.id==='rack'&&/^U\d+$/.test(selected.id))slotId=selected.id;showView(selected.visit);}
 function layers(){
+    if(renderer) renderer.shadowMap.needsUpdate=true;
   const cut=$('cutaway').checked;
   if(model.layers.has('shell'))model.layers.get('shell').visible=!cut;
   if(model.layers.has('walls'))model.layers.get('walls').visible=!cut;
@@ -89,9 +93,10 @@ function setFamily(next){
   flows.set(next,activeFlow);resize();invalidate();
 }
 function showView(id){
-  const data=views.find(v=>v.study.id===id)||views[0];if(model){scene.remove(model.root);model.dispose();scene.remove(flows.root);flows.dispose();}
+  const data=views.find(v=>v.study.id===id)||views[0];streetClock?.dispose();streetClock=null;if(model){scene.remove(model.root);model.dispose();scene.remove(flows.root);flows.dispose();}
   if(highlight){scene.remove(highlight);highlight.geometry.dispose();highlight.material.dispose();highlight=null;}
-  current=data;selected=null;delete viewport.dataset.selected;model=buildStudy(data.study,materials);flows=buildFlows(data.flows,data.study.span);scene.add(model.root,flows.root);
+  current=data;selected=null;delete viewport.dataset.selected;model=buildStudy(data.study,materials);flows=buildFlows(data.flows,data.study.span);scene.add(model.root,flows.root);fixtureLights(data.study,model);
+  const roads=modelRoads(data.study);if(roads.length){const life=streetLife(roads);model.context.add(life.root);streetClock=runStreet(life,$('scene'),()=>{if(!raf)raf=requestAnimationFrame(render)});viewport.dataset.traffic=String(life.count)}else delete viewport.dataset.traffic;
   $('device-selection').hidden=true;
   $('title').textContent=data.study.title;$('chapter').textContent=data.study.subtitle;
   const context=id==='site'?names.site:`${names.hall}${['rack','server','board'].includes(id)?' / '+rackId:''}${['server','board'].includes(id)?' / '+slotId+'–'+(Number(slotId.slice(1))+1):''}${id==='board'?' / PCB':''}`;
@@ -113,11 +118,11 @@ function showView(id){
 function toggleStats(open){$('stats').hidden=!open;$('open-stats').setAttribute('aria-expanded',String(open));if(open)$('close-stats').focus();else $('open-stats').focus();invalidate();}
 async function start(){
   await import('./models.js');views=globalThis.moonDataCenter?.views;if(!views?.length)throw new Error('请先构建 MoonBit 模型');
-  renderer=new THREE.WebGLRenderer({canvas:$('scene'),antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.02;renderer.outputColorSpace=THREE.SRGBColorSpace;
+  renderer=new THREE.WebGLRenderer({canvas:$('scene'),antialias:!compactGraphics});renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap; renderer.shadowMap.autoUpdate=!compactGraphics;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.02;renderer.outputColorSpace=THREE.SRGBColorSpace;
   scene=new THREE.Scene();scene.background=new THREE.Color('#e2e8dd');materials=createMaterials();
   materials.screen.emissive.set('#458f9e');materials.screen.emissiveIntensity=.25;
   const pmrem=new THREE.PMREMGenerator(renderer),room=new RoomEnvironment(),env=pmrem.fromScene(room,.04);scene.environment=env.texture;scene.environmentIntensity=.38;pmrem.dispose();room.dispose();
-  scene.add(new THREE.HemisphereLight('#e7f2fc','#adac8e',2));sun=new THREE.DirectionalLight('#fff0d5',3);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);scene.add(sun,sun.target);
+  scene.add(new THREE.HemisphereLight('#e7f2fc','#adac8e',2));sun=new THREE.DirectionalLight('#fff0d5',3);sun.castShadow=true;sun.shadow.mapSize.set(shadowSize(2048),shadowSize(2048));scene.add(sun,sun.target);
   const fill=new THREE.DirectionalLight('#d9eaf4',1.1);fill.position.set(1,1,-1);scene.add(fill);
   camera=new THREE.PerspectiveCamera(38,1,.001,2000);controls=new OrbitControls(camera,$('scene'));controls.enableDamping=!reduced.matches;controls.dampingFactor=.15;controls.minPolarAngle=.015;controls.maxPolarAngle=Math.PI-.015;controls.addEventListener('change',invalidate);
   document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));

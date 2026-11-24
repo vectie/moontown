@@ -1,3 +1,5 @@
 import {
+  "moonbitlang/core/cmp",
+  "moonbitlang/core/priority_queue",
   "moonbitlang/core/json",
 }

@@ -1,0 +1,419 @@
+{
+  "wetSamplesOnImmovableReaches": 1046,
+  "crossChordScaleAlternative": {
+    "reviewOnly": true,
+    "reachesImproved": 16,
+    "wetSamples": 1198,
+    "wetGridLength": 270.18621081248676,
+    "transforms": [
+      {
+        "way": 47518902,
+        "fromNode": 3983786789,
+        "toNode": 4087374382,
+        "chordFrom": {
+          "x": 163.00869785435015,
+          "y": 21.2420984190242
+        },
+        "chordTo": {
+          "x": 176.93043645424586,
+          "y": 30.457858016074848
+        },
+        "scaleNormal": 0.8,
+        "wetBefore": 37,
+        "wetAfter": 29
+      },
+      {
+        "way": 47518911,
+        "fromNode": 605039861,
+        "toNode": 11896407860,
+        "chordFrom": {
+          "x": 155.73445723816673,
+          "y": 19.963963279201604
+        },
+        "chordTo": {
+          "x": 133.97191561995245,
+          "y": 7.970832498055287
+        },
+        "scaleNormal": 0.86,
+        "wetBefore": 74,
+        "wetAfter": 72
+      },
+      {
+        "way": 260842920,
+        "fromNode": 11626544491,
+        "toNode": 2407503796,
+        "chordFrom": {
+          "x": 166.03958712018357,
+          "y": 31.664942848395416
+        },
+        "chordTo": {
+          "x": 153.9970990382081,
+          "y": 25.77651185522587
+        },
+        "scaleNormal": 0.8,
+        "wetBefore": 2,
+        "wetAfter": 1
+      },
+      {
+        "way": 260842920,
+        "fromNode": 2407503576,
+        "toNode": 2407503434,
+        "chordFrom": {
+          "x": 143.41647959874652,
+          "y": 21.708826297179563
+        },
+        "chordTo": {
+          "x": 135.9727199773646,
+          "y": 12.800286473609816
+        },
+        "scaleNormal": 0.89,
+        "wetBefore": 6,
+        "wetAfter": 1
+      },
+      {
+        "way": 276208167,
+        "fromNode": 3982171278,
+        "toNode": 3982171304,
+        "chordFrom": {
+          "x": 97.72955333502838,
+          "y": 9.779486346282068
+        },
+        "chordTo": {
+          "x": 84.92538964091051,
+          "y": 23.86084907651916
+        },
+        "scaleNormal": 0.81,
+        "wetBefore": 7,
+        "wetAfter": 2
+      },
+      {
+        "way": 276208167,
+        "fromNode": 2808293836,
+        "toNode": 2808293882,
+        "chordFrom": {
+          "x": 83.77066138705624,
+          "y": 25.88703898817575
+        },
+        "chordTo": {
+          "x": 62.838461801024266,
+          "y": 30.642937558417927
+        },
+        "scaleNormal": 1.08,
+        "wetBefore": 25,
+        "wetAfter": 20
+      },
+      {
+        "way": 276208167,
+        "fromNode": 2808293893,
+        "toNode": 2808292986,
+        "chordFrom": {
+          "x": 45.10352247084117,
+          "y": 32.26766286526306
+        },
+        "chordTo": {
+          "x": 15.811823553595246,
+          "y": 32.043110927962786
+        },
+        "scaleNormal": 0.89,
+        "wetBefore": 45,
+        "wetAfter": 33
+      },
+      {
+        "way": 276208167,
+        "fromNode": 2808293899,
+        "toNode": 3982166501,
+        "chordFrom": {
+          "x": 14.429000169310967,
+          "y": 22.333300433324965
+        },
+        "chordTo": {
+          "x": 9.546265615038749,
+          "y": 14.271259238697585
+        },
+        "scaleNormal": 1.11,
+        "wetBefore": 4,
+        "wetAfter": 3
+      },
+      {
+        "way": 395308293,
+        "fromNode": 3982171272,
+        "toNode": 3982171278,
+        "chordFrom": {
+          "x": 83.83545628572799,
+          "y": 23.8843640501965
+        },
+        "chordTo": {
+          "x": 97.72955333502838,
+          "y": 9.779486346282068
+        },
+        "scaleNormal": 0.81,
+        "wetBefore": 54,
+        "wetAfter": 27
+      },
+      {
+        "way": 839901805,
+        "fromNode": 14061412750,
+        "toNode": 2293380488,
+        "chordFrom": {
+          "x": 55.74663192746348,
+          "y": 31.754799384724762
+        },
+        "chordTo": {
+          "x": 29.602992072148282,
+          "y": 42.378743017358275
+        },
+        "scaleNormal": 0.9,
+        "wetBefore": 62,
+        "wetAfter": 61
+      },
+      {
+        "way": 1059215622,
+        "fromNode": 3982166501,
+        "toNode": 2808293900,
+        "chordFrom": {
+          "x": 9.546265615038749,
+          "y": 14.271259238697585
+        },
+        "chordTo": {
+          "x": 14.612168418367332,
+          "y": 22.107274729375526
+        },
+        "scaleNormal": 1.15,
+        "wetBefore": 4,
+        "wetAfter": 3
+      },
+      {
+        "way": 1059215623,
+        "fromNode": 3982171279,
+        "toNode": 3982171284,
+        "chordFrom": {
+          "x": 99.20266864352845,
+          "y": 8.938270107270581
+        },
+        "chordTo": {
+          "x": 104.97734258942785,
+          "y": 6.4841568678596495
+        },
+        "scaleNormal": 1.13,
+        "wetBefore": 20,
+        "wetAfter": 19
+      },
+      {
+        "way": 1059215624,
+        "fromNode": 605039790,
+        "toNode": 9732173880,
+        "chordFrom": {
+          "x": 160.3552714355598,
+          "y": 19.14444897785201
+        },
+        "chordTo": {
+          "x": 177.09525387117972,
+          "y": 30.628805966877223
+        },
+        "scaleNormal": 0.89,
+        "wetBefore": 70,
+        "wetAfter": 64
+      },
+      {
+        "way": 1280740322,
+        "fromNode": 2293380488,
+        "toNode": 14061412699,
+        "chordFrom": {
+          "x": 29.602992072148282,
+          "y": 42.378743017358275
+        },
+        "chordTo": {
+          "x": 18.043884808677035,
+          "y": 42.85552005030862
+        },
+        "scaleNormal": 0.96,
+        "wetBefore": 53,
+        "wetAfter": 52
+      },
+      {
+        "way": 1280740322,
+        "fromNode": 14061412699,
+        "toNode": 14061412677,
+        "chordFrom": {
+          "x": 18.043884808677035,
+          "y": 42.85552005030862
+        },
+        "chordTo": {
+          "x": 12.079794338907163,
+          "y": 25.155607320603856
+        },
+        "scaleNormal": 0.9,
+        "wetBefore": 16,
+        "wetAfter": 15
+      },
+      {
+        "way": 1281900274,
+        "fromNode": 11896407860,
+        "toNode": 11896442969,
+        "chordFrom": {
+          "x": 133.97191561995245,
+          "y": 7.970832498055287
+        },
+        "chordTo": {
+          "x": 126.28848139709504,
+          "y": 5.631160628478312
+        },
+        "scaleNormal": 1.19,
+        "wetBefore": 26,
+        "wetAfter": 24
+      }
+    ]
+  },
+  "lengthFirstFitWetLength": 288.1888266314437,
+  "lengthFirstFitWetSamples": 1277,
+  "variables": 72,
+  "jointDegreesOfFreedom": 0,
+  "sharedNodeEquations": 220,
+  "junctionDelimitedReaches": 98,
+  "reachDegreesOfFreedom": 5,
+  "movableReaches": [
+    {
+      "way": 47518902,
+      "a": 4196865312,
+      "b": 1703021118,
+      "samples": 64,
+      "water": 34
+    },
+    {
+      "way": 47518911,
+      "a": 605039861,
+      "b": 11896407860,
+      "samples": 102,
+      "water": 74
+    },
+    {
+      "way": 47518911,
+      "a": 11896407860,
+      "b": 11896442969,
+      "samples": 36,
+      "water": 25
+    },
+    {
+      "way": 47518911,
+      "a": 11896442969,
+      "b": 4441550742,
+      "samples": 3,
+      "water": 3
+    },
+    {
+      "way": 276208167,
+      "a": 3982166501,
+      "b": 2808292997,
+      "samples": 26,
+      "water": 15
+    },
+    {
+      "way": 1059215623,
+      "a": 3982171279,
+      "b": 3982171284,
+      "samples": 35,
+      "water": 20
+    },
+    {
+      "way": 1280740322,
+      "a": 14061412654,
+      "b": 1883423132,
+      "samples": 0,
+      "water": 0
+    },
+    {
+      "way": 1281900274,
+      "a": 11896407860,
+      "b": 11896442969,
+      "samples": 37,
+      "water": 26
+    },
+    {
+      "way": 1282700850,
+      "a": 2808293857,
+      "b": 3982171284,
+      "samples": 7,
+      "water": 7
+    },
+    {
+      "way": 1282700850,
+      "a": 3982171284,
+      "b": 3982171279,
+      "samples": 31,
+      "water": 26
+    },
+    {
+      "way": 1282700850,
+      "a": 3982171279,
+      "b": 11902916253,
+      "samples": 2,
+      "water": 1
+    }
+  ],
+  "corridors": [
+    {
+      "name": "温榆河左堤路",
+      "ways": 4,
+      "samples": 1327,
+      "water": 641,
+      "waterOnImmovableWays": 641,
+      "waysWithoutTwoFixedPoints": [],
+      "fixedBridgeHeadsOnOpenWater": {}
+    },
+    {
+      "name": "温榆河右堤路",
+      "ways": 11,
+      "samples": 1498,
+      "water": 373,
+      "waterOnImmovableWays": 292,
+      "waysWithoutTwoFixedPoints": [
+        "1272460753",
+        "1280498646",
+        "1387759526",
+        "1387759527"
+      ],
+      "fixedBridgeHeadsOnOpenWater": {
+        "11816025349": {
+          "x": 230.59059502758296,
+          "y": 134.2172842072538
+        },
+        "11816025348": {
+          "x": 230.69365929071392,
+          "y": 133.94266881147243
+        }
+      }
+    },
+    {
+      "name": "温榆河绿道昌平段",
+      "ways": 9,
+      "samples": 958,
+      "water": 263,
+      "waterOnImmovableWays": 263,
+      "waysWithoutTwoFixedPoints": [],
+      "fixedBridgeHeadsOnOpenWater": {}
+    }
+  ],
+  "transforms": [
+    {
+      "way": 276208167,
+      "a": 3982166501,
+      "b": 2808292997,
+      "origin": {
+        "x": 9.546265615038749,
+        "y": 14.271259238697585
+      },
+      "dx": 0,
+      "dy": 0,
+      "scale": 1.04185,
+      "waterAfter": 14
+    }
+  ],
+  "waterAfterReachFit": {
+    "温榆河左堤路": 640,
+    "温榆河右堤路": 373,
+    "温榆河绿道昌平段": 263
+  },
+  "openWaterLengthInGridUnitsBefore": 288.2776758753523,
+  "openWaterLengthInGridUnitsAfter": 288.2784259420003,
+  "scope": "offline feasibility trial, not accepted geometry; no map or parcel changes"
+}

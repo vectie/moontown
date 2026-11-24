@@ -185,18 +185,17 @@ extern "js" fn street_life_test_camera(z : Double, transition : Bool) -> Unit =
   #| (z,transition)=>{const c=globalThis.__moontownGoldenValleyCamera;c.z=z;delete c.streetTransition;if(transition)c.streetClose={x:c.x,y:c.y,z};}
 
 ///|
-test "street camera cannot drift to map scale while overview remains available" {
+test "manual wheel scale survives a street repaint and also works in overview" {
   canvas_frame_test_install_harness(true)
+  defer canvas_frame_test_remove_harness()
   town_landmarks_init()
   prepare_street_living_room_camera(true)
   street_life_test_camera(0.1, false)
   prepare_street_living_room_camera(true)
-  assert_true(golden_valley_camera_zoom() >= 1.8)
-  // An actual overview, unlike a wheel zoom, is allowed to use map scale.
+  assert_eq(golden_valley_camera_zoom(), 0.1)
   prepare_street_living_room_camera(true, overview=true)
   street_life_test_camera(0.1, false)
   prepare_street_living_room_camera(true, overview=true)
   assert_true(golden_valley_camera_zoom() < 1)
   prepare_street_living_room_camera(false)
-  canvas_frame_test_remove_harness()
 }

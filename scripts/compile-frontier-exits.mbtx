@@ -12,7 +12,7 @@ fn str(j : Json) -> String { match j { String(s) => s; _ => "" } }
 fn inside(p : (Double, Double)) -> Bool { p.0 >= 0 && p.0 <= 256 && p.1 >= 0 && p.1 <= 144 }
 
 fn main raise {
-  let source = @json.parse(@fs.read_file_to_string("docs/project/wenyu-lower-perspective.json"))
+  let source = @json.parse(@fs.read_file_to_string("output/wenyu-road-town/roads.json"))
   let base = @json.parse(@fs.read_file_to_string("src/ui/assets/landmark-studio/navigation.json"))
   let terrain = arr(field(@json.parse(@fs.read_file_to_string("src/ui/assets/tilemap/wenyu_reference_labels.json")), "rows")).map(str)
   let nodes : Map[String, (Double, Double)] = Map([])
@@ -22,13 +22,12 @@ fn main raise {
     let tags = field(way, "tags")
     if !["secondary", "tertiary", "residential", "unclassified", "service", "footway", "path", "pedestrian", "steps", "cycleway"].contains(str(field(tags,"highway"))) ||
       ["no", "private"].contains(str(field(tags,"access"))) || str(field(tags,"foot")) == "no" || str(field(tags,"tunnel")) == "yes" { continue }
-    let ps = arr(field(way, "pathGrid"))
-    let ids = arr(field(way, "nodes"))
+    let ps = arr(field(way,"ground"))
+    let ids = arr(field(way,"nodes"))
     for i,p in ps {
       let x = num(field(p,"x")); let y = num(field(p,"y"))
-      let w = 1.0 + 0.01 * ((x - 256.0) / 256.0 - y / 144.0)
       let id = ids[i].stringify()
-      nodes[id] = (256.0 + (x-256.0)/w, y/w)
+      nodes[id] = (x,y)
       if !adj.contains(id) { adj[id] = [] }
       if i > 0 {
         let prev = ids[i-1].stringify()
@@ -149,6 +148,6 @@ fn main raise {
     }
   }
   assert_eq(exits.length(),4)
-  let result : Json = {"schema":"moontown.frontier-exits.v1","authority":"local navigation simulation only","source":"wenyu-lower-perspective.json; same unshifted gentle 0.01 calibration","core":[0,0,256,144],"nodes":ns,"edges":es,"exits":exits,"rivers":rivers}
+  let result : Json = {"schema":"moontown.frontier-exits.v1","authority":"local navigation simulation only","source":"Wenyu reviewed major-road fit and junction links","core":[0,0,256,144],"nodes":ns,"edges":es,"exits":exits,"rivers":rivers}
   @fs.write_string_to_file("src/ui/assets/tilemap/wenyu-frontier-exits.json",result.stringify())
 }

@@ -68,6 +68,12 @@ fn street_courtyard_draw_depth(
     street_courtyard_basis(w, h) is Some(basis) else {
     return
   }
+  if basis[0] < -300 * basis[6] ||
+    basis[0] > w.to_double() + 300 * basis[6] ||
+    basis[1] < -300 * basis[6] ||
+    basis[1] > h.to_double() + 300 * basis[6] {
+    return
+  }
   for (kind, x, z) in street_courtyard_props {
     let p = town_landmark_at(l, x, z)
     if (p.x + p.y).floor().to_int() == depth {

@@ -1,0 +1,15 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/wlxk-server/main"
+
+// Values
+
+// Errors
+
+// Types and methods
+type Peer
+
+type State
+
+// Type aliases
+
+// Traits

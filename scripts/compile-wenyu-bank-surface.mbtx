@@ -1,0 +1,423 @@
+///|
+import {
+  "moonbitlang/x@0.4.50/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/core/math",
+  "moonbitlang/core/env",
+}
+
+///|
+struct P {
+  x : Double
+  y : Double
+} derive(ToJson, FromJson, Eq, Debug)
+
+///|
+struct SourceWay {
+  osmWayId : Double
+  nodes : Array[Double]
+  ground : Array[P]
+  tags : Map[String, String]
+} derive(FromJson)
+
+///|
+struct Source {
+  ways : Array[SourceWay]
+} derive(FromJson)
+
+///|
+struct Labels {
+  rows : Array[String]
+} derive(FromJson)
+
+///|
+fn grade(way : SourceWay, key : String) -> Bool {
+  match way.tags.get(key) {
+    None | Some("no" | "false" | "0" | "") => false
+    _ => true
+  }
+}
+
+///|
+fn distance(a : P, b : P) -> Double {
+  ((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)).sqrt()
+}
+
+///|
+fn kind(w : SourceWay) -> String {
+  if grade(w, "bridge") {
+    "bridge"
+  } else if grade(w, "tunnel") {
+    "tunnel"
+  } else if grade(w, "ford") {
+    "ford"
+  } else {
+    "surface"
+  }
+}
+
+///|
+fn minor(w : SourceWay) -> Bool {
+  ["footway", "path", "steps", "cycleway", "track", "pedestrian"].contains(
+    w.tags.get("highway").unwrap_or(""),
+  )
+}
+
+///|
+fn rounded(x : Double) -> Double {
+  (x * 10000).round() / 10000
+}
+
+///|
+fn slab(a : Double, d : Double, lo : Double, hi : Double) -> (Double, Double) {
+  if d == 0 {
+    if a >= lo && a < hi {
+      (0, 1)
+    } else {
+      (1, 0)
+    }
+  } else {
+    let t = (lo - a) / d
+    let u = (hi - a) / d
+    (t.min(u).max(0), t.max(u).min(1))
+  }
+}
+
+///|
+// Exact interval union on a segment. pad=0 measures the centerline; half the
+// SVG stroke width is a conservative square envelope for the round-stroked road.
+fn intervals(
+  a : P,
+  b : P,
+  water : Array[Bool],
+  pad : Double,
+) -> Array[(Double, Double)] {
+  let hit : Array[(Double, Double)] = []
+  let x0 = (a.x.min(b.x) - pad).floor().to_int().max(0)
+  let x1 = (a.x.max(b.x) + pad).floor().to_int().min(255)
+  let y0 = (a.y.min(b.y) - pad).floor().to_int().max(0)
+  let y1 = (a.y.max(b.y) + pad).floor().to_int().min(143)
+  for y in y0..<=y1 {
+    let (v, w) = slab(
+      a.y,
+      b.y - a.y,
+      y.to_double() - pad,
+      y.to_double() + 1 + pad,
+    )
+    if w <= v {
+      continue
+    }
+    for x in x0..<=x1 {
+      if !water[y * 256 + x] {
+        continue
+      }
+      let (l, h) = slab(
+        a.x,
+        b.x - a.x,
+        x.to_double() - pad,
+        x.to_double() + 1 + pad,
+      )
+      let lo = l.max(v)
+      let hi = h.min(w)
+      if hi > lo {
+        hit.push((lo, hi))
+      }
+    }
+  }
+  hit.sort_by((a, b) => a.0.compare(b.0))
+  let merged : Array[(Double, Double)] = []
+  for (lo, hi) in hit {
+    let n = merged.length()
+    if n > 0 && lo <= merged[n - 1].1 {
+      merged[n - 1] = (merged[n - 1].0, hi.max(merged[n - 1].1))
+    } else {
+      merged.push((lo, hi))
+    }
+  }
+  merged
+}
+
+///|
+fn measure(a : P, b : P, water : Array[Bool], pad : Double) -> Double {
+  intervals(a, b, water, pad).fold(init=0.0, (v, h) => v + h.1 - h.0) *
+  distance(a, b)
+}
+
+///|
+fn mix(a : P, b : P, t : Double) -> P {
+  { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, }
+}
+
+///|
+fn flag_review(
+  a : P,
+  b : P,
+  spans : Array[(Double, Double)],
+  review : Array[Bool],
+) -> Unit {
+  for (lo, hi) in spans {
+    let n = ((hi - lo) * distance(a, b) * 5).ceil().to_int().max(1)
+    for k in 0..<=n {
+      let q = mix(a, b, lo + (hi - lo) * k.to_double() / n.to_double())
+      let x = q.x.floor().to_int()
+      let y = q.y.floor().to_int()
+      for yy in (y - 2).max(0)..<=(y + 2).min(143) {
+        for xx in (x - 2).max(0)..<=(x + 2).min(255) {
+          review[yy * 256 + xx] = true
+        }
+      }
+    }
+  }
+}
+
+///|
+fn main raise {
+  let source : Source = @json.from_json(
+    @json.parse(
+      @fs.read_file_to_string("output/wenyu-road-town/roads.json"),
+    ),
+  )
+  let labels : Labels = @json.from_json(
+    @json.parse(
+      @fs.read_file_to_string(
+        "src/ui/assets/tilemap/wenyu_reference_labels.json",
+      ),
+    ),
+  )
+  let rows = labels.rows
+  assert_eq(rows.length(), 144)
+  for row in rows {
+    assert_eq(row.length(), 256)
+  }
+  let water = Array::makei(256 * 144, i => rows[i / 256][i % 256] is ('r' | 'l'))
+  let bridge_cells = Array::makei(256 * 144, i => rows[i / 256][i % 256] == 'b')
+  let dike = source.ways[source.ways
+    .search_by(w => w.osmWayId == 47518902)
+    .unwrap()]
+  let road = Array::make(256 * 144, false)
+  let surface = road.copy()
+  let review = road.copy()
+  let slim = StringBuilder()
+  let wide = StringBuilder()
+  let spine = StringBuilder()
+  let paths : Array[Json] = []
+  let lanes : Array[Json] = []
+  let occupied : Map[Int,Int] = Map([])
+  let breakdown : Map[String, Int32] = Map([])
+  let checked : Map[Double, P] = Map([])
+  let residual : Array[Json] = []
+  let contacts : Array[Array[Double]] = []
+  let focus : Map[String,Array[Double]] = Map([])
+  let mut target : Json = Json::null()
+  let mut link_count=0
+  let mut link_wet=0.0
+  let mut max_join_delta = 0.0
+  let mut wet_surface = 0.0
+  let mut wet_center = 0.0
+  for way in source.ways {
+    let type_ = kind(way)
+    let small = minor(way)
+    let pad = if small { 0.045 } else { 0.12 }
+    let name = way.tags.get("name").unwrap_or("")
+    if !way.tags.contains("moontown:link") { breakdown[type_] = breakdown.get(type_).unwrap_or(0) + 1 }
+    let out = way.ground
+    assert_eq(out.length(),way.nodes.length())
+    let link = way.tags.contains("moontown:link")
+    if link { link_count+=1 }
+    let rounded_line = out.map(p => P::{ x: rounded(p.x), y: rounded(p.y), })
+    let wet_parts : Array[Array[P]] = []
+    let mut deck = 0.0
+    let mut center = 0.0
+    for i, id in way.nodes {
+      let p = out[i]
+      let delta = distance(checked.get_or_init(id, () => p), p)
+      max_join_delta = max_join_delta.max(delta)
+      assert_true(delta < 0.000001)
+      if i == 0 {
+        continue
+      }
+      let a = rounded_line[i - 1]
+      let b = rounded_line[i]
+      let spans = intervals(a, b, water, pad)
+      if type_ == "surface" {
+        center += measure(a, b, water, 0)
+        for (lo, hi) in spans {
+          deck += (hi - lo) * distance(a, b)
+          let start = mix(a,b,lo)
+          let end = mix(a,b,hi)
+          contacts.push([rounded(start.x),rounded(start.y),rounded(end.x),rounded(end.y)])
+          let key = way.osmWayId.to_string()
+          if !focus.contains(key) { focus[key]=[rounded((start.x+end.x)/2),rounded((start.y+end.y)/2)] }
+          if way.osmWayId == dike.osmWayId {
+            wet_parts.push([mix(a, b, lo), mix(a, b, hi)])
+          }
+        }
+        flag_review(a, b, spans, review)
+        flag_review(a, b, intervals(a, b, bridge_cells, pad), review)
+      }
+      let n = (distance(a, b) / 0.2).ceil().to_int().max(1)
+      for j in 0..<=n {
+        let q = mix(a, b, j.to_double() / n.to_double())
+        for
+          y in (q.y - 0.4).floor().to_int().max(0)..<=(q.y + 0.4)
+          .floor()
+          .to_int()
+          .min(143) {
+          for
+            x in (q.x - 0.4).floor().to_int().max(0)..<=(q.x + 0.4)
+            .floor()
+            .to_int()
+            .min(255) {
+            road[y * 256 + x] = true
+            if type_ == "surface" {
+              surface[y * 256 + x] = true
+            }
+          }
+        }
+      }
+    }
+    // Motor scenery uses the precise corrected line, excluding wet/review segments,
+    // bridges, tunnels and restricted ways. Limit population per neighbourhood.
+    if type_ == "surface" && deck == 0 && center == 0 && rounded_line.length() >= 2 &&
+      !link && way.tags.get("highway") is Some("residential" | "unclassified" | "tertiary" | "secondary" | "primary") &&
+      !(way.tags.get("access") is Some("no" | "private" | "customers" | "delivery")) &&
+      !(way.tags.get("motor_vehicle") is Some("no" | "private")) &&
+      !(way.tags.get("motorcar") is Some("no" | "private")) &&
+      rounded_line.all(p => p.x>=0 && p.x<256 && p.y>=0 && p.y<144) {
+      let mid=rounded_line[rounded_line.length()/2]
+      let key=mid.x.to_int()/14 + 20*(mid.y.to_int()/12)
+      let n=occupied.get(key).unwrap_or(0)
+      let mut length=0.0
+      for i in 1..<rounded_line.length() {length+=distance(rounded_line[i-1],rounded_line[i])}
+      if n<3 && length>=2.5 {
+        let dir=match way.tags.get("oneway") {
+          Some("-1") => -1
+          Some("yes" | "true" | "1") => 1
+          _ => if way.tags.get("junction") is Some("roundabout") { 1 } else { 0 }
+        }
+        occupied[key]=n+1
+        lanes.push([way.osmWayId,dir,Json(rounded_line.map(p=>[p.x,p.y]))])
+      }
+    }
+    if link { link_wet+=deck }
+    wet_surface += deck
+    wet_center += center
+    if deck > 0 {
+      residual.push({
+        "way": way.osmWayId,
+        "name": name,
+        "centerWet": center,
+        "surfaceWet": deck,
+      })
+    }
+    if way.osmWayId == dike.osmWayId {
+      target = {
+        "way": way.osmWayId,
+        "sourceNodes": way.nodes.length(),
+        "displayNodes": out.length(),
+        "fit": "wenyu-major-road-fit.json#coreFit",
+        "centerWet": center,
+        "surfaceWet": deck,
+        "wetParts": Json(wet_parts),
+      }
+    }
+    if out.any(p => p.x < 256) &&
+      out.any(p => p.x > 0) &&
+      out.any(p => p.y < 144) &&
+      out.any(p => p.y > 0) {
+      let path = StringBuilder()
+      for i, p in rounded_line {
+        path.write_string("\{if i==0 {"M"} else {"L"}}\{p.x},\{p.y}")
+      }
+      let dest = if small { slim } else { wide }
+      dest.write_string(
+        "<path d='\{path.to_string()}'\{if type_=="surface" {""} else {" data-kind='"+type_+"'"}}/>",
+      )
+      if name == "温榆河绿道昌平段" && type_ == "surface" {
+        spine.write_string(
+          "<path d='\{path.to_string()}' fill='none' stroke='#86ab70' stroke-width='1.5' opacity='0.48' stroke-linecap='round' stroke-linejoin='round'/>",
+        )
+      }
+    }
+    if out.all(p => p.x > 1 && p.x < 255 && p.y > 1 && p.y < 143) &&
+      (small || way.tags.get("highway") is Some("residential" | "unclassified")) &&
+      type_ != "tunnel" && (!link || way.tags.get("foot")!=Some("no")) {
+      paths.push({
+        "id": way.osmWayId,
+        "greenway": name == "温榆河绿道昌平段",
+        "points": Json(rounded_line.map(p => [p.x, p.y])),
+      })
+    }
+  }
+  @fs.write_string_to_file("src/ui/landmark-studio/web/town-motor-streets.json",Json(lanes).stringify())
+  if @env.args().contains("--traffic-only") { println("Motor streets: \{lanes.length()}");return }
+  let base_dir = "src/ui/assets/tilemap/"
+  let old_svg = @fs.read_file_to_string(
+    base_dir + "wenyu-unshifted-road-overlay.svg",
+  )
+  let prefix = old_svg.split("<g clip-path='url(#dry)'>").to_array()
+  assert_eq(prefix.length(), 2)
+  let svg = prefix[0].to_owned() +
+    "<g clip-path='url(#dry)'>" +
+    spine.to_string() +
+    "</g><g fill='none' stroke='#ffc46d' stroke-linejoin='round'><g stroke-width='0.09' stroke-opacity='0.35'>" +
+    slim.to_string() +
+    "</g><g stroke-width='0.24' stroke-opacity='0.95'>" +
+    wide.to_string() +
+    "</g></g></g></svg>"
+  let mask = (bits : Array[Bool], c : String) => {
+    Array::makei(144, y => {
+      let s = StringBuilder()
+      for x in 0..<256 {
+        s.write_string(if bits[y * 256 + x] { c } else { "." })
+      }
+      s.to_string()
+    })
+  }
+  let scene : Json = {
+    "schema": "moontown.wenyu_bank_scene.v2",
+    "layout": "major-road-fit",
+    "roadCells": Json(mask(road, "R")),
+    "paths": Json(paths),
+  }
+  let partitions : Json = {
+    "groundRoad": Json(mask(surface, "R")),
+    "unresolvedShore": Json(mask(review, "?")),
+  }
+  let report : Json = {
+    "leftDike": target,
+    "sourceWays": source.ways.length()-link_count,
+    "junctionLinks": link_count,
+    "linkWet":link_wet,
+    "gradeCounts": Json(breakdown),
+    "maxSharedNodeDrift": max_join_delta,
+    "surfaceCenterAfter": wet_center,
+    "surfaceEnvelopeAfter": wet_surface,
+    "unresolvedSurfaceWays": Json(residual),
+  }
+  let mid = dike.ground[dike.ground.length()/2]
+  focus[dike.osmWayId.to_string()] = [rounded(mid.x),rounded(mid.y)]
+  let saved = @json.parse(@fs.read_file_to_string("docs/project/wenyu-major-road-fit.json"))
+  guard saved is {"afterMarkers":Array(markers), ..} else { fail("Missing reviewed intersections") }
+  let crossings : Array[Json] = []
+  for marker in markers {
+    guard marker is {"lost":lost,"point":{"x":Number(x,..),"y":Number(y,..),..},..} else { fail("Invalid crossing marker") }
+    crossings.push([rounded(x),rounded(y),lost])
+  }
+  let overlay : Json = {"focus": Json(focus),"contacts":Json(contacts),"crossings":Json(crossings)}
+  @fs.write_string_to_file("src/ui/landmark-studio/web/town-road-review.json",overlay.stringify())
+  @fs.write_string_to_file(base_dir + "wenyu-bank-road-v2.svg", svg)
+  @fs.write_string_to_file(
+    base_dir + "wenyu-bank-scene-v2.json",
+    scene.stringify(),
+  )
+  @fs.write_string_to_file(
+    "docs/project/wenyu-bank-partition-input.json",
+    partitions.stringify(),
+  )
+  @fs.write_string_to_file(
+    "docs/project/wenyu-town-road-audit.json",
+    report.stringify(indent=2),
+  )
+  println("Town road layout: \{source.ways.length()-link_count} ways, \{link_count} connections; wet road + junction length \{wet_surface}")
+}

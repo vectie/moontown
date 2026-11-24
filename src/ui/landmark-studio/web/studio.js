@@ -1,7 +1,10 @@
+import {compactGraphics, resizeScene, shadowSize} from './scene-resolution.js';
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
 import { RoomEnvironment } from './vendor/RoomEnvironment.js';
 import { createMaterials, buildStudy } from './scene-adapter.js';
+import {mobileStudy,modelRoads,streetLife,runStreet} from './scene-life.js';
+let life,lifeClock;
 import { references } from './references.js';
 import { initViewerUI } from './viewer-ui.js';
 initViewerUI();
@@ -26,13 +29,13 @@ function render(time){
   $('viewport').dataset.frames=String(frameCount);
   $('viewport').dataset.camera=camera.position.toArray().map(v=>v.toFixed(2)).join(',');
   $('viewport').dataset.drawCalls=String(renderer.info.render.calls);
-  if(--dirty>0||controls.autoRotate)raf=requestAnimationFrame(render);
+  if((--dirty>0||controls.autoRotate) && !raf)raf=requestAnimationFrame(render);
 }
 
 function resize(){
   const w=$('viewport').clientWidth,h=$('viewport').clientHeight;
   const aspect=w/h;
-  renderer.setSize(w,h,false);
+  resizeScene(renderer,w,h);
   if(camera.isPerspectiveCamera){
     if(lastAspect>0&&Math.abs(lastAspect-aspect)>.001){
       const factor=Math.max(1,1.3/aspect)/Math.max(1,1.3/lastAspect);
@@ -78,7 +81,7 @@ function view(name){
 }
 
 function setLighting(mode){
-  lightMode=mode;
+  renderer.shadowMap.needsUpdate=true;lightMode=mode;life?.night(mode!=='day');
   const presets={
     day:{bg:'#dce6e0',sun:'#fff1d7',power:2.2,sky:'#d1e5f2',ambient:.85,pos:[-100,220,100],exposure:.83},
     golden:{bg:'#e6d9c5',sun:'#ffd09b',power:2.7,sky:'#b6cdd8',ambient:.65,pos:[-170,95,90],exposure:.87},
@@ -101,8 +104,12 @@ function setClay(){
 function select(id){
   const next=data.find(d=>d.id===id)||data[0];
   $('loading').hidden=false;
-  if(model){scene.remove(model.root);model.dispose();}
-  current=next;model=buildStudy(current,materials);scene.add(model.root);
+  lifeClock?.dispose();if(model){scene.remove(model.root);model.dispose();}
+  current=next;model=buildStudy(mobileStudy(current),materials);scene.add(model.root);
+  life=streetLife(modelRoads(current));model.context.add(life.root);life.night(lightMode!=='day');
+  renderer.shadowMap.needsUpdate=true;
+  lifeClock=runStreet(life,$('scene'),()=>{if(!raf)raf=requestAnimationFrame(render)},()=>model.context.visible);
+  lifeClock.pause(!$('traffic').checked);$('viewport').dataset.traffic=String(life.count);
   if(model.reflector){
     // Exclude the exhibition plinth and studio floor from the reflected view.
     const reflect=model.reflector.onBeforeRender;
@@ -139,15 +146,15 @@ function showReferences(){
 async function start(){
   await import('./models.js');data=globalThis.wenyuLandmarkStudies;
   if(!Array.isArray(data)||data.length!==4)throw new Error('Model data is missing. Run the MoonBit studio build.');
-  renderer=new THREE.WebGLRenderer({canvas:$('scene'),antialias:true,alpha:false,powerPreference:'high-performance'});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer=new THREE.WebGLRenderer({canvas:$('scene'),antialias:!compactGraphics,alpha:false,powerPreference:'high-performance'});
+  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.outputColorSpace=THREE.SRGBColorSpace;
   scene=new THREE.Scene();scene.fog=new THREE.Fog('#dce6e0',650,1500);
   camera=new THREE.PerspectiveCamera(38,1,.25,2400);
   materials=createMaterials();clayMaterial=new THREE.MeshStandardMaterial({color:'#d5d7cb',roughness:.9,side:THREE.DoubleSide});
   const pmrem=new THREE.PMREMGenerator(renderer),room=new RoomEnvironment();environment=pmrem.fromScene(room,.04);scene.environment=environment.texture;room.dispose();pmrem.dispose();
   hemi=new THREE.HemisphereLight('#d1e5f2','#87906e',2);scene.add(hemi);
-  sun=new THREE.DirectionalLight('#fff1d7',3);sun.castShadow=true;sun.shadow.mapSize.set(4096,4096);
+  sun=new THREE.DirectionalLight('#fff1d7',3);sun.castShadow=true;sun.shadow.mapSize.set(shadowSize(4096),shadowSize(4096));
   Object.assign(sun.shadow.camera,{left:-250,right:250,top:220,bottom:-220,near:1,far:650});sun.shadow.bias=-.00015;sun.shadow.normalBias=.35;sun.shadow.radius=3;scene.add(sun);
   fill=new THREE.DirectionalLight('#c4dfec',.7);fill.position.set(80,100,-120);scene.add(fill);
   ground=new THREE.Mesh(new THREE.PlaneGeometry(4000,4000),new THREE.MeshStandardMaterial({color:'#dce6e0',roughness:1}));ground.rotation.x=-Math.PI/2;ground.position.y=-9;ground.receiveShadow=true;scene.add(ground);
@@ -155,7 +162,8 @@ async function start(){
   document.querySelectorAll('[data-study]').forEach(b=>b.addEventListener('click',()=>select(b.dataset.study)));
   document.querySelectorAll('[data-light]').forEach(b=>b.addEventListener('click',()=>setLighting(b.dataset.light)));
   document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>view(b.dataset.view)));
-  $('context').addEventListener('change',()=>{model.context.visible=$('context').checked;ground.visible=$('context').checked;invalidate();});
+  $('traffic').addEventListener('change',()=>lifeClock?.pause(!$('traffic').checked));
+  $('context').addEventListener('change',()=>{model.context.visible=$('context').checked;ground.visible=$('context').checked;renderer.shadowMap.needsUpdate=true;lifeClock?.wake();invalidate();});
   $('clay').addEventListener('change',setClay);
   $('rotate').addEventListener('change',()=>{controls.autoRotate=$('rotate').checked;invalidate();});
   $('reset').addEventListener('click',()=>view('hero'));

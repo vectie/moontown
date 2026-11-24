@@ -6,14 +6,18 @@ const fetchJson = async path => {
   if(!r.ok)throw new Error(`Tile asset ${r.status}`);
   return r.json();
 };
-const signature = places => JSON.stringify(places.map(p=>({id:p.id,east:p.east,south:p.south,elevation:p.elevation})));
+// Depth order can change when a building moves. Only its projection basis
+// determines whether its existing image still fits.
+const signature = places => JSON.stringify(places
+  .map(p=>({id:p.id,east:p.east,south:p.south,elevation:p.elevation}))
+  .sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0));
 export async function loadTownTiles(places) {
   const version=await fetchJson('town-projection-version.json').catch(()=>({sha256:'unversioned'}));
   const registration=signature(places), key=`${version.sha256}:${registration}`;
   const exportMode=new URLSearchParams(location.search).get('bake-tiles')==='1';
   if(!exportMode)try {
     const pack=await fetchJson('town-projections/manifest.json');
-    if(pack.version!==version.sha256||pack.registration!==registration)throw new Error('Projection inputs changed');
+    if(pack.version!==version.sha256||signature(JSON.parse(pack.registration))!==registration)throw new Error('Projection inputs changed');
     if(pack.tiles?.length!==places.length||!places.every(p=>pack.tiles.some(r=>r.id===p.id&&(!p.id.endsWith('bridge')||r.front))))throw new Error('Incomplete projection pack');
     // Decode before accepting the pack; damaged/missing assets must fall back.
     for(const r of pack.tiles){await decodeTile(r);if(r.front)await decodeTile(r.front);}

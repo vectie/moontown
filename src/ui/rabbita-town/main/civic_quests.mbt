@@ -64,8 +64,16 @@ fn render_quest_card(quest : CivicQuestSim) -> @rabbita.Html {
     p(class="quest-next", quest.next_action),
     if quest.area == "Contest Express" {
       div([
-        a(href="./coffee-contest.html", class="quest-next", "半醒咖啡 · 每周创作 ↗"),
-        a(href="./hackathon.html", class="quest-next", "打开赛事工作台 ↗"),
+        a(
+          href="./coffee-contest.html",
+          class="quest-next",
+          "半醒咖啡 · 每周创作 ↗",
+        ),
+        a(
+          href="./hackathon.html",
+          class="quest-next",
+          "打开赛事工作台 ↗",
+        ),
       ])
     } else {
       @html.nothing

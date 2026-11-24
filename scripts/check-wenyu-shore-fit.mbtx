@@ -1,0 +1,754 @@
+///|
+import {
+  "moonbitlang/x@0.4.50/fs",
+  "moonbitlang/core/json",
+}
+
+///|
+struct P {
+  x : Double
+  y : Double
+} derive(ToJson, FromJson, Eq)
+
+///|
+struct SourceWay {
+  osmWayId : Double
+  nodes : Array[Double]
+  pathGrid : Array[P]
+  tags : Map[String, String]
+} derive(FromJson)
+
+///|
+struct Source {
+  ways : Array[SourceWay]
+} derive(FromJson)
+
+///|
+struct Labels {
+  rows : Array[String]
+} derive(FromJson)
+
+///|
+fn grade(way : SourceWay, key : String) -> Bool {
+  match way.tags.get(key) {
+    None | Some("no" | "false" | "0" | "") => false
+    _ => true
+  }
+}
+
+///|
+fn project(p : P) -> P {
+  let w = 1.0 + 0.01 * ((p.x - 256) / 256 - p.y / 144)
+  { x: 256 + (p.x - 256) / w, y: p.y / w, }
+}
+
+///|
+fn tile(rows : Array[String], p : P) -> Char {
+  let x = p.x.floor().to_int()
+  let y = p.y.floor().to_int()
+  if x < 0 || y < 0 || x >= 256 || y >= 144 {
+    return '?'
+  }
+  rows[y].get_char(x).unwrap()
+}
+
+///|
+fn distance(a : P, b : P) -> Double {
+  ((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)).sqrt()
+}
+
+///|
+fn samples(points : Array[P]) -> Array[P] {
+  let out = []
+  for i in 1..<points.length() {
+    let a = points[i - 1]
+    let b = points[i]
+    let n = (distance(a, b) / 0.25).ceil().to_int().max(1)
+    for j in 0..<n {
+      let t = (j.to_double() + 0.5) / n.to_double()
+      let p = { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, }
+      if p.x > 2 && p.x < 254 && p.y > 2 && p.y < 142 {
+        out.push(p)
+      }
+    }
+  }
+  out
+}
+
+///|
+// Unknowns per whole way: (dx,dy,k), with x' = x + dx + k*(x-origin.x)
+// and y' = y + dy + k*(y-origin.y). Thus scale=1+k, with no rotation,
+// shear or per-vertex freedom. Enforce equality at every actual shared node.
+fn constraints(
+  ways : Array[SourceWay],
+  outside : Set[Double],
+) -> Array[Array[Double]] {
+  let first : Map[Double, (Int32, P)] = Map([])
+  let n = 3 * ways.length()
+  let rows = []
+  for i, way in ways {
+    let origin = project(way.pathGrid[0])
+    for j, id in way.nodes {
+      let p = project(way.pathGrid[j])
+      let delta = { x: p.x - origin.x, y: p.y - origin.y, }
+      let previous = first.get(id)
+      if !outside.contains(id) && previous is None {
+        first[id] = (i, delta)
+        continue
+      }
+      let rx = Array::make(n, 0.0)
+      let ry = Array::make(n, 0.0)
+      rx[3 * i] = 1
+      ry[3 * i + 1] = 1
+      rx[3 * i + 2] = delta.x
+      ry[3 * i + 2] = delta.y
+      if !outside.contains(id) && previous is Some((h, d)) {
+        rx[3 * h] -= 1
+        ry[3 * h + 1] -= 1
+        rx[3 * h + 2] -= d.x
+        ry[3 * h + 2] -= d.y
+      }
+      rows.push(rx)
+      rows.push(ry)
+    }
+  }
+  rows
+}
+
+///|
+fn rank(
+  matrix : Array[Array[Double]],
+  columns : Int32,
+  tolerance : Double,
+) -> Int32 {
+  let a = matrix.map(r => r.copy())
+  let mut pivot = 0
+  for col in 0..<columns {
+    if pivot == a.length() {
+      break
+    }
+    let mut best = pivot
+    for r in (pivot + 1)..<a.length() {
+      if a[r][col].abs() > a[best][col].abs() {
+        best = r
+      }
+    }
+    if a[best][col].abs() <= tolerance {
+      continue
+    }
+    let tmp = a[pivot]
+    a[pivot] = a[best]
+    a[best] = tmp
+    for r in (pivot + 1)..<a.length() {
+      let t = a[r][col] / a[pivot][col]
+      if t == 0 {
+        continue
+      }
+      for c in col..<columns {
+        a[r][c] -= t * a[pivot][c]
+      }
+    }
+    pivot += 1
+  }
+  pivot
+}
+
+///|
+fn null_basis(
+  matrix : Array[Array[Double]],
+  n : Int32,
+) -> Array[Array[Double]] raise {
+  let a = matrix.map(row => row.copy())
+  let pivots : Array[Int32] = []
+  for c in 0..<n {
+    let r = pivots.length()
+    if r == a.length() {
+      break
+    }
+    let mut best = r
+    for j in (r + 1)..<a.length() {
+      if a[j][c].abs() > a[best][c].abs() {
+        best = j
+      }
+    }
+    if a[best][c].abs() <= 0.000000001 {
+      continue
+    }
+    let tmp = a[r]
+    a[r] = a[best]
+    a[best] = tmp
+    let v = a[r][c]
+    for j in c..<n {
+      a[r][j] /= v
+    }
+    for i in 0..<a.length() {
+      if i == r || a[i][c] == 0 {
+        continue
+      }
+      let t = a[i][c]
+      for j in c..<n {
+        a[i][j] -= t * a[r][j]
+      }
+    }
+    pivots.push(c)
+  }
+  let result = []
+  for f in 0..<n {
+    if pivots.contains(f) {
+      continue
+    }
+    let v = Array::make(n, 0.0)
+    v[f] = 1
+    for i, c in pivots {
+      v[c] = -a[i][f]
+    }
+    for row in matrix {
+      let mut residual = 0.0
+      for j, coef in row {
+        residual += coef * v[j]
+      }
+      assert_true(residual.abs() < 0.0000001)
+    }
+    result.push(v)
+  }
+  result
+}
+
+///|
+// A more permissive alternative: cut ONLY at real incident junctions and way
+// boundaries. Never give each OSM polyline vertex independent freedom.
+fn junction_reaches(
+  ways : Array[SourceWay],
+  outside : Set[Double],
+) -> Array[SourceWay] {
+  let count : Map[Double, Int32] = Map([])
+  for w in ways {
+    for node in w.nodes {
+      count[node] = count.get(node).unwrap_or(0) + 1
+    }
+  }
+  let out = []
+  for w in ways {
+    let mut start = 0
+    for j in 1..<w.nodes.length() {
+      if j + 1 == w.nodes.length() ||
+        outside.contains(w.nodes[j]) ||
+        count[w.nodes[j]] > 1 {
+        out.push({
+          ..w,
+          nodes: w.nodes[start:j + 1].to_owned(),
+          pathGrid: w.pathGrid[start:j + 1].to_owned(),
+        })
+        start = j
+      }
+    }
+  }
+  out
+}
+
+///|
+fn moved(p : P, o : P, v : Array[Double], i : Int32) -> P {
+  {
+    x: p.x + v[3 * i] + v[3 * i + 2] * (p.x - o.x),
+    y: p.y + v[3 * i + 1] + v[3 * i + 2] * (p.y - o.y),
+  }
+}
+
+///|
+// Independent acceptance: integrate actual in-water length, split precisely
+// at grid boundaries, in the same evaluation window. A displaced sample is
+// not evidence of a shorter wet road if the transform also lengthens it.
+fn wet_length(line : Array[P], rows : Array[String]) -> Double {
+  let mut total = 0.0
+  for i in 1..<line.length() {
+    let a = line[i - 1]
+    let b = line[i]
+    let dx = b.x - a.x
+    let dy = b.y - a.y
+    let ts = [0.0, 1.0]
+    if dx != 0 {
+      for x in 2..<=254 {
+        let t = (x.to_double() - a.x) / dx
+        if t > 0 && t < 1 {
+          ts.push(t)
+        }
+      }
+    }
+    if dy != 0 {
+      for y in 2..<=142 {
+        let t = (y.to_double() - a.y) / dy
+        if t > 0 && t < 1 {
+          ts.push(t)
+        }
+      }
+    }
+    ts.sort()
+    for j in 1..<ts.length() {
+      let t = (ts[j - 1] + ts[j]) * 0.5
+      let p = { x: a.x + t * dx, y: a.y + t * dy, }
+      if p.x > 2 &&
+        p.x < 254 &&
+        p.y > 2 &&
+        p.y < 142 &&
+        tile(rows, p) is ('r' | 'l') {
+        total += distance(a, b) * (ts[j] - ts[j - 1])
+      }
+    }
+  }
+  total
+}
+
+///|
+// Score on exactly the original sampling stations. Leaving the frame or
+// converting a formerly dry sample into a river/lake/bridge is never a win.
+fn trial_cost(
+  lines : Array[Array[P]],
+  stations : Array[Array[P]],
+  rows : Array[String],
+  v : Array[Double],
+  base_lengths : Array[Double],
+  length_first : Bool,
+) -> Double {
+  let mut motion = 0.0
+  let mut wet = 0
+  let mut length_change = 0.0
+  for i, line in lines {
+    if v[3 * i + 2].abs() > 0.10000001 {
+      return 1.0e12
+    }
+    for p in line {
+      let d = distance(p, moved(p, line[0], v, i))
+      if d > 1.500001 {
+        return 1.0e12
+      }
+      motion += d * d
+    }
+    for p in stations[i] {
+      let a = tile(rows, p)
+      let q = moved(p, line[0], v, i)
+      let b = tile(rows, q)
+      if b == '?' ||
+        (!(a is ('r' | 'l' | 'b')) && b is ('r' | 'l' | 'b')) ||
+        (a is ('r' | 'l') && b == 'b') ||
+        (a == 'b' && b is ('r' | 'l')) {
+        return 1.0e12
+      }
+      if b is ('r' | 'l') {
+        wet += 1
+      }
+    }
+    if length_first &&
+      v[3 * i].abs() + v[3 * i + 1].abs() + v[3 * i + 2].abs() > 1.0e-12 {
+      length_change += wet_length(line.map(p => moved(p, line[0], v, i)), rows) -
+        base_lengths[i]
+    }
+  }
+  if length_first {
+    length_change + motion * 0.0001
+  } else {
+    wet.to_double() + motion / (1.0 + motion) * 0.25
+  }
+}
+
+///|
+fn search(
+  reaches : Array[SourceWay],
+  basis : Array[Array[Double]],
+  rows : Array[String],
+  length_first~ : Bool = false,
+) -> Array[Double] {
+  let lines = reaches.map(w => w.pathGrid.map(project))
+  let stations = lines.map(samples)
+  let mut v = Array::make(3 * lines.length(), 0.0)
+  let base_lengths = lines.map(l => wet_length(l, rows))
+  let mut best = trial_cost(
+    lines, stations, rows, v, base_lengths, length_first,
+  )
+  for step in [1.0, 0.15] {
+    for dir in basis {
+      let mut max_d = 0.0
+      let mut max_s = 0.0
+      for i, line in lines {
+        max_s = max_s.max(dir[3 * i + 2].abs())
+        for p in line {
+          max_d = max_d.max(distance(p, moved(p, line[0], dir, i)))
+        }
+      }
+      let radius = (1.5 / max_d.max(1.0e-10)).min(0.10 / max_s.max(1.0e-10))
+      let start = v
+      for j in -100..<=100 {
+        let t = j.to_double() / 100 * radius * step
+        let trial = Array::makei(v.length(), i => start[i] + dir[i] * t)
+        let score = trial_cost(
+          lines, stations, rows, trial, base_lengths, length_first,
+        )
+        if score < best {
+          v = trial
+          best = score
+        }
+      }
+    }
+  }
+  v
+}
+
+///|
+// Alternative for review only. One cross-chord scale for the entire reach,
+// never one offset per point. Endpoints stay fixed; endpoint bearing change
+// is bounded to three degrees on each side of a junction.
+fn transverse_trial(reaches : Array[SourceWay], rows : Array[String]) -> Json {
+  let fits : Array[Json] = []
+  let mut accepted = 0
+  let mut new_wet = 0
+  let mut new_length = 0.0
+  for reach in reaches {
+    let line = reach.pathGrid.map(project)
+    let a = line[0]
+    let b = line.last().unwrap()
+    let chord = distance(a, b)
+    let nx = (a.y - b.y) / chord.max(0.000001)
+    let ny = (b.x - a.x) / chord.max(0.000001)
+    let ps = samples(line)
+    let base = ps.filter(p => tile(rows, p) is ('r' | 'l')).length()
+    let mut best = wet_length(line, rows)
+    let mut best_count = base
+    let mut best_k = 0.0
+    for j in -20..<=20 {
+      if chord < 0.01 || j == 0 || base == 0 {
+        continue
+      }
+      let k = j.to_double() / 100
+      let transform = (p : P) => {
+        let d = k * ((p.x - a.x) * nx + (p.y - a.y) * ny)
+        P::{ x: p.x + d * nx, y: p.y + d * ny, }
+      }
+      let out = line.map(transform)
+      let mut safe = true
+      for i, p in line {
+        if distance(p, out[i]) > 1.5 {
+          safe = false
+          break
+        }
+      }
+      for i in [1, line.length() - 1] {
+        let ux = line[i].x - line[i - 1].x
+        let uy = line[i].y - line[i - 1].y
+        let vx = out[i].x - out[i - 1].x
+        let vy = out[i].y - out[i - 1].y
+        if ux * vx + uy * vy <
+          0.99862953475 *
+          distance(line[i], line[i - 1]) *
+          distance(out[i], out[i - 1]) {
+          safe = false
+        }
+      }
+      if !safe {
+        continue
+      }
+      let mut wet = 0
+      for p in ps {
+        let old = tile(rows, p)
+        let c = tile(rows, transform(p))
+        if c == '?' ||
+          (!(old is ('r' | 'l' | 'b')) && c is ('r' | 'l' | 'b')) ||
+          (old is ('r' | 'l') && c == 'b') ||
+          (old == 'b' && c is ('r' | 'l')) {
+          safe = false
+          break
+        }
+        if c is ('r' | 'l') {
+          wet += 1
+        }
+      }
+      if !safe || wet >= base {
+        continue
+      }
+      let len = wet_length(out, rows)
+      if len < best - 0.000001 && wet <= best_count {
+        best = len
+        best_count = wet
+        best_k = k
+      }
+    }
+    new_length += best
+    new_wet += best_count
+    if best_k != 0 {
+      accepted += 1
+      fits.push({
+        "way": reach.osmWayId,
+        "fromNode": reach.nodes[0],
+        "toNode": reach.nodes.last().unwrap(),
+        "chordFrom": Json(a),
+        "chordTo": Json(b),
+        "scaleNormal": 1.0 + best_k,
+        "wetBefore": base,
+        "wetAfter": best_count,
+      })
+    }
+  }
+  {
+    "reviewOnly": true,
+    "reachesImproved": accepted,
+    "wetSamples": new_wet,
+    "wetGridLength": new_length,
+    "transforms": Json(fits),
+  }
+}
+
+///|
+fn main raise {
+  let raw : Source = @json.from_json(
+    @json.parse(
+      @fs.read_file_to_string("docs/project/wenyu-lower-perspective.json"),
+    ),
+  )
+  let labels : Labels = @json.from_json(
+    @json.parse(
+      @fs.read_file_to_string(
+        "src/ui/assets/tilemap/wenyu_reference_labels.json",
+      ),
+    ),
+  )
+  let rows = labels.rows
+  assert_eq(rows.length(), 144)
+  for row in rows {
+    assert_eq(row.length(), 256)
+  }
+  let names = [
+    "温榆河左堤路", "温榆河右堤路", "温榆河绿道昌平段",
+  ]
+  let target : Array[SourceWay] = []
+  let fixed : Set[Double] = Set([])
+  let bridge_ends : Set[Double] = Set([])
+  let original_nodes : Map[Double, P] = Map([])
+  for way in raw.ways {
+    assert_eq(way.nodes.length(), way.pathGrid.length())
+    for i, id in way.nodes {
+      let p = project(way.pathGrid[i])
+      let original = original_nodes.get_or_init(id, () => p)
+      assert_true(distance(original, p) < 0.000001)
+    }
+    for id in [way.osmWayId, ..way.nodes] {
+      assert_true(id > 0 && id < 9007199254740992.0 && id == id.floor())
+    }
+    if grade(way, "bridge") {
+      bridge_ends.add(way.nodes[0])
+      bridge_ends.add(way.nodes.last().unwrap())
+    }
+    if names.contains(way.tags.get("name").unwrap_or("")) &&
+      !grade(way, "bridge") &&
+      !grade(way, "tunnel") &&
+      !grade(way, "ford") {
+      target.push(way)
+    } else {
+      for node in way.nodes {
+        fixed.add(node)
+      }
+    }
+  }
+  // Even letting each OSM way have its own uniform scale and translation
+  // cannot move a way with two distinct fixed points. Propagate their shared
+  // nodes until no more ways become rigid. No graphical connectors allowed.
+  // Conservatively treat every in-frame, already dry, actual T/cross junction
+  // inside the target group as aligned too. A way-split alone is not a junction.
+  let incident : Map[Double, Set[Double]] = Map([])
+  for w in target {
+    for i, id in w.nodes {
+      let neighbors = incident.get_or_init(id, () => Set([]))
+      if i > 0 {
+        neighbors.add(w.nodes[i - 1])
+      }
+      if i + 1 < w.nodes.length() {
+        neighbors.add(w.nodes[i + 1])
+      }
+    }
+  }
+  for w in target {
+    for i, id in w.nodes {
+      let c = tile(rows, project(w.pathGrid[i]))
+      if incident[id].length() >= 3 && c != '?' && c != 'r' && c != 'l' {
+        fixed.add(id)
+      }
+    }
+  }
+  let equations = constraints(target, fixed)
+  let dof = 3 * target.length() -
+    rank(equations, 3 * target.length(), 0.000000001)
+  assert_eq(
+    dof,
+    3 * target.length() - rank(equations, 3 * target.length(), 0.0000001),
+  )
+  let reaches = junction_reaches(target, fixed)
+  let reach_equations = constraints(reaches, fixed)
+  let reach_dof = 3 * reaches.length() -
+    rank(reach_equations, 3 * reaches.length(), 0.000000001)
+  assert_eq(
+    reach_dof,
+    3 * reaches.length() -
+    rank(reach_equations, 3 * reaches.length(), 0.0000001),
+  )
+  let basis = null_basis(reach_equations, 3 * reaches.length())
+  assert_eq(basis.length(), reach_dof)
+  let fit = search(reaches, basis, rows)
+  let length_fit = search(reaches, basis, rows, length_first=true)
+  let mut length_first_total = 0.0
+  let mut length_first_samples = 0
+  for i, reach in reaches {
+    let line = reach.pathGrid.map(project)
+    length_first_total += wet_length(
+      line.map(p => moved(p, line[0], length_fit, i)),
+      rows,
+    )
+    length_first_samples += samples(line)
+      .filter(p => tile(rows, moved(p, line[0], length_fit, i)) is ('r' | 'l'))
+      .length()
+  }
+  for row in reach_equations {
+    let mut residual = 0.0
+    for j, coef in row {
+      residual += coef * fit[j]
+    }
+    assert_true(residual.abs() < 0.0000001)
+  }
+  let transforms : Array[Json] = []
+  let fitted_water : Map[String, Int32] = Map([])
+  let mut length_before = 0.0
+  let mut length_after = 0.0
+  for i, reach in reaches {
+    let line = reach.pathGrid.map(project)
+    length_before += wet_length(line, rows)
+    length_after += wet_length(line.map(p => moved(p, line[0], fit, i)), rows)
+    let ps = samples(line)
+    let name = reach.tags["name"]
+    let after = ps
+      .filter(p => tile(rows, moved(p, line[0], fit, i)) is ('r' | 'l'))
+      .length()
+    fitted_water[name] = fitted_water.get(name).unwrap_or(0) + after
+    if fit[3 * i].abs() + fit[3 * i + 1].abs() + fit[3 * i + 2].abs() > 1.0e-8 {
+      transforms.push({
+        "way": reach.osmWayId,
+        "a": reach.nodes[0],
+        "b": reach.nodes.last().unwrap(),
+        "origin": Json(line[0]),
+        "dx": fit[3 * i],
+        "dy": fit[3 * i + 1],
+        "scale": 1.0 + fit[3 * i + 2],
+        "waterAfter": after,
+      })
+    }
+  }
+  let movable : Array[Json] = []
+  let mut movable_water = 0
+  let mut initial_water = 0
+  for i, reach in reaches {
+    let ps = samples(reach.pathGrid.map(project))
+    let water = ps.filter(p => tile(rows, p) is ('r' | 'l')).length()
+    initial_water += water
+    if basis.any(v => {
+        v[3 * i].abs() + v[3 * i + 1].abs() + v[3 * i + 2].abs() > 0.0000001
+      }) {
+      movable_water += water
+      movable.push({
+        "way": reach.osmWayId,
+        "a": reach.nodes[0],
+        "b": reach.nodes.last().unwrap(),
+        "samples": ps.length(),
+        "water": water,
+      })
+    }
+  }
+  // Singular and full-rank controls: a single anchored way retains a scale
+  // degree of freedom; a second distinct pinned point removes it.
+  assert_eq(rank([[1, 0, 2], [0, 1, 4]], 3, 0.000000001), 2)
+  assert_eq(rank([[1, 0, 2], [0, 1, 4], [1, 0, 7]], 3, 0.000000001), 3)
+  let locked : Set[Double] = Set([])
+  for ;; {
+    let prior = locked.length()
+    for way in target {
+      if locked.contains(way.osmWayId) {
+        continue
+      }
+      let mut first : P? = None
+      for i, node in way.nodes {
+        if !fixed.contains(node) {
+          continue
+        }
+        let p = project(way.pathGrid[i])
+        match first {
+          Some(a) if distance(a, p) > 0.000001 => {
+            locked.add(way.osmWayId)
+            for id in way.nodes {
+              fixed.add(id)
+            }
+            break
+          }
+          None => first = Some(p)
+          _ => ()
+        }
+      }
+    }
+    if prior == locked.length() {
+      break
+    }
+  }
+  let results : Array[Json] = []
+  let expected = [(641, 1327), (373, 1498), (263, 958)]
+  for k, name in names {
+    let wet_heads : Map[String, Json] = Map([])
+    let mut all = 0
+    let mut wet = 0
+    let mut locked_wet = 0
+    let free : Array[String] = []
+    let mut count = 0
+    for way in target {
+      if way.tags.get("name") != Some(name) {
+        continue
+      }
+      count += 1
+      let points = way.pathGrid.map(project)
+      let ps = samples(points)
+      let water = ps.filter(p => tile(rows, p) is ('r' | 'l')).length()
+      wet += water
+      all += ps.length()
+      if locked.contains(way.osmWayId) {
+        locked_wet += water
+      } else {
+        free.push(way.osmWayId.to_string())
+      }
+      for i, node in way.nodes {
+        if bridge_ends.contains(node) && tile(rows, points[i]) is ('r' | 'l') {
+          wet_heads[node.to_string()] = Json(points[i])
+        }
+      }
+    }
+    assert_eq((wet, all), expected[k])
+    results.push({
+      "name": name,
+      "ways": count,
+      "samples": all,
+      "water": wet,
+      "waterOnImmovableWays": locked_wet,
+      "waysWithoutTwoFixedPoints": Json(free),
+      "fixedBridgeHeadsOnOpenWater": Json(wet_heads),
+    })
+  }
+  let report : Json = {
+    "wetSamplesOnImmovableReaches": initial_water - movable_water,
+    "crossChordScaleAlternative": transverse_trial(reaches, rows),
+    "lengthFirstFitWetLength": length_first_total,
+    "lengthFirstFitWetSamples": length_first_samples,
+    "variables": 3 * target.length(),
+    "jointDegreesOfFreedom": dof,
+    "sharedNodeEquations": equations.length(),
+    "junctionDelimitedReaches": reaches.length(),
+    "reachDegreesOfFreedom": reach_dof,
+    "movableReaches": Json(movable),
+    "corridors": Json(results),
+    "transforms": Json(transforms),
+    "waterAfterReachFit": Json(fitted_water),
+    "openWaterLengthInGridUnitsBefore": length_before,
+    "openWaterLengthInGridUnitsAfter": length_after,
+    "scope": "offline feasibility trial, not accepted geometry; no map or parcel changes",
+  }
+  println(report.stringify(indent=2))
+}

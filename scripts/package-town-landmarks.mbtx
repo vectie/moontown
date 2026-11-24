@@ -66,9 +66,13 @@ fn main raise {
   if @fs.path_exists(stale_private_reference) {
     @fs.remove_file(stale_private_reference)
   }
+  let old_campus_tile = target + "/town-projections/center.png"
+  if @fs.path_exists(old_campus_tile) {
+    @fs.remove_file(old_campus_tile)
+  }
   copy_tree("src/ui/landmark-studio/web", target)
   let source = @json.parse(
-    @fs.read_file_to_string("docs/project/wenyu-lower-perspective.json"),
+    @fs.read_file_to_string("output/wenyu-road-town/roads.json"),
   )
   let nodes : Map[String, Json] = Map([])
   let edges : Array[Json] = []
@@ -93,15 +97,14 @@ fn main raise {
       }) {
       continue
     }
-    let path = arr(field(way, "pathGrid"))
+    let path = arr(field(way, "ground"))
     let ids = arr(field(way, "nodes"))
     assert_eq(path.length(), ids.length())
     for i, p in path {
-      let x = num(field(p, "x"))
-      let y = num(field(p, "y"))
-      let w = 1.0 + 0.01 * ((x - 256.0) / 256.0 - y / 144.0)
       let id = ids[i].stringify()
-      nodes[id] = { "id": id, "x": 256.0 + (x - 256.0) / w, "y": y / w }
+      nodes[id] = if num(ids[i]) <= -5000000000.0 {
+        {"id":id,"x":(num(field(p,"x"))*10000).round()/10000,"y":(num(field(p,"y"))*10000).round()/10000}
+      } else { { "id": id, "x": field(p,"x"), "y": field(p,"y") } }
       if i > 0 {
         edges.push({
           "a": ids[i - 1].stringify(),
@@ -112,6 +115,48 @@ fn main raise {
       }
     }
   }
+  // Validate the site against the graph we actually ship, after walk-access
+  // and geographic filters. A street boundary can contain excluded nodes.
+  let site = @json.parse(@fs.read_file_to_string("docs/project/wenyu-future-center-site.json"))
+  let arrivals = [field(field(site,"forecourt"),"arrival").stringify()]
+  for block in arr(field(site,"blocks")) {
+    for building in arr(field(block,"buildings")) {
+      arrivals.push(field(building,"arrival").stringify())
+    }
+  }
+  let neighbors : Map[String,Array[String]] = Map([])
+  for edge in edges {
+    let a=str(field(edge,"a"))
+    let b=str(field(edge,"b"))
+    neighbors.get_or_init(a,()=>[]).push(b)
+    neighbors.get_or_init(b,()=>[]).push(a)
+  }
+  let reached : Map[String,Bool] = Map([])
+  let queue = [arrivals[0]]
+  reached[arrivals[0]]=true
+  for i=0; i<queue.length(); i=i+1 {
+    for next in neighbors.get(queue[i]).unwrap_or([]) {
+      if !reached.contains(next) { reached[next]=true; queue.push(next) }
+    }
+  }
+  let district_audit = @json.parse(@fs.read_file_to_string("docs/project/science-city-placement-audit.json"))
+  // The nearest geometric endpoint may be in a disconnected service-road component.
+  let candidates : Map[String,Map[String,Double]] = @json.from_json(field(district_audit,"streetCandidates"))
+  let stops : Map[String,String]=Map([])
+  for project, choices in candidates {
+    let mut best=1.0
+    for node, distance in choices {
+      if reached.contains(node) && nodes.contains(node) && (distance<best || (distance==best && node<stops.get(project).unwrap_or("~"))) {
+        best=distance;stops[project]=node
+      }
+    }
+  }
+  let keys=stops.keys().collect()
+  keys.sort()
+  @fs.write_string_to_file("src/ui/rabbita-town/main/science_city_arrivals.mbt","///|\n// Generated from reachable public street nodes at reviewed site boundaries.\nlet town_district_arrivals : Map[String, String] = {\n"+keys.map(k=>"  \"district:"+k+"\": \""+stops[k]+"\",\n").join("")+"}\n")
+  for id in arrivals {
+    guard nodes.contains(id) && reached.contains(id) else { fail("Unreachable Future Center street arrival " + id) }
+  }
   let ns : Array[Json] = []
   for _, n in nodes {
     ns.push(n)
@@ -121,7 +166,7 @@ fn main raise {
     "schema": "moontown.landmark-navigation.v1",
     "authority": "local navigation simulation; not live runtime assignment",
     "attribution": "© OpenStreetMap contributors, ODbL",
-    "source": "wenyu-lower-perspective.json + unshifted gentle 0.01",
+    "source": "Wenyu reviewed major-road fit and junction links",
     "nodes": ns,
     "edges": edges,
   }

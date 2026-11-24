@@ -6,7 +6,7 @@ import { Reflector } from './vendor/Reflector.js';
 export function createMaterials() {
   const colors = {
     ivory: '#e8e9dd', stone: '#b6baad', concrete: '#c6cbbc', paving: '#c8c7b5', paving2: '#aeb5aa',
-    glass: '#3d626b', glassLight: '#65929b', glassAmber: '#556c68', silver: '#aebfbb',
+    glass: '#3d626b', glassLight: '#65929b', glassAmber: '#556c68', glassSmoke: '#384f59', glassAzure: '#457f9f', silver: '#aebfbb',
     copper: '#be642d', amber: '#e09340', roof: '#7a8a86', metal: '#506567',
     grass: '#8caa74', earth: '#6b7963', sand: '#b7b794', leaf: '#527e57', lime: '#99b36a',
     sage: '#7f9a68', pine: '#3e6857', shrub: '#789354', bark: '#746651', blossom: '#deafa9',

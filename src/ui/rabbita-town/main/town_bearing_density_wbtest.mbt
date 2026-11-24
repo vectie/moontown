@@ -71,26 +71,32 @@ extern "js" fn town_density_fixture_text(name : String) -> String =
   #| name => process.getBuiltinModule('fs').readFileSync('../assets/tilemap/' + name, 'utf8')
 
 ///|
-test "density admission respects the actual unshifted Wenyu road and terrain masks" {
+test "density admission respects the actual bank-calibrated Wenyu road and terrain masks" {
   let saved_streets = town_street_segments.map(s => s)
   let streets = town_street_parse(
-    town_density_fixture_text("wenyu-unshifted-road-overlay.svg"),
+    town_density_fixture_text("wenyu-bank-road-v2.svg"),
   )
   let saved = wenyu_scene_prefix.map(n => n)
   let saved_roads = wenyu_scene_road_prefix.map(n => n)
-  let scene = @json.parse(
-    town_density_fixture_text("wenyu-unshifted-scene.json"),
-  )
+  let scene = @json.parse(town_density_fixture_text("wenyu-bank-scene-v2.json"))
   let terrain = @json.parse(
     town_density_fixture_text("wenyu_reference_labels.json"),
   )
   guard scene
-    is { "roadCells": Array(rows), "riversideShiftsApplied": False, .. } else {
+    is {
+      "roadCells": Array(rows),
+      "parcelRuns": Array(runs),
+      "schema": String("moontown.wenyu_bank_scene.v2"),
+      ..
+    } else {
     fail("invalid scene fixture")
   }
   guard terrain is { "rows": Array(land), .. } else {
     fail("invalid terrain fixture")
   }
+  let previous_parcels = wenyu_scene_parcels.val
+  let parcels = wenyu_scene_read_parcels(runs).unwrap()
+  wenyu_scene_parcels.val = parcels
   let prefix = Array::make(257 * 145, 0)
   let roads = Array::make(257 * 145, 0)
   for y in 0..<144 {
@@ -144,6 +150,10 @@ test "density admission respects the actual unshifted Wenyu road and terrain mas
     wenyu_scene_road_prefix.push(n)
   }
   town_street_index(saved_streets)
+  wenyu_scene_parcels.val = previous_parcels
+  for b in all {
+    assert_true(wenyu_scene_single_parcel(parcels, b.x, b.y, b.width, b.depth))
+  }
   assert_true(valid)
   assert_eq(all.length(), 176)
   for i in 0..<all.length() {
