@@ -1,0 +1,557 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+let root : String = "/home/HwHiAiUser/moon-public/work/products-20261111-r1"
+
+///|
+async fn command(program : String, args : Array[String]) -> String {
+  let r = @shell.Cmd(program, args).output()
+  if r.exit_code() != 0 {
+    eprintln(r.stderr())
+  }
+  r.check()
+  r.stdout()
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  command(
+    "kubectl",
+    ["--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", ..args],
+  )
+}
+
+///|
+async fn image(product : String) -> String {
+  let path = root +
+    "/" +
+    product +
+    (if product == "moontown" {
+      "-oci-r4"
+    } else if product == "gateway" {
+      "-oci-r3"
+    } else {
+      "-oci-r2"
+    }) +
+    "/receipt.json"
+  guard @json.parse(@fs.read_file(path).text())
+    is {
+      "repository": String(repository),
+      "manifest": { "digest": String(digest), .. },
+      ..
+    } else {
+    fail("Missing image receipt")
+  }
+  let pinned = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/" +
+    repository +
+    "@" +
+    digest
+  guard @json.parse(
+      @fs.read_file(root + "/" + product + "-canary-result.json").text(),
+    )
+    is { "image": String(qualified), "health": true, .. } &&
+    qualified == pinned else {
+    fail("Image has not passed its private canary")
+  }
+  pinned
+}
+
+///|
+async fn backup(ns : String, kind : String, name : String) -> Json {
+  let value = @json.parse(kube(["-n", ns, "get", kind, name, "-o", "json"]))
+  let saved_path = root + "/before-" + ns + "-" + kind + "-" + name + ".json"
+  if @fs.exists(saved_path) {
+    let previous = @json.parse(@fs.read_file(saved_path).text())
+    guard previous is { "spec": { "template": old, .. }, .. } &&
+      value is { "spec": { "template": current, .. }, .. } &&
+      old == current else {
+      fail("Resource changed since retained backup")
+    }
+    return value
+  }
+  @fs.write_file(
+    root + "/before-" + ns + "-" + kind + "-" + name + ".json",
+    value.stringify(indent=2),
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  value
+}
+
+///|
+async fn patch(
+  ns : String,
+  kind : String,
+  name : String,
+  operations : Array[Json],
+) -> Unit {
+  guard @json.parse(kube(["-n", ns, "get", kind, name, "-o", "json"]))
+    is { "metadata": { "resourceVersion": String(version), .. }, .. } else {
+    fail("Missing resource version")
+  }
+  let steps : Array[Json] = [
+    { "op": "test", "path": "/metadata/resourceVersion", "value": version },
+    ..operations,
+  ]
+  println(
+    kube([
+      "-n",
+      ns,
+      "patch",
+      kind,
+      name,
+      "--type=json",
+      "-p",
+      Json::array(steps).stringify(),
+    ]),
+  )
+}
+
+///|
+async fn stop(ns : String, name : String, selector : String) -> Unit {
+  guard @json.parse(
+      kube([
+        "-n", ns, "get", "pods", "-l", selector, "--field-selector=status.phase=Running",
+        "-o", "json",
+      ]),
+    )
+    is { "items": Array(pods), .. } else {
+    fail("Pod inventory failed")
+  }
+  println(kube(["-n", ns, "scale", "deployment", name, "--replicas=0"]))
+  for pod in pods {
+    guard pod is { "metadata": { "name": String(pod_name), .. }, .. } else {
+      fail("Invalid Pod")
+    }
+    println(
+      kube([
+        "-n",
+        ns,
+        "wait",
+        "--for=delete",
+        "pod/" + pod_name,
+        "--timeout=90s",
+      ]),
+    )
+  }
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, mode] else { fail("robo | profiles") }
+  if mode == "robo" {
+    let pinned = image("moonrobo")
+    let ns = "lunanexa"
+    let name = "moonrobo-jiaan"
+    let before = backup(ns, "deployment", name)
+    guard before
+      is { "spec": { "replicas": Number(1, ..), "template": template, .. }, .. } &&
+      template
+      is {
+        "spec": {
+          "containers": [Object(container)],
+          "volumes": Array(volumes),
+          ..
+        },
+        ..
+      } &&
+      container.get("volumeMounts") is Some(Array(mounts)) else {
+      fail("Unexpected shared Robo shape")
+    }
+    stop(ns, name, "app=" + name)
+    if !@fs.exists(root + "/shared-robo-state.tgz") {
+      ignore(
+        command("tar", [
+          "-C",
+          "/home/HwHiAiUser",
+          "-czf",
+          root + "/shared-robo-state.tgz",
+          "moonrobo-jiaan-data",
+        ]),
+      )
+      ignore(command("chmod", ["600", root + "/shared-robo-state.tgz"]))
+    }
+    let new_mounts = mounts.filter(v => !(v is { "name": "binary" | "ui", .. }))
+    let new_volumes = volumes.filter(v => {
+      !(v is { "name": "binary" | "ui", .. })
+    })
+    let notes = match template {
+      { "metadata": { "annotations": Object(old), .. }, .. } =>
+        match @json.parse(Json::object(old).stringify()) {
+          Object(copy) => copy
+          _ => fail("Invalid annotations")
+        }
+      _ => Map([])
+    }
+    notes["moonsuite.io/release"] = Json::string("products-20261111-r2")
+    try {
+      patch(ns, "deployment", name, [
+        {
+          "op": "add",
+          "path": "/spec/template/metadata/annotations",
+          "value": Json::object(notes),
+        },
+        {
+          "op": "replace",
+          "path": "/spec/template/spec/containers/0/image",
+          "value": pinned,
+        },
+        {
+          "op": "replace",
+          "path": "/spec/template/spec/containers/0/command",
+          "value": [
+            "/usr/local/bin/moonrobo", "serve", "/workspace", "/opt/moonrobo/ui",
+            "0.0.0.0", "5290",
+          ],
+        },
+        {
+          "op": "replace",
+          "path": "/spec/template/spec/containers/0/volumeMounts",
+          "value": new_mounts,
+        },
+        {
+          "op": "replace",
+          "path": "/spec/template/spec/volumes",
+          "value": new_volumes,
+        },
+      ])
+      println(kube(["-n", ns, "scale", "deployment", name, "--replicas=1"]))
+      println(
+        kube([
+          "-n",
+          ns,
+          "rollout",
+          "status",
+          "deployment/" + name,
+          "--timeout=150s",
+        ]),
+      )
+      println(
+        command("curl", [
+          "--noproxy", "*", "--fail", "--silent", "--show-error", "--retry", "8",
+          "--retry-delay", "1", "--retry-connrefused", "--max-time", "10", "http://10.43.24.215:5290/__moonrobo_health",
+        ]),
+      )
+    } catch {
+      err => {
+        patch(ns, "deployment", name, [
+          { "op": "replace", "path": "/spec/template", "value": template },
+        ])
+        println(kube(["-n", ns, "scale", "deployment", name, "--replicas=1"]))
+        fail("Shared Robo rolled back: " + err.to_string())
+      }
+    }
+    @fs.write_file(
+      root + "/shared-robo-live.json",
+      (
+        {
+          "image": pinned,
+          "health": true,
+          "state_backup": "shared-robo-state.tgz",
+        } : Json).stringify(),
+      permission=0o600,
+    )
+  } else if mode == "workspaces" {
+    let ns = "aigc-acceptance-20260915"
+    let desk = "webide-1a1ac56ce8c685d661eb9b5967fb19f0d38904b4773696db12449dd6"
+    let town = "moontown-platform"
+    let desk_image = image("moondesk")
+    let town_image = image("moontown")
+    let gateway_image = image("gateway")
+    let desk_before = backup(ns, "deployment", desk)
+    let town_before = backup(ns, "deployment", town)
+    guard desk_before is { "spec": { "template": desk_template, .. }, .. } &&
+      town_before is { "spec": { "template": town_template, .. }, .. } else {
+      fail("Missing original templates")
+    }
+    let backup_name = "products-state-backup-20261111"
+    let backup_pod : Json = {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": { "name": backup_name, "namespace": ns },
+      "spec": {
+        "restartPolicy": "Never",
+        "automountServiceAccountToken": false,
+        "nodeSelector": { "kubernetes.io/hostname": "ubuntu" },
+        "securityContext": {
+          "runAsUser": 1000,
+          "runAsGroup": 1000,
+          "fsGroup": 1000,
+        },
+        "containers": [
+          {
+            "name": "backup",
+            "image": image("moonrobo"),
+            "command": ["/bin/sleep", "1800"],
+            "resources": { "requests": { "cpu": "50m", "memory": "64Mi" } },
+            "volumeMounts": [
+              {
+                "name": "creative",
+                "mountPath": "/backup/creative",
+                "readOnly": true,
+              },
+              {
+                "name": "activity",
+                "mountPath": "/backup/activity",
+                "readOnly": true,
+              },
+              { "name": "desk", "mountPath": "/backup/desk", "readOnly": true },
+              { "name": "tmp", "mountPath": "/tmp" },
+            ],
+          },
+        ],
+        "volumes": [
+          {
+            "name": "creative",
+            "persistentVolumeClaim": {
+              "claimName": "moontown-creative-state",
+              "readOnly": true,
+            },
+          },
+          {
+            "name": "activity",
+            "persistentVolumeClaim": {
+              "claimName": "moontown-platform-activity-20261107",
+              "readOnly": true,
+            },
+          },
+          {
+            "name": "desk",
+            "persistentVolumeClaim": { "claimName": desk, "readOnly": true },
+          },
+          { "name": "tmp", "emptyDir": {} },
+        ],
+      },
+    }
+    let file = root + "/state-backup-pod.json"
+    @fs.write_file(
+      file,
+      backup_pod.stringify(indent=2),
+      permission=0o600,
+      create_mode=CreateNew,
+    )
+    println(kube(["create", "-f", file]))
+    println(
+      kube([
+        "-n",
+        ns,
+        "wait",
+        "--for=condition=Ready",
+        "pod/" + backup_name,
+        "--timeout=90s",
+      ]),
+    )
+    try {
+      stop(ns, town, "app=" + town)
+      stop(ns, desk, "lunanexa.io/workspace=" + desk)
+      println(
+        kube([
+          "-n", ns, "exec", backup_name, "--", "/bin/tar", "-czf", "/tmp/states.tgz",
+          "-C", "/backup", ".",
+        ]),
+      )
+      println(
+        kube([
+          "-n",
+          ns,
+          "cp",
+          backup_name + ":/tmp/states.tgz",
+          root + "/workspace-states.tgz",
+        ]),
+      )
+      ignore(command("chmod", ["600", root + "/workspace-states.tgz"]))
+      ignore(command("tar", ["-tzf", root + "/workspace-states.tgz"]))
+      patch(ns, "deployment", desk, [
+        {
+          "op": "replace",
+          "path": "/spec/template/spec/containers/0/image",
+          "value": desk_image,
+        },
+      ])
+      patch(ns, "deployment", town, [
+        {
+          "op": "replace",
+          "path": "/spec/template/spec/containers/0/image",
+          "value": gateway_image,
+        },
+        {
+          "op": "replace",
+          "path": "/spec/template/spec/initContainers/0/image",
+          "value": town_image,
+        },
+      ])
+      for name in [desk, town] {
+        println(kube(["-n", ns, "scale", "deployment", name, "--replicas=1"]))
+        println(
+          kube([
+            "-n",
+            ns,
+            "rollout",
+            "status",
+            "deployment/" + name,
+            "--timeout=180s",
+          ]),
+        )
+      }
+    } catch {
+      err => {
+        patch(ns, "deployment", desk, [
+          { "op": "replace", "path": "/spec/template", "value": desk_template },
+        ])
+        patch(ns, "deployment", town, [
+          { "op": "replace", "path": "/spec/template", "value": town_template },
+        ])
+        for name in [desk, town] {
+          println(kube(["-n", ns, "scale", "deployment", name, "--replicas=1"]))
+        }
+        fail("Workspace release rolled back: " + err.to_string())
+      }
+    }
+    @fs.write_file(
+      root + "/workspaces-live.json",
+      (
+        {
+          "desk": desk_image,
+          "town_ui": town_image,
+          "gateway": gateway_image,
+          "state_backup": "workspace-states.tgz",
+        } : Json).stringify(indent=2),
+      permission=0o600,
+    )
+    println(kube(["-n", ns, "delete", "pod", backup_name, "--wait=true"]))
+  } else if mode == "gateway-scope" {
+    let ns = "aigc-acceptance-20260915"
+    let name = "moontown-platform"
+    let pinned = image("gateway")
+    let current = @json.parse(
+      kube(["-n", ns, "get", "deployment", name, "-o", "json"]),
+    )
+    guard current
+      is {
+        "spec": {
+          "template": {
+            "spec": { "containers": [{ "image": String(old), .. }], .. },
+            ..
+          },
+          ..
+        },
+        ..
+      } &&
+      old ==
+      "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@sha256:75a3ab9eba79d6818346c681afdb3b59f105cf0cc73904848c2a7ea416cd7ed2" else {
+      fail("Public gateway changed before scope hotfix")
+    }
+    @fs.write_file(
+      root + "/before-scope-gateway.json",
+      current.stringify(indent=2),
+      permission=0o600,
+      create_mode=CreateNew,
+    )
+    patch(ns, "deployment", name, [
+      {
+        "op": "replace",
+        "path": "/spec/template/spec/containers/0/image",
+        "value": pinned,
+      },
+    ])
+    println(
+      kube([
+        "-n",
+        ns,
+        "rollout",
+        "status",
+        "deployment/" + name,
+        "--timeout=150s",
+      ]),
+    )
+    @fs.write_file(
+      root + "/scope-gateway-live.json",
+      ({ "image": pinned, "health": true } : Json).stringify(),
+      permission=0o600,
+    )
+  } else if mode == "profile-town-final" {
+    let ns = "aigc-acceptance-20260915"
+    let name = "moontown-webide-runtime"
+    let current = @json.parse(
+      kube(["-n", ns, "get", "configmap", name, "-o", "json"]),
+    )
+    @fs.write_file(
+      root + "/before-town-final-profile.json",
+      current.stringify(indent=2),
+      permission=0o600,
+      create_mode=CreateNew,
+    )
+    guard current is { "data": { "container.json": String(raw), .. }, .. } &&
+      @json.parse(raw) is Object(profile) &&
+      profile.get("image") ==
+      Some(
+        Json::string(
+          "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/hosted-apps@sha256:f25a68d227c80b14fc31fe422f16e394b1f1e66b721e027602b8f9c09122e366",
+        ),
+      ) else {
+      fail("Town profile changed")
+    }
+    profile["image"] = Json::string(image("moontown"))
+    patch(ns, "configmap", name, [
+      {
+        "op": "replace",
+        "path": "/data/container.json",
+        "value": Json::object(profile).stringify(),
+      },
+    ])
+  } else if mode == "refresh-gateways" {
+    let ns = "aigc-acceptance-20260915"
+    for
+      name in [
+        "webide-gateway", "mooncode-jiaan-gateway", "mooncode-limuheng-gateway",
+        "mooncode-wangzhixiang-gateway", "moonrobo-webide-gateway", "moontown-webide-gateway",
+      ] {
+      ignore(backup(ns, "deployment", name))
+      println(kube(["-n", ns, "rollout", "restart", "deployment/" + name]))
+      println(
+        kube([
+          "-n",
+          ns,
+          "rollout",
+          "status",
+          "deployment/" + name,
+          "--timeout=120s",
+        ]),
+      )
+    }
+  } else if mode == "profiles" {
+    let ns = "aigc-acceptance-20260915"
+    for
+      (product, name, key) in [
+        ("moondesk", "personal-mooncode-runtime", "desktop-container.json"),
+        ("moonrobo", "moonrobo-webide-runtime", "container.json"),
+        ("moontown", "moontown-webide-runtime", "container.json"),
+      ] {
+      let pinned = image(product)
+      let before = backup(ns, "configmap", name)
+      guard before is { "data": Object(data), .. } &&
+        data.get(key) is Some(String(raw)) &&
+        @json.parse(raw) is Object(profile) else {
+        fail("Unexpected launch profile")
+      }
+      profile["image"] = Json::string(pinned)
+      patch(ns, "configmap", name, [
+        {
+          "op": "replace",
+          "path": "/data/" + key,
+          "value": Json::object(profile).stringify(),
+        },
+      ])
+    }
+    println("Updated only application images in all three launch profiles")
+  } else {
+    fail("Unknown mode")
+  }
+}

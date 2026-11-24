@@ -1,0 +1,252 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+}
+
+///|
+async fn output(program : String, args : Array[String]) -> String {
+  let r = @shell.Cmd(program, args).output()
+  if r.exit_code() != 0 {
+    eprintln(r.stderr())
+  }
+  r.check()
+  r.stdout().trim().to_owned()
+}
+
+///|
+async fn hash(path : String) -> String {
+  output("sha256sum", [path]).split(" ").next().unwrap().to_owned()
+}
+
+///|
+async fn blob(root : String, name : String, value : Json) -> Json {
+  let path = root + "/" + name
+  @fs.write_file(path, value.stringify())
+  let digest = hash(path)
+  let size = @string.parse_int(output("stat", ["-c", "%s", path]))
+  @fs.rename(path, root + "/blobs/sha256/" + digest)
+  { "digest": "sha256:" + digest, "size": size }
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, product, repository, base_digest] &&
+    ["moondesk", "moonrobo", "moontown", "gateway"].contains(product) &&
+    [
+      "moon/hosted-apps", "moon/moontown-account-ui", "moon/moontown-account-gateway",
+    ].contains(repository) &&
+    base_digest.has_prefix("sha256:") &&
+    base_digest.length() == 71 else {
+    fail("PRODUCT REPOSITORY BASE_DIGEST")
+  }
+  let release = "/home/HwHiAiUser/moon-public/work/products-20261111-r1"
+  let root = release +
+    "/" +
+    product +
+    (if product == "moontown" {
+      "-oci-r4"
+    } else if product == "gateway" {
+      "-oci-r3"
+    } else {
+      "-oci-r2"
+    })
+  guard !@fs.exists(root) else { fail("Immutable package already exists") }
+  @fs.mkdir(root + "/blobs/sha256", recursive=true, permission=0o700)
+  let base = "https://lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/v2/" +
+    repository
+  let curl = [
+    "--noproxy", "*", "--cacert", "/etc/ssl/certs/ca-certificates.crt", "--fail",
+    "--silent", "--show-error",
+  ]
+  let base_file = root + "/base-manifest.json"
+  @shell.Cmd(
+    "curl",
+    [
+      ..curl,
+      "-H",
+      "Accept: application/vnd.oci.image.manifest.v1+json",
+      "-o",
+      base_file,
+      base + "/manifests/" + base_digest,
+    ],
+  ).run()
+  guard "sha256:" + hash(base_file) == base_digest else {
+    fail("Base digest mismatch")
+  }
+  let manifest = @json.parse(@fs.read_file(base_file).text())
+  guard manifest is Object(fields) &&
+    manifest
+    is {
+      "config": { "digest": String(config_digest), .. },
+      "layers": Array(layers),
+      ..
+    } else {
+    fail("Invalid base manifest")
+  }
+  let config_file = root + "/base-config.json"
+  @shell.Cmd(
+    "curl",
+    [..curl, "-o", config_file, base + "/blobs/" + config_digest],
+  ).run()
+  guard "sha256:" + hash(config_file) == config_digest else {
+    fail("Config digest mismatch")
+  }
+  let config = @json.parse(@fs.read_file(config_file).text())
+  guard config is Object(config_fields) &&
+    config
+    is {
+      "architecture": "amd64",
+      "os": "linux",
+      "rootfs": { "diff_ids": Array(diffs), .. },
+      "config": Object(runtime),
+      ..
+    } else {
+    fail("Expected Linux amd64 base")
+  }
+  let layer = root + "/layer"
+  @fs.mkdir(layer + "/usr/local/bin", recursive=true)
+  let binary = if product == "gateway" {
+    release +
+    "/source/moontown/src/account_gateway/_build/native/release/build/vectie/moontown-account-gateway/main/main.exe"
+  } else if product == "moontown" {
+    release +
+    "/source/moontown/_build/native/release/build/vectie/moontown/cmd/desktop_server/desktop_server.exe"
+  } else {
+    release +
+    "/source/" +
+    product +
+    "/_build/native/release/build/vectie/" +
+    product +
+    "/cmd/main/main.exe"
+  }
+  let executable = if product == "gateway" {
+    "lunanexa-webide-gateway"
+  } else {
+    product
+  }
+  @shell.Cmd("install", [
+    "-m",
+    "755",
+    binary,
+    layer + "/usr/local/bin/" + executable,
+  ]).run()
+  if product != "gateway" {
+    @fs.mkdir(layer + "/opt/" + product + "/ui", recursive=true)
+    @shell.Cmd("tar", [
+      "-xzf",
+      release + "/" + product + "-ui.tgz",
+      "-C",
+      layer + "/opt/" + product + "/ui",
+    ]).run()
+  }
+  let deps = "/home/HwHiAiUser/coffee-auth-queue-20261107/image-deps/unpack"
+  if product == "moontown" {
+    @shell.Cmd("tar", [
+      "-xzf",
+      release + "/town-templates.tgz",
+      "-C",
+      layer + "/opt/moontown",
+    ]).run()
+  }
+  let jpeg = "/home/HwHiAiUser/coffee-auth-queue-20261107/participation-20261109/jpeg/opt/libjpeg-turbo/lib64"
+  let libraries = output("env", [
+    "LD_LIBRARY_PATH=" +
+    jpeg +
+    ":" +
+    deps +
+    "/usr/lib/x86_64-linux-gnu:" +
+    deps +
+    "/lib/x86_64-linux-gnu",
+    "ldd",
+    binary,
+  ])
+  guard !libraries.contains("not found") else {
+    fail("Unresolved runtime library")
+  }
+  @fs.write_file(root + "/ldd.txt", libraries)
+  @fs.mkdir(layer + "/usr/lib/x86_64-linux-gnu", recursive=true)
+  for line in libraries.split("\n") {
+    if line.contains("=>") {
+      let parts = line.split("=>").to_array()
+      let name = parts[0].trim().to_owned()
+      let path = parts[1].trim().split(" ").next().unwrap().to_owned()
+      // Preserve the base's newer glibc and its platform tools.
+      if path.has_prefix("/") &&
+        ["libpng16.so.16", "libwebp.so.6", "libjpeg.so.62"].contains(name) {
+        @shell.Cmd("cp", [
+          "-L",
+          path,
+          layer + "/usr/lib/x86_64-linux-gnu/" + name,
+        ]).run()
+      }
+    }
+  }
+  let archive = root + "/payload.tar"
+  @shell.Cmd("tar", [
+    "--owner=0", "--group=0", "--mode=u+rwX,go+rX", "-C", layer, "-cf", archive,
+    ".",
+  ]).run()
+  let diff = hash(archive)
+  @shell.Cmd("gzip", ["-n", "-k", archive]).run()
+  let compressed = hash(archive + ".gz")
+  let bytes = @string.parse_int(output("stat", ["-c", "%s", archive + ".gz"]))
+  @fs.rename(archive + ".gz", root + "/blobs/sha256/" + compressed)
+  diffs.push(Json::string("sha256:" + diff))
+  layers.push({
+    "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+    "digest": "sha256:" + compressed,
+    "size": bytes,
+  })
+  let labels = match runtime.get("Labels") {
+    Some(Object(labels)) => labels
+    _ => Map([])
+  }
+  labels["org.opencontainers.image.version"] = Json::string(
+    "products-20261111-r1",
+  )
+  runtime["Labels"] = Json::object(labels)
+  config_fields["created"] = Json::string(
+    output("date", ["-u", "+%Y-%m-%dT%H:%M:%SZ"]),
+  )
+  guard blob(root, "new-config.json", config) is Object(config_descriptor) else {
+    fail("Config descriptor")
+  }
+  config_descriptor["mediaType"] = Json::string(
+    "application/vnd.oci.image.config.v1+json",
+  )
+  fields["config"] = Json::object(config_descriptor)
+  fields["mediaType"] = Json::string(
+    "application/vnd.oci.image.manifest.v1+json",
+  )
+  for item in layers {
+    if item is Object(layer_fields) &&
+      layer_fields.get("mediaType") ==
+      Some(Json::string("application/vnd.docker.image.rootfs.diff.tar.gzip")) {
+      layer_fields["mediaType"] = Json::string(
+        "application/vnd.oci.image.layer.v1.tar+gzip",
+      )
+    }
+  }
+  let descriptor = blob(root, "new-manifest.json", manifest)
+  @fs.write_file(
+    root + "/index.json",
+    ({ "schemaVersion": 2, "manifests": [descriptor] } : Json).stringify(),
+  )
+  @fs.write_file(
+    root + "/receipt.json",
+    (
+      {
+        "product": product,
+        "base": base_digest,
+        "binary_sha256": hash(binary),
+        "repository": repository,
+        "manifest": descriptor,
+      } : Json).stringify(indent=2),
+  )
+  println(descriptor.stringify())
+}

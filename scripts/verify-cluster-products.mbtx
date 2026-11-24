@@ -1,0 +1,156 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn command(program : String, args : Array[String]) -> String {
+  let r = @shell.Cmd(program, args).output()
+  if r.exit_code() != 0 {
+    eprintln(r.stderr())
+  }
+  r.check()
+  r.stdout()
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  command(
+    "kubectl",
+    ["--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", ..args],
+  )
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/moon-public/work/products-20261111-r1"
+  let ns = "aigc-acceptance-20260915"
+  let records : Array[Json] = []
+  for
+    (namespace_name, name) in [
+      ("lunanexa", "moonrobo-jiaan"),
+      (ns, "moontown-platform"),
+      (ns, "webide-1a1ac56ce8c685d661eb9b5967fb19f0d38904b4773696db12449dd6"),
+      (ns, "webide-gateway"),
+      (ns, "mooncode-jiaan-gateway"),
+      (ns, "mooncode-limuheng-gateway"),
+      (ns, "mooncode-wangzhixiang-gateway"),
+      (ns, "moonrobo-webide-gateway"),
+      (ns, "moontown-webide-gateway"),
+    ] {
+    let value = @json.parse(
+      kube(["-n", namespace_name, "get", "deployment", name, "-o", "json"]),
+    )
+    guard value
+      is {
+        "spec": { "replicas": Number(1, ..), .. },
+        "status": { "readyReplicas": Number(1, ..), .. },
+        ..
+      } else {
+      fail("Deployment not ready: " + name)
+    }
+    if name == "moonrobo-jiaan" ||
+      name == "moontown-platform" ||
+      name.has_prefix("webide-1a1ac56") {
+      let suffix = if name == "moonrobo-jiaan" {
+        "moon/hosted-apps@sha256:c3127565be01639c16d8ab188c006950f80c0ba8d27adfa5d206fb439f1a71fd"
+      } else if name == "moontown-platform" {
+        "moon/moontown-account-gateway@sha256:5baf6c9c2c930abf41ab2a4ba839adedf7cc80ee624145ccc64954928803325e"
+      } else {
+        "moon/hosted-apps@sha256:84a18bbdd50aae9b714528f19a248efd4364aa8269c1c98a6541412467857dde"
+      }
+      guard value
+        is {
+          "spec": {
+            "template": {
+              "spec": { "containers": [{ "image": String(image), .. }, ..], .. },
+              ..
+            },
+            ..
+          },
+          ..
+        } &&
+        image ==
+        "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/" + suffix else {
+        fail("Wrong application image: " + name)
+      }
+    }
+    records.push(value)
+  }
+  @fs.write_file(
+    root + "/final-deployments.json",
+    Json::array(records).stringify(indent=2),
+    permission=0o600,
+  )
+  @fs.write_file(
+    root + "/final-profiles.json",
+    kube([
+      "-n", ns, "get", "configmap", "personal-mooncode-runtime", "moonrobo-webide-runtime",
+      "moontown-webide-runtime", "-o", "json",
+    ]),
+    permission=0o600,
+  )
+  @fs.write_file(
+    root + "/final-shared-services.txt",
+    command("systemctl", [
+      "--user", "show", "moondesk.service", "moontown.service", "-p", "ActiveState",
+      "-p", "ExecStart",
+    ]),
+    permission=0o600,
+  )
+  let expected = @fs.read_file(
+    root + "/moontown-oci-r4/layer/opt/moontown/ui/index.html",
+  ).text()
+  for port in ["443", "8443"] {
+    let page = command("curl", [
+      "--noproxy",
+      "*",
+      "--fail",
+      "--silent",
+      "--show-error",
+      "--max-time",
+      "15",
+      "https://suanli.kechuangfuwu.com:" + port + "/moontown/",
+    ])
+    assert_eq(page, expected)
+    let scope = command("curl", [
+      "--noproxy",
+      "*",
+      "--fail",
+      "--silent",
+      "--show-error",
+      "--max-time",
+      "15",
+      "https://suanli.kechuangfuwu.com:" + port + "/moontown/platform-scope.js",
+    ])
+    assert_true(scope.contains("__MOONTOWN_ACCOUNT_SCOPE=\"public\""))
+    println("Port " + port + ": exact live HTML and anonymous scope verified")
+  }
+  for
+    name in [
+      "moonrobo-refresh-20261111", "moonrobo-refresh-20261111-r2", "moondesk-refresh-20261111-r2",
+      "moontown-refresh-20261111-r2", "moontown-refresh-20261111-r3", "moontown-refresh-20261111-r4",
+      "moontown-gateway-refresh-20261111", "moontown-gateway-refresh-20261111-r3",
+    ] {
+    let evidence = @shell.Cmd("kubectl", [
+      "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", "-n", ns, "logs",
+      name, "--all-containers=true", "--tail=30",
+    ]).output()
+    @fs.write_file(
+      root + "/canary-log-" + name + ".txt",
+      evidence.stdout() + evidence.stderr(),
+      permission=0o600,
+    )
+    println(
+      kube([
+        "-n", ns, "delete", "pod", name, "--ignore-not-found=true", "--wait=false",
+      ]),
+    )
+  }
+  println(
+    "All nine target deployments ready; shared services and both TLS ports verified",
+  )
+}

@@ -1,0 +1,167 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+}
+
+///|
+let ssh_options : ReadOnlyArray[String] = [
+  "-o", "ProxyCommand=ssh -o BatchMode=yes -o HostKeyAlias=192.168.2.175 -p 32123 HwHiAiUser@106.39.18.146 -W %h:%p",
+  "-o", "BatchMode=yes", "-o", "IdentitiesOnly=yes", "-i", "/Users/kq/.ssh/id_ed25519",
+  "-o", "ConnectTimeout=10",
+]
+
+///|
+async fn remote(command : String) -> String {
+  let r = @shell.Cmd("ssh", [..ssh_options, "jiaanguo@192.168.2.191", command]).output()
+  r.check()
+  r.stdout()
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, phase] else { fail("apply | migrate | verify") }
+  let local_root = "/Users/kq/Workspace/moontown/output/grub-repair-20261117/sogou-session"
+  let backup = "/home/jiaanguo/.local/state/sogou-session-repair-20261117"
+  let units = [
+    "sogoupinyin-session-service.service", "sogoupinyin-session-watchdog.service",
+  ]
+  if phase == "apply" {
+    println(
+      remote(
+        "test ! -e " +
+        backup +
+        " && test ! -e /home/jiaanguo/.config/autostart/sogoupinyin-service.desktop && test ! -e /home/jiaanguo/.config/autostart/sogoupinyin-watchdog.desktop && test ! -e /home/jiaanguo/.config/systemd/user/sogoupinyin-session-service.service && test ! -e /home/jiaanguo/.config/systemd/user/sogoupinyin-session-watchdog.service && install -d -m 700 " +
+        backup,
+      ),
+    )
+    println(
+      remote(
+        "tar -czf " +
+        backup +
+        "/original-autostart.tgz -C /etc/xdg/autostart sogoupinyin-service.desktop sogoupinyin-watchdog.desktop",
+      ),
+    )
+    for name in ["service", "watchdog"] {
+      let original = remote(
+        "cat /etc/xdg/autostart/sogoupinyin-" + name + ".desktop",
+      )
+      let old = "Exec=/opt/sogoupinyin/files/bin/sogoupinyin-" + name
+      guard original.contains(old + "\n") else {
+        fail("Unexpected vendor autostart command")
+      }
+      @fs.write_file(
+        local_root + "/sogoupinyin-" + name + ".desktop",
+        original.replace(
+          old~,
+          new="Exec=/usr/bin/systemctl --user start sogoupinyin-session-" +
+            name +
+            ".service",
+        ),
+      )
+    }
+    @shell.Cmd(
+      "scp",
+      [
+        ..ssh_options,
+        ..units.map(name => local_root + "/" + name),
+        local_root + "/sogoupinyin-service.desktop",
+        local_root + "/sogoupinyin-watchdog.desktop",
+        "jiaanguo@192.168.2.191:" + backup + "/",
+      ],
+    ).run()
+    println(
+      remote(
+        "install -d -m 700 /home/jiaanguo/.config/systemd/user /home/jiaanguo/.config/autostart",
+      ),
+    )
+    for name in units {
+      println(
+        remote(
+          "install -m 644 " +
+          backup +
+          "/" +
+          name +
+          " /home/jiaanguo/.config/systemd/user/" +
+          name,
+        ),
+      )
+    }
+    println(
+      remote(
+        "systemd-analyze --user verify " +
+        backup +
+        "/sogoupinyin-session-service.service " +
+        backup +
+        "/sogoupinyin-session-watchdog.service",
+      ),
+    )
+    for name in ["sogoupinyin-service.desktop", "sogoupinyin-watchdog.desktop"] {
+      println(
+        remote(
+          "install -m 644 " +
+          backup +
+          "/" +
+          name +
+          " /home/jiaanguo/.config/autostart/" +
+          name,
+        ),
+      )
+    }
+    println(remote("systemctl --user daemon-reload"))
+    println(
+      "Installed per-user lifecycle fix. Vendor package, dictionaries and global stop timeouts unchanged.",
+    )
+    return
+  }
+  if phase == "migrate" {
+    println(
+      remote(
+        "pkill -TERM -u 1000 -f '^/opt/sogoupinyin/files/bin/sogoupinyin-watchdog$' || test $? -eq 1",
+      ),
+    )
+    @async.sleep(500)
+    let exit_result = @shell.Cmd(
+      "ssh",
+      [
+        ..ssh_options, "jiaanguo@192.168.2.191", "busctl --user --timeout=2s call com.sogoupinyinsogouimebs_service.hotel_1000_0 / com.sogoupinyinsogouimebs_interface_service SogouImeServerExit",
+      ],
+    ).output()
+    println(exit_result.stdout())
+    @async.sleep(1000)
+    let remaining = remote(
+      "pgrep -u 1000 -f '^/opt/sogoupinyin/files/bin/sogoupinyin-(service|watchdog)$' || test $? -eq 1",
+    )
+    guard remaining.trim().is_empty() else {
+      fail(
+        "Original Sogou processes did not exit; inspect before takeover: " +
+        remaining,
+      )
+    }
+    println(
+      remote(
+        "systemctl --user start sogoupinyin-session-service.service sogoupinyin-session-watchdog.service",
+      ),
+    )
+    @async.sleep(1500)
+  } else {
+    guard phase == "verify" else { fail("Unknown phase") }
+  }
+  println(
+    remote(
+      "systemctl --user show sogoupinyin-session-service.service sogoupinyin-session-watchdog.service -p Id -p ActiveState -p SubState -p MainPID -p ControlGroup -p TimeoutStopUSec -p PartOf",
+    ),
+  )
+  println(
+    remote(
+      "busctl --user list --no-pager | grep -E '^com.sogoupinyinsogouimebs_(service|watchdog)'",
+    ),
+  )
+  println(
+    remote(
+      "env DISPLAY=:0 XAUTHORITY=/run/user/1000/gdm/Xauthority fcitx-remote; env DISPLAY=:0 XAUTHORITY=/run/user/1000/gdm/Xauthority fcitx-remote -m sogoupinyin; systemctl show k3s-agent.service -p ActiveState -p UnitFileState",
+    ),
+  )
+}

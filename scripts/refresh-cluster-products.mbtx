@@ -1,0 +1,416 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn output(program : String, args : Array[String]) -> String {
+  let r = @shell.Cmd(program, args).output()
+  if r.exit_code() != 0 {
+    eprintln(r.stderr())
+  }
+  r.check()
+  r.stdout().trim().to_owned()
+}
+
+///|
+async fn copy_source(source : String, destination : String) -> Unit {
+  @shell.Cmd("rsync", [
+    "-a",
+    "--delete",
+    "--prune-empty-dirs",
+    "--exclude=.git/",
+    "--exclude=_build/",
+    "--exclude=.mooncakes/",
+    "--exclude=node_modules/",
+    "--exclude=target/",
+    "--exclude=.moonsuite/",
+    "--exclude=output/",
+    "--exclude=state/",
+    "--exclude=tools/",
+    "--exclude=.repos/",
+    "--exclude=examples/",
+    "--exclude=docs/",
+    "--include=*/",
+    "--include=*.mbt",
+    "--include=*.mbti",
+    "--include=*.c",
+    "--include=*.h",
+    "--include=*.cpp",
+    "--include=*.cc",
+    "--include=*.hpp",
+    "--include=*.S",
+    "--include=moon.mod",
+    "--include=moon.pkg",
+    "--include=moon.work",
+    "--include=README.mbt.md",
+    "--include=README.md",
+    "--exclude=*",
+    source + "/",
+    destination + "/",
+  ]).run()
+}
+
+///|
+async fn main {
+  let staging = "/Users/kq/Workspace/moontown/output/cluster-products-20261111-r1"
+  let remote = "/home/HwHiAiUser/moon-public/work/products-20261111-r1"
+  guard @env.args() is [_, phase, .. rest] else {
+    fail("stage | transfer | build PRODUCT")
+  }
+  if phase == "stage" {
+    guard !@fs.exists(staging + "/source.tgz") else {
+      fail("Snapshot already exists")
+    }
+    if !@fs.exists(staging + "/source") {
+      @fs.mkdir(staging + "/source", recursive=true, permission=0o700)
+    }
+    let records : Array[Json] = []
+    for
+      name in [
+        "moontown", "moonchat", "moondesk", "moonleaf", "moonlib", "moonrobo", "moonnum",
+        "moonphys", "moonedit", "lunanexa",
+      ] {
+      let source = "/Users/kq/Workspace/" + name
+      let destination = staging + "/source/" + name
+      if !@fs.exists(destination) {
+        @fs.mkdir(destination)
+      }
+      @shell.Cmd("rsync", [
+        "-a",
+        "--prune-empty-dirs",
+        "--exclude=.git/",
+        "--exclude=_build/",
+        "--exclude=.mooncakes/",
+        "--exclude=node_modules/",
+        "--exclude=target/",
+        "--exclude=.moonsuite/",
+        "--exclude=output/",
+        "--exclude=state/",
+        "--exclude=tools/",
+        "--exclude=.repos/",
+        "--exclude=examples/",
+        "--exclude=docs/",
+        "--include=*/",
+        "--include=*.mbt",
+        "--include=*.mbti",
+        "--include=*.c",
+        "--include=*.h",
+        "--include=*.cpp",
+        "--include=*.cc",
+        "--include=*.hpp",
+        "--include=*.S",
+        "--include=moon.mod",
+        "--include=moon.pkg",
+        "--include=moon.work",
+        "--include=README.mbt.md",
+        "--include=README.md",
+        "--exclude=*",
+        source + "/",
+        destination + "/",
+      ]).run()
+      let head = output("git", ["-C", source, "rev-parse", "HEAD"]) catch {
+        _ => "unversioned"
+      }
+      let status = output("git", ["-C", source, "status", "--porcelain", "-uno"]) catch {
+        _ => "unversioned"
+      }
+      records.push({ "module": name, "head": head, "status": status })
+    }
+    @fs.write_file(
+      staging + "/source-receipt.json",
+      Json::array(records).stringify(indent=2),
+      permission=0o600,
+    )
+    @shell.Cmd("env", [
+      "COPYFILE_DISABLE=1",
+      "tar",
+      "--no-xattrs",
+      "-C",
+      staging,
+      "-czf",
+      staging + "/source.tgz",
+      "source",
+      "source-receipt.json",
+    ]).run()
+    println(output("shasum", ["-a", "256", staging + "/source.tgz"]))
+    println(output("du", ["-sh", staging + "/source", staging + "/source.tgz"]))
+  } else if phase == "refresh-town" {
+    let worktree = "/Users/kq/Workspace/moontown-release-20261111"
+    guard !@fs.exists(worktree) else {
+      fail("Release checkout exists; inspect it")
+    }
+    @shell.Cmd("git", [
+      "-C", "/Users/kq/Workspace/moontown", "worktree", "add", "--detach", worktree,
+      "github/main",
+    ]).run()
+    copy_source(worktree, staging + "/source/moontown")
+    @fs.write_file(
+      staging + "/town-latest.json",
+      (
+        {
+          "ref": "github/main",
+          "head": output("git", ["-C", worktree, "rev-parse", "HEAD"]),
+        } : Json).stringify(),
+    )
+    @fs.remove(staging + "/source.tgz")
+    @shell.Cmd("env", [
+      "COPYFILE_DISABLE=1",
+      "tar",
+      "--no-xattrs",
+      "-C",
+      staging,
+      "-czf",
+      staging + "/source.tgz",
+      "source",
+      "source-receipt.json",
+      "town-latest.json",
+    ]).run()
+    println(output("shasum", ["-a", "256", staging + "/source.tgz"]))
+  } else if phase == "metadata" {
+    let metadata = staging + "/legacy-metadata"
+    if !@fs.exists(metadata) {
+      @fs.mkdir(metadata)
+    }
+    for
+      name in [
+        "moontown", "moonchat", "moondesk", "moonleaf", "moonlib", "moonrobo", "moonnum",
+        "moonphys", "moonedit", "lunanexa",
+      ] {
+      let source = "/Users/kq/Workspace/" +
+        (if name == "moontown" { "moontown-release-20261111" } else { name })
+      let destination = metadata + "/" + name
+      if !@fs.exists(destination) {
+        @fs.mkdir(destination)
+      }
+      @shell.Cmd("rsync", [
+        "-a",
+        "--prune-empty-dirs",
+        "--exclude=.git/",
+        "--exclude=_build/",
+        "--exclude=.mooncakes/",
+        "--exclude=node_modules/",
+        "--exclude=target/",
+        "--exclude=output/",
+        "--exclude=.repos/",
+        "--include=*/",
+        "--include=moon.mod.json",
+        "--include=moon.pkg.json",
+        "--exclude=*",
+        source + "/",
+        destination + "/",
+      ]).run()
+    }
+    @shell.Cmd("rsync", ["-a", metadata + "/", staging + "/source/"]).run()
+    @shell.Cmd("env", [
+      "COPYFILE_DISABLE=1",
+      "tar",
+      "--no-xattrs",
+      "-C",
+      metadata,
+      "-czf",
+      staging + "/legacy-metadata.tgz",
+      ".",
+    ]).run()
+    @shell.Cmd("scp", [
+      staging + "/legacy-metadata.tgz",
+      "lunanexa-management:" + remote + "/",
+    ]).run()
+    @shell.Cmd("ssh", [
+      "lunanexa-management",
+      "tar -xzf '" + remote + "/legacy-metadata.tgz' -C '" + remote + "/source'",
+    ]).run()
+  } else if phase == "ui" {
+    guard rest is [product] &&
+      ["moondesk", "moonrobo", "moontown"].contains(product) else {
+      fail("Unknown UI product")
+    }
+    let relative = if product == "moontown" {
+      "src/ui/rabbita-town"
+    } else if product == "moondesk" {
+      "ui/rabbita-desk"
+    } else {
+      "ui/rabbita-cockpit"
+    }
+    let source = "/Users/kq/Workspace/" +
+      (if product == "moontown" {
+        "moontown-release-20261111"
+      } else {
+        product
+      }) +
+      "/" +
+      relative
+    let destination = staging + "/source/" + product + "/" + relative
+    if product == "moondesk" {
+      @shell.Cmd("rsync", [
+        "-a",
+        "/Users/kq/Workspace/moondesk/locales/",
+        staging + "/source/moondesk/locales/",
+      ]).run()
+    }
+    @shell.Cmd("rsync", [
+      "-a",
+      "--exclude=node_modules/",
+      "--exclude=_build/",
+      "--exclude=dist/",
+      "--exclude=*.mbt",
+      "--exclude=*.mbti",
+      "--exclude=moon.mod",
+      "--exclude=moon.pkg",
+      "--exclude=moon.work",
+      source + "/",
+      destination + "/",
+    ]).run()
+    let modules = "/Users/kq/Workspace/" +
+      product +
+      "/" +
+      relative +
+      "/node_modules"
+    if !@fs.exists(destination + "/node_modules") {
+      @fs.symlink(target=modules, destination + "/node_modules")
+    }
+    let command = if product == "moontown" {
+      [
+        "/Users/kq/Workspace/moontown-release-20261111/scripts/build-rabbita-ui.sh",
+      ]
+    } else {
+      [
+        "-lc",
+        "cd '" +
+        destination +
+        "' && " +
+        (if product == "moonrobo" {
+          "MOONROBO_PUBLIC_BASE=./"
+        } else {
+          "MOONDESK_BASE_PATH=./"
+        }) +
+        " npm run build",
+      ]
+    }
+    // Town's assembler consumes tracked non-source assets outside the UI tree.
+    if product == "moontown" {
+      if !@fs.exists(source + "/node_modules") {
+        @fs.symlink(target=modules, source + "/node_modules")
+      }
+    }
+    let r = @shell.Cmd("/bin/zsh", command).output()
+    @fs.write_file(
+      staging + "/" + product + "-ui.log",
+      r.stdout() + r.stderr(),
+      permission=0o600,
+    )
+    if r.exit_code() != 0 {
+      eprintln(r.stderr())
+    }
+    r.check()
+    let dist = (if product == "moontown" { source } else { destination }) +
+      "/dist"
+    @shell.Cmd("env", [
+      "COPYFILE_DISABLE=1",
+      "tar",
+      "--no-xattrs",
+      "-C",
+      dist,
+      "-czf",
+      staging + "/" + product + "-ui.tgz",
+      ".",
+    ]).run()
+    println(
+      output("shasum", ["-a", "256", staging + "/" + product + "-ui.tgz"]),
+    )
+  } else if phase == "transfer" {
+    @shell.Cmd("ssh", ["lunanexa-management", "mkdir -m 700 '" + remote + "'"]).run()
+    @shell.Cmd("scp", [
+      staging + "/source.tgz",
+      "/Users/kq/Workspace/moontown/scripts/refresh-cluster-products.mbtx",
+      "lunanexa-management:" + remote + "/",
+    ]).run()
+    println(
+      output("ssh", [
+        "lunanexa-management",
+        "sha256sum '" + remote + "/source.tgz'",
+      ]),
+    )
+    @shell.Cmd("ssh", [
+      "lunanexa-management",
+      "tar -xzf '" + remote + "/source.tgz' -C '" + remote + "'",
+    ]).run()
+  } else if phase == "build" {
+    guard rest is [product] &&
+      ["moondesk", "moonrobo", "moontown", "gateway"].contains(product) else {
+      fail("Unknown product")
+    }
+    let module_name = if product == "gateway" {
+      "moontown/src/account_gateway"
+    } else {
+      product
+    }
+    let entry = if product == "moontown" {
+      "src/cmd/desktop_server"
+    } else if product == "gateway" {
+      "src/main"
+    } else {
+      "cmd/main"
+    }
+    let repo = remote + "/source/" + module_name
+    if product == "moontown" || product == "gateway" {
+      let town = remote + "/source/moontown"
+      let deps = "/home/HwHiAiUser/coffee-auth-queue-20261107/image-deps/unpack"
+      let jpeg = "/home/HwHiAiUser/coffee-auth-queue-20261107/participation-20261109/jpeg/opt/libjpeg-turbo"
+      for
+        name in [
+          "src/creative_contest/moon.pkg", "src/account_gateway/src/main/moon.pkg",
+          "src/image_preview/moon.pkg", "src/activity_curation/moon.pkg",
+        ] {
+        let path = town + "/" + name
+        let raw = @fs.read_file(path).text()
+        @fs.write_file(
+          path,
+          raw
+          .replace(
+            old="-L/opt/homebrew/lib",
+            new="-L" +
+              jpeg +
+              "/lib64 -L" +
+              deps +
+              "/usr/lib/x86_64-linux-gnu -L" +
+              deps +
+              "/lib/x86_64-linux-gnu",
+          )
+          .replace(
+            old="-I/opt/homebrew/include",
+            new="-I" +
+              jpeg +
+              "/include -I" +
+              deps +
+              "/usr/include -I" +
+              deps +
+              "/usr/include/libpng16",
+          ),
+          create_mode=CreateOrTruncate,
+        )
+      }
+    }
+    let r = @shell.Cmd("prlimit", [
+      "--stack=unlimited", "/home/HwHiAiUser/.moon-new/bin/moon", "-C", repo, "build",
+      entry, "--target", "native", "--release", "--jobs", "2", "--diagnostic-limit",
+      "4",
+    ]).output()
+    @fs.write_file(
+      remote + "/" + product + "-build.log",
+      r.stdout() + r.stderr(),
+      permission=0o600,
+    )
+    if r.exit_code() != 0 {
+      eprintln(r.stderr())
+    }
+    r.check()
+    println("Built " + product)
+  } else {
+    fail("Unknown phase")
+  }
+}
