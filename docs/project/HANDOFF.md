@@ -1,5 +1,19 @@
 # MoonTown handoff notes
 
+## 2026-11-11 · Cluster refresh compatibility fix
+
+This isolated checkout is on `codex/cluster-refresh-20261111`, based on fetched
+main ef19c952. The production gateway normalizes tagged account digests into
+the existing `account-<64 hex>` browser storage scope; retain the frontend's
+strict isolation guard. Its real HTTP fixture checks the exact scope shape,
+two-account separation, expiry and revocation. Focused native tests passed
+3/3 and browser storage tests 7/7; the real signed-in public map loads.
+The three application services/launch profiles were updated with state and
+rollback backups. GLM remains stopped, so new private launches are still gated
+on model readiness. Full release evidence and digests are recorded in
+`/Users/kq/Workspace/moontown/docs/project/CLUSTER_REFRESH_20261111.md` and
+`/home/HwHiAiUser/moon-public/work/products-20261111-r1` on management node .173.
+
 ## 2026-11-10 · Equal QR codes, vertical prizes and subtle motion
 
 - `COFFEE_EQUAL_QR_2026-11-10.md` supersedes v10's unequal QR sizes and horizontal prizes. Both QR frames and captions must match; prizes are vertical beside the participation code. Phones stack the equal codes with prizes alongside. Keep the prize stack close on both desktop and phone.

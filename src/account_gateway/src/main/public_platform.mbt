@@ -157,9 +157,14 @@ async fn PublicPlatform::asset(
 ///|
 fn platform_storage_scope(session : @account_identity.Session?) -> String {
   match session {
-    Some(session) =>
-      "account-" +
-      @account_system.account_token_digest(session.context().user_id)
+    Some(session) => {
+      let digest = @account_system.account_token_digest(session.context().user_id)
+      let normalized = match digest.strip_prefix("sha256:") {
+        Some(raw) => raw.to_owned()
+        None => digest
+      }
+      "account-" + normalized
+    }
     None => "public"
   }
 }
