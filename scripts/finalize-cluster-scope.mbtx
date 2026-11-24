@@ -1,0 +1,65 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/moon-public/work/products-20261111-r1"
+  let moon = "/home/HwHiAiUser/.moon-new/bin/moon"
+  guard @fs.read_file(root + "/scope-tests.log")
+    .text()
+    .contains("Total tests: 3, passed: 3, failed: 0.") else {
+    fail("Focused regression tests must pass")
+  }
+  @shell.Cmd(moon, [
+    "run",
+    root + "/package-cluster-products.mbtx",
+    "gateway",
+    "moon/moontown-account-gateway",
+    "sha256:dfc9d4d371874dc3348e8139bd5e0a09ea70c907ff0bf8afd6a6ed8adf90278e",
+  ]).run()
+  @shell.Cmd(moon, [
+    "run",
+    root + "/publish-account-gateway.mbtx",
+    root + "/gateway-oci-r3",
+    "https://lunanexa-registry.lunanexa-registry.svc.cluster.local:5000",
+    "moon/moontown-account-gateway",
+    "account-binding-products-20261111-gateway-r3",
+    "/etc/ssl/certs/ca-certificates.crt",
+  ]).run()
+  guard @json.parse(@fs.read_file(root + "/gateway-oci-r3/index.json").text())
+    is { "manifests": [{ "digest": String(digest), .. }], .. } else {
+    fail("Missing manifest")
+  }
+  let image = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/moontown-account-gateway@" +
+    digest
+  @shell.Cmd(moon, [
+    "run",
+    root + "/rollout-cluster-products.mbtx",
+    "gateway",
+    image,
+  ]).run()
+  @shell.Cmd(moon, [
+    "run",
+    root + "/deploy-cluster-products.mbtx",
+    "gateway-scope",
+  ]).run()
+  let source = root + "/source/moontown/src/account_gateway"
+  let r = @shell.Cmd("sha256sum", [
+    source + "/src/main/public_platform.mbt",
+    source + "/src/main/public_platform_wbtest.mbt",
+    source +
+    "/_build/native/release/build/vectie/moontown-account-gateway/main/main.exe",
+  ]).output()
+  r.check()
+  @fs.write_file(
+    root + "/scope-source-and-binary.sha256",
+    r.stdout(),
+    permission=0o600,
+  )
+  println("Storage-scope compatibility release deployed: " + image)
+}

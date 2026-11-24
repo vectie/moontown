@@ -16,9 +16,9 @@ async fn main {
   }
   guard registry ==
     "https://lunanexa-registry.lunanexa-registry.svc.cluster.local:5000" &&
-    ["moon/moontown-account-gateway", "moon/moontown-account-ui"].contains(
-      repository,
-    ) &&
+    [
+      "moon/moontown-account-gateway", "moon/moontown-account-ui", "moon/hosted-apps",
+    ].contains(repository) &&
     tag.has_prefix("account-binding-") &&
     tag.all(c => c is ('a'..<='z' | '0'..<='9' | '-')) else {
     fail(

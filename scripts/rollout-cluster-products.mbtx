@@ -1,0 +1,316 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+///|
+let root : String = "/home/HwHiAiUser/moon-public/work/products-20261111-r1"
+
+///|
+async fn kube(args : Array[String]) -> String {
+  let r = @shell.Cmd(
+    "kubectl",
+    ["--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", ..args],
+  ).output()
+  if r.exit_code() != 0 {
+    eprintln(r.stderr())
+  }
+  r.check()
+  r.stdout()
+}
+
+///|
+async fn main {
+  if @env.args() is [_, "gateway", image] {
+    let ns = "aigc-acceptance-20260915"
+    let live = @json.parse(
+      kube(["-n", ns, "get", "deployment", "moontown-platform", "-o", "json"]),
+    )
+    guard live
+      is { "spec": { "template": { "spec": Object(spec), .. }, .. }, .. } &&
+      spec.get("containers") is Some(Array(containers)) &&
+      containers[0] is Object(container) &&
+      spec.get("volumes") is Some(Array(volumes)) else {
+      fail("Unexpected public gateway")
+    }
+    container["image"] = Json::string(image)
+    for volume in volumes {
+      if volume is Object(fields) && fields.contains("persistentVolumeClaim") {
+        ignore(fields.remove("persistentVolumeClaim"))
+        fields["emptyDir"] = { "sizeLimit": "1Gi" }
+      }
+    }
+    let security = match spec.get("securityContext") {
+      Some(Object(fields)) => fields
+      _ => Map([])
+    }
+    security["fsGroup"] = Json::number(1000)
+    spec["securityContext"] = Json::object(security)
+    let name = "moontown-gateway-refresh-20261111-r3"
+    let path = root + "/gateway-canary-r3.json"
+    @fs.write_file(
+      path,
+      (
+        {
+          "apiVersion": "v1",
+          "kind": "Pod",
+          "metadata": {
+            "name": name,
+            "namespace": ns,
+            "labels": { "app": name },
+          },
+          "spec": Json::object(spec),
+        } : Json).stringify(indent=2),
+      permission=0o600,
+      create_mode=CreateNew,
+    )
+    println(kube(["create", "-f", path]))
+    println(
+      kube([
+        "-n",
+        ns,
+        "wait",
+        "--for=condition=Ready",
+        "pod/" + name,
+        "--timeout=90s",
+      ]),
+    )
+    guard @json.parse(kube(["-n", ns, "get", "pod", name, "-o", "json"]))
+      is { "status": { "podIP": String(ip), .. }, .. } else {
+      fail("No candidate IP")
+    }
+    let health = @shell.Cmd("curl", [
+      "--noproxy",
+      "*",
+      "--fail",
+      "--silent",
+      "--show-error",
+      "--max-time",
+      "10",
+      "http://" + ip + ":8082/health",
+    ]).output()
+    @fs.write_file(
+      root + "/gateway-canary-health.txt",
+      health.stdout() + health.stderr(),
+      permission=0o600,
+    )
+    health.check()
+    @fs.write_file(
+      root + "/gateway-canary-result.json",
+      ({ "image": image, "health": true, "isolated_state": true } : Json).stringify(),
+      permission=0o600,
+    )
+    println("Public gateway private-state canary passed")
+    return
+  }
+  guard @env.args() is [_, phase, product, image] &&
+    phase == "canary" &&
+    ["moondesk", "moonrobo", "moontown"].contains(product) &&
+    image.has_prefix(
+      "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/",
+    ) &&
+    image.contains("@sha256:") else {
+    fail("canary PRODUCT PINNED_IMAGE")
+  }
+  let ns = "aigc-acceptance-20260915"
+  let name = product +
+    "-refresh-20261111-" +
+    (if product == "moontown" { "r4" } else { "r2" })
+  let port = if product == "moonrobo" {
+    5290
+  } else if product == "moondesk" {
+    8188
+  } else {
+    17842
+  }
+  let args : Array[Json] = if product == "moonrobo" {
+    [
+      "serve", "/workspace", "/opt/moonrobo/ui", "0.0.0.0", "5290", "127.0.0.1",
+      "5391",
+    ]
+  } else if product == "moondesk" {
+    [
+      "serve", "/workspace", "--ui", "/opt/moondesk/ui", "--host", "0.0.0.0", "--port",
+      "8188",
+    ]
+  } else {
+    []
+  }
+  let pod : Json = {
+    "apiVersion": "v1",
+    "kind": "Pod",
+    "metadata": { "name": name, "namespace": ns, "labels": { "app": name } },
+    "spec": {
+      "restartPolicy": "Never",
+      "automountServiceAccountToken": false,
+      "nodeSelector": { "kubernetes.io/hostname": "ubuntu" },
+      "securityContext": {
+        "runAsUser": 1000,
+        "runAsGroup": 1000,
+        "fsGroup": 1000,
+      },
+      "containers": [
+        {
+          "name": "app",
+          "image": image,
+          "command": ["/usr/local/bin/" + product],
+          "args": args,
+          "env": [
+            { "name": "MOONSUITE_ROOT", "value": "/workspace" },
+            { "name": "MOONTOWN_HOSTED_WEBIDE", "value": "true" },
+            { "name": "MOONTOWN_DESKTOP_BIND", "value": "0.0.0.0:17842" },
+            {
+              "name": "MOONTOWN_DESKTOP_STATIC_ROOT",
+              "value": "/opt/moontown/ui",
+            },
+            {
+              "name": "MOONTOWN_OPERATOR_POLICY_PATH",
+              "value": "/opt/moontown/assets/templates/operator-request-policy.json",
+            },
+          ],
+          "ports": [{ "containerPort": port }],
+          "readinessProbe": {
+            "tcpSocket": { "port": port },
+            "periodSeconds": 2,
+          },
+          "resources": {
+            "requests": { "cpu": "100m", "memory": "128Mi" },
+            "limits": { "cpu": "2", "memory": "2Gi" },
+          },
+          "securityContext": {
+            "allowPrivilegeEscalation": false,
+            "readOnlyRootFilesystem": true,
+            "capabilities": { "drop": ["ALL"] },
+          },
+          "volumeMounts": [
+            { "name": "workspace", "mountPath": "/workspace" },
+            { "name": "tmp", "mountPath": "/tmp" },
+          ],
+        },
+      ],
+      "volumes": [
+        { "name": "workspace", "emptyDir": {} },
+        { "name": "tmp", "emptyDir": {} },
+      ],
+    },
+  }
+  let path = root +
+    "/" +
+    product +
+    "-canary-" +
+    (if product == "moontown" { "r4" } else { "r2" }) +
+    ".json"
+  @fs.write_file(
+    path,
+    pod.stringify(indent=2),
+    permission=0o600,
+    create_mode=CreateOrTruncate,
+  )
+  let prior = @shell.Cmd("kubectl", [
+    "--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", "-n", ns, "get",
+    "pod", name, "-o", "json",
+  ]).output()
+  if prior.exit_code() == 0 {
+    guard @json.parse(prior.stdout())
+      is { "spec": { "containers": [{ "image": String(old), .. }], .. }, .. } &&
+      old == image else {
+      fail("Canary image changed")
+    }
+  } else {
+    println(kube(["create", "-f", path]))
+  }
+  println(
+    kube([
+      "-n",
+      ns,
+      "wait",
+      "--for=condition=Ready",
+      "pod/" + name,
+      "--timeout=90s",
+    ]),
+  )
+  let detail = @json.parse(kube(["-n", ns, "get", "pod", name, "-o", "json"]))
+  guard detail is { "status": { "podIP": String(ip), .. }, .. } else {
+    fail("Canary IP missing")
+  }
+  let health = if product == "moonrobo" {
+    "/__moonrobo_health"
+  } else if product == "moontown" {
+    "/health"
+  } else {
+    "/__moondesk_health"
+  }
+  let r = @shell.Cmd("curl", [
+    "--noproxy",
+    "*",
+    "--fail",
+    "--silent",
+    "--show-error",
+    "--max-time",
+    "10",
+    "-H",
+    "Host: 127.0.0.1:" + port.to_string(),
+    "http://" + ip + ":" + port.to_string() + health,
+  ]).output()
+  @fs.write_file(
+    root + "/" + product + "-canary-health.txt",
+    r.stdout() + r.stderr(),
+    permission=0o600,
+  )
+  r.check()
+  println(kube(["-n", ns, "exec", name, "--", "/bin/ls", "/bin/sh", "/bin/cp"]))
+  let page = @shell.Cmd("curl", [
+    "--noproxy",
+    "*",
+    "--fail",
+    "--silent",
+    "--show-error",
+    "--max-time",
+    "10",
+    "-H",
+    "Host: 127.0.0.1:" + port.to_string(),
+    "http://" + ip + ":" + port.to_string() + "/",
+  ]).output()
+  page.check()
+  let expected = @fs.read_file(
+    root +
+    "/" +
+    product +
+    (if product == "moontown" { "-oci-r4" } else { "-oci-r2" }) +
+    "/layer/opt/" +
+    product +
+    "/ui/index.html",
+  ).text()
+  assert_eq(page.stdout(), expected)
+  if product == "moontown" {
+    println(
+      kube([
+        "-n", ns, "exec", name, "--", "/bin/ls", "/opt/moontown/assets/templates/operator-request-policy.json",
+      ]),
+    )
+    let catalog = @shell.Cmd("curl", [
+      "--noproxy",
+      "*",
+      "--fail",
+      "--silent",
+      "--show-error",
+      "http://" + ip + ":" + port.to_string() + "/knowledge-domain-catalog.json",
+    ]).output()
+    catalog.check()
+    guard @json.parse(catalog.stdout()) is Object(_) else {
+      fail("Invalid application catalog")
+    }
+  }
+  @fs.write_file(
+    root + "/" + product + "-canary-result.json",
+    (
+      { "image": image, "health": true, "shell_tools": true, "ui_exact": true } :
+      Json).stringify(),
+    permission=0o600,
+  )
+  println(product + " private canary health passed")
+}

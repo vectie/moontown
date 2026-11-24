@@ -354,6 +354,63 @@ on model readiness. Full release evidence and digests are recorded in
 - See `COFFEE_CONTACT_REGISTRATION_2026-11-09.md`. Attribution uses its own first-touch cookie, never draft or image-cache keys; it is untrusted marketing metadata, not authorization.
 - Management kubelet has 5% eviction thresholds plus 10% minimum reclaim and a five-minute transition period. DiskPressure recovery needs roughly 15% free, not just the 5% threshold. Remove only reviewed inactive image export caches; retain source, executable/venv symlinks, PVCs, models and rollback releases.
 - Check standalone release scripts with `moon check path.mbtx` before upload. Source overlays exported from macOS need `COPYFILE_DISABLE=1` and `--no-xattrs`; AppleDouble `._*.mbt` files break Linux package compilation. Native Linux builds must use the current moonleaf sibling containing CSV, not an older release sibling.
+## 2026-11-19 · Read-only worker access review
+
+- Audited.176/.177/.178/.179 through existing management SSH, without changing
+  services, access controls, keys, deployment or models. No.191/build-VM action.
+  User explicitly treats192.168.2.x access as expected; do not flag.6's older
+  password sessions as suspicious solely from the address.
+- Nov19 00:00–21:00 China time:4,151 external failed-password records on.176,
+  19,337 on.179; none on.177/.178 in retained records. Automated guessing is
+  ongoing. No successful public-IP login found in the retained histories;
+  do not equate failed attempts or TCP established state with compromise.
+- Large successful SSH volume from.173 on.178/.179 matches management key and
+  system unit lunanexa-glm-control.service/PID1265. Its native observation
+  launches per-target SSH queries, both during2-second monitoring and status
+  requests. This creates70k/day logins per node; no optimization applied here.
+- Evidence/report:output/node-access-audit-20261119/REPORT.md. Retention differs:
+  .178/.179 success journals startNov14, not the full requestedNov12 interval.
+  Helpers stayed in exact /tmp task paths on management, no worker install.
+- Analysis pitfall: current StringView Compare orders by length first. Use
+  lexical_compare for timestamp bounds; ordinary comparison against a short
+  date cutoff wrongly discards longer log lines. Final history-r3 summaries
+  correct that analysis-only bug; earlier history summaries are superseded.
+- Ingress follow-up21:14: bounded header-only tcpdump on.179 enP7s7 captured
+  six public-source SYNs to192.168.2.179:22. All Ethernet source MACs match
+  gateway192.168.2.1/b8:27:c5:bb:5b:f9. This proves upstream wired IPv4 ingress,
+  not website/Wi-Fi/public IPv6 exposure. Exact NAT/DMZ/automatic rule remains
+  unconfirmed; router admin page requires login. Do not claim user published
+  SSH or assume UPnP/DMZ is enabled without reading authenticated settings.
+  Management NAT search found only relevant80/443 web rules, no worker SSH
+  forward. Public32123 is management; limited other-port probes were negative
+  and do not rule out other ports/WANs. No network or service change.
+- User then disabled mappings.120-second.176/.179 header-only captures saw
+  zero new external SYNs and no new external SSH auth events in the window;
+  management SSH to all four and public8443 lead/userHTTP200 remain working.
+  Do not call the short observation exhaustive proof of all closed ports.
+- ExplicitNov5–19 search for192.168.110.x found no SSH/auth/wtmp/btmp/current
+  connection evidence on all four or management.173. Own sudo/zgrep query
+  strings are not connection evidence. .176/.177 journals include the period;
+  .178/.179 detailed journals beginNov14, so earlier successful non-PTY SSH
+  access cannot be excluded from surviving wtmp/btmp alone. Management journal
+  beginsNov6. Evidence and exact coverage are appended to the same report.
+- Month extensionOct19–Nov19: old btmp archives show sustained public guessing
+  in October on.176/.179 and management.173. Retained failed SSH records total
+  473,211/.176,783,526/.179,218,743/.173 (not unique attempts). .177/.178 show
+  only expected LAN failed records. Worker last external failures21:16:39/45;
+  management still under guessing at21:38 and still permits external password
+  auth (root SSH disabled). No access restriction applied during this review.
+- Management successful public-key sources all match this Mac's existing SEMq
+  fingerprint. Own-public-IP password sessions require qualified reporting:
+  .176 has143 onNov9 10:29–16:01, paired with103 management password sessions
+  from.176; management has one own-public-IP password sessionOct26. Likely
+  relay/hairpin maintenance is an inference; original operator is not proved
+  by NAT-masked source alone. No successful login from guessing IPs or unknown
+  key found. .178/.179 earlier detailed-success coverage remains missing.
+- Management rotated auth files use traditional Oct/Nov timestamps; normalize
+  these rather than discarding them as non-ISO. Only172.16–31 is private,
+  not all172.x; initial helper diagnostic label corrected, counts unchanged.
+  Month evidence appended to output/node-access-audit-20261119/REPORT.md.
 
 Read this with `AGENTS.md` before starting work. Keep task evidence in its
 existing documentation and record concrete pitfalls here.
@@ -1252,3 +1309,230 @@ existing documentation and record concrete pitfalls here.
 - The legacy camera migration uses the old wide zoom and center as its signature. A just-fitted Wenyu overview can have the same values, especially with reduced motion. Only migrate the legacy camera and verify the final fit after canvas input has mounted.
 - In a multi-parcel plan the same building number can recur, and postal POIs can disagree with the design sequence. Use phase-qualified controls and check direction, retained support and actual project bounds. Huanyu’s numeric subset admitted an implausible rotation. Its independently identified north/south parcels give the stable fit.
 - A good footprint overlap can still cover a courtyard. Check both outer and inner rings against the image. Prefer a unique reference inside the enclosure for a previously rejected roof. See [regional checks, source and build workflow](science-city-regional-map.md).
+
+## 2026-11-08 · Wenyu road and parcel audit
+
+- Do not equate the planning reference's 75 stable road enclosures with a
+  partition derived from the displayed OSM overlay. Core building placement
+  checks occupied cells and frontage; exterior lots use world-grid candidates.
+- The historical `waterSamplesAfter` mixes river `r`, lake `l` and bridge `b`
+  terrain cells even after excluding ways tagged bridge/tunnel/ford. Keeping
+  the original gentle projection and sampling scheme, strict `r`+`l` counts
+  are 641/1327 (左堤路), 373/1498 (右堤路), and 263/958 (绿道昌平段); bridge-cell
+  counts are 92, 54, 12 separately. These are design-grid samples, not lengths
+  or surveyed encroachments. The public 8443 unshifted overlay and terrain
+  labels matched the local asset hashes during the audit. No map changes.
+
+## 2026-11-11 · Cluster application refresh
+
+- Read `CLUSTER_REFRESH_20261111.md` for source provenance, artifact digests,
+  services, backups and acceptance. The ordinary checkout is on an older
+  mobile-review branch. Latest Town was built from fetched `github/main`
+  ef19c952 in `/Users/kq/Workspace/moontown-release-20261111`; the compatibility
+  fix and HTTP regression are on `codex/cluster-refresh-20261111` there.
+- All three personal launch profiles, the active Desk workspace, public Town,
+  shared Robo and management-node Desk/Town user services were upgraded.
+  Existing volumes, permissions and companion/model services are preserved.
+  GPU nodes, GLM pause state, training and ComfyUI were not changed.
+- A real login exposed `account-sha256:<hex>` versus the browser's canonical
+  `account-<64 hex>` scope contract. Strip the backend digest tag; never relax
+  the frontend storage-isolation guard. Native public tests 3/3, browser scope
+  tests 7/7 and the real signed-in map passed. The stopped allowed GLM model
+  still blocks new private handoffs; that is separate from login success.
+- Preserve legacy nested MoonBit module metadata in snapshots. Preserve base
+  image glibc/loader when adding host-built binaries. A static UI image is not
+  a full Town runtime; package the launcher-required policy templates too.
+- Private build/source/state backups and final inventories are on management
+  node .173 under `moon-public/work/products-20261111-r1`. New shared releases
+  are `moondesk-20261111-r1` and `moontown-20261111-r1`; old releases remain.
+  Keep the first state backup when retrying, and wait for real endpoint health
+  after rollout rather than treating a ready/stale Deployment count as HTTP
+  acceptance. Failed historical Pods are not live state writers.
+
+## 2026-11-17 · Standalone .25 GRUB repair
+
+- User's test machine 192.168.2.25 is not a cluster node. Used management only
+  as an SSH jump; no cluster mutation or enrollment. Old access port 32122
+  closed before key exchange; existing direct management port 32123 worked
+  with its current key/host-key identity. SSH config was not rewritten.
+- Arch ISO was BIOS-booted. Samsung 1TB contains Arch; ZHITAI 2TB Ubuntu
+  22.04.5. Old Arch GRUB default selected an absent Windows EFI UUID; its
+  Ubuntu entries referenced removed kernel files. Ubuntu EFI was empty and
+  its fstab referenced the absent UUID. See
+  `output/grub-repair-20261117/REPAIR.md` and its original-files archive.
+- At user's explicit correction, restored Arch GRUB as primary, with Ubuntu
+  first/default and Arch retained second. `09_ubuntu` uses Ubuntu root UUID
+  and maintained `/boot/vmlinuz` + `/boot/initrd.img` symlinks. Reinstalled
+  Arch native and fallback EFI; restored Ubuntu signed EFI independently and
+  fixed its fstab. All changes backed up on both systems and this Mac.
+- Syntax, EFI type, root UUID, kernel paths and unchanged partition tables
+  passed. All repair mounts unmounted and disks synced. Physical reboot into
+  Samsung UEFI/GRUB then Ubuntu is pending user confirmation; do not claim
+  OS boot acceptance before observing it. BIOS live mode cannot set EFI
+  NVRAM. Do not install BIOS GRUB by altering these GPT partition tables.
+
+### .191 boot and login acceptance
+
+- User confirmed the repaired system booted and received 192.168.2.191. Existing
+  `jiaanguo` Mac SSH key works through the management jump on port 32123.
+  Actual system: QaQ, Ubuntu 22.04.5, 6.8.0-138-generic, UEFI, Ubuntu root and
+  EFI on nvme1n1p2/p1. This supersedes pending OS boot acceptance above.
+- Important: the historical k3s-agent was still enabled and automatically
+  rejoined under `lunanexa-gpu-180` on boot. To keep the machine standalone,
+  cordoned that existing record, then used user-supplied sudo authentication
+  to stop and disable its k3s-agent. Verified inactive/dead/disabled. No join
+  command was issued; no software/data removed. Do not uncordon or enable it
+  without a new user request. Credentials were not saved in project files.
+
+### .191 slow shutdown investigation
+
+- Read-only journals show three consecutive boots spending ~90 seconds on
+  `session-1.scope`, then killing remaining `sogoupinyin-ser` processes.
+  `output/grub-repair-20261117/SHUTDOWN_DIAGNOSIS.md` records timestamps and
+  boundaries; private raw log `previous-boot-shutdown.log` retains evidence.
+- Existing user@.service 5-second timeout does not affect the login session
+  scope's actual 90-second timeout. Do not conflate those units or label the
+  old k3s-agent as this bottleneck: it stopped in ~0.066 seconds in boot -1.
+- Startup separately takes ~56 seconds; it is not shutdown time. No reboot,
+  active input-method kill, package change or timeout change was performed.
+  Next repair should preserve Chinese input and verify the Sogou lifecycle
+  with an actual shutdown/reboot comparison rather than claim it is fixed.
+
+### .191 Sogou lifecycle repair applied; no further testing
+
+- At user's repair request, installed two per-user Sogou units and XDG
+  autostart overrides. Use Type=forking for these daemonizing binaries,
+  PartOf=graphical-session.target and After=dbus.service. Stop watchdog first;
+  call SogouImeServerExit before a Sogou-only 3-second cleanup fallback.
+  Keep vendor packages, dictionaries and global timeouts unchanged.
+- Existing Sogou processes migrated into dedicated user service cgroups.
+  A stop/restart took 4.36 seconds; both services and D-Bus owners recovered,
+  and Fcitx still advertised enabled Chinese Sogou. Internal Sogou threads
+  still required the targeted fallback; do not claim upstream code was fixed.
+- User then explicitly said **no reboot** and **no testing**. No reboot was
+  issued. Stop here; do not resume tests automatically. Whole-machine shutdown
+  and next-login behavior are unverified. See
+  `output/grub-repair-20261117/SHUTDOWN_REPAIR.md` for applied files, backup and
+  rollback. The active desktop/input method and disabled k3s-agent are retained.
+
+### .191 ToDesk desktop crash repair — 2026-11-19
+
+- New explicit user request authorized ToDesk-only diagnosis and repair; prior
+  no-reboot restriction and independent-machine setup remain. Do not resume
+  earlier shutdown tests or operate its build VM as part of this repair.
+- Old 4.8.6.2 daemon was healthy but the frontend segfaulted after ~4 seconds
+  in its bundled HTML renderer (`determine_style`/`window_frame_ctl`). Fresh
+  application data, accessibility-environment and XIM probes did not fix it;
+  missing libraries, disk capacity and Wayland were not the observed cause.
+- User downloaded official Ubuntu amd64 4.9.8.1 after the vendor download's
+  CAPTCHA blocked automation. Transfer SHA-256 matched. Backed up old package
+  files, service, launchers and user state before dpkg upgrade. Private 0600
+  rollback archive on .191: `~/.local/state/todesk-repair-20261119/before-upgrade.tgz`.
+- Installed app remains open with a viewable X11 window; new daemon active,
+  no restart loop, IPC listener present, no repeated old crash signature.
+  End-to-end external remote-control session was not tested. Existing vendor
+  autostart matches the new package; no persistent workaround was required.
+- Only ToDesk was restarted. No reboot, build-guest action, cluster join,
+  global display/input/accessibility change or configuration reset. Verified
+  k3s-agent still inactive/disabled. Full evidence and scope limitations:
+  `output/todesk-repair-20261119/REPORT.md`.
+- User subsequently requested removal of the old installation. Dpkg already
+  replaced 4.8.6.2, so removed its mixed `before-upgrade.tgz` rollback only
+  after successfully extracting config and user data to root-private
+  `~/.local/state/todesk-repair-20261119/preserved-user-data/`. Removed the
+  repair directory's extracted update/control files, fresh diagnostic profile
+  and redundant installer copy. Working 4.9.8.1, current settings, original
+  user state and the Mac's downloaded installer are retained. No restart or
+  reboot; full old binary rollback is no longer available.
+
+### .191 ToDesk lag investigation — 2026-11-19, pending UI control
+
+- Physical DP-4 display already runs 4K/60 Hz. Last completed ToDesk session
+  aggregate instead reports 4480×2520 VP8/libvpx software decode, target60,
+  mean42.055/min28/max50 fps and12 decode stalls/3063ms. These are historical
+  aggregates, not a fresh controlled test. Current connection requests60fps.
+- Decoder thread is busy; GPU decode utilization stayed0% in four samples.
+  Mapped NVIDIA libraries do not establish actual hardware decode. CPU is a
+  homogeneous i9-7900X, not hybrid P/E cores. No scheduling workaround applied.
+- The user is actively controlling this Mac from .191. Avoid a reverse
+  remote-control loop or an unannounced client restart. User cannot find
+  hardware-decoding controls. Native UI tools control only this Mac; explicit
+  permission requested for SSH command-based UI control on .191 and pending.
+- No settings/performance fix applied yet. Do not claim the lag is fixed or
+  guess private configuration keys. Evidence and next action boundary:
+  `output/todesk-repair-20261119/PERFORMANCE.md`.
+- User approved SSH UI control. Installed only xdotool/libxdo3; restored classic
+  ToDesk toolbar to expose Display → Advanced. Renderer acceleration and
+  hardware decode/encode preference were already on, vertical sync off,
+  fixed frame rate off. Clicked fixed-fps control, but final state/performance
+  remains unverified; action log alone is insufficient.
+- User confirmed intentionally closing the remote connection, then could not
+  reopen. Desktop PID104832 stayed hidden and ignored SIGTERM; cleared only
+  its user unit and relaunched installed client as PID140647. Main window is
+  viewable; daemon PID104717 stayed active with zero restarts. No reboot,
+  settings reset or build-VM change. Task's transient client stop timeout is5s.
+- Actual reconnect dialog now says account permits one simultaneous controlling
+  device, occupied by host466932609. Asked permission before disconnecting
+  that different host; no account/purchase/other-session action performed yet.
+  Do not mislabel it a stale .191 connection or claim reconnection is fixed.
+- Follow-up15:01–15:30: user had reconnected and reported10fps. Read actual
+  per-device JSON config and logs. Historical received/decoded fps~42–47,
+  rendered~8–10; do not confuse decoder throughput with presentation rate.
+  GPU driver/GLX is healthy; no driver update. Low-level .xlog is encrypted.
+- Enabled and verified hardware-decode preference (saved PreferHardDecode=1),
+  but live VP8 remained software. A Smooth-quality trial was reverted; final
+  Quality=2/High.60fps target and fixed-frame preference were already enabled.
+- Found logged4480-wide VP8 stream exceeds NVIDIA's documented4096VP8 limit;
+  this is a real incompatibility but not proof of the only fallback reason.
+  At15:26 selected ToDesk remote1920×1080HiDPI, physical3840×2160, preserving
+  HiDPI and High quality. This changes the sending Mac workspace; .191's
+  monitor stays4K60. User then reported60fps. No session/service restart.
+- GPU counters still do not show active ToDesk NVDEC after that result. Report
+  the effective resolution/rendering-load change, not a proved GPU decode fix.
+  No reboot, build-VM/driver/network/account change. Current outcome, exact
+  settings and remaining limits are in the performance report.
+- Follow-up15:42–15:43: a temporary PID-filtered uprobe of ToDesk's log
+  appender captured live plaintext before encrypted xlog writing. Removed the
+  task-owned probe afterward; no process-memory patch or restart. Twelve
+  reports show3840×2160 VP8/libvpx, rendered57–60fps, quality2. Hardware
+  decoding remains inactive; this was steady-state capture, not a captured
+  initialization failure. Root-private raw trace retained in the repair
+  directory on .191; selected metrics saved locally in the report's ui folder.
+- Desktop currently locked (loginctl LockedHint=yes, GNOME ScreenSaver=true).
+  XWD still returns the underlying window, but menus do not receive input.
+  User asked to unlock locally; do not bypass the screen lock or misdiagnose
+  the blocked clicks as an app hang. Need native codec/decode selection test
+  once unlocked, preserving current4K60/High. Build VM untouched.
+- Nov23 recurrence: reconnect log selected2240×1260HiDPI again at11:26
+  (physical4480×2520). User reported21fps, then independently selected
+  1920×1080HiDPI at11:42:57 and confirmed recovery. A subsequent20-second
+  PID-filtered trace verified3840×2160, High/quality2 and four rendered
+  reports59,59,60,60fps. Still VP8/libvpx; GPU decoding is not fixed.
+  No evidence establishes why the larger mode returned or a persistent
+  reconnect fix. Probe removed/absence verified; no restart, VM or cluster
+  operation. Evidence: `output/todesk-repair-20261123/REPORT.md`.
+- Nov23 later: attempted persistence/GPU investigation after explicit request.
+  Saved profile still follows remote (ResolutionX/Y=-1); no config change.
+  Reconnection blocked by one-channel account limit occupied by137815886;
+  did not disconnect it. User then said no testing, requested only restart
+  of .191 ToDesk. Stopped frontend, restarted todeskd.service (PID886370,
+  active/running), relaunched frontend with existing environment. Temporary
+  trace probe removed/absence verified. No VM/reboot/quality/resolution change.
+  Persistence and GPU decode are still unresolved; do not resume tests unless
+  newly requested.
+
+### .191 network activation notifications — 2026-11-23
+
+- Root cause: auto-generated `Wired connection 3` on Ascend PCIe vNIC
+  `endvnic` repeatedly timed out DHCP after45s (`ip-config-unavailable`).
+  udev/modinfo identify Huawei pcivnic host driver, not a build-VM bridge.
+- Backed up original runtime keyfile/profile in root-private
+  `/root/network-repair-20261123/`. Deleted only UUID
+  `684e00ca-6e29-3b6b-b27b-5d77f4ac5ba0`; installed matching-only-endvnic
+  managed=0 config `/etc/NetworkManager/conf.d/90-ignore-ascend-endvnic.conf`.
+  Reloaded conf without restarting NM; set live endvnic unmanaged. Verified
+  loaded config, unmanaged state, deleted profile and intact LAN/robot routes.
+- Do not unload Ascend drivers or delete the interface as a stale VM network.
+  Main192.168.2.191/enp4s0 and robot192.168.55.101/eno1 retained; no VM,
+  reboot, cluster, other-host or ToDesk operation. Evidence/rollback:
+  `output/network-repair-191-20261123/REPORT.md`.

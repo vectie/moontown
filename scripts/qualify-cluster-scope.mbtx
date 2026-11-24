@@ -1,0 +1,43 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/moon-public/work/products-20261111-r1"
+  let repo = root + "/source/moontown/src/account_gateway"
+  let moon = "/home/HwHiAiUser/.moon-new/bin/moon"
+  let tests = @shell.Cmd("env", [
+    "LD_LIBRARY_PATH=/home/HwHiAiUser/coffee-auth-queue-20261107/participation-20261109/jpeg/opt/libjpeg-turbo/lib64:/home/HwHiAiUser/coffee-auth-queue-20261107/image-deps/unpack/usr/lib/x86_64-linux-gnu:/home/HwHiAiUser/coffee-auth-queue-20261107/image-deps/unpack/lib/x86_64-linux-gnu",
+    "prlimit", "--stack=unlimited", moon, "-C", repo, "test", "src/main", "--target",
+    "native", "--filter", "public*", "--jobs", "2", "--diagnostic-limit", "3",
+  ]).output()
+  @fs.write_file(
+    root + "/scope-tests.log",
+    tests.stdout() + tests.stderr(),
+    permission=0o600,
+  )
+  if tests.exit_code() != 0 {
+    eprintln(tests.stderr())
+    eprintln(tests.stdout())
+  }
+  tests.check()
+  println(tests.stdout())
+  let build = @shell.Cmd("prlimit", [
+    "--stack=unlimited", moon, "-C", repo, "build", "src/main", "--target", "native",
+    "--release", "--jobs", "2", "--diagnostic-limit", "3",
+  ]).output()
+  @fs.write_file(
+    root + "/scope-build.log",
+    build.stdout() + build.stderr(),
+    permission=0o600,
+  )
+  if build.exit_code() != 0 {
+    eprintln(build.stderr())
+  }
+  build.check()
+  println("Qualified and built the storage-scope compatibility fix")
+}

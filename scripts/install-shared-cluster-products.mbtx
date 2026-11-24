@@ -1,0 +1,169 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/json",
+}
+
+///|
+async fn command(program : String, args : Array[String]) -> String {
+  let r = @shell.Cmd(program, args).output()
+  if r.exit_code() != 0 {
+    eprintln(r.stderr())
+  }
+  r.check()
+  r.stdout().trim().to_owned()
+}
+
+///|
+async fn main {
+  let root = "/home/HwHiAiUser/moon-public/work/products-20261111-r1"
+  let releases = "/home/HwHiAiUser/moon-public/releases"
+  let desk = releases + "/moondesk-20261111-r1"
+  let town = releases + "/moontown-20261111-r1"
+  guard !@fs.exists(desk) && !@fs.exists(town) else {
+    fail("Shared release paths already exist")
+  }
+  for product in ["moondesk", "moontown"] {
+    let directory = if product == "moondesk" { desk } else { town }
+    let layer = root +
+      "/" +
+      product +
+      (if product == "moontown" { "-oci-r4" } else { "-oci-r2" }) +
+      "/layer"
+    guard @json.parse(
+        @fs.read_file(root + "/" + product + "-canary-result.json").text(),
+      )
+      is { "health": true, "ui_exact": true, .. } else {
+      fail("Private canary required")
+    }
+    @fs.mkdir(directory, permission=0o755)
+    ignore(
+      command("install", [
+        "-m",
+        "755",
+        layer + "/usr/local/bin/" + product,
+        directory + "/" + product,
+      ]),
+    )
+    ignore(
+      command("cp", ["-a", layer + "/opt/" + product + "/ui", directory + "/ui"]),
+    )
+    if product == "moontown" {
+      ignore(
+        command("cp", [
+          "-a",
+          layer + "/opt/moontown/assets",
+          directory + "/assets",
+        ]),
+      )
+    }
+  }
+  let current = releases + "/moontown-current"
+  let old_town = command("readlink", ["-f", current])
+  @fs.write_file(
+    root + "/shared-town-previous.txt",
+    old_town,
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  let unit = "/home/HwHiAiUser/.config/systemd/user/moondesk.service.d/zz-products-20261111.conf"
+  guard !@fs.exists(unit) else { fail("Release drop-in already exists") }
+  @fs.write_file(
+    root + "/shared-units-before.txt",
+    command("systemctl", [
+      "--user", "cat", "moondesk.service", "moontown.service",
+    ]),
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  println(
+    command("systemctl", [
+      "--user", "stop", "moondesk.service", "moontown.service",
+    ]),
+  )
+  try {
+    ignore(
+      command("tar", [
+        "-C",
+        "/home/HwHiAiUser",
+        "-czf",
+        root + "/shared-suite-state.tgz",
+        "moonsuite",
+      ]),
+    )
+    ignore(command("chmod", ["600", root + "/shared-suite-state.tgz"]))
+    @fs.write_file(
+      unit,
+      "[Service]\nExecStart=\nExecStart=" +
+      desk +
+      "/moondesk serve /home/HwHiAiUser/moonsuite --ui " +
+      desk +
+      "/ui --host 127.0.0.1 --port 5001\n",
+      permission=0o600,
+      create_mode=CreateNew,
+    )
+    ignore(command("ln", ["-s", town, current + ".products-new"]))
+    ignore(command("mv", ["-Tf", current + ".products-new", current]))
+    ignore(command("systemctl", ["--user", "daemon-reload"]))
+    ignore(
+      command("systemctl", [
+        "--user", "start", "moondesk.service", "moontown.service",
+      ]),
+    )
+    ignore(
+      command("curl", [
+        "--noproxy", "*", "--fail", "--silent", "--show-error", "--retry", "10",
+        "--retry-delay", "1", "--retry-connrefused", "-H", "Host: 106.39.18.146:5001",
+        "http://127.0.0.1:5001/__moondesk_health",
+      ]),
+    )
+    ignore(
+      command("curl", [
+        "--noproxy", "*", "--fail", "--silent", "--show-error", "--retry", "10",
+        "--retry-delay", "1", "--retry-connrefused", "-H", "Host: 106.39.18.146:5007",
+        "http://127.0.0.1:5007/health",
+      ]),
+    )
+  } catch {
+    err => {
+      ignore(
+        command("systemctl", [
+          "--user", "stop", "moondesk.service", "moontown.service",
+        ]),
+      )
+      if @fs.exists(unit) {
+        @fs.remove(unit)
+      }
+      ignore(command("ln", ["-s", old_town, current + ".rollback-new"]))
+      ignore(command("mv", ["-Tf", current + ".rollback-new", current]))
+      ignore(command("systemctl", ["--user", "daemon-reload"]))
+      ignore(
+        command("systemctl", [
+          "--user", "start", "moondesk.service", "moontown.service",
+        ]),
+      )
+      fail(
+        "Shared services restored to their previous releases: " +
+        err.to_string(),
+      )
+    }
+  }
+  @fs.write_file(
+    root + "/shared-services-live.json",
+    (
+      {
+        "moondesk": desk,
+        "moontown": town,
+        "health": true,
+        "state_backup": "shared-suite-state.tgz",
+      } : Json).stringify(indent=2),
+    permission=0o600,
+  )
+  println(
+    command("systemctl", [
+      "--user", "is-active", "moondesk.service", "moontown.service",
+    ]),
+  )
+}
