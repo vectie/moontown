@@ -306,6 +306,19 @@ QA and formal use UI digest `sha256:da58e8ded58b9a0efbac24855eb2144d52ba092e81ba
 - Nov11 moved management to192.168.2.173 and deployed an account-storage-scope runtime fix. UI releases must inherit the current qualified hosted-apps image and preserve the formal runtime `sha256:5baf6c9c2c930abf41ab2a4ba839adedf7cc80ee624145ccc64954928803325e`; do not deploy an older checkout's runtime during a brand change.
 - Nov11's production assembly omitted `coffee-share.js` and `coffee-qr.js`, leaving the activity loading forever. Both assembly and required-file validation now include them. `coffee-package.test.js` follows the actual coffee ESM dependency graph and checks referenced image assets so a normal build cannot silently omit these files again. HTTP200 on HTML alone is insufficient: verify rendered event name and schedule.
 - The local ffmpeg has no libwebp encoder. Use its lossless PNG encoder for this raster workflow. Browser viewport overrides affect the selected tab; inspect actual innerWidth and reset after acceptance.
+## 2026-11-11 · Cluster refresh compatibility fix
+
+This isolated checkout is on `codex/cluster-refresh-20261111`, based on fetched
+main ef19c952. The production gateway normalizes tagged account digests into
+the existing `account-<64 hex>` browser storage scope; retain the frontend's
+strict isolation guard. Its real HTTP fixture checks the exact scope shape,
+two-account separation, expiry and revocation. Focused native tests passed
+3/3 and browser storage tests 7/7; the real signed-in public map loads.
+The three application services/launch profiles were updated with state and
+rollback backups. GLM remains stopped, so new private launches are still gated
+on model readiness. Full release evidence and digests are recorded in
+`/Users/kq/Workspace/moontown/docs/project/CLUSTER_REFRESH_20261111.md` and
+`/home/HwHiAiUser/moon-public/work/products-20261111-r1` on management node .173.
 
 ## 2026-11-10 · Equal QR codes, vertical prizes and subtle motion
 

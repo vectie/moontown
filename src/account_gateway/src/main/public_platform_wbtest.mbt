@@ -197,6 +197,15 @@ async test "public shell separates anonymous, customers, admin and expiry withou
     let scope_b = read("b", "platform-scope.js").1.text()
     assert_false(scope_a == scope_b)
     assert_true(scope_a.contains("account-"))
+    guard @json.parse(read("a", "account/self.json").1.text())
+      is { "storage_scope": String(storage_scope), .. } else {
+      fail("Account response must identify its browser storage scope")
+    }
+    assert_eq(storage_scope.length(), 72)
+    assert_true(storage_scope.has_prefix("account-"))
+    assert_true(storage_scope[8:].iter().all(c =>
+      (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')))
+    assert_true(scope_a.contains(storage_scope))
     expired.val = true
     let signed_out = read("a", "secret-compute-room.json").1.text()
     assert_false(signed_out.contains("owned-a"))
