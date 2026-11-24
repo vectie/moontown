@@ -97,6 +97,208 @@ QA and formal use UI digest `sha256:da58e8ded58b9a0efbac24855eb2144d52ba092e81ba
 8443 正式入口为 `https://suanli.kechuangfuwu.com:8443/town/`。新公共前缀在 Traefik 转给原服务；旧浏览器链接保留路径、查询参数并 302 跳转。原有身份交接与私有工作区仍使用 `/moontown/workspace/`。公共启动脚本与存储分区同时识别 `/town/`。路由配置见 `deploy/town-public-routes.yaml` 与 `deploy/town-public-legacy.yaml`。
 
 预发布与正式服务使用同一 UI 镜像 `moon/hosted-apps@sha256:9d25d893a03bfd6c529e6c4092bc3c968226765ab6095074f01b886c61453ff2`。管理节点的 `/home/HwHiAiUser/town-public-20261112-r1` 保存上版配置、镜像与发布记录。新包已纳入 4a8e6c65 的咖啡模块；正式网关继续用 5baf6c9c，回滚 UI 应参照 `before-formal.json` 的 initContainer。新首页、校准路网、区域二进制、3D 核心库、品牌图和活动模块均经 8443 实际取回并与发布包逐字节核对。匿名公共账户返回 public，未登录访问私有账户接口返回 401。
+## 2026-11-23 · Borderless motion control
+
+- The owner removed the square frame around play/pause. Keep the control
+  transparent and borderless in normal/hover states, with the44px touch target
+  and keyboard focus indication retained. The later instruction also removes
+  the circle inside the pause glyph: use two16-unit vertical strokes, sharing
+  the play glyph's24px viewBox,1.65 stroke width and round caps.
+- `publish-coffee-borderless-control.mbtx` publishes only versioned CSS and
+  HTML, retaining the v2 main/data modules. Private display backup/receipt root:
+  management `coffee-borderless-control-20261123`.
+- Actual390px acceptance confirmed zero border, transparent background, no
+  shadow,44×44px hit area and working pause/resume. Both public file hashes
+  matched; ten display tests passed. Temporary viewport override was reset.
+- The publisher's `plain-pause` option changes only HTML and retains the v3
+  CSS/v2 modules. Its private backup root adds the `-plain-pause` suffix.
+
+## 2026-11-23 · Third 暖暖 event and fresh group invitation
+
+- `COFFEE_WEEK03_2026-11-23.md` records the approved Nov26/27 schedule, new
+  group QR (valid before Nov30), qualified images, private backups and real
+  generation/upload/review/voting acceptance. The third submission format is
+  static PNG/JPG/WebP; do not imply animated uploads are connected.
+- Keep old event state and draft scopes separate. A canonical shared entry
+  link must route to its archived event before draft restoration. Historical
+  pages read canonical same-event draft aliases without deleting originals.
+- `platform-base.js` prefixes arbitrary same-origin root links with the active
+  app mount. Explicitly preserve the two known public archive routes or
+  `/coffee-week02/` becomes `/town/coffee-week02/`. Private APIs stay scoped.
+- The current hosted-apps base was2bbbb394, not the older documented0e08 image.
+  New third UI digest49c3c989 and second-history digestb0d04c5d preserve that
+  qualified platform and native runtime5baf6c9c. Do not rebuild an older runtime.
+- Formal acceptance data belongs in the isolated third QA event. Its natural
+  windows are closed after two real generations, one external upload, review
+  return/resubmit and six-ballot ranked settlement. Never copy those into formal.
+- The display has a five-minute HTML cache. A newly opened tab may reuse the
+  earlier preview within that window; ordinary Reload revalidates it. Management
+  cannot hairpin the external8443 route reliably; deployment guards use validated
+  internal443 and final verification uses public8443 from the local machine.
+- The owner requested icon-only play/pause controls and fixed random aliases
+  for the eight generated display works, then explicitly replaced the AI补位
+  wording with ordinary 获奖作品/主办方确认获奖. Preserve internal provenance
+  and every existing participant author; these display selections do not create
+  backend contestants or ballots. This supersedes earlier display badge notes.
+  Shared icon geometry comes from MoonVis's play/paused SVGs; touch target
+  remains at least44px. Final display release is coffee-display-controls-20261123-v2.
+
+## 2026-11-23 · Second first-prize Judy product photo
+
+- The latest Downloads photo is the second issue's prize: 朱迪侦探手办. Keep the
+  first issue's 史迪奇公仔 and 魔法使's winning artwork unchanged. Use an issue-
+  specific prize key, not a global replacement of the shared figure sprite.
+- `COFFEE_WEEK02_PRIZE_2026-11-23.md` records the transparent cutout, built-in
+  extraction prompt, PNG and small alpha WebP. The renderer reads the per-prize
+  thumb when present and keeps the existing click-to-enlarge behavior.
+- Publish both new main/data module filenames together, then HTML; preserve
+  warm-cover-v4 and accepted layout-v4 CSS. Release backup/receipt: management
+  `coffee-week02-prize-20261123`. No formal contest state or prize voting changes.
+
+## 2026-11-23 · Annotated pale-tail removal and medium rear tail
+
+- The user marked the lower-left PALE furry crescent as an old tail remnant.
+  V2's supposed torso contour was wrong: remove the whole pointed pale appendage
+  and fill with tabletop, leaving a compact round abdomen and the actual diagonal
+  forearm to the saucer. Do not preserve that crescent as body fur in later edits.
+- The real rear tail was then too short. User requested two modest extensions,
+  then an intermediate length between those two, and explicitly asked to put it
+  on site. Current v4 has one tail at the rear haunch, curving down beside the
+  upper-right saucer above the handle. Do not make a full cup/foreground loop.
+- Current master/derivatives use `warm-cover-original-v4.png`, `warm-cover-v4.webp`
+  and `warm-cover-mobile-v4.webp`. Prompt/lineage: `WARM_COVER_EDIT_2026-11-22.md`.
+  Layout-v4, 暖暖 title, QR bytes, partners and award data stay unchanged.
+  Release backup: management `coffee-warm-tail-mid-20261123`, with the earlier
+  `coffee-warm-tail-clean-20261123` release also retained.
+
+## 2026-11-22 · 暖暖 fluffy fur and tucked tail
+
+- The user rejected the first tail correction: repeated editing lost the original
+  fluffy brushwork and produced a tail longer than the cat. Current v2 edits the
+  ORIGINAL `siamese-cover-original.png` directly, preserving the original face,
+  separated dry-brush fur and feathered edges. Tail is tucked beside the rear
+  haunch; do not reintroduce the foreground ribbon or wrap it around the cup.
+- Current assets are `warm-cover-{original-,mobile-,}v2.{png,webp}` (see the exact
+  paths and built-in prompt in `WARM_COVER_EDIT_2026-11-22.md`). CSS/JS layout-v4,
+  暖暖 title, QR bytes and award data are unchanged. Release backup/receipt is
+  management `coffee-warm-fluffy-20261122`; old versions remain for rollback.
+
+## 2026-11-22 · 暖暖 name and tail correction
+
+- The user renamed the third theme to 暖暖. This supersedes 杯中暹罗 in visible
+  copy, metadata and accessibility names. Keep the preview status and existing
+  accepted layout; only the HTML and two new immutable WebP paths are published.
+- `WARM_COVER_EDIT_2026-11-22.md` records built-in ImageGen lineage, saved master
+  and final prompt. The tail has one visible root at the rear haunch and a free
+  lower-center tip, separated from the head/neck and foreleg. Inspect anatomy in
+  the whole illustration and in the actual page: the footer overlays its bottom.
+- Release backup: management `coffee-warm-20261122`. Previous layout-v4 CSS/JS,
+  logos, QR bytes and all two-issue award data remain unchanged. Formal event
+  state still refers to issue2; this name edit does not open issue3 registration.
+
+## 2026-11-22 · Third-cover layout correction
+
+- The user rejected the third cover's changed layout. Preserve the previous
+  issue's full-screen artwork and single bottom ticker structure; do not shrink
+  the full artwork into a shorter frame with internal side gutters.
+- Restore the footer's8% desktop proportion, with a108px floor for normal
+  browser widths. Give work images, captions and prize leads independent widths;
+  percentage-only thumbnail sizing plus a squeezed flex caption made titles
+  break into tiny fragments. Each caption now has a bounded width, at most two
+  title lines, and full text in its accessible button name and enlargement.
+- Portrait tablets up to1100px need the existing phone flow. The old700px-only
+  breakpoint left a centered miniature landscape canvas with large blank areas
+  at977×1044. All matching responsive blocks must use the same breakpoint,
+  including theme overrides and the direct action.
+- `fix-coffee-third-layout.mbtx` publishes only new versioned CSS/JS and HTML,
+  with a previous-HTML hash guard and retained old resources. No art, award,
+  contest state or QR bytes change. Browser acceptance covers320px,977px and4K.
+  Final live modules are `display-week03-layout-v4.{css,js}`; final HTML hash is
+  `12d502991b84f7c45a1e2a38c11a11ef98f0059b699ed0ff243b394961ba0fdf`.
+  Both layout release roots on management retain their own previous HTML;
+  screenshots are in `output/coffee-third-layout-20261122`. Live4K footer height
+  is172.8px, prize lead149.5px, with no card image/text overlap. Live390px keeps
+  two132px QR frames and a48px CTA. Live977px starts at the page top and shows
+  the direct action instead of a centered miniature TV canvas.
+
+## 2026-11-22 · Third cover and previous-issue award display
+
+- `COFFEE_THIRD_COVER_2026-11-22.md` records the 杯中暹罗 cover, organizer-confirmed
+  second first-prize work, and eight explicitly labelled AI supplements. The user
+  rejected 对味; do not revert that earlier name. No third schedule is implied.
+- Keep one complete static artwork with only the established footer scrolling.
+  Full-resolution winner images load on click. Preserve clear AI labels both on
+  cards and in the enlargement dialog; never create fake votes or contestants.
+- Bound ticker speed in px/s on phones: using viewport-relative speed alone made
+  a390px two-issue cycle take629 seconds. The48px/s floor gives about61 seconds.
+  Query-version both JS and imported data together when adding a shared export.
+- Native voting publication cannot issue three awards with one0-vote entry.
+  This task's organizer-selected display winner must not be represented as a
+  successful vote-based backend settlement. Backups are in management's
+  `coffee-third-cover-20261122{,-final}` directories.
+
+## 2026-11-22 · Siamese coffee visual direction
+
+- The user explicitly rejected animating two isolated cutouts before establishing
+  the artwork. First finish one beautiful, cohesive full-scene master illustration;
+  then develop motion from that scene. Preserve the direct overhead perspective
+  and the two coffee-colored faces. Current still-v2 uses a curled full Siamese
+  cat, paw/saucer contact, latte-art face and a shared morning window shadow.
+- Preview-only image/prompt live in
+  `output/double-half-awake-20261122/still-v2` of the original MoonTown checkout.
+  Current source image is1672×941; do not label it as a finished native4K render.
+  The old local animation preview server was stopped. Formal competition content,
+  permissions and schedule were not changed.
+
+## 2026-11-16 · Second-round transformation release
+
+- Nov19 read-only participation audit: `gallery: []` means no approved public
+  entries, not no submissions. The ordinary QA host has no formal-event manager
+  permission, so its empty review queue cannot answer an all-submissions request.
+  Read the authorized durable event state or an actual formal organizer snapshot;
+  preserve superseded submissions when exporting the complete history.
+- For unsubmitted-work attribution, join generation.actor to an entry.actor and
+  label the result with that submission nickname; do not guess a profile name.
+  Guest actors identify browser histories, not real people. Nov19 export excluded
+  both historical submitted generation IDs and separated the known Nov16 acceptance
+  image: 8 unsubmitted images share the 魔法使 submission account, 4 belong to one
+  unclaimed guest identity, plus 1 assistant acceptance image. All originals were
+  SHA-256 checked against the durable state before delivery.
+- Nov19 the owner explicitly approved the current 魔法使 submission
+  `c14d65aa…` (generation `87796696…`). The existing ordinary QA login correctly
+  lacks formal organizer rights. Owner-authorized maintenance instead used the
+  same exclusive state lock, approval guards, atomic save and review-event fields
+  as the application, with an explicit `operations:owner-confirmed:20261119`
+  audit actor. Backup/receipt: management `coffee-review-20261119-c14d65aa`.
+  Revision46 became47; only this pending entry, its audit event and revision
+  changed. Public API verified one visible approved entry; no account roles,
+  contest times, older entry, generations or votes changed.
+- Nov19 the configured `lunanexa-access` jump at port32122 closed connections.
+  The pre-existing authenticated management jump on port32123 worked with an
+  explicit SSH `-J` override, retaining the destination's existing host-key check.
+  No SSH config, access role, approval state or network protection was changed.
+
+- See `COFFEE_WEEK02_2026-11-16.md` for approved dates, immutable image pins,
+  preserved first-round history, QA evidence and rollback locations. Canonical
+  live route is `/town/`; legacy `/moontown/` redirects preserve acquisition query
+  parameters. Public HTTPS uses 8443; only internal 443 was verified.
+- New event IDs require event-scoped browser drafts/file caches. Preserve legacy
+  first-round keys and migrate non-destructively only into that same event.
+  Snapshot revisions may reset across events: reject stale revisions only within
+  the same event, and invalidate older asynchronous restoration callbacks.
+- `participant_account_ids: []` means deny every registered participant; omit the
+  field for open admission. Explicit manager IDs are scoped to the QA event,
+  never promoted into global organizer roles.
+- Use explicit UTF-8 encoding for HTML bytes: String.to_bytes() yields raw UTF-16
+  here. Hash equality alone cannot prove valid HTML. Check UTF-8 document content
+  and actual browser rendering before considering publication complete.
+- Standalone scripts are formatted with explicit `.mbtx` paths. A whole-workspace
+  `moon fmt` can introduce unrelated formatting churn in local sibling projects.
+  Production assembly requires npm dependencies plus built/assembled Landmark
+  Studio models; do not bypass these checks or remove the preserved studio.
+- Group QR `claim-group-20261116.jpg` is the user's latest supplied image, valid
+  before Nov23, superseding the temporary community-account fallback. The group
+  code and public community-account code have distinct purposes.
 
 ## 2026-11-12 · Supplied Banxing raster and production coffee imports
 

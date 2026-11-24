@@ -1,0 +1,86 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, mode] && ["external", "internal"].contains(mode) else {
+    fail("external|internal")
+  }
+  let external = mode == "external"
+  let root = if external {
+    "output/coffee-third-cover-20261122"
+  } else {
+    "/home/HwHiAiUser/coffee-third-cover-20261122-final"
+  }
+  let origin = "https://suanli.kechuangfuwu.com" +
+    (if external { ":8443" } else { "" })
+  async fn fetch(path : String) -> Bytes {
+    let file = root + "/verify-response.bin"
+    let args = [
+      "--fail", "--silent", "--show-error", "--max-time", "30", "--output", file,
+    ]
+    if !external {
+      args.append(["--resolve", "suanli.kechuangfuwu.com:443:192.168.2.173"])
+    }
+    args.push(origin + path)
+    let response = @shell.Cmd("curl", args).output()
+    response.check()
+    @fs.read_file(file).binary()
+  }
+  guard @json.parse(@fs.read_file(root + "/input/manifest.json").text())
+    is { "files": Array(files), .. } &&
+    files.length() == 41 else {
+    fail("Release manifest missing")
+  }
+  let html = @utf8.decode(fetch("/disp/"))
+  guard html.has_prefix("<!doctype html>") &&
+    html.contains("杯中暹罗") &&
+    html.contains("第三期预告") &&
+    html.contains("display-week03.js") else {
+    fail("Wrong live cover")
+  }
+  for row in files {
+    guard row is { "path": String(path), "sha256": String(expected), .. } &&
+      @crypto.bytes_to_hex_string(@crypto.sha256(fetch("/disp/" + path))) ==
+      expected else {
+      fail("Served asset differs from approved release")
+    }
+  }
+  let contest = @json.parse(@utf8.decode(fetch("/town/api/creative/public")))
+  guard contest
+    is {
+      "event": { "id": "banxing-coffee-20261116", .. },
+      "voting": { "total_votes": 0, .. },
+      "gallery": Array(entries),
+      ..
+    } &&
+    entries.length() == 1 else {
+    fail("Existing contest drifted; inspect")
+  }
+  let receipt : Json = {
+    "mode": mode,
+    "validated_tls": true,
+    "asset_hashes": files.length(),
+    "title": "杯中暹罗",
+    "cover_issue": 3,
+    "confirmed_winners": 4,
+    "ai_supplements": 8,
+    "formal_contest_id": "banxing-coffee-20261116",
+    "formal_public_entries": entries.length(),
+    "formal_votes": 0,
+  }
+  @fs.write_file(
+    root + "/" + mode + "-verification.json",
+    receipt.stringify(indent=2),
+    permission=0o600,
+  )
+  println(receipt.stringify())
+}

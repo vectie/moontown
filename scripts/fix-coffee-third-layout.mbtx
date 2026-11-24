@@ -1,0 +1,147 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, mode] else { fail("stage|ship|apply|verify") }
+  let staging = "output/coffee-third-layout-20261122"
+  let remote = "/home/HwHiAiUser/coffee-third-layout-20261122-final"
+  let live = "/home/HwHiAiUser/moontown-display-20261108/site/disp"
+  let ssh = [
+    "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-J", "HwHiAiUser@106.39.18.146:32123",
+  ]
+  async fn run(cmd : String, args : Array[String]) {
+    @shell.Cmd(cmd, args).output().check()
+  }
+  fn digest(bytes : Bytes) -> String {
+    @crypto.bytes_to_hex_string(@crypto.sha256(bytes))
+  }
+  match mode {
+    "stage" => {
+      if !@fs.exists(staging) {
+        @fs.mkdir(staging, recursive=true)
+      }
+      let rows : Array[Json] = []
+      for
+        (source, target) in [
+          ("display.css", "display-week03-layout-v4.css"),
+          ("display.js", "display-week03-layout-v4.js"),
+          ("index.html", "index.html"),
+        ] {
+        let content = @fs.read_file("src/ui/coffee-display/" + source).text()
+        let transformed = if source == "index.html" {
+          content
+          .replace(
+            old="display.css?v=week03-20261122",
+            new="display-week03-layout-v4.css",
+          )
+          .replace(
+            old="display.js?v=week03-20261122",
+            new="display-week03-layout-v4.js",
+          )
+        } else if source == "display.js" {
+          content.replace(
+            old="./display-awards.js?v=2",
+            new="./display-awards-week03.js?v=2",
+          )
+        } else {
+          content
+        }
+        let bytes = @utf8.encode(transformed)
+        @fs.write_file(staging + "/" + target, bytes)
+        rows.push({ "path": target, "sha256": digest(bytes) })
+      }
+      let manifest : Json = {
+        "previous_html": "1204674506780e11348ad66c83196a6ab57cbc1df14637b39d5d555886df791c",
+        "files": rows,
+      }
+      @fs.write_file(staging + "/manifest.json", manifest.stringify(indent=2))
+      println(manifest.stringify())
+    }
+    "ship" => {
+      run("ssh", ssh + ["lunanexa-management", "mkdir -p " + remote])
+      run(
+        "scp",
+        ssh +
+        [
+          staging + "/manifest.json",
+          staging + "/index.html",
+          staging + "/display-week03-layout-v4.css",
+          staging + "/display-week03-layout-v4.js",
+          "scripts/fix-coffee-third-layout.mbtx",
+          "lunanexa-management:" + remote + "/",
+        ],
+      )
+    }
+    "apply" => {
+      guard @json.parse(@fs.read_file(remote + "/manifest.json").text())
+        is { "previous_html": String(previous), "files": Array(files), .. } else {
+        fail("Manifest")
+      }
+      guard digest(@fs.read_file(live + "/index.html").binary()) == previous else {
+        fail("Live page changed")
+      }
+      // Prepare and verify all modules before the public HTML is switched.
+      for row in files {
+        guard row is { "path": String(path), "sha256": String(hash), .. } &&
+          [
+            "index.html", "display-week03-layout-v4.css", "display-week03-layout-v4.js",
+          ].contains(path) else {
+          fail("Path")
+        }
+        let bytes = @fs.read_file(remote + "/" + path).binary()
+        guard digest(bytes) == hash else { fail("Hash") }
+        let text = @utf8.decode(bytes)
+        guard !text.is_empty() else { fail("Empty file") }
+      }
+      run("cp", ["-n", live + "/index.html", remote + "/before-index.html"])
+      for
+        path in [
+          "display-week03-layout-v4.css", "display-week03-layout-v4.js", "index.html",
+        ] {
+        run("cp", [remote + "/" + path, live + "/" + path + ".next"])
+        run("mv", [live + "/" + path + ".next", live + "/" + path])
+      }
+      @fs.write_file(
+        remote + "/receipt.json",
+        "{\"published\":true,\"only_display\":true}",
+      )
+      println("Published display layout correction")
+    }
+    "verify" => {
+      guard @json.parse(@fs.read_file(staging + "/manifest.json").text())
+        is { "files": Array(files), .. } else {
+        fail("Manifest")
+      }
+      for row in files {
+        guard row is { "path": String(path), "sha256": String(hash), .. } else {
+          fail("Row")
+        }
+        let output = staging + "/verify-response.bin"
+        run("curl", [
+          "--fail",
+          "--silent",
+          "--show-error",
+          "--max-time",
+          "30",
+          "--output",
+          output,
+          "https://suanli.kechuangfuwu.com:8443/disp/" + path,
+        ])
+        guard digest(@fs.read_file(output).binary()) == hash else {
+          fail("Served file differs")
+        }
+      }
+      println("All three changed files match over validated public HTTPS")
+    }
+    _ => fail("Unknown mode")
+  }
+}

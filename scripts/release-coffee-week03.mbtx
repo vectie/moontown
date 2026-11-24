@@ -1,0 +1,689 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+let root = "/home/HwHiAiUser/coffee-week03-20261123"
+
+///|
+let ns = "aigc-acceptance-20260915"
+
+///|
+let registry = "lunanexa-registry.lunanexa-registry.svc.cluster.local:5000/moon/"
+
+///|
+let expected_runtime : String = registry +
+  "moontown-account-gateway@sha256:5baf6c9c2c930abf41ab2a4ba839adedf7cc80ee624145ccc64954928803325e"
+
+///|
+let expected_ui : String = registry +
+  "hosted-apps@sha256:2bbbb394f88a7726b283b3f836fe8fdb71c2378dac83ad08ae96e454a419d544"
+
+///|
+fn object(value : Json) -> Map[String, Json] raise {
+  guard value is Object(fields) else { fail("Expected JSON object") }
+  fields
+}
+
+///|
+fn field(value : Json, name : String) -> Json raise {
+  object(value).get(name).unwrap()
+}
+
+///|
+fn string(value : Json) -> String raise {
+  guard value is String(text) else { fail("Expected string") }
+  text
+}
+
+///|
+async fn command(name : String, args : Array[String]) -> String {
+  let result = @shell.Cmd(name, args).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+async fn kube(args : Array[String]) -> String {
+  command(
+    "kubectl",
+    ["--kubeconfig", "/home/HwHiAiUser/.kube/lunanexa-management", ..args],
+  )
+}
+
+///|
+async fn get(kind : String, name : String) -> Json {
+  @json.parse(kube(["-n", ns, "get", kind, name, "-o", "json"]))
+}
+
+///|
+async fn save(name : String, value : Json) -> Unit {
+  @fs.write_file(
+    root + "/" + name + ".json",
+    value.stringify(indent=2),
+    permission=0o600,
+    create_mode=CreateNew,
+    sync=Full,
+  )
+}
+
+///|
+fn resource(kind : String, name : String, spec : Json) -> Json {
+  {
+    "apiVersion": if kind == "IngressRoute" || kind == "Middleware" {
+      "traefik.io/v1alpha1"
+    } else if kind == "NetworkPolicy" {
+      "networking.k8s.io/v1"
+    } else if kind == "Deployment" {
+      "apps/v1"
+    } else {
+      "v1"
+    },
+    "kind": kind,
+    "metadata": { "name": name, "namespace": ns },
+    "spec": spec,
+  }
+}
+
+///|
+async fn apply(label : String, value : Json) -> Unit {
+  save(label, value)
+  println(kube(["apply", "-f", root + "/" + label + ".json"]))
+}
+
+///|
+async fn event_config(name : String) -> Json {
+  @json.parse(
+    string(field(field(get("configmap", name), "data"), "event.json")),
+  )
+}
+
+///|
+async fn ui_image(archive~ : Bool = false) -> String {
+  let value = @json.parse(
+    @fs.read_file(
+      root + (if archive { "/ui-archive-v2" } else { "/ui-v2" }) + "/image.json",
+    ).text(),
+  )
+  let digest = string(field(value, "image"))
+  guard digest.has_prefix("sha256:") && digest.length() == 71 else {
+    fail("Unqualified UI image")
+  }
+  registry + "hosted-apps@" + digest
+}
+
+///|
+async fn config(qa : Bool) -> Json {
+  let value = event_config("moontown-coffee-week02")
+  let settings = object(value)
+  let brief = object(field(value, "brief"))
+  brief["id"] = if qa {
+    "banxing-coffee-week03-qa-20261123"
+  } else {
+    "banxing-coffee-20261123"
+  }
+  brief["name"] = if qa {
+    "第三期暖暖 · 私有验收，不计正式比赛"
+  } else {
+    "未来社区创意活动 · 第03期：暖暖"
+  }
+  brief["topic"] = "暖暖"
+  brief["scope"] = "围绕「暖暖」进行AI二创：暹罗猫与咖啡、晨光、温柔与陪伴，也可自由发挥。请提交原创或拥有使用权的静态图片；灵感示例不属于参赛作品。"
+  brief["possibility_wiki"] = "./coffee-contest.html#inspiration"
+  brief["first_person_solution"] = "我编辑提示词或直接使用本期默认提示词生成图片，也可以登录后上传其他AI工具创作的作品；选一张投稿，审核通过后进入大众投票。"
+  brief["evaluation_materials"] = [
+    "主办先核对主题、内容和使用权利；审核通过才能参赛。大众投票封榜后按票数决定一、二、三等奖；同票时先公布处理安排。",
+  ]
+  let now = @async.now().reinterpret_as_uint64()
+  settings["opens_ms"] = Json::string((now - 60000UL).to_string())
+  brief["deadline_ms"] = Json::string(
+    (if qa { now + 3600000UL } else { 1795694400000UL }).to_string(),
+  )
+  settings["voting_opens_ms"] = Json::string(
+    (if qa { now + 3660000UL } else { 1795701600000UL }).to_string(),
+  )
+  settings["voting_closes_ms"] = Json::string(
+    (if qa { now + 3900000UL } else { 1795773600000UL }).to_string(),
+  )
+  settings["awards_ms"] = Json::string(
+    (if qa { now + 3905000UL } else { 1795780800000UL }).to_string(),
+  )
+  settings["voting_mode"] = "builtin"
+  settings["guest_generation"] = true
+  settings["participant_quota"] = if qa { 3 } else { 10 }
+  settings["event_quota"] = if qa { 8 } else { 200 }
+  if qa {
+    let old = event_config("moontown-coffee-qa")
+    settings["manager_account_ids"] = field(old, "manager_account_ids")
+    ignore(settings.remove("participant_account_ids"))
+  }
+  value
+}
+
+///|
+async fn configmap(name : String, value : Json, label : String) -> Unit {
+  guard kube([
+      "-n", ns, "get", "configmap", name, "--ignore-not-found", "-o", "name",
+    ])
+    .trim()
+    .is_empty() else {
+    fail("New round config already exists; inspect before replacing")
+  }
+  apply(label, {
+    "apiVersion": "v1",
+    "kind": "ConfigMap",
+    "metadata": { "name": name, "namespace": ns },
+    "data": { "event.json": value.stringify() },
+  })
+}
+
+///|
+async fn clone(qa : Bool) -> Unit {
+  let name = if qa {
+    "moontown-coffee-week03-qa"
+  } else {
+    "moontown-coffee-week02-archive"
+  }
+  let route = if qa { "coffee-week03-qa" } else { "coffee-week02" }
+  guard kube([
+      "-n", ns, "get", "deployment", name, "--ignore-not-found", "-o", "name",
+    ])
+    .trim()
+    .is_empty() else {
+    fail("Clone exists; inspect instead of replacing")
+  }
+  let original = get("deployment", "moontown-platform")
+  save(route + "-source", original)
+  let pod = field(field(field(original, "spec"), "template"), "spec")
+  guard field(pod, "containers") is Array([Object(container)]) &&
+    field(pod, "initContainers") is Array([Object(init)]) &&
+    field(pod, "volumes") is Array(volumes) &&
+    container.get("image") == Some(Json::string(expected_runtime)) &&
+    init.get("image") == Some(Json::string(expected_ui)) else {
+    fail("Qualified production bindings drifted")
+  }
+  init["image"] = Json::string(ui_image(archive=!qa))
+  guard container.get("env") is Some(Array(environment)) else {
+    fail("Missing environment")
+  }
+  container["env"] = Json::array(
+    environment.filter(setting => {
+      !(setting is { "name": String(key), .. } &&
+      key.has_prefix("MOONTOWN_ACTIVITY_"))
+    }),
+  )
+  if qa {
+    for setting in environment {
+      if setting is Object(fields) &&
+        fields.get("name") == Some(Json::string("MOONTOWN_CREATIVE_STATE_FILE")) {
+        fields["value"] = "/creative/banxing-coffee-week03-qa-20261123/state.json"
+      }
+    }
+  }
+  for volume in volumes {
+    let fields = object(volume)
+    if fields.get("name") == Some(Json::string("creative-config")) {
+      fields["configMap"] = { "name": name, "defaultMode": 292 }
+    }
+    if qa && fields.get("name") == Some(Json::string("creative-state")) {
+      fields["persistentVolumeClaim"] = {
+        "claimName": "moontown-coffee-qa-state",
+      }
+    }
+  }
+  configmap(
+    name,
+    if qa {
+      config(true)
+    } else {
+      event_config("moontown-coffee-week02")
+    },
+    route + "-config",
+  )
+  apply(
+    route + "-deployment",
+    resource("Deployment", name, {
+      "replicas": 1,
+      "strategy": {
+        "type": "RollingUpdate",
+        "rollingUpdate": { "maxSurge": 0, "maxUnavailable": 1 },
+      },
+      "selector": { "matchLabels": { "app": name } },
+      "template": { "metadata": { "labels": { "app": name } }, "spec": pod },
+    }),
+  )
+  apply(
+    route + "-service",
+    resource("Service", name, {
+      "selector": { "app": name },
+      "ports": [{ "port": 8082, "targetPort": 8082 }],
+    }),
+  )
+  apply(
+    route + "-rewrite",
+    resource("Middleware", name, {
+      "replacePathRegex": {
+        "regex": "^/" + route + "/(.*)",
+        "replacement": "/moontown/${1}",
+      },
+    }),
+  )
+  apply(
+    route + "-route",
+    resource("IngressRoute", name, {
+      "entryPoints": ["websecure"],
+      "tls": { "secretName": "lunanexa-public-suanli-tls" },
+      "routes": [
+        {
+          "kind": "Rule",
+          "match": "Host(`suanli.kechuangfuwu.com`) && PathPrefix(`/" +
+          route +
+          "/`)",
+          "priority": 220,
+          "middlewares": [{ "name": name }],
+          "services": [{ "name": name, "port": 8082 }],
+        },
+      ],
+    }),
+  )
+  guard @json.parse(kube(["-n", ns, "get", "networkpolicy", "-o", "json"]))
+    is { "items": Array(policies), .. } else {
+    fail("Missing policies")
+  }
+  for policy in policies {
+    let spec = field(policy, "spec")
+    if field(spec, "podSelector")
+      is { "matchLabels": { "app": "moontown-platform", .. }, .. } {
+      object(spec)["podSelector"] = { "matchLabels": { "app": name } }
+      let oldname = string(field(field(policy, "metadata"), "name"))
+      apply(
+        route + "-network-" + oldname,
+        resource("NetworkPolicy", route + "-" + oldname, spec),
+      )
+    }
+  }
+  if qa {
+    apply(route + "-provider", {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": { "name": name, "namespace": "lunanexa" },
+      "spec": {
+        "podSelector": { "matchLabels": { "app": "image-adapter" } },
+        "policyTypes": ["Ingress"],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": { "kubernetes.io/metadata.name": ns },
+                },
+                "podSelector": { "matchLabels": { "app": name } },
+              },
+            ],
+            "ports": [{ "protocol": "TCP", "port": 18991 }],
+          },
+        ],
+      },
+    })
+  }
+  println("Prepared " + route + "; original state/configuration preserved")
+}
+
+///|
+async fn backup_previous() -> Unit {
+  let pvc = get("pvc", "moontown-creative-state")
+  let pv = @json.parse(
+    kube([
+      "get",
+      "pv",
+      string(field(field(pvc, "spec"), "volumeName")),
+      "-o",
+      "json",
+    ]),
+  )
+  let attributes = field(field(field(pv, "spec"), "csi"), "volumeAttributes")
+  let share = string(field(attributes, "share"))
+  let subdir = string(field(attributes, "subDir"))
+  guard share == "/data/lunanexa-workspaces" &&
+    subdir.has_prefix(ns + "/moontown-creative-state/") &&
+    !subdir.contains("..") else {
+    fail("Unexpected state storage")
+  }
+  let directory = share + "/" + subdir
+  guard !@fs.exists(directory + "/banxing-coffee-20261123/state.json") else {
+    fail("Third-round state already exists; do not reset it")
+  }
+  let path = directory + "/banxing-coffee-20261116/state.json"
+  let lock = @fs.open(
+    path + ".lock",
+    mode=ReadWrite,
+    create_mode=OpenOrCreate,
+    permission=0o600,
+  )
+  defer lock.close()
+  lock.lock(Exclusive)
+  defer lock.unlock()
+  let bytes = @fs.read_file(path).binary()
+  guard @json.parse(@fs.read_file(path).text())
+    is {
+      "challenge_id": "banxing-coffee-20261116",
+      "generations": Array(jobs),
+      ..
+    } &&
+    jobs.all(job => job is { "state": "completed" | "failed", .. }) else {
+    fail("Previous-round jobs are not terminal")
+  }
+  @fs.write_file(
+    root + "/week02-state-before.json",
+    bytes,
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  ignore(
+    command("tar", [
+      "-C",
+      directory,
+      "-czf",
+      root + "/week02-before.tgz",
+      "banxing-coffee-20261116",
+    ]),
+  )
+  @fs.chmod(root + "/week02-before.tgz", 0o600)
+  @fs.mkdir(root + "/restore-check", permission=0o700)
+  ignore(
+    command("tar", [
+      "-xzf",
+      root + "/week02-before.tgz",
+      "-C",
+      root + "/restore-check",
+    ]),
+  )
+  ignore(
+    command("diff", [
+      "-qr",
+      directory + "/banxing-coffee-20261116",
+      root + "/restore-check/banxing-coffee-20261116",
+    ]),
+  )
+  save("week02-backup-receipt", {
+    "state_path": path,
+    "sha256": @crypto.bytes_to_hex_string(@crypto.sha256(bytes)),
+    "restore_exact": true,
+  })
+}
+
+///|
+async fn formal() -> Unit {
+  let before = get("deployment", "moontown-platform")
+  let spec = field(field(field(before, "spec"), "template"), "spec")
+  guard field(spec, "containers")
+    is Array([{ "image": String(runtime), "env": Array(environment), .. }]) &&
+    runtime == expected_runtime &&
+    field(spec, "initContainers") is Array([{ "image": String(old), .. }]) &&
+    old == expected_ui &&
+    field(spec, "volumes") is Array(volumes) else {
+    fail("Formal deployment drift")
+  }
+  save("formal-before", before)
+  save("week02-config-before", get("configmap", "moontown-coffee-week02"))
+  backup_previous()
+  configmap("moontown-coffee-week03", config(false), "week03-config")
+  let patch : Array[Json] = [
+    {
+      "op": "test",
+      "path": "/metadata/resourceVersion",
+      "value": field(field(before, "metadata"), "resourceVersion"),
+    },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/containers/0/image",
+      "value": expected_runtime,
+    },
+    {
+      "op": "test",
+      "path": "/spec/template/spec/initContainers/0/image",
+      "value": expected_ui,
+    },
+    {
+      "op": "replace",
+      "path": "/spec/template/spec/initContainers/0/image",
+      "value": ui_image(),
+    },
+  ]
+  let mut state_binding = false
+  for index, setting in environment {
+    if setting
+      is {
+        "name": "MOONTOWN_CREATIVE_STATE_FILE",
+        "value": "/creative/banxing-coffee-20261116/state.json",
+        ..
+      } {
+      patch.push({
+        "op": "test",
+        "path": "/spec/template/spec/containers/0/env/\{index}/value",
+        "value": "/creative/banxing-coffee-20261116/state.json",
+      })
+      patch.push({
+        "op": "replace",
+        "path": "/spec/template/spec/containers/0/env/\{index}/value",
+        "value": "/creative/banxing-coffee-20261123/state.json",
+      })
+      state_binding = true
+    }
+  }
+  let mut config_binding = false
+  for index, volume in volumes {
+    if volume
+      is {
+        "name": "creative-config",
+        "configMap": { "name": "moontown-coffee-week02", .. },
+        ..
+      } {
+      patch.push({
+        "op": "test",
+        "path": "/spec/template/spec/volumes/\{index}/configMap/name",
+        "value": "moontown-coffee-week02",
+      })
+      patch.push({
+        "op": "replace",
+        "path": "/spec/template/spec/volumes/\{index}/configMap/name",
+        "value": "moontown-coffee-week03",
+      })
+      config_binding = true
+    }
+  }
+  guard state_binding && config_binding else {
+    fail("Previous-round bindings missing")
+  }
+  save("formal-patch", Json::array(patch))
+  println(
+    kube([
+      "-n",
+      ns,
+      "patch",
+      "deployment",
+      "moontown-platform",
+      "--type=json",
+      "--patch-file",
+      root + "/formal-patch.json",
+    ]),
+  )
+}
+
+///|
+async fn vote_window() -> Unit {
+  let name = "moontown-coffee-week03-qa"
+  let before = get("configmap", name)
+  let raw = string(field(field(before, "data"), "event.json"))
+  let value = @json.parse(raw)
+  guard field(field(value, "brief"), "id") ==
+    Json::string("banxing-coffee-week03-qa-20261123") else {
+    fail("QA only")
+  }
+  let now = @async.now().reinterpret_as_uint64()
+  object(field(value, "brief"))["deadline_ms"] = Json::string(
+    (now + 30000UL).to_string(),
+  )
+  object(value)["voting_opens_ms"] = Json::string((now + 60000UL).to_string())
+  object(value)["voting_closes_ms"] = Json::string((now + 180000UL).to_string())
+  object(value)["awards_ms"] = Json::string((now + 185000UL).to_string())
+  save("qa-vote-window-before", before)
+  let patch : Json = [
+    {
+      "op": "test",
+      "path": "/metadata/resourceVersion",
+      "value": field(field(before, "metadata"), "resourceVersion"),
+    },
+    { "op": "test", "path": "/data/event.json", "value": raw },
+    { "op": "replace", "path": "/data/event.json", "value": value.stringify() },
+  ]
+  println(
+    kube([
+      "-n",
+      ns,
+      "patch",
+      "configmap",
+      name,
+      "--type=json",
+      "-p",
+      patch.stringify(),
+    ]),
+  )
+  println(kube(["-n", ns, "rollout", "restart", "deployment", name]))
+  println(
+    kube(["-n", ns, "rollout", "status", "deployment/" + name, "--timeout=55s"]),
+  )
+}
+
+///|
+async fn refresh_ui() -> Unit {
+  for
+    (name, old, archive) in [
+      (
+        "moontown-coffee-week03-qa", "sha256:032a9b2c97912db60b0f7a897de89ce4683186ea77a66a1e07b2419292d10236",
+        false,
+      ),
+      (
+        "moontown-coffee-week02-archive", "sha256:63d4c0225655a898c20b541bfb212b811c8400a29bce30443ce486acff5988f8",
+        true,
+      ),
+    ] {
+    let before = get("deployment", name)
+    let spec = field(field(field(before, "spec"), "template"), "spec")
+    guard field(spec, "initContainers")
+      is Array([{ "image": String(image), .. }]) &&
+      image == registry + "hosted-apps@" + old else {
+      fail("Clone UI drift")
+    }
+    save(name + "-ui-v2-before", before)
+    let patch : Json = [
+      {
+        "op": "test",
+        "path": "/metadata/resourceVersion",
+        "value": field(field(before, "metadata"), "resourceVersion"),
+      },
+      {
+        "op": "test",
+        "path": "/spec/template/spec/initContainers/0/image",
+        "value": image,
+      },
+      {
+        "op": "replace",
+        "path": "/spec/template/spec/initContainers/0/image",
+        "value": ui_image(archive~),
+      },
+    ]
+    println(
+      kube([
+        "-n",
+        ns,
+        "patch",
+        "deployment",
+        name,
+        "--type=json",
+        "-p",
+        patch.stringify(),
+      ]),
+    )
+    println(
+      kube([
+        "-n",
+        ns,
+        "rollout",
+        "status",
+        "deployment/" + name,
+        "--timeout=55s",
+      ]),
+    )
+  }
+}
+
+///|
+async fn verify() -> Unit {
+  let receipt = @json.parse(
+    @fs.read_file(root + "/week02-backup-receipt.json").text(),
+  )
+  let path = string(field(receipt, "state_path"))
+  guard path.contains("/banxing-coffee-20261116/state.json") &&
+    @crypto.bytes_to_hex_string(@crypto.sha256(@fs.read_file(path).binary())) ==
+    string(field(receipt, "sha256")) else {
+    fail("Previous event state changed")
+  }
+  let deployed = get("deployment", "moontown-platform")
+  let spec = field(field(field(deployed, "spec"), "template"), "spec")
+  guard field(spec, "containers") is Array([{ "image": String(runtime), .. }]) &&
+    runtime == expected_runtime &&
+    field(spec, "initContainers") is Array([{ "image": String(ui), .. }]) &&
+    ui == ui_image() else {
+    fail("Unexpected formal image")
+  }
+  let internal = @json.parse(
+    command("curl", [
+      "--fail", "--silent", "--show-error", "--noproxy", "*", "--max-time", "20",
+      "--resolve", "suanli.kechuangfuwu.com:443:192.168.2.173", "https://suanli.kechuangfuwu.com/town/api/creative/public",
+    ]),
+  )
+  guard internal
+    is {
+      "event": {
+        "id": "banxing-coffee-20261123",
+        "topic": "暖暖",
+        "provider_ready": true,
+        ..
+      },
+      ..
+    } else {
+    fail("Internal canonical event differs")
+  }
+  save("verification-receipt", {
+    "previous_state_exact": true,
+    "qualified_runtime_preserved": true,
+    "third_ui_pinned": true,
+    "internal_https_third_event": true,
+  })
+  println(
+    "Internal HTTPS third event ready; second state is byte-for-byte preserved, runtime and UI pins match",
+  )
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, mode] else {
+    fail("qa|archive|formal|vote-window|refresh-ui|verify")
+  }
+  match mode {
+    "qa" => clone(true)
+    "archive" => clone(false)
+    "formal" => formal()
+    "vote-window" => vote_window()
+    "refresh-ui" => refresh_ui()
+    "verify" => verify()
+    _ => fail("Unknown release phase")
+  }
+}

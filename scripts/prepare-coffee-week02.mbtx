@@ -1,0 +1,67 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.5.5/crypto",
+  "PaiGack/moonbitqrcode@0.1.0/src/lib",
+}
+
+///|
+async fn main {
+  let root = "output/coffee-week02-20261116"
+  if !@fs.exists(root + "/input/coffee") {
+    @fs.mkdir(root + "/input/coffee", recursive=true, permission=0o700)
+  }
+  let rows : Array[Json] = []
+  for
+    name in [
+      "coffee-contest.html", "coffee-contest.js", "coffee-contest.css", "coffee-themes.js",
+      "coffee-share.js", "coffee-drafts.js", "coffee-claim.js", "coffee/transformation-reference.webp",
+      "coffee/prize-figure-real.webp", "coffee/prize-tote-real.webp", "coffee/claim-group-20261116.jpg",
+    ] {
+    let source = if name.has_prefix("coffee/") {
+      "src/ui/assets/" + name
+    } else {
+      "src/ui/rabbita-town/" + name
+    }
+    let bytes = @fs.read_file(source).binary()
+    @fs.write_file(root + "/input/" + name, bytes, permission=0o644)
+    rows.push({
+      "path": name,
+      "sha256": @crypto.bytes_to_hex_string(@crypto.sha256(bytes)),
+    })
+  }
+  @fs.write_file(
+    root + "/input/manifest.json",
+    ({ "files": rows } : Json).stringify(),
+  )
+  let url = "https://suanli.kechuangfuwu.com:8443/town/coffee-contest.html?source=display-qr&campaign=banxing-02"
+  let code = @lib.encode_medium(url)
+  let paths : Array[String] = []
+  for y in 0..<code.size() {
+    for x in 0..<code.size() {
+      if code.is_black(x, y) {
+        paths.push("M\{x+4} \{y+4}h1v1h-1z")
+      }
+    }
+  }
+  @fs.write_file(
+    "src/ui/coffee-display/assets/participate-v7.svg",
+    "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 \{code.size()+8} \{code.size()+8}\" width=\"512\" height=\"512\" shape-rendering=\"crispEdges\"><title>" +
+    url.replace(old="&", new="&amp;") +
+    "</title><rect width=\"100%\" height=\"100%\" fill=\"white\"/><path fill=\"black\" d=\"" +
+    paths.join("") +
+    "\"/></svg>",
+  )
+  @shell.Cmd("tar", [
+    "--no-xattrs",
+    "-czf",
+    root + "/input.tgz",
+    "-C",
+    root + "/input",
+    ".",
+  ]).run()
+  println("Prepared second-round UI and exact canonical participation QR")
+}

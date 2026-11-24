@@ -1,0 +1,187 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, mode] else { fail("assets|stage|ship|apply|verify") }
+  let source = "src/ui/coffee-display"
+  let staging = "output/coffee-warm-tail-mid-20261123"
+  let remote = "/home/HwHiAiUser/coffee-warm-tail-mid-20261123"
+  let live = "/home/HwHiAiUser/moontown-display-20261108/site/disp"
+  let files = [
+    "assets/warm-cover-v4.webp", "assets/warm-cover-mobile-v4.webp", "index.html",
+  ]
+  let ssh = [
+    "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-J", "HwHiAiUser@106.39.18.146:32123",
+  ]
+  async fn run(cmd : String, args : Array[String]) {
+    @shell.Cmd(cmd, args).output().check()
+  }
+  fn digest(bytes : Bytes) -> String {
+    @crypto.bytes_to_hex_string(@crypto.sha256(bytes))
+  }
+  match mode {
+    "assets" => {
+      let original = source + "/assets/warm-cover-original-v4.png"
+      run("cwebp", [
+        "-quiet",
+        "-q",
+        "94",
+        original,
+        "-o",
+        source + "/assets/warm-cover-v4.webp",
+      ])
+      run("cwebp", [
+        "-quiet",
+        "-q",
+        "91",
+        "-resize",
+        "960",
+        "0",
+        original,
+        "-o",
+        source + "/assets/warm-cover-mobile-v4.webp",
+      ])
+    }
+    "stage" => {
+      if !@fs.exists(staging + "/assets") {
+        @fs.mkdir(staging + "/assets", recursive=true)
+      }
+      let rows : Array[Json] = []
+      for path in files {
+        let data = @fs.read_file(source + "/" + path)
+        let bytes = if path == "index.html" {
+          let html = data
+            .text()
+            .replace(
+              old="display.css?v=week03-20261122",
+              new="display-week03-layout-v4.css",
+            )
+            .replace(
+              old="display.js?v=week03-20261122",
+              new="display-week03-layout-v4.js",
+            )
+          guard html.contains("<h1>暖暖</h1>") &&
+            !html.contains("杯中暹罗") else {
+            fail("Stale theme")
+          }
+          @utf8.encode(html)
+        } else {
+          data.binary()
+        }
+        @fs.write_file(staging + "/" + path, bytes)
+        rows.push({
+          "path": path,
+          "bytes": bytes.length(),
+          "sha256": digest(bytes),
+        })
+      }
+      let manifest : Json = {
+        "previous_html": "c93df4dff043669840ed0e8a7008067144da8af72d256e7f2f67f8915bb6ae9a",
+        "only_display": true,
+        "title": "暖暖",
+        "files": rows,
+      }
+      @fs.write_file(staging + "/manifest.json", manifest.stringify(indent=2))
+      println(manifest.stringify())
+    }
+    "ship" => {
+      run(
+        "ssh",
+        ssh + ["lunanexa-management", "mkdir -p " + remote + "/assets"],
+      )
+      run(
+        "scp",
+        ssh +
+        [
+          staging + "/manifest.json",
+          staging + "/index.html",
+          "scripts/release-coffee-warm.mbtx",
+          "lunanexa-management:" + remote + "/",
+        ],
+      )
+      run(
+        "scp",
+        ssh +
+        [
+          staging + "/assets/warm-cover-v4.webp",
+          staging + "/assets/warm-cover-mobile-v4.webp",
+          "lunanexa-management:" + remote + "/assets/",
+        ],
+      )
+    }
+    "apply" => {
+      guard @json.parse(@fs.read_file(remote + "/manifest.json").text())
+        is { "previous_html": String(previous), "files": Array(rows), .. } &&
+        rows.length() == files.length() else {
+        fail("Manifest")
+      }
+      guard digest(@fs.read_file(live + "/index.html").binary()) == previous else {
+        fail("Live HTML changed")
+      }
+      for row in rows {
+        guard row is { "path": String(path), "sha256": String(hash), .. } &&
+          files.contains(path) else {
+          fail("Path")
+        }
+        let bytes = @fs.read_file(remote + "/" + path).binary()
+        guard digest(bytes) == hash else { fail("Hash") }
+        if path == "index.html" {
+          let html = @utf8.decode(bytes)
+          guard html.contains("<h1>暖暖</h1>") &&
+            html.contains("display-week03-layout-v4.css") else {
+            fail("HTML")
+          }
+        }
+      }
+      run("cp", ["-n", live + "/index.html", remote + "/before-index.html"])
+      // Immutable new image paths first, HTML last; retain all previous art and layout resources.
+      for path in files {
+        run("cp", [remote + "/" + path, live + "/" + path + ".next"])
+        run("mv", [live + "/" + path + ".next", live + "/" + path])
+      }
+      @fs.write_file(
+        remote + "/receipt.json",
+        "{\"published\":true,\"title\":\"暖暖\",\"layout_changed\":false,\"contest_state_changed\":false}",
+      )
+      println(
+        "Published 暖暖 with corrected cat anatomy; existing layout retained",
+      )
+    }
+    "verify" => {
+      guard @json.parse(@fs.read_file(staging + "/manifest.json").text())
+        is { "files": Array(rows), .. } else {
+        fail("Manifest")
+      }
+      for row in rows {
+        guard row is { "path": String(path), "sha256": String(hash), .. } else {
+          fail("Row")
+        }
+        let output = staging + "/verify-response.bin"
+        run("curl", [
+          "--fail",
+          "--silent",
+          "--show-error",
+          "--max-time",
+          "30",
+          "--output",
+          output,
+          "https://suanli.kechuangfuwu.com:8443/disp/" + path,
+        ])
+        guard digest(@fs.read_file(output).binary()) == hash else {
+          fail("Served file differs")
+        }
+      }
+      println("Three warm-cover release files match over validated HTTPS")
+    }
+    _ => fail("Unknown mode")
+  }
+}

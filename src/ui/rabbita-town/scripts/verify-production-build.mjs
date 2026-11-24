@@ -15,8 +15,10 @@ const distRoot = path.join(frontendRoot, 'dist')
 // Keep their release cost inside a narrow, explicit ceiling.
 // Add the preserved offline Three.js studio and its pinned vendor modules.
 // The complete studio, street-registered building tiles and gzip sidecars
-// share the existing town release ceiling.
-const MAX_DIST_BYTES = 73 * 1024 * 1024
+// share the town release ceiling with the current coffee theme and awards.
+// Round 2 adds a compressed theme reference, two real prize cutouts and the
+// exact new claim QR. Include their sidecars inside a further 1 MiB ceiling.
+const MAX_DIST_BYTES = 74 * 1024 * 1024
 const REQUIRED_BROWSER_FILES = [
   'landmark-studio/wlxk.html',
   'index.html',
@@ -30,6 +32,7 @@ const REQUIRED_BROWSER_FILES = [
   'coffee-drafts.js',
   'coffee-claim.js',
   'coffee-share.js',
+  'coffee-themes.js',
   'coffee-qr.js',
   'coffee-contest.css',
   'coffee-vote-preview.html',

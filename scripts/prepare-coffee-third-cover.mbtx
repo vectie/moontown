@@ -1,0 +1,230 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/x@0.5.5/crypto",
+  "PaiGack/moonbitqrcode@0.1.0/src/lib",
+}
+
+///|
+let base = "src/ui/coffee-display"
+
+///|
+let assets = "src/ui/coffee-display/assets"
+
+///|
+let generated = "/Users/kq/.codex/generated_images/01a10af2-c8fb-7663-b4df-2fd1b2c9d71c/"
+
+///|
+let media : ReadOnlyArray[String] = [
+  "siamese-cover.webp", "siamese-cover-mobile.webp", "banxing-logo-20261112.png",
+  "company-wordmark.png", "group-mark-raster-v5.png", "vector-sticker-wordmark.svg",
+  "participate-week03.svg", "community-qr.png", "prizes-v1.webp", "prize-figure-real.png",
+  "prize-figure-real.webp", "prize-tote-real.png", "prize-tote-real.webp", "work-autumn.png",
+  "work-autumn-thumb.webp", "work-spoon.png", "work-spoon-thumb.webp", "work-forest.png",
+  "work-forest-thumb.webp", "award-second-ink.png", "award-second-ink-thumb.webp",
+  "award-second-op.png", "award-second-op-thumb.webp", "award-third-line.png", "award-third-line-thumb.webp",
+  "week02-winner.png", "week02-winner-thumb.webp", "week02-refraction.png", "week02-refraction-thumb.webp",
+  "week02-butterfly.png", "week02-butterfly-thumb.webp", "week02-storm.png", "week02-storm-thumb.webp",
+  "week02-cyanotype.png", "week02-cyanotype-thumb.webp", "week02-origami.png", "week02-origami-thumb.webp",
+]
+
+///|
+async fn prepare_assets() -> Unit {
+  let cover = "/Users/kq/Workspace/moontown/output/double-half-awake-20261122/still-v2/double-half-awake-full-scene.png"
+  @fs.write_file(
+    assets + "/siamese-cover-original.png",
+    @fs.read_file(cover).binary(),
+  )
+  @shell.Cmd("cwebp", [
+    "-quiet",
+    "-q",
+    "94",
+    cover,
+    "-o",
+    assets + "/siamese-cover.webp",
+  ]).run()
+  @shell.Cmd("cwebp", [
+    "-quiet",
+    "-q",
+    "91",
+    "-resize",
+    "960",
+    "0",
+    cover,
+    "-o",
+    assets + "/siamese-cover-mobile.webp",
+  ]).run()
+  for
+    (name, source) in [
+      (
+        "winner", "/Users/kq/Downloads/半醒咖啡-第二期全部投稿-20261119/2-待审核.png",
+      ),
+      (
+        "refraction",
+        generated + "exec-7f694c20-de2c-4182-b0ca-b730378cf516.png",
+      ),
+      ("butterfly", generated + "exec-80463f9e-4823-445b-854f-5a2b5b4555f4.png"),
+      ("storm", generated + "exec-2ac8120e-2168-4b73-9e33-242d7efe6d45.png"),
+      ("cyanotype", generated + "exec-671460cf-b66a-4058-ba9d-0738afbbccdd.png"),
+      ("origami", generated + "exec-7a8fcf53-960d-4f31-89bd-c434addda3b1.png"),
+    ] {
+    @fs.write_file(
+      assets + "/week02-" + name + ".png",
+      @fs.read_file(source).binary(),
+    )
+    @shell.Cmd("cwebp", [
+      "-quiet",
+      "-q",
+      "85",
+      "-resize",
+      "384",
+      "0",
+      source,
+      "-o",
+      assets + "/week02-" + name + "-thumb.webp",
+    ]).run()
+  }
+  let url = "https://suanli.kechuangfuwu.com:8443/town/coffee-contest.html?source=display-qr&campaign=coffee-03"
+  let qr = @lib.encode_medium(url)
+  let paths : Array[String] = []
+  for y in 0..<qr.size() {
+    for x in 0..<qr.size() {
+      if qr.is_black(x, y) {
+        paths.push("M\{x+4} \{y+4}h1v1h-1z")
+      }
+    }
+  }
+  @fs.write_file(
+    assets + "/participate-week03.svg",
+    "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 \{qr.size()+8} \{qr.size()+8}\" width=\"512\" height=\"512\" shape-rendering=\"crispEdges\"><title>" +
+    url.replace(old="&", new="&amp;") +
+    "</title><rect width=\"100%\" height=\"100%\" fill=\"white\"/><path fill=\"black\" d=\"" +
+    paths.join("") +
+    "\"/></svg>",
+  )
+  println(
+    "Prepared whole-scene cover, one confirmed winner, five labelled AI supplements and exact QR",
+  )
+}
+
+///|
+async fn stage() -> Unit {
+  let root = "output/coffee-third-cover-20261122/input"
+  if !@fs.exists(root + "/assets") {
+    @fs.mkdir(root + "/assets", recursive=true, permission=0o700)
+  }
+  let files : Array[Json] = []
+  for
+    (source, target) in [
+      ("index.html", "index.html"),
+      ("display.css", "display-week03.css"),
+      ("display.js", "display-week03.js"),
+      ("display-awards.js", "display-awards-week03.js"),
+      ..media.map(name => ("assets/" + name, "assets/" + name)),
+    ] {
+    let data = @fs.read_file(base + "/" + source)
+    let bytes = if source == "index.html" {
+      @utf8.encode(
+        data
+        .text()
+        .replace(old="display.css?v=week03-20261122", new="display-week03.css")
+        .replace(
+          old="display.js?v=week03-20261122",
+          new="display-week03.js?v=2",
+        ),
+      )
+    } else if source == "display.js" {
+      @utf8.encode(
+        data
+        .text()
+        .replace(
+          old="'./display-awards.js?v=2'",
+          new="'./display-awards-week03.js?v=2'",
+        ),
+      )
+    } else {
+      data.binary()
+    }
+    @fs.write_file(root + "/" + target, bytes, permission=0o644)
+    files.push({
+      "path": target,
+      "bytes": bytes.length(),
+      "sha256": @crypto.bytes_to_hex_string(@crypto.sha256(bytes)),
+    })
+  }
+  @fs.write_file(
+    root + "/manifest.json",
+    (
+      {
+        "expected_previous_html": "60bdd0dd0235ff3751101d8208a7e279361853dd9f33c12cc181363c1808db00",
+        "files": files,
+        "title": "杯中暹罗",
+        "issue": 3,
+        "only_display": true,
+      } : Json).stringify(indent=2),
+  )
+  @shell.Cmd("tar", [
+    "--no-xattrs", "-czf", "output/coffee-third-cover-20261122/input.tgz", "-C",
+    root, ".",
+  ]).run()
+  println(
+    "Staged " +
+    files.length().to_string() +
+    " display files with SHA-256 manifest",
+  )
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, mode] else { fail("assets|stage|ship") }
+  match mode {
+    "assets" => prepare_assets()
+    "stage" => stage()
+    "ship" => {
+      let jump = "HwHiAiUser@106.39.18.146:32123"
+      let root = "/home/HwHiAiUser/coffee-third-cover-20261122-final"
+      @shell.Cmd("ssh", [
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "StrictHostKeyChecking=yes",
+        "-J",
+        jump,
+        "lunanexa-management",
+        "mkdir -p " + root + "/input",
+      ]).run()
+      @shell.Cmd("scp", [
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "StrictHostKeyChecking=yes",
+        "-J",
+        jump,
+        "scripts/publish-coffee-third-cover.mbtx",
+        "scripts/verify-coffee-third-cover.mbtx",
+        "output/coffee-third-cover-20261122/input.tgz",
+        "lunanexa-management:" + root + "/",
+      ]).run()
+      @shell.Cmd("ssh", [
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "StrictHostKeyChecking=yes",
+        "-J",
+        jump,
+        "lunanexa-management",
+        "tar -xzf " + root + "/input.tgz -C " + root + "/input",
+      ]).run()
+      println(
+        "Uploaded verified third-cover release to its dedicated directory",
+      )
+    }
+    _ => fail("Unknown phase")
+  }
+}

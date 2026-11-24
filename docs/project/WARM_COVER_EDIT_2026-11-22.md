@@ -1,0 +1,119 @@
+# Third cover: 暖暖
+
+## Current v4 · Nov23 annotated cleanup and intermediate rear tail
+
+The user circled the pale furry crescent at lower left: it was an OLD TAIL
+REMNANT, not acceptable torso contour. V2 mistakenly left this appendage in
+place. A precise built-in ImageGen edit removed its entire cream footprint and
+restored open tabletop plus a compact rounded abdomen behind the real forearm.
+The user supplied the cleaned result `exec-6b53efda-0ee0-46c9-bef6-27b6807da57c.png`
+and requested a slightly longer real rear tail, then another small extension.
+Two local tail-tip edits extended the one rear tail downward beside the saucer.
+The user then requested a length BETWEEN those last two versions and explicitly
+approved putting that result on site. V4 trims the latest tip to that intermediate
+length, above the handle. The lower-left tabletop stays clear.
+Do not confuse the removed pale appendage with the real diagonal forearm.
+
+Selected built-in output: `exec-980cd1a7-b8ea-46e5-9940-cf73c5e0ea8e.png`.
+Saved master: `src/ui/coffee-display/assets/warm-cover-original-v4.png`.
+Public derivatives: `warm-cover-v4.webp` (237200 bytes),
+`warm-cover-mobile-v4.webp` (62878 bytes).
+Release backup: management `coffee-warm-tail-mid-20261123`.
+The earlier Nov23 release `coffee-warm-tail-clean-20261123` is also retained.
+Theme 暖暖, layout-v4 CSS/JS, partner marks, QR codes and award data are unchanged.
+
+V4 acceptance:9/9 source checks, standalone script check/format, all three public
+file hashes matched with validated TLS. Actual desktop browser loads v4 and keeps
+all12 work cards;390px uses the960px mobile derivative. Desktop,390px and3840×2160
+browser checks show no horizontal overflow. Screenshots:
+`output/coffee-warm-tail-mid-20261123/{live-desktop,live-mobile,live-4k}.jpg`.
+Final HTML hash:
+`45323adbc855371012591ed1c3449c307826719b726edb7cfc73c1815a6f1970`.
+
+Final precise-object-edit prompt (built-in tool, verbatim):
+
+> Precise tail-length interpolation. Image 1 is the edit target, the latest version with a slightly-too-long brown tail beside the upper-right of the saucer. Image 2 is the previous version with a slightly-too-short tail. Make the visible length of the SINGLE rear tail EXACTLY BETWEEN those two versions, keeping the root/hip position unchanged. Shorten Image 1's free tail-tip section modestly so the final tail endpoint is approximately midway between the endpoints in the two references: around x=1430,y=375 on this 1672x941 composition. Smoothly taper to that intermediate endpoint, with the same relaxed downward curve alongside the saucer's UPPER RIGHT, above the cup handle. This is a very small local trim to the tip only. Keep Image 1's head, face, blue eyes, ears, body contour and fluffy painterly fur, front arm/paw, latte face, cup/saucer, colors, paper and lighting exactly unchanged. The clean lower-left tabletop stays empty; do not restore any pale crescent or false-tail remnant. One real tail only from rear hip, no new tail, no long foreground loop. Same wide framing. No text. Goal: intermediate tail length, visibly longer than Image 2 and visibly shorter than Image 1, no other visual change.
+
+## Previous v2 (superseded)
+
+### Restore fluffy original and tuck the tail
+
+The user rejected v1's lost fluffy brushwork and excessively long tail. Do not
+use the multi-pass v1 image as a new edit target. The current v2 edits the original
+`siamese-cover-original.png` directly with built-in ImageGen (precise-object-edit),
+preserving its layered cream/chocolate dry-brush fur, feathered edges and face.
+The foreground ribbon is removed; only a modest tucked tail section is visible
+beside the rear haunch, above the saucer. It no longer encircles the cup or scene.
+
+Selected built-in output: `exec-a54eb5a6-0f76-4b72-8972-2ab68779a1ca.png`.
+Saved master: `src/ui/coffee-display/assets/warm-cover-original-v2.png`.
+Public derivatives: `warm-cover-v2.webp` (379864 bytes),
+`warm-cover-mobile-v2.webp` (80938 bytes). Layout-v4 CSS/JS, theme 暖暖,
+QR codes, partner marks and all12 work cards are preserved.
+Release backup/receipt: management `coffee-warm-fluffy-20261122`.
+
+V2 acceptance:9/9 focused tests, standalone release script check/format, three
+published file hashes matched over validated public HTTPS. Actual390px browser
+loads the960px v2 derivative and retains all12 works without horizontal overflow.
+Actual3840×2160 browser loads v2 desktop WebP without overflow. Saved screenshots:
+`output/coffee-warm-fluffy-20261122/{live-desktop,live-mobile,live-4k}.jpg`.
+V2 HTML SHA-256:
+`f14cb537353194b2bd4ace77cf48eabcc06d563647ef253afbb042d449c71b7d`.
+
+Final v2 prompt (verbatim):
+
+> Use case: precise-object-edit. EDIT THIS ORIGINAL illustration, not a new redraw. The user likes the original soft fluffy fur, lively separated dry-brush strokes and feathered fur edges. Preserve the original cat face, blue eyes, head shape, expressive ears, cream chest, coat texture, single front paw on saucer, latte face, cup/saucer, overhead composition, warm paper, sunlight and window shadows. Absolutely preserve its fluffy painterly touch: soft wispy tufts and broad layered brush strokes, NOT smooth plastic, NOT engraved squiggles, NOT embossed uniform texture, NOT outlines around every hair. Only correct the tail and tiny necessary rear-hip connection. REMOVE the entire existing huge dark-brown ribbon looping along the bottom from left to right. Restore warm tabletop in its former space, with the natural cream chest/front-leg contour at lower left. Draw ONE modest normal-sized Siamese tail, only a SHORT VISIBLE SECTION, tucked close to the actual rounded REAR HAUNCH at the upper right of the curled cream body. The visible tail should be roughly 200–250 pixels long in this 1672x941 frame, about one quarter the cream torso's outer arc; soft fluffy chocolate-brown fur, natural taper, a small relaxed curve close beside the hip. Most of the tail may be tucked naturally behind its haunch. Root clearly at the rear pelvis, away from the head/neck. DO NOT wrap the tail around the cup, do not loop across the foreground, do not encircle cat or scene, do not make it longer than the cat. Keep the cat the main visual subject, cozy and soft. Wide 16:9 original framing and composition, no text, no logos, no QR. The result must look like the SAME original fluffy painting with one small tail correction, not a newly stylized version.
+
+## Previous v1 (superseded visual)
+
+The user renamed the third theme to 暖暖 and identified the tail as appearing to
+grow from the head. This supersedes 杯中暹罗 as the current display name. The page
+title, description, visible h1 and accessible section name are updated together.
+This remains the third-issue preview; no event dates or competition state change.
+
+Built-in ImageGen was used in precise-object-edit mode. Starting from the
+existing master, the correction separates the cream chest/front leg from the
+tail, places one visible tail root at the rounded rear haunch above/right of
+the head, routes the tail outside the saucer, and tapers toward the lower center.
+The final pass raised its foreground tip to account for the existing footer.
+The head has only two ears and a clean neck contour. The cat/latte faces, morning
+light, overhead framing and warm paper illustration remain the same direction.
+
+Final saved master:
+`src/ui/coffee-display/assets/warm-cover-original-v1.png` (1672×941).
+Public derivatives: `warm-cover-v1.webp` (329326 bytes) and
+`warm-cover-mobile-v1.webp` (91042 bytes). Original art remains available alongside
+the new version. No CSS, JS, logo, QR, prize or award data changed in this release.
+The runtime display still uses the previous accepted layout-v4 resources.
+
+The source tests now validate the current local HTML/module/asset references
+directly, allowing a clean checkout to run them without historical output files.
+`release-coffee-warm.mbtx` builds the WebPs, stages and hashes exactly two images
+and HTML, guards the previous public HTML digest, publishes images before HTML,
+and verifies the public byte hashes with TLS validation. Management backup and
+receipt: `/home/HwHiAiUser/coffee-warm-20261122`.
+
+Image edit lineage (built-in outputs retained):
+
+1. `exec-900efbe4-0995-441b-b719-c72cc031d186.png`: first anatomy clarification.
+2. `exec-3efae37a-d84c-474e-b530-abdaf6a715d2.png`: explicit upper-right hip root,
+   tail along outside of cup, free tip lower left; remove lower-left neck join.
+3. `exec-cbecdfb9-bd0e-4544-a90e-2bedcd8f55f6.png`: selected final, lifted tail tip.
+
+Final prompt (verbatim):
+
+> Precise final production adjustment of this exact wide illustration. The single-tail anatomy is now correct: preserve its visible root at the upper-right rear hip, its route down the outside right of the saucer, and the clean cream chest/front-leg at lower left. Keep the Siamese head, blue eyes, cup with latte face, body, paw, warm flat painterly style, paper texture, window shadows, exact wide framing unchanged. Only lift the tail's LOWER foreground curve and tapered free tip approximately 80 pixels upward in this 1672x941 composition, so the whole tail INCLUDING ITS TIP stays ABOVE y=835 (top 88% of the image). The lower 10% of the image should be calm cream tabletop and soft shadows, because an existing website footer overlays it. Do NOT add or depict that footer, text or any graphics. Make the tail curve pass comfortably below the cup and beside the front paw, no collision or second tail, and let its slim free tip end around lower-center left with clear tabletop space separating it from the neck and front leg. Exactly one tail from the rear rump, no tail from head. Preserve all other composition, colors, light, subject proportions and painterly detail.
+
+The numeric safe-area coordinate is prompt intent, not a pixel-perfect guarantee;
+the selected result is accepted by inspecting the actual composed page. Native
+art dimensions are1672×941, independent of the4K browser layout.
+
+Acceptance:9/9 focused source tests, standalone script check/format, all three
+published hashes verified over validated public HTTPS. Live desktop title/h1 are
+暖暖 and the loaded image is1672px wide. At390px the960px derivative loads, both
+QR frames are132px, the direct action remains48px, and the page has no horizontal
+overflow. At3840×2160 the footer remains172.8px with no horizontal overflow.
+All12 work cards remain present. Screenshots are in
+`output/coffee-warm-20261122/{live-desktop,live-mobile,live-4k}.jpg`.
+Final published HTML SHA-256:
+`ce029fec779f7b38c1e10ab0afdf63f804fc194be0327d4f88320af2c80272db`.

@@ -1,0 +1,150 @@
+///|
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/x@0.5.5/crypto",
+}
+
+///|
+fn hash(bytes : Bytes) -> String {
+  @crypto.bytes_to_hex_string(@crypto.sha256(bytes))
+}
+
+///|
+let paths : ReadOnlyArray[String] = [
+  "assets/crystal-gem.webp", "assets/crystal-portrait.webp", "assets/banxing-logo-20261112.png",
+  "assets/company-wordmark.png", "assets/group-mark-raster-v5.png", "assets/vector-sticker-wordmark.svg",
+  "assets/participate-v7.svg", "assets/community-qr.png", "assets/prizes-v1.webp",
+  "assets/prize-figure-real.png", "assets/prize-figure-real.webp", "assets/prize-tote-real.png",
+  "assets/prize-tote-real.webp", "assets/work-autumn.png", "assets/work-autumn-thumb.webp",
+  "assets/work-spoon.png", "assets/work-spoon-thumb.webp", "assets/work-forest.png",
+  "assets/work-forest-thumb.webp", "assets/award-second-ink.png", "assets/award-second-ink-thumb.webp",
+  "assets/award-second-op.png", "assets/award-second-op-thumb.webp", "assets/award-third-line.png",
+  "assets/award-third-line-thumb.webp",
+]
+
+///|
+async fn stage() -> Unit {
+  let root = "output/coffee-week02-20261116/display-input"
+  if !@fs.exists(root + "/assets") {
+    @fs.mkdir(root + "/assets", recursive=true, permission=0o700)
+  }
+  let files : Array[Json] = []
+  for
+    (source, target) in [
+      ("index.html", "index.html"),
+      ("display.js", "display-week02.js"),
+      ("display.css", "display-week02.css"),
+      ..paths.map(path => (path, path)),
+    ] {
+    let input = @fs.read_file("src/ui/coffee-display/" + source)
+    let bytes = if source == "index.html" {
+      @utf8.encode(
+        input
+        .text()
+        .replace(old="display.css?v=week02-20261116", new="display-week02.css")
+        .replace(old="display.js?v=week02-20261116", new="display-week02.js"),
+      )
+    } else {
+      input.binary()
+    }
+    @fs.write_file(root + "/" + target, bytes, permission=0o644)
+    files.push({ "path": target, "sha256": hash(bytes) })
+  }
+  @fs.write_file(
+    root + "/manifest.json",
+    (
+      {
+        "files": files,
+        "expected_previous_html": "65ad073862260eb3df166bf05dcc4955922d2023bd8cf1feca65217067b5a3f1",
+      } : Json).stringify(),
+  )
+  @shell.Cmd("tar", [
+    "--no-xattrs", "-czf", "output/coffee-week02-20261116/display-input.tgz", "-C",
+    root, ".",
+  ]).run()
+  println(
+    "Prepared complete display, preserving legacy JS/CSS for existing clients",
+  )
+}
+
+///|
+async fn publish() -> Unit {
+  let incoming = "/home/HwHiAiUser/coffee-week02-20261116/display-v2"
+  let target = "/home/HwHiAiUser/moontown-display-20261108/site/disp"
+  guard @json.parse(@fs.read_file(incoming + "/manifest.json").text())
+    is { "files": Array(files), "expected_previous_html": String(previous), .. } &&
+    previous ==
+    "65ad073862260eb3df166bf05dcc4955922d2023bd8cf1feca65217067b5a3f1" &&
+    hash(@fs.read_file(target + "/index.html").binary()) == previous else {
+    fail("Display drifted; inspect before publication")
+  }
+  for row in files {
+    guard row is { "path": String(path), "sha256": String(expected), .. } &&
+      ["index.html", "display-week02.js", "display-week02.css", ..paths].contains(
+        path,
+      ) &&
+      hash(@fs.read_file(incoming + "/" + path).binary()) == expected else {
+      fail("Invalid display asset")
+    }
+  }
+  let before = incoming + "/before"
+  @fs.mkdir(before + "/assets", recursive=true, permission=0o700)
+  @fs.write_file(
+    before + "/index.html",
+    @fs.read_file(target + "/index.html").binary(),
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  for path in [..paths, "display-week02.css", "display-week02.js", "index.html"] {
+    if @fs.exists(target + "/" + path) && path != "index.html" {
+      @fs.write_file(
+        before + "/" + path,
+        @fs.read_file(target + "/" + path).binary(),
+        permission=0o600,
+        create_mode=CreateNew,
+      )
+    }
+    @fs.write_file(
+      target + "/" + path + ".week02-next",
+      @fs.read_file(incoming + "/" + path).binary(),
+      permission=0o644,
+      create_mode=CreateNew,
+    )
+    @fs.rename(
+      target + "/" + path + ".week02-next",
+      target + "/" + path,
+      replace=true,
+    )
+  }
+  @fs.write_file(
+    incoming + "/receipt.json",
+    (
+      {
+        "published": true,
+        "previous_html": previous,
+        "new_html": hash(@fs.read_file(target + "/index.html").binary()),
+        "files": files.length(),
+        "video_and_legacy_scripts_preserved": true,
+      } : Json).stringify(),
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  println(
+    "Published second-round crystal display; exact QR and real prizes installed",
+  )
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, mode] else { fail("stage|publish") }
+  match mode {
+    "stage" => stage()
+    "publish" => publish()
+    _ => fail("Unknown phase")
+  }
+}
