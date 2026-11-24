@@ -1,5 +1,35 @@
 # MoonTown handoff notes
 
+## 2026-11-16 · Crystal coffee close-up direction
+
+- User's latest composition is a large anime woman's head facing the camera and sky, holding a crystalline coffee mug that refracts sunlight onto her face, shoulder and hair. This supersedes the ornate butterfly/princess treatment as the current candidate. Prefer expressive linework, bold light/dark shapes and the face/cup/light relationship; no jewelry overload.
+- New sibling preview is `output/transformation-crystal-20261116`; retain the preceding two candidates. Use its dedicated4:5 phone composition so the face, cup, handle and fingers stay visible together, rather than cropping the landscape. Exact original marks, equal QR codes, transparent physical prizes and only the bottom8% grouped ticker remain. No live event, ranking or deployment change is implied by design iteration.
+
+## 2026-11-15 · Sparkling transformation and physical prizes
+
+- Latest visual direction supersedes the earlier flat-print rule below: the user now explicitly wants beautiful magical-girl transformation, sparkling jewels and iridescent wings. Preserve one full-screen composition and only the bottom8% grouped ticker; do not reintroduce the right banner.
+- Use user-supplied physical prize photos, with transparent backgrounds. The tote is white in reality: correct the yellow/gray photo lighting while retaining fabric weave, folds, dark handles and original print. Keep handle holes transparent and remove the external jute display string. Do not expose the source WeChat filenames, which contain query identifiers.
+- The figure cutout was blocked twice by image_gen output review; user explicitly approved local tools afterward. Local rembg2.0.87/BiRefNet-general-lite + ViTMatte + decontamination preserves the photographed plush, with FFmpeg alpha cleanup for its attached dark display tag. Final asset is `assets/prize-figure-real.png` (810×1040 RGBA), with a640px-highWebP derivative; no cloud cutout or generated replacement toy. Keep failed/intermediate mattes out of the user preview package.
+- Local preview assets are in `output/transformation-banners-20261115`. Brand marks and QR codes remain exact separate assets; generated hero illustrations must leave their space quiet. Recompose phone typography around the face rather than overlaying it. This remains a design preview, with no backend award settlement or production release.
+
+## 2026-11-15 · Final banner and award-preview direction
+
+- Latest steering supersedes the right-banner experiments: remove the right banner entirely, keep the full-screen4K artwork, and use only a bottom continuous ticker at8% height. Group first/second/third prize artwork beside its corresponding prize, with content-sized cards and tight internal spacing. The large side panel and ultra-thin4.4% ticker were both rejected.
+- User selected 小王's《深秋半醒，刚刚好》for the first-place display. Spoon/forest are third-place display works; user requested2 generated second-place works and1 simple generated third-place supplement. Final host AI works deliberately vary in style: ink《一盏未醒》, op art《醒来频率》, line drawing《早安，半醒》. Keep AI provenance visible; do not invent participant identities. This is local display configuration, not a backend settlement or approval change.
+- Local files are at `output/transformation-banners-20261115`. Native uploads are used only on explicit enlargement; ticker images are derived384px WebP. Keep clone cycles hidden from assistive technology and out of keyboard traversal. All original brand/QR assets remain separate.
+
+## 2026-11-15 · Art direction: mature flat graphic design
+
+- Final display-format correction: each candidate is ONE full-bleed3840×2160,16:9 composition for the4K screen. The user rejected the impression of several portrait posters tiled together and separate stacked image/information bands. Recompose the whole scene horizontally; keep logos, equal QR codes and adjacent vertical prizes in intentional negative space. Do not stretch/crop a portrait or default to a gallery/rotation.
+- The user rejected Nov14's cute coffee characters and Nov15's realistic oil-painting concepts. For subsequent campaign work, “艺术” means mature conceptual flat poster design: silhouette, collage, printmaking, restrained solid colors, negative space and integrated typography. Avoid photoreal anatomy, modeled lighting, 3D and childish illustration.
+- Current two directions remain the user's own: a kneeling woman holding coffee with one butterfly wing free and the other emerging from silk; a seated person on a raised stage undergoing change amid storm/lightning. Clever details should be legible visual relationships, not claims about invisible microscopic details. New design files belong in `output/transformation-flat-20261115`; old cartoon and realistic drafts are superseded.
+
+## 2026-11-14 · Transformation poster preview
+
+- Local design deliverables live at `/Users/kq/Workspace/moontown/output/coffee-transform-20261114`; no production event or display was changed. Existing QR bytes still target the first activity: reconnect to the correct second-round entry before publication.
+- Keep original brand marks and QR/prize assets separate from generated illustrations. Generated blank cup fronts can receive the exact native logo as a positioned PNG. A percentage-height square in an auto-sized grid can resolve from its width and overflow the invitation footer; explicitly position the square inside its measured artwork bounds, and inspect captions as well as the image.
+- A buildless offline design preview should use a deferred classic script when it needs no modules, so opening index.html locally does not depend on file-origin ESM permissions.
+
 ## 2026-11-12 · Supplied Banxing raster and production coffee imports
 
 - See `BANXING_LOGO_2026-11-12.md`. The supplied new logo supersedes v6: keep its complete cup, Chinese lettering and English line; remove white by pixel alpha detection, never redraw. The optimized PNG is960×934 and282734 bytes. Original is retained outside production allowlists.
