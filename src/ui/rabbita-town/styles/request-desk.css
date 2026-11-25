@@ -51,10 +51,23 @@
 }
 
 .request-composer {
+  position: relative;
   border: 1px solid rgba(28, 73, 122, 0.16);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.84);
   box-shadow: 0 10px 24px rgba(35, 82, 125, 0.08);
+}
+
+.request-composer::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: -1px;
+  width: 2.5px;
+  height: 14px;
+  border-radius: 99px;
+  background: var(--ms-human-mark, #c27803);
+  pointer-events: none;
 }
 
 .request-action-button {
