@@ -1,0 +1,252 @@
+----
+import {
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/x@0.5.5/crypto",
+}
+----
+
+///|
+let staging = "output/coffee-display-label-20261127/display"
+
+///|
+let remote = "/home/HwHiAiUser/coffee-display-label-20261127/display"
+
+///|
+let target = "/home/HwHiAiUser/moontown-display-20261108/site/disp"
+
+///|
+let previous = "f81a4485d826a4d6416ae833c6397b80a4e9535a38b72c04465229354b515c6f"
+
+///|
+let paths : ReadOnlyArray[String] = [
+  "display-week04-label-v3.css", "index.html",
+]
+
+///|
+let preserved : ReadOnlyArray[String] = [
+  "assets/participate-week03.svg", "assets/community-qr.png", "assets/group-mark-raster-v5.png",
+  "assets/company-wordmark.png", "assets/banxing-logo-20261112.png", "assets/vector-sticker-wordmark.svg",
+  "display-awards-round03-results-v1.js", "assets/winter-cover-v1.webp", "assets/winter-cover-mobile-v1.webp",
+  "assets/winter-cover-4k-v2.webp", "display-week04-4k-v2.js",
+]
+
+///|
+fn hash(bytes : Bytes) -> String {
+  @crypto.bytes_to_hex_string(@crypto.sha256(bytes))
+}
+
+///|
+async fn command(name : String, args : Array[String]) -> String {
+  let result = @shell.Cmd(name, args).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+async fn stage() -> Unit {
+  if !@fs.exists(staging + "/assets") {
+    @fs.mkdir(staging + "/assets", recursive=true, permission=0o700)
+  }
+  let rows : Array[Json] = []
+  for
+    (source, destination) in [
+      ("display.css", paths[0]),
+      ("index.html", "index.html"),
+    ] {
+    let input = @fs.read_file("src/ui/coffee-display/" + source)
+    let bytes = if source == "index.html" {
+      @utf8.encode(
+        input
+        .text()
+        .replace_all(old="display.css?v=week04-label-v3-20261127", new=paths[0])
+        .replace_all(
+          old="display.js?v=week04-4k-v2-20261127",
+          new="display-week04-4k-v2.js",
+        ),
+      )
+    } else {
+      input.binary()
+    }
+    @fs.write_file(staging + "/" + destination, bytes, permission=0o644)
+    rows.push({ "path": destination, "sha256": hash(bytes) })
+  }
+  @fs.write_file(
+    staging + "/manifest.json",
+    ({ "files": rows, "expected_previous_html": previous } : Json).stringify(),
+  )
+  ignore(
+    command("env", [
+      "COPYFILE_DISABLE=1",
+      "tar",
+      "--no-xattrs",
+      "-czf",
+      staging + ".tgz",
+      "-C",
+      staging,
+      ".",
+    ]),
+  )
+  println("Staged label CSS and HTML; retain cover and original logo colors")
+}
+
+///|
+async fn ship() -> Unit {
+  let ssh = [
+    "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-J", "HwHiAiUser@106.39.18.146:32123",
+  ]
+  ignore(command("ssh", ssh + ["lunanexa-management", "mkdir -p " + remote]))
+  ignore(
+    command(
+      "scp",
+      ssh +
+      [
+        staging + ".tgz",
+        "scripts/publish-coffee-display-label.mbtx",
+        "lunanexa-management:/home/HwHiAiUser/coffee-display-label-20261127/",
+      ],
+    ),
+  )
+  ignore(
+    command(
+      "ssh",
+      ssh +
+      [
+        "lunanexa-management",
+        "tar -xzf /home/HwHiAiUser/coffee-display-label-20261127/display.tgz -C " +
+        remote,
+      ],
+    ),
+  )
+  println("Uploaded immutable label display inputs")
+}
+
+///|
+async fn publish() -> Unit {
+  guard hash(@fs.read_file(target + "/index.html").binary()) == previous else {
+    fail("Live cover drift; inspect before replacing")
+  }
+  guard @json.parse(
+      command("curl", [
+        "--fail", "--silent", "--show-error", "--noproxy", "*", "--max-time", "20",
+        "--resolve", "suanli.kechuangfuwu.com:443:192.168.2.173", "https://suanli.kechuangfuwu.com/town/api/creative/public",
+      ]),
+    )
+    is {
+      "event": {
+        "id": "banxing-coffee-20261130",
+        "topic": "把冬天泡开",
+        ..
+      },
+      ..
+    } else {
+    fail("Fourth event is not canonical")
+  }
+  guard @json.parse(@fs.read_file(remote + "/manifest.json").text())
+    is { "files": Array(rows), "expected_previous_html": String(old), .. } &&
+    old == previous &&
+    rows.length() == 2 else {
+    fail("Invalid manifest")
+  }
+  for row in rows {
+    guard row is { "path": String(path), "sha256": String(expected), .. } &&
+      paths.contains(path) &&
+      hash(@fs.read_file(remote + "/" + path).binary()) == expected else {
+      fail("Invalid asset")
+    }
+    guard path == "index.html" || !@fs.exists(target + "/" + path) else {
+      fail("Immutable asset exists")
+    }
+  }
+  let before : Array[Json] = []
+  for path in preserved {
+    before.push({
+      "path": path,
+      "sha256": hash(@fs.read_file(target + "/" + path).binary()),
+    })
+  }
+  @fs.write_file(
+    remote + "/before.html",
+    @fs.read_file(target + "/index.html").binary(),
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  for path in paths {
+    @fs.write_file(
+      target + "/" + path + ".label-v3-next",
+      @fs.read_file(remote + "/" + path).binary(),
+      permission=0o644,
+      create_mode=CreateNew,
+    )
+    @fs.rename(
+      target + "/" + path + ".label-v3-next",
+      target + "/" + path,
+      replace=true,
+    )
+  }
+  for row in before {
+    guard row is { "path": String(path), "sha256": String(expected), .. } &&
+      hash(@fs.read_file(target + "/" + path).binary()) == expected else {
+      fail("Preserved asset changed")
+    }
+  }
+  @fs.write_file(
+    remote + "/receipt.json",
+    (
+      {
+        "previous_html": previous,
+        "new_html": hash(@fs.read_file(target + "/index.html").binary()),
+        "files": rows,
+        "preserved": before,
+      } : Json).stringify(indent=2),
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  println(
+    "Published softened label backing; original logo assets, cover and ticker preserved",
+  )
+}
+
+///|
+async fn verify() -> Unit {
+  guard @json.parse(@fs.read_file(staging + "/manifest.json").text())
+    is { "files": Array(rows), .. } else {
+    fail("Manifest missing")
+  }
+  for row in rows {
+    guard row is { "path": String(path), "sha256": String(expected), .. } else {
+      fail("Manifest row")
+    }
+    ignore(
+      command("curl", [
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--max-time",
+        "20",
+        "-o",
+        staging + "/served.bin",
+        "https://suanli.kechuangfuwu.com:8443/disp/" + path,
+      ]),
+    )
+    guard hash(@fs.read_file(staging + "/served.bin").binary()) == expected else {
+      fail("Public file differs " + path)
+    }
+  }
+  println("Label CSS and HTML match reviewed hashes over validated HTTPS")
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, mode] else { fail("stage|ship|publish|verify") }
+  match mode {
+    "stage" => stage()
+    "ship" => ship()
+    "publish" => publish()
+    "verify" => verify()
+    _ => fail("Unknown mode")
+  }
+}

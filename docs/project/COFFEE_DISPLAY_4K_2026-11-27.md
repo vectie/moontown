@@ -38,3 +38,11 @@ Invariants: keep the exact composition, camera, object shapes and placements: na
 浏览器测试入口 `src/ui/coffee-display/display-browser.test.mjs`，需要Playwright Chromium/WebKit；非默认模块路径设置PLAYWRIGHT_MODULE。设置COFFEE_DISPLAY_URL测试正式站，缺省启动只读本地素材服务器。
 
 现有Lepusa应用每5分钟检查网站版本，暂停或大图期间推迟刷新。能访问网站时SSH不通不影响此机制。本轮恢复连接后已重启并确认新页面生效。
+
+## 联名字标后续调整
+
+用户随后决定暂不进行原生4K重制，只调整联名字标。反白字在雪景上难辨，用户要求恢复原配色；反白方案未上线。最终保留原黑色公司字标、半醒工坊原线稿和向量贴贴原填充色，把白色底板改为半透明暖纸色渐变，边角轻微柔化，无阴影或发光。手机继续使用原透明背景。
+
+发布 `scripts/publish-coffee-display-label.mbtx`，只更新 `display-week04-label-v3.css` 和HTML；旧HTML固定 `f81a4485…`，管理机备份/回执 `/home/HwHiAiUser/coffee-display-label-20261127/display/`。封面、logo位图、二维码、获奖数据和播放JS均校验未变。WebKit检查3840×2160、1024×600、1024×768及390×844，原图字标filter=none，无横向溢出；预览位于 `output/coffee-display-label-20261127/`。
+
+正式HTTPS两文件散列核验通过；正式站四尺寸复查通过。ELF板应用刷新后正常主题与全屏几何再次通过，证据 `output/coffee-display-label-20261127/native-receipt.json`。

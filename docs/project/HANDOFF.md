@@ -1,5 +1,18 @@
 # MoonTown handoff notes
 
+## 2026-11-27 · Partner label refinement
+
+- Owner deferred native4K generation and requested only the label change.
+  Preserve the current cover. Light/inverted partner lettering became illegible
+  over snow and was rejected; it was never published. Keep original raster
+  wordmarks and brand colors, without CSS inversion or drop-shadow treatments.
+- The winter label now has a warmer translucent paper gradient with subtle
+  corners, replacing the white panel. Mobile retains the transparent flow row.
+  Checked4K,1024×600,1024×768 and390px in WebKit; no horizontal overflow.
+- Label publisher changes only CSS and HTML; preserves artwork, logos, QR and
+  ticker hashes. Guard mkdir with exists when restaging: the current standalone
+  async fs still errors on an existing directory even with recursive=true.
+
 ## 2026-11-27 · 4K display asset and native ticker repair
 
 - Responsive4K layout still served1672×941 artwork. Desktop>=1800px now

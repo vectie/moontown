@@ -75,7 +75,7 @@ body[data-theme=siamese]{--paper:#f3e3cb;--ink:#573c2b;--line:#7252352b;color:va
 /* The approved winter artwork already contains its title. Keep one accessible heading. */
 body[data-cover=winter]{--paper:#ebe6dc;--ink:#243a4a;--line:#354d612b;background:#122f49;color:var(--ink)}
 [data-cover=winter] .copy{width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
-[data-cover=winter] .partners{background:#f5f0e7ed;padding:.3cqw .5cqw;border-radius:.2cqw;height:4.2cqw}
+[data-cover=winter] .partners{background:linear-gradient(115deg,#e7dcc6e8,#eee5d4c7);padding:.3cqw .5cqw;border-radius:.16cqw;height:4.2cqw}
 [data-cover=winter] .bottom-banner{background:#f4f0e8fa}
 [data-cover=winter] figcaption{background:#f4f0e8ed}
 [data-cover=winter] .join-direct{background:#22415c}
