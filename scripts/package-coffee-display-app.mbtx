@@ -1,0 +1,79 @@
+----
+import {
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+----
+
+///|
+async fn main {
+  guard @env.args() is [_, mode, target] && ["linux", "macos"].contains(target) else {
+    fail(
+      "plan|bundle linux|macos; bundle needs a matching LEPUSA_RUNTIME_EXECUTABLE",
+    )
+  }
+  let pwd = @shell.Cmd("pwd", []).output()
+  pwd.check()
+  let workspace = pwd.stdout().trim().to_owned()
+  let source = @env.get_env_var("LEPUSA_WORKSPACE").unwrap_or(
+    workspace + "/../lepusa",
+  )
+  let cli = @env.get_env_var("LEPUSA_CLI").unwrap_or(
+    source + "/_build/native/release/build/cmd/main/main.exe",
+  )
+  let project = workspace + "/src/ui/coffee-display-app/lepusa.json"
+  let output = workspace + "/output/coffee-display-app-20261127/" + target
+  if !@fs.exists(output) {
+    @fs.mkdir(output, recursive=true, permission=0o700)
+  }
+  let command = if mode == "plan" {
+    "bundle-plan"
+  } else if mode == "bundle" {
+    "bundle-write"
+  } else {
+    fail("Unknown mode")
+  }
+  let args = [command, target]
+  if mode == "bundle" {
+    args.push(output)
+  }
+  args.append(["--project", project, "--json"])
+  let result = @shell.Cmd(cli, args, cwd=source).output()
+  @fs.write_file(
+    output + "/bundle-report.json",
+    result.stdout(),
+    permission=0o600,
+  )
+  result.check()
+  if mode == "plan" {
+    println("Lepusa plan retained for " + target)
+    return
+  }
+  guard @json.parse(result.stdout())
+    is { "bundle": { "root": String(base), "verified": true, .. }, .. } else {
+    fail("Unexpected or unverified Lepusa bundle report")
+  }
+  let bundle_root = base +
+    "/future-community-display" +
+    (if target == "macos" { ".app" } else { "" })
+  let manifest = if target == "macos" {
+    bundle_root + "/Contents/Resources/lepusa/runtime.json"
+  } else {
+    bundle_root + "/lepusa/runtime.json"
+  }
+  let value = @json.parse(@fs.read_file(manifest).text())
+  guard value is { "runtime": { "webviews": [Object(webview)], .. }, .. } &&
+    webview.get("initializationScripts") is Some(Array(scripts)) else {
+    fail("Expected one Lepusa WebView")
+  }
+  scripts.push(
+    Json::string(@fs.read_file("src/ui/coffee-display-app/app-init.js").text()),
+  )
+  @fs.write_file(manifest, value.stringify(indent=2))
+  println(
+    "Materialized Lepusa app with native startup fullscreen and F11; " +
+    bundle_root,
+  )
+}

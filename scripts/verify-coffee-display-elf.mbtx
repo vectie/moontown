@@ -1,0 +1,241 @@
+----
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+----
+
+///|
+async fn output(name : String, args : Array[String]) -> String {
+  let result = @shell.Cmd(name, args).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+async fn accessibility(args : Array[String]) -> Json {
+  @json.parse(
+    output(
+      "busctl",
+      ["--address=unix:path=/run/user/1000/at-spi/bus", "--json=short", ..args],
+    ),
+  )
+}
+
+///|
+fn children(value : Json) -> Array[(String, String)] raise {
+  guard value is { "data": [Array(items)], .. } else {
+    fail("Accessibility children format")
+  }
+  items.map(item => {
+    guard item is [String(bus), String(path)] else { fail("Child") }
+    (bus, path)
+  })
+}
+
+///|
+async fn main {
+  let args = @env.args()
+  guard args is [_, receipt, ..] && receipt.has_prefix("/") else {
+    fail("Supply an absolute receipt path, optionally followed by restart")
+  }
+  if args is [_, _, "restart"] {
+    let before = @async.now()
+    ignore(
+      output("systemctl", [
+        "--user", "stop", "future-community-display-monitor.service", "future-community-display.service",
+      ]),
+    )
+    let duration = @async.now() - before
+    let result = output("systemctl", [
+        "--user", "show", "future-community-display.service", "-p", "Result", "--value",
+      ])
+      .trim()
+      .to_owned()
+    let inhibited = output("gnome-session-inhibit", ["--list"]).contains(
+      "dev.vectie.future-community-display",
+    )
+    ignore(
+      output("systemctl", [
+        "--user", "start", "future-community-display.service",
+      ]),
+    )
+    @fs.write_file(
+      receipt,
+      (
+        {
+          "stop_ms": duration.to_string(),
+          "result": result,
+          "inhibitor_removed_on_stop": !inhibited,
+          "restarted": true,
+        } : Json).stringify(indent=2),
+      permission=0o600,
+    )
+    guard duration < 5000L && result == "success" && !inhibited else {
+      fail("Graceful native shutdown failed; app has been restarted")
+    }
+    println(
+      "Native stop completed normally in " +
+      duration.to_string() +
+      "ms; screen inhibitor released and app restarted",
+    )
+    return
+  }
+  let active = output("systemctl", [
+    "--user", "is-active", "future-community-display.service", "future-community-display-monitor.service",
+  ])
+  let roots = children(
+    accessibility([
+      "call", "org.a11y.atspi.Registry", "/org/a11y/atspi/accessible/root", "org.a11y.atspi.Accessible",
+      "GetChildren",
+    ]),
+  )
+  let mut selected : (String, String)? = None
+  for (bus, path) in roots {
+    if accessibility([
+        "get-property", bus, path, "org.a11y.atspi.Accessible", "Name",
+      ])
+      is { "data": "lepusa-runtime", .. } {
+      selected = Some((bus, path))
+      break
+    }
+  }
+  guard selected is Some((bus, root)) else {
+    fail("Native Lepusa accessibility application absent")
+  }
+  let queue = children(
+    accessibility([
+      "call", bus, root, "org.a11y.atspi.Accessible", "GetChildren",
+    ]),
+  )
+  let nodes : Array[Json] = []
+  let mut index = 0
+  let mut title_found = false
+  let mut theme_found = false
+  while index < queue.length() && index < 180 {
+    let (owner, path) = queue[index]
+    index += 1
+    try {
+      let name = accessibility([
+        "get-property", owner, path, "org.a11y.atspi.Accessible", "Name",
+      ])
+      let role = accessibility([
+        "call", owner, path, "org.a11y.atspi.Accessible", "GetRoleName",
+      ])
+      if name is { "data": String(text), .. } {
+        if text.has_prefix("未来社区 · ") {
+          title_found = true
+        }
+        if text.contains("把冬天泡开") {
+          theme_found = true
+        }
+      }
+      let extents = accessibility([
+        "call", owner, path, "org.a11y.atspi.Component", "GetExtents", "u", "0",
+      ]) catch {
+        _ => Json::null()
+      }
+      nodes.push({ "name": name, "role": role, "extents": extents })
+      if index < 150 {
+        queue.append(
+          children(
+            accessibility([
+              "call", owner, path, "org.a11y.atspi.Accessible", "GetChildren",
+            ]),
+          ),
+        )
+      }
+    } catch {
+      _ => ()
+    }
+  }
+  let display = @json.parse(
+    output("busctl", [
+      "--user", "--json=short", "call", "org.gnome.Mutter.DisplayConfig", "/org/gnome/Mutter/DisplayConfig",
+      "org.gnome.Mutter.DisplayConfig", "GetCurrentState",
+    ]),
+  )
+  guard display
+    is {
+      "data": [
+        _,
+        Array(monitors),
+        [[_, _, Number(scale, ..), _, true, [[String(connector), ..]], _]],
+        _,
+      ],
+      ..
+    } else {
+    fail("Expected one primary monitor for kiosk acceptance")
+  }
+  let mut dimensions : (Double, Double)? = None
+  for physical in monitors {
+    if physical is [[String(name), ..], Array(modes), _] && name == connector {
+      for mode in modes {
+        if mode
+          is [
+            _,
+            Number(width, ..),
+            Number(height, ..),
+            _,
+            _,
+            _,
+            { "is-current": { "data": true, .. }, .. },
+          ] {
+          dimensions = Some((width / scale, height / scale))
+        }
+      }
+    }
+  }
+  guard dimensions is Some((width, height)) &&
+    nodes.any(node => {
+      node
+      is {
+        "role": { "data": ["frame"], .. },
+        "extents": { "data": [[0, 0, Number(w, ..), Number(h, ..)]], .. },
+        ..
+      } &&
+      w == width &&
+      h == height
+    }) else {
+    fail("Native window does not fill the current monitor")
+  }
+  let counters = output("systemctl", [
+    "--user", "show", "future-community-display.service", "-p", "NRestarts", "-p",
+    "MemoryCurrent", "-p", "ActiveEnterTimestampMonotonic", "-p", "CPUUsageNSec",
+  ])
+  @fs.write_file(
+    receipt,
+    (
+      {
+        "services": active,
+        "boot_id": @fs.read_file("/proc/sys/kernel/random/boot_id")
+        .text()
+        .trim()
+        .to_owned(),
+        "display": display,
+        "native_window_and_theme_visible": title_found && theme_found,
+        "native_window_found": title_found,
+        "theme_found": theme_found,
+        "native_fullscreen_matches_monitor": true,
+        "page_readiness_evidence": "Native title follows the DOM topic after ticker creation and visible image decoding; page accessibility is not exposed by this WebKit build.",
+        "nodes": nodes,
+        "service_counters": counters,
+        "idle_inhibitor": output("gnome-session-inhibit", ["--list"]),
+        "meminfo": @fs.read_file("/proc/meminfo").text(),
+      } : Json).stringify(indent=2),
+    permission=0o600,
+  )
+  guard title_found && theme_found else {
+    fail(
+      "Native window or rendered fourth-theme document missing; inspect the receipt",
+    )
+  }
+  println(
+    "Native Lepusa window and fourth-theme document verified; " +
+    index.to_string() +
+    " accessibility nodes inspected",
+  )
+}

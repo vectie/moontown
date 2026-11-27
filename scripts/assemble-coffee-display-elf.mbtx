@@ -1,0 +1,93 @@
+----
+import {
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+----
+
+///|
+async fn main {
+  guard @env.args() is [_, root] &&
+    root.has_prefix("/home/elf/.local/state/future-community-display/build-") else {
+    fail("Supply isolated board build root")
+  }
+  let bundle = root +
+    "/workspace/output/coffee-display-app-20261127/linux/future-community-display"
+  guard @json.parse(@fs.read_file(bundle + "/lepusa/runtime.json").text())
+    is { "version": String(version), "target": "linux", .. } &&
+    version == "0.1.3" else {
+    fail("Review the package version")
+  }
+  let archive_name = "future-community-display-" + version + "-linux-arm64"
+  let artifact = root + "/" + archive_name
+  guard !@fs.exists(artifact) else {
+    fail("Use a fresh immutable package directory")
+  }
+  @fs.mkdir(artifact + "/payload/lepusa", recursive=true, permission=0o700)
+  for
+    name in [
+      "future-community-display", "lepusa-runtime", "lepusa/runtime.json", "lepusa/distribution.json",
+    ] {
+    @fs.write_file(
+      artifact + "/payload/" + name,
+      @fs.read_file(bundle + "/" + name).binary(),
+      permission=if name.has_suffix(".json") { 0o644 } else { 0o755 },
+    )
+  }
+  @fs.write_file(
+    artifact + "/payload/coffee-display-monitor",
+    @fs.read_file(
+      root +
+      "/monitor-build/coffee-display-monitor.mbtx/native/release/build/single/single.exe",
+    ).binary(),
+    permission=0o755,
+  )
+  @fs.write_file(
+    artifact + "/install",
+    @fs.read_file(
+      root +
+      "/installer-build/install-coffee-display-app.mbtx/native/release/build/single/single.exe",
+    ).binary(),
+    permission=0o755,
+  )
+  @fs.write_file(
+    artifact + "/payload/icon.png",
+    @fs.read_file(root + "/icon.png").binary(),
+    permission=0o644,
+  )
+  for
+    name in [
+      "install", "payload/lepusa-runtime", "payload/coffee-display-monitor",
+    ] {
+    let result = @shell.Cmd("file", ["-b", artifact + "/" + name]).output()
+    result.check()
+    guard result.stdout().contains("ELF 64-bit") &&
+      result.stdout().contains("aarch64") else {
+      fail("Not a native Linux ARM64 executable: " + name)
+    }
+  }
+  @shell.Cmd(artifact + "/payload/coffee-display-monitor", ["self-test"])
+  .output()
+  .check()
+  let hashes : Array[String] = []
+  for
+    name in [
+      "payload/future-community-display", "payload/lepusa-runtime", "payload/coffee-display-monitor",
+      "payload/lepusa/runtime.json", "payload/lepusa/distribution.json", "payload/icon.png",
+    ] {
+    let result = @shell.Cmd("sha256sum", [name], cwd=artifact).output()
+    result.check()
+    hashes.push(result.stdout())
+  }
+  @fs.write_file(artifact + "/manifest.sha256", hashes.join(""))
+  @fs.write_file(
+    artifact + "/README.txt",
+    "未来社区 · Lepusa 活动展屏\n\nLinux ARM64 / Ubuntu 22.04 / GNOME Wayland\n依赖系统 WebKitGTK 4.1 或 4.0、GTK3、curl、busctl、gnome-session-inhibit。\n以桌面用户运行，不需要sudo：\n  ./install /解压后的绝对目录\n\n开机自动登录后启动，自动全屏；F11切换全屏。\n检测到3840x2160外接屏时选择最接近60Hz的原生模式，展屏期间只使用该外接屏；未接外屏时保留内置屏。\n应用运行期间阻止自动息屏/挂起，停用应用后恢复系统原策略。\n每5分钟核对网站新版本，联网恢复后继续更新；打开大图或暂停时推迟刷新。\n\n停止：systemctl --user stop future-community-display.service future-community-display-monitor.service\n启动：systemctl --user start future-community-display.service\n日志：journalctl --user -u future-community-display.service\n网站：https://suanli.kechuangfuwu.com:8443/disp/\n",
+  )
+  @shell.Cmd("tar", ["-czf", artifact + ".tar.gz", "-C", root, archive_name])
+  .output()
+  .check()
+  println("Native ARM64 installable package ready: " + artifact + ".tar.gz")
+}

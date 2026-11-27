@@ -1,0 +1,22 @@
+{
+  "identifier": "dev.vectie.future-community-display",
+  "productName": "Future Community Display",
+  "version": "0.1.3",
+  "signing": {"identity": "-"},
+  "runtime": {"backend": "system-webview", "assetProtocol": "lepusa", "devtools": false},
+  "window": {
+    "label": "main",
+    "title": "未来社区 · 活动展屏",
+    "width": 1280,
+    "height": 720,
+    "resizable": true,
+    "source": {"url": "https://suanli.kechuangfuwu.com:8443/disp/"}
+  },
+  "plugins": [{"name": "window", "commands": [{"name":"setFullscreen", "mode":"sync", "permission":"window", "affinity":"main-thread"}, {"name":"setTitle", "mode":"sync", "permission":"window", "affinity":"main-thread"}]}],
+  "capabilities": [{
+    "name": "display-fullscreen",
+    "windows": ["main"],
+    "origins": ["https://suanli.kechuangfuwu.com:8443"],
+    "permissions": ["window"]
+  }]
+}

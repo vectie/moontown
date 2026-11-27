@@ -1,0 +1,112 @@
+----
+import {
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+}
+----
+
+///|
+async fn main {
+  guard @env.args() is [_, root] &&
+    root.has_prefix("/home/elf/.local/state/future-community-display/build-") else {
+    fail("Supply the isolated board build root")
+  }
+  let sdk = root + "/sdk"
+  let build_env = [
+    "MOON_HOME=" + sdk,
+    "PATH=" + sdk + "/bin:/usr/local/bin:/usr/bin:/bin",
+  ]
+  if !@fs.exists(root + "/lepusa/.mooncakes/vectie/moonlib/errno/errno.mbt") {
+    ignore(
+      @shell.Cmd(
+        "env",
+        [..build_env, sdk + "/bin/moon", "check", "--target", "native"],
+        cwd=root + "/lepusa",
+      ).output(),
+    )
+  }
+  // This private SDK/cache belongs only to this build. Do not edit shared caches.
+  let errno = root + "/lepusa/.mooncakes/vectie/moonlib/errno/errno.mbt"
+  let content = @fs.read_file(errno).text()
+  guard content.contains("self.to_string().to_json()") ||
+    content.contains("Show::to_string(self).to_json()") ||
+    content.contains("Json::string(Show::to_string(self))") else {
+    fail("Inspect MoonLib compatibility patch before applying")
+  }
+  @fs.write_file(
+    errno,
+    content
+    .replace(
+      old="self.to_string().to_json()",
+      new="Json::string(Show::to_string(self))",
+    )
+    .replace(
+      old="Show::to_string(self).to_json()",
+      new="Json::string(Show::to_string(self))",
+    ),
+  )
+  let scaffold = root + "/lepusa/scaffold/app.mbt"
+  let original = @fs.read_file(scaffold).text()
+  guard original.contains("#derive(Debug, Eq)\nstruct ScaffoldFile") ||
+    original.contains(
+      "#derive(Debug, Eq)\n#derive(Debug, Eq)\n#derive(Debug, Eq)",
+    ) else {
+    fail("Inspect duplicate derivation compatibility patch")
+  }
+  @fs.write_file(
+    scaffold,
+    original.replace(
+      old="#derive(Debug, Eq)\n#derive(Debug, Eq)\n#derive(Debug, Eq)",
+      new="#derive(Debug, Eq)",
+    ),
+  )
+  let backend = @fs.read_file(root + "/lepusa/runtime/linux/linux_backend.c").text()
+  if !backend.contains(
+      "pthread_sigmask(SIG_UNBLOCK, &stop_set, &previous_mask)",
+    ) {
+    guard !backend.contains("lepusa_linux_stop_gui_on_signal") else {
+      fail(
+        "An older partial GTK signal patch is present; use the pinned clean source",
+      )
+    }
+    @shell.Cmd(
+      "git",
+      ["apply", "--check", root + "/lepusa-linux-gtk-stop.patch"],
+      cwd=root + "/lepusa",
+    )
+    .output()
+    .check()
+    @shell.Cmd(
+      "git",
+      ["apply", root + "/lepusa-linux-gtk-stop.patch"],
+      cwd=root + "/lepusa",
+    )
+    .output()
+    .check()
+  }
+  let result = @shell.Cmd(
+    "env",
+    [
+      "MOON_HOME=" + sdk,
+      "PATH=" + sdk + "/bin:/usr/local/bin:/usr/bin:/bin",
+      sdk + "/bin/moon",
+      "build",
+      "cmd/main",
+      "cmd/runtime",
+      "--frozen",
+      "--target",
+      "native",
+      "--release",
+      "-j",
+      "2",
+    ],
+    cwd=root + "/lepusa",
+  ).output()
+  @fs.write_file(root + "/framework-build.stdout", result.stdout())
+  @fs.write_file(root + "/framework-build.stderr", result.stderr())
+  result.check()
+  println(
+    "Built native ARM64 Lepusa CLI and runtime in the isolated board directory",
+  )
+}

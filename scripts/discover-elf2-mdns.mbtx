@@ -1,0 +1,66 @@
+----
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/socket",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/json",
+}
+----
+
+///|
+fn query(name : String, kind : Int32) -> Bytes {
+  let bytes : Array[Byte] = [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+  for label in name.split(".") {
+    let part = @utf8.encode(label.to_owned())
+    bytes.push(part.length().to_byte())
+    for byte in part {
+      bytes.push(byte)
+    }
+  }
+  bytes.append([0, 0, kind.to_byte(), 128, 1])
+  Bytes::from_array(bytes)
+}
+
+///|
+async fn main {
+  let socket = @socket.UdpServer(@socket.Addr::parse("0.0.0.0:0"))
+  defer socket.close()
+  socket.set_multicast_interface(@socket.Addr::parse("192.168.2.173:0"))
+  socket.set_multicast_ttl(1)
+  let multicast = @socket.Addr::parse("224.0.0.251:5353")
+  for
+    (name, kind) in [
+      ("elf2.local", 1),
+      ("elf.local", 1),
+      ("board2.local", 1),
+      ("_workstation._tcp.local", 12),
+      ("_ssh._tcp.local", 12),
+    ] {
+    socket.sendto(query(name, kind), multicast)
+  }
+  socket.sendto(query("elf2", 1), @socket.Addr::parse("224.0.0.252:5355"))
+  let buffer = FixedArray::make(8192, b'\x00')
+  let deadline = @async.now() + 10000L
+  while @async.now() < deadline {
+    let result = @async.with_timeout_opt(1000, async fn() {
+      socket.recvfrom(buffer)
+    })
+    if result is Some((length, source)) {
+      // Host labels remain readable; replace DNS binary fields in the audit.
+      let printable = Array::makei(length, i => {
+        if buffer[i] >= 32 && buffer[i] < 127 {
+          buffer[i]
+        } else {
+          b' '
+        }
+      })
+      println(
+        (
+          {
+            "source": source.to_string(),
+            "labels": @utf8.decode_lossy(Bytes::from_array(printable)),
+          } : Json).stringify(),
+      )
+    }
+  }
+}

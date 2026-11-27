@@ -1,5 +1,29 @@
 # MoonTown handoff notes
 
+## 2026-11-27 · ELF 2 native exhibition app
+
+- Correct board is `192.168.2.23`, hardware `ELF 2 Board`, hostname
+  `elf2-desktop`, desktop user `elf`; hostname is not the SSH username.
+- Installed Lepusa ARM64 app0.1.3, opening the existing `/disp/` website.
+  Actual build compiler is `v1.0.0-rc1+3c0520448 (2026-11-26)`, not final1.0.
+  User-scoped systemd services and XDG autostart reuse existing GDM autologin.
+  A real reboot passed: automatic start, loaded theme and native fullscreen.
+- External4K detection selects only advertised3840×2160 modes, scale1,
+  closest60Hz, temporary external-only output; absent4K preserves current
+  display. Board currently has only1024×600 DSI. Physical HDMI4K and hotplug
+  still need an attached screen; never report those as already verified.
+- Moon async masks termination signals while GTK owns its blocking main loop.
+  The isolated Lepusa build applies `scripts/patches/lepusa-linux-gtk-stop.patch`
+  to unblock those signals and stop on the GLib thread, then restore masks and
+  handlers. Normal stop252ms; Linux backend9/9 pass. Shared Lepusa source stays
+  unchanged. Headless backend tests need an unavailable Wayland display and a
+  PATH without SDK binaries so fixture servers cannot accidentally start.
+- Full WebKit page accessibility and noninteractive GNOME screenshots are
+  unavailable. Proof uses real native window geometry plus page-ready topic
+  title after ticker creation and image decoding; no browser screenshot is
+  presented as a board capture. Build/install/stop commands, compatibility
+  patches, package hashes and evidence: `COFFEE_DISPLAY_ELF_2026-11-27.md`.
+
 ## 2026-11-27 · Fourth issue release
 
 - Owner approved the exact 把冬天泡开 cover and scheduled Nov30 opening,

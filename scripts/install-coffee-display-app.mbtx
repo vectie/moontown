@@ -1,0 +1,178 @@
+----
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+----
+
+///|
+async fn mkdir(path : String) -> Unit {
+  if !@fs.exists(path) {
+    @fs.mkdir(path, recursive=true, permission=0o700)
+  }
+}
+
+///|
+async fn command(args : Array[String]) -> Unit {
+  @shell.Cmd("systemctl", ["--user", ..args]).output().check()
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, source] && source.has_prefix("/") else {
+    fail("Supply the absolute extracted package directory")
+  }
+  let home = @env.get_env_var("HOME").unwrap()
+  guard @env.get_env_var("USER") != Some("root") && home.has_prefix("/") else {
+    fail("Install as the desktop user, without sudo")
+  }
+  guard @json.parse(
+      @fs.read_file(source + "/payload/lepusa/runtime.json").text(),
+    )
+    is {
+      "identifier": "dev.vectie.future-community-display",
+      "target": "linux",
+      "runtime": {
+        "webviews": [
+          { "url": "https://suanli.kechuangfuwu.com:8443/disp/", .. },
+        ],
+        ..
+      },
+      ..
+    } else {
+    fail("Unexpected app identity, platform or display origin")
+  }
+  @shell.Cmd("sha256sum", ["--check", "manifest.sha256"], cwd=source)
+  .output()
+  .check()
+  let stamp = @async.now().to_string()
+  let state = home + "/.local/state/future-community-display"
+  let backup = state + "/install-before-" + stamp
+  let app = home + "/.local/opt/future-community-display"
+  let staging = app + ".next-" + stamp
+  mkdir(backup)
+  mkdir(staging + "/lepusa")
+  for
+    name in [
+      "future-community-display", "lepusa-runtime", "coffee-display-monitor", "lepusa/runtime.json",
+      "lepusa/distribution.json", "icon.png",
+    ] {
+    @fs.write_file(
+      staging + "/" + name,
+      @fs.read_file(source + "/payload/" + name).binary(),
+      permission=if name.has_suffix(".json") || name.has_suffix(".png") {
+        0o644
+      } else {
+        0o755
+      },
+    )
+  }
+  command([
+    "stop", "future-community-display-monitor.service", "future-community-display.service",
+  ]) catch {
+    _ => ()
+  }
+  if @fs.exists(app) {
+    @fs.rename(app, backup + "/app")
+  }
+  @fs.rename(staging, app)
+  let units = home + "/.config/systemd/user"
+  let autostart = home + "/.config/autostart"
+  let applications = home + "/.local/share/applications"
+  for directory in [units, autostart, applications] {
+    mkdir(directory)
+  }
+  let desktop =
+    #|[Desktop Entry]
+    #|Type=Application
+    #|Name=未来社区活动展屏
+    #|Exec=/usr/bin/systemctl --user start future-community-display.service
+    #|Icon=__ICON__
+    #|Terminal=false
+    #|StartupNotify=false
+    #|X-GNOME-Autostart-enabled=true
+    #|X-GNOME-Autostart-Phase=Applications
+    #|
+  let service =
+    #|[Unit]
+    #|Description=Future Community Lepusa Display
+    #|After=graphical-session.target
+    #|PartOf=graphical-session.target
+    #|Wants=future-community-display-monitor.service
+    #|StartLimitIntervalSec=0
+    #|
+    #|[Service]
+    #|Type=simple
+    #|Environment=GDK_SCALE=1 GDK_DPI_SCALE=1
+    #|ExecStartPre=%h/.local/opt/future-community-display/coffee-display-monitor configure
+    #|ExecStartPre=/usr/bin/curl --fail --silent --show-error --connect-timeout 3 --max-time 8 --retry 60 --retry-all-errors --retry-delay 5 --output /dev/null https://suanli.kechuangfuwu.com:8443/disp/
+    #|ExecStart=/usr/bin/gnome-session-inhibit --inhibit idle:suspend --app-id dev.vectie.future-community-display --reason "未来社区活动展屏" %h/.local/opt/future-community-display/future-community-display
+    #|Restart=always
+    #|RestartSec=5
+    #|TimeoutStartSec=0
+    #|TimeoutStopSec=10
+    #|KillMode=control-group
+    #|
+  let monitor =
+    #|[Unit]
+    #|Description=Future Community external 4K monitor selection
+    #|After=graphical-session.target future-community-display.service
+    #|PartOf=graphical-session.target
+    #|
+    #|[Service]
+    #|Type=simple
+    #|ExecStart=%h/.local/opt/future-community-display/coffee-display-monitor watch
+    #|Restart=on-failure
+    #|RestartSec=15
+    #|TimeoutStopSec=5
+    #|
+  for
+    (name, path, content) in [
+      ("display.service", units + "/future-community-display.service", service),
+      (
+        "monitor.service",
+        units + "/future-community-display-monitor.service",
+        monitor,
+      ),
+      (
+        "autostart.desktop",
+        autostart + "/future-community-display.desktop",
+        desktop.replace(old="__ICON__", new=app + "/icon.png"),
+      ),
+      (
+        "menu.desktop",
+        applications + "/dev.vectie.future-community-display.desktop",
+        desktop.replace(old="__ICON__", new=app + "/icon.png"),
+      ),
+    ] {
+    if @fs.exists(path) {
+      @fs.write_file(
+        backup + "/" + name,
+        @fs.read_file(path).binary(),
+        permission=0o600,
+      )
+    }
+    @fs.write_file(path + ".next", content, permission=0o644)
+    @fs.rename(path + ".next", path, replace=true)
+  }
+  command(["daemon-reload"])
+  command(["start", "future-community-display.service"])
+  @fs.write_file(
+    state + "/install-receipt.json",
+    (
+      {
+        "installed": app,
+        "backup": backup,
+        "autostart": autostart + "/future-community-display.desktop",
+        "current_user": @env.get_env_var("USER").unwrap_or(""),
+        "source": source,
+      } : Json).stringify(indent=2),
+    permission=0o600,
+  )
+  println(
+    "Installed user-scoped Lepusa display, desktop autostart and external-4K selection",
+  )
+}

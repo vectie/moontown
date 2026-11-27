@@ -1,0 +1,250 @@
+----
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+----
+
+///|
+fn list(value : Json) -> Array[Json] raise {
+  guard value is Array(items) else { fail("Expected array") }
+  items
+}
+
+///|
+fn number(value : Json) -> Double raise {
+  guard value is Number(n, ..) else { fail("Expected number") }
+  n
+}
+
+///|
+fn word(value : Json) -> String raise {
+  guard value is String(s) else { fail("Expected string") }
+  s
+}
+
+///|
+fn variant_flag(value : Json, name : String) -> Bool {
+  value is Object(fields) && fields.get(name) is Some({ "data": true, .. })
+}
+
+///|
+struct Choice {
+  connector : String
+  mode : String
+  refresh : Double
+  current : Bool
+}
+
+///|
+fn choose(state : Json) -> Choice? raise {
+  guard state is { "data": Array([_, Array(monitors), _, _]), .. } else {
+    fail("Mutter state format changed")
+  }
+  let mut best : Choice? = None
+  for physical in monitors {
+    let record = list(physical)
+    let connector = word(list(record[0])[0])
+    if variant_flag(record[2], "is-builtin") {
+      continue
+    }
+    for mode in list(record[1]) {
+      let values = list(mode)
+      if number(values[1]) != 3840 || number(values[2]) != 2160 {
+        continue
+      }
+      if !list(values[5]).contains(Json::number(1)) {
+        continue
+      }
+      let refresh = number(values[3])
+      let candidate = Choice::{
+        connector,
+        mode: word(values[0]),
+        refresh,
+        current: variant_flag(values[6], "is-current"),
+      }
+      if best is None ||
+        (refresh - 60).abs() < (best.unwrap().refresh - 60).abs() {
+        best = Some(candidate)
+      }
+    }
+  }
+  best
+}
+
+///|
+fn plan(state : Json) -> (String, Array[String], Bool)? raise {
+  guard choose(state) is Some(choice) else { return None }
+  guard state is { "data": Array([serial, _, Array(logical), _]), .. } else {
+    fail("Mutter logical state changed")
+  }
+  let already = choice.current &&
+    logical.length() == 1 &&
+    ({
+      let row = list(logical[0])
+      number(row[0]) == 0 &&
+      number(row[1]) == 0 &&
+      number(row[2]) == 1 &&
+      number(row[3]) == 0 &&
+      row[4] == Json::boolean(true) &&
+      list(row[5]).length() == 1 &&
+      word(list(list(row[5])[0])[0]) == choice.connector
+    })
+  // Temporary, external-4K-only configuration: the internal panel remains the
+  // fallback while no external 4K mode is advertised. No guessed mode timings.
+  let args = [
+    "--user",
+    "call",
+    "org.gnome.Mutter.DisplayConfig",
+    "/org/gnome/Mutter/DisplayConfig",
+    "org.gnome.Mutter.DisplayConfig",
+    "ApplyMonitorsConfig",
+    "uua(iiduba(ssa{sv}))a{sv}",
+    number(serial).to_int().to_string(),
+    "1",
+    "1",
+    "0",
+    "0",
+    "1",
+    "0",
+    "true",
+    "1",
+    choice.connector,
+    choice.mode,
+    "0",
+    "0",
+  ]
+  Some((choice.connector, args, already))
+}
+
+///|
+async fn current_state() -> Json {
+  let result = @shell.Cmd("busctl", [
+    "--user", "--json=short", "call", "org.gnome.Mutter.DisplayConfig", "/org/gnome/Mutter/DisplayConfig",
+    "org.gnome.Mutter.DisplayConfig", "GetCurrentState",
+  ]).output()
+  result.check()
+  @json.parse(result.stdout())
+}
+
+///|
+async fn configure() -> String {
+  let state = current_state()
+  guard plan(state) is Some((connector, args, already)) else {
+    return "internal-fallback"
+  }
+  if !already {
+    let directory = @env.get_env_var("HOME").unwrap() +
+      "/.local/state/future-community-display"
+    let backup = directory + "/display-before-4k.json"
+    if !@fs.exists(directory) {
+      @fs.mkdir(directory, recursive=true, permission=0o700)
+    }
+    if !@fs.exists(backup) {
+      @fs.write_file(
+        backup,
+        state.stringify(indent=2),
+        permission=0o600,
+        create_mode=CreateNew,
+      )
+    }
+    @shell.Cmd("busctl", args).output().check()
+    println("Selected external 3840x2160 display: " + connector)
+  }
+  connector
+}
+
+///|
+fn self_test() -> Unit raise {
+  let internal : Json = [
+    ["DSI-1", "unknown", "unknown", "unknown"],
+    [["dsi", 1024, 600, 56, 1, [1], { "is-current": { "data": true } }]],
+    { "is-builtin": { "data": true } },
+  ]
+  let external : Json = [
+    ["HDMI-A-1", "test", "4K", "1"],
+    [
+      ["4k30", 3840, 2160, 30, 1, [1, 2], {}],
+      ["4k60", 3840, 2160, 60, 1, [1, 2], {}],
+      ["1080", 1920, 1080, 60, 1, [1], { "is-current": { "data": true } }],
+    ],
+    {},
+  ]
+  let state : Json = {
+    "data": [
+      7,
+      [internal, external],
+      [[0, 0, 1, 0, true, [["DSI-1", "unknown", "unknown", "unknown"]], {}]],
+      {},
+    ],
+  }
+  guard plan(state) is Some(("HDMI-A-1", args, false)) &&
+    args.contains("4k60") &&
+    !args.contains("4k30") &&
+    args[7] == "7" else {
+    fail("Native 4K/60 selection")
+  }
+  guard plan({ "data": [1, [internal], [], {}] }) is None else {
+    fail("Do not force unsupported 4K modes")
+  }
+  guard external is Array(rows) &&
+    rows[1] is Array(modes) &&
+    modes[1] is Array(mode) else {
+    fail("Fixture")
+  }
+  mode[6] = { "is-current": { "data": true } }
+  guard plan({
+      "data": [
+        8,
+        [internal, external],
+        [[0, 0, 1, 0, true, [["HDMI-A-1", "test", "4K", "1"]], {}]],
+        {},
+      ],
+    })
+    is Some((_, _, true)) else {
+    fail("Do not repeatedly apply the same layout")
+  }
+  println(
+    "4K selection, 60Hz preference, internal fallback and no-op checks passed",
+  )
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, mode] else { fail("configure|watch|self-test") }
+  if mode == "self-test" {
+    self_test()
+    return
+  }
+  if mode == "configure" {
+    println(configure())
+    return
+  }
+  guard mode == "watch" else { fail("Unknown mode") }
+  let mut previous : String? = None
+  while true {
+    try {
+      @shell.Cmd("systemctl", [
+        "--user", "is-active", "--quiet", "future-community-display.service",
+      ])
+      .output()
+      .check()
+      let selected = configure()
+      if previous is Some(before) && before != selected {
+        @shell.Cmd("systemctl", [
+          "--user", "restart", "future-community-display.service",
+        ])
+        .output()
+        .check()
+        println("Reopened display after monitor change: " + selected)
+      }
+      previous = Some(selected)
+    } catch {
+      error => println("Display monitor check deferred: " + error.to_string())
+    }
+    @async.sleep(15000)
+  }
+}

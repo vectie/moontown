@@ -1,0 +1,112 @@
+--- a/runtime/linux/linux_backend.c
++++ b/runtime/linux/linux_backend.c
+@@ -11,6 +11,7 @@
+ #include <fcntl.h>
+ #include <netdb.h>
+ #include <poll.h>
++#include <pthread.h>
+ #include <signal.h>
+ #include <spawn.h>
+ #include <stdio.h>
+@@ -29,6 +30,7 @@
+ 
+ static LepusaLinuxServiceProcess lepusa_linux_service_processes[64];
+ static volatile sig_atomic_t lepusa_linux_service_signal_handlers_installed = 0;
++static int lepusa_linux_gui_signal_sources_active = 0;
+ 
+ typedef int (*LepusaGtkInitCheck)(int *, char ***);
+ typedef void *(*LepusaGtkSettingsGetDefault)(void);
+@@ -79,6 +81,8 @@
+ typedef unsigned int (*LepusaGdkKeyvalFromName)(const char *);
+ typedef void (*LepusaGtkMain)(void);
+ typedef void (*LepusaGtkMainQuit)(void);
++typedef unsigned int (*LepusaGUnixSignalAdd)(int, int (*)(void *), void *);
++typedef int (*LepusaGSourceRemove)(unsigned int);
+ typedef void (*LepusaGFree)(void *);
+ typedef void (*LepusaGObjectSet)(void *, const char *, ...);
+ typedef void (*LepusaGObjectUnref)(void *);
+@@ -185,6 +189,8 @@
+   LepusaGdkKeyvalFromName gdk_keyval_from_name;
+   LepusaGtkMain gtk_main;
+   LepusaGtkMainQuit gtk_main_quit;
++  LepusaGUnixSignalAdd g_unix_signal_add;
++  LepusaGSourceRemove g_source_remove;
+   LepusaGFree g_free;
+   LepusaGObjectSet g_object_set;
+   LepusaGObjectUnref g_object_unref;
+@@ -365,6 +371,8 @@
+   }
+   ok = ok && lepusa_linux_load_symbol(api->gtk, "gtk_main", (void **)&api->gtk_main);
+   ok = ok && lepusa_linux_load_symbol(api->gtk, "gtk_main_quit", (void **)&api->gtk_main_quit);
++  ok = ok && lepusa_linux_load_symbol(api->glib, "g_unix_signal_add", (void **)&api->g_unix_signal_add);
++  ok = ok && lepusa_linux_load_symbol(api->glib, "g_source_remove", (void **)&api->g_source_remove);
+   ok = ok && lepusa_linux_load_symbol(api->glib, "g_free", (void **)&api->g_free);
+   ok = ok && lepusa_linux_load_symbol(api->gobject, "g_object_set", (void **)&api->g_object_set);
+   ok = ok && lepusa_linux_load_symbol(api->gobject, "g_object_unref", (void **)&api->g_object_unref);
+@@ -3495,7 +3503,25 @@
+   }
+   lepusa_linux_service_signal_handlers_installed = 1;
+   atexit(lepusa_linux_cleanup_services_at_exit);
+-  lepusa_linux_install_service_signal_action();
++  if (!lepusa_linux_gui_signal_sources_active) {
++    lepusa_linux_install_service_signal_action();
++  }
++}
++
++/* GTK owns the main thread during gtk_main(). MoonBit's async signal handler
++ * cannot unwind that blocking call, so route stop signals through GMainContext.
++ * The callback borrows its stack context only until sources are removed below. */
++static int lepusa_linux_stop_gui_on_signal(void *data) {
++  LepusaLinuxBridgeContext *context = data;
++  while (context->window_count > 0) {
++    int before = context->window_count;
++    context->api->gtk_widget_destroy(context->windows[0].window);
++    if (context->window_count >= before) {
++      context->api->gtk_main_quit();
++      break;
++    }
++  }
++  return 1; /* Keep the source alive until explicit main-loop cleanup. */
+ }
+ 
+ static long lepusa_linux_now_ms(void) {
+@@ -3822,7 +3848,39 @@
+     &bridge_context,
+     initial_open_packet
+   );
++  const int stop_signals[] = { SIGTERM, SIGINT, SIGHUP };
++  struct sigaction previous_actions[3];
++  int previous_valid[3] = { 0 };
++  unsigned int signal_sources[3] = { 0 };
++  sigset_t stop_set, previous_mask;
++  sigemptyset(&stop_set);
++  lepusa_linux_gui_signal_sources_active = 1;
++  for (int i = 0; i < 3; i++) {
++    sigaddset(&stop_set, stop_signals[i]);
++    previous_valid[i] = sigaction(stop_signals[i], NULL, &previous_actions[i]) == 0;
++    signal_sources[i] = api.g_unix_signal_add(
++      stop_signals[i], lepusa_linux_stop_gui_on_signal, &bridge_context
++    );
++  }
++  /* MoonBit async blocks its interested signals while outside its event loop.
++   * GTK temporarily owns those stop signals; restore the caller's mask on exit. */
++  int previous_mask_valid = pthread_sigmask(SIG_UNBLOCK, &stop_set, &previous_mask) == 0;
+   api.gtk_main();
++  if (previous_mask_valid) {
++    pthread_sigmask(SIG_SETMASK, &previous_mask, NULL);
++  }
++  for (int i = 0; i < 3; i++) {
++    if (signal_sources[i] != 0) {
++      api.g_source_remove(signal_sources[i]);
++    }
++    if (previous_valid[i]) {
++      sigaction(stop_signals[i], &previous_actions[i], NULL);
++    }
++  }
++  lepusa_linux_gui_signal_sources_active = 0;
++  if (lepusa_linux_service_signal_handlers_installed) {
++    lepusa_linux_install_service_signal_action();
++  }
+   lepusa_linux_destroy_tray(&bridge_context);
+   free(bridge_context.app_menu_payload);
+   free(title_text);
