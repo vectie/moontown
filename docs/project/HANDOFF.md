@@ -15,6 +15,11 @@
   simple test use i2c-4/0x29. Preserve originals and configure a working copy
   when moving to another board. User subsequently plugged a sensor into .192;
   its hardware status must be checked independently from this source backup.
+- .192 is now reachable and also uses `elf` (elf2/elf2 failed), with the same
+  `elf2-desktop` hostname and ELF2 hardware string as .23. Distinguish by IP and
+  host key, not hostname. It has no `/home/elf/bno055`; USB enumeration shows a
+  RealSense D455 and QinHeng USB serial device. Sensor identity clarification is
+  pending; do not assume the D455 is the BNO055 or probe unrelated I2C devices.
 
 ## 2026-11-27 · Exhibition idle cursor
 
