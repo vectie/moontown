@@ -1,0 +1,282 @@
+----
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/x@0.5.5/crypto",
+}
+----
+
+///|
+async fn main {
+  guard @env.args() is [_, mode] else { fail("assets|stage|ship|apply|verify") }
+  let staging = "output/coffee-week03-awards-20261127"
+  let remote = "/home/HwHiAiUser/coffee-week03-awards-20261127"
+  let source = "src/ui/coffee-display"
+  let live = "/home/HwHiAiUser/moontown-display-20261108/site/disp"
+  let old_html = "745e8f581d77144f93810b1dde62c899d3433b2f7bf2ae4beeb07a87a9366ec9"
+  let data_js = "display-awards-round03-results-v1.js"
+  let main_js = "display-round03-results-v1.js"
+  let names = ["winner", "window", "sun", "stitch", "night", "water"]
+  let paths : Array[String] = []
+  for name in names {
+    paths.append([
+      "assets/week03-" + name + ".png",
+      "assets/week03-" + name + "-thumb.webp",
+    ])
+  }
+  paths.append([data_js, main_js, "index.html"])
+  fn digest(bytes : Bytes) -> String {
+    @crypto.bytes_to_hex_string(@crypto.sha256(bytes))
+  }
+  async fn run(command : String, args : Array[String]) -> String {
+    let result = @shell.Cmd(command, args).output()
+    result.check()
+    result.stdout()
+  }
+  let ssh = [
+    "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-J", "HwHiAiUser@106.39.18.146:32123",
+  ]
+  match mode {
+    "assets" => {
+      guard @json.parse(@fs.read_file(staging + "/generated.json").text())
+        is Array(rows) &&
+        rows.length() == 5 else {
+        fail("Five generated originals required")
+      }
+      for row in rows {
+        guard row is { "name": String(name), "path": String(path), .. } &&
+          names.contains(name) &&
+          name != "winner" else {
+          fail("Invalid generated asset")
+        }
+        let bytes = @fs.read_file(path).binary()
+        guard bytes.length() > 1000 &&
+          bytes[0] == 137 &&
+          bytes[1] == 80 &&
+          bytes[2] == 78 &&
+          bytes[3] == 71 else {
+          fail("PNG original expected")
+        }
+        let target = source + "/assets/week03-" + name
+        @fs.write_file(target + ".png", bytes, create_mode=CreateNew)
+        ignore(
+          run("cwebp", [
+            "-quiet",
+            "-resize",
+            "384",
+            "0",
+            "-q",
+            "82",
+            "-m",
+            "6",
+            target + ".png",
+            "-o",
+            target + "-thumb.webp",
+          ]),
+        )
+      }
+      println("Saved five generated originals and bounded thumbnails")
+    }
+    "stage" => {
+      @fs.mkdir(staging + "/input/assets", recursive=true, permission=0o700)
+      let rows : Array[Json] = []
+      for path in paths {
+        let bytes = if path.has_prefix("assets/") {
+          @fs.read_file(source + "/" + path).binary()
+        } else {
+          let original = if path == data_js {
+            "display-awards.js"
+          } else if path == main_js {
+            "display.js"
+          } else {
+            "index.html"
+          }
+          let content = @fs.read_file(source + "/" + original).text()
+          @utf8.encode(
+            if path == main_js {
+              content.replace(old="./display-awards.js?v=3", new="./" + data_js)
+            } else if path == "index.html" {
+              content
+              .replace(
+                old="display.css?v=week03-20261122",
+                new="display-week03-controls-v3.css",
+              )
+              .replace(old="display.js?v=week03-20261122", new=main_js)
+            } else {
+              content
+            },
+          )
+        }
+        @fs.write_file(staging + "/input/" + path, bytes)
+        rows.push({
+          "path": path,
+          "sha256": digest(bytes),
+          "bytes": bytes.length(),
+        })
+      }
+      guard digest(
+          @fs.read_file(staging + "/input/assets/week03-winner.png").binary(),
+        ) ==
+        "08fac9a1a1796b26862638174fd2b278bc338baae20671723a64ee4be2f8bb72" else {
+        fail("Real winner image changed")
+      }
+      @fs.write_file(
+        staging + "/input/manifest.json",
+        ({ "previous_html": old_html, "files": rows } : Json).stringify(),
+      )
+      ignore(
+        run("env", [
+          "COPYFILE_DISABLE=1",
+          "tar",
+          "--no-xattrs",
+          "-czf",
+          staging + "/payload.tgz",
+          "-C",
+          staging + "/input",
+          ".",
+        ]),
+      )
+      println(
+        "Staged18 winner cards across three issues; real first prize bytes preserved",
+      )
+    }
+    "ship" => {
+      ignore(
+        run(
+          "ssh",
+          ssh +
+          ["lunanexa-management", "install -d -m 700 " + remote + "/input"],
+        ),
+      )
+      ignore(
+        run(
+          "scp",
+          ssh +
+          [
+            staging + "/payload.tgz",
+            "scripts/publish-coffee-week03-awards.mbtx",
+            "lunanexa-management:" + remote + "/",
+          ],
+        ),
+      )
+      ignore(
+        run(
+          "ssh",
+          ssh +
+          [
+            "lunanexa-management",
+            "tar -xzf " + remote + "/payload.tgz -C " + remote + "/input",
+          ],
+        ),
+      )
+    }
+    "apply" => {
+      guard @json.parse(@fs.read_file(remote + "/input/manifest.json").text())
+        is { "previous_html": String(previous), "files": Array(files), .. } &&
+        previous == old_html &&
+        files.length() == paths.length() else {
+        fail("Manifest")
+      }
+      guard digest(@fs.read_file(live + "/index.html").binary()) == previous else {
+        fail("Live display changed")
+      }
+      for row in files {
+        guard row is { "path": String(path), "sha256": String(expected), .. } &&
+          paths.contains(path) &&
+          digest(@fs.read_file(remote + "/input/" + path).binary()) == expected else {
+          fail("Invalid asset")
+        }
+        guard path == "index.html" || !@fs.exists(live + "/" + path) else {
+          fail("Immutable target exists")
+        }
+      }
+      let public = @json.parse(
+        run("curl", [
+          "--fail", "--silent", "--show-error", "--noproxy", "*", "--resolve", "suanli.kechuangfuwu.com:443:192.168.2.173",
+          "--max-time", "20", "https://suanli.kechuangfuwu.com/town/api/creative/public",
+        ]),
+      )
+      guard public
+        is {
+          "event": { "id": "banxing-coffee-20261123", .. },
+          "gallery": Array(gallery),
+          ..
+        } &&
+        gallery.any(entry => {
+          entry
+          is {
+            "id": "bf30aa696e7e0e6f8a03c29486744b1ff0ad69686d623655b2a2212f5ba9c7ce",
+            "title": "惬意",
+            "display_name": "勺子",
+            "sha256": "08fac9a1a1796b26862638174fd2b278bc338baae20671723a64ee4be2f8bb72",
+            ..
+          }
+        }) else {
+        fail("Owner-selected approved entry changed")
+      }
+      @fs.write_file(
+        remote + "/before-index.html",
+        @fs.read_file(live + "/index.html").binary(),
+        permission=0o600,
+        create_mode=CreateNew,
+        sync=Full,
+      )
+      for path in paths {
+        @fs.write_file(
+          live + "/" + path + ".next",
+          @fs.read_file(remote + "/input/" + path).binary(),
+          permission=0o644,
+          sync=Full,
+        )
+        @fs.rename(live + "/" + path + ".next", live + "/" + path)
+      }
+      @fs.write_file(
+        remote + "/receipt.json",
+        (
+          {
+            "published": true,
+            "owner_selected_winner": "bf30aa696e7e0e6f8a03c29486744b1ff0ad69686d623655b2a2212f5ba9c7ce",
+            "generated_display_works": 5,
+            "display_cards": 18,
+            "contest_state_written": false,
+          } : Json).stringify(),
+        permission=0o600,
+        create_mode=CreateNew,
+      )
+      println("Published third-issue awards and retained earlier winners")
+    }
+    "verify" => {
+      guard @json.parse(@fs.read_file(staging + "/input/manifest.json").text())
+        is { "files": Array(files), .. } else {
+        fail("Manifest")
+      }
+      for row in files {
+        guard row is { "path": String(path), "sha256": String(expected), .. } else {
+          fail("Row")
+        }
+        ignore(
+          run("curl", [
+            "--fail",
+            "--silent",
+            "--show-error",
+            "--max-time",
+            "20",
+            "--output",
+            staging + "/served.bin",
+            "https://suanli.kechuangfuwu.com:8443/disp/" + path,
+          ]),
+        )
+        guard digest(@fs.read_file(staging + "/served.bin").binary()) ==
+          expected else {
+          fail("Public file differs: " + path)
+        }
+      }
+      println("All15 files match staged hashes over public HTTPS")
+    }
+    _ => fail("Unknown mode")
+  }
+}

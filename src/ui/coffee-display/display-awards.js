@@ -1,9 +1,12 @@
 // Winners shown here are organizer-confirmed display selections. Generated
 // display assets retain provenance here and are never backend participant records.
-export const prizeItems={figure:{sprite:'figure',title:'史迪奇公仔',full:'assets/prize-figure-real.png'},judy:{sprite:'figure',title:'朱迪侦探手办',thumb:'assets/prize-judy-v1.webp',full:'assets/prize-judy-v1.png'},tote:{sprite:'tote',title:'白色帆布包',full:'assets/prize-tote-real.png'},coffee:{sprite:'coffee',title:'半醒咖啡券'}};
+export const prizeItems={figure:{sprite:'figure',title:'史迪奇公仔',full:'assets/prize-figure-real.png'},judy:{sprite:'figure',title:'朱迪侦探手办',thumb:'assets/prize-judy-v1.webp',full:'assets/prize-judy-v1.png'},warmFigure:{sprite:'figure',title:'惊喜公仔',full:'assets/prize-figure-real.png',caption:'公仔实物参考，以主办方兑奖安排为准'},tote:{sprite:'tote',title:'白色帆布包',full:'assets/prize-tote-real.png'},coffee:{sprite:'coffee',title:'半醒咖啡券'}};
 const real=(title,author,asset,extra={})=>({kind:'work',title,author,thumb:`assets/${asset}-thumb.webp`,full:`assets/${asset}.png`,ai:false,selection:'organizer',...extra});
 const ai=(title,author,asset)=>({kind:'work',title,author,thumb:`assets/${asset}-thumb.webp`,full:`assets/${asset}.png`,ai:true,selection:'organizer-display'});
 export const awardGroups=[
+ {issue:3,theme:'暖暖',rank:'一等奖',prize:'warmFigure',works:[real('惬意','勺子','week03-winner',{entryId:'bf30aa696e7e0e6f8a03c29486744b1ff0ad69686d623655b2a2212f5ba9c7ce',confirmedOn:'2026-11-27'})]},
+ {issue:3,theme:'暖暖',rank:'二等奖',prize:'tote',works:[ai('窗边的温度','松子拿铁','week03-window'),ai('晒一会儿太阳','晴川','week03-sun')]},
+ {issue:3,theme:'暖暖',rank:'三等奖',prize:'coffee',works:[ai('一针一线的暖','绒绒','week03-stitch'),ai('夜归的一盏灯','晚风邮局','week03-night'),ai('捧住一小片晴天','山茶','week03-water')]},
  {issue:1,theme:'半醒咖啡',rank:'一等奖',prize:'figure',works:[real('深秋半醒，刚刚好','小王','work-autumn')]},
  {issue:1,theme:'半醒咖啡',rank:'二等奖',prize:'tote',works:[ai('一盏未醒','白桃乌龙','award-second-ink'),ai('醒来频率','薄荷星','award-second-op')]},
  {issue:1,theme:'半醒咖啡',rank:'三等奖',prize:'coffee',works:[real('勺子','勺子','work-spoon'),real('森林氧吧','草莓奶昔','work-forest'),ai('早安，半醒','小满','award-third-line')]},

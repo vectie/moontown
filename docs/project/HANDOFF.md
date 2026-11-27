@@ -1,5 +1,30 @@
 # MoonTown handoff notes
 
+## 2026-11-27 · Third-issue award ticker
+
+- The owner selected 勺子《惬意》 as the third first prize and authorized five
+  generated display works to fill2 second/3 third slots. Record owner selection,
+  not vote-based settlement: the formal event has one approved entry and0 votes.
+  `COFFEE_WEEK03_AWARDS_2026-11-27.md` records all asset paths and exact prompts.
+- Third groups lead the existing single ticker; earlier groups, current cover,
+  QR bytes, borderless play/two-line pause controls and CSS are retained. New
+  image masters are read on enlargement;384px thumbnails keep18-work initial
+  image cost under1MiB. Preserve the real winner's exact PNG hash.
+- Management display backup/receipt: `coffee-week03-awards-20261127`. The
+  publisher checks the actual approved winner before switching HTML last.
+- Fourth-topic ideas are proposals only; do not open a fourth event or change
+  its cover/schedule until a topic is selected.
+- Browser QA passed at390px and4K, including original enlargement and resumed
+  rolling. Use full-page capture for the4K screenshot: viewport-only capture
+  clipped the large emulated surface even though its DOM bounds were correct.
+
+## 2026-11-27 · Management Moon script compatibility
+
+- The management `.moon-new/bin/moon` now requires `.mbtx` imports inside
+  opening/closing `----` frontmatter. Historical bare-import scripts fail before
+  execution. Adapt a new copy for read-only audits; preserve old release scripts
+  and receipts. The updated third-round audit completed successfully.
+
 ## 2026-11-23 · NAT 对照实验恢复内网访问
 
 用户随后授权在 `.191` 启动临时测试服务，并亲自操作公网 18091 映射。两台同端口对照发现：新增／切换临时 NAT 后原 8443 恢复，删除临时 NAT 后两台同时重新超时（服务仍运行、LAN 直连正常、外网正常）。14:38 用户重新保存正式 `8443 → .173:443` 映射后，两台原 8443/443/32123 恢复；没有改 Nginx、服务器网络、权限隔离或 DNS/hosts。两台临时服务已停止、18091 映射已删除；14:44 间隔复测两台四个业务路径均 200，外网 8443 也为 200，临时目录已清理、端口无监听。外网 443 未纳入最终验收。详细时间线和证据边界见 [NAT 对照记录](nat-probe-comparison-2026-11-23.md)。这支持映射应用／回流运行状态问题，但没有网关内部日志可证明具体缓存机制或归责。
