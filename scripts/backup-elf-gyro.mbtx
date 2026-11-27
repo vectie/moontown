@@ -1,0 +1,167 @@
+----
+import {
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.5.5/crypto",
+}
+----
+
+///|
+let name : String = "elf-bno055-transfer-20261127"
+
+///|
+let staging : String = "output/" + name
+
+///|
+let destination : String = "/home/jiaanguo/Workspace/" + name
+
+///|
+let originals : ReadOnlyArray[(String, String)] = [
+  (
+    "bno055_direct_i2c.py", "48cbdb9971b54d46d60a7ed1b83e6adb4e297cba56fe4e4ddcedada05525927f",
+  ),
+  (
+    "bno055_fixed", "52e099cebfa1c4cecf8bfd44750853511ce8a19d60e1c90c3b3de15b405082e0",
+  ),
+  (
+    "bno055_fixed.cpp", "a047508f2df9b4029536d3ddb35074926fe30af1eb4d1d10fce53178105054c3",
+  ),
+  (
+    "bno055_i2c_read.py", "d2719c7c1af39091d357a3f8f45c09ab8273a64e1c92c15d5b6c575eb44b002d",
+  ),
+  (
+    "bno055_read", "9ce9e75f0fcc1ba724c4bde95be27ede23e66c9afa3f172eb98ea0a1d624f007",
+  ),
+  (
+    "bno055_read.cpp", "ae6287bf761d28dd25fc4588594ace1d625a010958ceb78fec212517324deb0e",
+  ),
+  (
+    "simple_test", "1407aa700279f83b314435992b13a79a45f11e815d9b6f531f3533e3b41eb32b",
+  ),
+  (
+    "simple_test.cpp", "bde6182b46bb389223b451a8d156d46a11160d95cdd13f835d976f42adaee135",
+  ),
+]
+
+///|
+fn hash(bytes : Bytes) -> String {
+  @crypto.bytes_to_hex_string(@crypto.sha256(bytes))
+}
+
+///|
+async fn command(name : String, args : Array[String]) -> String {
+  let result = @shell.Cmd(name, args).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+async fn remote(command_text : String) -> String {
+  command("ssh", [
+    "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "pblaze3-host", command_text,
+  ])
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, mode] else { fail("package|ship|verify") }
+  if mode == "package" {
+    let rows : Array[String] = []
+    for (file, expected) in originals {
+      guard hash(@fs.read_file(staging + "/original/" + file).binary()) ==
+        expected else {
+        fail("Original differs from the board: " + file)
+      }
+      rows.push(expected + "  original/" + file + "\n")
+    }
+    let readme = @fs.read_file("docs/project/ELF_BNO055_TRANSFER_2026-11-27.md").binary()
+    @fs.write_file(staging + "/README.md", readme)
+    rows.push(hash(readme) + "  README.md\n")
+    @fs.write_file(staging + "/SHA256SUMS", rows.join(""))
+    ignore(
+      command("env", [
+        "COPYFILE_DISABLE=1",
+        "tar",
+        "--no-xattrs",
+        "-czf",
+        staging + ".tar.gz",
+        "-C",
+        "output",
+        name,
+      ]),
+    )
+    let archive_hash = hash(@fs.read_file(staging + ".tar.gz").binary())
+    @fs.write_file(
+      staging + ".sha256",
+      archive_hash + "  " + name + ".tar.gz\n",
+    )
+    println(
+      "Packaged8 original files with verified board hashes: " + archive_hash,
+    )
+  } else if mode == "ship" {
+    ignore(remote("test ! -e " + destination))
+    ignore(
+      command("scp", [
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "StrictHostKeyChecking=yes",
+        staging + ".tar.gz",
+        staging + ".sha256",
+        "pblaze3-host:/home/jiaanguo/Workspace/",
+      ]),
+    )
+    let expected = hash(@fs.read_file(staging + ".tar.gz").binary())
+    guard remote("sha256sum " + destination + ".tar.gz").has_prefix(
+      expected + "  ",
+    ) else {
+      fail("Archive changed in transit")
+    }
+    ignore(
+      remote("tar -xzf " + destination + ".tar.gz -C /home/jiaanguo/Workspace"),
+    )
+    println(remote("cd " + destination + " && sha256sum --check SHA256SUMS"))
+    @fs.write_file(
+      staging + "-receipt.json",
+      (
+        {
+          "source": "elf@192.168.2.23:/home/elf/bno055",
+          "destination": destination,
+          "archive_sha256": expected,
+          "original_files": 8,
+          "archive_verified": true,
+          "hardware_executed": false,
+        } : Json).stringify(indent=2),
+    )
+  } else if mode == "verify" {
+    println(remote("cd " + destination + " && sha256sum --check SHA256SUMS"))
+    ignore(remote("mkdir -p " + destination + "/verification/x86_64"))
+    let logs : Array[String] = []
+    for file in ["bno055_fixed", "bno055_read", "simple_test"] {
+      logs.push(
+        command("ssh", [
+          "-o",
+          "BatchMode=yes",
+          "-o",
+          "StrictHostKeyChecking=yes",
+          "pblaze3-host",
+          "g++ -std=c++17 -O2 -Wall -Wextra " +
+          destination +
+          "/original/" +
+          file +
+          ".cpp -o " +
+          destination +
+          "/verification/x86_64/" +
+          file,
+        ]),
+      )
+      logs.push(remote("file " + destination + "/verification/x86_64/" + file))
+    }
+    @fs.write_file(staging + "-compile-check.txt", logs.join("\n"))
+    println("All3 C++ readers compile on .191; no sensor programs executed")
+  } else {
+    fail("Unknown mode")
+  }
+}

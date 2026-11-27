@@ -1,5 +1,21 @@
 # MoonTown handoff notes
 
+## 2026-11-27 · BNO055 source preserved on .191
+
+- Found `/home/elf/bno055` on .23:3 C++ readers,3 ARM64 binaries and2 Python
+  examples. All8 originals copied unchanged to .191/QaQ at
+  `/home/jiaanguo/Workspace/elf-bno055-transfer-20261127`, with a portable
+  `.tar.gz` beside it. Archive SHA256 is
+  `b6092d7ca5d1857a80df84877091c6922a1689f58325aae4af9958253256b69a`.
+- Source/destination hashes match;3 C++ programs pass ARM syntax checks and
+  compile/link into separate x86_64 verification outputs on .191. No sensor
+  programs or new services were run there. Dependency/migration notes and known
+  original bugs: `ELF_BNO055_TRANSFER_2026-11-27.md`. No credentials copied.
+- Bus numbers differ between examples: fixed reader uses i2c-1/0x28; read and
+  simple test use i2c-4/0x29. Preserve originals and configure a working copy
+  when moving to another board. User subsequently plugged a sensor into .192;
+  its hardware status must be checked independently from this source backup.
+
 ## 2026-11-27 · Exhibition idle cursor
 
 - Native Lepusa exhibition now hides the cursor initially and after1.8s idle;
