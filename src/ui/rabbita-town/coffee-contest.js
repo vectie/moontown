@@ -353,8 +353,9 @@ function init() {
     const guide=creationGuide(ev);
     document.querySelector('.prompt-chips').hidden=false;
     $('previous-round').hidden=ev.id==='banxing-coffee-20261106';
-    $('previous-round').href=guide.key==='warm'?'/coffee-week02/coffee-contest.html':'/coffee-week01/coffee-contest.html';
-    $('previous-round').textContent=guide.key==='warm'?'第二期作品':'第一期作品';
+    $('previous-round').href=guide.key==='winter'?'/coffee-week03/coffee-contest.html':guide.key==='warm'?'/coffee-week02/coffee-contest.html':'/coffee-week01/coffee-contest.html';
+    $('previous-round').textContent=guide.key==='winter'?'第三期作品':guide.key==='warm'?'第二期作品':'第一期作品';
+    $('claim-group').textContent=claimGroup(ev)?.kind==='community'?'开奖与领奖通知':'开奖与领奖群';
     if(presentationKey!==guide.key){
       presentationKey=guide.key;
       $('create-title').textContent=guide.label;
@@ -386,7 +387,7 @@ function init() {
     $("create-form").hidden = closed;
     document.querySelector('.create-section').classList.toggle('is-closed', closed);
     if(ev.name){$("event-name").textContent=ev.name;document.title=`${ev.name}｜未来社区`;}
-    $('choose-upload').disabled=writing || closed;
+    $('choose-upload').disabled=writing || phase!=='open' || !activityAllowed;
     $('replace-upload').disabled=writing;
     document.querySelector('.upload-option').hidden=closed;
     if(ev.topic)$("event-topic").textContent=`本期主题：${ev.topic}`;

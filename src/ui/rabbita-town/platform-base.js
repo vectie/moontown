@@ -80,7 +80,7 @@
     if (sharedNeighborhoodPaths.has(url.pathname)) return input
     // Weekly archives are separate public services on this shared origin.
     // Keep their links outside the currently mounted activity/workspace.
-    if (/^\/coffee-week0[12](?:\/|$)/.test(url.pathname)) return input
+    if (/^\/coffee-week0[123](?:\/|$)/.test(url.pathname)) return input
     if (url.pathname === base || url.pathname.startsWith(`${base}/`)) return input
     if (otherProducts.some(prefix => url.pathname === prefix || url.pathname.startsWith(`${prefix}/`))) return input
     url.pathname = `${base}${url.pathname}`

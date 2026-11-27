@@ -14,7 +14,13 @@ const warmPrompts=[
  ['慢半拍','暖暖主题，正俯视的咖啡桌，一只暹罗猫好奇地歪头，咖啡里的猫脸拉花像是慢半拍回应它，两个小脸有相似的咖啡色面罩和不同的小表情。温暖幽默的静态手绘插画，蓬松绒毛、柔和晨光、克制留白，不要文字、水印和商标'],
 ];
 export function isWarmEvent(event={}) {return /暖暖/.test(event.topic || '') || /^banxing-coffee-(?:20261123|week03-qa)/.test(event.id || '')}
+const winterPrompts=[
+ ['泡开雪城','把冬天泡开主题，冷蓝色的雪城里一杯琥珀色咖啡散发热气，一条金色蒸汽同时变成蜿蜒的城市道路，沿途积雪融化为陶土色路面，枝头开出少量花朵。成熟的丝网版画与撕纸拼贴艺术，普鲁士蓝、象牙白与克制的琥珀金，完整横幅构图，不要卡通表情，不要文字、水印和商标'],
+ ['杯沿解冻','把冬天泡开主题，一杯热咖啡放在结霜的窗前，杯沿的暖光让窗上的冰花逐渐变成真实的花枝，窗外是蓝色雪夜。成熟的平面艺术插画，留白与纸张油墨肌理，冷暖对照，简洁有力，不要文字、水印和商标'],
+ ['心事回暖','把冬天泡开主题，一双成年人的手捧住咖啡，胸前冰封的抽象形状被热气缓缓融成金色河流，表达心情回暖与重新出发。成熟的纸张拼贴与版画风格，克制构图、冷蓝与暖金，不要文字、水印和商标'],
+];
 export function creationGuide(event={}) {
+ if(/把冬天泡开/.test(event.topic || '') || /^banxing-coffee-(?:20261130|week04-qa)/.test(event.id || ''))return {key:'winter',label:'描述你的冬日灵感',placeholder:'不填也可以：一杯咖啡的热气，化成一条让雪城回暖的路。',prompts:winterPrompts,reference:'coffee/winter-reference.webp',referenceAlt:'第四期把冬天泡开灵感示例，非参赛作品',shareTitle:'分享我的冬日作品',inspirationCopy:'可以从雪城解冻、杯沿冰花、心情回暖开始。人、动物、城市和回忆都可以成为主角；本期提交静态图片。'};
  if(isWarmEvent(event))return {key:'warm',label:'描述你的暖暖灵感',placeholder:'不填也可以：暹罗猫与咖啡里的猫脸，在晨光里暖暖相伴。',prompts:warmPrompts,reference:'coffee/warm-reference.webp',referenceAlt:'第三期暖暖灵感示例，非参赛作品',shareTitle:'分享我的暖暖作品',inspirationCopy:'可以从暹罗猫与咖啡、晨光和陪伴开始。自由发挥，不必照着示例画；本期提交静态图片。'};
  const transformation=/(?:变身|蜕变)/.test(event.topic || '') || /^banxing-coffee-(?:20261116|week02-qa)/.test(event.id || '');
  return transformation?{key:'transformation',label:'描述你的变身灵感',placeholder:'不填也可以：阳光穿过水晶咖啡杯，在少女身上映出彩色折光。',prompts:transformationPrompts,reference:'coffee/transformation-reference.webp',referenceAlt:'本期变身灵感示例，非参赛作品'}:{key:'first',label:'描述你的半醒时刻',placeholder:'不填也可以：我们会画一座住在咖啡杯里的清晨小城。',prompts:firstPrompts,reference:'coffee/cup.png',referenceAlt:'主办参考杯型，非参赛作品'};

@@ -8,6 +8,16 @@ import {draftStore,scopedDraftStore,draftKey} from './coffee-drafts.js';
 
 const second={id:'banxing-coffee-20261116',topic:'变身'};
 const third={id:'banxing-coffee-20261123',topic:'暖暖'};
+const fourth={id:'banxing-coffee-20261130',topic:'把冬天泡开'};
+test('fourth round uses winter prompts and evergreen claim QR without replacing custom work',()=>{
+  const guide=creationGuide(fourth);
+  assert.equal(guide.key,'winter');assert.match(guide.reference,/winter-reference/);
+  assert.match(generationPrompt('',fourth),/雪城/);assert.equal(generationPrompt('  我的冬日  ',fourth),'我的冬日');
+  assert.deepEqual(guide.prompts.map(x=>x[0]),['泡开雪城','杯沿解冻','心事回暖']);
+  assert.equal(creationGuide({id:'banxing-coffee-week04-qa-20261127'}).key,'winter');
+  const claim=claimGroup(fourth,Date.parse('2026-12-04T20:00:00+08:00'));
+  assert.equal(claim.kind,'community');assert.equal(claim.expired,false);assert.match(claim.src,/community-qr/);
+});
 test('third round uses warm defaults, names and reference without replacing custom prompts',()=>{
   const guide=creationGuide(third);
   assert.equal(guide.key,'warm');assert.match(guide.reference,/warm-reference/);
@@ -27,7 +37,8 @@ test('old shared entries return to their archived event without redirecting curr
   const base='https://example.test/town/coffee-contest.html?entry='+ 'a'.repeat(64);
   const old=new URL(archivedShareHref(base+'&campaign='+second.id+'#gallery'));
   assert.equal(old.pathname,'/coffee-week02/coffee-contest.html');assert.equal(old.searchParams.get('entry'),'a'.repeat(64));assert.equal(old.hash,'#gallery');
-  assert.equal(archivedShareHref(base+'&campaign='+third.id),null);
+  assert.equal(new URL(archivedShareHref(base+'&campaign='+third.id)).pathname,'/coffee-week03/coffee-contest.html');
+  assert.equal(archivedShareHref(base+'&campaign='+fourth.id),null);
   assert.equal(archivedShareHref(base+'&campaign='+second.id+'&activity=custom'),null);
   assert.equal(archivedShareHref('https://example.test/coffee-week02/coffee-contest.html?entry=x&campaign='+second.id),null);
 });
@@ -69,6 +80,8 @@ test('a stable page can change rounds without losing old drafts or inheriting th
     next.write('A',{prompt:'第二期的提示词'});
     assert.equal(await warm.read('A'),null);
     warm.write('A',{prompt:'第三期暖暖的提示词'});
+    assert.equal(await scopedDraftStore(scope,fourth.id).read('A'),null);
+    assert.equal((await scopedDraftStore('https://example.test/coffee-week03/api/creative/',third.id).read('A')).prompt,'第三期暖暖的提示词');
     assert.equal((await scopedDraftStore(scope,third.id).read('A')).prompt,'第三期暖暖的提示词');
     assert.equal((await scopedDraftStore(scope,second.id).read('A')).prompt,'第二期的提示词');
     assert.equal((await scopedDraftStore('https://example.test/coffee-week02/api/creative/',second.id).read('A')).prompt,'第二期的提示词');

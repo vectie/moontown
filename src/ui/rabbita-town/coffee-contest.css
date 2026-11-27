@@ -56,6 +56,7 @@
 .claim-dialog .dialog-heading { text-align: left; }
 .claim-code { position: relative; display: block; width: min(240px,100%); aspect-ratio: 1; margin: 16px auto; overflow: hidden; background: white; }
 .claim-code img { position: absolute; display: block; width: 132.861%; max-width: none; height: auto; left: -16.495%; top: -64.691%; }
+.claim-code[data-kind=community] img { width:151.081%;left:-25.405%;top:-14.595%; }
 .claim-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 16px; }
 .claim-actions > a, .claim-actions > button { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; margin: 0; text-decoration: none; }
 .claim-dialog .claim-actions > .primary { width: auto; flex: 1; margin: 0; }

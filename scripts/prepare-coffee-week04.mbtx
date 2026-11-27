@@ -1,0 +1,186 @@
+----
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/x@0.5.5/crypto",
+}
+----
+
+///|
+async fn main {
+  guard @env.args() is [_, mode] else { fail("stage|ship|verify") }
+  let root = "output/coffee-week04-20261127"
+  let remote = "/home/HwHiAiUser/coffee-week04-20261127"
+  if !@fs.exists(root + "/input/coffee") {
+    @fs.mkdir(root + "/input/coffee", recursive=true, permission=0o700)
+  }
+  match mode {
+    "stage" => {
+      let rows : Array[Json] = []
+      for
+        name in [
+          "coffee-contest.html", "coffee-contest.js", "coffee-themes.js", "coffee-share.js",
+          "coffee-claim.js", "coffee-drafts.js", "platform-base.js", "coffee-contest.css",
+          "coffee/winter-reference.webp", "coffee/community-qr.png",
+        ] {
+        let source = if name.has_prefix("coffee/") {
+          "src/ui/assets/" + name
+        } else {
+          "src/ui/rabbita-town/" + name
+        }
+        let bytes = @fs.read_file(source).binary()
+        @fs.write_file(root + "/input/" + name, bytes, permission=0o644)
+        rows.push({
+          "path": name,
+          "sha256": @crypto.bytes_to_hex_string(@crypto.sha256(bytes)),
+        })
+      }
+      @fs.write_file(
+        root + "/input/manifest.json",
+        ({ "files": rows } : Json).stringify(),
+      )
+      let result = @shell.Cmd("env", [
+        "COPYFILE_DISABLE=1",
+        "tar",
+        "--no-xattrs",
+        "-czf",
+        root + "/input.tgz",
+        "-C",
+        root + "/input",
+        ".",
+      ]).output()
+      result.check()
+      if !@fs.exists(root + "/archive-input") {
+        @fs.mkdir(root + "/archive-input", permission=0o700)
+      }
+      let drafts = @fs.read_file(root + "/input/coffee-drafts.js").binary()
+      @fs.write_file(root + "/archive-input/coffee-drafts.js", drafts)
+      let platform = @fs.read_file(root + "/input/platform-base.js").binary()
+      @fs.write_file(root + "/archive-input/platform-base.js", platform)
+      @fs.write_file(
+        root + "/archive-input/manifest.json",
+        (
+          {
+            "files": [
+              {
+                "path": "coffee-drafts.js",
+                "sha256": @crypto.bytes_to_hex_string(@crypto.sha256(drafts)),
+              },
+              {
+                "path": "platform-base.js",
+                "sha256": @crypto.bytes_to_hex_string(@crypto.sha256(platform)),
+              },
+            ],
+          } : Json).stringify(),
+      )
+      @shell.Cmd("env", [
+        "COPYFILE_DISABLE=1",
+        "tar",
+        "--no-xattrs",
+        "-czf",
+        root + "/archive-input.tgz",
+        "-C",
+        root + "/archive-input",
+        ".",
+      ])
+      .output()
+      .check()
+      println(
+        "Staged ten round04 files and two historical navigation/draft fixes",
+      )
+    }
+    "ship" => {
+      let ssh = [
+        "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-J", "HwHiAiUser@106.39.18.146:32123",
+      ]
+      @shell.Cmd(
+        "ssh",
+        ssh +
+        [
+          "lunanexa-management",
+          "mkdir -p " +
+          remote +
+          "/ui-v1/input " +
+          remote +
+          "/ui-archive-v1/input",
+        ],
+      )
+      .output()
+      .check()
+      @shell.Cmd(
+        "scp",
+        ssh +
+        [
+          root + "/input.tgz",
+          root + "/archive-input.tgz",
+          "scripts/release-coffee-week04.mbtx",
+          "scripts/package-coffee-week04-ui.mbtx",
+          "lunanexa-management:" + remote + "/",
+        ],
+      )
+      .output()
+      .check()
+      @shell.Cmd(
+        "ssh",
+        ssh +
+        [
+          "lunanexa-management",
+          "tar -xzf " + remote + "/input.tgz -C " + remote + "/ui-v1/input",
+        ],
+      )
+      .output()
+      .check()
+      @shell.Cmd(
+        "ssh",
+        ssh +
+        [
+          "lunanexa-management",
+          "tar -xzf " +
+          remote +
+          "/archive-input.tgz -C " +
+          remote +
+          "/ui-archive-v1/input",
+        ],
+      )
+      .output()
+      .check()
+      println("Uploaded private round04 UI and guarded operations scripts")
+    }
+    "verify" => {
+      guard @json.parse(@fs.read_file(root + "/input/manifest.json").text())
+        is { "files": Array(files), .. } else {
+        fail("Manifest")
+      }
+      for row in files {
+        guard row is { "path": String(path), "sha256": String(expected), .. } else {
+          fail("Manifest row")
+        }
+        @shell.Cmd("curl", [
+          "--fail",
+          "--silent",
+          "--show-error",
+          "--max-time",
+          "20",
+          "--output",
+          root + "/served.bin",
+          "https://suanli.kechuangfuwu.com:8443/town/" + path,
+        ])
+        .output()
+        .check()
+        guard @crypto.bytes_to_hex_string(
+            @crypto.sha256(@fs.read_file(root + "/served.bin").binary()),
+          ) ==
+          expected else {
+          fail("Public file differs: " + path)
+        }
+      }
+      println(
+        "All ten public fourth-event UI files match their reviewed hashes over validated HTTPS",
+      )
+    }
+    _ => fail("Unknown mode")
+  }
+}

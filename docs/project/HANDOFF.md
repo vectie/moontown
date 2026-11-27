@@ -1,5 +1,45 @@
 # MoonTown handoff notes
 
+## 2026-11-27 · Fourth issue release
+
+- Owner approved the exact 把冬天泡开 cover and scheduled Nov30 opening,
+  Dec3 20:00 submissions close/22:00 voting opens, Dec4 18:00 voting closes/
+  20:00 awards (Asia/Shanghai). Do not move these deadlines to preview time.
+- Cover has its title baked in; the HTML heading remains accessible but is
+  visually clipped. Phones show the complete composition, then existing logos,
+  entry/QR and the unchanged18-work winner ticker. WebP derivatives are369KiB
+  and100KiB; the exact1672×941 master is retained, not advertised as native4K.
+- Reuse participation SVG bytes/campaign03: its canonical route selects the
+  current event. New direct visits use campaign04. Fourth claim notifications
+  use the existing community account QR; third group code expires Nov30.
+- Third archive is `/coffee-week03/`; share redirects require an entry ID and
+  third event campaign. Event/account-scoped drafts copy across canonical and
+  archive routes without deleting their source or importing into fourth drafts.
+- `scripts/*coffee-week04*.mbtx` stage/hash/package qualified UI overlays and
+  guarded releases. Keep the native runtime and full hosted-app base pinned;
+  never replace MoonBook/MoonClaw/Studio with a coffee-only build.
+- Fourth cover and scheduled event are now live. QA natural seal/settlement,
+  3/2/1 voting and prize publication passed; formal pre-open writes rejected
+  without consuming quota. Third state is byte-for-byte preserved. Release
+  details and pins: `COFFEE_WEEK04_2026-11-27.md`. Screenshots include320/390px,
+  portrait977px and4K. Refresh pre-existing open tabs to load updated modules.
+- MoonBit String.replace changes only the first match. Use replace_all for
+  multi-occurrence release derivation and inspect IDs/paths before shipping.
+  Historical publishers need a newly adapted frontmatter copy for current Moon;
+  do not edit historical release scripts or receipts in place.
+
+
+## 2026-11-27 · Fourth-theme cover preview
+
+- The owner selected 把冬天泡开 and requested one artful cover preview, avoiding
+  a cartoon look. V1 is a single16:9 silkscreen/paper-collage composition: a
+  luminous amber coffee cup, cold blue snow town and one steam/road ribbon that
+  thaws snow into terracotta and blossom. The exact theme and small fourth-issue
+  line are baked into this preview; avoid double titles if later adapting it.
+- Preview and exact built-in ImageGen prompt are retained in
+  `output/coffee-week04-cover-20261127/{winter-thaw-cover-v1.png,request.json}`.
+  This is a preview, not a fourth-event opening or a live cover replacement.
+
 ## 2026-11-27 · Third-issue award ticker
 
 - The owner selected 勺子《惬意》 as the third first prize and authorized five
@@ -12,8 +52,8 @@
   image cost under1MiB. Preserve the real winner's exact PNG hash.
 - Management display backup/receipt: `coffee-week03-awards-20261127`. The
   publisher checks the actual approved winner before switching HTML last.
-- Fourth-topic ideas are proposals only; do not open a fourth event or change
-  its cover/schedule until a topic is selected.
+- The fourth topic was subsequently selected as 把冬天泡开; see the preview
+  note above. The fourth event/schedule has not been opened by that preview.
 - Browser QA passed at390px and4K, including original enlargement and resumed
   rolling. Use full-page capture for the4K screenshot: viewport-only capture
   clipped the large emulated surface even though its DOM bounds were correct.

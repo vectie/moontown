@@ -1,6 +1,7 @@
 // Event-specific public group invitation, never an admission requirement.
 const eventIds = new Set(['banxing-coffee-20261106', 'coffee-mobile-qa-20261107', 'creative-http-fixture']);
 export function claimGroup(event, now = Date.now()) {
+  if(['banxing-coffee-20261130','banxing-coffee-week04-qa-20261127'].includes(event?.id))return {src:'coffee/community-qr.png',kind:'community',expired:false};
   if(['banxing-coffee-20261123','banxing-coffee-week03-qa-20261123'].includes(event?.id))return {src:'coffee/claim-group-20261123.jpg',expired:now>=Date.parse('2026-11-30T00:00:00+08:00'),validUntil:'11月30日'};
   if(['banxing-coffee-20261116','banxing-coffee-week02-qa-20261116'].includes(event?.id))return {src:'coffee/claim-group-20261116.jpg',expired:now>=Date.parse('2026-11-23T00:00:00+08:00'),validUntil:'11月23日'};
   if (!eventIds.has(event?.id)) return null;
@@ -13,12 +14,17 @@ export function coffeeClaim({fitDialog, now = () => Date.now(), onDone = () => {
     const group = claimGroup(event, now());
     if (!group) return;
     returnTo = document.activeElement;
-    $('claim-title').textContent = submitted ? '投稿成功' : '开奖与领奖群';
-    $('claim-description').textContent = group.expired ? '群二维码已到期，请等待主办更新。你的投稿和审核不受影响。' : '扫码加入领奖群，留意开奖和领奖安排。';
+    const community=group.kind==='community';
+    $('claim-code').dataset.kind=community?'community':'group';
+    $('claim-title').textContent = submitted ? '投稿成功' : community?'开奖与领奖通知':'开奖与领奖群';
+    $('claim-description').textContent = group.expired ? '群二维码已到期，请等待主办更新。你的投稿和审核不受影响。' : community?'关注社区公众号，查看开奖和领奖通知。':'扫码加入领奖群，留意开奖和领奖安排。';
     $('claim-code').hidden = group.expired;
     $('save-claim-code').hidden = group.expired;
     $('claim-instructions').hidden = group.expired;
-    $('claim-instructions').textContent=`微信中长按识别；其他浏览器可保存到相册，再用微信扫一扫。二维码有效至${group.validUntil || '11月16日'}前。`;
+    $('claim-instructions').textContent=community?'微信中长按识别；其他浏览器可保存到相册，再用微信扫一扫。':`微信中长按识别；其他浏览器可保存到相册，再用微信扫一扫。二维码有效至${group.validUntil || '11月16日'}前。`;
+    $('save-claim-code').textContent=community?'保存公众号二维码':'下载群二维码';
+    $('claim-code-image').alt=community?'能源谷创未来生态街区社区公众号二维码':'能源谷“创未来”生态街区欢迎群二维码';
+    $('save-claim-code').download=community?'未来社区-开奖通知二维码.png':'未来社区-领奖群二维码.jpg';
     if (!group.expired) {
       $('claim-code-image').src = group.src;
       $('save-claim-code').href = group.src;

@@ -1,0 +1,584 @@
+----
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/base64",
+}
+----
+
+///|
+let root = "/Users/kq/.codex/coffee-week04-20261127"
+
+///|
+let origin = "https://suanli.kechuangfuwu.com:8443"
+
+///|
+let endpoint : String = origin + "/coffee-week04-qa/api/creative/"
+
+///|
+async fn save(name : String, value : Json) -> Unit {
+  @fs.write_file(
+    root + "/" + name + ".json",
+    value.stringify(indent=2),
+    permission=0o600,
+  )
+}
+
+///|
+fn object(value : Json) -> Map[String, Json] raise {
+  guard value is Object(fields) else { fail("Object expected") }
+  fields
+}
+
+///|
+fn field(value : Json, key : String) -> Json raise {
+  object(value).get(key).unwrap()
+}
+
+///|
+fn string(value : Json) -> String raise {
+  guard value is String(text) else { fail("String expected") }
+  text
+}
+
+///|
+fn array(value : Json) -> Array[Json] raise {
+  guard value is Array(items) else { fail("Array expected") }
+  items
+}
+
+///|
+async fn request(
+  key : String,
+  label : String,
+  url : String,
+  body~ : Json? = None,
+  expected~ : String = "200",
+) -> Json {
+  let output = root + "/" + key + "-" + label + ".json"
+  @fs.write_file(output, "", permission=0o600)
+  let cookie = root + "/" + key + "-cookies.txt"
+  if !@fs.exists(cookie) {
+    @fs.write_file(cookie, "", permission=0o600)
+  }
+  let args = [
+    "--silent", "--show-error", "--max-time", "30", "--cookie", cookie, "--cookie-jar",
+    cookie, "--output", output, "--write-out", "%{http_code}",
+  ]
+  if body is Some(value) {
+    let input = root + "/" + key + "-" + label + "-input.json"
+    @fs.write_file(input, value.stringify(), permission=0o600)
+    args.append([
+      "--header",
+      "Origin: " + origin,
+      "--header",
+      "Sec-Fetch-Site: same-origin",
+      "--header",
+      "Content-Type: application/json",
+      "--data-binary",
+      "@" + input,
+    ])
+  }
+  args.push(url)
+  let result = @shell.Cmd("curl", args).output()
+  result.check()
+  guard result.stdout() == expected else {
+    fail(
+      key +
+      " " +
+      label +
+      " HTTP " +
+      result.stdout() +
+      "; private response retained",
+    )
+  }
+  @json.parse(@fs.read_file(output).text())
+}
+
+///|
+async fn actor(key : String) -> String {
+  let members = array(@json.parse(@fs.read_file(root + "/members.json").text()))
+  guard members
+    .iter()
+    .find_first(item => item is { "role": String(role), .. } && role == key)
+    is Some(person) else {
+    fail("Member missing")
+  }
+  string(field(person, "account_id"))
+}
+
+///|
+async fn action(
+  key : String,
+  name : String,
+  payload : Json,
+  expected~ : String = "200",
+) -> Json {
+  request(
+    key,
+    name,
+    endpoint + "actions",
+    body=Some({
+      "expected_actor_id": actor(key),
+      "action": name,
+      "payload": payload,
+    }),
+    expected~,
+  )
+}
+
+///|
+async fn login() -> Unit {
+  let identities : Array[(String, String, String)] = []
+  for key in ["01", "02", "03", "04", "05", "06"] {
+    guard @json.parse(
+        @fs.read_file(
+          "/Users/kq/.codex/coffee-load20-20261107/" + key + "-register.json",
+        ).text(),
+      )
+      is { "email": String(email), "password": String(password), .. } else {
+      fail("Existing test identity missing")
+    }
+    identities.push((key, email, password))
+  }
+  let existing = array(
+    @json.parse(
+      @fs.read_file(
+        "/Users/kq/.codex/coffee-qa-accounts-real-20261107/credentials.json",
+      ).text(),
+    ),
+  )
+  guard existing.iter().find_first(item => item is { "role": "host", .. })
+    is Some({ "username": String(host), "password": String(password), .. }) else {
+    fail("Existing scoped host missing")
+  }
+  identities.push(("host", host, password))
+  let members : Array[Json] = []
+  for (key, username, password) in identities {
+    ignore(
+      request(
+        key,
+        "login",
+        origin + "/user/auth/password",
+        body=Some({
+          "username": username,
+          "password": password,
+          "audience": "enterprise",
+        }),
+      ),
+    )
+    let mine = request(key, "identity", endpoint + "mine")
+    guard mine is { "viewer": { "account_id": String(id), .. }, .. } &&
+      !id.is_empty() &&
+      field(field(mine, "viewer"), "operator") == Json::boolean(key == "host") else {
+      fail("Unexpected account or manager scope")
+    }
+    members.push({ "role": key, "account_id": id })
+  }
+  save("members", Json::array(members))
+  println(
+    "Six existing ordinary identities and scoped host authenticated; no global role changed",
+  )
+}
+
+///|
+async fn create() -> Unit {
+  for
+    (key, prompt) in [
+      (
+        "01", "把冬天泡开，一杯热咖啡升起金色蒸汽，蒸汽化作道路穿过蓝色雪城，雪融化成春花，丝网版画与纸张拼贴，不要文字和水印",
+      ),
+      (
+        "02", "把冬天泡开主题，窗边热咖啡的蒸汽让玻璃冰花慢慢解冻，琥珀色阳光，成熟平面版画，纸张肌理，不要文字和水印",
+      ),
+    ] {
+    let existing = request(key, "before-create", endpoint + "mine")
+    if array(field(existing, "generations")).any(job => {
+        job is { "state": "completed", .. }
+      }) {
+      continue
+    }
+    ignore(
+      action(key, "generate", {
+        "prompt": prompt,
+        "intent": "week04-acceptance-" + key,
+      }),
+    )
+    println("Accepted real generation " + key)
+  }
+  for key in ["01", "02"] {
+    let mut completed = false
+    for _ in 0..<90 {
+      let mine = request(key, "poll", endpoint + "mine")
+      let jobs = array(field(mine, "generations"))
+      if jobs.any(job => job is { "state": "failed" | "needs_reconcile", .. }) {
+        fail("Generation did not complete; inspect private response")
+      }
+      if jobs.any(job => job is { "state": "completed", .. }) {
+        completed = true
+        break
+      }
+      @async.sleep(2000)
+    }
+    guard completed else { fail("Generation poll deadline") }
+    println("Real GPU image completed " + key)
+  }
+  let bytes = @fs.read_file("src/ui/assets/coffee/winter-reference.webp").binary()
+  ignore(
+    request(
+      "anonymous",
+      "upload-requires-login",
+      endpoint + "uploads",
+      body=Some({
+        "expected_actor_id": "",
+        "filename": "把冬天泡开-未登录验收.webp",
+        "content_type": "image/webp",
+        "intent": "week04-unauth-upload",
+        "data_base64": @base64.encode(bytes),
+      }),
+      expected="401",
+    ),
+  )
+  ignore(
+    request(
+      "03",
+      "upload",
+      endpoint + "uploads",
+      body=Some({
+        "expected_actor_id": actor("03"),
+        "filename": "把冬天泡开-外部AI验收.webp",
+        "content_type": "image/webp",
+        "intent": "week04-external-upload-03",
+        "data_base64": @base64.encode(bytes),
+      }),
+    ),
+  )
+  ignore(
+    request(
+      "03",
+      "reject-script",
+      endpoint + "uploads",
+      body=Some({
+        "expected_actor_id": actor("03"),
+        "filename": "invalid.png",
+        "content_type": "image/png",
+        "intent": "week04-reject-script-03",
+        "data_base64": @base64.encode(
+          b"<svg xmlns='http://www.w3.org/2000/svg'><script>test</script></svg>",
+        ),
+      }),
+      expected="400",
+    ),
+  )
+  for key in ["01", "02", "03"] {
+    let mine = request(key, "before-submit", endpoint + "mine")
+    let jobs = array(field(mine, "generations"))
+    guard jobs.get(0) is Some({ "id": String(id), "state": "completed", .. }) else {
+      fail("Completed image missing")
+    }
+    ignore(
+      action(key, "submit", {
+        "generation_id": id,
+        "title": "把冬天泡开验收作品 · " + key,
+        "display_name": "第四期验收 " + key,
+        "consent": true,
+      }),
+    )
+  }
+  let public = request("04", "before-review", endpoint + "public")
+  guard array(field(public, "gallery")).is_empty() else {
+    fail("Pending entries leaked to public wall")
+  }
+  println(
+    "Three submissions remain private; external WebP rebuilt and script-disguised PNG rejected",
+  )
+}
+
+///|
+async fn review() -> Unit {
+  let mine = request("host", "review-queue", endpoint + "mine")
+  let queue = array(field(mine, "review_queue"))
+  guard [2, 3].contains(queue.length()) else {
+    fail("Expected the remaining pending entries after optional UI approval")
+  }
+  ignore(
+    action(
+      "04",
+      "approve",
+      {
+        "entry_id": field(field(queue[0], "entry"), "id"),
+        "reason": "普通账户越权验收",
+      },
+      expected="403",
+    ),
+  )
+  let second = queue[if queue.length() == 2 { 0 } else { 1 }]
+  let rejected = string(field(field(second, "entry"), "id"))
+  ignore(
+    action("host", "reject", {
+      "entry_id": rejected,
+      "reason": "私有验收：请确认作品名后重新投稿。",
+    }),
+  )
+  let jobs = array(field(mine, "review_queue"))
+  let rejected_actor = string(field(field(second, "entry"), "actor"))
+  let members = array(@json.parse(@fs.read_file(root + "/members.json").text()))
+  guard members
+    .iter()
+    .find_first(person => {
+      person is { "account_id": String(id), .. } && id == rejected_actor
+    })
+    is Some(person) else {
+    fail("Rejected author missing")
+  }
+  let key = string(field(person, "role"))
+  let after = request(key, "rejected-visible", endpoint + "mine")
+  guard array(field(after, "entries")).any(entry => {
+    entry is { "id": String(id), "state": "rejected", .. } && id == rejected
+  }) else {
+    fail("Rejected work not visible to creator")
+  }
+  ignore(
+    action(key, "submit", {
+      "generation_id": field(field(second, "generation"), "id"),
+      "title": "把冬天泡开验收作品 · 已修改",
+      "display_name": "第四期验收 " + key,
+      "consent": true,
+    }),
+  )
+  let pending = request("host", "review-again", endpoint + "mine")
+  for row in array(field(pending, "review_queue")) {
+    ignore(
+      action("host", "approve", {
+        "entry_id": field(field(row, "entry"), "id"),
+        "reason": "私有验收通过，不属于正式比赛",
+      }),
+    )
+  }
+  let public = request("04", "after-review", endpoint + "public")
+  guard array(field(public, "gallery")).length() == 3 else {
+    fail("Expected three approved public entries")
+  }
+  save("review-receipt", {
+    "approved": 3,
+    "rejected_retained": true,
+    "resubmitted": true,
+    "original_pending_count": jobs.length(),
+  })
+  println(
+    "Host return/resubmit/approve completed; only approved entries became public",
+  )
+}
+
+///|
+async fn vote() -> Unit {
+  let mut public = request("04", "voting-poll", endpoint + "public")
+  for _ in 0..<90 {
+    if field(field(public, "voting"), "phase") == Json::string("open") {
+      break
+    }
+    @async.sleep(2000)
+    public = request("04", "voting-poll", endpoint + "public")
+  }
+  guard field(field(public, "voting"), "phase") == Json::string("open") else {
+    fail("Natural voting window did not open")
+  }
+  let entries : Map[String, Json] = Map([])
+  for key in ["01", "02", "03"] {
+    let mine = request(key, "vote-entry", endpoint + "mine")
+    guard array(field(mine, "entries"))
+      .iter()
+      .find_first(entry => entry is { "state": "approved", .. })
+      is Some(entry) else {
+      fail("Approved entry missing")
+    }
+    entries[key] = field(entry, "id")
+  }
+  for
+    (voter, author) in [
+      ("01", "02"),
+      ("02", "01"),
+      ("03", "01"),
+      ("04", "01"),
+      ("05", "02"),
+      ("06", "03"),
+    ] {
+    ignore(
+      action(voter, "vote", {
+        "entry_id": entries.get(author).unwrap(),
+        "intent": "week04-vote-" + voter,
+      }),
+    )
+  }
+  let counted = request("04", "six-votes", endpoint + "public")
+  guard field(field(counted, "voting"), "total_votes") == Json::number(6) else {
+    fail("Six votes were not counted")
+  }
+  println("Six distinct real QA voters cast valid ballots, expected ranks3/2/1")
+}
+
+///|
+async fn settle() -> Unit {
+  let mut mine = request("host", "settle-poll", endpoint + "mine")
+  for _ in 0..<120 {
+    if field(field(mine, "ranked_awards"), "ready") == Json::boolean(true) {
+      break
+    }
+    @async.sleep(2000)
+    mine = request("host", "settle-poll", endpoint + "mine")
+  }
+  guard field(field(mine, "ranked_awards"), "ready") == Json::boolean(true) else {
+    fail("Ranked prizes are not ready")
+  }
+  let result = action("host", "publish-results", {})
+  guard array(field(result, "awards")).length() == 3 else {
+    fail("Three QA awards were not published")
+  }
+  save("final-receipt", {
+    "qa_only": true,
+    "real_generations": 2,
+    "external_uploads": 1,
+    "approved_entries": 3,
+    "distinct_voters": 6,
+    "total_votes": 6,
+    "prizes": 3,
+    "formal_entries_created": 0,
+    "formal_votes_cast": 0,
+  })
+  println(
+    "Natural QA close, sealed ranks and three QA prize results completed; no formal contest votes",
+  )
+}
+
+///|
+async fn formal_checks() -> Unit {
+  let base = origin + "/town/api/creative/"
+  let public = request("anonymous", "formal-before", base + "public")
+  guard public
+    is {
+      "event": {
+        "id": "banxing-coffee-20261130",
+        "topic": "把冬天泡开",
+        "opens_ms": "1795968000000",
+        "deadline_ms": "1796299200000",
+        "voting_opens_ms": "1796306400000",
+        "voting_closes_ms": "1796378400000",
+        "awards_ms": "1796385600000",
+        "provider_ready": true,
+        ..
+      },
+      "revision": 0,
+      "event_remaining": 200,
+      "gallery": [],
+      ..
+    } else {
+    fail("Formal schedule or clean state differs")
+  }
+  let mine = request("01", "formal-mine", base + "mine")
+  guard mine
+    is {
+      "viewer": { "account_id": String(id), "operator": false, .. },
+      "entries": [],
+      "generations": [],
+      ..
+    } &&
+    id == actor("01") else {
+    fail("Formal identity or private state differs")
+  }
+  ignore(
+    request(
+      "01",
+      "formal-upcoming-generate",
+      base + "actions",
+      body=Some({
+        "expected_actor_id": id,
+        "action": "generate",
+        "payload": {
+          "prompt": "未开赛边界验收，不应生成",
+          "intent": "week04-upcoming-guard",
+        },
+      }),
+      expected="409",
+    ),
+  )
+  ignore(
+    request(
+      "01",
+      "formal-upcoming-upload",
+      base + "uploads",
+      body=Some({
+        "expected_actor_id": id,
+        "filename": "upcoming.webp",
+        "content_type": "image/webp",
+        "intent": "week04-upcoming-guard",
+        "data_base64": @base64.encode(
+          @fs.read_file("src/ui/assets/coffee/winter-reference.webp").binary(),
+        ),
+      }),
+      expected="409",
+    ),
+  )
+  let after = request("01", "formal-after", base + "mine")
+  guard after
+    is {
+      "revision": 0,
+      "event_remaining": 200,
+      "entries": [],
+      "generations": [],
+      ..
+    } else {
+    fail("Pre-open guard consumed state or quota")
+  }
+  let old = request(
+    "anonymous",
+    "third-archive",
+    origin + "/coffee-week03/api/creative/public",
+  )
+  guard old
+    is {
+      "event": { "id": "banxing-coffee-20261123", .. },
+      "gallery": [
+        {
+          "id": "bf30aa696e7e0e6f8a03c29486744b1ff0ad69686d623655b2a2212f5ba9c7ce",
+          ..
+        },
+      ],
+      ..
+    } else {
+    fail("Third archive entry differs")
+  }
+  save("formal-receipt", {
+    "fourth_schedule_exact": true,
+    "preopen_generation_and_upload_rejected": true,
+    "formal_entries": 0,
+    "formal_generations": 0,
+    "formal_votes": 0,
+    "event_remaining": 200,
+    "third_approved_entry_preserved": true,
+  })
+  println(
+    "Fourth formal schedule exact; pre-open writes rejected without consuming quota; third approved entry preserved",
+  )
+}
+
+///|
+async fn main {
+  if !@fs.exists(root) {
+    @fs.mkdir(root, permission=0o700)
+  }
+  guard @env.args() is [_, phase] else {
+    fail("login|create|review|vote|settle|formal-checks")
+  }
+  match phase {
+    "login" => login()
+    "create" => create()
+    "review" => review()
+    "vote" => vote()
+    "settle" => settle()
+    "formal-checks" => formal_checks()
+    _ => fail("Unknown acceptance phase")
+  }
+}

@@ -2,6 +2,10 @@
 // goes into the card or URL. The QR encoder is loaded only when requested.
 import { creationGuide } from './coffee-themes.js';
 export function suggestedTitle(prompt='', variant=0,event) {
+  if(creationGuide(event).key==='winter'){
+    const names=/城|路|街|雪/.test(prompt)?['把冬天泡开','雪城回暖','热气经过的地方']:/窗|花|霜/.test(prompt)?['窗上的春天','杯沿解冻','冰花开了']:['心事回暖','一杯解冻的时光','慢慢暖起来'];
+    return names[((variant%names.length)+names.length)%names.length];
+  }
   if(creationGuide(event).key==='warm'){
     const names=/猫|暹罗|拉花/.test(prompt)?['暖暖相伴','杯里的小伙伴','和你一起晒太阳']:/晨光|阳光|窗/.test(prompt)?['一束暖暖的光','把晨光捧在手心','窗边的温度']:['暖暖，刚刚好','一杯温柔','陪你慢一点'];
     return names[((variant%names.length)+names.length)%names.length];
@@ -15,7 +19,7 @@ export function suggestedTitle(prompt='', variant=0,event) {
   return names[((variant%names.length)+names.length)%names.length];
 }
 export function archivedShareHref(href){
-  const link=new URL(href),route={'banxing-coffee-20261106':'/coffee-week01/coffee-contest.html','banxing-coffee-20261116':'/coffee-week02/coffee-contest.html'}[link.searchParams.get('campaign')];
+  const link=new URL(href),route={'banxing-coffee-20261106':'/coffee-week01/coffee-contest.html','banxing-coffee-20261116':'/coffee-week02/coffee-contest.html','banxing-coffee-20261123':'/coffee-week03/coffee-contest.html'}[link.searchParams.get('campaign')];
   if(!route || !link.searchParams.has('entry') || link.searchParams.has('activity') || !/^\/(?:town|moontown)\/coffee-contest\.html$/.test(link.pathname))return null;
   link.pathname=route;return link.href;
 }

@@ -72,6 +72,18 @@ body[data-theme=siamese]{--paper:#f3e3cb;--ink:#573c2b;--line:#7252352b;color:va
 .controls #motion{display:grid;place-items:center;width:clamp(44px,1.45cqw,56px);height:clamp(44px,1.45cqw,56px);min-width:44px;min-height:44px;padding:0;border:0;background:transparent;box-shadow:none;border-radius:6px}
 .controls #motion:hover{background:transparent}
 .motion-icon{display:block;width:clamp(20px,.7cqw,28px);height:clamp(20px,.7cqw,28px);pointer-events:none}
+/* The approved winter artwork already contains its title. Keep one accessible heading. */
+body[data-cover=winter]{--paper:#ebe6dc;--ink:#243a4a;--line:#354d612b;background:#122f49;color:var(--ink)}
+[data-cover=winter] .copy{width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+[data-cover=winter] .partners{background:#f5f0e7ed;padding:.3cqw .5cqw;border-radius:.2cqw;height:4.2cqw}
+[data-cover=winter] .bottom-banner{background:#f4f0e8fa}
+[data-cover=winter] figcaption{background:#f4f0e8ed}
+[data-cover=winter] .join-direct{background:#22415c}
+@media(max-width:700px),(max-width:1100px) and (max-aspect-ratio:4/3){
+ [data-cover=winter] .hero-image{aspect-ratio:1672/941;background:#12324f}
+ [data-cover=winter] .hero-image img{object-fit:contain}
+ [data-cover=winter] .partners{background:transparent;padding:14px 20px 16px;border-radius:0;height:auto}
+}
 /* Portrait tablets follow the same flow as phones instead of centering a tiny TV canvas. */
 @media(min-width:701px) and (max-width:1100px) and (max-aspect-ratio:4/3){
  [data-theme=siamese] .hero-image{aspect-ratio:16/9}
