@@ -4,7 +4,7 @@ pub fn miniapp_submit_publication_request(
   viewer : @miniapp_projection.MiniappViewerContext,
   request : MiniappPublicationRequest,
   now_ms~ : UInt64,
-  policy? : MiniappPublicationPolicy = miniapp_default_publication_policy(),
+  policy~ : MiniappPublicationPolicy = miniapp_default_publication_policy(),
 ) -> MiniappModerationChange {
   let validation = miniapp_validate_publication(
     snapshot,
@@ -38,7 +38,7 @@ pub fn miniapp_review_publication_request(
   request : MiniappPublicationRequest,
   decision : MiniappModerationDecision,
   now_ms~ : UInt64,
-  policy? : MiniappPublicationPolicy = miniapp_default_publication_policy(),
+  policy~ : MiniappPublicationPolicy = miniapp_default_publication_policy(),
 ) -> MiniappModerationChange {
   let validation = miniapp_validate_publication(
     snapshot,

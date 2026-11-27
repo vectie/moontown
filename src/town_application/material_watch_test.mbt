@@ -22,9 +22,9 @@ async fn setup_fixture() -> (String, @town_application.RequestApplication) {
 
 ///|
 fn setup_body(
-  sources? : Json = "sources/customer.txt\nsources/market.txt",
-  book? : String = "research-material",
-  goal? : String = "",
+  sources~ : Json = "sources/customer.txt\nsources/market.txt",
+  book~ : String = "research-material",
+  goal~ : String = "",
 ) -> String {
   let body : Json = {
     "watch_mode": "local-material",
@@ -58,7 +58,7 @@ async test "material setup rejects invalid unavailable duplicate escaped and bin
     "sources/binary.bin",
     "sources/escape.txt",
     "sources/customer.txt\nsources/customer.txt",
-    [("sources/customer.txt" : Json), (4 : Json)].to_json(),
+    ToJson::to_json([("sources/customer.txt" : Json), (4 : Json)]),
   ]
   for source in bad {
     try app.submit_standing_watch(setup_body(sources=source)) catch {
@@ -78,6 +78,7 @@ async test "material setup rejects invalid unavailable duplicate escaped and bin
 }
 
 ///|
+#warnings("-deprecated")
 async test "material setup same request is idempotent across restart and preserves source filenames" {
   let (root, app) = setup_fixture()
   @support.write_text_file(
@@ -114,7 +115,7 @@ async test "material setup same request is idempotent across restart and preserv
   }
   assert_eq(
     material.get("sources"),
-    Some((["sources/customer,notes.txt"] : Array[String]).to_json()),
+    Some(ToJson::to_json((["sources/customer,notes.txt"] : Array[String]))),
   )
   assert_eq(
     material.get("baseline_status"),
@@ -144,6 +145,7 @@ async test "material setup plan write failure never publishes a goal and can be 
 }
 
 ///|
+#warnings("-deprecated")
 async test "material setup receipt failure repairs identical durable goal after restart" {
   let (root, app) = setup_fixture()
   @fs.mkdir(root + "/operator-requests", recursive=true)
@@ -206,6 +208,7 @@ async test "material setup conflicts retain prior plan and legacy cadence still 
 }
 
 ///|
+#warnings("-deprecated")
 async test "material setup concurrent repeated saves retain one watch beside an ordinary cadence save" {
   let (root, app) = setup_fixture()
   let responses : Array[Json] = []

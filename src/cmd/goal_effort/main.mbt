@@ -36,7 +36,7 @@ async fn main {
   run() catch {
     error => {
       @stdio.stderr.write("goal_effort: \{error}\n")
-      @sys.exit(1)
+      @env.exit(1)
     }
   }
 }

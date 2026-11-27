@@ -1,5 +1,5 @@
 ///|
-fn standing_watch_policy_goal(threshold : Int) -> @core.StandingGoal {
+fn standing_watch_policy_goal(threshold : Int32) -> @core.StandingGoal {
   @core.StandingGoal::new(
     id="watch-policy",
     title="Watch policy",
@@ -12,7 +12,7 @@ fn standing_watch_policy_goal(threshold : Int) -> @core.StandingGoal {
 ///|
 fn standing_watch_policy_execution(
   summary : String,
-  status? : @core.TaskExecutionStatus = Completed,
+  status~ : @core.TaskExecutionStatus = Completed,
 ) -> @core.TaskExecutionRecord {
   @core.TaskExecutionRecord::new(
     task_id="watch-policy-task",

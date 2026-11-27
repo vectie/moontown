@@ -60,7 +60,7 @@ async test "PlanBook default is durable native queue without generated ACP targe
   let terminal_state : @native_work.State = { ..state, work: [completed], }
   @support.write_text_file(
     @native_work.path_for_snapshot(workspace.snapshot_path),
-    terminal_state.to_json().stringify(),
+    ToJson::to_json(terminal_state).stringify(),
   )
   let repeated = materialize_native_planbook_repair(
     criterion,
@@ -75,7 +75,10 @@ async test "PlanBook default is durable native queue without generated ACP targe
     path=@native_work.path_for_snapshot(workspace.snapshot_path),
   )
   assert_eq(retained.work.length(), 1)
-  assert_eq(retained.work[0].request.to_json(), state.work[0].request.to_json())
+  assert_eq(
+    ToJson::to_json(retained.work[0].request),
+    ToJson::to_json(state.work[0].request),
+  )
 }
 
 ///|
@@ -112,12 +115,14 @@ test "native repair policy preserves saved commit requirement without making all
     fail("invalid completion contract")
   }
   assert_eq(commands, [
-    "moon fmt".to_json(),
-    "moon info".to_json(),
-    "moon check --no-render".to_json(),
-    "moon test src/planbook_runtime/planbook_autonomy_wbtest.mbt src/live_autonomy_runtime/live_autonomy_wbtest.mbt --no-render".to_json(),
-    "moon test --no-render".to_json(),
-    "git diff --check".to_json(),
+    ToJson::to_json("moon fmt"),
+    ToJson::to_json("moon info"),
+    ToJson::to_json("moon check --no-render"),
+    ToJson::to_json(
+      "moon test src/planbook_runtime/planbook_autonomy_wbtest.mbt src/live_autonomy_runtime/live_autonomy_wbtest.mbt --no-render",
+    ),
+    ToJson::to_json("moon test --no-render"),
+    ToJson::to_json("git diff --check"),
   ])
   assert_eq(checks.length(), commands.length())
   for index, check in checks {

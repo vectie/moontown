@@ -134,7 +134,7 @@ test "salon rejects stale selection missing comparison and erased dissent" {
       @collaboration_contract.salon_selection(
         saved,
         work,
-        change_salon_field(fields, key, value.to_json()),
+        change_salon_field(fields, key, ToJson::to_json(value)),
       )
       is Err(_),
     )
@@ -222,7 +222,7 @@ fn salon_reply(
     outcome: None,
     source_listing: None,
   }
-  reply.to_json().stringify()
+  ToJson::to_json(reply).stringify()
 }
 
 ///|

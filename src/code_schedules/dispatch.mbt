@@ -45,7 +45,7 @@ fn code_receipt_status(claim : Json, command_id : String) -> String? {
   }
   for row in rows {
     guard row is Object(item) &&
-      item.get("command_id") == Some(command_id.to_json()) &&
+      item.get("command_id") == Some(ToJson::to_json(command_id)) &&
       item.get("receipt") is Some(Object(receipt)) &&
       receipt.get("status") is Some(String(status)) else {
       continue
@@ -106,7 +106,7 @@ async fn code_schedule_book_still_registered(
 pub async fn run_due_code_schedules(
   now : Int64,
   catalog_path : String,
-  path? : String = default_code_schedule_path(),
+  path~ : String = default_code_schedule_path(),
 ) -> String {
   let initial = load_code_schedule_state(path~)
   if initial.schedules.length() == 0 {

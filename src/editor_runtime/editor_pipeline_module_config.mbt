@@ -1,11 +1,13 @@
 ///|
+#derive(Debug, Eq, FromJson)
 struct EditorPipelineModuleConfig {
-  version : Int
+  version : Int32
   description : String
   modules : Array[EditorPipelineModuleConfigEntry]
-} derive(Debug, Eq, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, FromJson)
 struct EditorPipelineModuleConfigEntry {
   id : String
   enabled : Bool
@@ -13,14 +15,14 @@ struct EditorPipelineModuleConfigEntry {
   book_id : String
   district : String
   building_kind : String
-  grid_x : Int
-  grid_y : Int
-  footprint_w : Int
-  footprint_h : Int
-  display_w : Int
-  display_h : Int
-  entrance_x : Int
-  entrance_y : Int
+  grid_x : Int32
+  grid_y : Int32
+  footprint_w : Int32
+  footprint_h : Int32
+  display_w : Int32
+  display_h : Int32
+  entrance_x : Int32
+  entrance_y : Int32
   interior_kind : String
   style_family : String
   asset_base : String
@@ -29,7 +31,7 @@ struct EditorPipelineModuleConfigEntry {
   use_case : String
   agent_flow : String
   summary : String
-} derive(Debug, Eq, FromJson)
+}
 
 ///|
 fn default_editor_pipeline_module_config_path() -> String {

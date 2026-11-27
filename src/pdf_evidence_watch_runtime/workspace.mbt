@@ -5,7 +5,7 @@ async fn write_pdf_evidence_watch_workspace(
   purpose : String,
   websites : Array[String],
   analysis_method : String,
-  cadence_ticks : Int,
+  cadence_ticks : Int32,
   template_root : String,
 ) -> Unit {
   let root = entry.workspace_root

@@ -16,13 +16,13 @@ pub fn default_code_schedule_path() -> String
 
 pub async fn delete_code_schedule(String, path? : String) -> CodeScheduleState
 
-pub async fn edit_code_schedule(String, prompt~ : String, model~ : String, title~ : String, interval_seconds~ : Int, next_due_at~ : Int64, repeat~ : Bool, recurrence? : String, timezone? : String, path? : String) -> CodeScheduleState
+pub async fn edit_code_schedule(String, prompt~ : String, model~ : String, title~ : String, interval_seconds~ : Int32, next_due_at~ : Int64, repeat~ : Bool, recurrence? : String, timezone? : String, path? : String) -> CodeScheduleState
 
 pub fn find_code_schedule_book(Array[@moonbook.BookCatalogEntry], String) -> @moonbook.BookCatalogEntry?
 
 pub async fn load_code_schedule_state(path? : String) -> CodeScheduleState
 
-pub async fn pending_code_schedule_intents(limit? : Int, path? : String) -> Array[CodeDispatchIntent]
+pub async fn pending_code_schedule_intents(limit? : Int32, path? : String) -> Array[CodeDispatchIntent]
 
 pub async fn record_code_schedule_acceptance(String, String, path? : String) -> Bool
 
@@ -45,6 +45,7 @@ pub async fn set_code_schedule_enabled(String, Bool, Int64, path? : String) -> B
 // Errors
 
 // Types and methods
+#derive(@debug.Debug, @json.FromJson, @json.ToJson)
 pub struct CodeDispatchIntent {
   schedule_id : String
   command_id : String
@@ -54,8 +55,9 @@ pub struct CodeDispatchIntent {
   prompt : String
   model : String
   due_at : Int64
-} derive(ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(@debug.Debug, @json.FromJson, @json.ToJson)
 pub struct CodeSchedule {
   id : String
   book_id : String
@@ -63,7 +65,7 @@ pub struct CodeSchedule {
   session_id : String
   prompt : String
   model : String
-  interval_seconds : Int
+  interval_seconds : Int32
   enabled : Bool
   next_due_at : Int64
   pending_command_id : String
@@ -76,23 +78,24 @@ pub struct CodeSchedule {
   recurrence : String?
   timezone : String?
   calendar_anchor_at : Int64?
-} derive(ToJson, @debug.Debug, @json.FromJson)
+}
 pub fn CodeSchedule::mark_accepted(Self, String) -> Self?
 pub fn CodeSchedule::mark_terminal(Self, String, String, Int64) -> Self?
 pub fn CodeSchedule::mark_uncertain(Self, String) -> Self?
 pub fn CodeSchedule::mark_waiting(Self, String, String) -> Self?
-pub fn CodeSchedule::new(id~ : String, book_id~ : String, book_root~ : String, session_id~ : String, prompt~ : String, model~ : String, interval_seconds~ : Int, now~ : Int64) -> Result[Self, String]
+pub fn CodeSchedule::new(id~ : String, book_id~ : String, book_root~ : String, session_id~ : String, prompt~ : String, model~ : String, interval_seconds~ : Int32, now~ : Int64) -> Result[Self, String]
 pub fn CodeSchedule::pause(Self) -> Self
 pub fn CodeSchedule::prepare_due(Self, Int64) -> (Self, CodeDispatchIntent)?
 pub fn CodeSchedule::reactivate(Self, Int64) -> Self
-pub fn CodeSchedule::reschedule(Self, prompt~ : String, model~ : String, title~ : String, interval_seconds~ : Int, next_due_at~ : Int64, repeat~ : Bool) -> Result[Self, String]
+pub fn CodeSchedule::reschedule(Self, prompt~ : String, model~ : String, title~ : String, interval_seconds~ : Int32, next_due_at~ : Int64, repeat~ : Bool) -> Result[Self, String]
 pub async fn CodeSchedule::with_calendar(Self, String, String) -> Self
 
+#derive(@debug.Debug, @json.FromJson, @json.ToJson)
 pub struct CodeScheduleState {
   schema : String
-  revision : Int
+  revision : Int32
   schedules : Array[CodeSchedule]
-} derive(ToJson, @debug.Debug, @json.FromJson)
+}
 
 // Type aliases
 

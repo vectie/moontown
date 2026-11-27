@@ -25,7 +25,7 @@ pub fn selected_style_family(
 ///|
 pub fn movement_loop_records(
   modules : Array[EditorPipelineModulePlacement],
-  limit? : Int = 8,
+  limit~ : Int32 = 8,
 ) -> Array[EditorPipelineMovementLoopRecord] {
   let records : Array[EditorPipelineMovementLoopRecord] = []
   for module_entry in modules {
@@ -153,7 +153,7 @@ pub fn terrain_layers_for_modules(
 ///|
 pub fn terrain_reason_records(
   modules : Array[EditorPipelineModulePlacement],
-  limit? : Int = 12,
+  limit~ : Int32 = 12,
 ) -> Array[EditorPipelineTerrainReasonRecord] {
   let records : Array[EditorPipelineTerrainReasonRecord] = []
   for module_entry in modules {

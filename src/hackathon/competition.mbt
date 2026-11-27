@@ -57,6 +57,7 @@ pub fn register_team(
 }
 
 ///|
+#warnings("-reserved_keyword")
 fn register_team_unconfigured(
   state : HackathonState,
   team : Team,
@@ -71,15 +72,15 @@ fn register_team_unconfigured(
     fail("team ID already exists")
   }
   let members : Map[String, Bool] = Map([])
-  for member in team.members {
-    guard !member.trim().is_empty() &&
-      !members.contains(member) &&
+  for member_val in team.members {
+    guard !member_val.trim().is_empty() &&
+      !members.contains(member_val) &&
       !state.teams.any(t => {
-        t.challenge_id == team.challenge_id && t.members.contains(member)
+        t.challenge_id == team.challenge_id && t.members.contains(member_val)
       }) else {
       fail("a resident may belong to only one team in a challenge")
     }
-    members[member] = true
+    members[member_val] = true
   }
   let teams = state.teams.copy()
   teams.push(team)

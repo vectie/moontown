@@ -127,6 +127,7 @@ async fn PortableStore::save_index(
 }
 
 ///|
+#warnings("-deprecated")
 async fn[T] PortableStore::with_index(
   self : PortableStore,
   action : async (StoreIndex) -> T,

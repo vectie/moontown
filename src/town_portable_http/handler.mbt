@@ -134,7 +134,7 @@ async fn TransferService::dispatch(
         () => self.recheck(request, actor, binding),
         self.now,
       )
-      sink.json(200, { "ok": true, "payload": view.to_json() })
+      sink.json(200, { "ok": true, "payload": ToJson::to_json(view) })
       return
     }
     if request.meth is @http.Get {
@@ -182,7 +182,10 @@ async fn TransferService::dispatch(
         visible.push(view)
       }
     }
-    sink.json(200, { "ok": true, "payload": { "packages": visible.to_json() } })
+    sink.json(200, {
+      "ok": true,
+      "payload": { "packages": ToJson::to_json(visible) },
+    })
     return
   }
   if !(request.meth is @http.Post) {
@@ -224,10 +227,10 @@ async fn TransferService::dispatch(
       sink.json(200, {
         "ok": true,
         "payload": {
-          "package": view.to_json(),
+          "package": ToJson::to_json(view),
           "recipient_principal_id": draft.grantee_principal_id,
           "tenant_id": actor.tenant_id,
-          "expires_at_ms": draft.expires_at_ms.to_json(),
+          "expires_at_ms": ToJson::to_json(draft.expires_at_ms),
           "package_size_bytes": view.binding.source.package_size_bytes,
           "package_sha256": view.binding.source.package_sha256,
           "included_output_count": view.binding.source.included_output_count,
@@ -238,7 +241,7 @@ async fn TransferService::dispatch(
       })
     } else {
       let grant = self.store.grant(actor, draft, (self.now)())
-      sink.json(200, { "ok": true, "payload": grant.to_json() })
+      sink.json(200, { "ok": true, "payload": ToJson::to_json(grant) })
     }
     return
   }
@@ -249,7 +252,7 @@ async fn TransferService::dispatch(
       control_string(fields, "grant_id"),
       (self.now)(),
     )
-    sink.json(200, { "ok": true, "payload": grant.to_json() })
+    sink.json(200, { "ok": true, "payload": ToJson::to_json(grant) })
     return
   }
   if path == @town_contract.portable_package_withdraw_path() {
@@ -262,7 +265,7 @@ async fn TransferService::dispatch(
       control_string(fields, "binding_digest"),
       (self.now)(),
     )
-    sink.json(200, { "ok": true, "payload": view.to_json() })
+    sink.json(200, { "ok": true, "payload": ToJson::to_json(view) })
     return
   }
   reject(405, "method_not_allowed")

@@ -6,7 +6,7 @@ async fn apply_supervision_directive(
   directive : @roles.MayorSupervisionDirective,
   snapshot_path : String,
   standing_goals : Array[@core.StandingGoal],
-  retry? : async (
+  retry~ : async (
     @core.TownState,
     @roles.Mayor,
     Array[@moonbook.BookCatalogEntry],

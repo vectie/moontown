@@ -3,7 +3,7 @@ fn civic_communication_reducer_packet(
   scenario : CivicCommunicationScenario,
   packet_id : String,
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> @moonclaw.ExternalProposalPacket {
   let pattern = @civic.communication_pattern_for_scenario(scenario)
   @moonclaw.ExternalProposalPacket::new(
@@ -44,16 +44,16 @@ fn civic_communication_reducer_packet_metadata(
   scenario : CivicCommunicationScenario,
   pattern : @civic.CivicCommunicationPattern,
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> Json {
-  let fields : Map[String, Json] = {}
-  fields["producer"] = "moontown".to_json()
-  fields["building_id"] = scenario.building_id.to_json()
-  fields["book_id"] = scenario.building_book_id.to_json()
-  fields["round_id"] = round_id.to_json()
-  fields["round_number"] = round_number.to_json()
-  fields["communication_pattern_id"] = pattern.id.to_json()
-  fields["communication_pattern_title"] = pattern.title.to_json()
+  let fields : Map[String, Json] = Map([])
+  fields["producer"] = ToJson::to_json("moontown")
+  fields["building_id"] = ToJson::to_json(scenario.building_id)
+  fields["book_id"] = ToJson::to_json(scenario.building_book_id)
+  fields["round_id"] = ToJson::to_json(round_id)
+  fields["round_number"] = ToJson::to_json(round_number)
+  fields["communication_pattern_id"] = ToJson::to_json(pattern.id)
+  fields["communication_pattern_title"] = ToJson::to_json(pattern.title)
   @moonclaw_runtime.add_moonclaw_no_input_policy(fields)
   fields["profile_metadata"] = @moonclaw_runtime.moonclaw_no_input_policy_json()
   fields["step_metadata"] = civic_communication_reducer_packet_step_metadata(
@@ -67,11 +67,13 @@ fn civic_communication_reducer_packet_step_metadata(
   scenario : CivicCommunicationScenario,
   pattern : @civic.CivicCommunicationPattern,
 ) -> Json {
-  let fields : Map[String, Json] = {}
-  fields["kind"] = @civic.civic_reducer_step_kind().to_json()
-  fields["output_contract"] = pattern.output_contract.to_json()
-  fields["preferred_skills"] = [scenario.skill_name].to_json()
-  fields["target_pages"] = [@civic.civic_reducer_output_relative_path()].to_json()
+  let fields : Map[String, Json] = Map([])
+  fields["kind"] = ToJson::to_json(@civic.civic_reducer_step_kind())
+  fields["output_contract"] = ToJson::to_json(pattern.output_contract)
+  fields["preferred_skills"] = ToJson::to_json([scenario.skill_name])
+  fields["target_pages"] = ToJson::to_json([
+    @civic.civic_reducer_output_relative_path(),
+  ])
   @moonclaw_runtime.add_moonclaw_no_input_policy(fields)
   Json::object(fields)
 }
@@ -80,7 +82,7 @@ fn civic_communication_reducer_packet_step_metadata(
 fn civic_communication_reducer_request(
   scenario : CivicCommunicationScenario,
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> String {
   let pattern = @civic.communication_pattern_for_scenario(scenario)
   [

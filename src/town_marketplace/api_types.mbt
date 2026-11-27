@@ -1,23 +1,26 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ListingTransitionDraft {
   listing_id : String
   listing_kind : String
   target_state : String
   review_summary : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ListingActionDraft {
   listing_id : String
   listing_kind : String
   action_id : String
   message : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ActionRequestDecisionDraft {
   request_id : String
-  expected_version : Int
+  expected_version : Int32
   decision : String
   decision_summary : String
   instruction : String
@@ -25,34 +28,38 @@ pub(all) struct ActionRequestDecisionDraft {
   max_cost_micro_usd : Int64
   max_runtime_ms : Int64
   max_tokens : Int64
-  max_artifacts : Int
+  max_artifacts : Int32
   web_search : Bool
   expires_at : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ActionRequestHandoffDraft {
   request_id : String
-  expected_version : Int
+  expected_version : Int32
   handoff_id : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ActionRequestResumeDraft {
   request_id : String
-  expected_version : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  expected_version : Int32
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ActionRequestRuntimeDraft {
   handoff_id : String
   runtime_status : String
   worker_run_id : String
   result_summary : String
   result_evidence_refs : Array[String]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct OrderDraft {
   order_id : String
   title : String
@@ -60,31 +67,35 @@ pub(all) struct OrderDraft {
   deliverable : String
   acceptance_criteria : String
   tags : Array[String]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct OrderFulfillmentDraft {
   order_id : String
-  expected_version : Int
+  expected_version : Int32
   summary : String
   evidence_refs : Array[String]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct OrderDecisionDraft {
   order_id : String
-  expected_version : Int
+  expected_version : Int32
   decision : String
   decision_summary : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct OrderCancelDraft {
   order_id : String
-  expected_version : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  expected_version : Int32
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ChannelDraft {
   channel_id : String
   title : String
@@ -94,9 +105,10 @@ pub(all) struct ChannelDraft {
   building_listing_id : String?
   agent_listing_id : String?
   member_principal_ids : Array[String]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct MessageDraft {
   message_id : String
   channel_id : String
@@ -106,22 +118,25 @@ pub(all) struct MessageDraft {
   audience_principal_ids : Array[String]
   public_audience : Bool
   reply_to_message_id : String?
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct NotificationReadDraft {
   notification_id : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct SubscriptionDraft {
   subscription_id : String
   topic_kind : String
   topic_id : String
   enabled : Bool
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ShareGrantDraft {
   grant_id : String
   resource_kind : String
@@ -129,21 +144,24 @@ pub(all) struct ShareGrantDraft {
   grantee_principal_id : String
   permission : String
   expires_at_ms : UInt64?
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ShareGrantRevokeDraft {
   grant_id : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct SharePreviewDraft {
   resource_kind : String
   resource_id : String
   grantee_principal_id : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct SponsoredPlacementDraft {
   placement_id : String
   listing_kind : String
@@ -153,7 +171,7 @@ pub(all) struct SponsoredPlacementDraft {
   starts_at_ms : UInt64
   ends_at_ms : UInt64
   active : Bool
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 fn parse_listing_kind(value : String) -> ListingKind raise {

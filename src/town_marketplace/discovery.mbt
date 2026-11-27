@@ -23,7 +23,7 @@ fn json_card_strings(card : Json, key : String) -> Array[String] {
 }
 
 ///|
-fn json_card_int(card : Json, key : String) -> Int {
+fn json_card_int(card : Json, key : String) -> Int32 {
   guard card is Object(fields) else { return 0 }
   match fields.get(key) {
     Some(Number(value, ..)) => value.to_int()
@@ -43,7 +43,7 @@ fn query_terms(query : String) -> Array[String] {
 }
 
 ///|
-fn organic_listing_score(card : Json, terms : Array[String]) -> Int {
+fn organic_listing_score(card : Json, terms : Array[String]) -> Int32 {
   let title = json_card_string(card, "title").to_lower()
   let summary = json_card_string(card, "summary").to_lower()
   let capabilities = json_card_strings(card, "capabilities")
@@ -212,11 +212,13 @@ pub fn marketplace_discovery_feed(
 ) -> Json {
   {
     "contract_id": "moontown.discovery-feed.v1",
-    "organic_results": marketplace_organic_search(state, query).to_json(),
-    "recommendations": marketplace_recommendations(state, principal).to_json(),
-    "sponsored_placements": marketplace_active_sponsored(
-      state, principal, now_ms,
-    ).to_json(),
+    "organic_results": ToJson::to_json(marketplace_organic_search(state, query)),
+    "recommendations": ToJson::to_json(
+      marketplace_recommendations(state, principal),
+    ),
+    "sponsored_placements": ToJson::to_json(
+      marketplace_active_sponsored(state, principal, now_ms),
+    ),
     "policy": {
       "organic_and_sponsored_separated": true,
       "recommendations_explainable": true,

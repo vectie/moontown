@@ -46,11 +46,14 @@ pub async fn write_editor_pipeline_state(snapshot_path? : String, workspace_root
 // Errors
 
 // Types and methods
-type EditorPipelineModuleConfig derive(Eq, @debug.Debug, @json.FromJson)
+#derive(Eq, @debug.Debug, @json.FromJson)
+type EditorPipelineModuleConfig
 
-type EditorPipelineModuleConfigEntry derive(Eq, @debug.Debug, @json.FromJson)
+#derive(Eq, @debug.Debug, @json.FromJson)
+type EditorPipelineModuleConfigEntry
 
-type EditorSelectedFeature derive(Eq, @debug.Debug)
+#derive(Eq, @debug.Debug)
+type EditorSelectedFeature
 
 // Type aliases
 

@@ -1,7 +1,7 @@
 ///|
 fn places_table(
   text : String,
-  delimiter? : Char = ',',
+  delimiter~ : Char = ',',
 ) -> @imported_output_contract.DataTable raise {
   match @imported_output_contract.parse_data_table(text, delimiter) {
     Ok(table) => table
@@ -123,6 +123,7 @@ test "places intake rejects invalid coordinates atomically with exact data row" 
 }
 
 ///|
+#warnings("-unused_mut")
 test "places bounded input rejects excess rows malformed public tables and oversized derived data" {
   let table : @imported_output_contract.DataTable = {
     headers: ["name", "lat", "lon", "category"],
@@ -136,8 +137,7 @@ test "places bounded input rejects excess rows malformed public tables and overs
     malformed.places(latitude=1, longitude=2, name=0, category=3),
     Err("Data row 1: column count differs from the header"),
   )
-  let large = {
-    ..table,
+  let large : @imported_output_contract.DataTable = {
     headers: ["name", "lat", "lon", "category", "note"],
     rows: Array::make(500, ["Place", "0", "0", "site", "x".repeat(2000)]),
   }

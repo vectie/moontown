@@ -1,13 +1,14 @@
 ///|
+#derive(Eq, ToJson, FromJson)
 pub(all) struct BookQualityStructuralAssessment {
-  score : Int
+  score : Int32
   grade : String
   ready_without_semantic : Bool
-} derive(Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn assess_structural_quality(
-  raw_score : Int,
+  raw_score : Int32,
   gaps : Array[String],
 ) -> BookQualityStructuralAssessment {
   let score = if gaps.is_empty() {
@@ -23,16 +24,17 @@ pub fn assess_structural_quality(
 }
 
 ///|
+#derive(Eq, ToJson, FromJson)
 pub(all) struct BookQualitySemanticAssessment {
-  score : Int?
+  score : Int32?
   grade : String
   status : String
   allows_ready : Bool
-} derive(Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn semantic_quality_assessment(
-  score : Int?,
+  score : Int32?,
 ) -> BookQualitySemanticAssessment {
   {
     score,
@@ -49,7 +51,7 @@ pub fn semantic_quality_assessment(
 }
 
 ///|
-pub fn semantic_quality_allows_ready(score : Int?) -> Bool {
+pub fn semantic_quality_allows_ready(score : Int32?) -> Bool {
   match score {
     Some(value) => value >= semantic_ready_threshold()
     None => true

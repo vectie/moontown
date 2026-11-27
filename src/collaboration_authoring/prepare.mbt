@@ -61,7 +61,7 @@ async fn Store::prepare_revision(
     (prefix + "source-packet.json", packet),
     (
       prefix + "handoff.json",
-      @utf8.encode(handoff.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(handoff).stringify(indent=2)),
     ),
     (
       prefix + "review-bundle.json",
@@ -103,7 +103,7 @@ async fn Store::prepare_revision(
   }
   write_bytes(
     root + "/" + prefix + "prepared.json",
-    @utf8.encode(prepared.to_json().stringify(indent=2)),
+    @utf8.encode(ToJson::to_json(prepared).stringify(indent=2)),
   )
   prepared
 }
@@ -122,7 +122,7 @@ async fn Store::verify_prepared(
     @utf8.decode(read_bytes(root + "/" + prefix + "prepared.json", 1048576)),
   )
   let prepared : @contract.Prepared = @json.from_json(json)
-  guard prepared.to_json() == json &&
+  guard ToJson::to_json(prepared) == json &&
     prepared.draft_id == saved.draft.draft_id &&
     prepared.revision == saved.revision &&
     prepared.contract_version == "moontown.collaboration-prepared.v1" &&
@@ -158,7 +158,7 @@ async fn Store::verify_prepared(
   }
   let handoff = read_bytes(root + "/" + prefix + "handoff.json", 1048576)
   guard handoff ==
-    @utf8.encode(civic_handoff(saved).to_json().stringify(indent=2)) else {
+    @utf8.encode(ToJson::to_json(civic_handoff(saved)).stringify(indent=2)) else {
     raise CollaborationError("Prepared handoff changed")
   }
   let bundle = @review.reimport_review_bundle(

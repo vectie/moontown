@@ -60,10 +60,10 @@ fn research_bootstrap_step_json(
   title~ : String,
   prompt_template~ : String,
   preferred_skills~ : Array[String],
-  board_order~ : Int,
+  board_order~ : Int32,
   output_contract~ : String,
-  retry_max_attempts~ : Int,
-  web_search? : Bool = true,
+  retry_max_attempts~ : Int32,
+  web_search~ : Bool = true,
 ) -> Json {
   {
     "id": id,
@@ -83,21 +83,21 @@ fn research_bootstrap_step_json(
 ///|
 fn research_bootstrap_step_metadata(
   preferred_skills~ : Array[String],
-  board_order~ : Int,
+  board_order~ : Int32,
   output_contract~ : String,
-  retry_max_attempts~ : Int,
+  retry_max_attempts~ : Int32,
   web_search~ : Bool,
 ) -> Json {
   let fields = @moonclaw_policy.non_adaptive_no_input_policy_fields()
-  fields["preferred_skills"] = preferred_skills.to_json()
-  fields["enable_tools"] = true.to_json()
-  fields["web_search"] = web_search.to_json()
-  fields["best_effort_on_timeout"] = true.to_json()
-  fields["retry_max_attempts"] = retry_max_attempts.to_json()
-  fields["retry_backoff_ms"] = (4000).to_json()
-  fields["timeout_ms"] = (900000).to_json()
-  fields["board_lane"] = "Bootstrap".to_json()
-  fields["board_order"] = board_order.to_json()
+  fields["preferred_skills"] = ToJson::to_json(preferred_skills)
+  fields["enable_tools"] = ToJson::to_json(true)
+  fields["web_search"] = ToJson::to_json(web_search)
+  fields["best_effort_on_timeout"] = ToJson::to_json(true)
+  fields["retry_max_attempts"] = ToJson::to_json(retry_max_attempts)
+  fields["retry_backoff_ms"] = ToJson::to_json(4000)
+  fields["timeout_ms"] = ToJson::to_json(900000)
+  fields["board_lane"] = ToJson::to_json("Bootstrap")
+  fields["board_order"] = ToJson::to_json(board_order)
   fields["role_runtime"] = research_bootstrap_role_runtime(output_contract)
   Json::object(fields)
 }

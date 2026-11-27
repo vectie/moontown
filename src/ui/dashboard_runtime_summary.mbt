@@ -31,12 +31,12 @@ fn is_mayor_book(book : @core.BookRef) -> Bool {
 fn count_execution_status(
   town : @core.TownState,
   status : @core.TaskExecutionStatus,
-) -> Int {
+) -> Int32 {
   count_executions_by_status(town, fn(candidate) { candidate == status })
 }
 
 ///|
-fn running_like_count(town : @core.TownState) -> Int {
+fn running_like_count(town : @core.TownState) -> Int32 {
   count_executions_by_status(town, dashboard_execution_status_running_like)
 }
 
@@ -44,7 +44,7 @@ fn running_like_count(town : @core.TownState) -> Int {
 fn count_executions_by_status(
   town : @core.TownState,
   predicate : (@core.TaskExecutionStatus) -> Bool,
-) -> Int {
+) -> Int32 {
   let mut count = 0
   for execution in town.executions {
     if predicate(execution.status) {

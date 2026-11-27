@@ -1,9 +1,9 @@
 ///|
 pub async fn install_pdf_evidence_watch_book_config(
   config_path : String,
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  standing_goal_path? : String = @storage.default_standing_goal_path(),
-  template_root? : String = @pdf_evidence_watch.default_pdf_evidence_watch_template_root(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  standing_goal_path~ : String = @storage.default_standing_goal_path(),
+  template_root~ : String = @pdf_evidence_watch.default_pdf_evidence_watch_template_root(),
 ) -> String {
   match load_pdf_evidence_watch_install_spec(config_path) {
     Some(spec) =>

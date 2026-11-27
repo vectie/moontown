@@ -31,11 +31,11 @@ fn editor_feature_selection_packet(
 
 ///|
 fn editor_feature_selection_packet_metadata(result_path : String) -> Json {
-  let fields : Map[String, Json] = {}
+  let fields : Map[String, Json] = Map([])
   add_planbook_bounded_wait_policy(fields)
-  fields["producer"] = "moontown".to_json()
-  fields["book_id"] = default_planbook_book_id().to_json()
-  fields["course_book_id"] = default_wenyu_course_book_id().to_json()
+  fields["producer"] = ToJson::to_json("moontown")
+  fields["book_id"] = ToJson::to_json(default_planbook_book_id())
+  fields["course_book_id"] = ToJson::to_json(default_wenyu_course_book_id())
   fields["step_metadata"] = editor_feature_selection_step_metadata(result_path)
   Json::object(fields)
 }
@@ -48,9 +48,11 @@ fn editor_feature_selection_step_metadata(result_path : String) -> Json {
     output_contract=@editor_pipeline.feature_selection_result_contract(),
   )
   add_planbook_bounded_wait_policy(fields)
-  fields["kind"] = "editor_feature_selection".to_json()
-  fields["source_root"] = planbook_repair_source_root().to_json()
-  fields["target_files"] = editor_feature_selection_target_files().to_json()
-  fields["target_pages"] = [result_path].to_json()
+  fields["kind"] = ToJson::to_json("editor_feature_selection")
+  fields["source_root"] = ToJson::to_json(planbook_repair_source_root())
+  fields["target_files"] = ToJson::to_json(
+    editor_feature_selection_target_files(),
+  )
+  fields["target_pages"] = ToJson::to_json([result_path])
   Json::object(fields)
 }

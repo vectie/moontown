@@ -113,11 +113,11 @@ async test "material notebook imports explores edits saves reopens prepares and 
     @fs.mkdir(output, recursive=true)
     for
       (name, value) in [
-        ("notebook", notebook.to_json()),
-        ("search", search.to_json()),
-        ("saved", saved.to_json()),
-        ("edited", edited.to_json()),
-        ("prepared", prepared.to_json()),
+        ("notebook", ToJson::to_json(notebook)),
+        ("search", ToJson::to_json(search)),
+        ("saved", ToJson::to_json(saved)),
+        ("edited", ToJson::to_json(edited)),
+        ("prepared", ToJson::to_json(prepared)),
       ] {
       @fs.write_file(
         output + "/" + name + ".json",

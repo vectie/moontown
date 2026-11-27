@@ -80,7 +80,10 @@ async test "native work saved list and detail preserve output without state muta
       "private_receipt": true,
     },
   }
-  @fs.write_file(path, { ..state, work: [updated], }.to_json().stringify())
+  @fs.write_file(
+    path,
+    ToJson::to_json({ ..state, work: [updated], }).stringify(),
+  )
   let before = @fs.read_file(path).text()
   let list = native_work_api_read("", path~)
   let detail = native_work_api_read(work.id, path~)

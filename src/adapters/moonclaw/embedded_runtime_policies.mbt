@@ -137,7 +137,7 @@ pub fn mayor_to_keeper_handoff(
   book_id : String,
   objective : String,
   scope_summary : String,
-  constraints? : Array[String] = [],
+  constraints~ : Array[String] = [],
 ) -> EmbeddedRuntimeHandoff {
   EmbeddedRuntimeHandoff::new(
     kind=StrategicToDomain,

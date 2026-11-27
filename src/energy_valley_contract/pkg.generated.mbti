@@ -6,17 +6,17 @@ import {
 }
 
 // Values
-pub fn actor_presence(StableId, StableId, StableId?, StableId?, PresencePhase, String, Int, Int?, Provenance, route_position? : ActorRoutePosition?, activity_kind? : ActorActivityKind) -> ActorPresence
+pub fn actor_presence(StableId, StableId, StableId?, StableId?, PresencePhase, String, Int32, Int32?, Provenance, route_position? : ActorRoutePosition?, activity_kind? : ActorActivityKind) -> ActorPresence
 
-pub fn actor_profile(StableId, String, String, String, Int, Int, ActorSourceKind, ActorStateKind, Provenance) -> ActorProfile
+pub fn actor_profile(StableId, String, String, String, Int32, Int32, ActorSourceKind, ActorStateKind, Provenance) -> ActorProfile
 
-pub fn actor_route_position(WorldPoint, Int, road_segment_id? : StableId?, origin_node_id? : StableId?, destination_node_id? : StableId?, heading_degrees? : Double?) -> ActorRoutePosition
+pub fn actor_route_position(WorldPoint, Int32, road_segment_id? : StableId?, origin_node_id? : StableId?, destination_node_id? : StableId?, heading_degrees? : Double?) -> ActorRoutePosition
 
-pub fn attention_focus(StableId, StableId, Int, Int) -> AttentionFocus
+pub fn attention_focus(StableId, StableId, Int32, Int32) -> AttentionFocus
 
-pub fn attention_signal(StableId, StableId, StableId?, AttentionSignalKind, Int, Int, Int?) -> AttentionSignal
+pub fn attention_signal(StableId, StableId, StableId?, AttentionSignalKind, Int32, Int32, Int32?) -> AttentionSignal
 
-pub fn attention_target(StableId, StableId?, AttentionTargetKind, String, WorldPoint, Int, ArrayView[String]) -> AttentionTarget
+pub fn attention_target(StableId, StableId?, AttentionTargetKind, String, WorldPoint, Int32, ArrayView[String]) -> AttentionTarget
 
 pub fn buildable_region(StableId, Polygon, LandUse, Provenance) -> BuildableRegion
 
@@ -26,15 +26,15 @@ pub fn building_deletion(StableId, Provenance) -> BuildingDeletion
 
 pub fn building_movement(StableId, GridPosition, Polygon, Provenance, entrance_grid? : GridPosition?) -> BuildingMovement
 
-pub fn building_profile(String, Int, Double, RoofKind, Int) -> BuildingProfile
+pub fn building_profile(String, Int32, Double, RoofKind, Int32) -> BuildingProfile
 
-pub fn compile_parcel_plan(String, Int, RoadNetwork, ArrayView[LandBlockSeed], ArrayView[ParcelProgram]) -> Result[ParcelPlan, ParcelCompileError]
+pub fn compile_parcel_plan(String, Int32, RoadNetwork, ArrayView[LandBlockSeed], ArrayView[ParcelProgram]) -> Result[ParcelPlan, ParcelCompileError]
 
-pub fn compiled_town_world(String, StableId, String, Int, WorldBounds, ArrayView[TerrainRegion], RoadNetwork, ArrayView[LandBlock], ArrayView[Parcel], ArrayView[Place], ArrayView[AttentionTarget], parcel_programs? : ArrayView[ParcelProgram], parcel_program_assignments? : ArrayView[ParcelProgramAssignment], place_relations? : ArrayView[PlaceRelation], installations? : ArrayView[Installation], diagnostics? : ArrayView[WorldDiagnostic], rejected_placements? : ArrayView[RejectedPlacement]) -> CompiledTownWorld
+pub fn compiled_town_world(String, StableId, String, Int32, WorldBounds, ArrayView[TerrainRegion], RoadNetwork, ArrayView[LandBlock], ArrayView[Parcel], ArrayView[Place], ArrayView[AttentionTarget], parcel_programs? : ArrayView[ParcelProgram], parcel_program_assignments? : ArrayView[ParcelProgramAssignment], place_relations? : ArrayView[PlaceRelation], installations? : ArrayView[Installation], diagnostics? : ArrayView[WorldDiagnostic], rejected_placements? : ArrayView[RejectedPlacement]) -> CompiledTownWorld
 
 pub fn entrance_portal(StableId, WorldPoint, StableId?, ArrayView[MobilityMode], primary? : Bool) -> EntrancePortal
 
-pub fn grid_position(Int, Int) -> GridPosition
+pub fn grid_position(Int32, Int32) -> GridPosition
 
 pub fn has_errors(ArrayView[ContractIssue]) -> Bool
 
@@ -46,7 +46,7 @@ pub fn installation_path(ArrayView[WorldPoint]) -> InstallationGeometry
 
 pub fn installation_point(WorldPoint) -> InstallationGeometry
 
-pub fn interaction_slot(StableId, InteractionKind, String, WorldPoint, Int, StableId?, RuntimeBinding?) -> InteractionSlot
+pub fn interaction_slot(StableId, InteractionKind, String, WorldPoint, Int32, StableId?, RuntimeBinding?) -> InteractionSlot
 
 pub fn land_block(StableId, Polygon, LandUse, ArrayView[StableId], ArrayView[StableId], PreservationLevel, Provenance, buildable_regions? : ArrayView[BuildableRegion], parcelable? : Bool) -> LandBlock
 
@@ -58,9 +58,9 @@ pub fn normalize_polygon(Polygon) -> Polygon
 
 pub fn parcel(StableId, StableId, Polygon, LandUse, ArrayView[StableId], ArrayView[String], PreservationLevel, Provenance) -> Parcel
 
-pub fn parcel_grammar(Int, split_axis? : ParcelSplitAxis, variation? : PreservationLevel, minimum_area_sqm? : Double) -> ParcelGrammar
+pub fn parcel_grammar(Int32, split_axis? : ParcelSplitAxis, variation? : PreservationLevel, minimum_area_sqm? : Double) -> ParcelGrammar
 
-pub fn parcel_program(StableId, String, ArrayView[LandUse], minimum_area_sqm? : Double, maximum_area_sqm? : Double, requires_frontage? : Bool, weight? : Int) -> ParcelProgram
+pub fn parcel_program(StableId, String, ArrayView[LandUse], minimum_area_sqm? : Double, maximum_area_sqm? : Double, requires_frontage? : Bool, weight? : Int32) -> ParcelProgram
 
 pub fn park_addition(StableId, String, GridPosition, Polygon, Provenance, parcel_id? : StableId?) -> ParkAddition
 
@@ -70,13 +70,13 @@ pub fn park_movement(StableId, GridPosition, Polygon, Provenance) -> ParkMovemen
 
 pub fn place(StableId, String, PlaceKind, StableId?, Polygon, ArrayView[EntrancePortal], ArrayView[PlaceTrait], ArrayView[InteractionSlot], BuildingProfile?, RuntimeBinding?, Provenance, program_id? : StableId?) -> Place
 
-pub fn place_exchange(StableId, StableId, StableId, StableId?, ExchangeKind, String, Int, Int, Int?, Provenance) -> PlaceExchange
+pub fn place_exchange(StableId, StableId, StableId, StableId?, ExchangeKind, String, Int32, Int32, Int32?, Provenance) -> PlaceExchange
 
 pub fn place_relation(StableId, StableId, StableId, PlaceRelationKind, String, Provenance) -> PlaceRelation
 
 pub fn polygon(ArrayView[WorldPoint]) -> Polygon
 
-pub fn provenance(String, String, ProvenanceKind, PreservationLevel, confidence_per_mille? : Int) -> Provenance
+pub fn provenance(String, String, ProvenanceKind, PreservationLevel, confidence_per_mille? : Int32) -> Provenance
 
 pub fn rejected_placement(StableId, StableId, PlacementKind, GridPosition, Polygon, PlacementRejectionReason, String, Provenance, parcel_id? : StableId?) -> RejectedPlacement
 
@@ -98,7 +98,7 @@ pub fn stable_id(String, String) -> Result[StableId, ContractError]
 
 pub fn terrain_region(StableId, TerrainKind, Polygon, Bool, Provenance) -> TerrainRegion
 
-pub fn town_snapshot(CompiledTownWorld, Int, ArrayView[AttentionSignal], ArrayView[AttentionFocus], actor_profiles? : ArrayView[ActorProfile], actor_presences? : ArrayView[ActorPresence], place_exchanges? : ArrayView[PlaceExchange]) -> TownSnapshot
+pub fn town_snapshot(CompiledTownWorld, Int32, ArrayView[AttentionSignal], ArrayView[AttentionFocus], actor_profiles? : ArrayView[ActorProfile], actor_presences? : ArrayView[ActorPresence], place_exchanges? : ArrayView[PlaceExchange]) -> TownSnapshot
 
 pub fn validate_snapshot(TownSnapshot) -> ReadOnlyArray[ContractIssue]
 
@@ -110,7 +110,7 @@ pub fn validate_world_delta(WorldDelta, base_world? : CompiledTownWorld?) -> Rea
 
 pub fn world_bounds(WorldPoint, WorldPoint) -> WorldBounds
 
-pub fn world_delta(String, StableId, String, Int, ArrayView[WorldDeltaOperation]) -> WorldDelta
+pub fn world_delta(String, StableId, String, Int32, ArrayView[WorldDeltaOperation]) -> WorldDelta
 
 pub fn world_diagnostic(StableId, WorldCompileStage, WorldDiagnosticSeverity, WorldDiagnosticCode, String, Provenance, entity_id? : StableId?, position? : WorldPoint?, evidence_id? : String?) -> WorldDiagnostic
 
@@ -119,6 +119,7 @@ pub fn world_point(Double, Double, z? : Double) -> WorldPoint
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) enum ActorActivityKind {
   ActorCoordinate
   ActorResearch
@@ -137,8 +138,9 @@ pub(all) enum ActorActivityKind {
   ActorFailed
   ActorIdle
   ActorCustom(String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct ActorPresence {
   actor_id : StableId
   place_id : StableId
@@ -146,43 +148,47 @@ pub(all) struct ActorPresence {
   interaction_slot_id : StableId?
   phase : PresencePhase
   intention : String
-  since_tick : Int
-  until_tick : Int?
+  since_tick : Int32
+  until_tick : Int32?
   provenance : Provenance
   route_position : ActorRoutePosition?
   activity_kind : ActorActivityKind
-} derive(Eq, @debug.Debug)
-pub fn ActorPresence::is_active(Self, Int) -> Bool
+}
+pub fn ActorPresence::is_active(Self, Int32) -> Bool
 pub fn ActorPresence::is_outdoor(Self) -> Bool
 pub fn ActorPresence::render_position(Self, CompiledTownWorld) -> WorldPoint?
 
+#derive(Eq, @debug.Debug)
 pub(all) struct ActorProfile {
   actor_id : StableId
   display_name : String
   role_label : String
   avatar_family : String
-  avatar_variant : Int
-  palette_variant : Int
+  avatar_variant : Int32
+  palette_variant : Int32
   source_kind : ActorSourceKind
   state : ActorStateKind
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct ActorRoutePosition {
   position : WorldPoint
   road_segment_id : StableId?
   origin_node_id : StableId?
   destination_node_id : StableId?
-  progress_per_mille : Int
+  progress_per_mille : Int32
   heading_degrees : Double?
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ActorSourceKind {
   AmbientSimulation
   RuntimeEvidence
   LocalEmbodiment
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ActorStateKind {
   ActorStateActive
   ActorStateWaitingReview
@@ -191,26 +197,29 @@ pub(all) enum ActorStateKind {
   ActorStateCompleted
   ActorStateAssigned
   ActorStateIdle
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct AttentionFocus {
   actor_id : StableId
   target_id : StableId
-  strength_per_mille : Int
-  since_tick : Int
-} derive(Eq, @debug.Debug)
+  strength_per_mille : Int32
+  since_tick : Int32
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct AttentionSignal {
   id : StableId
   target_id : StableId
   source_id : StableId?
   kind : AttentionSignalKind
-  intensity_per_mille : Int
-  started_tick : Int
-  expires_tick : Int?
-} derive(Eq, @debug.Debug)
-pub fn AttentionSignal::is_active(Self, Int) -> Bool
+  intensity_per_mille : Int32
+  started_tick : Int32
+  expires_tick : Int32?
+}
+pub fn AttentionSignal::is_active(Self, Int32) -> Bool
 
+#derive(Eq, @debug.Debug)
 pub(all) enum AttentionSignalKind {
   Motion
   Sound
@@ -221,18 +230,20 @@ pub(all) enum AttentionSignalKind {
   Reward
   Ambient
   Custom(String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct AttentionTarget {
   id : StableId
   owner_id : StableId?
   kind : AttentionTargetKind
   label : String
   position : WorldPoint
-  base_salience_per_mille : Int
+  base_salience_per_mille : Int32
   tags : ReadOnlyArray[String]
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum AttentionTargetKind {
   Place
   InteractionSlot
@@ -241,15 +252,17 @@ pub(all) enum AttentionTargetKind {
   Event
   AmbientDetail
   Custom(String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct BuildableRegion {
   id : StableId
   boundary : Polygon
   land_use : LandUse
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct BuildingAddition {
   id : StableId
   name : String
@@ -260,34 +273,38 @@ pub(all) struct BuildingAddition {
   footprint : Polygon
   profile : BuildingProfile
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct BuildingDeletion {
   id : StableId
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct BuildingMovement {
   id : StableId
   grid_anchor : GridPosition
   entrance_grid : GridPosition?
   footprint : Polygon
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct BuildingProfile {
   archetype : String
-  floors : Int
+  floors : Int32
   height_meters : Double
   roof : RoofKind
-  interior_seed : Int
-} derive(Eq, @debug.Debug)
+  interior_seed : Int32
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct CompiledTownWorld {
   schema_version : String
   blueprint_id : StableId
   blueprint_digest : String
-  layout_seed : Int
+  layout_seed : Int32
   bounds : WorldBounds
   terrain_regions : ReadOnlyArray[TerrainRegion]
   road_network : RoadNetwork
@@ -301,7 +318,7 @@ pub(all) struct CompiledTownWorld {
   attention_targets : ReadOnlyArray[AttentionTarget]
   diagnostics : ReadOnlyArray[WorldDiagnostic]
   rejected_placements : ReadOnlyArray[RejectedPlacement]
-} derive(Eq, @debug.Debug)
+}
 pub fn CompiledTownWorld::diagnostics_for(Self, StableId) -> ReadOnlyArray[WorldDiagnostic]
 pub fn CompiledTownWorld::find_attention_target(Self, StableId) -> AttentionTarget?
 pub fn CompiledTownWorld::find_block(Self, StableId) -> LandBlock?
@@ -315,17 +332,20 @@ pub fn CompiledTownWorld::rejections_for(Self, StableId) -> ReadOnlyArray[Reject
 pub fn CompiledTownWorld::relations_for(Self, StableId) -> ReadOnlyArray[PlaceRelation]
 pub fn CompiledTownWorld::relations_from(Self, StableId) -> ReadOnlyArray[PlaceRelation]
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ContractError {
   InvalidStableId(scope~ : String, key~ : String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct ContractIssue {
   severity : IssueSeverity
   code : ContractIssueCode
   entity_id : StableId?
   message : String
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ContractIssueCode {
   InvalidWorldMetadata
   InvalidBounds
@@ -379,16 +399,18 @@ pub(all) enum ContractIssueCode {
   InvalidWorldDelta
   WorldDeltaBlueprintMismatch
   InvalidWorldDeltaOperation
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct EntrancePortal {
   id : StableId
   position : WorldPoint
   road_node_id : StableId?
   mobility : ReadOnlyArray[MobilityMode]
   primary : Bool
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ExchangeKind {
   Knowledge
   Social
@@ -397,13 +419,15 @@ pub(all) enum ExchangeKind {
   Mobility
   Care
   Custom(String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, Hash, @debug.Debug)
 pub(all) struct GridPosition {
-  column : Int
-  row : Int
-} derive(Eq, Hash, @debug.Debug)
+  column : Int32
+  row : Int32
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Installation {
   id : StableId
   label : String
@@ -415,15 +439,17 @@ pub(all) struct Installation {
   interactive : Bool
   tags : ReadOnlyArray[String]
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 pub fn Installation::representative_position(Self) -> WorldPoint?
 
+#derive(Eq, @debug.Debug)
 pub(all) enum InstallationGeometry {
   AtPoint(WorldPoint)
   AlongPath(ReadOnlyArray[WorldPoint])
   WithinArea(Polygon)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum InstallationKind {
   MetroAlignment
   Boardwalk
@@ -433,8 +459,9 @@ pub(all) enum InstallationKind {
   TransitEntrance
   Signage
   Custom(String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum InteractionKind {
   Workstation
   MeetingPoint
@@ -445,23 +472,26 @@ pub(all) enum InteractionKind {
   TransitGate
   ServicePoint
   Custom(String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct InteractionSlot {
   id : StableId
   kind : InteractionKind
   label : String
   position : WorldPoint
-  capacity : Int
+  capacity : Int32
   attention_target_id : StableId?
   runtime_binding : RuntimeBinding?
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum IssueSeverity {
   Warning
   Error
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct LandBlock {
   id : StableId
   boundary : Polygon
@@ -472,9 +502,10 @@ pub(all) struct LandBlock {
   provenance : Provenance
   buildable_regions : ReadOnlyArray[BuildableRegion]
   parcelable : Bool
-} derive(Eq, @debug.Debug)
+}
 pub fn LandBlock::effective_buildable_regions(Self) -> ReadOnlyArray[BuildableRegion]
 
+#derive(Eq, @debug.Debug)
 pub(all) struct LandBlockSeed {
   id : StableId
   boundary : Polygon
@@ -485,8 +516,9 @@ pub(all) struct LandBlockSeed {
   grammar : ParcelGrammar
   buildable_regions : ReadOnlyArray[BuildableRegion]
   parcelable : Bool
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum LandUse {
   Civic
   Research
@@ -497,15 +529,17 @@ pub(all) enum LandUse {
   Transit
   Utility
   Custom(String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum MobilityMode {
   Pedestrian
   Bicycle
   ServiceVehicle
   Transit
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Parcel {
   id : StableId
   block_id : StableId
@@ -515,8 +549,9 @@ pub(all) struct Parcel {
   allowed_programs : ReadOnlyArray[String]
   preservation : PreservationLevel
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ParcelCompileError {
   InvalidCompilerVersion
   DuplicateBlockId(StableId)
@@ -527,29 +562,32 @@ pub(all) enum ParcelCompileError {
   InvalidParcelGrammar(StableId)
   InvalidProgram(StableId)
   MissingFrontageSegment(block_id~ : StableId, segment_id~ : StableId)
-  GeneratedParcelTooSmall(block_id~ : StableId, parcel_index~ : Int)
+  GeneratedParcelTooSmall(block_id~ : StableId, parcel_index~ : Int32)
   NoCompatibleProgram(StableId)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct ParcelGrammar {
-  target_count : Int
+  target_count : Int32
   split_axis : ParcelSplitAxis
   variation : PreservationLevel
   minimum_area_sqm : Double
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct ParcelPlan {
   compiler_version : String
-  layout_seed : Int
+  layout_seed : Int32
   land_blocks : ReadOnlyArray[LandBlock]
   parcels : ReadOnlyArray[Parcel]
   programs : ReadOnlyArray[ParcelProgram]
   assignments : ReadOnlyArray[ParcelProgramAssignment]
-} derive(Eq, @debug.Debug)
+}
 pub fn ParcelPlan::find_assignment(Self, StableId) -> ParcelProgramAssignment?
 pub fn ParcelPlan::find_program(Self, StableId) -> ParcelProgram?
 pub fn ParcelPlan::parcels_for(Self, StableId) -> ReadOnlyArray[Parcel]
 
+#derive(Eq, @debug.Debug)
 pub(all) struct ParcelProgram {
   id : StableId
   label : String
@@ -557,25 +595,28 @@ pub(all) struct ParcelProgram {
   minimum_area_sqm : Double
   maximum_area_sqm : Double?
   requires_frontage : Bool
-  weight : Int
-} derive(Eq, @debug.Debug)
+  weight : Int32
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct ParcelProgramAssignment {
   id : StableId
   parcel_id : StableId
   program_id : StableId
   placement_anchor : WorldPoint
   frontage_segment_id : StableId?
-  variant_seed : Int
+  variant_seed : Int32
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ParcelSplitAxis {
   LongestAxis
   VerticalBands
   HorizontalBands
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct ParkAddition {
   id : StableId
   label : String
@@ -583,20 +624,23 @@ pub(all) struct ParkAddition {
   grid_anchor : GridPosition
   boundary : Polygon
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct ParkDeletion {
   id : StableId
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct ParkMovement {
   id : StableId
   grid_anchor : GridPosition
   boundary : Polygon
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Place {
   id : StableId
   name : String
@@ -610,11 +654,12 @@ pub(all) struct Place {
   building : BuildingProfile?
   runtime_binding : RuntimeBinding?
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 pub fn Place::find_slot(Self, StableId) -> InteractionSlot?
 pub fn Place::primary_entrance(Self) -> EntrancePortal?
 pub fn Place::supports_runtime_work(Self) -> Bool
 
+#derive(Eq, @debug.Debug)
 pub(all) struct PlaceExchange {
   id : StableId
   source_place_id : StableId
@@ -622,13 +667,14 @@ pub(all) struct PlaceExchange {
   actor_id : StableId?
   kind : ExchangeKind
   label : String
-  intensity_per_mille : Int
-  started_tick : Int
-  expires_tick : Int?
+  intensity_per_mille : Int32
+  started_tick : Int32
+  expires_tick : Int32?
   provenance : Provenance
-} derive(Eq, @debug.Debug)
-pub fn PlaceExchange::is_active(Self, Int) -> Bool
+}
+pub fn PlaceExchange::is_active(Self, Int32) -> Bool
 
+#derive(Eq, @debug.Debug)
 pub(all) enum PlaceKind {
   Building
   Park
@@ -638,8 +684,9 @@ pub(all) enum PlaceKind {
   Landmark
   Installation
   Custom(String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct PlaceRelation {
   id : StableId
   source_place_id : StableId
@@ -647,15 +694,17 @@ pub(all) struct PlaceRelation {
   kind : PlaceRelationKind
   label : String
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum PlaceRelationKind {
   Collaboration
   Dependency
   KnowledgeFlow
   Custom(String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum PlaceTrait {
   Public
   Landmark
@@ -668,15 +717,17 @@ pub(all) enum PlaceTrait {
   NightActive
   Accessible
   Signature(String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum PlacementKind {
   BuildingPlacement
   ParkPlacement
   InstallationPlacement
   CustomPlacement(String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum PlacementRejectionReason {
   OutsideWorld
   OutsideParcel
@@ -687,47 +738,53 @@ pub(all) enum PlacementRejectionReason {
   ProgramMismatch
   DeltaConflictReason
   CustomReason(String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Polygon {
   vertices : ReadOnlyArray[WorldPoint]
-} derive(Eq, @debug.Debug)
+}
 pub fn Polygon::area(Self) -> Double
 pub fn Polygon::contains_point(Self, WorldPoint) -> Bool
 pub fn Polygon::is_well_formed(Self) -> Bool
 
+#derive(Eq, @debug.Debug)
 pub(all) enum PresencePhase {
   Approaching
   AtEntrance
   Inside
   Departing
   Away
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum PreservationLevel {
   Fixed
   Bounded
   Statistical
   Free
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Provenance {
   source_id : String
   source_version : String
   kind : ProvenanceKind
   preservation : PreservationLevel
-  confidence_per_mille : Int
-} derive(Eq, @debug.Debug)
+  confidence_per_mille : Int32
+}
 pub fn Provenance::has_valid_confidence(Self) -> Bool
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ProvenanceKind {
   WenyuReference
   Procedural
   UserDelta
   RuntimeProjection
   Derived
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct RejectedPlacement {
   id : StableId
   candidate_id : StableId
@@ -738,8 +795,9 @@ pub(all) struct RejectedPlacement {
   reason : PlacementRejectionReason
   message : String
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct RoadAddition {
   id : StableId
   grid_path : ReadOnlyArray[GridPosition]
@@ -747,8 +805,9 @@ pub(all) struct RoadAddition {
   width_meters : Double
   mobility : ReadOnlyArray[MobilityMode]
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum RoadClass {
   Arterial
   Collector
@@ -756,24 +815,27 @@ pub(all) enum RoadClass {
   Service
   Footpath
   Bridge
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct RoadDeletion {
   id : StableId
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct RoadMovement {
   id : StableId
   grid_path : ReadOnlyArray[GridPosition]
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct RoadNetwork {
   nodes : ReadOnlyArray[RoadNode]
   segments : ReadOnlyArray[RoadSegment]
   access_anchor_node_ids : ReadOnlyArray[StableId]
-} derive(Eq, @debug.Debug)
+}
 pub fn RoadNetwork::find_node(Self, StableId) -> RoadNode?
 pub fn RoadNetwork::find_segment(Self, StableId) -> RoadSegment?
 pub fn RoadNetwork::is_reachable(Self, StableId, StableId, mode? : MobilityMode) -> Bool
@@ -781,13 +843,15 @@ pub fn RoadNetwork::is_reachable_from_anchor(Self, StableId, mode? : MobilityMod
 pub fn RoadNetwork::neighbors(Self, StableId, mode? : MobilityMode) -> ReadOnlyArray[StableId]
 pub fn RoadNetwork::shortest_path(Self, StableId, StableId, mode? : MobilityMode) -> ReadOnlyArray[RoadNode]?
 
+#derive(Eq, @debug.Debug)
 pub(all) struct RoadNode {
   id : StableId
   grid : GridPosition
   position : WorldPoint
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct RoadSegment {
   id : StableId
   from_node_id : StableId
@@ -798,9 +862,10 @@ pub(all) struct RoadSegment {
   mobility : ReadOnlyArray[MobilityMode]
   bidirectional : Bool
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 pub fn RoadSegment::supports(Self, MobilityMode) -> Bool
 
+#derive(Eq, @debug.Debug)
 pub(all) enum RoofKind {
   Flat
   Garden
@@ -808,28 +873,32 @@ pub(all) enum RoofKind {
   Glass
   Sculptural
   Custom(String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct RuntimeBinding {
   system : RuntimeSystem
   resource_id : String
   capability : String
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum RuntimeSystem {
   MoonBook
   MoonClaw
   TownRuntime
   External(String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, Hash, @debug.Debug)
 pub struct StableId {
   value : String
-} derive(Eq, Hash, @debug.Debug)
+}
 pub fn StableId::local_key(Self) -> String
 pub fn StableId::scope(Self) -> String
 pub fn StableId::to_string(Self) -> String
 
+#derive(Eq, @debug.Debug)
 pub(all) enum TerrainKind {
   Meadow
   Woodland
@@ -838,25 +907,27 @@ pub(all) enum TerrainKind {
   Paving
   Restricted
   Custom(String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct TerrainRegion {
   id : StableId
   kind : TerrainKind
   boundary : Polygon
   walkable : Bool
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct TownSnapshot {
   world : CompiledTownWorld
-  tick : Int
+  tick : Int32
   attention_signals : ReadOnlyArray[AttentionSignal]
   attention_focuses : ReadOnlyArray[AttentionFocus]
   actor_profiles : ReadOnlyArray[ActorProfile]
   actor_presences : ReadOnlyArray[ActorPresence]
   place_exchanges : ReadOnlyArray[PlaceExchange]
-} derive(Eq, @debug.Debug)
+}
 pub fn TownSnapshot::active_exchanges(Self) -> ReadOnlyArray[PlaceExchange]
 pub fn TownSnapshot::active_presences(Self) -> ReadOnlyArray[ActorPresence]
 pub fn TownSnapshot::active_signals(Self) -> ReadOnlyArray[AttentionSignal]
@@ -866,13 +937,15 @@ pub fn TownSnapshot::outdoor_presences(Self) -> ReadOnlyArray[ActorPresence]
 pub fn TownSnapshot::presences_at(Self, StableId) -> ReadOnlyArray[ActorPresence]
 pub fn TownSnapshot::signals_for(Self, StableId) -> ReadOnlyArray[AttentionSignal]
 
+#derive(Eq, @debug.Debug)
 pub(all) struct WorldBounds {
   minimum : WorldPoint
   maximum : WorldPoint
-} derive(Eq, @debug.Debug)
+}
 pub fn WorldBounds::contains(Self, WorldPoint) -> Bool
 pub fn WorldBounds::is_well_formed(Self) -> Bool
 
+#derive(Eq, @debug.Debug)
 pub(all) enum WorldCompileStage {
   ReferenceEvidence
   TerrainCompilation
@@ -884,26 +957,29 @@ pub(all) enum WorldCompileStage {
   DeltaApplication
   RuntimeProjection
   Custom(String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct WorldDelta {
   schema_version : String
   base_blueprint_id : StableId
   base_blueprint_digest : String
-  revision : Int
+  revision : Int32
   operations : ReadOnlyArray[WorldDeltaOperation]
-} derive(Eq, @debug.Debug)
+}
 pub fn WorldDelta::latest_operation_for(Self, StableId) -> WorldDeltaOperation?
 pub fn WorldDelta::normalized(Self) -> Self
 pub fn WorldDelta::operations_for(Self, StableId) -> ReadOnlyArray[WorldDeltaOperation]
 pub fn WorldDelta::targets(Self, CompiledTownWorld) -> Bool
 
+#derive(Eq, @debug.Debug)
 pub(all) enum WorldDeltaEntityKind {
   DeltaBuilding
   DeltaRoad
   DeltaPark
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum WorldDeltaOperation {
   AddBuilding(BuildingAddition)
   MoveBuilding(BuildingMovement)
@@ -914,11 +990,12 @@ pub(all) enum WorldDeltaOperation {
   AddPark(ParkAddition)
   MovePark(ParkMovement)
   DeletePark(ParkDeletion)
-} derive(Eq, @debug.Debug)
+}
 pub fn WorldDeltaOperation::entity_id(Self) -> StableId
 pub fn WorldDeltaOperation::entity_kind(Self) -> WorldDeltaEntityKind
 pub fn WorldDeltaOperation::provenance(Self) -> Provenance
 
+#derive(Eq, @debug.Debug)
 pub(all) struct WorldDiagnostic {
   id : StableId
   stage : WorldCompileStage
@@ -929,8 +1006,9 @@ pub(all) struct WorldDiagnostic {
   position : WorldPoint?
   evidence_id : String?
   provenance : Provenance
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum WorldDiagnosticCode {
   EvidenceAccepted
   EvidenceMissing
@@ -942,19 +1020,21 @@ pub(all) enum WorldDiagnosticCode {
   UnsupportedSchema
   PlacementRejected
   Custom(String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum WorldDiagnosticSeverity {
   Information
   Caution
   Failure
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct WorldPoint {
   x : Double
   y : Double
   z : Double
-} derive(Eq, @debug.Debug)
+}
 
 // Type aliases
 

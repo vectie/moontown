@@ -2,55 +2,61 @@
 pub using @competition_brief {type Challenge, type RubricCriterion}
 
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct Team {
   id : String
   challenge_id : String
   name : String
   members : Array[String]
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct Submission {
   id : String
   challenge_id : String
   team_id : String
-  version : Int
+  version : Int32
   artifact_url : String
   first_person_solution : String
   submitted_ms : UInt64
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct CriterionScore {
   criterion_id : String
-  points : Int
+  points : Int32
   evidence : String
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct Evaluation {
   submission_id : String
-  benchmark_version : Int
+  benchmark_version : Int32
   reviewer : String
   scores : Array[CriterionScore]
-  total : Int
+  total : Int32
   evaluated_ms : UInt64
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct LeaderboardEntry {
-  rank : Int
+  rank : Int32
   team_id : String
   team_name : String
   submission_id : String
-  total : Int
+  total : Int32
   evaluated_ms : UInt64
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct HackathonState {
   schema : String
-  revision : Int
+  revision : Int32
   challenges : Array[Challenge]
   challenge_history : Array[Challenge]
   teams : Array[Team]
@@ -63,7 +69,7 @@ pub struct HackathonState {
   benchmark_runs : Array[BenchmarkRun]
   appeals : Array[CompetitionAppeal]
   program_history : Array[CompetitionProgram]
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
 pub fn empty_hackathon_state() -> HackathonState {

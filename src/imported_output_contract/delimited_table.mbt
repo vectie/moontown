@@ -1,10 +1,11 @@
 ///|
 /// A complete, bounded table. The first record is the header; labels and cell
 /// values remain strings, including duplicate headers, empty cells and zeros.
+#derive(Debug, Eq)
 pub(all) struct DataTable {
   headers : Array[String]
   rows : Array[Array[String]]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Recognize included CSV/TSV filenames. MIME fallback applies only to extensionless
@@ -150,9 +151,12 @@ pub fn parse_data_table(
 
 ///|
 /// Stable row indices matching a case-insensitive substring in any column.
-pub fn DataTable::matching_rows(self : DataTable, query : String) -> Array[Int] {
+pub fn DataTable::matching_rows(
+  self : DataTable,
+  query : String,
+) -> Array[Int32] {
   let needle = query.to_lower()
-  let indices : Array[Int] = []
+  let indices : Array[Int32] = []
   for index, row in self.rows {
     if needle.is_empty() || row.any(cell => cell.to_lower().contains(needle)) {
       indices.push(index)

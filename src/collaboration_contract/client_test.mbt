@@ -49,7 +49,7 @@ test "collaboration client dirty edits invalidate prepared downloads and named r
   let loaded = initial.settle(
     initial.generation,
     "load",
-    reply.to_json().stringify(),
+    ToJson::to_json(reply).stringify(),
   )
   assert_false(loaded.dirty)
   assert_eq(loaded.draft.draft_id, "example")
@@ -68,7 +68,7 @@ test "collaboration client dirty edits invalidate prepared downloads and named r
   let blocked = initial.settle(
     initial.generation,
     "load",
-    wrong.to_json().stringify(),
+    ToJson::to_json(wrong).stringify(),
   )
   assert_true(blocked.notice.contains("identity"))
   assert_eq(blocked.revision, "")

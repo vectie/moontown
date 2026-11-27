@@ -1,8 +1,8 @@
 ///|
 fn test_principal(
   personal_plan : AccountPlan,
-  platform_roles? : Array[AccountRole] = [],
-  tenant_access? : Array[AccountTenantAccess] = [],
+  platform_roles~ : Array[AccountRole] = [],
+  tenant_access~ : Array[AccountTenantAccess] = [],
 ) -> AccountPrincipal {
   {
     user_id: "user-a",
@@ -17,7 +17,7 @@ fn test_principal(
 
 ///|
 fn enterprise_access(
-  roles? : Array[AccountRole] = [AccountMember],
+  roles~ : Array[AccountRole] = [AccountMember],
 ) -> AccountTenantAccess {
   {
     tenant_id: "energy-labs",
@@ -76,7 +76,7 @@ test "v1 enterprise personal plans normalize to paid tenant-scoped accounts" {
       test_principal(EnterprisePlan, tenant_access=[enterprise_access()]),
     ],
   }
-  guard legacy.to_json() is Object(legacy_fields) else {
+  guard ToJson::to_json(legacy) is Object(legacy_fields) else {
     fail("legacy account fixture must serialize as an object")
   }
   legacy_fields.remove("subscriptions")

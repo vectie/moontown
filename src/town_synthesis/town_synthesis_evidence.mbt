@@ -3,7 +3,7 @@ async fn render_town_evidence_and_limits(
   state : @core.TownState,
   plan : @roles.MayorGoalPlan,
 ) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string("### Lane Matrix\n\n")
   builder.write_string(render_town_lane_matrix(state, plan))
   builder.write_string("\n### Readiness\n\n")
@@ -32,7 +32,7 @@ async fn render_town_lane_matrix(
   state : @core.TownState,
   plan : @roles.MayorGoalPlan,
 ) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string(
     "| Lane | Status | Verified Sources | Domain Evidence | Operational Evidence | Entities | Concepts | Deep Report |\n",
   )

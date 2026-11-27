@@ -107,8 +107,8 @@ pub fn modeled_dashboard() -> String {
 
 ///|
 pub async fn load_or_create_saved_state(
-  path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
+  path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
 ) -> @core.TownState {
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
   match @storage.load_snapshot_file(path) {
@@ -123,8 +123,8 @@ pub async fn load_or_create_saved_state(
 
 ///|
 pub async fn load_or_create_modeled_state(
-  path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
+  path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
 ) -> @core.TownState {
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
   let snapshot = @storage.load_or_create_snapshot(path, () => {
@@ -136,7 +136,7 @@ pub async fn load_or_create_modeled_state(
 ///|
 pub async fn[Provider : @core.BookProvider] load_or_create_modeled_state_with_provider(
   provider : Provider,
-  path? : String = @storage.default_snapshot_path(),
+  path~ : String = @storage.default_snapshot_path(),
 ) -> @core.TownState {
   let snapshot = @storage.load_or_create_snapshot(path, () => {
     modeled_state_with_provider(provider)
@@ -146,8 +146,8 @@ pub async fn[Provider : @core.BookProvider] load_or_create_modeled_state_with_pr
 
 ///|
 pub async fn load_or_create_saved_dashboard(
-  path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
+  path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
 ) -> String {
   let state = load_or_create_saved_state(path~, book_catalog_path~)
   render_state_dashboard(state)

@@ -45,7 +45,7 @@ async fn detached_import_stderr_summary(packet_path : String) -> String {
 
 ///|
 fn compact_detached_import_stderr(text : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let mut count = 0
   for line in text.split("\n") {
     if count >= 8 {

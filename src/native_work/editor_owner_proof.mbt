@@ -1,11 +1,12 @@
 ///|
 /// Frozen artifacts from one validated applied package. Archive callers use
 /// these bytes rather than rereading mutable selection/proof files after I/O.
+#derive(Debug, Eq)
 pub(all) struct EditorAppliedFeature {
   selected_feature : String
   selection_content : String
   implementation_content : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Read-only proof consumer shared by editor readiness, lifecycle and archival.
@@ -24,6 +25,7 @@ pub async fn editor_applied_feature_artifacts(
 }
 
 ///|
+#warnings("-reserved_keyword")
 async fn read_editor_applied_feature(root : String) -> EditorAppliedFeature? {
   let proof_relative = "raw/editor-pipeline/selected-feature-implementation.md"
   let proof_path = editor_owner_file(root, proof_relative)
@@ -69,22 +71,23 @@ async fn read_editor_applied_feature(root : String) -> EditorAppliedFeature? {
     @fs.kind(receipt_path, follow_symlink=false) is Regular else {
     return None
   }
-  let package : EditorOutputPackage = @json.from_json(
+  let pkg_val : EditorOutputPackage = @json.from_json(
     @json.parse(@fs.read_file(package_path).text()),
   )
-  let work = editor_package_work(package)
-  guard package.contract == "planbook.editor.output-package.v1" &&
-    package.work_id == work_id &&
-    package.request.book_root == root &&
-    editor_spec(package.request) is Some(spec) &&
+  let work = editor_package_work(pkg_val)
+  guard pkg_val.contract == "planbook.editor.output-package.v1" &&
+    pkg_val.work_id == work_id &&
+    pkg_val.request.book_root == root &&
+    editor_spec(pkg_val.request) is Some(spec) &&
     spec.criterion_id == "editor-selected-feature-implementation" &&
     editor_evidence_bound(work) &&
-    text(package.engineering_receipt, "engineering_status") ==
+    text(pkg_val.engineering_receipt, "engineering_status") ==
     "applied_and_validated" &&
-    package.to_json() == editor_owner_package(work, spec).to_json() &&
-    package.pages.get(proof_relative) == Some(proof) &&
+    ToJson::to_json(pkg_val) ==
+    ToJson::to_json(editor_owner_package(work, spec)) &&
+    pkg_val.pages.get(proof_relative) == Some(proof) &&
     @json.parse(@fs.read_file(receipt_path).text()) ==
-    editor_application_receipt(package) else {
+    editor_application_receipt(pkg_val) else {
     return None
   }
   // A same-ID selection with changed acceptance is a different owner input.

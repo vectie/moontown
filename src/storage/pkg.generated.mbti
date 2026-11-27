@@ -12,7 +12,7 @@ pub async fn append_watcher_run_record(String, @core.WatcherRunRecord, dir? : St
 
 pub async fn append_watcher_run_record_file(String, @core.WatcherRunRecord) -> Unit
 
-pub fn consecutive_no_change_count(Array[@core.WatcherRunRecord]) -> Int
+pub fn consecutive_no_change_count(Array[@core.WatcherRunRecord]) -> Int32
 
 pub fn default_snapshot_path() -> String
 
@@ -79,28 +79,32 @@ pub fn watcher_ledger_path(String, dir? : String) -> String
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct Checkpoint {
   run_id : String
   summary : String
-  event_count : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  event_count : Int32
+}
 pub impl Show for Checkpoint
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct EventCursor {
-  offset : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  offset : Int32
+}
 pub impl Show for EventCursor
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct TownSnapshot {
   town : @core.TownState
-  event_count : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  event_count : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct TownSnapshotProjection {
   town : @core.TownState
-  event_count : Int
+  event_count : Int32
   retention : @core.TownStateProjectionEvidence
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
 // Type aliases
 

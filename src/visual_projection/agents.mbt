@@ -20,7 +20,7 @@ fn visual_agent_projection(
     worker_name: worker.name,
     book_id: worker.book_id,
     book_title,
-    role: worker.role.to_string(),
+    role: Show::to_string(worker.role),
     status,
     phase,
     task_id,

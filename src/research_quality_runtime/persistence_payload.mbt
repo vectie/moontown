@@ -113,7 +113,7 @@ fn research_persist_display(entry : @moonbook.BookCatalogEntry) -> String {
 ///|
 fn first_non_empty_compact_excerpt(
   texts : Array[String],
-  limit : Int,
+  limit : Int32,
 ) -> String {
   for text in texts {
     let compact = compact_markdown_for_candidate(text)
@@ -126,7 +126,7 @@ fn first_non_empty_compact_excerpt(
 
 ///|
 fn compact_markdown_for_candidate(text : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let mut wrote = false
   for raw in text.split("\n") {
     let line = raw.trim().to_owned()

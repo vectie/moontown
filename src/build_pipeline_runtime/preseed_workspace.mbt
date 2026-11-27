@@ -3,7 +3,7 @@ pub async fn preseed_wenyu_goal_inputs(
   entry : @moonbook.BookCatalogEntry,
   objective : String,
   repo_root : String,
-  execution? : String = "native",
+  execution~ : String = "native",
 ) -> Unit {
   guard ["native", "acp"].contains(execution) else {
     fail("wenyu_execution_invalid")

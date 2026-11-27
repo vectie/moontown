@@ -121,8 +121,8 @@ async fn attach_focused_diff(work : Work, now : UInt64) -> Work {
     )
   }
   if work.receipt is Object(fields) {
-    fields["focused_diff"] = diff.to_json()
-    fields["focused_diff_digest"] = digest(diff).to_json()
+    fields["focused_diff"] = ToJson::to_json(diff)
+    fields["focused_diff_digest"] = ToJson::to_json(digest(diff))
     { ..work, receipt: Json::object(fields), }
   } else {
     waiting(work, "waiting_result", "native_receipt_invalid", now)
@@ -133,7 +133,7 @@ async fn attach_focused_diff(work : Work, now : UInt64) -> Work {
 pub async fn accepted_repair(
   book_root : String,
   criterion : String,
-  path? : String = default_path(),
+  path~ : String = default_path(),
 ) -> Bool {
   if !@fs.exists(path) {
     return false

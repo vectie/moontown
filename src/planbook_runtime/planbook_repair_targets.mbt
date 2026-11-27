@@ -1,7 +1,7 @@
 ///|
 fn planbook_repair_timeout_ms_json() -> Json {
   let value = 600000
-  value.to_json()
+  ToJson::to_json(value)
 }
 
 ///|

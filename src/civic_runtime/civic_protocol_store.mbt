@@ -3,7 +3,7 @@ pub async fn write_protocol_jsonl_record(
   building_id : String,
   ledger : String,
   value : Json,
-  ledger_base_dir? : String = default_protocol_ledger_base_dir(),
+  ledger_base_dir~ : String = default_protocol_ledger_base_dir(),
 ) -> Unit {
   @support.write_text_file(
     protocol_ledger_path(building_id, ledger, ledger_base_dir~),
@@ -16,9 +16,9 @@ pub async fn write_protocol_jsonl_records(
   building_id : String,
   ledger : String,
   values : Array[Json],
-  ledger_base_dir? : String = default_protocol_ledger_base_dir(),
+  ledger_base_dir~ : String = default_protocol_ledger_base_dir(),
 ) -> Unit {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   for value in values {
     builder.write_string(value.stringify())
     builder.write_char('\n')
@@ -33,8 +33,8 @@ pub async fn write_protocol_jsonl_records(
 pub async fn count_protocol_jsonl_records(
   building_id : String,
   ledger : String,
-  ledger_base_dir? : String = default_protocol_ledger_base_dir(),
-) -> Int {
+  ledger_base_dir~ : String = default_protocol_ledger_base_dir(),
+) -> Int32 {
   let text = @support.read_text_or_empty(
     protocol_ledger_path(building_id, ledger, ledger_base_dir~),
   )

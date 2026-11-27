@@ -1,8 +1,8 @@
 ///|
-const MemberLimit : Int = 16 * 1024 * 1024
+const MemberLimit : Int32 = 16 * 1024 * 1024
 
 ///|
-const TextLimit : Int = 4 * 1024 * 1024
+const TextLimit : Int32 = 4 * 1024 * 1024
 
 ///|
 fn hash(bytes : Bytes) -> String {
@@ -39,7 +39,11 @@ async fn check_path(path : String, directory~ : Bool) -> Unit {
 }
 
 ///|
-async fn bounded_bytes(root : String, relative : String, limit : Int) -> Bytes {
+async fn bounded_bytes(
+  root : String,
+  relative : String,
+  limit : Int32,
+) -> Bytes {
   guard @contract.relative_path_valid(relative) else {
     fail("Unsafe member path")
   }
@@ -54,13 +58,13 @@ async fn bounded_bytes(root : String, relative : String, limit : Int) -> Bytes {
   guard size >= 0L && size <= limit.to_int64() else {
     fail("File exceeds size limit")
   }
-  let bytes = @buffer.Buffer(size_hint=size.to_int().min(8192))
+  let bytes = @buffer.Buffer(capacity=size.to_int().min(8192))
   while file.read_some(max_len=(limit - bytes.length() + 1).min(65536))
         is Some(chunk) {
     guard bytes.length() + chunk.length() <= limit else {
       fail("File grew beyond size limit")
     }
-    bytes.write_bytes(chunk)
+    bytes.write_bytesview(chunk)
   }
   guard bytes.length().to_int64() == size &&
     file.size() == size &&
@@ -73,7 +77,7 @@ async fn bounded_bytes(root : String, relative : String, limit : Int) -> Bytes {
 }
 
 ///|
-async fn bounded_absolute(path : String, limit : Int) -> Bytes {
+async fn bounded_absolute(path : String, limit : Int32) -> Bytes {
   guard absolute_path_valid(path) &&
     path.rev_find("/") is Some(index) &&
     index > 0 else {

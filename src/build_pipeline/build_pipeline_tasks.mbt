@@ -1,5 +1,5 @@
 ///|
-pub fn wenyu_build_task_limit(task_limit : Int) -> Int {
+pub fn wenyu_build_task_limit(task_limit : Int32) -> Int32 {
   if task_limit < 4 {
     4
   } else {
@@ -89,7 +89,7 @@ pub fn wenyu_civic_service_plan_tasks(
 }
 
 ///|
-pub fn positive_wenyu_task_limit(task_limit : Int) -> Int {
+pub fn positive_wenyu_task_limit(task_limit : Int32) -> Int32 {
   if task_limit < 1 {
     1
   } else {

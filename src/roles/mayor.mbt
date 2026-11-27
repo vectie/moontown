@@ -1,7 +1,8 @@
 ///|
+#derive(Eq)
 pub struct Mayor {
   runtime : @moonclaw.EmbeddedMoonclawRuntime
-} derive(Eq)
+}
 
 ///|
 pub impl Show for Mayor with fn output(self : Mayor, logger : &Logger) -> Unit {
@@ -21,11 +22,12 @@ pub fn Mayor::runtime(self : Mayor) -> @moonclaw.EmbeddedMoonclawRuntime {
 }
 
 ///|
+#derive(Eq)
 pub struct MayorDispatchPacket {
   decision : @dispatch.RouteDecision
   output_contract : String
   rationale : String
-} derive(Eq)
+}
 
 ///|
 pub impl Show for MayorDispatchPacket with fn output(
@@ -46,7 +48,7 @@ pub fn Mayor::decide_dispatch(
   let decision = @dispatch.route_task(state, @dispatch.RouteRequest::new(task~))
   let rationale = match decision {
     Assigned(plan) =>
-      "mayor routed \{plan.task_id} to \{plan.worker_id} under \{plan.isolation.to_string()}"
+      "mayor routed \{plan.task_id} to \{plan.worker_id} under \{plan.isolation}"
     Escalated(reason) => "mayor escalated \{task.id}: \{reason}"
     Deferred(reason) => "mayor deferred \{task.id}: \{reason}"
   }

@@ -1,6 +1,6 @@
 ///|
 fn render_wenyu_next_build_plan(plan : @roles.MayorGoalPlan) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let steps = wenyu_next_build_steps()
   let mut index = 1
   for step in steps {

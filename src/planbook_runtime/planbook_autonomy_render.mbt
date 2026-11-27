@@ -1,6 +1,6 @@
 ///|
 fn render_planbook_autonomy_markdown(status : PlanbookAutonomyStatus) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string("# PlanBook Autonomy Status\n\n")
   builder.write_string("- status: `\{status.status}`\n")
   builder.write_string("- book: `\{status.book_id}`\n")
@@ -32,7 +32,7 @@ fn render_planbook_autonomy_markdown(status : PlanbookAutonomyStatus) -> String 
 
 ///|
 fn planbook_autonomy_table(status : PlanbookAutonomyStatus) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string(
     "| Criterion | Owner | State | Evidence | Next Action |\n",
   )

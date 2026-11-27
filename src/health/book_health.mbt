@@ -5,7 +5,7 @@ fn latest_book_execution_note(
 ) -> String? {
   for execution in town.executions {
     if execution.book_id == book_id {
-      return Some("\{execution.status.to_string()}: \{execution.summary}")
+      return Some("\{execution.status}: \{execution.summary}")
     }
   }
   None

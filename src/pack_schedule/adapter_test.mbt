@@ -4,6 +4,7 @@ test "projection registers schedules without domain branching" {
     contract: "moonsuite.pack-host-activation.v1",
     pack_id: "fixture",
     product_id: "fixture",
+    app_runtime_identity: None,
     version: "1.0.0",
     required_runtime_extensions: [],
     book_templates: [],
@@ -20,14 +21,17 @@ test "projection registers schedules without domain branching" {
     provider_ports: [],
     policies: [],
   }
-  let projected = bindings(projection)
-  guard resolve(projected, "fixture.daily") is Some(binding) else {
+  let projected = @pack_schedule.bindings(projection)
+  guard @pack_schedule.resolve(projected, "fixture.daily") is Some(binding) else {
     fail("schedule should resolve")
   }
   assert_eq(binding.workflow_id, "fixture.workflow")
   assert_eq(binding.pack_id, "fixture")
-  let once = reconcile(empty_registry(), projection)
-  let twice = reconcile(once, projection)
+  let once = @pack_schedule.reconcile(
+    @pack_schedule.empty_registry(),
+    projection,
+  )
+  let twice = @pack_schedule.reconcile(once, projection)
   assert_eq(twice.schedules.length(), 1)
-  assert_eq(remove_pack(twice, "fixture").schedules.length(), 0)
+  assert_eq(@pack_schedule.remove_pack(twice, "fixture").schedules.length(), 0)
 }

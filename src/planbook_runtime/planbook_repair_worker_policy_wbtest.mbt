@@ -75,7 +75,7 @@ test "planbook repair packet helpers expose stable worker policy" {
 
 ///|
 test "planbook bounded wait policy is shared by repair-style workers" {
-  let fields : Map[String, Json] = { "kind": "editor".to_json() }
+  let fields : Map[String, Json] = { "kind": ToJson::to_json("editor") }
   add_planbook_bounded_wait_policy(fields)
   let text = Json::object(fields).stringify()
   assert_true(text.contains("\"kind\":\"editor\""))

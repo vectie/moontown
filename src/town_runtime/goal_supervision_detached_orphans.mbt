@@ -3,7 +3,7 @@ async fn rehydrate_orphaned_deferred_watcher_records(
   state : @core.TownState,
   snapshot_path : String,
   standing_goals : Array[@core.StandingGoal],
-  tick : Int,
+  tick : Int32,
 ) -> Unit {
   let ledger_dir = @storage.watcher_ledger_dir_for_snapshot(snapshot_path)
   for goal in standing_goals {

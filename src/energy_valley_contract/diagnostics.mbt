@@ -1,6 +1,7 @@
 ///|
 /// Compiler stages shared by Map Lab. These are semantic stages rather than
 /// renderer passes, so diagnostics remain useful to CLI and test consumers.
+#derive(Debug, Eq)
 pub(all) enum WorldCompileStage {
   ReferenceEvidence
   TerrainCompilation
@@ -12,16 +13,18 @@ pub(all) enum WorldCompileStage {
   DeltaApplication
   RuntimeProjection
   Custom(String)
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum WorldDiagnosticSeverity {
   Information
   Caution
   Failure
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum WorldDiagnosticCode {
   EvidenceAccepted
   EvidenceMissing
@@ -33,10 +36,11 @@ pub(all) enum WorldDiagnosticCode {
   UnsupportedSchema
   PlacementRejected
   Custom(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// A compiler explanation suitable for Map Lab overlays and build reports.
+#derive(Debug, Eq)
 pub(all) struct WorldDiagnostic {
   id : StableId
   stage : WorldCompileStage
@@ -47,7 +51,7 @@ pub(all) struct WorldDiagnostic {
   position : WorldPoint?
   evidence_id : String?
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn world_diagnostic(
@@ -57,9 +61,9 @@ pub fn world_diagnostic(
   code : WorldDiagnosticCode,
   message : String,
   provenance : Provenance,
-  entity_id? : StableId? = None,
-  position? : WorldPoint? = None,
-  evidence_id? : String? = None,
+  entity_id~ : StableId? = None,
+  position~ : WorldPoint? = None,
+  evidence_id~ : String? = None,
 ) -> WorldDiagnostic {
   {
     id,
@@ -75,14 +79,16 @@ pub fn world_diagnostic(
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum PlacementKind {
   BuildingPlacement
   ParkPlacement
   InstallationPlacement
   CustomPlacement(String)
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum PlacementRejectionReason {
   OutsideWorld
   OutsideParcel
@@ -93,11 +99,12 @@ pub(all) enum PlacementRejectionReason {
   ProgramMismatch
   DeltaConflictReason
   CustomReason(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Rejections are first-class compiler output, not discarded log messages.
 /// They let Map Lab show the candidate footprint and the exact failed rule.
+#derive(Debug, Eq)
 pub(all) struct RejectedPlacement {
   id : StableId
   candidate_id : StableId
@@ -108,7 +115,7 @@ pub(all) struct RejectedPlacement {
   reason : PlacementRejectionReason
   message : String
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn rejected_placement(
@@ -120,7 +127,7 @@ pub fn rejected_placement(
   reason : PlacementRejectionReason,
   message : String,
   provenance : Provenance,
-  parcel_id? : StableId? = None,
+  parcel_id~ : StableId? = None,
 ) -> RejectedPlacement {
   {
     id,

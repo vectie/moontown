@@ -1,5 +1,6 @@
 ///|
 /// A deployment-owned preset. No field is taken from an organizer's request.
+#derive(FromJson)
 priv struct Preset {
   template_id : String
   template_version : String
@@ -14,7 +15,7 @@ priv struct Preset {
   curator_profile : String
   workflow_id : String
   workflow_version : String
-} derive(FromJson)
+}
 
 ///|
 fn digest(bytes : Bytes) -> String {

@@ -1,17 +1,19 @@
 ///|
+#derive(Debug, Eq)
 pub(all) struct GeoPoint {
   longitude : Double
   latitude : Double
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct GeoFeature {
   name : String
   kind : String
   category : String
   points : Array[GeoPoint]
   source : Json
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn geojson_file(path : String, mime : String) -> Bool {
@@ -40,7 +42,7 @@ fn geo_point(value : Json) -> GeoPoint? {
   guard value is Array(coords) && coords.length() >= 2 && coords.length() <= 3 else {
     return None
   }
-  guard coords[0] is Number(lon) && coords[1] is Number(lat) else {
+  guard coords[0] is Number(lon, ..) && coords[1] is Number(lat, ..) else {
     return None
   }
   // Comparisons reject NaN as well as out-of-range and infinite coordinates.
@@ -48,7 +50,7 @@ fn geo_point(value : Json) -> GeoPoint? {
     return None
   }
   if coords.length() == 3 {
-    guard coords[2] is Number(alt) && alt - alt == 0.0 else { return None }
+    guard coords[2] is Number(alt, ..) && alt - alt == 0.0 else { return None }
   }
   Some({ longitude: lon, latitude: lat, })
 }
@@ -177,7 +179,7 @@ pub fn geojson_selection(
   }
   let result : Json = {
     "type": "FeatureCollection",
-    "features": rows.to_json(),
+    "features": ToJson::to_json(rows),
   }
   result.stringify(indent=2) + "\n"
 }

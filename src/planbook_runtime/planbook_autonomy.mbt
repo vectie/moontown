@@ -6,23 +6,23 @@ pub type PlanbookAutonomyStatus = @planbook_policy.PlanbookAutonomyStatus
 
 ///|
 pub fn default_planbook_autonomy_path(
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> String {
   "\{@storage.snapshot_base_dir(snapshot_path)}/planbook/autonomy.json"
 }
 
 ///|
 pub fn default_planbook_autonomy_digest_path(
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> String {
   "\{@storage.snapshot_base_dir(snapshot_path)}/planbook/autonomy.md"
 }
 
 ///|
 pub async fn inspect_moontown_planbook_autonomy(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  workspace_root? : String = default_planbook_workspace_root(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  workspace_root~ : String = default_planbook_workspace_root(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
 ) -> PlanbookAutonomyStatus {
   let criteria = planbook_autonomy_criteria(
     snapshot_path, workspace_root, book_catalog_path,
@@ -51,9 +51,9 @@ pub async fn inspect_moontown_planbook_autonomy(
 
 ///|
 pub async fn write_moontown_planbook_autonomy(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  workspace_root? : String = default_planbook_workspace_root(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  workspace_root~ : String = default_planbook_workspace_root(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
 ) -> String {
   if !@fs.exists("\{workspace_root}/wiki/index.md") {
     ignore(bootstrap_moontown_planbook(book_catalog_path~, workspace_root~))
@@ -67,7 +67,10 @@ pub async fn write_moontown_planbook_autonomy(
   )
   let status_path = default_planbook_autonomy_path(snapshot_path~)
   let digest_path = default_planbook_autonomy_digest_path(snapshot_path~)
-  @support.write_text_file(status_path, status.to_json().stringify(indent=2))
+  @support.write_text_file(
+    status_path,
+    ToJson::to_json(status).stringify(indent=2),
+  )
   @support.write_text_file(
     digest_path,
     render_planbook_autonomy_markdown(status),
@@ -78,9 +81,9 @@ pub async fn write_moontown_planbook_autonomy(
 
 ///|
 pub async fn render_moontown_planbook_autonomy_status(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  workspace_root? : String = default_planbook_workspace_root(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  workspace_root~ : String = default_planbook_workspace_root(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
 ) -> String {
   let status = inspect_moontown_planbook_autonomy(
     snapshot_path~,
@@ -92,8 +95,8 @@ pub async fn render_moontown_planbook_autonomy_status(
 
 ///|
 pub async fn planbook_open_gap_count(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-) -> Int {
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+) -> Int32 {
   let status = inspect_moontown_planbook_autonomy(snapshot_path~)
   status.open_count
 }

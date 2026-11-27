@@ -22,7 +22,7 @@ pub async fn load_request_event_request_ids(String) -> Array[String]
 
 pub async fn load_request_ledger(String) -> @book_templates.BookTemplateRequestLedger
 
-pub async fn process_book_template_requests(request_path? : String, registry_path? : String, book_catalog_path? : String, standing_goal_path? : String, tick? : Int) -> String
+pub async fn process_book_template_requests(request_path? : String, registry_path? : String, book_catalog_path? : String, standing_goal_path? : String, tick? : Int32) -> String
 
 pub async fn render_book_template_registry(registry_path? : String) -> String
 

@@ -1,7 +1,7 @@
 ///|
 async fn seed_social_square_protocol_slice(
   protocol : @civic.BuildingProtocolDefinition,
-  ledger_base_dir? : String = default_protocol_ledger_base_dir(),
+  ledger_base_dir~ : String = default_protocol_ledger_base_dir(),
 ) -> Unit {
   let input = @civic.BuildingInputPacket::{
     id: "pkt-social-square-resident-intro-001",
@@ -76,31 +76,31 @@ async fn seed_social_square_protocol_slice(
   write_protocol_jsonl_record(
     protocol.building_id,
     "inbox",
-    input.to_json(),
+    ToJson::to_json(input),
     ledger_base_dir~,
   )
   write_protocol_jsonl_record(
     protocol.building_id,
     "contributions",
-    contribution.to_json(),
+    ToJson::to_json(contribution),
     ledger_base_dir~,
   )
   write_protocol_jsonl_record(
     protocol.building_id,
     "reductions",
-    reduction.to_json(),
+    ToJson::to_json(reduction),
     ledger_base_dir~,
   )
   write_protocol_jsonl_record(
     protocol.building_id,
     "outbox",
-    distribution.to_json(),
+    ToJson::to_json(distribution),
     ledger_base_dir~,
   )
   write_protocol_jsonl_record(
     protocol.building_id,
     "reviews",
-    review.to_json(),
+    ToJson::to_json(review),
     ledger_base_dir~,
   )
 }

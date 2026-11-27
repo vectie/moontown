@@ -73,7 +73,7 @@ pub async fn receive_download(
   response : @http.Response,
   reader : &@io.Reader,
   output_path : String,
-  limits? : @transfer.TransferLimits = @transfer.default_limits(),
+  limits~ : @transfer.TransferLimits = @transfer.default_limits(),
 ) -> DownloadedPackage {
   receive_download_impl(view, response, reader, output_path, limits, _ => ())
 }
@@ -82,6 +82,7 @@ pub async fn receive_download(
 /// Private stage observer enables deterministic failure/cancellation tests on
 /// the same commit code used in production. No filesystem implementation is
 /// substituted, and the public path supplies a no-op observer.
+#warnings("-deprecated")
 async fn receive_download_impl(
   view : @transfer.PackageView,
   response : @http.Response,
@@ -127,7 +128,7 @@ async fn receive_download_impl(
     for count = 0 {
       let part = @async.with_timeout(limits.idle_timeout_ms, () => {
         reader.read_some(
-          max_len=Int::min(limits.chunk_bytes, expected - count + 1),
+          max_len=Int32::min(limits.chunk_bytes, expected - count + 1),
         )
       })
       guard part is Some(bytes) else {
@@ -159,7 +160,7 @@ async fn receive_download_impl(
     )
     owned.push(binding_temp)
     opened.val = Some(binding_file)
-    binding_file.write(view.binding.to_json().stringify(indent=2))
+    binding_file.write(ToJson::to_json(view.binding).stringify(indent=2))
     binding_file.sync()
     after_step("binding_synced")
     binding_file.close()
@@ -176,7 +177,7 @@ async fn receive_download_impl(
     guard view.receipt is Some(receipt) else {
       raise ClientError("missing_byte_receipt")
     }
-    receipt_file.write(receipt.to_json().stringify(indent=2))
+    receipt_file.write(ToJson::to_json(receipt).stringify(indent=2))
     receipt_file.sync()
     after_step("receipt_synced")
     receipt_file.close()
@@ -251,10 +252,14 @@ pub async fn PortableClient::download(
   headers["x-town-binding-digest"] = binding.binding_digest
   headers["accept"] = "application/octet-stream"
   let result : Ref[DownloadedPackage?] = Ref(None)
+  let ci_headers : Map[@http.CaseInsensitiveString, String] = Map([])
+  for k, v in headers {
+    ci_headers[@http.CaseInsensitiveString(k)] = v
+  }
   let request : @http.Request = {
     meth: Get,
     path: route_root + "/content?package_id=" + package_id,
-    headers,
+    headers: ci_headers,
   }
   @async.with_timeout(self.limits.total_timeout_ms, () => {
     (self.exchange)(request, _ => (), (response, reader) => {

@@ -1,6 +1,8 @@
 ///|
 fn competition_access_fixture() -> @hackathon.HackathonState raise {
-  let fields = contest_fields(@hackathon.empty_hackathon_state().to_json())
+  let fields = contest_fields(
+    ToJson::to_json(@hackathon.empty_hackathon_state()),
+  )
   fields["challenges"] = Json::array([
     {
       "id": "public-event",

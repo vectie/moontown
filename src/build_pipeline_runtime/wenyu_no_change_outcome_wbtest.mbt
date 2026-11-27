@@ -1,27 +1,28 @@
 ///|
+#warnings("-unused_async")
 async test "Wenyu import rejects both relabel directions and failed native no change projection" {
   let launch = wenyu_launch_fixture()
   let work = wenyu_journey_completed(launch)
   let changed : @native_work.Work = @json.from_json(
-    @json.parse(work.to_json().stringify()),
+    @json.parse(ToJson::to_json(work).stringify()),
   )
   let answer = @json.parse(changed.output)
-  wenyu_test_set(answer, "outcome", "implemented".to_json())
+  wenyu_test_set(answer, "outcome", ToJson::to_json("implemented"))
   let output = answer.stringify()
   wenyu_test_set(
     changed.receipt,
     "engineering_status",
-    "applied_and_validated".to_json(),
+    ToJson::to_json("applied_and_validated"),
   )
   wenyu_test_set(
     changed.receipt,
     "contract",
-    "wenyu.build.native_patch_receipt.v1".to_json(),
+    ToJson::to_json("wenyu.build.native_patch_receipt.v1"),
   )
   wenyu_test_set(
     changed.receipt,
     "output_digest",
-    @native_work.digest(output).to_json(),
+    ToJson::to_json(@native_work.digest(output)),
   )
   let relabeled = { ..changed, output, }
   try {
@@ -37,12 +38,12 @@ async test "Wenyu import rejects both relabel directions and failed native no ch
   }
   for status in ["runtime-failed", "runtime-cancelled"] {
     let changed : @native_work.Work = @json.from_json(
-      @json.parse(work.to_json().stringify()),
+      @json.parse(ToJson::to_json(work).stringify()),
     )
     wenyu_test_set(
       wenyu_test_field(changed.receipt, "native_receipt"),
       "status",
-      status.to_json(),
+      ToJson::to_json(status),
     )
     try {
       ignore(
@@ -57,7 +58,11 @@ async test "Wenyu import rejects both relabel directions and failed native no ch
     }
   }
   let (mutation_launch, mutation) = wenyu_owner_fixture("outcome-agreement")
-  wenyu_test_set(mutation.receipt, "result_decision", "no_change".to_json())
+  wenyu_test_set(
+    mutation.receipt,
+    "result_decision",
+    ToJson::to_json("no_change"),
+  )
   try {
     ignore(
       import_wenyu_native_result(mutation_launch, mutation, persist=async fn(
@@ -72,18 +77,22 @@ async test "Wenyu import rejects both relabel directions and failed native no ch
       assert_true(error.to_string().contains("wenyu_result_evidence_invalid"))
   }
   let answer = @json.parse(mutation.output)
-  wenyu_test_set(answer, "outcome", "no_change".to_json())
+  wenyu_test_set(answer, "outcome", ToJson::to_json("no_change"))
   let output = answer.stringify()
-  wenyu_test_set(mutation.receipt, "engineering_status", "no_change".to_json())
+  wenyu_test_set(
+    mutation.receipt,
+    "engineering_status",
+    ToJson::to_json("no_change"),
+  )
   wenyu_test_set(
     mutation.receipt,
     "contract",
-    "wenyu.build.native_no_change_receipt.v1".to_json(),
+    ToJson::to_json("wenyu.build.native_no_change_receipt.v1"),
   )
   wenyu_test_set(
     mutation.receipt,
     "output_digest",
-    @native_work.digest(output).to_json(),
+    ToJson::to_json(@native_work.digest(output)),
   )
   try {
     ignore(

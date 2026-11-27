@@ -7,7 +7,7 @@ import {
 }
 
 // Values
-pub fn count_health_anomalies_by_title(HealthReport, String) -> Int
+pub fn count_health_anomalies_by_title(HealthReport, String) -> Int32
 
 pub fn inspect_town(@core.TownState) -> HealthReport
 
@@ -16,44 +16,50 @@ pub fn recovery_actions(HealthReport) -> Array[RecoveryAction]
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub struct Anomaly {
   title : String
   detail : String
-} derive(Eq, @debug.Debug)
+}
 pub impl Show for Anomaly
 
+#derive(Eq, @debug.Debug)
 pub struct BookHealth {
   book_id : String
   level : HealthLevel
   note : String
-} derive(Eq, @debug.Debug)
+}
 pub impl Show for BookHealth
 
+#derive(Eq, @debug.Debug)
 pub enum HealthLevel {
   Healthy
   Degraded
   Critical
-} derive(Eq, @debug.Debug)
+}
 pub impl Show for HealthLevel
 
+#derive(Eq, @debug.Debug)
 pub struct HealthReport {
   worker_health : Array[WorkerHealth]
   book_health : Array[BookHealth]
   anomalies : Array[Anomaly]
-} derive(Eq, @debug.Debug)
+}
 pub impl Show for HealthReport
 
+#derive(Eq, @debug.Debug)
 pub struct RecoveryAction {
   kind : String
   detail : String
-} derive(Eq, @debug.Debug)
+}
 pub impl Show for RecoveryAction
 
+#derive(Eq, @debug.Debug)
 pub struct WorkerHealth {
   worker_id : String
   level : HealthLevel
   note : String
-} derive(Eq, @debug.Debug)
+}
 pub impl Show for WorkerHealth
 
 // Type aliases

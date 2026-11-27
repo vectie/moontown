@@ -81,10 +81,10 @@ async test "MoonTown static book skill templates keep exploration quality" {
 
 ///|
 async test "configured MoonBook seed wiki skills keep exploration quality" {
-  let root = match @sys.get_env_var("MOONTOWN_MOONBOOK_ROOT") {
+  let root = match @env.get_env_var("MOONTOWN_MOONBOOK_ROOT") {
     Some(root) if !root.is_empty() => root
     _ =>
-      match @sys.get_env_var("MOONBOOK_ROOT") {
+      match @env.get_env_var("MOONBOOK_ROOT") {
         Some(root) if !root.is_empty() => root
         _ => return
       }

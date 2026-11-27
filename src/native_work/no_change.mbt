@@ -8,7 +8,7 @@ fn validate_no_change(
   final_snapshot : Json,
   changed : Array[Json],
   checks : Array[Json],
-  last_mutation : Int,
+  last_mutation : Int32,
 ) -> String {
   let policy = field(work.request.acceptance_policy, "completion_policy")
   let reserved = @json.parse(work.reservation.unwrap().request_body) catch {
@@ -20,7 +20,7 @@ fn validate_no_change(
       "completion_policy",
     ) ||
     text(policy, "contract") != "mooncode.completion-outcome.v1" ||
-    !rows(policy, "allowed_outcomes").contains("no_change".to_json()) ||
+    !rows(policy, "allowed_outcomes").contains(ToJson::to_json("no_change")) ||
     text(policy, "no_change_reason") != "already_satisfied" ||
     text(policy, "evidence_scope") != "native_tool_journal" ||
     text(policy, "acceptance_scope") != "engineering_only" ||
@@ -39,7 +39,7 @@ fn validate_no_change(
   let verdict = field(execution, "completion_verdict")
   let proposal = field(verdict, "no_change")
   if text(verdict, "kind") != "mooncode-coding-completion-verdict" ||
-    field(verdict, "accepted") != true.to_json() ||
+    field(verdict, "accepted") != ToJson::to_json(true) ||
     text(verdict, "completion_contract") != "mooncode.completion-outcome.v1" ||
     text(verdict, "completion_outcome") != "no_change" ||
     text(verdict, "acceptance_scope") != "engineering_only" ||
@@ -50,7 +50,7 @@ fn validate_no_change(
   }
   let ordered = rows(events, "events")
   let accepted : Map[String, Json] = Map([])
-  let positions : Map[String, Int] = Map([])
+  let positions : Map[String, Int32] = Map([])
   let identities : Array[String] = []
   let mut sequence = 0UL
   let terminal = @string.parse_uint64(text(native_receipt, "journal_sequence")) catch {
@@ -100,7 +100,7 @@ fn validate_no_change(
     }
   }
   let checkpoint_proposal = field(checkpoint, "checkpoint")
-  if field(checkpoint, "all_done") != true.to_json() ||
+  if field(checkpoint, "all_done") != ToJson::to_json(true) ||
     text(checkpoint_proposal, "completion_outcome") != "no_change" ||
     field(checkpoint_proposal, "no_change") != proposal ||
     text(finish, "completion_outcome") != "no_change" ||
@@ -124,7 +124,7 @@ fn validate_no_change(
     if text(milestone, "resolution") == "already_satisfied" {
       let id = text(milestone, "id")
       if !mutation_kind ||
-        !alternatives.contains(id.to_json()) ||
+        !alternatives.contains(ToJson::to_json(id)) ||
         resolved.contains(id) {
         return "native_no_change_milestone_invalid"
       }
@@ -137,8 +137,8 @@ fn validate_no_change(
   let mut final_finish = Json::null()
   for result in rows(execution, "tool_results") {
     if text(result, "tool") == "finish" &&
-      field(result, "accepted") == true.to_json() &&
-      field(field(result, "result"), "is_error") != true.to_json() {
+      field(result, "accepted") == ToJson::to_json(true) &&
+      field(field(result, "result"), "is_error") != ToJson::to_json(true) {
       final_finish = field(field(result, "result"), "metadata")
     }
   }
@@ -176,7 +176,7 @@ fn validate_no_change(
       !["shell", "moon_cmd"].contains(tool) ||
       command == "" ||
       cwd == "" ||
-      field(check, "exit_code") != (0).to_json() {
+      field(check, "exit_code") != ToJson::to_json(0) {
       return "native_no_change_required_check_invalid"
     }
     ids.push(id)
@@ -238,12 +238,12 @@ fn validate_no_change(
       actual_command != command ||
       !same_cwd ||
       text(metadata, "execution_sandbox_policy") != "grant-bound" ||
-      field(metadata, "exit_code") != (0).to_json() ||
+      field(metadata, "exit_code") != ToJson::to_json(0) ||
       text(metadata, "run_id") == "" ||
       text(metadata, "approval_id") == "" ||
       text(sandbox, "command_digest") == "" ||
-      field(sandbox, "cleanup_verified") != true.to_json() ||
-      field(metadata, "pipeline_exit_ambiguous") == true.to_json() {
+      field(sandbox, "cleanup_verified") != ToJson::to_json(true) ||
+      field(metadata, "pipeline_exit_ambiguous") == ToJson::to_json(true) {
       return "native_no_change_required_check_invalid"
     }
     if !checks.any(proof => text(proof, "event_id") == event_id) {

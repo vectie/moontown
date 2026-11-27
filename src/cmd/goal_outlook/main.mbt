@@ -11,7 +11,7 @@ async fn read_source(path : String) -> Bytes {
 }
 
 ///|
-fn tick(text : String) -> Int raise {
+fn tick(text : String) -> Int32 raise {
   guard !text.is_empty() && text.iter().all(c => c >= '0' && c <= '9') else {
     fail("Ticks must be nonnegative signed 32-bit decimal integers")
   }
@@ -56,7 +56,7 @@ async fn main {
   run() catch {
     error => {
       @stdio.stderr.write("goal_outlook: \{error}\n")
-      @sys.exit(1)
+      @env.exit(1)
     }
   }
 }

@@ -34,7 +34,7 @@ fn repair_budget_deferred_standing_goal(
   state : @core.TownState,
   goal : @core.StandingGoal,
   watcher_records : Array[@core.WatcherRunRecord],
-  last_run_tick : Int,
+  last_run_tick : Int32,
 ) -> @core.StandingGoal {
   state.record_event(
     @core.TownEvent::new(
@@ -66,7 +66,7 @@ fn repair_budget_deferred_standing_goal(
 fn standing_goal_has_nonexecuted_deferred_event(
   state : @core.TownState,
   goal_id : String,
-  tick : Int,
+  tick : Int32,
 ) -> Bool {
   let budget_event_id = "event-standing-goal-\{tick}-\{goal_id}-deferred-budget"
   let cap_event_id = "event-standing-goal-\{tick}-\{goal_id}-deferred-cap"
@@ -79,7 +79,7 @@ fn standing_goal_has_nonexecuted_deferred_event(
 fn standing_goal_has_watcher_record_at_tick(
   records : Array[@core.WatcherRunRecord],
   goal_id : String,
-  tick : Int,
+  tick : Int32,
 ) -> Bool {
   records.any(fn(record) { record.goal_id == goal_id && record.tick == tick })
 }
@@ -88,8 +88,8 @@ fn standing_goal_has_watcher_record_at_tick(
 fn latest_watcher_record_tick_for_goal_before(
   records : Array[@core.WatcherRunRecord],
   goal_id : String,
-  tick : Int,
-) -> Int? {
+  tick : Int32,
+) -> Int32? {
   let mut latest = 0
   for record in records {
     if record.goal_id == goal_id && record.tick < tick && record.tick > latest {

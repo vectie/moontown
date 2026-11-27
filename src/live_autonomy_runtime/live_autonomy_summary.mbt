@@ -1,19 +1,19 @@
 ///|
 priv struct LiveAutonomySummaryContext {
-  tick : Int
+  tick : Int32
   metrics : LiveAutonomyMetricCounts
   waiting : LiveAutonomyWaitingState
-  planbook_open : Int
-  template_request_count : Int
-  pending_template_count : Int
+  planbook_open : Int32
+  template_request_count : Int32
+  pending_template_count : Int32
 }
 
 ///|
 fn live_autonomy_summary_context(
-  tick : Int,
+  tick : Int32,
   metrics : LiveAutonomyMetricCounts,
   waiting : LiveAutonomyWaitingState,
-  planbook_open : Int,
+  planbook_open : Int32,
   template_request_counts : @book_templates.BookTemplateRuntimeCounts,
 ) -> LiveAutonomySummaryContext {
   {
@@ -58,7 +58,7 @@ fn live_autonomy_summary_metrics_text(
 }
 
 ///|
-fn live_autonomy_tick_metrics_text(tick : Int) -> String {
+fn live_autonomy_tick_metrics_text(tick : Int32) -> String {
   "tick=\{tick}"
 }
 
@@ -105,14 +105,14 @@ fn live_autonomy_standing_goal_metrics_text(
 }
 
 ///|
-fn live_autonomy_planbook_metrics_text(planbook_open : Int) -> String {
+fn live_autonomy_planbook_metrics_text(planbook_open : Int32) -> String {
   "planbook_open=\{planbook_open}"
 }
 
 ///|
 fn live_autonomy_template_request_metrics_text(
-  template_request_count : Int,
-  pending_template_count : Int,
+  template_request_count : Int32,
+  pending_template_count : Int32,
 ) -> String {
   [
     "template_requests=\{template_request_count}",

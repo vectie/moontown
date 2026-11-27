@@ -6,9 +6,9 @@ fn fixture() -> String raise {
 }
 
 ///|
-fn accepted(text : String) -> TownPresentationAsset raise {
+fn accepted(text : String) -> @spatial_assets.TownPresentationAsset raise {
   match
-    ingest_moonmold_presentation(
+    @spatial_assets.ingest_moonmold_presentation(
       text,
       building_id="building-habitat",
       placement_id="placement-habitat-plaza",
@@ -64,7 +64,7 @@ test "MoonTown rejects engineering, manufacturing, stale and physical claims" {
   for item in cases {
     let (candidate, expected) = item
     match
-      ingest_moonmold_presentation(
+      @spatial_assets.ingest_moonmold_presentation(
         candidate,
         building_id="building-habitat",
         placement_id="placement-habitat-plaza",
@@ -75,7 +75,7 @@ test "MoonTown rejects engineering, manufacturing, stale and physical claims" {
     }
   }
   match
-    ingest_moonmold_presentation(
+    @spatial_assets.ingest_moonmold_presentation(
       base,
       building_id="building-habitat",
       placement_id="placement-habitat-plaza",
@@ -93,7 +93,7 @@ test "MoonTown rejects loss stripping and identity conflation" {
     new="\"declared_losses\":[]",
   )
   match
-    ingest_moonmold_presentation(
+    @spatial_assets.ingest_moonmold_presentation(
       no_losses,
       building_id="building-habitat",
       placement_id="placement-habitat-plaza",
@@ -103,7 +103,7 @@ test "MoonTown rejects loss stripping and identity conflation" {
     Ok(_) => fail("expected loss rejection")
   }
   match
-    ingest_moonmold_presentation(
+    @spatial_assets.ingest_moonmold_presentation(
       fixture(),
       building_id="same-id",
       placement_id="same-id",

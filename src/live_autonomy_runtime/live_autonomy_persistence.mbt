@@ -8,7 +8,7 @@ async fn persist_live_autonomy_spine(
 ) -> Unit {
   @support.write_text_file(
     default_live_autonomy_path(snapshot_path~),
-    spine.to_json().stringify(indent=2),
+    ToJson::to_json(spine).stringify(indent=2),
   )
   append_live_autonomy_journal(default_town_journal_path(snapshot_path~), spine)
   write_live_autonomy_digest(

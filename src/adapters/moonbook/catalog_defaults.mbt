@@ -34,10 +34,10 @@ pub fn default_catalog_path() -> String {
 
 ///|
 pub fn default_moonbook_root() -> String {
-  match @sys.get_env_var("MOONTOWN_MOONBOOK_ROOT") {
+  match @env.get_env_var("MOONTOWN_MOONBOOK_ROOT") {
     Some(root) if !root.is_empty() => root
     _ =>
-      match @sys.get_env_var("MOONBOOK_ROOT") {
+      match @env.get_env_var("MOONBOOK_ROOT") {
         Some(root) if !root.is_empty() => root
         _ => default_moonbook_external_root()
       }

@@ -34,7 +34,7 @@ fn fixture_config() -> Config {
 ///|
 fn fixture_config_json(config : Config) -> Json {
   {
-    "brief": config.brief.to_json(),
+    "brief": ToJson::to_json(config.brief),
     "opens_ms": config.opens_ms,
     "voting_opens_ms": config.voting_opens_ms,
     "voting_closes_ms": config.voting_closes_ms,
@@ -44,7 +44,9 @@ fn fixture_config_json(config : Config) -> Json {
     "provider_origin": config.provider_origin,
     "provider_key_file": config.provider_key_file,
     "model": config.model,
-    "manager_account_ids": config.manager_account_ids.unwrap_or([]).to_json(),
+    "manager_account_ids": ToJson::to_json(
+      config.manager_account_ids.unwrap_or([]),
+    ),
     "voting_mode": config.voting_mode.unwrap_or("external"),
     "guest_generation": config.guest_generation.unwrap_or(false),
   }
@@ -221,7 +223,7 @@ async test "ambiguous generation recovers by GET only and expired queued work ne
     assert_eq(calls.val, 2)
     assert_true(
       snapshot(read(path, config), config, 500UL, Some("alice"), false)
-      is { "remaining": Number(2), .. },
+      is { "remaining": Number(2, ..), .. },
     )
     save(path, {
       ..original,
@@ -280,8 +282,10 @@ test "durable intent is idempotent and conflicting reuse cannot spend again" {
     "intent": "a",
   })
   assert_eq(
-    apply(state, "generate", { "prompt": "hello", "intent": "a" }).to_json(),
-    state.to_json(),
+    ToJson::to_json(
+      apply(state, "generate", { "prompt": "hello", "intent": "a" }),
+    ),
+    ToJson::to_json(state),
   )
   assert_true(
     try {
@@ -532,7 +536,7 @@ async test "private image access follows approval and withdrawal on disk" {
     config_path,
     (
       {
-        "brief": config.brief.to_json(),
+        "brief": ToJson::to_json(config.brief),
         "opens_ms": "100",
         "voting_opens_ms": "1100",
         "voting_closes_ms": "1200",

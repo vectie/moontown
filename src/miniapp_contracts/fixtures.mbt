@@ -1,6 +1,6 @@
 ///|
 pub fn miniapp_fixture_publication(
-  state? : MiniappVisibilityState = Published,
+  state~ : MiniappVisibilityState = Published,
 ) -> MiniappBuildingPublication {
   {
     state,
@@ -19,13 +19,13 @@ pub fn miniapp_fixture_publication(
 }
 
 ///|
-pub fn miniapp_fixture_user(id? : String = "user-a") -> MiniappUser {
+pub fn miniapp_fixture_user(id~ : String = "user-a") -> MiniappUser {
   { id, display_name: "User A", avatar_url: None, version: 1, }
 }
 
 ///|
 pub fn miniapp_fixture_workspace(
-  user_id? : String = "user-a",
+  user_id~ : String = "user-a",
 ) -> MiniappWorkspace {
   {
     id: "workspace-\{user_id}",
@@ -38,7 +38,7 @@ pub fn miniapp_fixture_workspace(
 }
 
 ///|
-pub fn miniapp_fixture_layer(user_id? : String = "user-a") -> MiniappTownLayer {
+pub fn miniapp_fixture_layer(user_id~ : String = "user-a") -> MiniappTownLayer {
   {
     id: "layer-personal-\{user_id}",
     title: "Personal map",
@@ -51,7 +51,7 @@ pub fn miniapp_fixture_layer(user_id? : String = "user-a") -> MiniappTownLayer {
 
 ///|
 pub fn miniapp_fixture_book(
-  id? : String = "book-policy-hall",
+  id~ : String = "book-policy-hall",
 ) -> MiniappBookSummary {
   {
     id,
@@ -66,11 +66,11 @@ pub fn miniapp_fixture_book(
 
 ///|
 pub fn miniapp_fixture_building(
-  id? : String = "policy-hall",
-  owner_id? : String = "system",
-  owner_kind? : MiniappOwnerKind = SystemOwner,
-  visibility? : MiniappVisibilityState = Published,
-  scope? : MiniappScope = TownPublicScope,
+  id~ : String = "policy-hall",
+  owner_id~ : String = "system",
+  owner_kind~ : MiniappOwnerKind = SystemOwner,
+  visibility~ : MiniappVisibilityState = Published,
+  scope~ : MiniappScope = TownPublicScope,
 ) -> MiniappBuilding {
   {
     id,
@@ -93,8 +93,8 @@ pub fn miniapp_fixture_building(
 
 ///|
 pub fn miniapp_fixture_placement(
-  building_id? : String = "policy-hall",
-  layer_id? : String = "layer-personal-user-a",
+  building_id~ : String = "policy-hall",
+  layer_id~ : String = "layer-personal-user-a",
 ) -> MiniappBuildingPlacement {
   {
     id: "placement-\{layer_id}-\{building_id}",
@@ -110,7 +110,7 @@ pub fn miniapp_fixture_placement(
 
 ///|
 pub fn miniapp_fixture_agent(
-  building_id? : String = "policy-hall",
+  building_id~ : String = "policy-hall",
 ) -> MiniappAgent {
   {
     id: "agent-policy-guide",
@@ -125,7 +125,7 @@ pub fn miniapp_fixture_agent(
 
 ///|
 pub fn miniapp_fixture_thread(
-  building_id? : String = "policy-hall",
+  building_id~ : String = "policy-hall",
 ) -> MiniappThread {
   {
     id: "thread-policy-hall",
@@ -139,7 +139,7 @@ pub fn miniapp_fixture_thread(
 
 ///|
 pub fn miniapp_fixture_message(
-  thread_id? : String = "thread-policy-hall",
+  thread_id~ : String = "thread-policy-hall",
 ) -> MiniappMessage {
   {
     id: "msg-policy-hall-1",

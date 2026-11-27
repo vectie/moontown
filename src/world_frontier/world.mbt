@@ -1,19 +1,22 @@
 ///|
 /// Experimental, renderer-neutral scenery. IDs never confer runtime authority.
+#derive(Debug, Eq, ToJson)
 pub(all) struct Point {
   x : Double
   y : Double
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) struct Road {
   a : Point
   b : Point
   bridge : Bool
   width : Double
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) struct Lot {
   id : String
   x : Int32
@@ -25,16 +28,18 @@ pub(all) struct Lot {
   frontage : Point
   east : Point
   north : Point
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) struct Plant {
   point : Point
   kind : Int32
   size : Double
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) struct Chunk {
   x : Int32
   y : Int32
@@ -44,7 +49,7 @@ pub(all) struct Chunk {
   roads : Array[Road]
   lots : Array[Lot]
   plants : Array[Plant]
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
 pub let version : String = "frontier-v1"

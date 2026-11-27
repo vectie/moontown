@@ -9,7 +9,7 @@ fn digest(bytes : Bytes) -> String {
 }
 
 ///|
-fn project(bytes : Bytes, start : Int, end : Int) -> Outlook raise {
+fn project(bytes : Bytes, start : Int32, end : Int32) -> Outlook raise {
   guard start >= 0 && end > start && end - start <= 1000000 else {
     fail(
       "Choose a nonnegative start and an exclusive end 1 to 1,000,000 ticks later, within signed 32-bit range",
@@ -20,7 +20,7 @@ fn project(bytes : Bytes, start : Int, end : Int) -> Outlook raise {
     Err(error) => fail(error)
   }
   let views : Array[GoalView] = []
-  let events : Array[(Int, Int)] = []
+  let events : Array[(Int32, Int32)] = []
   for i, goal in goals {
     let cadence = if goal.cadence_ticks < 1 { 1 } else { goal.cadence_ticks }
     let state = if !goal.enabled {
@@ -34,7 +34,7 @@ fn project(bytes : Bytes, start : Int, end : Int) -> Outlook raise {
     } else {
       "beyond_window"
     }
-    let ticks : Array[Int] = []
+    let ticks : Array[Int32] = []
     if goal.enabled {
       let first = if goal.next_due_tick < start {
         start
@@ -121,8 +121,8 @@ fn bounded(text : String) -> String raise {
 /// Returns full JSON with chronological slots, or CSV with one row per goal.
 pub fn report(
   bytes : Bytes,
-  start : Int,
-  end : Int,
+  start : Int32,
+  end : Int32,
   format~ : String,
 ) -> Result[String, String] {
   try {
@@ -132,7 +132,7 @@ pub fn report(
     let outlook = project(bytes, start, end)
     bounded(
       if format == "json" {
-        outlook.to_json().stringify() + "\n"
+        ToJson::to_json(outlook).stringify() + "\n"
       } else {
         csv(outlook)
       },

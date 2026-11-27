@@ -1,5 +1,6 @@
 ///|
 /// Framework-independent composer state, shared by the Rabbita UI and tests.
+#derive(Debug)
 pub(all) struct Client {
   draft : Draft
   revision : String
@@ -28,7 +29,7 @@ pub(all) struct Client {
   source_book : String
   source_listing : SourceListing?
   source_filter : String
-} derive(Debug)
+}
 
 ///|
 pub fn Client::new() -> Client {

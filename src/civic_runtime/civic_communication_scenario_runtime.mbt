@@ -1,12 +1,12 @@
 ///|
 pub async fn bootstrap_civic_communication_scenario(
   scenario : CivicCommunicationScenario,
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  round_id? : String = "",
-  round_number? : Int = 1,
-  workspace_base? : String = "",
-  reducer_mode? : CivicCommunicationReductionMode = MoonClawReducer,
-  run_inline? : Bool = moontown_moonclaw_inline_enabled(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  round_id~ : String = "",
+  round_number~ : Int32 = 1,
+  workspace_base~ : String = "",
+  reducer_mode~ : CivicCommunicationReductionMode = MoonClawReducer,
+  run_inline~ : Bool = moontown_moonclaw_inline_enabled(),
 ) -> String {
   let resolved_round_id = civic_pattern_round_id_for_scenario(
     scenario, round_id, round_number,
@@ -45,11 +45,11 @@ pub async fn bootstrap_civic_communication_scenario(
 async fn materialize_civic_communication_scenario(
   scenario : CivicCommunicationScenario,
   ideas : Array[CivicCommunicationIdea],
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  round_id? : String = "civic-salon-round-001",
-  round_number? : Int = 1,
-  workspace_base? : String = "",
-  reducer_summary? : String? = None,
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  round_id~ : String = "civic-salon-round-001",
+  round_number~ : Int32 = 1,
+  workspace_base~ : String = "",
+  reducer_summary~ : String? = None,
 ) -> String {
   if ideas.length() == 0 {
     return civic_communication_blocked_summary(

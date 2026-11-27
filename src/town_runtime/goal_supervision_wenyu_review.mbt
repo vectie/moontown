@@ -11,7 +11,7 @@ pub async fn reconcile_native_wenyu_review(
   state : @core.TownState,
   entry : @moonbook.BookCatalogEntry,
   task_id : String,
-  tick : Int,
+  tick : Int32,
 ) -> Unit {
   let execution = match @core.find_execution(state, task_id) {
     Some(execution) => execution
@@ -33,8 +33,12 @@ async fn reconcile_wenyu_review_execution(
   state : @core.TownState,
   entry : @moonbook.BookCatalogEntry,
   execution : @core.TaskExecutionRecord,
-  tick : Int,
-  readback? : async (@moonbook.BookCatalogEntry, @core.TaskExecutionRecord, Int) -> @core.TaskExecutionRecord,
+  tick : Int32,
+  readback? : async (
+    @moonbook.BookCatalogEntry,
+    @core.TaskExecutionRecord,
+    Int32,
+  ) -> @core.TaskExecutionRecord,
 ) -> Unit {
   if execution.result_decision == "native-book-review-rejected" ||
     @core.find_execution(state, execution.task_id) != Some(execution) {

@@ -1,6 +1,6 @@
 ///|
 pub fn compact_watch_segment(text : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let mut emitted = 0
   let mut last_dash = false
   for char in text.to_lower() {
@@ -29,7 +29,7 @@ pub fn compact_watch_segment(text : String) -> String {
 }
 
 ///|
-pub fn standing_watch_task_id(goal_id : String, tick : Int) -> String {
+pub fn standing_watch_task_id(goal_id : String, tick : Int32) -> String {
   "standing-\{compact_watch_segment(goal_id)}-tick-\{tick}"
 }
 
@@ -47,7 +47,7 @@ pub fn standing_watch_task_tick_prefix(goal_id : String) -> String {
 pub fn standing_watch_tick_for_goal_task(
   goal : @core.StandingGoal,
   task_id : String,
-) -> Int? {
+) -> Int32? {
   let prefix = standing_watch_task_tick_prefix(goal.id)
   if task_id.has_prefix(prefix) {
     first_non_negative_int(task_id[prefix.length():].to_owned())
@@ -71,7 +71,7 @@ pub fn standing_goal_for_execution_task(
 }
 
 ///|
-fn first_non_negative_int(text : String) -> Int? {
+fn first_non_negative_int(text : String) -> Int32? {
   let mut seen = false
   let mut value = 0
   for char in text {

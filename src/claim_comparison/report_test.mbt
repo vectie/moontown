@@ -23,7 +23,7 @@ fn row(
 fn output(
   rows : String,
   sources : Map[String, Bytes],
-  format? : String = "json",
+  format~ : String = "json",
 ) -> String raise {
   match
     @claim_comparison.report(
@@ -46,7 +46,7 @@ fn field(value : Json, key : String) -> Json raise {
 }
 
 ///|
-fn item(value : Json, index : Int) -> Json raise {
+fn item(value : Json, index : Int32) -> Json raise {
   guard value is Array(items) && items.get(index) is Some(found) else {
     fail("Missing item")
   }
@@ -72,18 +72,21 @@ test "exact-context groups preserve cross-book differences agreement and single-
       "b.txt": @utf8.encode("Launch: December\n水"),
     }),
   )
-  assert_eq(field(report, "state"), "pending_review".to_json())
+  assert_eq(field(report, "state"), ToJson::to_json("pending_review"))
   let groups = field(report, "groups")
-  assert_eq(field(item(groups, 0), "state"), "different_values".to_json())
-  assert_eq(field(item(groups, 1), "state"), "single_book".to_json())
-  assert_eq(field(item(groups, 2), "state"), "same_value".to_json())
+  assert_eq(
+    field(item(groups, 0), "state"),
+    ToJson::to_json("different_values"),
+  )
+  assert_eq(field(item(groups, 1), "state"), ToJson::to_json("single_book"))
+  assert_eq(field(item(groups, 2), "state"), ToJson::to_json("same_value"))
   assert_eq(
     field(item(field(item(groups, 0), "claims"), 1), "quote"),
-    "Launch: December".to_json(),
+    ToJson::to_json("Launch: December"),
   )
   assert_eq(
     field(item(field(report, "sources"), 0), "size_bytes"),
-    (20).to_json(),
+    ToJson::to_json(20),
   )
 }
 
@@ -96,7 +99,7 @@ test "literal whitespace case and context identities are never normalized" {
   let groups = field(@json.parse(output(rows, { "a": b"yes" })), "groups")
   guard groups is Array(groups) else { fail("groups") }
   assert_eq(groups.length(), 3)
-  assert_eq(field(groups[0], "state"), "different_values".to_json())
+  assert_eq(field(groups[0], "state"), ToJson::to_json("different_values"))
 }
 
 ///|
@@ -110,7 +113,9 @@ test "source and table digests bind exact bytes even with unchanged quotes" {
   )
   assert_eq(
     field(item(field(first, "sources"), 0), "digest"),
-    ("sha256:" + @crypto.bytes_to_hex_string(@crypto.sha256(b"yes"))).to_json(),
+    ToJson::to_json(
+      "sha256:" + @crypto.bytes_to_hex_string(@crypto.sha256(b"yes")),
+    ),
   )
   let changed = @json.parse(
     output(rows + row("b", "B", "t", "ctx", "yes", "a", "yes"), { "a": b"yes" }),
@@ -127,7 +132,7 @@ test "CSV multiline quotes TSV BOM and repeated source selection" {
   let report = @json.parse(output(rows, { "a": @utf8.encode("x,\"水\"\ny") }))
   assert_eq(
     field(item(field(item(field(report, "groups"), 0), "claims"), 0), "value"),
-    "x,\"水\"\ny".to_json(),
+    ToJson::to_json("x,\"水\"\ny"),
   )
   let tsv = @utf8.encode(
     "\uFEFFclaim_id\tbook_id\ttopic\tcontext\tvalue\tsource_path\tquote\r\na\tA\tt\tctx\ty\ta\ty\r\n",
@@ -215,7 +220,7 @@ test "row source input and output limits reject rather than truncate" {
   let rows = Array::makei(33, i => {
     row(i.to_string(), "A", "t", "ctx", "x", i.to_string(), "x")
   }).join("")
-  let sources : Map[String, Bytes] = {}
+  let sources : Map[String, Bytes] = Map([])
   for i = 0; i < 33; i = i + 1 {
     sources[i.to_string()] = @utf8.encode("x".repeat(262144))
   }
@@ -280,7 +285,7 @@ test "200 claims and 64 captured sources are admitted without truncation" {
       "x",
     )
   }).join("")
-  let sources : Map[String, Bytes] = {}
+  let sources : Map[String, Bytes] = Map([])
   for i = 0; i < 64; i = i + 1 {
     sources[i.to_string()] = b"x"
   }
@@ -300,6 +305,6 @@ test "multiple different values from one Book remain a single-book group" {
   let report = @json.parse(output(rows, { "a": b"yes no" }))
   assert_eq(
     field(item(field(report, "groups"), 0), "state"),
-    "single_book".to_json(),
+    ToJson::to_json("single_book"),
   )
 }

@@ -1,6 +1,10 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "vectie/moontown/town_application"
 
+import {
+  "moonbitlang/core/json",
+}
+
 // Values
 pub fn default_request_application(String) -> RequestApplication
 
@@ -14,9 +18,9 @@ pub struct RequestApplication {
   operator_policy_path : String
   catalog_path : String
 }
-pub async fn RequestApplication::queue_evidence_book(Self, String) -> Json
-pub async fn RequestApplication::register_existing_book(Self, String) -> Json
-pub async fn RequestApplication::submit_standing_watch(Self, String) -> Json
+pub async fn RequestApplication::queue_evidence_book(Self, String) -> @json.Json
+pub async fn RequestApplication::register_existing_book(Self, String) -> @json.Json
+pub async fn RequestApplication::submit_standing_watch(Self, String) -> @json.Json
 
 // Type aliases
 

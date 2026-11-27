@@ -1,6 +1,6 @@
 ///|
 fn daemon_civic_communication_schedule(
-  next_due_ms? : UInt64 = 0UL,
+  next_due_ms~ : UInt64 = 0UL,
 ) -> CivicCommunicationSchedule {
   CivicCommunicationSchedule::new(
     id="future-energy-social-square",

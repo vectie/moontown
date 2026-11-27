@@ -20,7 +20,7 @@ fn civic_communication_metrics_table(
 fn civic_communication_output_metric_table(
   ideas : Array[CivicCommunicationIdea],
 ) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string(
     "| Output | Workspaces | Questions | Home workspaces |\n",
   )
@@ -37,7 +37,7 @@ fn civic_communication_output_metric_table(
 fn civic_communication_participant_table(
   participants : Array[CivicCommunicationParticipantBook],
 ) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string("| Workspace | Focus | Current Question |\n")
   builder.write_string("| --- | --- | --- |\n")
   for participant in participants {

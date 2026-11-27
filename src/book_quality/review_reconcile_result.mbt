@@ -22,7 +22,7 @@ fn book_quality_review_run_reconcile_result(
 pub fn reconcile_review_run_from_observation(
   run : BookQualityReviewRun,
   result_exists~ : Bool,
-  result_content? : String = "",
+  result_content~ : String = "",
   process_alive~ : Bool,
   poll_summary~ : String,
   now_ms~ : UInt64,

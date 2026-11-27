@@ -9,7 +9,7 @@ priv struct OccurrenceProperty {
 priv struct OccurrenceSource {
   event : CalendarEvent
   properties : Array[OccurrenceProperty]
-  ordinal : Int
+  ordinal : Int32
 }
 
 ///|
@@ -28,7 +28,7 @@ fn occurrence_sources(text : String) -> Result[Array[OccurrenceSource], String] 
       if lines.is_empty() {
         return Err("Folded line without a preceding property")
       }
-      lines[lines.length() - 1] += (try! raw.to_owned()[1:]).to_string()
+      lines[lines.length() - 1] += raw.to_owned()[1:].to_owned()
     } else {
       lines.push(raw.to_owned())
     }

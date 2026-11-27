@@ -4,15 +4,15 @@
 /// directly, or JSON null when the value is absent.
 fn wire_string_or_null(value : String?) -> Json {
   match value {
-    Some(item) => item.to_json()
+    Some(item) => ToJson::to_json(item)
     None => Json::null()
   }
 }
 
 ///|
-fn wire_int_or_null(value : Int?) -> Json {
+fn wire_int_or_null(value : Int32?) -> Json {
   match value {
-    Some(item) => item.to_json()
+    Some(item) => ToJson::to_json(item)
     None => Json::null()
   }
 }
@@ -20,7 +20,7 @@ fn wire_int_or_null(value : Int?) -> Json {
 ///|
 fn wire_uint64_or_null(value : UInt64?) -> Json {
   match value {
-    Some(item) => item.to_json()
+    Some(item) => ToJson::to_json(item)
     None => Json::null()
   }
 }

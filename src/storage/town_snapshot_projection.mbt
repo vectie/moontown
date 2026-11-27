@@ -6,17 +6,18 @@
 /// retention object makes every omission explicit while remaining an additive
 /// field for readers that only understand the existing `town`/`event_count`
 /// shape.
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct TownSnapshotProjection {
   town : @core.TownState
-  event_count : Int
+  event_count : Int32
   retention : @core.TownStateProjectionEvidence
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 /// Produces a bounded read view without changing the supplied durable snapshot.
 pub fn project_town_snapshot(
   snapshot : TownSnapshot,
-  limits? : @core.TownStateProjectionLimits = @core.TownStateProjectionLimits::new(),
+  limits~ : @core.TownStateProjectionLimits = @core.TownStateProjectionLimits::new(),
 ) -> TownSnapshotProjection {
   let projection = snapshot.town.bounded_read_projection(limits)
   {

@@ -67,7 +67,7 @@ fn valid_program_timezone(timezone : String) -> Bool {
   [
     "Africa", "America", "Antarctica", "Arctic", "Asia", "Atlantic", "Australia",
     "Europe", "Indian", "Pacific", "Etc",
-  ].contains(parts[0].to_string()) &&
+  ].contains(parts[0].to_owned()) &&
   parts.all(part => {
     !part.is_empty() &&
     part
@@ -311,7 +311,7 @@ fn save_competition_program(
   state : HackathonState,
   request : SaveProgramRequest,
   now_ms : UInt64,
-  force_benchmark_revision? : Bool = false,
+  force_benchmark_revision~ : Bool = false,
 ) -> HackathonState raise {
   let previous = competition_program(state, request.program.challenge_id)
   require_unfrozen_program(state, request.program.challenge_id)
@@ -347,7 +347,7 @@ fn save_competition_program(
   if state.teams.any(t => t.challenge_id == program.challenge_id) &&
     previous is Some(old) &&
     old_brief is Some(old_challenge) {
-    guard old.tracks.to_json() == program.tracks.to_json() &&
+    guard ToJson::to_json(old.tracks) == ToJson::to_json(program.tracks) &&
       old.max_team_size == program.max_team_size &&
       old.daily_submission_limit == program.daily_submission_limit &&
       old_challenge.scope == request.brief.scope &&
@@ -378,11 +378,11 @@ fn save_competition_program(
   let benchmark_version = match old_brief {
     Some(old) =>
       if force_benchmark_revision ||
-        old.benchmark_materials.to_json() !=
-        request.brief.benchmark_materials.to_json() ||
-        old.evaluation_materials.to_json() !=
-        request.brief.evaluation_materials.to_json() ||
-        old.rubric.to_json() != request.brief.rubric.to_json() {
+        ToJson::to_json(old.benchmark_materials) !=
+        ToJson::to_json(request.brief.benchmark_materials) ||
+        ToJson::to_json(old.evaluation_materials) !=
+        ToJson::to_json(request.brief.evaluation_materials) ||
+        ToJson::to_json(old.rubric) != ToJson::to_json(request.brief.rubric) {
         old.benchmark_version + 1
       } else {
         old.benchmark_version

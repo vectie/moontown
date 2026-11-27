@@ -1,6 +1,7 @@
 ///|
 /// A historical source revision. "unavailable" is an integrity failure, never
 /// an execution failure. Only completed/partial entries have retained dossiers.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct OutcomeEntry {
   draft_id : String
   revision : String
@@ -8,29 +9,32 @@ pub(all) struct OutcomeEntry {
   recorded_at : String
   outcome_status : String
   review_status : String
-  review_version : Int
+  review_version : Int32
   result_digest : String
   review_digest : String
   error : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 /// Exact immutable selection. A new review must not silently replace this pin.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct OutcomeKey {
   draft_id : String
   revision : String
   result_digest : String
-  review_version : Int
+  review_version : Int32
   review_digest : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct OutcomeReview {
-  version : Int
+  version : Int32
   digest : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct RetainedOutcome {
   contract_version : String
   key : OutcomeKey
@@ -40,8 +44,8 @@ pub(all) struct RetainedOutcome {
   reviews : Array[OutcomeReview]
   artifacts : Array[Artifact]
   archive_digest : String
-  archive_size_bytes : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  archive_size_bytes : Int32
+}
 
 ///|
 pub fn OutcomeEntry::key(self : OutcomeEntry) -> OutcomeKey {

@@ -8,7 +8,7 @@ fn fixture_limits() -> @transfer.TransferLimits {
 
 ///|
 fn fixture_binding(
-  bytes? : Bytes = fixture_bytes,
+  bytes~ : Bytes = fixture_bytes,
 ) -> @marketplace.PortableListingBinding {
   let source : @marketplace.PortableSource = {
     contract: "moonbook.portable_source.v1",
@@ -45,7 +45,7 @@ fn fixture_binding(
     "publisher_principal_id": binding.publisher_principal_id,
     "tenant_id": binding.tenant_id,
     "binding_revision": binding.binding_revision,
-    "source": source.to_json(),
+    "source": ToJson::to_json(source),
     "reuse_mode": binding.reuse_mode,
     "verification_scope": binding.verification_scope,
   }
@@ -53,7 +53,7 @@ fn fixture_binding(
 }
 
 ///|
-fn fixture_view(bytes? : Bytes = fixture_bytes) -> @transfer.PackageView {
+fn fixture_view(bytes~ : Bytes = fixture_bytes) -> @transfer.PackageView {
   let binding = fixture_binding(bytes~)
   let package_id = @transfer.package_id(binding.binding_digest)
   let receipt : @transfer.PackageByteReceipt = {
@@ -96,7 +96,11 @@ fn fixture_headers(view : @transfer.PackageView) -> Map[String, String] {
 
 ///|
 fn fixture_response(view : @transfer.PackageView) -> @http.Response {
-  { code: 200, reason: "OK", headers: fixture_headers(view), cookies: [], }
+  let ci_headers : Map[@http.CaseInsensitiveString, String] = Map([])
+  for k, v in fixture_headers(view) {
+    ci_headers[@http.CaseInsensitiveString(k)] = v
+  }
+  { code: 200, reason: "OK", headers: ci_headers, cookies: [], }
 }
 
 ///|
@@ -113,7 +117,7 @@ async fn with_temp(body : async (String) -> Unit) -> Unit {
 ///|
 struct RecordingWriter {
   buffer : Buffer
-  writes : Array[Int]
+  writes : Array[Int32]
 }
 
 ///|
@@ -124,28 +128,30 @@ impl @io.Writer for RecordingWriter with fn write_once(
   len~,
 ) {
   self.writes.push(len)
-  self.buffer.write_bytes(bytes[offset:offset + len])
+  self.buffer.write_bytesview(bytes[offset:offset + len])
   len
 }
 
 ///|
+#warnings("-alert_internal")
 struct ObservedReader {
   bytes : Bytes
   buffer : @io.ReaderBuffer
-  mut offset : Int
-  max_chunk : Int
-  reads : Ref[Int]
+  mut offset : Int32
+  max_chunk : Int32
+  reads : Ref[Int32]
   hidden_path : String?
-  fail_after : Int?
-  delay_ms : Int
+  fail_after : Int32?
+  delay_ms : Int32
 }
 
 ///|
+#warnings("-alert_internal")
 fn observed_reader(
   bytes : Bytes,
   hidden_path? : String,
-  fail_after? : Int,
-  delay_ms? : Int = 0,
+  fail_after? : Int32,
+  delay_ms~ : Int32 = 0,
 ) -> ObservedReader {
   {
     bytes,
@@ -181,9 +187,9 @@ impl @io.Reader for ObservedReader with fn _direct_read(
   if self.delay_ms > 0 {
     @async.sleep(self.delay_ms)
   }
-  let n = Int::min(
+  let n = Int32::min(
     max_len,
-    Int::min(self.max_chunk, self.bytes.length() - self.offset),
+    Int32::min(self.max_chunk, self.bytes.length() - self.offset),
   )
   for i in 0..<n {
     output[offset + i] = self.bytes[self.offset + i]

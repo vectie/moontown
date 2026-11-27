@@ -166,6 +166,7 @@ fn no_change_set(value : Json, key : String, replacement : Json) -> Unit {
 }
 
 ///|
+#warnings("-unresolved_type_variable")
 async test "native no change rejects synthetic verdicts mismatched proposals incomplete or invalid evidence" {
   let work = no_change_fixture_work()
   for
@@ -189,47 +190,63 @@ async test "native no change rejects synthetic verdicts mismatched proposals inc
     match boundary {
       "no-verdict" =>
         no_change_set(execution, "completion_verdict", Json::null())
-      "rejected-verdict" => no_change_set(verdict, "accepted", false.to_json())
-      "wrong-kind" => no_change_set(verdict, "kind", "forged".to_json())
+      "rejected-verdict" =>
+        no_change_set(verdict, "accepted", ToJson::to_json(false))
+      "wrong-kind" => no_change_set(verdict, "kind", ToJson::to_json("forged"))
       "wrong-contract" =>
-        no_change_set(verdict, "completion_contract", "unknown".to_json())
+        no_change_set(
+          verdict,
+          "completion_contract",
+          ToJson::to_json("unknown"),
+        )
       "wrong-outcome" =>
-        no_change_set(verdict, "completion_outcome", "mutation".to_json())
+        no_change_set(
+          verdict,
+          "completion_outcome",
+          ToJson::to_json("mutation"),
+        )
       "wrong-scope" =>
-        no_change_set(verdict, "acceptance_scope", "customer".to_json())
+        no_change_set(verdict, "acceptance_scope", ToJson::to_json("customer"))
       "claimed-acceptance" =>
-        no_change_set(verdict, "original_task_acceptance", "accepted".to_json())
+        no_change_set(
+          verdict,
+          "original_task_acceptance",
+          ToJson::to_json("accepted"),
+        )
       "empty-observation" =>
-        no_change_set(proposal, "observation", " ".to_json())
+        no_change_set(proposal, "observation", ToJson::to_json(" "))
       "wrong-reason" =>
-        no_change_set(proposal, "reason", "nothing-to-do".to_json())
+        no_change_set(proposal, "reason", ToJson::to_json("nothing-to-do"))
       "missing-reference" =>
-        no_change_set(proposal, "evidence_refs", [].to_json())
+        no_change_set(proposal, "evidence_refs", ToJson::to_json([]))
       "duplicate-reference" =>
         no_change_set(
           proposal,
           "evidence_refs",
-          ["check-2", "check-2"].to_json(),
+          ToJson::to_json(["check-2", "check-2"]),
         )
       "unknown-reference" =>
-        no_change_set(proposal, "evidence_refs", ["missing"].to_json())
+        no_change_set(proposal, "evidence_refs", ToJson::to_json(["missing"]))
       "missing-events" => {
-        no_change_set(events, "events", [].to_json())
-        no_change_set(events, "event_count", (0).to_json())
+        no_change_set(events, "events", ToJson::to_json([]))
+        no_change_set(events, "event_count", ToJson::to_json(0))
       }
-      "incomplete-events" => no_change_set(events, "event_count", (4).to_json())
-      "duplicate-event" => no_change_set(journal[1], "id", "check-2".to_json())
+      "incomplete-events" =>
+        no_change_set(events, "event_count", ToJson::to_json(4))
+      "duplicate-event" =>
+        no_change_set(journal[1], "id", ToJson::to_json("check-2"))
       "out-of-order" =>
-        no_change_set(journal[1], "journal_sequence", "1".to_json())
+        no_change_set(journal[1], "journal_sequence", ToJson::to_json("1"))
       "checkpoint-mismatch" =>
         no_change_set(
           field(checkpoint, "checkpoint"),
           "no_change",
           Json::null(),
         )
-      "not-all-done" => no_change_set(checkpoint, "all_done", false.to_json())
+      "not-all-done" =>
+        no_change_set(checkpoint, "all_done", ToJson::to_json(false))
       "finish-mismatch" =>
-        no_change_set(finish, "completion_outcome", "mutation".to_json())
+        no_change_set(finish, "completion_outcome", ToJson::to_json("mutation"))
       "projection-mismatch" =>
         no_change_set(
           field(field(rows(execution, "tool_results")[0], "result"), "metadata"),
@@ -240,34 +257,40 @@ async test "native no change rejects synthetic verdicts mismatched proposals inc
         no_change_set(
           rows(field(checkpoint, "checkpoint"), "milestones")[0],
           "id",
-          "other".to_json(),
+          ToJson::to_json("other"),
         )
       "missing-check-id" =>
         no_change_set(
           verdict,
           "required_check_evidence",
-          [{ "id": "other", "event_id": "check-2" }].to_json(),
+          ToJson::to_json([{ "id": "other", "event_id": "check-2" }]),
         )
       "wrong-check-event" =>
         no_change_set(
           verdict,
           "required_check_evidence",
-          [{ "id": "check-1", "event_id": "checkpoint-3" }].to_json(),
+          ToJson::to_json([{ "id": "check-1", "event_id": "checkpoint-3" }]),
         )
-      "wrong-command" => no_change_set(check, "cmd", "moon check".to_json())
-      "wrong-cwd" => no_change_set(check, "cwd", "/other".to_json())
+      "wrong-command" =>
+        no_change_set(check, "cmd", ToJson::to_json("moon check"))
+      "wrong-cwd" => no_change_set(check, "cwd", ToJson::to_json("/other"))
       "wrong-tool" => {
-        no_change_set(journal[0], "tool", "moon_cmd".to_json())
-        no_change_set(check, "command", "moon check --no-render".to_json())
+        no_change_set(journal[0], "tool", ToJson::to_json("moon_cmd"))
+        no_change_set(
+          check,
+          "command",
+          ToJson::to_json("moon check --no-render"),
+        )
       }
-      "failed-check" => no_change_set(check, "exit_code", (1).to_json())
+      "failed-check" => no_change_set(check, "exit_code", ToJson::to_json(1))
       "no-cleanup" =>
         no_change_set(
           field(check, "sandbox_evidence"),
           "cleanup_verified",
-          false.to_json(),
+          ToJson::to_json(false),
         )
-      _ => no_change_set(check, "pipeline_exit_ambiguous", true.to_json())
+      _ =>
+        no_change_set(check, "pipeline_exit_ambiguous", ToJson::to_json(true))
     }
     let result = reconcile_repair_evidence(
       work,
@@ -298,7 +321,7 @@ async test "native no change rejects net source mode symlink head index and root
   let work = no_change_fixture_work()
   for key in ["root", "head", "index_digest", "source_digest"] {
     let snapshot = source_snapshot(work.request.execution_root)
-    no_change_set(snapshot, key, "different".to_json())
+    no_change_set(snapshot, key, ToJson::to_json("different"))
     assert_true(
       reconcile_repair_evidence(
         work,
@@ -313,7 +336,11 @@ async test "native no change rejects net source mode symlink head index and root
     )
   }
   let snapshot = source_snapshot(work.request.execution_root)
-  no_change_set(field(snapshot, "executable"), "source.mbt", true.to_json())
+  no_change_set(
+    field(snapshot, "executable"),
+    "source.mbt",
+    ToJson::to_json(true),
+  )
   assert_true(
     reconcile_repair_evidence(
       work,
@@ -329,7 +356,7 @@ async test "native no change rejects net source mode symlink head index and root
   no_change_set(
     field(snapshot, "files"),
     "source.mbt",
-    "symlink:other".to_json(),
+    ToJson::to_json("symlink:other"),
   )
   assert_true(
     reconcile_repair_evidence(
@@ -357,7 +384,7 @@ async test "native no change rejects net source mode symlink head index and root
       "after_fingerprint": native_fingerprint(b"after\n"),
     }),
   )
-  no_change_set(events, "event_count", journal.length().to_json())
+  no_change_set(events, "event_count", ToJson::to_json(journal.length()))
   assert_eq(
     reconcile_repair_evidence(
       work,
@@ -391,7 +418,11 @@ async test "native no change attested edit restore requires final checks and nev
   let events = no_change_fixture_events(work)
   let journal = rows(events, "events")
   for offset, event in journal {
-    no_change_set(event, "journal_sequence", (offset + 3).to_string().to_json())
+    no_change_set(
+      event,
+      "journal_sequence",
+      ToJson::to_json((offset + 3).to_string()),
+    )
   }
   journal.insert(
     0,
@@ -423,7 +454,7 @@ async test "native no change attested edit restore requires final checks and nev
       sequence="2",
     ),
   )
-  no_change_set(events, "event_count", journal.length().to_json())
+  no_change_set(events, "event_count", ToJson::to_json(journal.length()))
   let result = reconcile_repair_evidence(
     work,
     no_change_fixture_receipt(work),
@@ -447,9 +478,13 @@ async test "native no change attested edit restore requires final checks and nev
   stale_events.insert(1, journal[0])
   stale_events.insert(2, journal[1])
   for offset, event in stale_events {
-    no_change_set(event, "journal_sequence", (offset + 1).to_string().to_json())
+    no_change_set(
+      event,
+      "journal_sequence",
+      ToJson::to_json((offset + 1).to_string()),
+    )
   }
-  no_change_set(stale, "event_count", stale_events.length().to_json())
+  no_change_set(stale, "event_count", ToJson::to_json(stale_events.length()))
   assert_true(
     reconcile_repair_evidence(
       work,
@@ -465,7 +500,7 @@ async test "native no change attested edit restore requires final checks and nev
     no_change_set(
       field(field(event, "tool_result"), "metadata"),
       "path",
-      "notes.txt".to_json(),
+      ToJson::to_json("notes.txt"),
     )
   }
   assert_true(
@@ -490,9 +525,13 @@ async test "native no change requires all checks after a later failed tool and f
     fixture_event(work, "failed-read", "read", {}, ok=false, sequence="3"),
   )
   for offset, event in journal {
-    no_change_set(event, "journal_sequence", (offset + 1).to_string().to_json())
+    no_change_set(
+      event,
+      "journal_sequence",
+      ToJson::to_json((offset + 1).to_string()),
+    )
   }
-  no_change_set(events, "event_count", journal.length().to_json())
+  no_change_set(events, "event_count", ToJson::to_json(journal.length()))
   assert_true(
     reconcile_repair_evidence(
       work,
@@ -529,7 +568,11 @@ async test "native no change permits an attested new file created and removed be
   let events = no_change_fixture_events(work)
   let journal = rows(events, "events")
   for offset, event in journal {
-    no_change_set(event, "journal_sequence", (offset + 3).to_string().to_json())
+    no_change_set(
+      event,
+      "journal_sequence",
+      ToJson::to_json((offset + 3).to_string()),
+    )
   }
   journal.insert(
     0,
@@ -561,7 +604,7 @@ async test "native no change permits an attested new file created and removed be
       sequence="2",
     ),
   )
-  no_change_set(events, "event_count", journal.length().to_json())
+  no_change_set(events, "event_count", ToJson::to_json(journal.length()))
   assert_eq(
     reconcile_repair_evidence(
       work,
@@ -608,7 +651,7 @@ async test "native no change generic checks cannot replace a frozen task specifi
   no_change_set(
     field(changed.request.acceptance_policy, "completion_policy"),
     "acceptance_scope",
-    "customer".to_json(),
+    ToJson::to_json("customer"),
   )
   assert_eq(
     reconcile_repair_evidence(

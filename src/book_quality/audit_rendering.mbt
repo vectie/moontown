@@ -36,7 +36,7 @@ pub fn audit_from_scores(
 
 ///|
 pub fn render_audit_markdown(audit : BookQualityAudit) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string("# MoonBook Management And Quality Audit\n\n")
   builder.write_string(
     "Total: \{audit.total}; structurally ready: \{audit.ready_count}; structurally excellent: \{audit.world_class_count}; weakest structural book: `\{audit.weakest_book_id}` (\{audit.weakest_score}).\n\n",

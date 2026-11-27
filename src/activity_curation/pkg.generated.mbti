@@ -1,10 +1,14 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "vectie/moontown/activity_curation"
 
-// Values
-pub async fn prepare(String, Json, String) -> Json
+import {
+  "moonbitlang/core/json",
+}
 
-pub async fn prepare_from_config(String, Json, String, String, String) -> Json
+// Values
+pub async fn prepare(String, @json.Json, String) -> @json.Json
+
+pub async fn prepare_from_config(String, @json.Json, String, String, String) -> @json.Json
 
 // Errors
 

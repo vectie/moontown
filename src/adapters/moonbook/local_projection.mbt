@@ -1,10 +1,11 @@
 ///|
+#derive(Debug, ToJson, FromJson)
 pub(all) struct LocalProjectionOutcome {
   contract : String
   generated_artifacts : Array[String]
   preserved_artifacts : Array[String]
   missing_artifacts : Array[String]
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
 /// Ask MoonBook to fill missing local projection outputs, preserving authored
@@ -20,7 +21,7 @@ pub(all) struct LocalProjectionOutcome {
 /// ```
 pub async fn ensure_local_projection(
   entry : BookCatalogEntry,
-  moonbook_root? : String = default_moonbook_root(),
+  moonbook_root~ : String = default_moonbook_root(),
 ) -> LocalProjectionOutcome {
   let root = resolved_workspace_root(entry.workspace_root)
   let (command, args) = moonbook_runtime_invocation(["wiki", "projection", root])

@@ -1,5 +1,4 @@
 import {
-  "moonbitlang/core/json",
   "vectie/moontown/miniapp_buildings",
   "vectie/moontown/miniapp_contracts",
   "vectie/moontown/miniapp_projection",

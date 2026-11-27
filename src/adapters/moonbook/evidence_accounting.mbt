@@ -1,14 +1,15 @@
 ///|
+#derive(Debug, Eq)
 struct EvidenceAccounting {
-  total_count : Int
-  domain_count : Int
-  operational_count : Int
-} derive(Debug, Eq)
+  total_count : Int32
+  domain_count : Int32
+  operational_count : Int32
+}
 
 ///|
 async fn evidence_accounting_for_workspace(
   root : String,
-  fallback_total~ : Int,
+  fallback_total~ : Int32,
 ) -> EvidenceAccounting {
   let evidence_path = moonbook_adapter_path(root)
     .join(moonbook_adapter_path("wiki/synthesis/evidence.md"))
@@ -122,7 +123,7 @@ fn summary_field(content : String, key : String) -> String {
 }
 
 ///|
-fn summary_field_int(content : String, key : String) -> Int {
+fn summary_field_int(content : String, key : String) -> Int32 {
   match first_non_negative_int(summary_field(content, key)) {
     Some(value) => value
     None => 0
@@ -130,7 +131,7 @@ fn summary_field_int(content : String, key : String) -> Int {
 }
 
 ///|
-fn first_non_negative_int(text : String) -> Int? {
+fn first_non_negative_int(text : String) -> Int32? {
   let mut seen = false
   let mut value = 0
   for char in text {

@@ -92,7 +92,7 @@ fn workspace_relative_ref(root : String, reference : String) -> String raise {
   if !normalized.has_prefix(prefix) {
     fail("MoonTown evidence escapes the Flow workspace: \{reference}")
   }
-  normalized[prefix.length():].to_string()
+  normalized[prefix.length():].to_owned()
 }
 
 ///|

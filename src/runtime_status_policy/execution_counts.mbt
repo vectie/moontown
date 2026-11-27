@@ -1,9 +1,9 @@
 ///|
 fn count_runtime_executions_in_indexes(
   state : @core.TownState,
-  indexes : Array[Int],
+  indexes : Array[Int32],
   statuses : Array[@core.TaskExecutionStatus],
-) -> Int {
+) -> Int32 {
   let mut count = 0
   for index in indexes {
     let execution = state.executions[index]
@@ -17,8 +17,8 @@ fn count_runtime_executions_in_indexes(
 ///|
 fn count_active_work_executions_in_indexes(
   state : @core.TownState,
-  indexes : Array[Int],
-) -> Int {
+  indexes : Array[Int32],
+) -> Int32 {
   let mut count = 0
   for index in indexes {
     let execution = state.executions[index]
@@ -30,8 +30,8 @@ fn count_active_work_executions_in_indexes(
 }
 
 ///|
-fn effective_execution_indexes(state : @core.TownState) -> Array[Int] {
-  let indexes : Array[Int] = []
+fn effective_execution_indexes(state : @core.TownState) -> Array[Int32] {
+  let indexes : Array[Int32] = []
   for index in 0..<state.executions.length() {
     if effective_execution_record(state, index) {
       indexes.push(index)
@@ -41,7 +41,7 @@ fn effective_execution_indexes(state : @core.TownState) -> Array[Int] {
 }
 
 ///|
-fn effective_execution_record(state : @core.TownState, index : Int) -> Bool {
+fn effective_execution_record(state : @core.TownState, index : Int32) -> Bool {
   let current = state.executions[index]
   for other_index in 0..<state.executions.length() {
     if other_index == index {

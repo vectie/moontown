@@ -140,7 +140,7 @@ pub fn operational_site(
 
 ///|
 fn operational_markdown_bullets(values : Array[String]) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   for value in values {
     builder.write_string("- ")
     builder.write_string(value)
@@ -151,7 +151,7 @@ fn operational_markdown_bullets(values : Array[String]) -> String {
 
 ///|
 fn operational_json_string(text : String) -> String {
-  text.to_json().stringify()
+  ToJson::to_json(text).stringify()
 }
 
 ///|

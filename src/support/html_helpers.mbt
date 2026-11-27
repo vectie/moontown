@@ -1,6 +1,6 @@
 ///|
 pub fn html_escape(text : String) -> String {
-  let out = StringBuilder::new()
+  let out = StringBuilder()
   for ch in text {
     match ch {
       '&' => out.write_string("&amp;")

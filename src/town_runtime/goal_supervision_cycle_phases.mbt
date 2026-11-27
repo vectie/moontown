@@ -4,7 +4,7 @@ async fn run_supervision_reconciliation_passes(
   catalog : Array[@moonbook.BookCatalogEntry],
   snapshot_path : String,
   standing_goals : Array[@core.StandingGoal],
-  tick? : Int = supervision_tick(state),
+  tick~ : Int32 = supervision_tick(state),
 ) -> Unit {
   restore_material_watch_executions(state, snapshot_path, standing_goals)
   recover_saved_wenyu_native_launches(state, catalog, snapshot_path, tick)
@@ -42,7 +42,7 @@ async fn reconcile_standing_watch_imports_and_ledgers(
   catalog : Array[@moonbook.BookCatalogEntry],
   snapshot_path : String,
   standing_goals : Array[@core.StandingGoal],
-  tick : Int,
+  tick : Int32,
 ) -> Unit {
   rehydrate_orphaned_deferred_watcher_records(
     state, snapshot_path, standing_goals, tick,

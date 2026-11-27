@@ -2,6 +2,7 @@
 pub type CivicCommunicationReductionMode = @civic.CivicCommunicationReductionMode
 
 ///|
+#derive(Eq)
 struct CivicCommunicationReductionResult {
   ideas : Array[CivicCommunicationIdea]
   status : @core.TaskExecutionStatus
@@ -12,7 +13,7 @@ struct CivicCommunicationReductionResult {
   run_id : String?
   workspace_root : String
   reducer_kind : String
-} derive(Eq)
+}
 
 ///|
 pub type CivicCommunicationParticipantBook = @civic.CivicCommunicationParticipantBook

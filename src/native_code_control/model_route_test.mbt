@@ -77,7 +77,7 @@ test "native automatic selection requires ready exact configured default" {
     ] {
     assert_true(
       @native_code_control.select_model(
-        route_override(route, "default_model", default_model.to_json()),
+        route_override(route, "default_model", ToJson::to_json(default_model)),
         "",
       )
       is Err(_),

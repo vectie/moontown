@@ -64,7 +64,7 @@ pub fn geo_rings(feature : GeoFeature) -> Array[Array[GeoPoint]] {
 ///|
 /// 0 outside, 1 inside, 2 exactly on an edge. Longitude/latitude plane,
 /// not a geodesic projection; no distance or area interpretation is implied.
-fn geo_ring_location(point : GeoPoint, ring : Array[GeoPoint]) -> Int {
+fn geo_ring_location(point : GeoPoint, ring : Array[GeoPoint]) -> Int32 {
   let mut inside = false
   for i in 1..<ring.length() {
     let a = ring[i - 1]
@@ -101,8 +101,8 @@ fn geo_ring_location(point : GeoPoint, ring : Array[GeoPoint]) -> Int {
 /// Lines and other polygons are not point locations and are not selected.
 pub fn geo_places_in_zone(
   features : Array[GeoFeature],
-  zone : Int,
-) -> Array[Int] {
+  zone : Int32,
+) -> Array[Int32] {
   if zone < 0 || zone >= features.length() {
     return []
   }
@@ -110,7 +110,7 @@ pub fn geo_places_in_zone(
   if rings.is_empty() {
     return []
   }
-  let result : Array[Int] = []
+  let result : Array[Int32] = []
   for i, feature in features {
     if feature.kind != "Point" || feature.points.is_empty() {
       continue

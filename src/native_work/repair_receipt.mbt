@@ -6,8 +6,8 @@ fn successful_native_event(event : Json, work : Work) -> Bool {
   text(event, "command_id") == reservation.command_id &&
   text(event, "book_root") == reservation.execution_root &&
   text(event, "id") != "" &&
-  field(field(event, "tool_result"), "ok") == true.to_json() &&
-  field(field(event, "tool_result"), "is_error") == false.to_json()
+  field(field(event, "tool_result"), "ok") == ToJson::to_json(true) &&
+  field(field(event, "tool_result"), "is_error") == ToJson::to_json(false)
 }
 
 ///|
@@ -16,7 +16,7 @@ fn reconcile_repair_evidence(
   native_receipt : Json,
   events : Json,
   final_snapshot : Json,
-  diff_check_exit : Int,
+  diff_check_exit : Int32,
   now : UInt64,
 ) -> Work {
   if work.request.kind == "wenyu_build" && !wenyu_policy_valid(work.request) {
@@ -44,7 +44,7 @@ fn reconcile_repair_evidence(
     )
   }
   let ordered = rows(events, "events")
-  if field(events, "event_count") != ordered.length().to_json() {
+  if field(events, "event_count") != ToJson::to_json(ordered.length()) {
     return waiting(
       work, "waiting_result", "native_event_evidence_incomplete", now,
     )
@@ -106,7 +106,7 @@ fn reconcile_repair_evidence(
       text(early_metadata, "run_id") != "" &&
       text(early_metadata, "approval_id") != "" &&
       field(field(early_metadata, "sandbox_evidence"), "cleanup_verified") ==
-      true.to_json() &&
+      ToJson::to_json(true) &&
       !rows(field(early_metadata, "sandbox_evidence"), "changes").is_empty()
     if !successful_native_event(event, work) && !failed_sandbox_mutation {
       continue
@@ -138,7 +138,7 @@ fn reconcile_repair_evidence(
           work, "waiting_result", "native_mutation_fingerprint_missing", now,
         )
       }
-      if dirty.contains(path.to_json()) {
+      if dirty.contains(ToJson::to_json(path)) {
         return waiting(
           work,
           "waiting_result",
@@ -192,12 +192,12 @@ fn reconcile_repair_evidence(
       // source changes must still have explicit native mutation fingerprints.
       if successful_native_event(event, work) &&
         text(metadata, "execution_sandbox_policy") == "grant-bound" &&
-        field(metadata, "exit_code") == (0).to_json() &&
+        field(metadata, "exit_code") == ToJson::to_json(0) &&
         text(metadata, "run_id") != "" &&
         text(metadata, "approval_id") != "" &&
         text(sandbox, "command_digest") != "" &&
-        field(sandbox, "cleanup_verified") == true.to_json() &&
-        field(metadata, "pipeline_exit_ambiguous") != true.to_json() &&
+        field(sandbox, "cleanup_verified") == ToJson::to_json(true) &&
+        field(metadata, "pipeline_exit_ambiguous") != ToJson::to_json(true) &&
         [".", work.request.execution_root].contains(text(metadata, "cwd")) {
         validations[command] = {
           "command": command,
@@ -391,15 +391,15 @@ fn reconcile_repair_evidence(
     },
   }
   if work.request.kind == "wenyu_build" && receipt is Object(fields) {
-    fields["book_id"] = work.request.book_id.to_json()
+    fields["book_id"] = ToJson::to_json(work.request.book_id)
     fields["task_id"] = field(work.request.acceptance_policy, "task_id")
     fields["goal_id"] = field(work.request.acceptance_policy, "goal_id")
-    fields["original_task_acceptance"] = "unevaluated".to_json()
+    fields["original_task_acceptance"] = ToJson::to_json("unevaluated")
   }
   if no_change && receipt is Object(fields) {
-    fields["completion_outcome"] = "no_change".to_json()
-    fields["acceptance_scope"] = "engineering_only".to_json()
-    fields["original_task_acceptance"] = "unevaluated".to_json()
+    fields["completion_outcome"] = ToJson::to_json("no_change")
+    fields["acceptance_scope"] = ToJson::to_json("engineering_only")
+    fields["original_task_acceptance"] = ToJson::to_json("unevaluated")
     fields["native_completion_verdict"] = verdict
     fields["no_change"] = field(verdict, "no_change")
     fields["required_check_evidence"] = field(

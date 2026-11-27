@@ -81,9 +81,10 @@ pub fn collective_followup(
       "exact_quote": row["quote"],
       "connection_to_proposal": row["connection"],
       "peer_challenge": row["challenge"],
-      "prior_source_snapshots": saved.sources
-      .filter(s => s.book_id == candidate.book_id)
-      .to_json(),
+      "prior_source_snapshots": saved.sources.filter(s => {
+        s.book_id == candidate.book_id
+      })
+      |> ToJson::to_json,
     })
     let original = saved.draft.participants.filter(p => {
         p.book_id == candidate.book_id
@@ -103,7 +104,7 @@ pub fn collective_followup(
     "origin_result_digest": work.result_digest,
     "origin_review_version": work.review_version,
     "origin_review_status": work.review_status,
-    "prior_result_decisions": work.decisions.to_json(),
+    "prior_result_decisions": ToJson::to_json(work.decisions),
     "origin_question": saved.draft.question,
     "title": values["title"],
     "hypothesis": values["hypothesis"],
@@ -112,10 +113,9 @@ pub fn collective_followup(
     "dissent": values["dissent"],
     "unresolved_assumptions": values["assumptions"],
     "original_objection": saved.draft.objection,
-    "contributions": bridges.to_json(),
-    "failed_participants": work.participants
-    .filter(p => p.status == "failed")
-    .to_json(),
+    "contributions": ToJson::to_json(bridges),
+    "failed_participants": work.participants.filter(p => p.status == "failed")
+    |> ToJson::to_json,
     "authorship": "Operator-authored cross-Book hypothesis grounded in retained excerpts. Participants have not endorsed it.",
     "source_policy": "Prior excerpt identities refer to the original retained result. This new round captures current files at the original selected Book paths; those are new inputs, not the old source snapshots.",
     "genuine_emergence_verified": false,

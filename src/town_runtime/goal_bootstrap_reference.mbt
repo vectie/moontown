@@ -66,7 +66,7 @@ async fn preseed_reference_style_inputs(
 
 ///|
 fn optional_env_text(key : String) -> String? {
-  match @sys.get_env_var(key) {
+  match @env.get_env_var(key) {
     Some(value) => {
       let trimmed = value.trim().to_owned()
       if trimmed.is_empty() {
@@ -87,9 +87,9 @@ fn reference_style_seed_text(
   visual_path : String?,
   source_hints_path : String?,
   copied_report : Bool,
-  copied_report_lines : Int,
+  copied_report_lines : Int32,
   copied_source_hints : Bool,
-  copied_source_hint_lines : Int,
+  copied_source_hint_lines : Int32,
 ) -> String {
   let report_line = match report_path {
     Some(path) =>
@@ -148,7 +148,7 @@ fn reference_style_seed_text(
 }
 
 ///|
-fn count_reference_lines(text : String) -> Int {
+fn count_reference_lines(text : String) -> Int32 {
   if text.is_empty() {
     return 0
   }

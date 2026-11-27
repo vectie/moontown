@@ -27,7 +27,7 @@ pub fn prioritized_book_tasks(
 fn book_task_priority_score(
   task : @moonbook.BookTask,
   research_goal : Bool,
-) -> Int {
+) -> Int32 {
   let kind_score = match task.kind {
     "analysis" => 60
     "synthesis" => 50

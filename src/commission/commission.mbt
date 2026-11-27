@@ -1,19 +1,22 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CommissionCriterion {
   criterion_id : String
   weight : Double
   minimum_score : Double
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CommissionRating {
   criterion_id : String
   score : Double
   evidence_refs : Array[String]
   rationale : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CommissionCandidate {
   candidate_id : String
   summary : String
@@ -21,27 +24,30 @@ pub(all) struct CommissionCandidate {
   artifact_refs : Array[String]
   ratings : Array[CommissionRating]
   proposal : Json
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct TownCommission {
   contract_id : String
   commission_id : String
   question : String
   criteria : Array[CommissionCriterion]
   candidates : Array[CommissionCandidate]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CandidateEvaluation {
   candidate_id : String
   qualified : Bool
   weighted_score : Double
-  evidence_count : Int
+  evidence_count : Int32
   reasons : Array[String]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct TownPromotion {
   contract_id : String
   commission_id : String
@@ -52,7 +58,7 @@ pub(all) struct TownPromotion {
   source_book_ids : Array[String]
   artifact_refs : Array[String]
   proposal : Json
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 fn rating_for(

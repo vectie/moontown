@@ -1,7 +1,7 @@
 ///|
 priv struct ResearchBootstrapPlan {
   tasks : Array[@moonbook.BookTask]
-  task_limit : Int
+  task_limit : Int32
   bootstrap_active : Bool
 }
 
@@ -11,7 +11,7 @@ async fn research_bootstrap_plan(
   goal : String,
   summary : @moonbook.BookStateSummary,
   tasks : Array[@moonbook.BookTask],
-  task_limit : Int,
+  task_limit : Int32,
 ) -> ResearchBootstrapPlan {
   let ordered = @dispatch.prioritized_book_tasks(tasks, goal)
   let quality_gaps = @research_quality_runtime.research_quality_gaps(entry)
@@ -39,6 +39,6 @@ async fn research_bootstrap_plan(
 }
 
 ///|
-fn research_bootstrap_task_limit() -> Int {
+fn research_bootstrap_task_limit() -> Int32 {
   @system_settings.current_system_settings().research_bootstrap_task_limit
 }

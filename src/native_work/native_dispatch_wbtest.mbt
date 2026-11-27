@@ -1,13 +1,14 @@
 ///|
+#warnings("-reserved_keyword-unused_async")
 async test "native owner sync executes injected configured route and reconciles exact receipt into Book" {
   let request = fixture_request()
   let path = request.owner_workspace + "/end-to-end.json"
   let queued = enqueue(request, path~)
   let submitted : Array[String] = []
   let native_events : Array[Json] = []
-  let phase : Array[Int] = [0]
+  let phase : Array[Int32] = [0]
   let client = fixture_configured_client(request, async fn(
-    method,
+    method_val,
     route,
     body,
   ) {
@@ -22,7 +23,7 @@ async test "native owner sync executes injected configured route and reconciles 
         "models": [{ "name": "moongate/exact" }],
       })
     }
-    if method == "POST" {
+    if method_val == "POST" {
       submitted.push(body)
       let command = @json.parse(body)
       phase[0] = 1
@@ -76,8 +77,8 @@ async test "native owner sync executes injected configured route and reconciles 
         },
       ]
     } else if route.contains("runtime-events") {
-      fields["event_count"] = native_events.length().to_json()
-      fields["events"] = native_events.to_json()
+      fields["event_count"] = ToJson::to_json(native_events.length())
+      fields["events"] = ToJson::to_json(native_events)
     }
     Ok(Json::object(fields))
   })

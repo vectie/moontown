@@ -1,12 +1,13 @@
 ///|
 /// Existing operator-owned control. The credential never leaves this package.
+#derive(FromJson)
 priv struct Config {
-  protocol_version : Int
+  protocol_version : Int32
   instance_id : String
   auth_token : String
   workspace_id : String
   workspace_root : String
-} derive(FromJson)
+}
 
 ///|
 pub struct Client {
@@ -18,6 +19,7 @@ pub struct Client {
 
 ///|
 /// An injected, already authenticated transport is also used by socket-free tests.
+#warnings("-reserved_keyword")
 pub fn Client::new(
   owner_workspace~ : String,
   instance_id~ : String,
@@ -30,15 +32,15 @@ pub fn Client::new(
 ///|
 pub async fn Client::request(
   self : Client,
-  method : String,
+  method_val : String,
   path : String,
   body : String,
 ) -> Result[Json, String] {
-  (self.request)(method, path, body)
+  (self.request)(method_val, path, body)
 }
 
 ///|
-fn hex(value : String, length : Int) -> Bool {
+fn hex(value : String, length : Int32) -> Bool {
   value.length() == length &&
   value.all(ch => ch.is_ascii_digit() || (ch >= 'a' && ch <= 'f'))
 }
@@ -56,10 +58,10 @@ pub fn configured_path() -> String {
 
 ///|
 pub async fn load(
-  path? : String = configured_path(),
-  owner_workspace? : String = @storage.moontown_active_workspace_root(),
+  path~ : String = configured_path(),
+  owner_workspace~ : String = @storage.moontown_active_workspace_root(),
   exchange? : async (String, String, String, Map[String, String]) -> (
-    Int,
+    Int32,
     String,
     String,
   ),
@@ -70,11 +72,12 @@ pub async fn load(
 }
 
 ///|
+#warnings("-reserved_keyword")
 async fn load_existing(
   path : String,
   owner_workspace : String,
   exchange? : async (String, String, String, Map[String, String]) -> (
-    Int,
+    Int32,
     String,
     String,
   ),
@@ -134,8 +137,8 @@ async fn load_existing(
       owner_workspace~,
       instance_id=config.instance_id,
       config_path=path,
-      request=async fn(method, path, body) {
-        request_existing(config, uri, method, path, body, exchange?)
+      request=async fn(method_val, path, body) {
+        request_existing(config, uri, method_val, path, body, exchange?)
       },
     ),
   )
@@ -165,10 +168,10 @@ fn catalog_only_route_response(route : Json) -> Bool {
 ///|
 fn validate_response(
   config : Config,
-  status : Int,
+  status : Int32,
   instance : String,
   text : String,
-  route_catalog? : Bool = false,
+  route_catalog~ : Bool = false,
 ) -> Result[Json, String] {
   if status == 401 || status == 403 {
     return Err("control_authority_denied")
@@ -198,20 +201,21 @@ fn validate_response(
 }
 
 ///|
+#warnings("-reserved_keyword")
 async fn request_existing(
   config : Config,
   uri : String,
-  method : String,
+  method_val : String,
   path : String,
   body : String,
   exchange? : async (String, String, String, Map[String, String]) -> (
-    Int,
+    Int32,
     String,
     String,
   ),
 ) -> Result[Json, String] {
   @async.with_timeout(10000, async fn() {
-    let route_catalog = method == "GET" &&
+    let route_catalog = method_val == "GET" &&
       path == "/v1/moongate-route" &&
       body == ""
     let headers = {
@@ -220,24 +224,28 @@ async fn request_existing(
       "X-MoonClaw-Instance-ID": config.instance_id,
     }
     if exchange is Some(send) {
-      let (status, instance, text) = send(method, uri + path, body, headers)
+      let (status, instance, text) = send(method_val, uri + path, body, headers)
       if status >= 200 &&
         status < 300 &&
-        status != (if method == "POST" { 202 } else { 200 }) {
+        status != (if method_val == "POST" { 202 } else { 200 }) {
         return Err("native_response_status_invalid")
       }
       return validate_response(config, status, instance, text, route_catalog~)
     }
     let client = @http.Client(uri)
     defer client.close()
+    let extra_headers : Map[@http.CaseInsensitiveString, String] = Map([])
+    for k, v in headers {
+      extra_headers[@http.CaseInsensitiveString(k)] = v
+    }
     client.request(
-      if method == "POST" {
+      if method_val == "POST" {
         @http.Post
       } else {
         @http.Get
       },
       path,
-      extra_headers=headers,
+      extra_headers~,
     )
     if body != "" {
       client.write(@utf8.encode(body))
@@ -245,7 +253,7 @@ async fn request_existing(
     let response = client.end_request()
     if response.code >= 200 &&
       response.code < 300 &&
-      response.code != (if method == "POST" { 202 } else { 200 }) {
+      response.code != (if method_val == "POST" { 202 } else { 200 }) {
       return Err("native_response_status_invalid")
     }
     let instance = response.headers.get("x-moonclaw-instance-id").unwrap_or("")

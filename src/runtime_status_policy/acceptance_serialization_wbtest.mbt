@@ -49,9 +49,12 @@ test "runtime acceptance count dedupes approved review and stale live snapshots"
 test "legacy runtime status JSON omits acceptance count and still decodes as zero" {
   let empty = empty_runtime_status("/tmp/legacy-town.json")
   assert_eq(empty.awaiting_acceptance_count, Some(0))
-  let encoded = empty.to_json()
+  let encoded = ToJson::to_json(empty)
   guard encoded is Object(fields) else { fail("expected status object") }
-  assert_eq(fields.get("awaiting_acceptance_count"), Some((0 : Int).to_json()))
+  assert_eq(
+    fields.get("awaiting_acceptance_count"),
+    Some(ToJson::to_json((0 : Int32))),
+  )
   ignore(fields.remove("awaiting_acceptance_count"))
   let legacy : TownRuntimeStatus = @json.from_json(encoded)
   assert_eq(legacy.awaiting_acceptance_count, None)
@@ -77,9 +80,12 @@ test "new runtime status JSON explicitly roundtrips acceptance count" {
     ..empty_runtime_status("/tmp/town.json"),
     awaiting_acceptance_count: Some(2),
   }
-  let encoded = status.to_json()
+  let encoded = ToJson::to_json(status)
   guard encoded is Object(fields) else { fail("expected status object") }
-  assert_eq(fields.get("awaiting_acceptance_count"), Some((2 : Int).to_json()))
+  assert_eq(
+    fields.get("awaiting_acceptance_count"),
+    Some(ToJson::to_json((2 : Int32))),
+  )
   let decoded : TownRuntimeStatus = @json.from_json(encoded)
   assert_eq(decoded, status)
   let report = render_runtime_status_report(

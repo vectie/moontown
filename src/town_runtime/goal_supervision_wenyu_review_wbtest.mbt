@@ -30,6 +30,7 @@ fn wenyu_review_supervision_fixture() -> (
 }
 
 ///|
+#warnings("-unused_async")
 async test "native human review save reload and repeat preserves acceptance pending and one bound event" {
   let (state, entry, execution) = wenyu_review_supervision_fixture()
   let approved = copy_execution_with(
@@ -72,6 +73,7 @@ async test "native human review save reload and repeat preserves acceptance pend
 }
 
 ///|
+#warnings("-unused_async")
 async test "native rejected review is not automatically retried reread or reapproved" {
   let (state, entry, execution) = wenyu_review_supervision_fixture()
   let rejected = copy_execution_with(
@@ -110,6 +112,7 @@ async test "native rejected review is not automatically retried reread or reappr
 }
 
 ///|
+#warnings("-unused_async")
 async test "native missing legacy or unavailable review binding stays visibly unresolved" {
   let (state, entry, execution) = wenyu_review_supervision_fixture()
   reconcile_wenyu_review_execution(state, entry, execution, 3, readback=async fn(

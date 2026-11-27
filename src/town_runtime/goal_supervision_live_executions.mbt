@@ -4,7 +4,7 @@ async fn reconcile_live_executions(
   catalog : Array[@moonbook.BookCatalogEntry],
   snapshot_path : String,
   standing_goals : Array[@core.StandingGoal],
-  tick? : Int = supervision_tick(state),
+  tick~ : Int32 = supervision_tick(state),
 ) -> Unit {
   let snapshot = state.executions.copy()
   for execution in snapshot {
@@ -68,7 +68,7 @@ async fn reconcile_run_backed_live_execution(
   standing_goals : Array[@core.StandingGoal],
   execution : @core.TaskExecutionRecord,
   run_id : String,
-  tick : Int,
+  tick : Int32,
 ) -> Unit {
   let polled = @moonclaw.poll_run(
     execution.task_id,
@@ -152,9 +152,9 @@ fn replace_execution_task_and_worker(
 async fn reconcile_no_run_id_live_execution(
   state : @core.TownState,
   execution : @core.TaskExecutionRecord,
-  tick : Int,
-  launch_confirmed_run? : Bool = true,
-  launch_command_override? : String? = None,
+  tick : Int32,
+  launch_confirmed_run~ : Bool = true,
+  launch_command_override~ : String? = None,
 ) -> Unit {
   if @build_pipeline_runtime.is_wenyu_native_execution(execution) {
     return
@@ -201,7 +201,7 @@ async fn reconcile_no_run_id_live_execution(
 async fn fail_stale_no_run_id_execution(
   state : @core.TownState,
   execution : @core.TaskExecutionRecord,
-  tick : Int,
+  tick : Int32,
 ) -> Unit {
   let stderr_summary = detached_import_stderr_summary(
     detached_import_packet_path_for_execution(execution),

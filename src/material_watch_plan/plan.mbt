@@ -1,5 +1,6 @@
 ///|
 /// Saved opt-in plan used by both watch setup and the existing durable cycle.
+#derive(Eq, ToJson, FromJson)
 pub(all) struct Plan {
   contract : String
   goal_id : String
@@ -8,20 +9,21 @@ pub(all) struct Plan {
   acceptance : String
   next_action : String
   sources : Array[String]
-} derive(Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Eq, ToJson, FromJson)
 pub(all) struct Source {
   path : String
   sha256 : String
   content : String
-} derive(Eq, ToJson, FromJson)
+}
 
 ///|
 /// ```mbt check
 /// test {
-///   assert_true(relative_path("sources/customer.txt"))
-///   assert_false(relative_path("../outside.txt"))
+///   assert_true(@material_watch_plan.relative_path("sources/customer.txt"))
+///   assert_false(@material_watch_plan.relative_path("../outside.txt"))
 /// }
 /// ```
 pub fn relative_path(path : String) -> Bool {

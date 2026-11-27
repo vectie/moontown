@@ -16,9 +16,9 @@ fn runtime_status_test_execution(
   packet_id : String,
   status : @core.TaskExecutionStatus,
   summary : String,
-  packet_path? : String = "",
-  run_id? : String? = None,
-  output_contract? : String = "test",
+  packet_path~ : String = "",
+  run_id~ : String? = None,
+  output_contract~ : String = "test",
 ) -> @core.TaskExecutionRecord {
   @core.TaskExecutionRecord::new(
     task_id~,
@@ -42,9 +42,9 @@ fn runtime_status_standing_goal(
   title~ : String,
   prompt~ : String,
   book_id~ : String,
-  next_due_tick? : Int = 0,
-  last_run_tick? : Int? = None,
-  cadence_ticks? : Int = 60,
+  next_due_tick~ : Int32 = 0,
+  last_run_tick~ : Int32? = None,
+  cadence_ticks~ : Int32 = 60,
 ) -> @core.StandingGoal {
   @core.StandingGoal::new(
     id~,

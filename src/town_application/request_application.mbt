@@ -9,7 +9,7 @@ pub struct RequestApplication {
 pub fn request_application(
   state_root : String,
   operator_policy_path : String,
-  catalog_path? : String = state_root + "/moonbooks.json",
+  catalog_path~ : String = state_root + "/moonbooks.json",
 ) -> RequestApplication {
   { state_root, operator_policy_path, catalog_path, }
 }

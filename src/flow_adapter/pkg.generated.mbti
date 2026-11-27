@@ -3,20 +3,21 @@ package "vectie/moontown/flow_adapter"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
 pub fn adapter_id() -> String
 
-pub fn capability_json(healthy? : Bool) -> Json
+pub fn capability_json(healthy? : Bool) -> @json.Json
 
-pub async fn execute(String, String, String) -> Json
+pub async fn execute(String, String, String) -> @json.Json
 
-pub async fn execute_research_handoff(String, Json, String) -> Json
+pub async fn execute_research_handoff(String, @json.Json, String) -> @json.Json
 
 pub fn input_schema_ref() -> String
 
-pub async fn moonflow_research_handoff(String, Json) -> Json
+pub async fn moonflow_research_handoff(String, @json.Json) -> @json.Json
 
 pub fn operation_id() -> String
 
@@ -26,18 +27,19 @@ pub fn output_schema_ref() -> String
 
 pub fn pack_version() -> String
 
-pub async fn prepare_moonflow_research_receipt(String, Json, Json, Int, String) -> Json
+pub async fn prepare_moonflow_research_receipt(String, @json.Json, @json.Json, Int32, String) -> @json.Json
 
-pub async fn publish_health(String, String, String, String, String) -> Json
+pub async fn publish_health(String, String, String, String, String) -> @json.Json
 
-pub async fn reconcile(String, String, String) -> Json
+pub async fn reconcile(String, String, String) -> @json.Json
 
-pub async fn reconcile_research_handoff(String, Json, String) -> Json
+pub async fn reconcile_research_handoff(String, @json.Json, String) -> @json.Json
 
 // Errors
 
 // Types and methods
-type FlowRequest derive(Eq, @debug.Debug)
+#derive(Eq, @debug.Debug)
+type FlowRequest
 
 // Type aliases
 

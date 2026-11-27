@@ -1,11 +1,14 @@
 ///|
-fn daemon_scheduled_job_due(job : @scheduler.ScheduledJob, tick : Int) -> Bool {
+fn daemon_scheduled_job_due(
+  job : @scheduler.ScheduledJob,
+  tick : Int32,
+) -> Bool {
   let interval_ticks = daemon_scheduled_job_interval_ticks(job)
   tick % interval_ticks == 0
 }
 
 ///|
-fn daemon_scheduled_job_interval_ticks(job : @scheduler.ScheduledJob) -> Int {
+fn daemon_scheduled_job_interval_ticks(job : @scheduler.ScheduledJob) -> Int32 {
   let interval = if job.interval_seconds <= 0 {
     30
   } else {

@@ -1,12 +1,12 @@
 ///|
 pub async fn process_book_template_requests(
-  request_path? : String = @book_templates.request_path_for_snapshot(
+  request_path~ : String = @book_templates.request_path_for_snapshot(
     @storage.default_snapshot_path(),
   ),
-  registry_path? : String = @book_templates.default_registry_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  standing_goal_path? : String = @storage.default_standing_goal_path(),
-  tick? : Int = 0,
+  registry_path~ : String = @book_templates.default_registry_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  standing_goal_path~ : String = @storage.default_standing_goal_path(),
+  tick~ : Int32 = 0,
 ) -> String {
   let ledger = load_request_ledger(request_path)
   if ledger.requests.is_empty() {

@@ -45,18 +45,20 @@ test "strict decoder validates byte-exact ready body including valid empty text"
     content: Some(""),
   }
   assert_true(
-    @imported_output_contract.parse_text_reply(reply.to_json().stringify())
+    @imported_output_contract.parse_text_reply(
+      ToJson::to_json(reply).stringify(),
+    )
     is Some(_),
   )
   assert_true(
     @imported_output_contract.parse_text_reply(
-      { ..reply, content: Some("unexpected"), }.to_json().stringify(),
+      ToJson::to_json({ ..reply, content: Some("unexpected"), }).stringify(),
     )
     is None,
   )
   assert_true(
     @imported_output_contract.parse_text_reply(
-      { ..reply, state: "unavailable", }.to_json().stringify(),
+      ToJson::to_json({ ..reply, state: "unavailable", }).stringify(),
     )
     is None,
   )

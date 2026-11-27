@@ -1,6 +1,6 @@
 ///|
 /// Deterministic GNU-compatible tar. Long names retain exact UTF-8 paths.
-fn tar_octal(value : Int, width : Int) -> String {
+fn tar_octal(value : Int32, width : Int32) -> String {
   let mut n = value
   let mut result = ""
   while n > 0 {
@@ -14,7 +14,7 @@ fn tar_octal(value : Int, width : Int) -> String {
 }
 
 ///|
-fn tar_field(header : Array[Byte], offset : Int, text : String) -> Unit {
+fn tar_field(header : Array[Byte], offset : Int32, text : String) -> Unit {
   let bytes = @utf8.encode(text)
   for i in 0..<bytes.length() {
     header[offset + i] = bytes[i]
@@ -41,8 +41,8 @@ fn tar_entry(
   tar_field(header, 263, "00")
   let sum = header.fold(init=0, (total, byte) => total + byte.to_int())
   tar_field(header, 148, tar_octal(sum, 7) + " ")
-  output.write_bytes(@buffer.from_array(header).to_bytes())
-  output.write_bytes(bytes)
+  output.write_bytesview(@buffer.from_array(header).to_bytes())
+  output.write_bytesview(bytes)
   let padding = (512 - bytes.length() % 512) % 512
   for _ in 0..<padding {
     output.write_byte(b'\x00')
@@ -73,7 +73,7 @@ pub async fn Store::export_tar(
     tar_file(
       output,
       "manifest.json",
-      @utf8.encode(prepared.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(prepared).stringify(indent=2)),
     )
     tar_file(
       output,

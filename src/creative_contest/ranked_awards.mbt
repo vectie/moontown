@@ -65,7 +65,7 @@ fn ranked_award_projection(
         } else {
           "已按封榜票数确定一、二、三等奖，请核对后公布。"
         },
-        "candidates": awards.map(award => award.to_json()),
+        "candidates": awards.map(award => ToJson::to_json(award)),
       }
   }
 }

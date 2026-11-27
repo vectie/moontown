@@ -3,7 +3,7 @@ fn goal_run_research_entry(
   id~ : String,
   name~ : String,
   workspace_root~ : String,
-  purpose? : String = "test",
+  purpose~ : String = "test",
 ) -> @moonbook.BookCatalogEntry {
   @moonbook.BookCatalogEntry::new(id~, name~, purpose~, workspace_root~)
 }
@@ -13,7 +13,7 @@ fn goal_run_wenyu_entry(
   id~ : String,
   name~ : String,
   workspace_root~ : String,
-  purpose? : String = "test",
+  purpose~ : String = "test",
 ) -> @moonbook.BookCatalogEntry {
   @moonbook.BookCatalogEntry::new(id~, name~, purpose~, workspace_root~)
 }
@@ -56,18 +56,18 @@ fn goal_run_test_state() -> @core.TownState {
 ///|
 fn goal_run_book_summary(
   book_id~ : String,
-  root? : String = "/tmp/goal-run-book",
-  page_count? : Int = 4,
-  source_count? : Int = 1,
-  entity_count? : Int = 1,
-  concept_count? : Int = 1,
-  pending_review_count? : Int = 0,
-  keeper_memory_count? : Int = 0,
-  keeper_working_count? : Int = 0,
-  evidence_count? : Int = 1,
-  total_evidence_count? : Int = evidence_count,
-  operational_evidence_count? : Int = total_evidence_count - evidence_count,
-  summary? : String = "goal run summary",
+  root~ : String = "/tmp/goal-run-book",
+  page_count~ : Int32 = 4,
+  source_count~ : Int32 = 1,
+  entity_count~ : Int32 = 1,
+  concept_count~ : Int32 = 1,
+  pending_review_count~ : Int32 = 0,
+  keeper_memory_count~ : Int32 = 0,
+  keeper_working_count~ : Int32 = 0,
+  evidence_count~ : Int32 = 1,
+  total_evidence_count~ : Int32 = evidence_count,
+  operational_evidence_count~ : Int32 = total_evidence_count - evidence_count,
+  summary~ : String = "goal run summary",
 ) -> @moonbook.BookStateSummary {
   @moonbook.BookStateSummary::new(
     book_id~,
@@ -169,8 +169,8 @@ fn goal_run_lane_execution(
   book_id~ : String,
   status~ : @core.TaskExecutionStatus,
   summary~ : String,
-  output_contract? : String = "test",
-  packet_id? : String = "",
+  output_contract~ : String = "test",
+  packet_id~ : String = "",
 ) -> @core.TaskExecutionRecord {
   let resolved_packet_id = if packet_id == "" {
     "packet-\{task_id}"

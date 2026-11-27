@@ -1,5 +1,4 @@
 import {
-  "moonbitlang/async",
   "moonbitlang/async/http",
   "moonbitlang/async/fs",
   "moonbitlang/async/io",
@@ -32,3 +31,7 @@ pkgtype(kind: "executable")
 options(
   link: { "native": { "cc-link-flags": "-pthread -ldl" } },
 )
+
+import {
+  "moonbitlang/async",
+} for "wbtest"

@@ -50,7 +50,7 @@ test "canonical identity is stable, private and does not inherit paid or admin g
 ///|
 async test "display name and organization roles cannot grant fleet reads" {
   guard identity_fixture() is Object(fields) else { abort("fixture") }
-  fields["display_name"] = "PlatformOperator".to_json()
+  fields["display_name"] = ToJson::to_json("PlatformOperator")
   fields["roles"] = ["OrganizationAdmin", "EnterpriseUser"]
   let ordinary = test_identity_session(Json::object(fields)).unwrap()
   assert_false(ordinary.is_platform_operator())
@@ -65,7 +65,7 @@ test "inactive, incomplete, and alternate issuer identities cannot alias the act
     is None,
   )
   guard identity_fixture() is Object(fields) else { abort("fixture") }
-  fields["identity_issuer"] = "https://another.example".to_json()
+  fields["identity_issuer"] = ToJson::to_json("https://another.example")
   assert_false(
     test_identity_session(Json::object(fields)).unwrap().context().user_id ==
     test_identity_session(identity_fixture()).unwrap().context().user_id,

@@ -59,7 +59,7 @@ fn resolve_supervisor_activation_model(
   }
   let catalog_ready = fields
     .get("catalog_ready")
-    .unwrap_or(fields.get("ready").unwrap_or(false.to_json()))
+    .unwrap_or(fields.get("ready").unwrap_or(ToJson::to_json(false)))
     is True
   if !catalog_ready ||
     !selected.has_prefix("moongate/") ||
@@ -75,11 +75,13 @@ fn resolve_supervisor_activation_model(
     )
   }
   let binding = original.copy()
-  binding["model"] = selected.to_json()
-  binding["model_resolution"] = (if requested == "" {
-    "configured_default"
-  } else {
-    "explicit"
-  }).to_json()
+  binding["model"] = ToJson::to_json(selected)
+  binding["model_resolution"] = ToJson::to_json(
+    if requested == "" {
+      "configured_default"
+    } else {
+      "explicit"
+    },
+  )
   { ..payload, runtime_binding: Json::object(binding), }
 }

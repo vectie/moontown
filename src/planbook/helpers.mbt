@@ -1,6 +1,6 @@
 ///|
 fn json_string(value : String) -> String {
-  value.to_json().stringify()
+  ToJson::to_json(value).stringify()
 }
 
 ///|

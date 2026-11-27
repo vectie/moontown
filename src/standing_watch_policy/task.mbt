@@ -19,8 +19,8 @@ pub fn standing_watch_target_pages() -> Array[String] {
 pub fn standing_watch_prompt(
   goal : @core.StandingGoal,
   target_book_id : String,
-  tick : Int,
-  no_change_streak : Int,
+  tick : Int32,
+  no_change_streak : Int32,
 ) -> String {
   let prompt =
     $|This is a MoonBook-owned 24/7 standing-watch cycle.

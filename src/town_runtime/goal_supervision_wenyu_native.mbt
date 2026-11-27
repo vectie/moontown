@@ -5,7 +5,7 @@ async fn recover_saved_wenyu_native_launches(
   state : @core.TownState,
   catalog : Array[@moonbook.BookCatalogEntry],
   snapshot_path : String,
-  tick : Int,
+  tick : Int32,
 ) -> Unit {
   let path = @native_work.path_for_snapshot(snapshot_path)
   let directory = path + ".wenyu-launches"

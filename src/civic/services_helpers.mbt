@@ -39,7 +39,7 @@ fn unique_strings(values : Array[String]) -> Array[String] {
 
 ///|
 fn bullet_lines(values : Array[String]) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   for value in values {
     builder.write_string("- ")
     builder.write_string(value)

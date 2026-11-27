@@ -2,7 +2,7 @@
 fn supervision_directive_for(
   state : @core.TownState,
   execution : @core.TaskExecutionRecord,
-  tick : Int,
+  tick : Int32,
 ) -> MayorSupervisionDirective? {
   ignore(state)
   if @core.unconfirmed_standing_watch_dispatch(execution) {
@@ -24,7 +24,7 @@ fn supervision_directive_for(
 ///|
 fn stale_supervision_directive(
   execution : @core.TaskExecutionRecord,
-  tick : Int,
+  tick : Int32,
 ) -> MayorSupervisionDirective? {
   let stale = if execution.status == Running || execution.status == RunConfirmed {
     execution.stale_after_tick <= tick
@@ -54,7 +54,7 @@ fn stale_supervision_directive(
 ///|
 fn packet_ready_supervision_directive(
   execution : @core.TaskExecutionRecord,
-  tick : Int,
+  tick : Int32,
 ) -> MayorSupervisionDirective? {
   match execution.next_retry_tick {
     Some(next_tick) if next_tick > tick => None
@@ -85,7 +85,7 @@ fn awaiting_persistence_supervision_directive(
 ///|
 fn review_queued_supervision_directive(
   execution : @core.TaskExecutionRecord,
-  tick : Int,
+  tick : Int32,
 ) -> MayorSupervisionDirective? {
   match execution.next_retry_tick {
     Some(next_tick) if execution.attempt < 3 && next_tick <= tick =>
@@ -114,7 +114,7 @@ fn review_queued_supervision_directive(
 ///|
 fn failed_or_stale_supervision_directive(
   execution : @core.TaskExecutionRecord,
-  tick : Int,
+  tick : Int32,
 ) -> MayorSupervisionDirective? {
   match execution.next_retry_tick {
     _ if recoverable_profile_dispatch_failure(execution) &&
@@ -158,7 +158,7 @@ fn recoverable_profile_dispatch_failure(
 }
 
 ///|
-fn retry_backoff_ticks(attempt : Int) -> Int {
+fn retry_backoff_ticks(attempt : Int32) -> Int32 {
   match attempt {
     0 | 1 => 1
     2 => 3

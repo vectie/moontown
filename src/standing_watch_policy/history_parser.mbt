@@ -82,7 +82,7 @@ pub fn remove_standing_watch_history_block(
   block_id : String,
 ) -> String {
   let heading = "### \{block_id}"
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let mut skipping = false
   let mut removed = false
   for raw in history.split("\n") {

@@ -12,8 +12,8 @@ async test "settings update persists revision audit and effective values" {
     max_live_external_executions: 10,
   }
   let request : Json = {
-    "expected_revision": (1 : Int).to_json(),
-    "values": proposed.to_json(),
+    "expected_revision": ToJson::to_json((1 : Int32)),
+    "values": ToJson::to_json(proposed),
   }
   let updated = update_system_settings(
     request.stringify(),
@@ -39,8 +39,8 @@ async test "settings update rejects a stale revision" {
   }
   ignore(system_settings_management_snapshot(path~))
   let request : Json = {
-    "expected_revision": (2 : Int).to_json(),
-    "values": @system_settings.default_system_settings().to_json(),
+    "expected_revision": ToJson::to_json((2 : Int32)),
+    "values": ToJson::to_json(@system_settings.default_system_settings()),
   }
   let body = request.stringify()
   try
@@ -62,12 +62,12 @@ async test "settings load fills additive fields without losing stored values" {
     _ => ()
   }
   let state = @system_settings.empty_system_settings_state()
-  guard state.to_json() is Object(fields) &&
+  guard ToJson::to_json(state) is Object(fields) &&
     fields.get("settings") is Some(Object(values)) else {
     fail("settings fixture must use the durable object shape")
   }
   values.remove("map_lab_entity_result_limit")
-  values["max_concurrent_tasks"] = (20 : Int).to_json()
+  values["max_concurrent_tasks"] = ToJson::to_json((20 : Int32))
   fields["settings"] = Json::object(values)
   @fs.write_file(
     path,

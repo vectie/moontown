@@ -128,17 +128,17 @@ fn review_external_metadata(
   result_path : String,
   execution_target : String,
 ) -> Json {
-  let fields : Map[String, Json] = {}
+  let fields : Map[String, Json] = Map([])
   add_review_no_input_policy(fields)
-  fields["producer"] = "moontown".to_json()
-  fields["book_id"] = packet.book_id.to_json()
+  fields["producer"] = ToJson::to_json("moontown")
+  fields["book_id"] = ToJson::to_json(packet.book_id)
   let policy_fields = @core.json_object_copy(
     Some(@policy.policy_context_metadata(packet.book_type, packet.policy)),
   )
   for key, value in policy_fields {
     fields[key] = value
   }
-  fields["result_path"] = result_path.to_json()
+  fields["result_path"] = ToJson::to_json(result_path)
   fields["profile_metadata"] = review_no_input_policy_json()
   fields["step_metadata"] = review_packet_step_metadata_json(
     packet.output_contract,

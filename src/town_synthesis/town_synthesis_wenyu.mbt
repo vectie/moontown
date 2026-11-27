@@ -25,7 +25,7 @@ async fn render_wenyu_town_goal_synthesis(
   plan : @roles.MayorGoalPlan,
   lane_reports : Array[TownSynthesisLaneReport],
 ) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string("# Wenyu Valley AI Innovation Town: Build Synthesis\n\n")
   builder.write_string("Goal: \{goal}\n\n")
   builder.write_string("Mayor plan: \{plan.summary}\n\n")

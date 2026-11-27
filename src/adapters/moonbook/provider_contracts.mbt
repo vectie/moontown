@@ -1,13 +1,15 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 struct BookTaskProviderMetadata {
   command : String
   args : Array[String]
   task_args_prefix : Array[String]
   cwd : String
   workspace_root : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 struct BookTaskProviderManifestEntry {
   name : String
   title : String
@@ -15,4 +17,4 @@ struct BookTaskProviderManifestEntry {
   kind : String
   capabilities : Array[String]
   metadata : BookTaskProviderMetadata
-} derive(Debug, Eq, ToJson, FromJson)
+}

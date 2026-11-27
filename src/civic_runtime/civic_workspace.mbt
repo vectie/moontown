@@ -1,6 +1,6 @@
 ///|
 pub async fn bootstrap_wenyu_civic_workspaces(
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
 ) -> String {
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
   let services = @civic.wenyu_civic_services()

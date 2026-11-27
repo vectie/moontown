@@ -28,14 +28,14 @@ fn reserve(
     )
   }
   if request.kind == "wenyu_build" && task_contract is Object(fields) {
-    fields["owner_work_id"] = work.id.to_json()
-    fields["owner_book_id"] = request.book_id.to_json()
+    fields["owner_work_id"] = ToJson::to_json(work.id)
+    fields["owner_book_id"] = ToJson::to_json(request.book_id)
     fields["owner_task_id"] = field(request.acceptance_policy, "task_id")
     fields["owner_goal_id"] = field(request.acceptance_policy, "goal_id")
-    fields["output_contract"] = request.output_contract.to_json()
+    fields["output_contract"] = ToJson::to_json(request.output_contract)
     // MoonCode preserves constraints in its compacted long-horizon context,
     // even when the original source/Book context exceeds its text budget.
-    fields["constraints"] = [
+    fields["constraints"] = ToJson::to_json([
       (if wenyu_no_change_enabled(request) {
         "Return exactly these nine finish JSON keys with your summary, behavior and residual_risks; preserve all owner identities. Choose outcome no_change for verified already-satisfied work or implemented for attested mutation: "
       } else {
@@ -49,19 +49,19 @@ fn reserve(
       },
       "Frozen validation commands (run each separately after the final source mutation): " +
       field(request.acceptance_policy, "required_validation_commands").stringify(),
-    ].to_json()
+    ])
   }
   if editor_spec(request) is Some(_) && task_contract is Object(fields) {
-    fields["owner_work_id"] = work.id.to_json()
-    fields["owner_book_id"] = request.book_id.to_json()
-    fields["output_contract"] = request.output_contract.to_json()
-    fields["constraints"] = [
+    fields["owner_work_id"] = ToJson::to_json(work.id)
+    fields["owner_book_id"] = ToJson::to_json(request.book_id)
+    fields["output_contract"] = ToJson::to_json(request.output_contract)
+    fields["constraints"] = ToJson::to_json([
       "Return the exact owner-issued finish JSON schema and preserve its identities: " +
       editor_finish_schema(work).stringify(),
       "Book/course inputs are captured read-only context. Only the frozen source execution root is writable. Never write owner outputs, commit or push. No-change is engineering-only and cannot accept a selected feature.",
       "Run each frozen validation command separately after the final source mutation: " +
       field(request.acceptance_policy, "required_validation_commands").stringify(),
-    ].to_json()
+    ])
   }
   let body : Json = {
     "protocol": "mooncode.v1",
@@ -141,10 +141,10 @@ async fn validate_book(request : Request) -> Bool {
 pub async fn sync(
   id : String,
   now : UInt64,
-  path? : String = default_path(),
+  path~ : String = default_path(),
   client? : @native_code_control.Client,
-  force? : Bool = false,
-  expected_revision? : Int,
+  force~ : Bool = false,
+  expected_revision? : Int32,
 ) -> Work {
   let lock = lock_state(path)
   defer lock.close()
@@ -162,7 +162,7 @@ pub async fn sync(
   guard selected is Some(original) else { fail("native_work_not_found") }
   if terminal(original.state) {
     let applied = apply_owner_result(original)
-    if applied.to_json() != original.to_json() {
+    if ToJson::to_json(applied) != ToJson::to_json(original) {
       save_unlocked(path, replace_work(state, applied))
     }
     return applied
@@ -228,11 +228,11 @@ pub async fn sync(
         }
     }
   }
-  if work.to_json().stringify() != original.to_json().stringify() {
+  if ToJson::to_json(work).stringify() != ToJson::to_json(original).stringify() {
     save_unlocked(path, replace_work(load_unlocked(path), work))
   }
   let applied = apply_owner_result(work)
-  if applied.to_json() != work.to_json() {
+  if ToJson::to_json(applied) != ToJson::to_json(work) {
     save_unlocked(path, replace_work(load_unlocked(path), applied))
   }
   let work = applied
@@ -353,7 +353,7 @@ async fn sync_with_client(
   // Reuse exact saved bytes even after uncertainty or a default change. Native
   // duplicate handling starts/reuses the existing durable command service.
   match client.request("POST", base + "/turns", reservation.request_body) {
-    Ok(reply) if field(reply, "accepted") == true.to_json() &&
+    Ok(reply) if field(reply, "accepted") == ToJson::to_json(true) &&
       text(reply, "session_id") == reservation.session_id &&
       text(reply, "command_id") == reservation.command_id &&
       text(reply, "book_root") == reservation.execution_root =>

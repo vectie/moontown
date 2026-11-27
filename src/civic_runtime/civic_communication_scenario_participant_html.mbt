@@ -4,7 +4,7 @@ fn civic_communication_participant_html(
   participant : CivicCommunicationParticipantBook,
   returned_ideas : Array[CivicCommunicationIdea],
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> String {
   [
     "<!doctype html>",
@@ -28,7 +28,7 @@ fn civic_communication_returned_output_cards(
   if returned_ideas.length() == 0 {
     "<p>No returned outputs yet.</p>"
   } else {
-    let builder = StringBuilder::new()
+    let builder = StringBuilder()
     for idea in returned_ideas {
       builder.write_string(civic_communication_returned_output_card(idea))
     }
@@ -66,7 +66,7 @@ fn civic_communication_participant_html_body_close() -> String {
 fn civic_communication_participant_round_meta(
   scenario : CivicCommunicationScenario,
   participant : CivicCommunicationParticipantBook,
-  round_number : Int,
+  round_number : Int32,
 ) -> String {
   "<p><code>\{scenario.title}</code> <code>\{participant.cadence}</code> <code>round \{round_number}</code></p>"
 }

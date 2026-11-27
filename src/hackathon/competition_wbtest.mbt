@@ -49,8 +49,8 @@ fn sample_submission(
 ///|
 fn sample_evaluation(
   id : String,
-  quality : Int,
-  clarity : Int,
+  quality : Int32,
+  clarity : Int32,
   time : UInt64,
 ) -> Evaluation {
   {
@@ -163,19 +163,19 @@ async test "action store persists revisions and uses server submission time" {
   let path = "/tmp/moontown-hackathon-\{@env.now()}-test.json"
   let state = apply_hackathon_action(
     "publish",
-    sample_challenge().to_json(),
+    ToJson::to_json(sample_challenge()),
     10UL,
     path~,
   )
   assert_eq(state.revision, 1)
   let state = apply_hackathon_action(
     "register-team",
-    sample_team("blue").to_json(),
+    ToJson::to_json(sample_team("blue")),
     20UL,
     path~,
   )
   assert_eq(state.revision, 2)
-  let payload = sample_submission("blue-1", "blue", 1UL).to_json()
+  let payload = ToJson::to_json(sample_submission("blue-1", "blue", 1UL))
   if payload is Object(fields) {
     fields.remove("version")
     fields.remove("submitted_ms")

@@ -116,7 +116,7 @@ fn civic_service_portfolio(
 fn count_civic_services_by(
   services : Array[CivicServiceHealth],
   predicate : (CivicServiceHealth) -> Bool,
-) -> Int {
+) -> Int32 {
   services.filter(predicate).length()
 }
 

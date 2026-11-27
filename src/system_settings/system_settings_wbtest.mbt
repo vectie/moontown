@@ -10,7 +10,7 @@ test "defaults validate and expose every value through the catalog" {
     .join("\n")
     .contains("max_live_external_executions"),
   )
-  guard settings.to_json() is Object(value_fields) else {
+  guard ToJson::to_json(settings) is Object(value_fields) else {
     fail("system settings must serialize as an object")
   }
   let catalog_keys : Array[String] = []

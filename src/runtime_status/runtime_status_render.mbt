@@ -1,13 +1,13 @@
 ///|
 pub async fn render_saved_town_status(
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> String {
   let status = inspect_saved_town(snapshot_path~)
   let daemon = @daemon_runtime.load_daemon_state(
     @daemon_runtime.default_daemon_state_path(snapshot_path),
   )
   let runtime = @daemon_runtime.inspect_daemon_runtime(snapshot_path~)
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string("MoonTown status\n")
   builder.write_string("\{status.summary}\n")
   if !status.has_snapshot {

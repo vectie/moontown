@@ -5,8 +5,13 @@ test "town snapshot owns presence and exchange truth" {
   let place_id = test_id("place", "knowledge-lab-01")
   let portal_id = test_id("portal", "knowledge-lab-01-20-0")
   let other_place_id = test_id("place", "social-square")
-  let source = provenance("moontown-ambient-resident", "v1", Derived, Bounded)
-  let presence = actor_presence(
+  let source = @energy_valley_contract.provenance(
+    "moontown-ambient-resident",
+    "v1",
+    Derived,
+    Bounded,
+  )
+  let presence = @energy_valley_contract.actor_presence(
     actor_id,
     place_id,
     Some(portal_id),
@@ -18,7 +23,7 @@ test "town snapshot owns presence and exchange truth" {
     source,
     activity_kind=ActorReview,
   )
-  let profile = actor_profile(
+  let profile = @energy_valley_contract.actor_profile(
     actor_id,
     "知河",
     "知识守护",
@@ -29,7 +34,7 @@ test "town snapshot owns presence and exchange truth" {
     ActorStateActive,
     source,
   )
-  let exchange = place_exchange(
+  let exchange = @energy_valley_contract.place_exchange(
     test_id("exchange", "zhihé-knowledge-to-square"),
     place_id,
     other_place_id,
@@ -41,7 +46,7 @@ test "town snapshot owns presence and exchange truth" {
     Some(20),
     source,
   )
-  let snapshot = town_snapshot(
+  let snapshot = @energy_valley_contract.town_snapshot(
     world,
     12,
     [],
@@ -57,9 +62,14 @@ test "town snapshot owns presence and exchange truth" {
   assert_eq(snapshot.active_exchanges().length(), 1)
   assert_eq(snapshot.exchanges_for(place_id).length(), 1)
   assert_eq(snapshot.exchanges_for(other_place_id).length(), 1)
-  let later = town_snapshot(world, 22, [], [], actor_presences=[presence], place_exchanges=[
-    exchange,
-  ])
+  let later = @energy_valley_contract.town_snapshot(
+    world,
+    22,
+    [],
+    [],
+    actor_presences=[presence],
+    place_exchanges=[exchange],
+  )
   assert_true(later.active_presences().is_empty())
   assert_true(later.active_exchanges().is_empty())
 }
@@ -68,8 +78,13 @@ test "town snapshot owns presence and exchange truth" {
 test "snapshot validation rejects malformed actor descriptors" {
   let world = test_world()
   let actor_id = test_id("resident", "missing-theme")
-  let source = provenance("ambient", "v1", Derived, Bounded)
-  let malformed = actor_profile(
+  let source = @energy_valley_contract.provenance(
+    "ambient",
+    "v1",
+    Derived,
+    Bounded,
+  )
+  let malformed = @energy_valley_contract.actor_profile(
     actor_id,
     "",
     "",
@@ -80,8 +95,10 @@ test "snapshot validation rejects malformed actor descriptors" {
     ActorStateIdle,
     source,
   )
-  let issues = validate_snapshot(
-    town_snapshot(world, 1, [], [], actor_profiles=[malformed]),
+  let issues = @energy_valley_contract.validate_snapshot(
+    @energy_valley_contract.town_snapshot(world, 1, [], [], actor_profiles=[
+      malformed,
+    ]),
   )
   assert_true(issues.any(issue => issue.code == InvalidActorProfile))
 }
@@ -89,9 +106,14 @@ test "snapshot validation rejects malformed actor descriptors" {
 ///|
 test "snapshot validation rejects route metadata that disagrees with RoadNetwork" {
   let world = test_world()
-  let source = provenance("runtime", "v1", RuntimeProjection, Free)
+  let source = @energy_valley_contract.provenance(
+    "runtime",
+    "v1",
+    RuntimeProjection,
+    Free,
+  )
   let actor_id = test_id("runtime-agent", "misrouted")
-  let presence = actor_presence(
+  let presence = @energy_valley_contract.actor_presence(
     actor_id,
     test_id("place", "knowledge-lab-01"),
     Some(test_id("portal", "knowledge-lab-01-20-0")),
@@ -102,8 +124,8 @@ test "snapshot validation rejects route metadata that disagrees with RoadNetwork
     Some(10),
     source,
     route_position=Some(
-      actor_route_position(
-        world_point(5.0, 0.0),
+      @energy_valley_contract.actor_route_position(
+        @energy_valley_contract.world_point(5.0, 0.0),
         500,
         road_segment_id=Some(test_id("road-segment", "0-0--10-0")),
         origin_node_id=Some(test_id("road-node", "0-0")),
@@ -113,8 +135,10 @@ test "snapshot validation rejects route metadata that disagrees with RoadNetwork
     ),
     activity_kind=ActorWalk,
   )
-  let issues = validate_snapshot(
-    town_snapshot(world, 2, [], [], actor_presences=[presence]),
+  let issues = @energy_valley_contract.validate_snapshot(
+    @energy_valley_contract.town_snapshot(world, 2, [], [], actor_presences=[
+      presence,
+    ]),
   )
   assert_true(issues.any(issue => issue.code == InvalidActorRoutePosition))
 }
@@ -126,8 +150,13 @@ test "presence rendering resolves portals outside and slots inside" {
   let place_id = test_id("place", "knowledge-lab-01")
   let portal_id = test_id("portal", "knowledge-lab-01-20-0")
   let slot_id = test_id("slot", "knowledge-lab-01-exchange")
-  let source = provenance("ambient", "v1", Derived, Bounded)
-  let at_entrance = actor_presence(
+  let source = @energy_valley_contract.provenance(
+    "ambient",
+    "v1",
+    Derived,
+    Bounded,
+  )
+  let at_entrance = @energy_valley_contract.actor_presence(
     actor_id,
     place_id,
     Some(portal_id),
@@ -154,10 +183,15 @@ test "presence rendering resolves portals outside and slots inside" {
 ///|
 test "snapshot validation rejects dangling ecosystem activity" {
   let world = test_world()
-  let source = provenance("test-activity", "v1", Derived, Bounded)
+  let source = @energy_valley_contract.provenance(
+    "test-activity",
+    "v1",
+    Derived,
+    Bounded,
+  )
   let missing_place = test_id("place", "missing")
   let actor = test_id("resident", "wanderer")
-  let invalid_presence = actor_presence(
+  let invalid_presence = @energy_valley_contract.actor_presence(
     actor,
     missing_place,
     None,
@@ -169,7 +203,7 @@ test "snapshot validation rejects dangling ecosystem activity" {
     source,
   )
   let valid_place = test_id("place", "knowledge-lab-01")
-  let invalid_exchange = place_exchange(
+  let invalid_exchange = @energy_valley_contract.place_exchange(
     test_id("exchange", "missing-endpoint"),
     valid_place,
     missing_place,
@@ -181,10 +215,15 @@ test "snapshot validation rejects dangling ecosystem activity" {
     Some(1),
     source,
   )
-  let issues = validate_snapshot(
-    town_snapshot(world, 2, [], [], actor_presences=[invalid_presence], place_exchanges=[
-      invalid_exchange,
-    ]),
+  let issues = @energy_valley_contract.validate_snapshot(
+    @energy_valley_contract.town_snapshot(
+      world,
+      2,
+      [],
+      [],
+      actor_presences=[invalid_presence],
+      place_exchanges=[invalid_exchange],
+    ),
   )
   assert_true(issues.any(issue => issue.code == MissingPresencePlace))
   assert_true(issues.any(issue => issue.code == MissingExchangePlace))
@@ -197,7 +236,7 @@ test "world validation rejects spatial ownership contradictions" {
   let base = test_world()
   let parcel_id = test_id("parcel", "energy-core-01")
   let block_id = test_id("land-block", "energy-core")
-  let invalid_parcel = parcel(
+  let invalid_parcel = @energy_valley_contract.parcel(
     parcel_id,
     block_id,
     test_polygon(35.0, 35.0, 10.0),
@@ -207,7 +246,7 @@ test "world validation rejects spatial ownership contradictions" {
     Bounded,
     test_provenance(),
   )
-  let invalid_world = compiled_town_world(
+  let invalid_world = @energy_valley_contract.compiled_town_world(
     base.schema_version,
     base.blueprint_id,
     base.blueprint_digest,
@@ -220,7 +259,7 @@ test "world validation rejects spatial ownership contradictions" {
     base.places,
     base.attention_targets,
   )
-  let issues = validate_world(invalid_world)
+  let issues = @energy_valley_contract.validate_world(invalid_world)
   assert_true(issues.any(issue => issue.code == ParcelOutsideLandBlock))
   assert_true(issues.any(issue => issue.code == ParcelLandUseMismatch))
   assert_true(issues.any(issue => issue.code == PlaceOutsideParcel))
@@ -231,8 +270,13 @@ test "snapshot validation enforces one active place per actor" {
   let world = test_world()
   let actor_id = test_id("resident", "double-booked")
   let place_id = test_id("place", "knowledge-lab-01")
-  let source = provenance("test-activity", "v1", Derived, Bounded)
-  let first = actor_presence(
+  let source = @energy_valley_contract.provenance(
+    "test-activity",
+    "v1",
+    Derived,
+    Bounded,
+  )
+  let first = @energy_valley_contract.actor_presence(
     actor_id,
     place_id,
     None,
@@ -243,7 +287,7 @@ test "snapshot validation enforces one active place per actor" {
     Some(10),
     source,
   )
-  let second = actor_presence(
+  let second = @energy_valley_contract.actor_presence(
     actor_id,
     place_id,
     None,
@@ -254,7 +298,7 @@ test "snapshot validation enforces one active place per actor" {
     Some(9),
     source,
   )
-  let expired = actor_presence(
+  let expired = @energy_valley_contract.actor_presence(
     actor_id,
     place_id,
     None,
@@ -265,8 +309,10 @@ test "snapshot validation enforces one active place per actor" {
     Some(2),
     source,
   )
-  let issues = validate_snapshot(
-    town_snapshot(world, 5, [], [], actor_presences=[first, second, expired]),
+  let issues = @energy_valley_contract.validate_snapshot(
+    @energy_valley_contract.town_snapshot(world, 5, [], [], actor_presences=[
+      first, second, expired,
+    ]),
   )
   assert_eq(
     issues.filter(issue => issue.code == DuplicateActivePresence).length(),
@@ -279,11 +325,16 @@ test "snapshot validation enforces active inside slot capacity" {
   let world = test_world()
   let place_id = test_id("place", "knowledge-lab-01")
   let slot_id = test_id("slot", "knowledge-lab-01-exchange")
-  let source = provenance("test-activity", "v1", Derived, Bounded)
-  let presences : Array[ActorPresence] = []
+  let source = @energy_valley_contract.provenance(
+    "test-activity",
+    "v1",
+    Derived,
+    Bounded,
+  )
+  let presences : Array[@energy_valley_contract.ActorPresence] = []
   for index in 0..<5 {
     presences.push(
-      actor_presence(
+      @energy_valley_contract.actor_presence(
         test_id("resident", "capacity-\{index}"),
         place_id,
         None,
@@ -296,8 +347,14 @@ test "snapshot validation enforces active inside slot capacity" {
       ),
     )
   }
-  let issues = validate_snapshot(
-    town_snapshot(world, 5, [], [], actor_presences=presences),
+  let issues = @energy_valley_contract.validate_snapshot(
+    @energy_valley_contract.town_snapshot(
+      world,
+      5,
+      [],
+      [],
+      actor_presences=presences,
+    ),
   )
   assert_true(
     issues.any(issue => issue.code == InteractionSlotCapacityExceeded),

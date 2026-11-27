@@ -141,7 +141,7 @@ fn queue_book_review_backlog(
   state : @core.TownState,
   book_id : String,
   task_ids : Array[String],
-  pending_review_count : Int,
+  pending_review_count : Int32,
 ) -> Unit {
   let mut marked = 0
   for task_id in task_ids {

@@ -1,9 +1,7 @@
 import {
-  "moonbitlang/async",
   "moonbitlang/async/fs",
   "moonbitlang/async/stdio",
   "moonbitlang/core/env",
-  "moonbitlang/x/sys",
   "vectie/moontown/imported_output_contract" @table,
   "vectie/moontown/goal_effort" @effort,
 }
@@ -16,4 +14,8 @@ import {
   "vectie/moontown/core",
   "vectie/moontown/storage",
   "moonbitlang/core/encoding/utf8",
+} for "wbtest"
+
+import {
+  "moonbitlang/async",
 } for "wbtest"

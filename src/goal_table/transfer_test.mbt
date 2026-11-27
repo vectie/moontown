@@ -1,6 +1,6 @@
 ///|
 fn snapshot(goals : Array[@core.StandingGoal]) -> Bytes {
-  @utf8.encode(goals.to_json().stringify())
+  @utf8.encode(ToJson::to_json(goals).stringify())
 }
 
 ///|
@@ -170,8 +170,7 @@ test "editing changes only selected declaration fields and table order is snapsh
 ///|
 test "nullable target and last-run preserve empty strings null text zero and signed Int boundaries" {
   let absent = @core.StandingGoal::new(id="optional", title="", prompt="")
-  let with_null = absent
-    .to_json()
+  let with_null = ToJson::to_json(absent)
     .stringify()
     .replace_all(
       old="\"id\":",
@@ -254,7 +253,7 @@ test "invalid table data fails as a whole with a row diagnostic" {
 
 ///|
 test "snapshot rejects unknown fields malformed types duplicate and blank IDs instead of discarding them" {
-  let original = fixture()[0].to_json().stringify()
+  let original = ToJson::to_json(fixture()[0]).stringify()
   let extra = original.replace_all(
     old="\"id\":",
     new="\"future_field\":true,\"id\":",

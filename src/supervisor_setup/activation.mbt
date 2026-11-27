@@ -11,7 +11,7 @@ fn activation_request_json(
     "runtimeExpectedCursor": wire_int_or_null(draft.runtime_expected_cursor),
   }
   match draft.requested_model {
-    Some(model) => fields["model"] = model.to_json()
+    Some(model) => fields["model"] = ToJson::to_json(model)
     None => ()
   }
   Json::object(fields)
@@ -70,7 +70,7 @@ pub async fn SupervisorSetupApplication::activate_profile(
     runtime_binding: {
       "workspace_id": current.bindings.workspace_id,
       "building_id": current.bindings.building_id,
-      "book_ids": current.bindings.book_ids.to_json(),
+      "book_ids": ToJson::to_json(current.bindings.book_ids),
       "model": if requested_model == "gpt-5.6-sol" {
         requested_model
       } else {
@@ -217,7 +217,7 @@ pub async fn SupervisorSetupApplication::runtime_handoffs(
     "ok": true,
     "schema": "moontown.runtime-handoff-outbox.v1",
     "cursor": store.cursor,
-    "activationHandoffs": activations.to_json(),
+    "activationHandoffs": ToJson::to_json(activations),
     "executionHandoffs": executions,
   }
 }
@@ -289,7 +289,7 @@ pub async fn SupervisorSetupApplication::claim_activation_handoff(
     "profile": supervisor_activation_payload_wire_json(current.payload),
   }
   match current.expected_cursor {
-    Some(cursor) => command_fields["expected_cursor"] = cursor.to_json()
+    Some(cursor) => command_fields["expected_cursor"] = ToJson::to_json(cursor)
     None => ()
   }
   let command = Json::object(command_fields)

@@ -12,7 +12,7 @@ fn wenyu_review_test_resolution(
     "work_id": work.id,
     "request_digest": work.request_digest,
     "payload_digest": @native_work.digest(
-      wenyu_output_package(launch, work).result.to_json().stringify(),
+      ToJson::to_json(wenyu_output_package(launch, work).result).stringify(),
     ),
     "result_id": launch.task.id,
     "review_id": "result-review-native-wenyu-" + key,
@@ -21,15 +21,16 @@ fn wenyu_review_test_resolution(
     "reason": "Synthetic Book review observation",
   }
   if status == "approved" || status == "rejected" {
-    wenyu_owner_set(value, "resolution_timestamp", "-123".to_json())
+    wenyu_owner_set(value, "resolution_timestamp", ToJson::to_json("-123"))
   }
   @json.from_json(value)
 }
 
 ///|
+#warnings("-unused_async")
 async fn wenyu_review_test_saved(
   label : String,
-  failed? : Bool = false,
+  failed~ : Bool = false,
 ) -> (WenyuLaunch, @native_work.Work, @core.TaskExecutionRecord) {
   let (launch, completed) = wenyu_owner_fixture("human-review-" + label)
   let work = if failed {
@@ -39,7 +40,7 @@ async fn wenyu_review_test_saved(
   }
   @support.write_text_file(
     wenyu_launch_path(launch.native_path, launch.task.id),
-    launch.to_json().stringify(),
+    ToJson::to_json(launch).stringify(),
   )
   @support.write_text_file(
     launch.native_path,
@@ -47,19 +48,19 @@ async fn wenyu_review_test_saved(
       {
         "schema": "moontown.native-work.v1",
         "revision": 1,
-        "work": [work.to_json()],
+        "work": [ToJson::to_json(work)],
       } : Json).stringify(),
   )
   ignore(
     import_wenyu_native_result(launch, work, persist=async fn(result) {
-      let outcome = wenyu_owner_outcome(result).to_json()
+      let outcome = ToJson::to_json(wenyu_owner_outcome(result))
       let evidence = "EV-native-wenyu-" + @native_work.digest(work.id)
-      wenyu_owner_set(outcome, "evidence_id", evidence.to_json())
+      wenyu_owner_set(outcome, "evidence_id", ToJson::to_json(evidence))
       guard outcome is Object(fields) else { fail("fixture outcome") }
       wenyu_owner_set(
         fields["executable_event"],
         "evidence_id",
-        evidence.to_json(),
+        ToJson::to_json(evidence),
       )
       @json.from_json(outcome)
     }),
@@ -68,6 +69,7 @@ async fn wenyu_review_test_saved(
 }
 
 ///|
+#warnings("-unused_async")
 async test "native Book review disposition clears only human review and preserves immutable engineering evidence" {
   let (launch, work, execution) = wenyu_review_test_saved("states")
   let native_before = @fs.read_file(launch.native_path).text()
@@ -125,6 +127,7 @@ async test "native Book review disposition clears only human review and preserve
 }
 
 ///|
+#warnings("-unused_async")
 async test "approving a failed native work note never converts engineering failure into success" {
   let (launch, work, execution) = wenyu_review_test_saved("failed", failed=true)
   let resolution = wenyu_review_test_resolution(launch, work, "approved")
@@ -141,6 +144,7 @@ async test "approving a failed native work note never converts engineering failu
 }
 
 ///|
+#warnings("-unused_async")
 async test "native review rejects wrong work root request result and package before projecting approval" {
   let (launch, work, execution) = wenyu_review_test_saved("binding")
   let valid = wenyu_review_test_resolution(launch, work, "approved")
@@ -149,8 +153,8 @@ async test "native review rejects wrong work root request result and package bef
       "root", "work_id", "request_digest", "payload_digest", "result_id", "review_id",
       "evidence_id", "original_task_acceptance",
     ] {
-    let raw = valid.to_json()
-    wenyu_owner_set(raw, key, "wrong-binding".to_json())
+    let raw = ToJson::to_json(valid)
+    wenyu_owner_set(raw, key, ToJson::to_json("wrong-binding"))
     let wrong : @moonbook.NativeWenyuReviewResolution = @json.from_json(raw)
     try
       reconcile_wenyu_native_review_with_query(launch.entry, execution, 2, query=async fn(
@@ -209,6 +213,7 @@ async test "native review rejects wrong work root request result and package bef
 }
 
 ///|
+#warnings("-unused_async")
 async test "native readback recovers after import replay without requeuing approved Book review" {
   let (launch, work, original) = wenyu_review_test_saved("replay")
   let resolution = wenyu_review_test_resolution(launch, work, "approved")

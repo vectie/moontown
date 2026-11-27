@@ -42,7 +42,7 @@ async test "live status reconciles stale planbook counts from authoritative stat
   write_live_autonomy_watcher_record_line(root, "watch-sync-deferred", record)
   @support.write_text_file(
     default_live_autonomy_path(snapshot_path~),
-    stale_spine.to_json().stringify(indent=2),
+    ToJson::to_json(stale_spine).stringify(indent=2),
   )
   let status = render_live_autonomy_status(snapshot_path~)
   assert_true(!status.contains("PlanBook open gaps: `99`"))

@@ -1,11 +1,19 @@
 ///|
-fn compiler_test_id(scope : String, key : String) -> StableId {
-  stable_id(scope, key).unwrap()
+fn compiler_test_id(
+  scope : String,
+  key : String,
+) -> @energy_valley_contract.StableId {
+  @energy_valley_contract.stable_id(scope, key).unwrap()
 }
 
 ///|
-fn compiler_test_source() -> Provenance {
-  provenance("wenyu-block-labels", "v1", WenyuReference, Fixed)
+fn compiler_test_source() -> @energy_valley_contract.Provenance {
+  @energy_valley_contract.provenance(
+    "wenyu-block-labels",
+    "v1",
+    WenyuReference,
+    Fixed,
+  )
 }
 
 ///|
@@ -14,45 +22,71 @@ fn compiler_test_rectangle(
   top : Double,
   right : Double,
   bottom : Double,
-) -> Polygon {
-  polygon([
-    world_point(left, top),
-    world_point(right, top),
-    world_point(right, bottom),
-    world_point(left, bottom),
+) -> @energy_valley_contract.Polygon {
+  @energy_valley_contract.polygon([
+    @energy_valley_contract.world_point(left, top),
+    @energy_valley_contract.world_point(right, top),
+    @energy_valley_contract.world_point(right, bottom),
+    @energy_valley_contract.world_point(left, bottom),
   ])
 }
 
 ///|
-fn compiler_test_roads() -> RoadNetwork {
+fn compiler_test_roads() -> @energy_valley_contract.RoadNetwork {
   let source = compiler_test_source()
   let west_a = compiler_test_id("road-node", "west-a")
   let west_b = compiler_test_id("road-node", "west-b")
   let east_a = compiler_test_id("road-node", "east-a")
   let east_b = compiler_test_id("road-node", "east-b")
-  road_network(
+  @energy_valley_contract.road_network(
     [
-      road_node(west_a, grid_position(0, 0), world_point(0.0, 0.0), source),
-      road_node(west_b, grid_position(20, 0), world_point(20.0, 0.0), source),
-      road_node(east_a, grid_position(40, 0), world_point(40.0, 0.0), source),
-      road_node(east_b, grid_position(60, 0), world_point(60.0, 0.0), source),
+      @energy_valley_contract.road_node(
+        west_a,
+        @energy_valley_contract.grid_position(0, 0),
+        @energy_valley_contract.world_point(0.0, 0.0),
+        source,
+      ),
+      @energy_valley_contract.road_node(
+        west_b,
+        @energy_valley_contract.grid_position(20, 0),
+        @energy_valley_contract.world_point(20.0, 0.0),
+        source,
+      ),
+      @energy_valley_contract.road_node(
+        east_a,
+        @energy_valley_contract.grid_position(40, 0),
+        @energy_valley_contract.world_point(40.0, 0.0),
+        source,
+      ),
+      @energy_valley_contract.road_node(
+        east_b,
+        @energy_valley_contract.grid_position(60, 0),
+        @energy_valley_contract.world_point(60.0, 0.0),
+        source,
+      ),
     ],
     [
-      road_segment(
+      @energy_valley_contract.road_segment(
         compiler_test_id("road-segment", "west"),
         west_a,
         west_b,
-        [world_point(0.0, 0.0), world_point(20.0, 0.0)],
+        [
+          @energy_valley_contract.world_point(0.0, 0.0),
+          @energy_valley_contract.world_point(20.0, 0.0),
+        ],
         Local,
         8.0,
         [Pedestrian],
         source,
       ),
-      road_segment(
+      @energy_valley_contract.road_segment(
         compiler_test_id("road-segment", "east"),
         east_a,
         east_b,
-        [world_point(40.0, 0.0), world_point(60.0, 0.0)],
+        [
+          @energy_valley_contract.world_point(40.0, 0.0),
+          @energy_valley_contract.world_point(60.0, 0.0),
+        ],
         Local,
         8.0,
         [Pedestrian],
@@ -65,10 +99,10 @@ fn compiler_test_roads() -> RoadNetwork {
 
 ///|
 fn compiler_test_seed(
-  variation : PreservationLevel,
-  target_count? : Int = 3,
-) -> LandBlockSeed {
-  land_block_seed(
+  variation : @energy_valley_contract.PreservationLevel,
+  target_count~ : Int32 = 3,
+) -> @energy_valley_contract.LandBlockSeed {
+  @energy_valley_contract.land_block_seed(
     compiler_test_id("land-block", "research-core"),
     compiler_test_rectangle(0.0, 0.0, 60.0, 30.0),
     Research,
@@ -78,7 +112,7 @@ fn compiler_test_seed(
     ],
     Fixed,
     compiler_test_source(),
-    parcel_grammar(
+    @energy_valley_contract.parcel_grammar(
       target_count,
       split_axis=VerticalBands,
       variation~,
@@ -88,16 +122,16 @@ fn compiler_test_seed(
 }
 
 ///|
-fn compiler_test_programs() -> Array[ParcelProgram] {
+fn compiler_test_programs() -> Array[@energy_valley_contract.ParcelProgram] {
   [
-    parcel_program(
+    @energy_valley_contract.parcel_program(
       compiler_test_id("parcel-program", "garden-court"),
       "Garden court",
       [Research, MixedUse],
       minimum_area_sqm=100.0,
       weight=30,
     ),
-    parcel_program(
+    @energy_valley_contract.parcel_program(
       compiler_test_id("parcel-program", "street-lab"),
       "Street research lab",
       [Research],
@@ -110,10 +144,10 @@ fn compiler_test_programs() -> Array[ParcelProgram] {
 
 ///|
 fn compiler_test_plan(
-  seed : Int,
-  variation? : PreservationLevel = Bounded,
-) -> ParcelPlan {
-  compile_parcel_plan(
+  seed : Int32,
+  variation~ : @energy_valley_contract.PreservationLevel = Bounded,
+) -> @energy_valley_contract.ParcelPlan {
+  @energy_valley_contract.compile_parcel_plan(
     "v2",
     seed,
     compiler_test_roads(),
@@ -125,14 +159,14 @@ fn compiler_test_plan(
 ///|
 test "parcel compiler is deterministic and input-order independent" {
   let programs = compiler_test_programs()
-  let first = compile_parcel_plan(
+  let first = @energy_valley_contract.compile_parcel_plan(
     "v2",
     20260727,
     compiler_test_roads(),
     [compiler_test_seed(Bounded)],
     programs,
   ).unwrap()
-  let second = compile_parcel_plan(
+  let second = @energy_valley_contract.compile_parcel_plan(
     "v2",
     20260727,
     compiler_test_roads(),
@@ -153,20 +187,20 @@ test "parcel compiler is deterministic and input-order independent" {
 test "parcel compiler retains an explicitly nonparcelable land block" {
   let source = compiler_test_source()
   let block_id = compiler_test_id("land-block", "retained-road-island")
-  let seed = land_block_seed(
+  let seed = @energy_valley_contract.land_block_seed(
     block_id,
     compiler_test_rectangle(0.0, 0.0, 1.0, 1.0),
     Utility,
     [],
     Fixed,
     source,
-    parcel_grammar(0),
+    @energy_valley_contract.parcel_grammar(0),
     parcelable=false,
   )
-  let plan = compile_parcel_plan(
+  let plan = @energy_valley_contract.compile_parcel_plan(
     "v2",
     20260727,
-    road_network([], [], []),
+    @energy_valley_contract.road_network([], [], []),
     [seed],
     compiler_test_programs(),
   ).unwrap()
@@ -225,7 +259,7 @@ test "preservation level controls whether the seed may move parcels" {
 
 ///|
 test "invalid grammar and missing authored frontage fail explicitly" {
-  let invalid = compile_parcel_plan(
+  let invalid = @energy_valley_contract.compile_parcel_plan(
     "v2",
     1,
     compiler_test_roads(),
@@ -234,16 +268,16 @@ test "invalid grammar and missing authored frontage fail explicitly" {
   )
   assert_true(invalid is Err(InvalidParcelGrammar(_)))
   let source = compiler_test_source()
-  let missing_frontage = land_block_seed(
+  let missing_frontage = @energy_valley_contract.land_block_seed(
     compiler_test_id("land-block", "broken-frontage"),
     compiler_test_rectangle(0.0, 0.0, 20.0, 20.0),
     Research,
     [compiler_test_id("road-segment", "missing")],
     Fixed,
     source,
-    parcel_grammar(1, variation=Fixed),
+    @energy_valley_contract.parcel_grammar(1, variation=Fixed),
   )
-  let missing = compile_parcel_plan(
+  let missing = @energy_valley_contract.compile_parcel_plan(
     "v2",
     1,
     compiler_test_roads(),
@@ -255,12 +289,12 @@ test "invalid grammar and missing authored frontage fail explicitly" {
 
 ///|
 test "program compatibility is a compiler invariant" {
-  let park_only = parcel_program(
+  let park_only = @energy_valley_contract.parcel_program(
     compiler_test_id("parcel-program", "wetland-walk"),
     "Wetland walk",
     [Park],
   )
-  let result = compile_parcel_plan(
+  let result = @energy_valley_contract.compile_parcel_plan(
     "v2",
     1,
     compiler_test_roads(),

@@ -3,7 +3,7 @@ pub fn repair_bridge_item(
   score : BookQualityScore,
   result_path : String,
   result_text : String,
-  semantic_score : Int,
+  semantic_score : Int32,
   generated_at_ms~ : UInt64,
 ) -> BookQualityRepairBridgeItem {
   let contract = repair_review_contract(result_text, score)

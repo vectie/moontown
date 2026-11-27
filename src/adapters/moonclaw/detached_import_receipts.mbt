@@ -75,7 +75,7 @@ fn detached_import_text_has_top_level_terminal_failure_signal(
 
 ///|
 fn compact_detached_import_failure_text(text : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let mut count = 0
   for raw in text.split("\n") {
     if count >= 6 {

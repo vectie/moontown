@@ -37,8 +37,8 @@ fn knowledge_catalog_request_status(
 
 ///|
 pub async fn seed_knowledge_domain_catalog(
-  catalog_path? : String = default_knowledge_domain_catalog_path(),
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  catalog_path~ : String = default_knowledge_domain_catalog_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> String {
   let (loaded, errors) = load_knowledge_domain_catalog_with_errors(catalog_path)
   let catalog = match loaded {

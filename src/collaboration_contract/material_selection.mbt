@@ -4,7 +4,7 @@
 ///
 /// ```mbt check
 /// test {
-///   let page : MaterialPage = {
+///   let page : @collaboration_contract.MaterialPage = {
 ///     book_id: "a",
 ///     book_title: "A",
 ///     source_path: "raw/a.md",
@@ -12,7 +12,9 @@
 ///     size_bytes: 6,
 ///     text: "first\n",
 ///   }
-///   let notebook = empty_material_notebook("inquiry", [page])
+///   let notebook = @collaboration_contract.empty_material_notebook("inquiry", [
+///     page,
+///   ])
 ///   let selected = notebook.select_lines(
 ///     "a", "raw/a.md", 1, 1, "Observed", "Recheck",
 ///   )
@@ -24,8 +26,8 @@ pub fn MaterialNotebook::select_lines(
   self : MaterialNotebook,
   book_id : String,
   source_path : String,
-  first : Int,
-  last : Int,
+  first : Int32,
+  last : Int32,
   observation : String,
   challenge : String,
 ) -> MaterialNotebook raise {
@@ -70,7 +72,7 @@ pub fn MaterialNotebook::select_lines(
 /// pages and all other authored fields remain unchanged.
 pub fn MaterialNotebook::remove_excerpt(
   self : MaterialNotebook,
-  position : Int,
+  position : Int32,
 ) -> MaterialNotebook raise {
   self.validate_pages()
   guard position >= 1 && position <= self.excerpts.length() else {

@@ -4,7 +4,7 @@ fn score_civic_service_definition(
   service : @civic.CivicServiceDefinition,
   strengths : Array[String],
   gaps : Array[String],
-) -> Int {
+) -> Int32 {
   let mut score = 0
   score += paths_score(structural, service.schema_pages, 10, strengths, gaps)
   score += paths_score(structural, service.wiki_pages, 10, strengths, gaps)
@@ -36,7 +36,7 @@ fn civic_service_latest_result_score(
   structural : BookQualityStructuralObservation,
   strengths : Array[String],
   gaps : Array[String],
-) -> Int {
+) -> Int32 {
   apply_score_signal(
     civic_latest_result_assessment(structural.civic_latest_result_exists),
     strengths,

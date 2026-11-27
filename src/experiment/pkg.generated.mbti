@@ -24,6 +24,7 @@ pub fn validate_capability_experiment_plan(CapabilityExperimentPlan) -> Unit rai
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CapabilityExperimentAssignment {
   contract_version : String
   experiment_id : String
@@ -31,8 +32,9 @@ pub(all) struct CapabilityExperimentAssignment {
   participant_id : String
   assignment : String
   capability : CapabilityExperimentRecordRef
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CapabilityExperimentObservation {
   observation_id : String
   experiment_id : String
@@ -44,22 +46,24 @@ pub(all) struct CapabilityExperimentObservation {
   reward_evidence : CapabilityExperimentRecordRef
   accepted : Bool
   recorded_at : Int64
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CapabilityExperimentOutcome {
   contract_version : String
   experiment_id : String
   scope_id : String
-  baseline_observations : Int
-  challenger_observations : Int
+  baseline_observations : Int32
+  challenger_observations : Int32
   baseline_accepted_rate : Double
   challenger_accepted_rate : Double
   accepted_rate_delta : Double
   recommendation : String
   evidence_complete : Bool
   evaluated_at : Int64
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CapabilityExperimentPlan {
   contract_version : String
   experiment_id : String
@@ -68,24 +72,27 @@ pub(all) struct CapabilityExperimentPlan {
   challenger_capability : CapabilityExperimentRecordRef
   baseline_participant_ids : Array[String]
   challenger_participant_ids : Array[String]
-  minimum_observations_per_arm : Int
+  minimum_observations_per_arm : Int32
   minimum_accepted_rate_delta : Double
   maximum_challenger_rejection_rate : Double
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CapabilityExperimentRecordRef {
   record_id : String
   record_version : String
   record_digest : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug)
 pub struct Cohort {
   id : String
   name : String
   participants : Array[String]
-} derive(Eq, @debug.Debug)
+}
 pub fn Cohort::new(id~ : String, name~ : String, participants? : Array[String]) -> Self
 
+#derive(Eq, @debug.Debug)
 pub struct ExperimentDefinition {
   id : String
   title : String
@@ -93,23 +100,26 @@ pub struct ExperimentDefinition {
   target_book_ids : Array[String]
   interventions : Array[Intervention]
   stop_rules : Array[StopRule]
-} derive(Eq, @debug.Debug)
+}
 pub fn ExperimentDefinition::new(id~ : String, title~ : String, hypothesis~ : String, target_book_ids? : Array[String], interventions? : Array[Intervention], stop_rules? : Array[StopRule]) -> Self
 
+#derive(Eq, @debug.Debug)
 pub struct ExperimentOutcome {
   run_id : String
   summary : String
   should_stop : Bool
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub enum ExperimentPhase {
   Draft
   Running
   CoolingDown
   Complete
   Halted
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub struct ExperimentRun {
   id : String
   definition_id : String
@@ -117,29 +127,32 @@ pub struct ExperimentRun {
   cohorts : Array[Cohort]
   measurements : Array[Measurement]
   spawned_task_ids : Array[String]
-} derive(Eq, @debug.Debug)
+}
 pub fn ExperimentRun::record_measurement(Self, Measurement) -> Self
 
+#derive(Eq, @debug.Debug)
 pub struct Intervention {
   id : String
   title : String
   detail : String
   target_book_ids : Array[String]
-} derive(Eq, @debug.Debug)
+}
 pub fn Intervention::new(id~ : String, title~ : String, detail~ : String, target_book_ids? : Array[String]) -> Self
 
+#derive(Eq, @debug.Debug)
 pub struct Measurement {
   metric : String
   value : Double
   note : String
-} derive(Eq, @debug.Debug)
+}
 pub fn Measurement::new(metric~ : String, value~ : Double, note? : String) -> Self
 
+#derive(Eq, @debug.Debug)
 pub struct StopRule {
   metric : String
   threshold : Double
   direction : String
-} derive(Eq, @debug.Debug)
+}
 pub fn StopRule::new(metric~ : String, threshold~ : Double, direction? : String) -> Self
 
 // Type aliases

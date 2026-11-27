@@ -135,7 +135,7 @@ pub fn moontown_product_tmp_dir() -> String {
 
 ///|
 fn safe_watcher_goal_id(goal_id : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let mut emitted = 0
   let mut last_dash = false
   for char in goal_id.to_lower() {

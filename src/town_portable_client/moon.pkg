@@ -6,7 +6,6 @@ import {
   "moonbitlang/core/encoding/utf8",
   "moonbitlang/core/json",
   "moonbitlang/core/random",
-  "moonbitlang/core/string",
   "moonbitlang/x/crypto",
   "vectie/moontown/town_marketplace" @marketplace,
   "vectie/moontown/town_portable_transfer" @transfer,

@@ -4,7 +4,7 @@ fn civic_communication_output_protocol_records(
   protocol : @civic.BuildingProtocolDefinition,
   ideas : Array[CivicCommunicationIdea],
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> (Array[Json], Array[Json]) {
   let reductions : Array[Json] = []
   let outbox : Array[Json] = []
@@ -29,9 +29,9 @@ fn civic_communication_reduction_json(
   protocol : @civic.BuildingProtocolDefinition,
   idea : CivicCommunicationIdea,
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> Json {
-  @civic.BuildingReductionResult::{
+  ToJson::to_json(@civic.BuildingReductionResult::{
     id: "red-\{round_id}-\{idea.id}",
     building_id: protocol.building_id,
     reduction_kind: scenario.reduction_kind,
@@ -50,7 +50,7 @@ fn civic_communication_reduction_json(
     review_status: "pending",
     idempotency_key: "\{scenario.id}/reduction/\{idea.id}/round-\{round_number}",
     related_book_id: protocol.book_id,
-  }.to_json()
+  })
 }
 
 ///|
@@ -73,9 +73,9 @@ fn civic_communication_outbox_json(
   protocol : @civic.BuildingProtocolDefinition,
   idea : CivicCommunicationIdea,
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> Json {
-  @civic.BuildingDistributionRecord::{
+  ToJson::to_json(@civic.BuildingDistributionRecord::{
     id: "out-\{round_id}-\{idea.id}",
     building_id: protocol.building_id,
     target_kind: "participant_question_backlog",
@@ -84,7 +84,7 @@ fn civic_communication_outbox_json(
     summary: "Distributed reviewable pattern output `\{idea.title}` to \{idea.participating_books.length()} internal participant workspace(s).",
     review_status: "pending",
     idempotency_key: "\{scenario.id}/outbox/\{idea.id}/round-\{round_number}",
-  }.to_json()
+  })
 }
 
 ///|
@@ -95,7 +95,7 @@ fn civic_communication_review_gate_json(
   ideas : Array[CivicCommunicationIdea],
   round_id : String,
 ) -> Json {
-  @civic.BuildingReviewGateRecord::{
+  ToJson::to_json(@civic.BuildingReviewGateRecord::{
     id: "rev-\{round_id}",
     building_id: protocol.building_id,
     gate: scenario.review_gate,
@@ -108,5 +108,5 @@ fn civic_communication_review_gate_json(
       ideas, round_id,
     ),
     owner: scenario.review_owner,
-  }.to_json()
+  })
 }

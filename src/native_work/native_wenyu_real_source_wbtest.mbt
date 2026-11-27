@@ -65,6 +65,7 @@ async fn wenyu_copy_retained_fixture(
 /// The transport and journal are explicitly injected. Only source bytes,
 /// Git's bounded whitespace check, focused diff, and owner reconciliation are
 /// real; this test does not claim compiler or live-provider execution.
+#warnings("-reserved_keyword-unused_async")
 async test "wenyu actual source mutation and bounded Git check reconcile through injected native sync" {
   let root = @fs.realpath(@fsx.mkdtemp("/tmp/town-wenyu-real-source-XXXXXX"))
   let retained = root + "/retained-baseline"
@@ -85,7 +86,7 @@ async test "wenyu actual source mutation and bounded Git check reconcile through
   no_change_set(
     request.acceptance_policy,
     "required_validation_commands",
-    [command].to_json(),
+    ToJson::to_json([command]),
   )
   let request = {
     ..request,
@@ -96,7 +97,7 @@ async test "wenyu actual source mutation and bounded Git check reconcile through
   let posted : Array[String] = []
   let terminal_receipts : Array[Json] = []
   let journal : Array[Json] = []
-  let client = fixture_client(request, async fn(method, route, body) {
+  let client = fixture_client(request, async fn(method_val, route, body) {
     if route == "/v1/code/capabilities" {
       return Ok({ "model_workspace_contract": "mooncode.model-workspace.v1" })
     }
@@ -108,7 +109,7 @@ async test "wenyu actual source mutation and bounded Git check reconcile through
         "models": [{ "name": "moongate/fixture" }],
       })
     }
-    if method == "POST" {
+    if method_val == "POST" {
       posted.push(body)
       let reserved = @json.parse(body)
       return Ok({
@@ -138,8 +139,12 @@ async test "wenyu actual source mutation and bounded Git check reconcile through
       ]
       no_change_set(projection, "delivered_commands", delivered)
     } else if route.contains("runtime-events") {
-      no_change_set(projection, "events", journal.to_json())
-      no_change_set(projection, "event_count", journal.length().to_json())
+      no_change_set(projection, "events", ToJson::to_json(journal))
+      no_change_set(
+        projection,
+        "event_count",
+        ToJson::to_json(journal.length()),
+      )
     }
     Ok(projection)
   })
@@ -193,7 +198,7 @@ async test "wenyu actual source mutation and bounded Git check reconcile through
   )
   let answer = wenyu_fixture_answer(running).stringify()
   let receipt = fixture_receipt(running, answer~)
-  no_change_set(receipt, "protocol", "mooncode.v1".to_json())
+  no_change_set(receipt, "protocol", ToJson::to_json("mooncode.v1"))
   no_change_set(receipt, "command", @json.parse(posted[0]))
   terminal_receipts.push(receipt)
   let completed = sync(queued.id, 40000UL, path~, client~)

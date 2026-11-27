@@ -60,7 +60,7 @@ fn research_evidence_matrix_step() -> String {
 }
 
 ///|
-fn research_numbered_step(number : Int, clauses : Array[String]) -> String {
+fn research_numbered_step(number : Int32, clauses : Array[String]) -> String {
   "\{number}. \{clauses.join(" ")}"
 }
 

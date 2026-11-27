@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq)
 pub(all) enum ExecutionViewStage {
   Packet
   Running
@@ -7,7 +8,7 @@ pub(all) enum ExecutionViewStage {
   Acceptance
   Completed
   Recovery
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn execution_view_stage_for_status(

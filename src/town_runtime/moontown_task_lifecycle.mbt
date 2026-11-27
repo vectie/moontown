@@ -1,5 +1,5 @@
 ///|
-fn execution_status_for_index(index : Int) -> @core.TaskExecutionStatus {
+fn execution_status_for_index(index : Int32) -> @core.TaskExecutionStatus {
   match index {
     0 => ProposalImported
     1 => Running
@@ -12,7 +12,7 @@ fn execution_status_for_index(index : Int) -> @core.TaskExecutionStatus {
 ///|
 fn modeled_lifecycle_execution_record(
   task : @core.TownTask,
-  index : Int,
+  index : Int32,
 ) -> @core.TaskExecutionRecord {
   let status = execution_status_for_index(index)
   @core.TaskExecutionRecord::new(

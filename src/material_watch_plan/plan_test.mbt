@@ -24,7 +24,10 @@ async test "shared material plan roundtrips sorted exact sources and rejects wro
   }
   @support.write_text_file(root + "/sources/a.txt", "unchanged\n")
   @support.write_text_file(root + "/sources/z.txt", "中文 source\n")
-  @support.write_text_file(root + "/plan.json", plan.to_json().stringify())
+  @support.write_text_file(
+    root + "/plan.json",
+    ToJson::to_json(plan).stringify(),
+  )
   let readback = @material_watch_plan.read_plan(entry, goal, "plan.json")
   assert_eq(readback.sources, ["sources/a.txt", "sources/z.txt"])
   let sources = @material_watch_plan.read_sources(entry, readback)

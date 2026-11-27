@@ -1,6 +1,6 @@
 ///|
 pub fn render_dashboard(model : DashboardModel) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string("Dashboard / \{model.title}\n")
   for alert in model.alerts {
     builder.write_string("! [\{alert.level}] \{alert.text}\n")

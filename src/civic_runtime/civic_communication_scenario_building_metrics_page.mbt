@@ -5,7 +5,7 @@ fn civic_communication_metrics_markdown(
   participants : Array[CivicCommunicationParticipantBook],
   ideas : Array[CivicCommunicationIdea],
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> String {
   [
     "# \{scenario.title} Effectiveness Metrics",

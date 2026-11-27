@@ -2,9 +2,9 @@
 fn miniapp_agent_accept(
   snapshot : @miniapp_contracts.MiniappTownSnapshot,
   message : String,
-  agent_id? : String = "",
-  thread_id? : String = "",
-  run_id? : String = "",
+  agent_id~ : String = "",
+  thread_id~ : String = "",
+  run_id~ : String = "",
 ) -> MiniappAgentRuntimeChange {
   {
     ok: true,
@@ -32,9 +32,9 @@ fn miniapp_agent_accept(
 fn miniapp_agent_reject(
   snapshot : @miniapp_contracts.MiniappTownSnapshot,
   message : String,
-  agent_id? : String = "",
-  thread_id? : String = "",
-  run_id? : String = "",
+  agent_id~ : String = "",
+  thread_id~ : String = "",
+  run_id~ : String = "",
 ) -> MiniappAgentRuntimeChange {
   {
     ok: false,

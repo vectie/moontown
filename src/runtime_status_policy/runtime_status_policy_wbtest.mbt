@@ -51,7 +51,7 @@ fn runtime_status_policy_test_state() -> @core.TownState {
 fn runtime_status_policy_test_execution(
   task_id : String,
   status : @core.TaskExecutionStatus,
-  packet_id? : String = task_id,
+  packet_id~ : String = task_id,
 ) -> @core.TaskExecutionRecord {
   @core.TaskExecutionRecord::new(
     task_id~,

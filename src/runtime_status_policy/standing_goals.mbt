@@ -1,7 +1,7 @@
 ///|
 pub fn runtime_status_standing_goal_counts(
   goals : Array[@core.StandingGoal],
-  next_tick : Int,
+  next_tick : Int32,
 ) -> RuntimeStatusStandingGoalCounts {
   let mut enabled = 0
   let mut due = 0

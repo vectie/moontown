@@ -10,7 +10,7 @@ fn moontown_moonclaw_inline_enabled() -> Bool {
 }
 
 ///|
-fn moontown_moonclaw_supervision_seconds() -> Int {
+fn moontown_moonclaw_supervision_seconds() -> Int32 {
   match optional_env_text("MOONTOWN_MOONCLAW_SUPERVISION_SECONDS") {
     Some(value) => parse_non_negative_seconds(value, fallback=0)
     None => 0
@@ -18,7 +18,7 @@ fn moontown_moonclaw_supervision_seconds() -> Int {
 }
 
 ///|
-fn moontown_moonclaw_import_timeout_ms() -> Int {
+fn moontown_moonclaw_import_timeout_ms() -> Int32 {
   match optional_env_text("MOONTOWN_MOONCLAW_IMPORT_TIMEOUT_MS") {
     Some(value) =>
       parse_non_negative_seconds(
@@ -31,7 +31,7 @@ fn moontown_moonclaw_import_timeout_ms() -> Int {
 }
 
 ///|
-fn parse_non_negative_seconds(text : String, fallback~ : Int) -> Int {
+fn parse_non_negative_seconds(text : String, fallback~ : Int32) -> Int32 {
   let mut seen = false
   let mut value = 0
   for char in text.trim() {

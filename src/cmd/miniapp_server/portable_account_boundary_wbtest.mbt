@@ -76,7 +76,7 @@ async test "portable direct account resolver denies missing expired revoked and 
   )
   @fs.write_file(
     account_path,
-    state.to_json().stringify(),
+    ToJson::to_json(state).stringify(),
     create_mode=CreateOrTruncate,
   )
   let accounts = @account_system.account_application(
@@ -191,7 +191,7 @@ async test "portable direct account resolver denies missing expired revoked and 
     "license_class": "fixture-only",
     "rights_summary": "Synthetic data",
     "version_label": "1.0.0",
-    "portable_source": source.to_json(),
+    "portable_source": ToJson::to_json(source),
     "publisher_principal_id": "forged-publisher",
     "tenant_id": "forged-tenant",
     "requester_principal_id": "forged-requester",
@@ -212,8 +212,11 @@ async test "portable direct account resolver denies missing expired revoked and 
   let binding = bridge_object(
     bridge_object(bridge_object(saved)["payload"])["portable_binding"],
   )
-  assert_eq(binding["publisher_principal_id"], "boundary-owner".to_json())
-  assert_eq(binding["tenant_id"], "portable-boundary-tenant".to_json())
+  assert_eq(
+    binding["publisher_principal_id"],
+    ToJson::to_json("boundary-owner"),
+  )
+  assert_eq(binding["tenant_id"], ToJson::to_json("portable-boundary-tenant"))
   let reader_request = portable_boundary_request(
     "synthetic-boundary-reader-token",
   )

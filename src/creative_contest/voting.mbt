@@ -1,12 +1,14 @@
 ///|
+#derive(ToJson, FromJson)
 struct VoteEvent {
   actor : String
   intent : String
   entry_id : String
   created_ms : UInt64
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 struct RosterEntry {
   entry_id : String
   generation_id : String
@@ -14,26 +16,29 @@ struct RosterEntry {
   title : String
   display_name : String
   actor : String
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 struct VotingRoster {
   version : Int32
   digest : String
   opens_ms : UInt64
   closes_ms : UInt64
   rows : Array[RosterEntry]
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 struct VoteCount {
   entry_id : String
   votes : Int32
   rank : Int32
   eligible_at_close : Bool
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 struct VotingSettlement {
   version : Int32
   digest : String
@@ -41,7 +46,7 @@ struct VotingSettlement {
   closed_ms : UInt64
   rows : Array[VoteCount]
   total_votes : Int32
-} derive(ToJson, FromJson)
+}
 
 ///|
 fn builtin(config : Config) -> Bool {
@@ -82,7 +87,7 @@ fn settlement_hash(config : Config, value : VotingSettlement) -> String {
         "version": value.version,
         "roster_digest": value.roster_digest,
         "closed_ms": value.closed_ms,
-        "rows": value.rows.map(row => row.to_json()),
+        "rows": value.rows.map(row => ToJson::to_json(row)),
         "total_votes": value.total_votes,
       } : Json).stringify(),
   )
@@ -168,6 +173,7 @@ fn live_counts(state : State, roster : VotingRoster) -> Array[VoteCount] {
 }
 
 ///|
+#warnings("-deprecated")
 fn validate_voting_state(state : State, config : Config) -> Unit raise {
   guard state.voting_rosters.length() <= 1 &&
     state.voting_settlements.length() <= 1 &&
@@ -196,7 +202,7 @@ fn validate_voting_state(state : State, config : Config) -> Unit raise {
       }) else {
       raise Unavailable
     }
-    let row_ids : Set[String] = Set::new()
+    let row_ids : Set[String] = Set([])
     let authors : Map[String, String] = Map([])
     for row in roster.rows {
       guard identifier(row.entry_id) &&
@@ -208,7 +214,7 @@ fn validate_voting_state(state : State, config : Config) -> Unit raise {
       row_ids.add(row.entry_id)
       authors[row.entry_id] = row.actor
     }
-    let intents : Set[String] = Set::new()
+    let intents : Set[String] = Set([])
     for event in state.vote_events {
       let key = event.actor.length().to_string() +
         ":" +

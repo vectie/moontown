@@ -21,7 +21,7 @@ fn bridge_string(fields : Map[String, Json], key : String) -> String {
 }
 
 ///|
-fn bridge_int(fields : Map[String, Json], key : String) -> Int {
+fn bridge_int(fields : Map[String, Json], key : String) -> Int32 {
   match fields.get(key) {
     Some(Number(value, ..)) => value.to_int()
     _ => 0
@@ -92,7 +92,7 @@ fn marketplace_pending_handoff_result(
 ///|
 fn bridge_profile_context(
   snapshot : Json,
-) -> (Int, Int, Int, String, String, String, String, String) raise {
+) -> (Int32, Int32, Int32, String, String, String, String, String) raise {
   let root = bridge_object(snapshot)
   let profile = bridge_object(root.get("profile").unwrap_or(Json::null()))
   let bindings = bridge_object(profile.get("bindings").unwrap_or(Json::null()))

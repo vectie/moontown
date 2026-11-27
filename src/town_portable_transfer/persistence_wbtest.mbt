@@ -39,7 +39,7 @@ async test "strict index corruption fails closed without replacing durable metad
     { ..original, grants: [{ ..g, revoked_at_ms: Some(1UL), }], }.to_json(),
   ]
   guard original.to_json() is Object(extra) else { fail("index") }
-  extra["unexpected"] = true.to_json()
+  extra["unexpected"] = ToJson::to_json(true)
   invalid.push(Json::object(extra))
   guard original.to_json() is Object(missing) else { fail("index") }
   missing.remove("reservations")
@@ -264,6 +264,7 @@ async test "withdraw during active upload marks cleanup pending and cannot commi
 }
 
 ///|
+#warnings("-deprecated")
 async test "cancellation immediately after durable reservation releases accounting before retry" {
   for stop_at in ["index_committed", "part_create"] {
     let root = @fs.realpath(@fs.tmpdir(prefix="town-store-cancel-reserve-"))

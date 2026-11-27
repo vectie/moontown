@@ -1,7 +1,7 @@
 ///|
 pub fn miniapp_audit_frontend_bundle(
   bundle_json : String,
-  forbidden_keys? : Array[String] = [
+  forbidden_keys~ : Array[String] = [
     "wechat_app_secret", "appSecret", "private_key", "token_secret", "database_password",
   ],
 ) -> MiniappFrontendBundleAudit {

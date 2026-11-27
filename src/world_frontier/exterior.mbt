@@ -1,11 +1,12 @@
 ///|
 /// An authored footprint is immutable. Procedural geometry lives outside it.
+#derive(Debug, Eq)
 pub(all) struct Rect {
   min_x : Double
   min_y : Double
   max_x : Double
   max_y : Double
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn Rect::contains(self : Rect, p : Point, pad~ : Double = 0) -> Bool {
@@ -35,12 +36,13 @@ pub fn Rect::chunk_envelope(self : Rect) -> Rect {
 
 ///|
 /// Continue an observed river mouth outwards; bending starts with zero tangent.
+#derive(Debug, Eq)
 pub(all) struct Mouth {
   point : Point
   normal : Point
   radius : Double
   drift : Double
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn mouth_water(mouths : Array[Mouth], p : Point) -> Bool {

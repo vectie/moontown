@@ -1,7 +1,7 @@
 ///|
 test "context preserves exact windows and feeds passage selection" {
   let text = "before\r\nmatch here\r\nafter\r\nlast"
-  let page : MaterialPage = {
+  let page : @collaboration_contract.MaterialPage = {
     book_id: "a",
     book_title: "A",
     source_path: "raw/a.md",
@@ -9,7 +9,9 @@ test "context preserves exact windows and feeds passage selection" {
     size_bytes: @utf8.encode(text).length(),
     text,
   }
-  let notebook = empty_material_notebook("inquiry", [page])
+  let notebook = @collaboration_contract.empty_material_notebook("inquiry", [
+    page,
+  ])
   let result = notebook.find_context("match", 1)
   assert_eq(result.search.matched_lines, 1)
   let window = result.windows[0]
@@ -35,7 +37,7 @@ test "context preserves exact windows and feeds passage selection" {
 ///|
 test "context shares search truncation and validates neighbor count" {
   let text = "match\n".repeat(105)
-  let page : MaterialPage = {
+  let page : @collaboration_contract.MaterialPage = {
     book_id: "a",
     book_title: "A",
     source_path: "raw/a.md",
@@ -43,7 +45,9 @@ test "context shares search truncation and validates neighbor count" {
     size_bytes: @utf8.encode(text).length(),
     text,
   }
-  let notebook = empty_material_notebook("inquiry", [page])
+  let notebook = @collaboration_contract.empty_material_notebook("inquiry", [
+    page,
+  ])
   let result = notebook.find_context("match", 0)
   assert_eq(result.search.matched_lines, 105)
   assert_eq(result.windows.length(), 100)

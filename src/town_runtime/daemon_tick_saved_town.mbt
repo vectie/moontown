@@ -1,8 +1,8 @@
 ///|
 pub async fn daemon_tick_saved_town(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  respect_runtime_lock? : Bool = true,
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  respect_runtime_lock~ : Bool = true,
 ) -> String {
   ignore(@system_settings_runtime.load_and_install_system_settings())
   if respect_runtime_lock &&

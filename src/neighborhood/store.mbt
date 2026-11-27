@@ -48,7 +48,7 @@ async fn save_state(path : String, state : State) -> Unit {
   regular_or_missing(temporary)
   @fs.write_file(
     temporary,
-    state.to_json().stringify(indent=2) + "\n",
+    ToJson::to_json(state).stringify(indent=2) + "\n",
     create_mode=CreateOrTruncate,
     permission=0o600,
     sync=Full,

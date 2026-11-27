@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum TaskExecutionStatus {
   PacketReady
   ProposalImported
@@ -11,16 +12,17 @@ pub(all) enum TaskExecutionStatus {
   Failed
   // Book review is approved; the original goal acceptance is still unevaluated.
   AwaitingAcceptance
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct AssignmentPlan {
   task_id : String
   worker_id : String
   book_id : String
   isolation : IsolationMode
   reason : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn AssignmentPlan::new(
@@ -34,6 +36,7 @@ pub fn AssignmentPlan::new(
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct TaskExecutionRecord {
   task_id : String
   book_id : String
@@ -48,14 +51,14 @@ pub struct TaskExecutionRecord {
   skill_paths : Array[String]
   last_command : String?
   assigned_worker_id : String?
-  attempt : Int
-  heartbeat_tick : Int
-  stale_after_tick : Int
-  next_retry_tick : Int?
+  attempt : Int32
+  heartbeat_tick : Int32
+  stale_after_tick : Int32
+  next_retry_tick : Int32?
   result_decision : String
   requires_review : Bool
   notify_town : Bool
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn TaskExecutionRecord::new(
@@ -63,22 +66,22 @@ pub fn TaskExecutionRecord::new(
   book_id~ : String,
   packet_id~ : String,
   packet_path~ : String,
-  proposal_id? : String? = None,
-  run_id? : String? = None,
+  proposal_id~ : String? = None,
+  run_id~ : String? = None,
   status~ : TaskExecutionStatus,
   summary~ : String,
   output_contract~ : String,
-  context_pages? : Array[String] = [],
-  skill_paths? : Array[String] = [],
-  last_command? : String? = None,
-  assigned_worker_id? : String? = None,
-  attempt? : Int = 1,
-  heartbeat_tick? : Int = 0,
-  stale_after_tick? : Int = 3,
-  next_retry_tick? : Int? = None,
-  result_decision? : String = "pending",
-  requires_review? : Bool = false,
-  notify_town? : Bool = false,
+  context_pages~ : Array[String] = [],
+  skill_paths~ : Array[String] = [],
+  last_command~ : String? = None,
+  assigned_worker_id~ : String? = None,
+  attempt~ : Int32 = 1,
+  heartbeat_tick~ : Int32 = 0,
+  stale_after_tick~ : Int32 = 3,
+  next_retry_tick~ : Int32? = None,
+  result_decision~ : String = "pending",
+  requires_review~ : Bool = false,
+  notify_town~ : Bool = false,
 ) -> TaskExecutionRecord {
   {
     task_id,

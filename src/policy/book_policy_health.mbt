@@ -1,13 +1,14 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct PolicyHealth {
-  structural_score : Int
-  semantic_score : Int?
+  structural_score : Int32
+  semantic_score : Int32?
   missing_required_files : Array[String]
-  execute_skill_count : Int
-  tend_skill_count : Int
+  execute_skill_count : Int32
+  tend_skill_count : Int32
   ready : Bool
   status : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 fn missing_required_files(
@@ -24,7 +25,7 @@ fn missing_required_files(
 }
 
 ///|
-fn semantic_score_ready(policy : BookPolicy, semantic_score : Int?) -> Bool {
+fn semantic_score_ready(policy : BookPolicy, semantic_score : Int32?) -> Bool {
   if !review_required(policy) {
     return true
   }
@@ -39,8 +40,8 @@ fn policy_health_status(
   missing : Array[String],
   structural_ready : Bool,
   semantic_ready : Bool,
-  execute_count : Int,
-  tend_count : Int,
+  execute_count : Int32,
+  tend_count : Int32,
 ) -> String {
   if execute_count == 0 {
     "missing-execute-lane"
@@ -60,8 +61,8 @@ fn policy_health_status(
 ///|
 pub fn evaluate_health(
   policy : BookPolicy,
-  structural_score : Int,
-  semantic_score : Int?,
+  structural_score : Int32,
+  semantic_score : Int32?,
   present_required_files : Array[String],
 ) -> PolicyHealth {
   let structural_score = clamp_score(structural_score)

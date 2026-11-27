@@ -1,15 +1,15 @@
 ///|
 fn live_autonomy_action_context_fixture(
-  active_workers? : Int = 0,
-  review? : Int = 0,
-  blocked? : Int = 0,
-  due_goals? : Int = 0,
-  watcher_records? : Array[@core.WatcherRunRecord] = [],
-  planbook_open? : Int = 0,
-  planbook_repair_active? : Int = 0,
-  pending_book_template_requests? : Int = 0,
-  failed_book_template_requests? : Int = 0,
-  transient_infrastructure_debt? : Int = 0,
+  active_workers~ : Int32 = 0,
+  review~ : Int32 = 0,
+  blocked~ : Int32 = 0,
+  due_goals~ : Int32 = 0,
+  watcher_records~ : Array[@core.WatcherRunRecord] = [],
+  planbook_open~ : Int32 = 0,
+  planbook_repair_active~ : Int32 = 0,
+  pending_book_template_requests~ : Int32 = 0,
+  failed_book_template_requests~ : Int32 = 0,
+  transient_infrastructure_debt~ : Int32 = 0,
 ) -> LiveAutonomyActionContext {
   {
     blockers: live_autonomy_blocker_context_fixture(
@@ -31,15 +31,15 @@ fn live_autonomy_action_context_fixture(
 
 ///|
 fn live_autonomy_blocker_context_fixture(
-  active_workers? : Int = 0,
-  review? : Int = 0,
-  blocked? : Int = 0,
-  failed? : Int = 0,
-  due_goals? : Int = 0,
-  planbook_open? : Int = 0,
-  planbook_repair_active? : Int = 0,
-  pending_book_template_requests? : Int = 0,
-  failed_book_template_requests? : Int = 0,
+  active_workers~ : Int32 = 0,
+  review~ : Int32 = 0,
+  blocked~ : Int32 = 0,
+  failed~ : Int32 = 0,
+  due_goals~ : Int32 = 0,
+  planbook_open~ : Int32 = 0,
+  planbook_repair_active~ : Int32 = 0,
+  pending_book_template_requests~ : Int32 = 0,
+  failed_book_template_requests~ : Int32 = 0,
 ) -> LiveAutonomyBlockerContext {
   {
     active_workers,

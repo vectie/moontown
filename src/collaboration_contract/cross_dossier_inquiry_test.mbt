@@ -182,7 +182,7 @@ test "cross dossier basket survives inspection and opens an editable ordinary sa
   let opened = pending.settle(
     pending.generation,
     "cross-dossier-inquiry",
-    reply.to_json().stringify(),
+    ToJson::to_json(reply).stringify(),
   )
   assert_eq(opened.draft, draft)
   assert_true(opened.inquiry_dossiers.is_empty())

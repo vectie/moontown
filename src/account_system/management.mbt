@@ -135,7 +135,9 @@ fn account_principal_projection(principal : AccountPrincipal) -> Json {
     "display_name": principal.display_name,
     "account_kind": account_kind_name(context.account_kind),
     "personal_plan": account_plan_name(principal.personal_plan),
-    "platform_roles": principal.platform_roles.map(account_role_name).to_json(),
+    "platform_roles": ToJson::to_json(
+      principal.platform_roles.map(account_role_name),
+    ),
     "tenant_count": principal.tenant_access.count_if(access => access.active),
     "active": principal.active,
     "version": principal.version,
@@ -150,7 +152,7 @@ fn tenant_member_projection(
   {
     "user_id": principal.user_id,
     "display_name": principal.display_name,
-    "roles": access.roles.map(account_role_name).to_json(),
+    "roles": ToJson::to_json(access.roles.map(account_role_name)),
     "active": principal.active && access.active,
     "version": access.version,
   }
@@ -304,9 +306,11 @@ pub async fn AccountApplication::admin_snapshot(
   {
     "contract_id": "moontown.admin-management.v2",
     "users": state.principals.map(account_principal_projection),
-    "tenant_ids": active_tenants.to_json(),
+    "tenant_ids": ToJson::to_json(active_tenants),
     "active_sessions": state.sessions.length(),
-    "audit_events": state.audit_events.rev().map(event => event.to_json()),
+    "audit_events": state.audit_events
+    .rev()
+    .map(event => ToJson::to_json(event)),
     "impersonation": "disabled",
   }
 }
@@ -323,7 +327,7 @@ pub async fn AccountApplication::admin_create_account(
   session_id : String,
   opaque_token : String,
   now_ms~ : UInt64,
-  ttl_ms? : UInt64 = 0UL,
+  ttl_ms~ : UInt64 = 0UL,
 ) -> VisitorSessionResult {
   let ttl_ms = if ttl_ms == 0UL {
     @system_settings.current_system_settings().managed_session_ttl_ms.to_uint64()
@@ -466,7 +470,8 @@ pub async fn AccountApplication::enterprise_snapshot(
         members.any(entry => {
           match entry {
             Object(fields) =>
-              fields.get("user_id") == Some(session.principal_id.to_json())
+              fields.get("user_id") ==
+              Some(ToJson::to_json(session.principal_id))
             _ => false
           }
         })
@@ -492,7 +497,7 @@ pub async fn AccountApplication::enterprise_upsert_member(
   session_id : String,
   opaque_token : String,
   now_ms~ : UInt64,
-  ttl_ms? : UInt64 = 0UL,
+  ttl_ms~ : UInt64 = 0UL,
 ) -> VisitorSessionResult {
   let ttl_ms = if ttl_ms == 0UL {
     @system_settings.current_system_settings().managed_session_ttl_ms.to_uint64()

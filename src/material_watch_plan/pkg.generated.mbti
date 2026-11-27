@@ -19,6 +19,7 @@ pub fn validate(Plan, @moonbook.BookCatalogEntry, @core.StandingGoal) -> Plan ra
 // Errors
 
 // Types and methods
+#derive(Eq, @json.FromJson, @json.ToJson)
 pub(all) struct Plan {
   contract : String
   goal_id : String
@@ -27,13 +28,14 @@ pub(all) struct Plan {
   acceptance : String
   next_action : String
   sources : Array[String]
-} derive(Eq, ToJson, @json.FromJson)
+}
 
+#derive(Eq, @json.FromJson, @json.ToJson)
 pub(all) struct Source {
   path : String
   sha256 : String
   content : String
-} derive(Eq, ToJson, @json.FromJson)
+}
 
 // Type aliases
 

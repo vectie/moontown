@@ -8,7 +8,7 @@ pub struct PlanbookDaemonPhaseResult {
 pub async fn run_planbook_daemon_phase(
   snapshot_path : String,
   book_catalog_path : String,
-  dispatch_repair? : Bool = true,
+  dispatch_repair~ : Bool = true,
 ) -> PlanbookDaemonPhaseResult {
   let planbook_summary = write_moontown_planbook_autonomy(
     snapshot_path~,

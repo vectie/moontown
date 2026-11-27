@@ -38,7 +38,7 @@ fn pdf_evidence_watch_config(
   title : String,
   purpose : String,
   websites : Array[String],
-  cadence_ticks : Int,
+  cadence_ticks : Int32,
 ) -> PdfEvidenceWatchConfig {
   {
     template_id: "pdf-evidence-watch",
@@ -95,11 +95,11 @@ pub fn pdf_evidence_watch_config_json(
   title : String,
   purpose : String,
   websites : Array[String],
-  cadence_ticks : Int,
+  cadence_ticks : Int32,
 ) -> String {
-  pdf_evidence_watch_config(entry, title, purpose, websites, cadence_ticks)
-  .to_json()
-  .stringify(indent=2)
+  ToJson::to_json(
+    pdf_evidence_watch_config(entry, title, purpose, websites, cadence_ticks),
+  ).stringify(indent=2)
 }
 
 ///|

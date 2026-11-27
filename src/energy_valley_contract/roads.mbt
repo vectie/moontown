@@ -1,12 +1,14 @@
 ///|
+#derive(Debug, Eq)
 pub(all) enum MobilityMode {
   Pedestrian
   Bicycle
   ServiceVehicle
   Transit
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum RoadClass {
   Arterial
   Collector
@@ -14,15 +16,16 @@ pub(all) enum RoadClass {
   Service
   Footpath
   Bridge
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct RoadNode {
   id : StableId
   grid : GridPosition
   position : WorldPoint
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn road_node(
@@ -35,6 +38,7 @@ pub fn road_node(
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct RoadSegment {
   id : StableId
   from_node_id : StableId
@@ -45,7 +49,7 @@ pub(all) struct RoadSegment {
   mobility : ReadOnlyArray[MobilityMode]
   bidirectional : Bool
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn road_segment(
@@ -57,7 +61,7 @@ pub fn road_segment(
   width_meters : Double,
   mobility : ArrayView[MobilityMode],
   provenance : Provenance,
-  bidirectional? : Bool = true,
+  bidirectional~ : Bool = true,
 ) -> RoadSegment {
   {
     id,
@@ -78,11 +82,12 @@ pub fn RoadSegment::supports(self : RoadSegment, mode : MobilityMode) -> Bool {
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct RoadNetwork {
   nodes : ReadOnlyArray[RoadNode]
   segments : ReadOnlyArray[RoadSegment]
   access_anchor_node_ids : ReadOnlyArray[StableId]
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn road_network(
@@ -116,7 +121,7 @@ pub fn RoadNetwork::find_segment(
 pub fn RoadNetwork::neighbors(
   self : RoadNetwork,
   node_id : StableId,
-  mode? : MobilityMode = Pedestrian,
+  mode~ : MobilityMode = Pedestrian,
 ) -> ReadOnlyArray[StableId] {
   let neighbors : Array[StableId] = []
   let seen : Map[StableId, Bool] = Map([])
@@ -150,7 +155,7 @@ pub fn RoadNetwork::shortest_path(
   self : RoadNetwork,
   origin : StableId,
   destination : StableId,
-  mode? : MobilityMode = Pedestrian,
+  mode~ : MobilityMode = Pedestrian,
 ) -> ReadOnlyArray[RoadNode]? {
   let origin_node = match self.find_node(origin) {
     Some(node) => node
@@ -243,7 +248,7 @@ pub fn RoadNetwork::is_reachable(
   self : RoadNetwork,
   origin : StableId,
   destination : StableId,
-  mode? : MobilityMode = Pedestrian,
+  mode~ : MobilityMode = Pedestrian,
 ) -> Bool {
   // shortest_path builds adjacency once instead of rescanning every segment
   // for each BFS node on a large compiled town graph.
@@ -254,7 +259,7 @@ pub fn RoadNetwork::is_reachable(
 pub fn RoadNetwork::is_reachable_from_anchor(
   self : RoadNetwork,
   destination : StableId,
-  mode? : MobilityMode = Pedestrian,
+  mode~ : MobilityMode = Pedestrian,
 ) -> Bool {
   self.access_anchor_node_ids.any(anchor => {
     self.is_reachable(anchor, destination, mode~)

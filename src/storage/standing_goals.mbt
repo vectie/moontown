@@ -27,7 +27,7 @@ pub async fn save_standing_goals_file(
   ensure_parent_directory(path)
   @fs.write_file(
     path,
-    @encoding/utf8.encode(goals.to_json().stringify()),
+    @encoding/utf8.encode(ToJson::to_json(goals).stringify()),
     create_mode=CreateOrTruncate,
     permission=0o644,
   )
@@ -47,7 +47,7 @@ pub async fn load_standing_goals_file(
 
 ///|
 pub async fn load_or_create_standing_goals(
-  path? : String = default_standing_goal_path(),
+  path~ : String = default_standing_goal_path(),
 ) -> Array[@core.StandingGoal] {
   match load_standing_goals_file(path) {
     Some(goals) => goals

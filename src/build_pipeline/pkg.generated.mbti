@@ -11,11 +11,11 @@ pub fn is_local_wenyu_build_fallback_task(String) -> Bool
 
 pub fn is_wenyu_book(@moonbook.BookCatalogEntry) -> Bool
 
-pub fn local_wenyu_build_execution_record(@moonbook.BookCatalogEntry, @moonbook.BookTask, assigned_worker_id? : String?, tick? : Int) -> @core.TaskExecutionRecord
+pub fn local_wenyu_build_execution_record(@moonbook.BookCatalogEntry, @moonbook.BookTask, assigned_worker_id? : String?, tick? : Int32) -> @core.TaskExecutionRecord
 
-pub fn local_wenyu_execution_stale_window_ticks() -> Int
+pub fn local_wenyu_execution_stale_window_ticks() -> Int32
 
-pub fn positive_wenyu_task_limit(Int) -> Int
+pub fn positive_wenyu_task_limit(Int32) -> Int32
 
 pub fn wenyu_asset_pack_prompt(@moonbook.BookCatalogEntry, String, String) -> String
 
@@ -27,7 +27,7 @@ pub fn wenyu_build_packet_contract() -> String
 
 pub fn wenyu_build_review_prompt_template() -> String
 
-pub fn wenyu_build_task_limit(Int) -> Int
+pub fn wenyu_build_task_limit(Int32) -> Int32
 
 pub fn wenyu_build_tasks(@moonbook.BookCatalogEntry, String, String) -> Array[@moonbook.BookTask]
 

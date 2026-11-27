@@ -1,6 +1,6 @@
 ///|
 pub async fn inspect_registry(
-  registry_path? : String = @book_templates.default_registry_path(),
+  registry_path~ : String = @book_templates.default_registry_path(),
 ) -> @book_templates.BookTemplateRegistry {
   let templates = load_registry_file(registry_path)
   @book_templates.registry_from_observed(

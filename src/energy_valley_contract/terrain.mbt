@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq)
 pub(all) enum TerrainKind {
   Meadow
   Woodland
@@ -7,16 +8,17 @@ pub(all) enum TerrainKind {
   Paving
   Restricted
   Custom(String)
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct TerrainRegion {
   id : StableId
   kind : TerrainKind
   boundary : Polygon
   walkable : Bool
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn terrain_region(

@@ -1,4 +1,5 @@
 ///|
+#derive(ToJson, FromJson)
 struct EditorOutputPackage {
   contract : String
   work_id : String
@@ -9,7 +10,7 @@ struct EditorOutputPackage {
   output : String
   pages : Map[String, String]
   before : Map[String, String]
-} derive(ToJson, FromJson)
+}
 
 ///|
 fn editor_owner_package(
@@ -123,7 +124,7 @@ fn editor_evidence_bound(work : Work) -> Bool {
   let engineering = editor_engineering_receipt(work.receipt)
   let status = text(engineering, "engineering_status")
   guard work.state == "completed" &&
-    work.request_digest == digest(work.request.to_json().stringify()) &&
+    work.request_digest == digest(ToJson::to_json(work.request).stringify()) &&
     work.request.input_digest == digest(work.request.prompt) &&
     work.id == "town-work-" + work.request_digest[:32].to_owned() &&
     work.request.result_path ==
@@ -158,50 +159,52 @@ fn editor_evidence_bound(work : Work) -> Bool {
 }
 
 ///|
-fn editor_package_work(package : EditorOutputPackage) -> Work {
+#warnings("-reserved_keyword")
+fn editor_package_work(pkg_val : EditorOutputPackage) -> Work {
   {
-    id: package.work_id,
-    request: package.request,
-    request_digest: package.request_digest,
-    reservation: Some(package.reservation),
+    id: pkg_val.work_id,
+    request: pkg_val.request,
+    request_digest: pkg_val.request_digest,
+    reservation: Some(pkg_val.reservation),
     state: "completed",
     blocked_reason: "",
     control: None,
-    baseline: field(package.engineering_receipt, "baseline"),
+    baseline: field(pkg_val.engineering_receipt, "baseline"),
     observed_instances: [],
     last_attempt_at_ms: 0UL,
     retry_after_ms: 0UL,
-    output: package.output,
-    receipt: package.engineering_receipt,
+    output: pkg_val.output,
+    receipt: pkg_val.engineering_receipt,
   }
 }
 
 ///|
-fn editor_application_receipt(package : EditorOutputPackage) -> Json {
-  let spec = editor_spec(package.request).unwrap()
+#warnings("-reserved_keyword")
+fn editor_application_receipt(pkg_val : EditorOutputPackage) -> Json {
+  let spec = editor_spec(pkg_val.request).unwrap()
   let hashes : Map[String, String] = Map([])
-  for relative, content in package.pages {
+  for relative, content in pkg_val.pages {
     hashes[relative] = digest(content)
   }
   {
     "contract": "planbook.editor.application-receipt.v1",
     "status": "applied",
-    "work_id": package.work_id,
-    "request_digest": package.request_digest,
-    "book_id": package.request.book_id,
-    "criterion_id": package.request.criterion_id,
+    "work_id": pkg_val.work_id,
+    "request_digest": pkg_val.request_digest,
+    "book_id": pkg_val.request.book_id,
+    "criterion_id": pkg_val.request.criterion_id,
     "selection_digest": spec.selection_digest,
-    "package_digest": digest(package.to_json().stringify()),
+    "package_digest": digest(ToJson::to_json(pkg_val).stringify()),
     "engineering_receipt_digest": digest(
-      package.engineering_receipt.stringify(),
+      pkg_val.engineering_receipt.stringify(),
     ),
     "engineering_status": text(
-      package.engineering_receipt,
+      pkg_val.engineering_receipt,
       "engineering_status",
     ),
-    "session_id": package.reservation.session_id,
-    "command_id": package.reservation.command_id,
-    "request_body_digest": package.reservation.body_digest,
+    "session_id": pkg_val.reservation.session_id,
+    "command_id": pkg_val.reservation.command_id,
+    "request_body_digest": pkg_val.reservation.body_digest,
     "document_digests": hashes,
   }
 }

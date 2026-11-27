@@ -17,7 +17,7 @@ pub async fn build_workspace(BookCatalogEntry, moonbook_root? : String) -> Strin
 
 pub fn catalog_to_book_refs(Array[BookCatalogEntry]) -> Array[@core.BookRef]
 
-pub fn decode_book_result_payload(Json) -> BookResult?
+pub fn decode_book_result_payload(@json.Json) -> BookResult?
 
 pub fn default_catalog() -> Array[BookCatalogEntry]
 
@@ -53,11 +53,11 @@ pub async fn persist_native_wenyu_result(BookCatalogEntry, BookResult, String, S
 
 pub async fn persist_result(BookCatalogEntry, BookResult, moonbook_root? : String) -> PersistResultOutcome
 
-pub async fn persist_result_payload(BookCatalogEntry, Json, moonbook_root? : String) -> PersistResultOutcome
+pub async fn persist_result_payload(BookCatalogEntry, @json.Json, moonbook_root? : String) -> PersistResultOutcome
 
 pub async fn produce_task_batch(BookCatalogEntry, String, goal_id? : String?) -> BookTaskBatch
 
-pub async fn product_outcome_operation(BookCatalogEntry, String, String) -> Json
+pub async fn product_outcome_operation(BookCatalogEntry, String, String) -> @json.Json
 
 pub async fn read_native_wenyu_review(BookCatalogEntry, String, String, String, String, moonbook_root? : String) -> NativeWenyuReviewResolution
 
@@ -80,6 +80,7 @@ pub fn workspace_root(BookCatalogEntry) -> String
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct BookCatalogEntry {
   id : String
   name : String
@@ -88,10 +89,11 @@ pub struct BookCatalogEntry {
   memory_scope : @core.MemoryScope
   tags : Array[String]
   skills : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub fn BookCatalogEntry::new(id~ : String, name~ : String, purpose~ : String, workspace_root~ : String, memory_scope? : @core.MemoryScope, tags? : Array[String], skills? : Array[String]) -> Self
 pub fn BookCatalogEntry::to_book_ref(Self) -> @core.BookRef
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct BookCatalogRecord {
   id : String
   name : String
@@ -100,27 +102,30 @@ pub struct BookCatalogRecord {
   memory_scope : String
   tags : Array[String]
   skills : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct BookGoalAcceptance {
   goal_id : String
   accepted : Bool
   reason : String
-  task_count : Int
+  task_count : Int32
   summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct BookHealthReport {
   level : String
   summary : String
-  pending_review_count : Int
-  low_confidence_claim_count : Int
-  maintenance_entry_count : Int
-  keeper_working_count : Int
-  evidence_count : Int
+  pending_review_count : Int32
+  low_confidence_claim_count : Int32
+  maintenance_entry_count : Int32
+  keeper_working_count : Int32
+  evidence_count : Int32
   issues : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct BookResult {
   result_id : String
   summary : String
@@ -128,18 +133,20 @@ pub struct BookResult {
   memory_candidates : Array[MemoryCandidate]
   requires_review : Bool
   notify_town : Bool
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub fn BookResult::new(result_id~ : String, summary~ : String, artifacts? : Array[String], memory_candidates? : Array[MemoryCandidate], requires_review? : Bool, notify_town? : Bool) -> Self
 pub fn BookResult::to_executable_book_event(Self, book_id~ : String, evidence_id? : String?, run_id? : String?, review_path? : String?) -> @moonbook_contracts.ExecutableBookEvent
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct BookStatePaths {
   knowledge_manifest : String
   generated_knowledge_bundle : String
   generated_graph : String
   latest_event : String
   review_queue : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct BookStateSnapshot {
   contract : String
   book_id : String
@@ -151,63 +158,72 @@ pub struct BookStateSnapshot {
   knowledge : KnowledgeBundle
   latest_event : @moonbook_contracts.ExecutableBookEvent?
   paths : BookStatePaths
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct BookStateSummary {
   book_id : String
   root : String
-  page_count : Int
-  source_count : Int
-  source_page_count : Int
-  candidate_source_count : Int
-  provisional_source_count : Int
-  verified_source_count : Int
-  entity_count : Int
-  entity_page_count : Int
-  concept_count : Int
-  concept_page_count : Int
-  query_note_count : Int
-  pending_review_count : Int
-  keeper_memory_count : Int
-  keeper_working_count : Int
-  evidence_count : Int
-  total_evidence_count : Int
-  operational_evidence_count : Int
+  page_count : Int32
+  source_count : Int32
+  source_page_count : Int32
+  candidate_source_count : Int32
+  provisional_source_count : Int32
+  verified_source_count : Int32
+  entity_count : Int32
+  entity_page_count : Int32
+  concept_count : Int32
+  concept_page_count : Int32
+  query_note_count : Int32
+  pending_review_count : Int32
+  keeper_memory_count : Int32
+  keeper_working_count : Int32
+  evidence_count : Int32
+  total_evidence_count : Int32
+  operational_evidence_count : Int32
   substantive_coverage_ready : Bool
   summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-pub fn BookStateSummary::new(book_id~ : String, root~ : String, page_count~ : Int, source_count~ : Int, source_page_count? : Int, candidate_source_count? : Int, provisional_source_count? : Int, verified_source_count? : Int, entity_count~ : Int, entity_page_count? : Int, concept_count~ : Int, concept_page_count? : Int, query_note_count? : Int, pending_review_count~ : Int, keeper_memory_count~ : Int, keeper_working_count~ : Int, evidence_count~ : Int, total_evidence_count? : Int, operational_evidence_count? : Int, substantive_coverage_ready? : Bool, summary~ : String) -> Self
+}
+pub fn BookStateSummary::new(book_id~ : String, root~ : String, page_count~ : Int32, source_count~ : Int32, source_page_count? : Int32, candidate_source_count? : Int32, provisional_source_count? : Int32, verified_source_count? : Int32, entity_count~ : Int32, entity_page_count? : Int32, concept_count~ : Int32, concept_page_count? : Int32, query_note_count? : Int32, pending_review_count~ : Int32, keeper_memory_count~ : Int32, keeper_working_count~ : Int32, evidence_count~ : Int32, total_evidence_count? : Int32, operational_evidence_count? : Int32, substantive_coverage_ready? : Bool, summary~ : String) -> Self
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct BookTask {
   id : String
   goal : String?
   title : String
   kind : String
   prompt : String
-  priority : Int
+  priority : Int32
   requires_review : Bool
   target_pages : Array[String]
   required_role : @core.WorkerRole?
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-pub fn BookTask::new(id~ : String, goal? : String?, title~ : String, kind~ : String, prompt~ : String, priority~ : Int, requires_review~ : Bool, target_pages? : Array[String], required_role? : @core.WorkerRole?) -> Self
+}
+pub fn BookTask::new(id~ : String, goal? : String?, title~ : String, kind~ : String, prompt~ : String, priority~ : Int32, requires_review~ : Bool, target_pages? : Array[String], required_role? : @core.WorkerRole?) -> Self
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct BookTaskBatch {
   goal_id : String
   goal : String
   summary : String
   tasks : Array[BookTask]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
-type BookTaskProviderManifestEntry derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
+type BookTaskProviderManifestEntry
 
-type BookTaskProviderMetadata derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
+type BookTaskProviderMetadata
 
-type EvidenceAccounting derive(Eq, @debug.Debug)
+#derive(Eq, @debug.Debug)
+type EvidenceAccounting
 
-type ExternalBookTask derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
+type ExternalBookTask
 
-type ExternalBookTaskBatch derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
+type ExternalBookTaskBatch
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct KnowledgeBundle {
   contract : String
   book_id : String
@@ -219,19 +235,22 @@ pub struct KnowledgeBundle {
   graph : KnowledgeGraph
   review_queue_path : String
   event_protocol : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct KnowledgeGraph {
   nodes : Array[KnowledgePageRecord]
   edges : Array[KnowledgeGraphEdge]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct KnowledgeGraphEdge {
   from : String
   to : String
   label : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct KnowledgePageRecord {
   path : String
   moonbook_type : String
@@ -241,24 +260,27 @@ pub struct KnowledgePageRecord {
   source_quality : String
   tags : Array[String]
   outbound_links : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(@debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct LocalProjectionOutcome {
   contract : String
   generated_artifacts : Array[String]
   preserved_artifacts : Array[String]
   missing_artifacts : Array[String]
-} derive(ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct MemoryCandidate {
   kind : String
   title : String
   detail : String
   durable : Bool
   target_page : String?
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub fn MemoryCandidate::new(kind~ : String, title~ : String, detail~ : String, durable? : Bool, target_page? : String?) -> Self
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct MoonCodeBookResultImport {
   key : String
   session_id : String
@@ -273,15 +295,17 @@ pub struct MoonCodeBookResultImport {
   executable_event_path : String
   latest_executable_event_path : String
   executable_event : @moonbook_contracts.ExecutableBookEvent
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug)
 pub struct MoonbookCatalogProvider {
   catalog : Array[BookCatalogEntry]
-} derive(Eq, @debug.Debug)
+}
 pub fn MoonbookCatalogProvider::book_refs(Self) -> Array[@core.BookRef]
 pub fn MoonbookCatalogProvider::new(Array[BookCatalogEntry]) -> Self
 pub impl @core.BookProvider for MoonbookCatalogProvider
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct NativeWenyuReviewResolution {
   contract : String
   status : String
@@ -295,8 +319,9 @@ pub struct NativeWenyuReviewResolution {
   resolution_timestamp : String?
   original_task_acceptance : String
   reason : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct PersistResultOutcome {
   log_path : String
   updated_pages : Array[String]
@@ -306,9 +331,10 @@ pub struct PersistResultOutcome {
   executable_event_path : String
   latest_executable_event_path : String
   executable_event : @moonbook_contracts.ExecutableBookEvent
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub fn PersistResultOutcome::new(log_path~ : String, updated_pages~ : Array[String], review_queued~ : Bool, notify_town~ : Bool, evidence_id~ : String, executable_event_path~ : String, latest_executable_event_path~ : String, executable_event~ : @moonbook_contracts.ExecutableBookEvent) -> Self
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct WorkerContextBundle {
   book_id : String
   workspace_root : String
@@ -323,7 +349,7 @@ pub struct WorkerContextBundle {
   working_memory : Array[String]
   memory_summary : String
   output_contract : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
 // Type aliases
 

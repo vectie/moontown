@@ -64,7 +64,7 @@ pub fn request_after_install_result(
   request : BookTemplateRequest,
   config_path : String,
   summary : String,
-  tick : Int,
+  tick : Int32,
 ) -> BookTemplateRequest {
   {
     ..request,
@@ -172,8 +172,8 @@ pub fn request_status_summary(
 ///|
 pub fn render_request_process_summary(
   ledger : BookTemplateRequestLedger,
-  processed~ : Int,
-  reconciled_events~ : Int,
+  processed~ : Int32,
+  reconciled_events~ : Int32,
 ) -> String {
   render_request_process_summary_with_counts(
     processed~,
@@ -184,8 +184,8 @@ pub fn render_request_process_summary(
 
 ///|
 pub fn render_request_process_summary_with_counts(
-  processed~ : Int,
-  reconciled_events~ : Int,
+  processed~ : Int32,
+  reconciled_events~ : Int32,
   counts~ : BookTemplateRequestStatusCounts,
 ) -> String {
   [
@@ -292,7 +292,7 @@ pub fn append_request_event_text(
   existing : String,
   event : BookTemplateRequestEvent,
 ) -> String {
-  let line = event.to_json().stringify()
+  let line = ToJson::to_json(event).stringify()
   if existing == "" {
     "\{line}\n"
   } else {
@@ -303,7 +303,7 @@ pub fn append_request_event_text(
 ///|
 pub fn request_event_id(
   request_id : String,
-  tick : Int,
+  tick : Int32,
   generated_at_ms : UInt64,
 ) -> String {
   "\{request_id}-\{tick}-\{generated_at_ms}"
@@ -312,7 +312,7 @@ pub fn request_event_id(
 ///|
 pub fn request_reconcile_event_id(
   request_id : String,
-  tick : Int,
+  tick : Int32,
   generated_at_ms : UInt64,
 ) -> String {
   "\{request_id}-reconciled-\{tick}-\{generated_at_ms}"
@@ -321,7 +321,7 @@ pub fn request_reconcile_event_id(
 ///|
 pub fn request_event(
   request : BookTemplateRequest,
-  tick : Int,
+  tick : Int32,
   generated_at_ms : UInt64,
   id~ : String,
 ) -> BookTemplateRequestEvent {

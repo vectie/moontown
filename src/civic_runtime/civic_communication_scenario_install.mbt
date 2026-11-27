@@ -1,12 +1,12 @@
 ///|
 pub async fn bootstrap_civic_communication_scenario_file(
   template_path : String,
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  round_id? : String = "",
-  round_number? : Int = 1,
-  workspace_base? : String = "",
-  reducer_mode? : CivicCommunicationReductionMode = MoonClawReducer,
-  run_inline? : Bool = moontown_moonclaw_inline_enabled(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  round_id~ : String = "",
+  round_number~ : Int32 = 1,
+  workspace_base~ : String = "",
+  reducer_mode~ : CivicCommunicationReductionMode = MoonClawReducer,
+  run_inline~ : Bool = moontown_moonclaw_inline_enabled(),
 ) -> String {
   match load_civic_communication_scenario_file(template_path) {
     Some(scenario) => {
@@ -35,8 +35,8 @@ pub async fn bootstrap_civic_communication_scenario_file(
 ///|
 pub async fn install_civic_pattern_scenario_file(
   template_path : String,
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  due_now? : Bool = false,
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  due_now~ : Bool = false,
 ) -> String {
   match load_civic_communication_scenario_file(template_path) {
     Some(scenario) => {
@@ -56,7 +56,7 @@ pub async fn install_civic_pattern_scenario_file(
 fn civic_pattern_round_id_for_scenario(
   scenario : CivicCommunicationScenario,
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> String {
   if round_id.trim().is_empty() {
     "\{scenario.id}-round-\{round_number}"
@@ -73,7 +73,7 @@ async fn install_civic_pattern_scenario(
 ) -> CivicCommunicationSchedule {
   @support.write_text_file(
     civic_communication_scenario_path(scenario.id, snapshot_path~),
-    scenario.to_json().stringify(indent=2),
+    ToJson::to_json(scenario).stringify(indent=2),
   )
   upsert_civic_communication_schedule_for_scenario(
     scenario,
@@ -87,7 +87,7 @@ async fn install_civic_communication_scenario_for_daemon(
   scenario : CivicCommunicationScenario,
   workspace_base : String,
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
   summary : String,
 ) -> Unit {
   let snapshot_path = civic_communication_snapshot_path_for_workspace_base(
@@ -125,7 +125,7 @@ fn mark_civic_communication_schedule_after_template_round(
   schedule : CivicCommunicationSchedule,
   now_ms : UInt64,
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
   summary : String,
 ) -> CivicCommunicationSchedule {
   let interval = if schedule.interval_ms < 1UL {

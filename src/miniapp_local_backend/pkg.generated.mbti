@@ -44,27 +44,30 @@ pub fn miniapp_local_backend_snapshot(MiniappLocalBackendState, String, now_ms~ 
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct MiniappLocalBackendResponse {
   ok : Bool
-  status : Int
+  status : Int32
   body : String
   state : MiniappLocalBackendState
   session_id : String?
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct MiniappLocalBackendRoute {
   http_method : String
   path : String
   name : String
   auth_required : Bool
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct MiniappLocalBackendState {
   identity : @miniapp_identity.MiniappIdentityState
   snapshot : @miniapp_contracts.MiniappTownSnapshot
   active_session_id : String?
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
 // Type aliases
 

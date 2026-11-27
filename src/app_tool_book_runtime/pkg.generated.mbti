@@ -6,7 +6,7 @@ import {
 }
 
 // Values
-pub async fn bootstrap_app_tool_book(book_id? : String, title? : String, purpose? : String, websites? : Array[String], analysis_method? : String, tool_spec? : String, civic_building_id? : String, cadence_ticks? : Int, book_catalog_path? : String, standing_goal_path? : String, workspace_root? : String, template_root? : String) -> String
+pub async fn bootstrap_app_tool_book(book_id? : String, title? : String, purpose? : String, websites? : Array[String], analysis_method? : String, tool_spec? : String, civic_building_id? : String, cadence_ticks? : Int32, book_catalog_path? : String, standing_goal_path? : String, workspace_root? : String, template_root? : String) -> String
 
 pub async fn inspect_app_tool_book(book_id? : String, workspace_root? : String, book_catalog_path? : String, standing_goal_path? : String) -> @app_tool_book.AppToolBookStatus
 

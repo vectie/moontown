@@ -21,7 +21,7 @@ pub fn merge_single_book(Array[@moonbook.BookCatalogEntry], @moonbook.BookCatalo
 
 pub fn pdf_evidence_watch_catalog_entry(String, String, String, String) -> @moonbook.BookCatalogEntry
 
-pub fn pdf_evidence_watch_config_json(@moonbook.BookCatalogEntry, String, String, Array[String], Int) -> String
+pub fn pdf_evidence_watch_config_json(@moonbook.BookCatalogEntry, String, String, Array[String], Int32) -> String
 
 pub fn pdf_evidence_watch_generated_site_html(@moonbook.BookCatalogEntry, String, String, Array[String]) -> String
 
@@ -41,7 +41,7 @@ pub fn pdf_evidence_watch_required_paths() -> Array[String]
 
 pub fn pdf_evidence_watch_resolved_workspace_root(String, String) -> String
 
-pub fn pdf_evidence_watch_standing_goal(String, String, String, Array[String], Int) -> @core.StandingGoal
+pub fn pdf_evidence_watch_standing_goal(String, String, String, Array[String], Int32) -> @core.StandingGoal
 
 pub fn pdf_evidence_watch_template_copy_paths() -> Array[String]
 
@@ -52,22 +52,26 @@ pub fn upsert_pdf_evidence_watch_standing_goal(Array[@core.StandingGoal], @core.
 // Errors
 
 // Types and methods
-type PdfEvidenceWatchAnalysisSettings derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
+type PdfEvidenceWatchAnalysisSettings
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct PdfEvidenceWatchBookStatus {
   book_id : String
   workspace_root : String
-  required_count : Int
-  missing_count : Int
+  required_count : Int32
+  missing_count : Int32
   missing_paths : Array[String]
   has_catalog_entry : Bool
   has_standing_goal : Bool
   standing_goal_enabled : Bool
   ready : Bool
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
-type PdfEvidenceWatchConfig derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
+type PdfEvidenceWatchConfig
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct PdfEvidenceWatchInstallSpec {
   book_id : String
   title : String
@@ -75,13 +79,15 @@ pub(all) struct PdfEvidenceWatchInstallSpec {
   websites : Array[String]
   analysis_method : String
   analysis_method_path : String
-  cadence_ticks : Int
+  cadence_ticks : Int32
   workspace_root : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
-type PdfEvidenceWatchMoondeskSettings derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
+type PdfEvidenceWatchMoondeskSettings
 
-type PdfEvidenceWatchSettings derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
+type PdfEvidenceWatchSettings
 
 // Type aliases
 

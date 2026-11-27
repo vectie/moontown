@@ -1,5 +1,5 @@
 ///|
-pub fn count_english_word_tokens(text : String) -> Int {
+pub fn count_english_word_tokens(text : String) -> Int32 {
   let mut count = 0
   let mut in_word = false
   for char in text {

@@ -1,13 +1,13 @@
 ///|
 pub async fn run_goal(
   goal : String,
-  book_id? : String? = None,
-  task_limit_per_book? : Int = 1,
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  wenyu_execution? : String = "native",
-  wenyu_model? : String = "",
-  wenyu_allow_no_change? : Bool = false,
+  book_id~ : String? = None,
+  task_limit_per_book~ : Int32 = 1,
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  wenyu_execution~ : String = "native",
+  wenyu_model~ : String = "",
+  wenyu_allow_no_change~ : Bool = false,
 ) -> @core.TownState {
   let state = @core.empty_state(
     @core.TownConfig::new(id="moonrise", name="MoonTown / Moonrise"),
@@ -29,13 +29,13 @@ pub async fn run_goal(
 async fn run_goal_into_state(
   state : @core.TownState,
   goal : String,
-  book_id? : String? = None,
-  task_limit_per_book? : Int = 1,
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  wenyu_execution? : String = "native",
-  wenyu_model? : String = "",
-  wenyu_allow_no_change? : Bool = false,
+  book_id~ : String? = None,
+  task_limit_per_book~ : Int32 = 1,
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  wenyu_execution~ : String = "native",
+  wenyu_model~ : String = "",
+  wenyu_allow_no_change~ : Bool = false,
 ) -> @core.TownState {
   guard ["native", "acp"].contains(wenyu_execution) else {
     fail("wenyu_execution_invalid")
@@ -111,13 +111,13 @@ async fn run_goal_into_state(
 ///|
 pub async fn render_goal_run(
   goal : String,
-  book_id? : String? = None,
-  task_limit_per_book? : Int = 1,
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  wenyu_execution? : String = "native",
-  wenyu_model? : String = "",
-  wenyu_allow_no_change? : Bool = false,
+  book_id~ : String? = None,
+  task_limit_per_book~ : Int32 = 1,
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  wenyu_execution~ : String = "native",
+  wenyu_model~ : String = "",
+  wenyu_allow_no_change~ : Bool = false,
 ) -> String {
   let state = run_goal(
     goal,
@@ -134,8 +134,8 @@ pub async fn render_goal_run(
 
 ///|
 pub async fn supervise_saved_town(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
 ) -> String {
   let snapshot = @storage.load_snapshot_file(snapshot_path)
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)

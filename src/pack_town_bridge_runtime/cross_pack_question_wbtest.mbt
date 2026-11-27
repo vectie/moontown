@@ -128,7 +128,7 @@ async test "cross-pack question retains distinct observations through reviewed m
   assert_eq(@json.parse(@fs.read_file(inbox).text()), candidate)
   let reloaded = load_runtime_state(state_path)
   assert_eq(reloaded.candidate_envelopes.length(), 1)
-  assert_eq(reloaded.candidate_envelopes[0].to_json(), candidate)
+  assert_eq(ToJson::to_json(reloaded.candidate_envelopes[0]), candidate)
   assert_eq(reloaded.projections, before.projections)
   let replay = submit_candidate(workspace, state_path, candidate, "t4")
   assert_eq(replay.receipt, submitted.receipt)

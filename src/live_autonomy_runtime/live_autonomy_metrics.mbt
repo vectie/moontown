@@ -1,5 +1,5 @@
 ///|
-fn count_live_workers(state : @core.TownState) -> Int {
+fn count_live_workers(state : @core.TownState) -> Int32 {
   let mut count = 0
   for worker in state.workers {
     if worker_is_live(worker) {
@@ -15,7 +15,7 @@ fn worker_is_live(worker : @core.WorkerRef) -> Bool {
 }
 
 ///|
-fn count_live_activity(state : @core.TownState) -> Int {
+fn count_live_activity(state : @core.TownState) -> Int32 {
   @support.max_int(
     count_live_workers(state),
     count_live_active_executions(state),
@@ -23,12 +23,12 @@ fn count_live_activity(state : @core.TownState) -> Int {
 }
 
 ///|
-fn count_live_active_executions(state : @core.TownState) -> Int {
+fn count_live_active_executions(state : @core.TownState) -> Int32 {
   @live_autonomy_policy.count_live_active_executions(state)
 }
 
 ///|
-fn count_transient_infrastructure_debt(state : @core.TownState) -> Int {
+fn count_transient_infrastructure_debt(state : @core.TownState) -> Int32 {
   let mut count = 0
   for execution in state.executions {
     if execution_is_transient_infrastructure_debt(execution) {
@@ -46,6 +46,6 @@ fn execution_is_transient_infrastructure_debt(
 }
 
 ///|
-fn live_autonomy_tick(state : @core.TownState) -> Int {
+fn live_autonomy_tick(state : @core.TownState) -> Int32 {
   @live_autonomy_policy.live_autonomy_tick(state)
 }

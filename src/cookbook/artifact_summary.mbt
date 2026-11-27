@@ -1,10 +1,11 @@
 ///|
+#derive(Debug, Eq)
 pub(all) struct CookbookArtifactSummary {
-  docs_count : Int
-  definition_count : Int
-  runtime_state_count : Int
+  docs_count : Int32
+  definition_count : Int32
+  runtime_state_count : Int32
   required_missing_paths : Array[String]
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn CookbookArtifactSummary::from_artifacts(
@@ -31,6 +32,6 @@ pub fn CookbookArtifactSummary::from_artifacts(
 ///|
 pub fn CookbookArtifactSummary::required_missing_count(
   self : CookbookArtifactSummary,
-) -> Int {
+) -> Int32 {
   self.required_missing_paths.length()
 }

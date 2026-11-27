@@ -1,8 +1,9 @@
 ///|
+#derive(FromJson)
 struct MoonFlowResearchExecutionRequest {
   contract_version : String
   intake : Json
-} derive(FromJson)
+}
 
 ///|
 fn moonflow_research_execution_request_version(action : String) -> String {
@@ -45,7 +46,7 @@ fn moonflow_research_execution_reply(
   execution_status : String,
   review_status : String,
   callback_status : String,
-  callback_http_status : Int,
+  callback_http_status : Int32,
   handoff_id : String,
   result_package : Json?,
   receiver_receipt : Json?,

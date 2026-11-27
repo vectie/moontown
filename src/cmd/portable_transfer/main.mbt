@@ -2,18 +2,18 @@
 async fn execute(command : Command, client : @client.PortableClient) -> Json {
   let args = command.args
   match command.name {
-    "list" => { "packages": client.list().to_json() }
+    "list" => { "packages": ToJson::to_json(client.list()) }
     "upload" =>
-      client
-      .upload(args[0], args[1], @client.read_binding_file(args[2]))
-      .to_json()
+      client.upload(args[0], args[1], @client.read_binding_file(args[2]))
+      |> ToJson::to_json
     "download" =>
-      client
-      .download(args[0], @client.read_binding_file(args[1]), args[2])
-      .to_json()
+      client.download(args[0], @client.read_binding_file(args[1]), args[2])
+      |> ToJson::to_json
     "withdraw" =>
-      client.withdraw(args[0], @client.read_binding_file(args[1])).to_json()
-    "revoke" => client.revoke(args[0]).to_json()
+      ToJson::to_json(
+        client.withdraw(args[0], @client.read_binding_file(args[1])),
+      )
+    "revoke" => ToJson::to_json(client.revoke(args[0]))
     "preview-share" | "share" => {
       let binding = @client.read_binding_file(args[1])
       if args[0] != @transfer.package_id(binding.binding_digest) {
@@ -29,7 +29,7 @@ async fn execute(command : Command, client : @client.PortableClient) -> Json {
       if command.name == "preview-share" {
         client.preview_share(draft)
       } else {
-        client.share(draft).to_json()
+        ToJson::to_json(client.share(draft))
       }
     }
     _ => raise @client.ClientError("unknown_command")

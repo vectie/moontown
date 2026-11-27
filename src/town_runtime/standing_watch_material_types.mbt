@@ -1,21 +1,24 @@
 ///|
+#derive(Eq, ToJson, FromJson)
 priv struct MaterialWatchInput {
   goal : @core.StandingGoal
   task_id : String
   plan : @material_watch_plan.Plan
   before : Array[@material_watch_plan.Source]
   after : Array[@material_watch_plan.Source]
-} derive(Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Eq, ToJson, FromJson)
 priv struct MaterialWatchChange {
   input : MaterialWatchInput
   input_path : String
   execution : @core.TaskExecutionRecord?
   book_receipt : @moonbook.PersistResultOutcome?
-} derive(Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Eq, ToJson, FromJson)
 priv struct MaterialWatchJournal {
   contract : String
   goal_id : String
@@ -23,7 +26,7 @@ priv struct MaterialWatchJournal {
   baseline_plan : @material_watch_plan.Plan
   baseline : Array[@material_watch_plan.Source]
   changes : Array[MaterialWatchChange]
-} derive(Eq, ToJson, FromJson)
+}
 
 ///|
 priv enum MaterialWatchPreparation {

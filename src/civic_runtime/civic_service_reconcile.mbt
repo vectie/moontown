@@ -1,7 +1,7 @@
 ///|
 pub async fn reconcile_wenyu_civic_service_results(
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  status_path? : String = default_wenyu_civic_status_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  status_path~ : String = default_wenyu_civic_status_path(),
 ) -> String {
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
   let summaries : Array[String] = []

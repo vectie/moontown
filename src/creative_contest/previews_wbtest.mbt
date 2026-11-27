@@ -1,5 +1,4 @@
 ///|
-#borrow
 extern "C" fn preview_fixture() -> Bytes = "moontown_preview_test_png"
 
 ///|

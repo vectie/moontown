@@ -93,7 +93,7 @@ fn valid_public_index_id(value : String) -> Bool {
 fn validate_public_text(
   label : String,
   value : String,
-  max_length : Int,
+  max_length : Int32,
 ) -> String raise {
   let normalized = normalized_string(value)
   let lower = normalized.to_lower()

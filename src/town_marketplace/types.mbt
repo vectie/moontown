@@ -1,19 +1,22 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum PublicationState {
   PublicationDraft
   PublicationShared
   PublicationSubmitted
   PublicationPublished
   PublicationArchived
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum ListingKind {
   AgentListing
   BuildingListing
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum ChannelVisibility {
   DirectChannel
   PrivateChannel
@@ -21,25 +24,28 @@ pub(all) enum ChannelVisibility {
   BuildingChannel
   AgentChannel
   PublicAnnouncementChannel
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum ChannelMemberRole {
   ChannelOwner
   ChannelModerator
   ChannelParticipant
   ChannelObserver
   ChannelAgent
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum MessageAudience {
   EntireChannel
   NamedPrincipals(Array[String])
   PublicAudience
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum MarketplaceActionRequestState {
   ActionRequested
   ActionRejected
@@ -49,9 +55,10 @@ pub(all) enum MarketplaceActionRequestState {
   ActionRunning
   ActionSucceeded
   ActionFailed
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct MarketplacePrincipal {
   principal_id : String
   tenant_id : String
@@ -60,21 +67,23 @@ pub(all) struct MarketplacePrincipal {
   roles : Array[String]
   interest_tags : Array[String]
   active : Bool
-  version : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  version : Int32
+}
 
 ///|
 /// The durable store contains only the digest of an opaque session token.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct MarketplaceSession {
   session_id : String
   token_digest : String
   principal_id : String
   expires_at_ms : UInt64
   revoked : Bool
-  version : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  version : Int32
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct PublicationLifecycle {
   state : PublicationState
   shared_at_ms : UInt64?
@@ -83,12 +92,13 @@ pub(all) struct PublicationLifecycle {
   archived_at_ms : UInt64?
   reviewed_by : String?
   review_summary : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///| Publishable agent metadata. It intentionally has no runtime memory,
 
 ///|
 /// credentials, authority envelope, raw evidence, path, or consent fields.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AgentListingRecord {
   listing_id : String
   publisher_id : String
@@ -105,18 +115,19 @@ pub(all) struct AgentListingRecord {
   license_class : String
   rights_summary : String
   version_label : String
-  quality_score : Int
-  reliability_score : Int
+  quality_score : Int32
+  reliability_score : Int32
   content_digest : String
   lifecycle : PublicationLifecycle
   updated_at_ms : UInt64
-  version : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  version : Int32
+}
 
 ///| Publishable building metadata. Private MoonBook contents and workspace
 
 ///|
 /// internals never appear in this record or its public projection.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct BuildingListingRecord {
   listing_id : String
   publisher_id : String
@@ -131,24 +142,26 @@ pub(all) struct BuildingListingRecord {
   license_class : String
   rights_summary : String
   version_label : String
-  quality_score : Int
-  reliability_score : Int
+  quality_score : Int32
+  reliability_score : Int32
   content_digest : String
   lifecycle : PublicationLifecycle
   updated_at_ms : UInt64
-  version : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  version : Int32
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ChannelMember {
   principal_id : String
   role : ChannelMemberRole
   joined_at_ms : UInt64
   active : Bool
-  version : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  version : Int32
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct Channel {
   channel_id : String
   tenant_id : String
@@ -162,10 +175,11 @@ pub(all) struct Channel {
   members : Array[ChannelMember]
   created_at_ms : UInt64
   updated_at_ms : UInt64
-  version : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  version : Int32
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ChannelMessage {
   message_id : String
   channel_id : String
@@ -177,10 +191,11 @@ pub(all) struct ChannelMessage {
   reply_to_message_id : String?
   created_at_ms : UInt64
   edited_at_ms : UInt64?
-  version : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  version : Int32
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ShareGrant {
   grant_id : String
   tenant_id : String
@@ -192,10 +207,11 @@ pub(all) struct ShareGrant {
   created_at_ms : UInt64
   expires_at_ms : UInt64?
   revoked_at_ms : UInt64?
-  version : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  version : Int32
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct Subscription {
   subscription_id : String
   principal_id : String
@@ -203,10 +219,11 @@ pub(all) struct Subscription {
   topic_id : String
   enabled : Bool
   created_at_ms : UInt64
-  version : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  version : Int32
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct TownNotification {
   notification_id : String
   principal_id : String
@@ -217,13 +234,14 @@ pub(all) struct TownNotification {
   object_id : String
   created_at_ms : UInt64
   read_at_ms : UInt64?
-  version : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  version : Int32
+}
 
 ///| Paid distribution is deliberately modeled separately from both the
 
 ///|
 /// organic search index and recommendation score.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct SponsoredPlacement {
   placement_id : String
   sponsor_principal_id : String
@@ -235,8 +253,8 @@ pub(all) struct SponsoredPlacement {
   starts_at_ms : UInt64
   ends_at_ms : UInt64
   active : Bool
-  version : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  version : Int32
+}
 
 ///| The publisher-approved ceiling for one marketplace-triggered worker.
 
@@ -244,20 +262,22 @@ pub(all) struct SponsoredPlacement {
 
 ///|
 /// book identity from the publisher's active profile before asking MoonClaw.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct MarketplaceExecutionBounds {
   claim_ceiling : String
   max_cost_micro_usd : Int64
   max_runtime_ms : Int64
   max_tokens : Int64
-  max_artifacts : Int
+  max_artifacts : Int32
   web_search : Bool
   expires_at : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///| A durable request/decision/receipt chain. It contains no runtime memory,
 
 ///|
 /// credentials, host paths, or caller-provided authority envelope.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct MarketplaceActionRequest {
   request_id : String
   listing_kind : ListingKind
@@ -267,7 +287,7 @@ pub(all) struct MarketplaceActionRequest {
   publisher_principal_id : String
   request_message : String
   state : MarketplaceActionRequestState
-  expected_version : Int
+  expected_version : Int32
   decision_summary : String
   instruction : String
   execution_bounds : MarketplaceExecutionBounds?
@@ -279,18 +299,20 @@ pub(all) struct MarketplaceActionRequest {
   created_at_ms : UInt64
   decided_at_ms : UInt64?
   updated_at_ms : UInt64
-  version : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  version : Int32
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum OrderState {
   OrderOpen
   OrderPendingReview
   OrderFulfilled
   OrderCancelled
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct OrderFulfillment {
   fulfiller_principal_id : String
   summary : String
@@ -299,9 +321,10 @@ pub(all) struct OrderFulfillment {
   decision : String
   decision_summary : String
   decided_at_ms : UInt64?
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct OrderRecord {
   order_id : String
   requester_principal_id : String
@@ -315,10 +338,11 @@ pub(all) struct OrderRecord {
   fulfillments : Array[OrderFulfillment]
   created_at_ms : UInt64
   updated_at_ms : UInt64
-  version : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  version : Int32
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct MarketplaceState {
   schema : String
   principals : Array[MarketplacePrincipal]
@@ -334,10 +358,11 @@ pub(all) struct MarketplaceState {
   action_requests : Array[MarketplaceActionRequest]
   orders : Array[OrderRecord]
   portable_bindings : Array[PortableListingBinding]
-  version : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  version : Int32
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AgentListingDraft {
   listing_id : String
   title : String
@@ -352,9 +377,10 @@ pub(all) struct AgentListingDraft {
   license_class : String
   rights_summary : String
   version_label : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct BuildingListingDraft {
   listing_id : String
   title : String
@@ -367,19 +393,21 @@ pub(all) struct BuildingListingDraft {
   license_class : String
   rights_summary : String
   version_label : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct Recommendation {
   listing : Json
-  score : Int
+  score : Int32
   reason : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct MarketplaceApplication {
   state_path : String
   bootstrap_principal : MarketplacePrincipal
   bootstrap_session_id : String
   bootstrap_token_digest : String
-} derive(Debug, Eq)
+}

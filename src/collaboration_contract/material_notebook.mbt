@@ -1,32 +1,36 @@
 ///|
 /// An explicit selection from the registered catalog, never a filesystem root.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct MaterialSelection {
   book_id : String
   source_paths : Array[String]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 /// Imported source text is evidence data. Edit excerpt notes, not this copy.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct MaterialPage {
   book_id : String
   book_title : String
   source_path : String
   digest : String
-  size_bytes : Int
+  size_bytes : Int32
   text : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct MaterialExcerpt {
   book_id : String
   source_path : String
   quote : String
   observation : String
   challenge : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 /// A portable local working document. Importing does not create a Town draft.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct MaterialNotebook {
   contract_version : String
   draft_id : String
@@ -41,32 +45,37 @@ pub(all) struct MaterialNotebook {
   objection_reviewer_name : String
   pages : Array[MaterialPage]
   excerpts : Array[MaterialExcerpt]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct MaterialMatch {
   book_id : String
   source_path : String
   digest : String
-  line_number : Int
+  line_number : Int32
   text : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct MaterialSearch {
   query : String
   case_sensitive : Bool
-  matched_lines : Int
+  matched_lines : Int32
   truncated : Bool
   matches : Array[MaterialMatch]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 /// Start without selected evidence or an authored conclusion.
 ///
 /// ```mbt check
 /// test {
-///   let notebook = empty_material_notebook("field-question", [])
+///   let notebook = @collaboration_contract.empty_material_notebook(
+///     "field-question",
+///     [],
+///   )
 ///   assert_eq(notebook.question, "")
 ///   assert_true(notebook.excerpts.is_empty())
 /// }
@@ -264,7 +273,7 @@ pub fn MaterialNotebook::draft(self : MaterialNotebook) -> Draft raise {
     "falsifier": self.falsifier,
     "dissent": self.dissent,
     "unresolved_assumptions": self.assumptions,
-    "passages": evidence.to_json(),
+    "passages": ToJson::to_json(evidence),
     "authorship": "Operator-authored question and observations from selected local material. No prior participant output, consensus or genuine emergence is claimed.",
     "authority": "Unrun draft; no schedule, provider execution, Book acceptance, publication or company commitment. Existing explicit Prepare, run and human review gates apply.",
   }
@@ -285,7 +294,7 @@ pub fn MaterialNotebook::draft(self : MaterialNotebook) -> Draft raise {
     objection_reviewer_name: self.objection_reviewer_name,
     participants,
   }
-  guard @utf8.encode(draft.to_json().stringify()).length() <= 65536 else {
+  guard @utf8.encode(ToJson::to_json(draft).stringify()).length() <= 65536 else {
     fail("Inquiry exceeds 64 KiB; narrow the selected passages and notes")
   }
   draft

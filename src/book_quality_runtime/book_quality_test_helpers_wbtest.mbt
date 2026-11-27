@@ -30,14 +30,14 @@ fn book_quality_review_run_fixture(
 ///|
 fn book_quality_review_run_update(
   base : @book_quality.BookQualityReviewRun,
-  book_id? : String? = None,
-  packet_path? : String? = None,
-  result_path? : String? = None,
-  proposal_id? : String? = None,
-  run_id? : String? = None,
-  status? : String? = None,
-  summary? : String? = None,
-  generated_at_ms? : UInt64? = None,
+  book_id~ : String? = None,
+  packet_path~ : String? = None,
+  result_path~ : String? = None,
+  proposal_id~ : String? = None,
+  run_id~ : String? = None,
+  status~ : String? = None,
+  summary~ : String? = None,
+  generated_at_ms~ : UInt64? = None,
 ) -> @book_quality.BookQualityReviewRun {
   {
     book_id: book_id.unwrap_or(base.book_id),
@@ -119,10 +119,10 @@ fn book_quality_repair_bridge_item_fixture(
 async fn write_book_quality_ai_review_result_fixture(
   result_dir : String,
   book_id : String,
-  score : Int,
-  grade? : String = "weak",
-  repair_owner? : String = "moonbook",
-  next_repair_task? : String = "improve source synthesis",
+  score : Int32,
+  grade~ : String = "weak",
+  repair_owner~ : String = "moonbook",
+  next_repair_task~ : String = "improve source synthesis",
 ) -> Unit {
   @support.write_text_file(
     @book_quality.review_result_path(result_dir, book_id),
@@ -138,7 +138,7 @@ async fn write_book_quality_ai_review_result_fixture(
 ///|
 fn assert_required_path_contract(
   paths : Array[@book_quality.BookQualityRequiredPath],
-  expected_length : Int,
+  expected_length : Int32,
   expected : Array[@book_quality.BookQualityRequiredPath],
 ) -> Unit raise {
   assert_eq(paths.length(), expected_length)

@@ -1,5 +1,5 @@
 ///|
-pub fn active_review_dispatch_message(active : Int) -> String {
+pub fn active_review_dispatch_message(active : Int32) -> String {
   "AI semantic book-quality review already active; daemon will not dispatch a duplicate. active=\{active}"
 }
 

@@ -9,7 +9,7 @@ async fn ensure_planbook_backlog(
     @planbook_policy.default_backlog_items(@env.now())
   }
   if !@fs.exists(path) {
-    @support.write_text_file(path, items.to_json().stringify(indent=2))
+    @support.write_text_file(path, ToJson::to_json(items).stringify(indent=2))
   }
   write_planbook_backlog_projection(workspace_root, items)
   write_planbook_backlog_progress(workspace_root, items)

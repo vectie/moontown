@@ -106,7 +106,7 @@ fn miniapp_public_discovery_score(
   building : @miniapp_contracts.MiniappBuilding,
   book : @miniapp_contracts.MiniappBookSummary?,
   query : String,
-) -> Int {
+) -> Int32 {
   let mut score = if building.owner_kind == @miniapp_contracts.SystemOwner {
     1000
   } else {

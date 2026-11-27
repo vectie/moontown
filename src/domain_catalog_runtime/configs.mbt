@@ -73,7 +73,7 @@ fn knowledge_book_config_json(
         cadence_ticks: book.cadence_ticks,
         workspace_root: "",
       }
-      Some(spec.to_json())
+      Some(ToJson::to_json(spec))
     }
     Some("app-tool-book") => {
       let spec = @app_tool_book.AppToolBookInstallSpec::{
@@ -89,7 +89,7 @@ fn knowledge_book_config_json(
         cadence_ticks: book.cadence_ticks,
         workspace_root: "",
       }
-      Some(spec.to_json())
+      Some(ToJson::to_json(spec))
     }
     _ => None
   }

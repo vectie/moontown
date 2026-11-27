@@ -114,7 +114,7 @@ async fn reconcile_observed_review_queued_standing_watch(
       "event-watch-auto-triage",
       state.events.length(),
       completed,
-      "Mayor auto-triaged standing watch `\{completed.task_id}` as \{decision.to_string()} using MoonBook keeper markers and goal threshold \{goal.quality_threshold}.",
+      "Mayor auto-triaged standing watch `\{completed.task_id}` as \{decision} using MoonBook keeper markers and goal threshold \{goal.quality_threshold}.",
     ),
   )
   let finalized = finalize_standing_watch_supervision_record(

@@ -1,16 +1,18 @@
 ///|
+#derive(Debug, Eq, ToJson)
 pub struct CompletedCommand {
   command : String
   args : Array[String]
-  status : Int
+  status : Int32
   stdout : String
   stderr : String
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
+#derive(ToJson)
 pub suberror CommandFailed {
   CommandFailed(CompletedCommand)
-} derive(ToJson)
+}
 
 ///|
 pub impl Show for CommandFailed with fn output(
@@ -21,7 +23,7 @@ pub impl Show for CommandFailed with fn output(
   logger.write_string("Command ")
   logger.write_string(render_command(command.command, command.args).escape())
   logger.write_string(" failed with status ")
-  command.status.output(logger)
+  Show::output(command.status, logger)
   if !command.stdout.trim().is_blank() {
     logger.write_string(".\nstdout:\n")
     logger.write_string(command.stdout.trim().to_owned())
@@ -34,7 +36,7 @@ pub impl Show for CommandFailed with fn output(
 
 ///|
 pub fn render_command(command : String, args : Array[String]) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string(command)
   for arg in args {
     builder.write_char(' ')
@@ -47,7 +49,7 @@ pub fn render_command(command : String, args : Array[String]) -> String {
 pub async fn run(
   command : String,
   args : Array[String],
-  cwd? : String? = None,
+  cwd~ : String? = None,
 ) -> CompletedCommand {
   @async.with_task_group(group => {
     fn redirect_output() raise {
@@ -76,7 +78,7 @@ pub async fn run(
 pub async fn run_checked(
   command : String,
   args : Array[String],
-  cwd? : String? = None,
+  cwd~ : String? = None,
 ) -> CompletedCommand {
   let completed = run(command, args, cwd~)
   if completed.status != 0 {
@@ -89,7 +91,7 @@ pub async fn run_checked(
 pub async fn run_json(
   command : String,
   args : Array[String],
-  cwd? : String? = None,
+  cwd~ : String? = None,
 ) -> Json {
   let completed = run_checked(command, args, cwd~)
   parse_json_stdout(completed)
@@ -106,7 +108,7 @@ fn parse_json_stdout(completed : CompletedCommand) -> Json raise {
         let start = count - offset - 1
         let line = lines[start].trim().to_owned()
         if line.has_prefix("{") || line.has_prefix("[") {
-          let builder = StringBuilder::new()
+          let builder = StringBuilder()
           for index in start..<count {
             if index > start {
               builder.write_char('\n')

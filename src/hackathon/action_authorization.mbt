@@ -143,13 +143,13 @@ fn bind_competition_actor(
   guard payload is Object(source) else { return payload }
   let fields = source.copy()
   match action {
-    "evaluate" => fields["reviewer"] = actor_id.to_json()
+    "evaluate" => fields["reviewer"] = ToJson::to_json(actor_id)
     "queue-benchmark" | "approve-benchmark" | "reject-benchmark" =>
-      fields["reviewer_id"] = actor_id.to_json()
+      fields["reviewer_id"] = ToJson::to_json(actor_id)
     "join-team" | "respond-invitation" | "open-appeal" =>
-      fields["member_id"] = actor_id.to_json()
-    "invite-member" => fields["inviter_id"] = actor_id.to_json()
-    "remove-member" => fields["captain_id"] = actor_id.to_json()
+      fields["member_id"] = ToJson::to_json(actor_id)
+    "invite-member" => fields["inviter_id"] = ToJson::to_json(actor_id)
+    "remove-member" => fields["captain_id"] = ToJson::to_json(actor_id)
     _ => ()
   }
   Json::object(fields)

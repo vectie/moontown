@@ -1,4 +1,5 @@
 ///|
+#warnings("-missing_priv")
 struct OutcomeHistory {
   bundle : @review.ConversationReviewBundle
   work : @contract.OneoffWork
@@ -11,7 +12,7 @@ async fn Store::outcome_history(
   self : Store,
   saved : @contract.SavedDraft,
   work : @contract.OneoffWork,
-  selected : Int,
+  selected : Int32,
 ) -> OutcomeHistory {
   let files : Array[(String, Bytes)] = []
   let reviews : Array[@contract.OutcomeReview] = []

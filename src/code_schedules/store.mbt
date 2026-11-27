@@ -1,9 +1,10 @@
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct CodeScheduleState {
   schema : String
-  revision : Int
+  revision : Int32
   schedules : Array[CodeSchedule]
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
 pub fn code_schedule_schema() -> String {
@@ -80,7 +81,7 @@ async fn code_schedule_lock(path : String) -> @fs.File {
 
 ///|
 pub async fn load_code_schedule_state(
-  path? : String = default_code_schedule_path(),
+  path~ : String = default_code_schedule_path(),
 ) -> CodeScheduleState {
   let lock = code_schedule_lock(path)
   defer lock.close()
@@ -91,7 +92,7 @@ pub async fn load_code_schedule_state(
 ///|
 pub async fn create_code_schedule(
   schedule : CodeSchedule,
-  path? : String = default_code_schedule_path(),
+  path~ : String = default_code_schedule_path(),
 ) -> CodeScheduleState {
   let lock = code_schedule_lock(path)
   defer lock.close()
@@ -112,7 +113,7 @@ pub async fn create_code_schedule(
 ///|
 pub async fn reserve_due_code_schedule(
   now : Int64,
-  path? : String = default_code_schedule_path(),
+  path~ : String = default_code_schedule_path(),
 ) -> CodeDispatchIntent? {
   let lock = code_schedule_lock(path)
   defer lock.close()
@@ -140,8 +141,8 @@ pub async fn reserve_due_code_schedule(
 /// Recover reservations after a daemon restart. The command identity and due
 /// time remain unchanged until MoonClaw reports a terminal receipt.
 pub async fn pending_code_schedule_intents(
-  limit? : Int = 4,
-  path? : String = default_code_schedule_path(),
+  limit~ : Int32 = 4,
+  path~ : String = default_code_schedule_path(),
 ) -> Array[CodeDispatchIntent] {
   let state = load_code_schedule_state(path~)
   let intents : Array[CodeDispatchIntent] = []
@@ -182,7 +183,7 @@ pub async fn record_code_schedule_attempt(
   schedule_id : String,
   command_id : String,
   now : Int64,
-  path? : String = default_code_schedule_path(),
+  path~ : String = default_code_schedule_path(),
 ) -> Bool {
   let lock = code_schedule_lock(path)
   defer lock.close()
@@ -209,7 +210,7 @@ pub async fn record_code_schedule_attempt(
 pub async fn record_code_schedule_acceptance(
   schedule_id : String,
   command_id : String,
-  path? : String = default_code_schedule_path(),
+  path~ : String = default_code_schedule_path(),
 ) -> Bool {
   let lock = code_schedule_lock(path)
   defer lock.close()
@@ -241,7 +242,7 @@ pub async fn record_code_schedule_acceptance(
 pub async fn record_code_schedule_uncertain(
   schedule_id : String,
   command_id : String,
-  path? : String = default_code_schedule_path(),
+  path~ : String = default_code_schedule_path(),
 ) -> Bool {
   let lock = code_schedule_lock(path)
   defer lock.close()
@@ -274,7 +275,7 @@ pub async fn record_code_schedule_waiting(
   schedule_id : String,
   command_id : String,
   status : String,
-  path? : String = default_code_schedule_path(),
+  path~ : String = default_code_schedule_path(),
 ) -> Bool {
   let lock = code_schedule_lock(path)
   defer lock.close()
@@ -308,7 +309,7 @@ pub async fn record_code_schedule_terminal(
   command_id : String,
   status : String,
   now : Int64,
-  path? : String = default_code_schedule_path(),
+  path~ : String = default_code_schedule_path(),
 ) -> Bool {
   let lock = code_schedule_lock(path)
   defer lock.close()
@@ -343,7 +344,7 @@ pub async fn set_code_schedule_enabled(
   schedule_id : String,
   enabled : Bool,
   now : Int64,
-  path? : String = default_code_schedule_path(),
+  path~ : String = default_code_schedule_path(),
 ) -> Bool {
   let lock = code_schedule_lock(path)
   defer lock.close()

@@ -11,7 +11,6 @@ import {
   "vectie/moontown/research_quality",
   "vectie/moontown/research_quality_runtime",
   "vectie/moontown/moonclaw_runtime",
-  "vectie/moontown/moonbook_contracts",
   "vectie/moontown/standing_watch_policy",
   "vectie/moontown/live_autonomy_runtime",
   "vectie/moontown/runtime_status",
@@ -40,7 +39,6 @@ import {
   "moonbitlang/core/json",
   "moonbitlang/core/encoding/utf8",
   "moonbitlang/x/crypto",
-  "moonbitlang/x/sys",
 }
 
 supported_targets = "native"
@@ -49,4 +47,8 @@ import {
   "vectie/moontown/town_synthesis",
   "vectie/moontown/test_fixtures",
   "vectie/moontown/town_application",
+} for "wbtest"
+
+import {
+  "vectie/moontown/moonbook_contracts",
 } for "wbtest"

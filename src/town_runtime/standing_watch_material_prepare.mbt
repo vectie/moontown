@@ -6,7 +6,7 @@ async fn prepare_material_watch(
   state : @core.TownState,
   entry : @moonbook.BookCatalogEntry,
   goal : @core.StandingGoal,
-  tick : Int,
+  tick : Int32,
   directory : String,
   plan_path : String,
 ) -> MaterialWatchPreparation {

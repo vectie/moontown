@@ -1,8 +1,8 @@
 ///|
 fn wenyu_test_bundle(
-  task_id? : String = "wenyu-build",
-  prompt? : String = "Build Wenyu Valley.",
-  context_pages? : Array[String] = [],
+  task_id~ : String = "wenyu-build",
+  prompt~ : String = "Build Wenyu Valley.",
+  context_pages~ : Array[String] = [],
 ) -> WorkerContextBundle {
   {
     book_id: "wenyu-valley",

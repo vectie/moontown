@@ -85,7 +85,7 @@ async test "overlapping real handlers preserve independent reservations objects 
       post(
         f.service,
         @town_contract.portable_package_grants_path(),
-        draft(c, id="concurrent-grant").to_json(),
+        ToJson::to_json(draft(c, id="concurrent-grant")),
       ).code,
       200,
     )

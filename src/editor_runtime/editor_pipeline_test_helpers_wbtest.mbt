@@ -2,7 +2,7 @@
 fn test_editor_feature_selection_json(
   feature_id : String,
   title : String,
-  score : Int,
+  score : Int32,
   implementation_hint : String,
   acceptance : String,
 ) -> String {
@@ -30,7 +30,7 @@ async fn write_editor_feature_selection_fixture(
   workspace_root : String,
   feature_id : String,
   title : String,
-  score : Int,
+  score : Int32,
   implementation_hint : String,
   acceptance : String,
 ) -> Unit {
@@ -59,7 +59,7 @@ async fn select_implemented_editor_feature_and_refresh(
   workspace_root : String,
   feature_id : String,
   title : String,
-  score : Int,
+  score : Int32,
   implementation_hint : String,
   acceptance : String,
 ) -> String {

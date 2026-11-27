@@ -1,20 +1,20 @@
 ///|
 pub fn default_live_autonomy_path(
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> String {
   @live_autonomy_policy.live_autonomy_path_for_snapshot(snapshot_path)
 }
 
 ///|
 pub fn default_town_journal_path(
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> String {
   @live_autonomy_policy.town_journal_path_for_snapshot(snapshot_path)
 }
 
 ///|
 pub fn default_live_digest_path(
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> String {
   @live_autonomy_policy.live_digest_path_for_snapshot(snapshot_path)
 }
@@ -34,7 +34,7 @@ fn live_autonomy_planbook_engineering_digest_path() -> String {
 }
 
 ///|
-fn standing_goal_tick_seconds() -> Int {
+fn standing_goal_tick_seconds() -> Int32 {
   30
 }
 

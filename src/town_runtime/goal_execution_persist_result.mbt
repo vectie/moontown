@@ -78,7 +78,7 @@ async fn persist_execution_into_book(
 fn execution_after_successful_book_persist(
   execution : @core.TaskExecutionRecord,
   outcome : @moonbook.PersistResultOutcome,
-  tick : Int,
+  tick : Int32,
 ) -> @core.TaskExecutionRecord {
   let execution = if execution.summary.contains("material_watch_input:") &&
     outcome.executable_event.book_id == execution.book_id &&

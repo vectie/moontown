@@ -22,7 +22,7 @@ async fn main {
   ) catch {
     error => {
       println(({ "accepted": false, "error": "\{error}" } : Json).stringify())
-      @sys.exit(1)
+      @env.exit(1)
     }
   }
 }

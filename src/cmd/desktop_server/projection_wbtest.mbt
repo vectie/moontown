@@ -221,8 +221,8 @@ test "desktop projection separates terminal transient triage from live blockers"
   assert_false(terminal_transient_handoff_is_history(task, untriaged_execution))
 
   let projected = town_work_item(
-    task.to_json(),
-    Some(execution.to_json()),
+    ToJson::to_json(task),
+    Some(ToJson::to_json(execution)),
     Map([]),
     None,
     None,

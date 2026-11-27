@@ -1,9 +1,9 @@
 ///|
 async fn reconcile_transient_dependency_failures(
   state : @core.TownState,
-  catalog? : Array[@moonbook.BookCatalogEntry] = [],
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  standing_goals? : Array[@core.StandingGoal] = [],
+  catalog~ : Array[@moonbook.BookCatalogEntry] = [],
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  standing_goals~ : Array[@core.StandingGoal] = [],
 ) -> Unit {
   let snapshot = state.executions.copy()
   for execution in snapshot {
@@ -69,7 +69,7 @@ fn transient_dependency_reconcilable_status(
 fn reopen_retriable_deferred_standing_watch_executions(
   state : @core.TownState,
   standing_goals : Array[@core.StandingGoal],
-  tick : Int,
+  tick : Int32,
 ) -> Unit {
   let snapshot = state.executions.copy()
   for execution in snapshot {

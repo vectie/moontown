@@ -4,13 +4,14 @@ fn public_service_host(host : String) -> Bool {
 }
 
 ///|
+#warnings("-unused_value")
 fn active_platform_operator(value : Json) -> Bool {
   value is { "state": String("Active"), "roles": Array(roles), .. } &&
   roles.any(role => role == Json::string("PlatformOperator"))
 }
 
 ///|
-async fn bounded_identity_text(reader : &@io.Reader, limit : Int) -> String? {
+async fn bounded_identity_text(reader : &@io.Reader, limit : Int32) -> String? {
   let bytes = FixedArray::make(limit + 1, b'\x00')
   let mut length = 0
   while length <= limit {
@@ -73,7 +74,7 @@ async fn public_password_login(
   request : @http.Request,
   body : &@io.Reader,
   conn : @http.ServerConnection,
-  audience? : String = "operator",
+  audience~ : String = "operator",
 ) -> Unit {
   if reject_unsafe_operator_write(request, conn) {
     return

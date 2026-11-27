@@ -1,7 +1,7 @@
 ///|
 fn goals_bytes() -> Bytes {
   @utf8.encode(
-    [
+    ToJson::to_json([
       @core.StandingGoal::new(
         id="watch-a",
         title="Customer evidence",
@@ -14,9 +14,7 @@ fn goals_bytes() -> Bytes {
         prompt="Question",
         enabled=false,
       ),
-    ]
-    .to_json()
-    .stringify(),
+    ]).stringify(),
   )
 }
 
@@ -36,8 +34,8 @@ fn row(
   followup : String,
   baseline_start? : String,
   baseline_end? : String,
-  outcome? : String = "Review customer evidence",
-  note? : String = "",
+  outcome~ : String = "Review customer evidence",
+  note~ : String = "",
 ) -> String {
   let ms = baseline_start.unwrap_or(if manual.is_empty() { "" } else { start })
   let me = baseline_end.unwrap_or(if manual.is_empty() { "" } else { end })
@@ -77,7 +75,7 @@ fn field(value : Json, key : String) -> Json raise {
 }
 
 ///|
-fn item(value : Json, i : Int) -> Json raise {
+fn item(value : Json, i : Int32) -> Json raise {
   guard value is Array(items) else { fail("Expected array") }
   match items.get(i) {
     Some(value) => value
@@ -429,7 +427,7 @@ test "canonical goals reject broken or ambiguous IDs and allow empty source" {
   )
   assert_true(
     @goal_effort.report(
-      @utf8.encode([goal, goal].to_json().stringify()),
+      @utf8.encode(ToJson::to_json([goal, goal]).stringify()),
       @utf8.encode(header()),
       ',',
       format="json",
@@ -439,7 +437,7 @@ test "canonical goals reject broken or ambiguous IDs and allow empty source" {
   let blank = @core.StandingGoal::new(id=" ", title="Title", prompt="Prompt")
   assert_true(
     @goal_effort.report(
-      @utf8.encode([blank].to_json().stringify()),
+      @utf8.encode(ToJson::to_json([blank]).stringify()),
       @utf8.encode(header()),
       ',',
       format="json",
@@ -534,7 +532,7 @@ test "maximum period count sums exactly and excess goal count fails" {
   let rows : Array[String] = []
   for year = 1; year <= 2000; year = year + 1 {
     let y = "0000" + year.to_string()
-    let y = try! y[y.length() - 4:].to_string()
+    let y = y[y.length() - 4:].to_owned()
     rows.push(
       row(
         "watch-a",
@@ -563,7 +561,7 @@ test "maximum period count sums exactly and excess goal count fails" {
     )
   })
   guard @goal_effort.report(
-      @utf8.encode(goals.to_json().stringify()),
+      @utf8.encode(ToJson::to_json(goals).stringify()),
       @utf8.encode(header()),
       ',',
       format="json",

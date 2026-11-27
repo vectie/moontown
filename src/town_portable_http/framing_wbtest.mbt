@@ -109,7 +109,7 @@ async test "started binary response failure closes without appending error JSON"
 async test "oversized metadata fails explicitly before response start without truncation" {
   let record = recording()
   let sink = record.sink()
-  try sink.json(200, "x".repeat(8 * 1024 * 1024).to_json()) catch {
+  try sink.json(200, ToJson::to_json("x".repeat(8 * 1024 * 1024))) catch {
     @town_portable_transfer.TransferError(code, reason) => {
       assert_eq(code, 503)
       assert_eq(reason, "package_metadata_capacity")
@@ -123,10 +123,11 @@ async test "oversized metadata fails explicitly before response start without tr
 }
 
 ///|
+#warnings("-alert_internal")
 struct StalledReader {
   buffer : @io.ReaderBuffer
   gate : @async.Semaphore
-  mut read_calls : Int
+  mut read_calls : Int32
   mut cancelled : Bool
 }
 
@@ -136,6 +137,7 @@ impl @io.Reader for StalledReader with fn _get_internal_buffer(self) {
 }
 
 ///|
+#warnings("-deprecated-fragile_catch_all-unused_try")
 impl @io.Reader for StalledReader with fn _direct_read(
   self,
   target,
@@ -154,6 +156,7 @@ impl @io.Reader for StalledReader with fn _direct_read(
 }
 
 ///|
+#warnings("-alert_internal")
 async test "binary chunks idle timeout and strict control field checks" {
   let f = fixture(limits={
     ..@town_portable_transfer.default_limits(),
@@ -198,8 +201,10 @@ async test "binary chunks idle timeout and strict control field checks" {
     call(f.service, download_request(binding, session=token("publisher-a"))).bytes(),
     bytes,
   )
-  guard draft(binding).to_json() is Object(fields) else { fail("draft object") }
-  fields["actor"] = "publisher-a".to_json()
+  guard ToJson::to_json(draft(binding)) is Object(fields) else {
+    fail("draft object")
+  }
+  fields["actor"] = ToJson::to_json("publisher-a")
   assert_eq(
     post(
       f.service,
@@ -212,7 +217,7 @@ async test "binary chunks idle timeout and strict control field checks" {
     post(
       f.service,
       @town_contract.portable_package_grants_path(),
-      draft(binding).to_json(),
+      ToJson::to_json(draft(binding)),
     ).code,
     200,
   )

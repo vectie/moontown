@@ -7,7 +7,7 @@ async fn write_app_tool_book_workspace(
   analysis_method : String,
   tool_spec : String,
   civic_building_id : String,
-  cadence_ticks : Int,
+  cadence_ticks : Int32,
   template_root : String,
 ) -> Unit {
   let root = entry.workspace_root
@@ -16,29 +16,29 @@ async fn write_app_tool_book_workspace(
   }
   write_text_file(
     "\{root}/book.json",
-    @app_tool_book.config_with_catalog_identity(
-      entry.id,
-      title,
-      purpose,
-      entry.workspace_root,
-      websites,
-      civic_building_id,
-      cadence_ticks,
-    )
-    .to_json()
-    .stringify(indent=2),
+    ToJson::to_json(
+      @app_tool_book.config_with_catalog_identity(
+        entry.id,
+        title,
+        purpose,
+        entry.workspace_root,
+        websites,
+        civic_building_id,
+        cadence_ticks,
+      ),
+    ).stringify(indent=2),
   )
   write_text_file(
     "\{root}/tool-manifest.json",
-    @app_tool_book.manifest(
-      entry.id,
-      title,
-      purpose,
-      civic_building_id,
-      Some(@env.now()),
-    )
-    .to_json()
-    .stringify(indent=2),
+    ToJson::to_json(
+      @app_tool_book.manifest(
+        entry.id,
+        title,
+        purpose,
+        civic_building_id,
+        Some(@env.now()),
+      ),
+    ).stringify(indent=2),
   )
   write_text_file_if_missing("\{root}/raw/data/.keep", "")
   write_text_file_if_missing("\{root}/raw/analysis-runs/.keep", "")

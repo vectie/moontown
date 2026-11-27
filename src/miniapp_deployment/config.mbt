@@ -44,7 +44,7 @@ pub fn miniapp_default_deployment_config() -> MiniappDeploymentConfig {
 pub fn miniapp_external_https_config(
   api_domain~ : String,
   asset_domain~ : String,
-  app_id? : String = "wx-placeholder",
+  app_id~ : String = "wx-placeholder",
 ) -> MiniappDeploymentConfig {
   {
     ..miniapp_default_deployment_config(),

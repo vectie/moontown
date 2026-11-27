@@ -28,7 +28,7 @@ pub fn building_protocol_portfolio(
 fn count_building_protocols_by(
   protocols : Array[BuildingProtocolSnapshot],
   predicate : (BuildingProtocolSnapshot) -> Bool,
-) -> Int {
+) -> Int32 {
   protocols.filter(predicate).length()
 }
 

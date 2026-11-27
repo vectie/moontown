@@ -4,7 +4,7 @@ fn render_wenyu_artifact_matrix(
   plan : @roles.MayorGoalPlan,
 ) -> String {
   ignore(state)
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string(wenyu_artifact_matrix_header())
   for lane in plan.lanes {
     builder.write_string(wenyu_artifact_matrix_row(lane.entry))
@@ -35,7 +35,7 @@ async fn render_wenyu_readiness(
   state : @core.TownState,
   plan : @roles.MayorGoalPlan,
 ) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string(wenyu_readiness_header())
   for lane in plan.lanes {
     let summary = Some(@moonbook.summarize_state(lane.entry)) catch {

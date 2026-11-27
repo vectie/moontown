@@ -16,6 +16,10 @@ async fn handle_imported_output_api(
     @moonbook.default_catalog_path(),
     books_root(),
   )
+  let ci_headers : Map[@http.CaseInsensitiveString, String] = Map([])
+  for k, v in reply.headers {
+    ci_headers[@http.CaseInsensitiveString(k)] = v
+  }
   conn.send_response(
     reply.status,
     if reply.status < 400 {
@@ -23,7 +27,7 @@ async fn handle_imported_output_api(
     } else {
       "Error"
     },
-    extra_headers=reply.headers,
+    extra_headers=ci_headers,
   )
   if !reply.body.is_empty() {
     conn.write(reply.body)

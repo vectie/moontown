@@ -1,6 +1,6 @@
 ///|
 pub async fn render_live_autonomy_status(
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> String {
   let path = default_live_autonomy_path(snapshot_path~)
   if !@fs.exists(path) {

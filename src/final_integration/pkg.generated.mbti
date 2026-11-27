@@ -10,45 +10,48 @@ import {
 // Values
 pub fn final_integration_source_policy(FinalIntegrationWatchSpec) -> String
 
-pub fn final_integration_status_json(FinalIntegrationManifest, Array[@core.StandingGoal], Int, String, String, Array[String]) -> Json
+pub fn final_integration_status_json(FinalIntegrationManifest, Array[@core.StandingGoal], Int32, String, String, Array[String]) -> @json.Json
 
 pub fn final_integration_watch_coverage(FinalIntegrationManifest, Array[@core.StandingGoal]) -> String
 
 pub fn find_standing_goal_by_id(Array[@core.StandingGoal], String) -> @core.StandingGoal?
 
-pub fn merge_final_integration_standing_goals(Array[@core.StandingGoal], Array[FinalIntegrationWatchSpec], Int) -> Array[@core.StandingGoal]
+pub fn merge_final_integration_standing_goals(Array[@core.StandingGoal], Array[FinalIntegrationWatchSpec], Int32) -> Array[@core.StandingGoal]
 
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct FinalIntegrationManifest {
   id : String
   title : String
   domain_watches : Array[FinalIntegrationWatchSpec]
   civic_pattern_manifests : Array[FinalIntegrationTemplateSpec]
   civic_scenarios : Array[FinalIntegrationTemplateSpec]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct FinalIntegrationTemplateSpec {
-  order : Int
+  order : Int32
   form : String
   path : String
   note : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct FinalIntegrationWatchSpec {
-  order : Int
+  order : Int32
   domain : String
   form : String
   id : String
   title : String
   prompt : String
   target_book_id : String
-  cadence_ticks : Int
-  quality_threshold : Int
+  cadence_ticks : Int32
+  quality_threshold : Int32
   source_policy : String
-  initial_stagger_ticks : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  initial_stagger_ticks : Int32
+}
 
 // Type aliases
 

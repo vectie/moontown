@@ -1,6 +1,6 @@
 ///|
 pub async fn daemon_stop_saved_town(
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> String {
   let launchd_stopped = stop_daemon_with_launchd()
   write_daemon_stop_request(snapshot_path)
@@ -17,11 +17,11 @@ pub async fn daemon_stop_saved_town(
 
 ///|
 pub async fn daemon_doctor_saved_town(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  stale_after_ms? : UInt64 = 900_000UL,
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  stale_after_ms~ : UInt64 = 900_000UL,
 ) -> String {
   let health = inspect_daemon_runtime(snapshot_path~, stale_after_ms~)
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string("MoonTown daemon doctor\n")
   builder.write_string(
     "\{@daemon_runtime_policy.daemon_runtime_health_summary(health)}\n",

@@ -35,7 +35,7 @@ async fn write_civic_communication_participant_workspace(
   participant : CivicCommunicationParticipantBook,
   ideas : Array[CivicCommunicationIdea],
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
   root : String,
 ) -> Unit {
   let returned_ideas = civic_communication_returned_ideas_for_book(
@@ -90,9 +90,9 @@ async fn write_civic_communication_building_pages(
   ideas : Array[CivicCommunicationIdea],
   metrics : CivicCommunicationMetric,
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
   root : String,
-  ledger_base_dir? : String = default_protocol_ledger_base_dir(),
+  ledger_base_dir~ : String = default_protocol_ledger_base_dir(),
 ) -> Unit {
   @support.write_text_file(
     "\{root}/\{scenario.synthesis_path}",
@@ -116,11 +116,11 @@ async fn write_civic_communication_building_pages(
   )
   @support.write_text_file(
     "\{root}/raw/bootstrap/\{scenario.id}-metrics.json",
-    metrics.to_json().stringify(indent=2),
+    ToJson::to_json(metrics).stringify(indent=2),
   )
   @support.write_text_file(
     "\{protocol_ledger_dir(protocol.building_id, ledger_base_dir~)}/metrics.json",
-    metrics.to_json().stringify(indent=2),
+    ToJson::to_json(metrics).stringify(indent=2),
   )
   let html = civic_communication_building_html(
     scenario, protocol, participants, ideas, metrics, round_id, round_number,

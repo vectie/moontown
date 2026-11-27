@@ -26,7 +26,7 @@ pub fn standing_watch_decision_text_marks_book_changed(String) -> Bool
 
 pub fn standing_watch_decision_text_marks_update(String) -> Bool
 
-pub fn standing_watch_delta_score(@core.TaskExecutionRecord) -> Int
+pub fn standing_watch_delta_score(@core.TaskExecutionRecord) -> Int32
 
 pub fn standing_watch_detached_import_log_noise_summary(String) -> Bool
 
@@ -40,7 +40,7 @@ pub fn standing_watch_event_for_record(@core.WatcherRunRecord) -> @core.TownEven
 
 pub fn standing_watch_event_kind() -> String
 
-pub fn standing_watch_execution_event(String, Int, @core.TaskExecutionRecord, String) -> @core.TownEvent
+pub fn standing_watch_execution_event(String, Int32, @core.TaskExecutionRecord, String) -> @core.TownEvent
 
 pub fn standing_watch_execution_has_zero_material_delta(@core.TaskExecutionRecord) -> Bool
 
@@ -52,19 +52,19 @@ pub fn standing_watch_latest_provider_decision_summary(String) -> String?
 
 pub fn standing_watch_marker_decision(String) -> @core.WatcherDecisionKind?
 
-pub fn standing_watch_marker_int(String, String, fallback~ : Int) -> Int
+pub fn standing_watch_marker_int(String, String, fallback~ : Int32) -> Int32
 
 pub fn standing_watch_marker_value(String, String) -> String?
 
 pub fn standing_watch_needs_review_with_zero_material_delta(@core.TaskExecutionRecord, @core.WatcherDecisionKind) -> Bool
 
-pub fn standing_watch_new_source_count(@core.TaskExecutionRecord) -> Int
+pub fn standing_watch_new_source_count(@core.TaskExecutionRecord) -> Int32
 
 pub fn standing_watch_operational_no_change_summary(String) -> Bool
 
 pub fn standing_watch_orphaned_running_failure_summary(String) -> Bool
 
-pub fn standing_watch_prompt(@core.StandingGoal, String, Int, Int) -> String
+pub fn standing_watch_prompt(@core.StandingGoal, String, Int32, Int32) -> String
 
 pub fn standing_watch_recovery_allowed(@core.StandingGoal, @core.TaskExecutionRecord, @core.WatcherDecisionKind) -> Bool
 
@@ -74,7 +74,7 @@ pub fn standing_watch_recovery_summary(@core.StandingGoal, @core.TaskExecutionRe
 
 pub fn standing_watch_review_superseded_by_newer_review(Array[@core.TaskExecutionRecord], Array[@core.StandingGoal], @core.StandingGoal, @core.TaskExecutionRecord) -> Bool
 
-pub fn standing_watch_stale_window_ticks() -> Int
+pub fn standing_watch_stale_window_ticks() -> Int32
 
 pub fn standing_watch_summary_from_history_block(String, Array[String]) -> String?
 
@@ -84,7 +84,7 @@ pub fn standing_watch_summary_has_zero_material_delta(String) -> Bool
 
 pub fn standing_watch_target_pages() -> Array[String]
 
-pub fn standing_watch_task_id(String, Int) -> String
+pub fn standing_watch_task_id(String, Int32) -> String
 
 pub fn standing_watch_task_kind() -> String
 
@@ -94,7 +94,7 @@ pub fn standing_watch_task_prefix(String) -> String
 
 pub fn standing_watch_task_tick_prefix(String) -> String
 
-pub fn standing_watch_tick_for_goal_task(@core.StandingGoal, String) -> Int?
+pub fn standing_watch_tick_for_goal_task(@core.StandingGoal, String) -> Int32?
 
 pub fn standing_watch_transient_dispatch_error(String) -> Bool
 

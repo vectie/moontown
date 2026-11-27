@@ -11,7 +11,7 @@ struct NativeEditorFixture {
 
 ///|
 fn native_editor_selection(
-  acceptance? : String = "The selected editor action works",
+  acceptance~ : String = "The selected editor action works",
 ) -> String {
   (
     {
@@ -26,9 +26,9 @@ fn native_editor_selection(
 
 ///|
 async fn native_editor_fixture(
-  criterion_id? : String = "editor-selected-feature-implementation",
-  selection? : String = native_editor_selection(),
-  omit_course_page? : String = "",
+  criterion_id~ : String = "editor-selected-feature-implementation",
+  selection~ : String = native_editor_selection(),
+  omit_course_page~ : String = "",
   existing_plan? : String,
 ) -> NativeEditorFixture {
   let root = @fs.realpath(
@@ -171,6 +171,7 @@ fn native_editor_spec(
 }
 
 ///|
+#warnings("-reserved_keyword-unused_async")
 fn native_editor_client(
   request : @native_work.Request,
   posted : Array[String],
@@ -183,8 +184,8 @@ fn native_editor_client(
     owner_workspace=request.owner_workspace,
     instance_id="editor-fixture-instance",
     config_path="/fixture-only/never-read/control.json",
-    request=async fn(method, route, body) {
-      calls.push(method + " " + route)
+    request=async fn(method_val, route, body) {
+      calls.push(method_val + " " + route)
       if route == "/v1/code/capabilities" {
         return Ok({
           "model_workspace_contract": "mooncode.model-workspace.v1",
@@ -199,7 +200,7 @@ fn native_editor_client(
           "models": [{ "name": models[0] }],
         })
       }
-      if method == "POST" {
+      if method_val == "POST" {
         posted.push(body)
         let command = @json.parse(body)
         return Ok({
@@ -245,8 +246,8 @@ fn native_editor_client(
           },
         ]
       } else if route.contains("runtime-events") {
-        fields["events"] = journal.to_json()
-        fields["event_count"] = journal.length().to_json()
+        fields["events"] = ToJson::to_json(journal)
+        fields["event_count"] = ToJson::to_json(journal.length())
       }
       Ok(projection)
     },
@@ -257,7 +258,7 @@ fn native_editor_client(
 fn native_editor_event(
   work : @native_work.Work,
   tool : String,
-  sequence : Int,
+  sequence : Int32,
   metadata : Json,
 ) -> Json {
   let reservation = work.reservation.unwrap()
@@ -293,7 +294,7 @@ async fn native_editor_finish_fixture(
   running : @native_work.Work,
   journal : Array[Json],
   receipts : Array[Json],
-  omit_command? : String = "",
+  omit_command~ : String = "",
 ) -> String {
   let source_path = running.request.execution_root + "/source.mbt"
   let before = @fs.read_file(source_path).text()

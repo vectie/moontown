@@ -89,7 +89,7 @@ test "snapshot projection remains compatible with existing snapshot readers" {
     snapshot_of(state),
     limits=@core.TownStateProjectionLimits::new(recent_events=1),
   )
-  let encoded = view.to_json()
+  let encoded = ToJson::to_json(view)
   let decoded : TownSnapshot = @json.from_json(encoded) catch {
     error =>
       fail(

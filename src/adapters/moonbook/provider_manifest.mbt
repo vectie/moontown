@@ -7,7 +7,7 @@ async fn ensure_book_provider_manifest(
   let manifest = [
     moonbook_task_provider_manifest_entry(root, moonbook_root, command~, args~),
   ]
-  let text = manifest.to_json().stringify()
+  let text = ToJson::to_json(manifest).stringify()
   write_workspace_text(moonclaw_provider_manifest_path(root), text)
   write_workspace_text(moonbook_resource_provider_manifest_path(root), text)
 }
@@ -28,8 +28,8 @@ fn moonbook_resource_provider_manifest_path(root : String) -> String {
 fn moonbook_task_provider_manifest_entry(
   root : String,
   moonbook_root : String,
-  command? : String = moonbook_moon_command(),
-  args? : Array[String] = ["run", "cmd/main", "--"],
+  command~ : String = moonbook_moon_command(),
+  args~ : Array[String] = ["run", "cmd/main", "--"],
 ) -> BookTaskProviderManifestEntry {
   {
     name: "moonbook",

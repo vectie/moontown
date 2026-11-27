@@ -1,14 +1,16 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct VisualDecoratorPlacement {
   book_id : String
-  grid_x : Int
-  grid_y : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  grid_x : Int32
+  grid_y : Int32
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct VisualDecoratorConfig {
   placements : Array[VisualDecoratorPlacement]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn VisualDecoratorConfig::empty() -> VisualDecoratorConfig {
@@ -29,19 +31,21 @@ pub fn VisualDecoratorConfig::placement_for(
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 struct VisualDecoratorModuleManifest {
   modules : Array[VisualDecoratorModuleEntry]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 struct VisualDecoratorModuleEntry {
   enabled : Bool
   book_id : String
-  grid_x : Int
-  grid_y : Int
-  entrance_x : Int
-  entrance_y : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  grid_x : Int32
+  grid_y : Int32
+  entrance_x : Int32
+  entrance_y : Int32
+}
 
 ///|
 pub fn visual_decorator_config_from_module_manifest(

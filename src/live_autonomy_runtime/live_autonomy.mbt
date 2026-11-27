@@ -1,11 +1,11 @@
 ///|
 pub async fn write_live_autonomy_spine(
   state : @core.TownState,
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  standing_goals? : Array[@core.StandingGoal] = [],
-  watcher_records? : Array[@core.WatcherRunRecord] = [],
-  tick_summary? : String = "",
-  daemon_tick? : Int? = None,
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  standing_goals~ : Array[@core.StandingGoal] = [],
+  watcher_records~ : Array[@core.WatcherRunRecord] = [],
+  tick_summary~ : String = "",
+  daemon_tick~ : Int32? = None,
 ) -> LiveAutonomySpine {
   let metadata = live_autonomy_write_metadata(state, snapshot_path, daemon_tick)
   let spine = build_live_autonomy_spine({

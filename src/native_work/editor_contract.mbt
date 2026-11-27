@@ -1,15 +1,17 @@
 ///|
 /// Owner-captured, read-only Book content. Roots are provenance, never native
 /// execution roots or extra writable scopes.
+#derive(ToJson, FromJson)
 pub(all) struct EditorCapturedInput {
   book_id : String
   root : String
   relative : String
   content : String
   content_digest : String
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 pub(all) struct EditorOwnerSpec {
   contract : String
   criterion_id : String
@@ -23,7 +25,7 @@ pub(all) struct EditorOwnerSpec {
   captured_inputs : Array[EditorCapturedInput]
   output_before : Map[String, String]
   missing_plan_template : String
-} derive(ToJson, FromJson)
+}
 
 ///|
 pub fn editor_owner_plan_relative() -> String {
@@ -143,6 +145,7 @@ fn editor_reserved_prompt(work : Work) -> String {
 }
 
 ///|
+#warnings("-deprecated")
 fn editor_result_satisfies_contract(
   work : Work,
   answer : String,

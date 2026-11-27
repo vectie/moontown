@@ -75,7 +75,7 @@ async fn wenyu_owner_fixture(
     output_before: before,
   }
   let request = { ..request, generation: 1, }
-  let request_digest = @native_work.digest(request.to_json().stringify())
+  let request_digest = @native_work.digest(ToJson::to_json(request).stringify())
   let id = "town-work-" + request_digest[:32].to_owned()
   let body = (
     {
@@ -218,6 +218,7 @@ fn wenyu_owner_set(value : Json, key : String, replacement : Json) -> Unit {
 }
 
 ///|
+#warnings("-unused_async")
 async test "wenyu owner import saves one immutable package and reuses application receipt" {
   let (launch, work) = wenyu_owner_fixture("replay")
   let calls = [0]
@@ -237,7 +238,7 @@ async test "wenyu owner import saves one immutable package and reuses applicatio
     "/output-package.json"
   let bytes = @fs.read_file(package_path).text()
   let second = import_wenyu_native_result(launch, work, persist~)
-  assert_eq(first.to_json(), second.to_json())
+  assert_eq(ToJson::to_json(first), ToJson::to_json(second))
   assert_eq(calls[0], 1)
   assert_eq(@fs.read_file(package_path).text(), bytes)
   assert_true(
@@ -256,6 +257,7 @@ async test "wenyu owner import saves one immutable package and reuses applicatio
 }
 
 ///|
+#warnings("-unused_async")
 async test "wenyu owner import rejects mismatched receipt request and nonterminal work before persistence" {
   let (launch, work) = wenyu_owner_fixture("binding")
   let calls = [0]
@@ -270,7 +272,7 @@ async test "wenyu owner import rejects mismatched receipt request and nontermina
       "model_workspace", "request_body_digest",
     ] {
     let receipt = @json.parse(work.receipt.stringify())
-    wenyu_owner_set(receipt, key, "wrong".to_json())
+    wenyu_owner_set(receipt, key, ToJson::to_json("wrong"))
     let error = try {
       ignore(import_wenyu_native_result(launch, { ..work, receipt, }, persist~))
       ""
@@ -290,7 +292,9 @@ async test "wenyu owner import rejects mismatched receipt request and nontermina
   let changed = {
     ..work,
     request: changed_request,
-    request_digest: @native_work.digest(changed_request.to_json().stringify()),
+    request_digest: @native_work.digest(
+      ToJson::to_json(changed_request).stringify(),
+    ),
   }
   let error = try {
     ignore(import_wenyu_native_result(launch, changed, persist~))
@@ -317,6 +321,7 @@ async test "wenyu owner import rejects mismatched receipt request and nontermina
 }
 
 ///|
+#warnings("-reserved_keyword")
 async test "wenyu owner recovers a Book committed Town unacknowledged crash without duplicate Book effects" {
   let (launch, work) = wenyu_owner_fixture("crash")
   let durable = launch.entry.workspace_root + "/synthetic-book-outcome.json"
@@ -332,7 +337,7 @@ async test "wenyu owner recovers a Book committed Town unacknowledged crash with
     let outcome = wenyu_owner_outcome(result)
     @fs.write_file(
       durable,
-      outcome.to_json().stringify(),
+      ToJson::to_json(outcome).stringify(),
       create_mode=CreateNew,
       sync=Full,
     )
@@ -348,14 +353,14 @@ async test "wenyu owner recovers a Book committed Town unacknowledged crash with
   assert_true(error.contains("simulated_crash_after_book_commit"))
   let directory = launch.entry.workspace_root + "/raw/build/native/" + work.id
   assert_false(@fs.exists(directory + "/application-receipt.json"))
-  let package = @fs.read_file(directory + "/output-package.json").text()
+  let pkg_val = @fs.read_file(directory + "/output-package.json").text()
   let page = @fs.read_file(launch.entry.workspace_root + "/build/CODE_PATCH.md").text()
   let result = import_wenyu_native_result(launch, work, persist~)
   assert_true(result.review_queued)
   ignore(import_wenyu_native_result(launch, work, persist~))
   assert_eq(attempts[0], 2)
   assert_eq(effects[0], 1)
-  assert_eq(@fs.read_file(directory + "/output-package.json").text(), package)
+  assert_eq(@fs.read_file(directory + "/output-package.json").text(), pkg_val)
   assert_eq(
     @fs.read_file(launch.entry.workspace_root + "/build/CODE_PATCH.md").text(),
     page,
@@ -364,6 +369,7 @@ async test "wenyu owner recovers a Book committed Town unacknowledged crash with
 }
 
 ///|
+#warnings("-unused_async")
 async test "wenyu owner retains human edits and the immutable failed import package" {
   let (launch, work) = wenyu_owner_fixture("human")
   let page = launch.entry.workspace_root + "/build/CODE_PATCH.md"
@@ -399,6 +405,7 @@ async test "wenyu owner retains human edits and the immutable failed import pack
 }
 
 ///|
+#warnings("-unused_async")
 async test "wenyu owner rejects dangling output symlinks without following or replacing them" {
   let (launch, work) = wenyu_owner_fixture("symlink")
   @fs.mkdir(launch.entry.workspace_root + "/build")
@@ -475,7 +482,7 @@ async test "wenyu owner projection distinguishes native running persistence revi
 async test "wenyu explicit supersession advances only the task manifest and preserves saved inputs" {
   let (launch, _) = wenyu_owner_fixture("supersession")
   let path = wenyu_launch_path(launch.native_path, launch.task.id)
-  let saved = launch.to_json().stringify(indent=2)
+  let saved = ToJson::to_json(launch).stringify(indent=2)
   @support.write_text_file(path, saved)
   let queued = @native_work.enqueue(launch.request, path=launch.native_path)
   assert_eq(
@@ -501,6 +508,7 @@ async test "wenyu explicit supersession advances only the task manifest and pres
 }
 
 ///|
+#warnings("-unused_async")
 async test "wenyu owner detects a human output race after the first page write" {
   let (launch, work) = wenyu_owner_fixture("page-race")
   let calls = [0]

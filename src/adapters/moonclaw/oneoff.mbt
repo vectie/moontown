@@ -1,11 +1,12 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct OneoffReceipt {
   packet_id : String
   proposal_id : String
   run_id : String
   status : String
   workspace_dir : String?
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 /// Explicit opt-in start, using the producer's durable idempotency boundary.

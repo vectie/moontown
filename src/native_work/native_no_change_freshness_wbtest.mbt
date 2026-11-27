@@ -19,13 +19,13 @@ async test "native no change task specific check proof must be latest and preced
     let events = no_change_fixture_events(work)
     let journal = rows(events, "events")
     let proof = fixture_validation(work, "task-check")
-    no_change_set(proof, "tool", "moon_cmd".to_json())
+    no_change_set(proof, "tool", ToJson::to_json("moon_cmd"))
     let metadata = field(field(proof, "tool_result"), "metadata")
-    no_change_set(metadata, "command", "moon test focused".to_json())
-    no_change_set(metadata, "cwd", "fixtures".to_json())
+    no_change_set(metadata, "command", ToJson::to_json("moon test focused"))
+    no_change_set(metadata, "cwd", ToJson::to_json("fixtures"))
     journal.insert(1, proof)
     let proposal = no_change_fixture_proposal()
-    rows(proposal, "evidence_refs").push("task-check".to_json())
+    rows(proposal, "evidence_refs").push(ToJson::to_json("task-check"))
     let execution = field(receipt, "execution")
     let verdict = field(execution, "completion_verdict")
     no_change_set(verdict, "no_change", proposal)
@@ -50,21 +50,26 @@ async test "native no change task specific check proof must be latest and preced
     )
     if boundary != "valid" {
       let later = @json.parse(proof.stringify())
-      no_change_set(later, "id", "later-check".to_json())
+      no_change_set(later, "id", ToJson::to_json("later-check"))
       let later_metadata = field(field(later, "tool_result"), "metadata")
       match boundary {
         "wrong-cwd" =>
-          no_change_set(later_metadata, "cwd", "elsewhere".to_json())
-        "nonzero" => no_change_set(later_metadata, "exit_code", (1).to_json())
+          no_change_set(later_metadata, "cwd", ToJson::to_json("elsewhere"))
+        "nonzero" =>
+          no_change_set(later_metadata, "exit_code", ToJson::to_json(1))
         "no-cleanup" =>
           no_change_set(
             field(later_metadata, "sandbox_evidence"),
             "cleanup_verified",
-            false.to_json(),
+            ToJson::to_json(false),
           )
         "wrong-tool" => {
-          no_change_set(later, "tool", "shell".to_json())
-          no_change_set(later_metadata, "cmd", "moon test focused".to_json())
+          no_change_set(later, "tool", ToJson::to_json("shell"))
+          no_change_set(
+            later_metadata,
+            "cmd",
+            ToJson::to_json("moon test focused"),
+          )
         }
         _ => ()
       }
@@ -74,10 +79,10 @@ async test "native no change task specific check proof must be latest and preced
       no_change_set(
         event,
         "journal_sequence",
-        (index + 1).to_string().to_json(),
+        ToJson::to_json((index + 1).to_string()),
       )
     }
-    no_change_set(events, "event_count", journal.length().to_json())
+    no_change_set(events, "event_count", ToJson::to_json(journal.length()))
     let result = reconcile_repair_evidence(
       work,
       receipt,

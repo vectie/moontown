@@ -23,7 +23,7 @@ test "customer machine binding uses stable lease identity without leaking access
       ..
     },
   )
-  let text = machines.to_json().stringify()
+  let text = ToJson::to_json(machines).stringify()
   for secret in ["private-user", "do-not-copy", "operator-only-node", "128000"] {
     assert_false(text.contains(secret))
   }

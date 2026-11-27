@@ -13,9 +13,9 @@ pub fn default_system_settings_path() -> String {
 fn migrate_system_settings_state_json(value : Json) -> Json {
   guard value is Object(fields) &&
     fields.get("schema") ==
-    Some(@system_settings.system_settings_schema().to_json()) &&
+    Some(ToJson::to_json(@system_settings.system_settings_schema())) &&
     fields.get("settings") is Some(Object(setting_fields)) &&
-    @system_settings.default_system_settings().to_json()
+    ToJson::to_json(@system_settings.default_system_settings())
     is Object(default_fields) else {
     return value
   }
@@ -56,7 +56,7 @@ async fn save_system_settings_state_unlocked(
   @support.ensure_parent_directory(path)
   @fs.write_file(
     temp,
-    state.to_json().stringify(indent=2) + "\n",
+    ToJson::to_json(state).stringify(indent=2) + "\n",
     create_mode=CreateOrTruncate,
     permission=0o600,
     sync=Full,
@@ -66,7 +66,7 @@ async fn save_system_settings_state_unlocked(
 
 ///|
 pub async fn load_and_install_system_settings(
-  path? : String = default_system_settings_path(),
+  path~ : String = default_system_settings_path(),
 ) -> @system_settings.SystemSettings {
   system_settings_store_mutex.acquire()
   defer system_settings_store_mutex.release()
@@ -77,7 +77,7 @@ pub async fn load_and_install_system_settings(
 
 ///|
 pub async fn system_settings_management_snapshot(
-  path? : String = default_system_settings_path(),
+  path~ : String = default_system_settings_path(),
 ) -> Json {
   system_settings_store_mutex.acquire()
   defer system_settings_store_mutex.release()
@@ -88,7 +88,7 @@ pub async fn system_settings_management_snapshot(
 
 ///|
 pub async fn public_system_settings_snapshot(
-  path? : String = default_system_settings_path(),
+  path~ : String = default_system_settings_path(),
 ) -> Json {
   system_settings_store_mutex.acquire()
   defer system_settings_store_mutex.release()
@@ -97,8 +97,10 @@ pub async fn public_system_settings_snapshot(
   {
     "schema": @system_settings.system_settings_schema(),
     "revision": state.revision,
-    "settings": state.settings.to_json(),
-    "catalog": @system_settings.system_settings_catalog(state.settings).to_json(),
+    "settings": ToJson::to_json(state.settings),
+    "catalog": ToJson::to_json(
+      @system_settings.system_settings_catalog(state.settings),
+    ),
   }
 }
 
@@ -108,8 +110,8 @@ fn changed_system_setting_keys(
   after : @system_settings.SystemSettings,
 ) -> Array[String] {
   let changed : Array[String] = []
-  guard before.to_json() is Object(before_fields) &&
-    after.to_json() is Object(after_fields) else {
+  guard ToJson::to_json(before) is Object(before_fields) &&
+    ToJson::to_json(after) is Object(after_fields) else {
     return changed
   }
   for key, value in after_fields {
@@ -125,7 +127,7 @@ pub async fn update_system_settings(
   body : String,
   actor_id~ : String,
   now_ms~ : UInt64,
-  path? : String = default_system_settings_path(),
+  path~ : String = default_system_settings_path(),
 ) -> Json {
   let request = @json.parse(body) catch {
     error => fail("invalid system settings JSON: \{error}")
@@ -138,7 +140,7 @@ pub async fn update_system_settings(
   let proposed : @system_settings.SystemSettings = @json.from_json(values_json) catch {
     error => fail("invalid system settings values: \{error}")
   }
-  let expected_revision : Int = @json.from_json(expected_revision_json) catch {
+  let expected_revision : Int32 = @json.from_json(expected_revision_json) catch {
     error => fail("invalid expected_revision: \{error}")
   }
   @system_settings.validate_system_settings(proposed)

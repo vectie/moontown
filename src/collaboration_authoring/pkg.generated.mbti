@@ -18,20 +18,23 @@ pub fn error_message(Error) -> String
 pub fn outcome_request_key(Request) -> @collaboration_contract.OutcomeKey raise
 
 // Errors
+#derive(@debug.Debug)
 pub suberror CollaborationError {
   CollaborationError(String)
-} derive(@debug.Debug)
+}
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct OneoffRuntime {
   moonclaw_root : String
   home : String
   profile : String
   profile_config_path : String?
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
 type OutcomeHistory
 
+#derive(@debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct Request {
   contract_version : String
   request_id : String
@@ -41,8 +44,8 @@ pub(all) struct Request {
   new_draft_id : String
   artifact_path : String
   draft : @collaboration_contract.Draft?
-  payload : Json?
-} derive(ToJson, @debug.Debug, @json.FromJson)
+  payload : @json.Json?
+}
 
 pub(all) struct Store {
   root : String
@@ -51,7 +54,7 @@ pub(all) struct Store {
 pub async fn Store::artifact(Self, String, String, String) -> Bytes
 pub async fn Store::books(Self) -> Array[@collaboration_contract.CatalogBook]
 pub async fn Store::compare_outcomes(Self, @collaboration_contract.OutcomeKey, @collaboration_contract.OutcomeKey) -> @collaboration_contract.OutcomeComparison
-pub async fn Store::decide_oneoff(Self, String, String, String?, Json, String) -> @collaboration_contract.OneoffWork
+pub async fn Store::decide_oneoff(Self, String, String, String?, @json.Json, String) -> @collaboration_contract.OneoffWork
 pub async fn Store::export_outcome(Self, @collaboration_contract.OutcomeKey) -> Bytes
 pub async fn Store::export_tar(Self, String, String) -> Bytes
 pub async fn Store::import_material(Self, String, Array[@collaboration_contract.MaterialSelection]) -> @collaboration_contract.MaterialNotebook
@@ -64,7 +67,7 @@ pub async fn Store::prepare(Self, String, String) -> @collaboration_contract.Pre
 pub async fn Store::read_oneoff(Self, String, String) -> @collaboration_contract.OneoffWork
 pub async fn Store::refresh_oneoff_book(Self, String, String) -> @collaboration_contract.OneoffWork
 pub async fn Store::request(Self, Request, String) -> @collaboration_contract.Reply
-pub async fn Store::request_oneoff(Self, Request, OneoffRuntime?, String?, String, Int) -> @collaboration_contract.Reply
+pub async fn Store::request_oneoff(Self, Request, OneoffRuntime?, String?, String, Int32) -> @collaboration_contract.Reply
 pub async fn Store::reuse(Self, String, String, String, String) -> @collaboration_contract.SavedDraft
 pub async fn Store::save(Self, @collaboration_contract.Draft, String, String) -> @collaboration_contract.SavedDraft
 pub async fn Store::save_claim_challenge(Self, @collaboration_contract.ClaimChallenge, String) -> @collaboration_contract.SavedDraft
@@ -73,11 +76,13 @@ pub async fn Store::save_material_notebook(Self, @collaboration_contract.Materia
 pub async fn Store::save_retained_inquiry(Self, @collaboration_contract.RetainedInquiry, String) -> @collaboration_contract.SavedDraft
 pub async fn Store::search_outcomes(Self, @collaboration_contract.OutcomeSearchQuery) -> @collaboration_contract.OutcomeSearch
 pub async fn Store::start_oneoff(Self, String, String, OneoffRuntime, background? : Bool) -> @collaboration_contract.OneoffWork
-pub async fn Store::submit_oneoff(Self, String, String, Json, Int) -> @collaboration_contract.OneoffWork
+pub async fn Store::submit_oneoff(Self, String, String, @json.Json, Int32) -> @collaboration_contract.OneoffWork
 
-type WorkInput derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
+type WorkInput
 
-type WorkIntent derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
+type WorkIntent
 
 // Type aliases
 

@@ -106,7 +106,7 @@ async test "empty store exposes no invented activity and no private actor" {
   assert_eq(items(public, "stories").length(), 0)
   assert_eq(items(public, "events").length(), 0)
   assert_true(field(public, "mine") is Null)
-  assert_true(field(public, "revision") is Number(0))
+  assert_true(field(public, "revision") is Number(0, ..))
   assert_false(@fs.exists(path))
   reject(path, "mine", {}, None, "unauthenticated")
   let mine = field(call(path, "mine", {}, Some("alice")), "mine")
@@ -219,8 +219,8 @@ async test "event creation uses trusted hosting capability and exact existing ow
   reject(path, "save-event", event_draft(), Some("alice"), "forbidden")
   let forged = event_draft()
   guard forged is Object(fields) else { fail("fixture") }
-  fields["can_host"] = true.to_json()
-  fields["owner_id"] = "host".to_json()
+  fields["can_host"] = ToJson::to_json(true)
+  fields["owner_id"] = ToJson::to_json("host")
   reject(path, "save-event", forged, Some("alice"), "forbidden")
   ignore(call(path, "save-event", event_draft(), Some("host"), host=true))
   reject(
@@ -389,9 +389,11 @@ async test "capacity waitlist cancellation and re-registration preserve FIFO" {
     is String("confirmed"),
   )
   let public = call(path, "public", {}, None)
-  assert_true(field(items(public, "events")[0], "confirmed_count") is Number(1))
   assert_true(
-    field(items(public, "events")[0], "waitlisted_count") is Number(1),
+    field(items(public, "events")[0], "confirmed_count") is Number(1, ..),
+  )
+  assert_true(
+    field(items(public, "events")[0], "waitlisted_count") is Number(1, ..),
   )
   assert_false(public.stringify().contains("contact"))
   assert_false(public.stringify().contains("participant_id"))
@@ -574,7 +576,7 @@ async test "organizer check-in and voluntary post-event follow-up form a private
   assert_true(
     field(completed, "next_step") is String("Meet to review observations"),
   )
-  assert_true(field(completed, "resolved_ms") is Number(1600))
+  assert_true(field(completed, "resolved_ms") is Number(1600, ..))
   let host = field(call(path, "mine", {}, Some("host")), "mine")
   assert_eq(items(items(host, "events")[0], "registrations").length(), 2)
   assert_eq(items(items(host, "events")[0], "followups").length(), 1)
@@ -615,7 +617,7 @@ async test "published cancellation is visible but closes all registrations witho
   }
   let notice = items(call(path, "public", {}, None), "events")[0]
   assert_true(field(notice, "state") is String("cancelled"))
-  assert_true(field(notice, "confirmed_count") is Number(0))
+  assert_true(field(notice, "confirmed_count") is Number(0, ..))
   reject(
     path,
     "register",
@@ -649,9 +651,9 @@ async test "concurrent applications cannot overbook or lose registrations" {
   })
   let public = call(path, "public", {}, None)
   let event = items(public, "events")[0]
-  assert_true(field(event, "confirmed_count") is Number(2))
-  assert_true(field(event, "waitlisted_count") is Number(6))
-  assert_true(field(public, "revision") is Number(10))
+  assert_true(field(event, "confirmed_count") is Number(2, ..))
+  assert_true(field(event, "waitlisted_count") is Number(6, ..))
+  assert_true(field(public, "revision") is Number(10, ..))
   let host = field(call(path, "mine", {}, Some("host")), "mine")
   assert_eq(items(items(host, "events")[0], "registrations").length(), 8)
 }
@@ -787,8 +789,8 @@ async test "event publication rejects stale consent even when two saves have the
     { "event_id": "walk", "consent": true, "expected_content_revision": 2 },
     Some("host"),
   )
-  assert_true(field(items(published, "events")[0], "capacity") is Number(2))
+  assert_true(field(items(published, "events")[0], "capacity") is Number(2, ..))
   assert_true(
-    field(items(published, "events")[0], "content_revision") is Number(2),
+    field(items(published, "events")[0], "content_revision") is Number(2, ..),
   )
 }

@@ -25,7 +25,7 @@ fn native_wenyu_result_envelope(
       "native Wenyu import requires review, Town notification, and no memory candidates",
     )
   }
-  let book_result = result.to_json()
+  let book_result = ToJson::to_json(result)
   let payload_digest = @crypto.bytes_to_hex_string(
     @crypto.sha256(@encoding/utf8.encode(book_result.stringify())),
   )
@@ -62,7 +62,7 @@ pub async fn persist_native_wenyu_result(
   result : BookResult,
   work_id : String,
   request_digest : String,
-  moonbook_root? : String = default_moonbook_root(),
+  moonbook_root~ : String = default_moonbook_root(),
 ) -> PersistResultOutcome {
   let payload = native_wenyu_result_envelope(result, work_id, request_digest)
   // Unlike legacy result_id scratch files, this transport path also binds the

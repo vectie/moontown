@@ -2,7 +2,7 @@
 pub fn final_integration_status_json(
   manifest : FinalIntegrationManifest,
   goals : Array[@core.StandingGoal],
-  current_tick : Int,
+  current_tick : Int32,
   civic_workspace_summary : String,
   protocol_summary : String,
   install_summaries : Array[String],

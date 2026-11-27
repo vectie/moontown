@@ -1,4 +1,5 @@
 ///|
+#derive(ToJson, FromJson)
 struct WenyuOutputPackage {
   contract : String
   work_id : String
@@ -7,7 +8,7 @@ struct WenyuOutputPackage {
   receipt : Json
   pages : Map[String, String]
   before : Map[String, String]
-} derive(ToJson, FromJson)
+}
 
 ///|
 fn wenyu_output_package(
@@ -106,11 +107,13 @@ fn validate_wenyu_result_binding(
     work.request.book_root == launch.entry.workspace_root &&
     work.request.criterion_id == launch.task.id &&
     work.request_digest ==
-    @native_work.digest(work.request.to_json().stringify()) &&
-    work.request.to_json() ==
-    (
-      { ..launch.request, generation: work.request.generation, } :
-      @native_work.Request).to_json() else {
+    @native_work.digest(ToJson::to_json(work.request).stringify()) &&
+    ToJson::to_json(work.request) ==
+    ToJson::to_json(
+      (
+        { ..launch.request, generation: work.request.generation, } :
+        @native_work.Request),
+    ) else {
     fail("wenyu_result_binding_mismatch")
   }
   if work.state == "completed" {
@@ -160,6 +163,7 @@ fn validate_wenyu_result_binding(
 }
 
 ///|
+#warnings("-reserved_keyword")
 async fn persist_wenyu_output_package(
   launch : WenyuLaunch,
   work : @native_work.Work,
@@ -185,11 +189,11 @@ async fn persist_wenyu_output_package(
   lock.lock(Exclusive)
   defer lock.unlock()
   let expected = wenyu_output_package(launch, work)
-  let package = if @fs.exists(package_path) {
+  let pkg_val = if @fs.exists(package_path) {
     let saved : WenyuOutputPackage = @json.from_json(
       @json.parse(@fs.read_file(package_path).text()),
     )
-    guard saved.to_json() == expected.to_json() else {
+    guard ToJson::to_json(saved) == ToJson::to_json(expected) else {
       fail("wenyu_output_package_conflict")
     }
     saved
@@ -197,7 +201,7 @@ async fn persist_wenyu_output_package(
     @support.ensure_parent_directory(package_path)
     @fs.write_file(
       package_path,
-      expected.to_json().stringify(indent=2),
+      ToJson::to_json(expected).stringify(indent=2),
       create_mode=CreateNew,
       permission=0o600,
       sync=Full,
@@ -208,20 +212,20 @@ async fn persist_wenyu_output_package(
   if @fs.exists(outcome_path) {
     let saved = @json.parse(@fs.read_file(outcome_path).text())
     guard saved is { "package_digest": String(digest), "outcome": outcome, .. } &&
-      digest == @native_work.digest(package.to_json().stringify()) else {
+      digest == @native_work.digest(ToJson::to_json(pkg_val).stringify()) else {
       fail("wenyu_application_receipt_invalid")
     }
     return @json.from_json(outcome)
   }
   // Validate all destinations before updating any one page.
-  for relative, content in package.pages {
+  for relative, content in pkg_val.pages {
     guard [
       "build/CODE_PATCH.md", "build/TEST_RESULTS.md", "build/CODE_BLOCKERS.md",
     ].contains(relative) else {
       fail("wenyu_output_path_not_allowed")
     }
     let actual = native_output_fingerprint(root, relative)
-    guard Some(actual) == package.before.get(relative) ||
+    guard Some(actual) == pkg_val.before.get(relative) ||
       actual == @native_work.digest(content) else {
       fail("wenyu_output_changed_by_human_or_newer_work: " + relative)
     }
@@ -230,7 +234,7 @@ async fn persist_wenyu_output_package(
     relative in [
       "build/CODE_PATCH.md", "build/TEST_RESULTS.md", "build/CODE_BLOCKERS.md",
     ] {
-    let content = match package.pages.get(relative) {
+    let content = match pkg_val.pages.get(relative) {
       Some(content) => content
       None => continue
     }
@@ -240,7 +244,7 @@ async fn persist_wenyu_output_package(
     if current == desired {
       continue
     }
-    guard Some(current) == package.before.get(relative) else {
+    guard Some(current) == pkg_val.before.get(relative) else {
       fail("wenyu_output_changed_by_human_or_newer_work: " + relative)
     }
     let next = native_book_file(root, relative + "." + work.id + ".next")
@@ -250,7 +254,7 @@ async fn persist_wenyu_output_package(
     if before_replace == desired {
       continue
     }
-    guard Some(before_replace) == package.before.get(relative) else {
+    guard Some(before_replace) == pkg_val.before.get(relative) else {
       fail("wenyu_output_changed_by_human_or_newer_work: " + relative)
     }
     @fs.rename(next, path, replace=true)
@@ -260,11 +264,11 @@ async fn persist_wenyu_output_package(
     }
   }
   let outcome = match persist {
-    Some(persist) => persist(package.result)
+    Some(persist) => persist(pkg_val.result)
     None =>
       @moonbook.persist_native_wenyu_result(
         launch.entry,
-        package.result,
+        pkg_val.result,
         work.id,
         work.request_digest,
       )
@@ -275,7 +279,9 @@ async fn persist_wenyu_output_package(
       {
         "contract": "moontown.wenyu.application-receipt.v1",
         "work_id": work.id,
-        "package_digest": @native_work.digest(package.to_json().stringify()),
+        "package_digest": @native_work.digest(
+          ToJson::to_json(pkg_val).stringify(),
+        ),
         "outcome": outcome,
       } : Json).stringify(indent=2),
     create_mode=CreateNew,

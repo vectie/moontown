@@ -1,11 +1,11 @@
 ///|
 pub async fn run_due_civic_communication_patterns(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  tick? : Int = 0,
-  now_ms? : UInt64 = @env.now(),
-  reducer_mode? : CivicCommunicationReductionMode = MoonClawReducer,
-  run_inline? : Bool = moontown_moonclaw_inline_enabled(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  tick~ : Int32 = 0,
+  now_ms~ : UInt64 = @env.now(),
+  reducer_mode~ : CivicCommunicationReductionMode = MoonClawReducer,
+  run_inline~ : Bool = moontown_moonclaw_inline_enabled(),
 ) -> String {
   let schedule_path = default_civic_communication_schedule_path(snapshot_path~)
   let schedules = load_or_create_civic_communication_schedules(

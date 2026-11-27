@@ -1,5 +1,5 @@
 ///|
-pub async fn latest_live_autonomy_journal_tick(snapshot_path : String) -> Int {
+pub async fn latest_live_autonomy_journal_tick(snapshot_path : String) -> Int32 {
   let mut latest = 0
   let journal_path = default_town_journal_path(snapshot_path~)
   if @fs.exists(journal_path) {
@@ -38,7 +38,7 @@ async fn append_live_autonomy_journal(
   spine : LiveAutonomySpine,
 ) -> Unit {
   let existing = @support.read_text_or_empty(path)
-  let line = spine.to_json().stringify()
+  let line = ToJson::to_json(spine).stringify()
   let content = if existing == "" {
     "\{line}\n"
   } else {
@@ -50,8 +50,8 @@ async fn append_live_autonomy_journal(
 ///|
 async fn prior_live_autonomy_stable_waiting_observation_streak(
   snapshot_path : String,
-  current_tick : Int,
-) -> Int {
+  current_tick : Int32,
+) -> Int32 {
   let journal_path = default_town_journal_path(snapshot_path~)
   if !@fs.exists(journal_path) {
     return 0

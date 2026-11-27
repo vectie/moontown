@@ -1,15 +1,15 @@
 ///|
 fn goal(
-  id? : String = "watch",
-  title? : String = "Title",
-  prompt? : String = "Source bounded",
-  cadence? : Int = 60,
-  due? : Int = 240,
-  last? : Int? = Some(180),
-  book? : String? = None,
-  enabled? : Bool = true,
-  policy? : String = "local-material:plan.json",
-  quality? : Int = 80,
+  id~ : String = "watch",
+  title~ : String = "Title",
+  prompt~ : String = "Source bounded",
+  cadence~ : Int32 = 60,
+  due~ : Int32 = 240,
+  last~ : Int32? = Some(180),
+  book~ : String? = None,
+  enabled~ : Bool = true,
+  policy~ : String = "local-material:plan.json",
+  quality~ : Int32 = 80,
 ) -> @core.StandingGoal {
   @core.StandingGoal::new(
     id~,
@@ -27,7 +27,7 @@ fn goal(
 
 ///|
 fn bytes(goals : Array[@core.StandingGoal]) -> Bytes {
-  @utf8.encode(goals.to_json().stringify())
+  @utf8.encode(ToJson::to_json(goals).stringify())
 }
 
 ///|
@@ -88,7 +88,7 @@ test "edited declaration merges onto advanced run ticks with exact text and disa
   ])
   assert_eq(
     field(report([base], [edited], [current]), "status"),
-    "merged".to_json(),
+    ToJson::to_json("merged"),
   )
 }
 
@@ -143,23 +143,23 @@ test "all diverging fields are visible and no partial merged candidate escapes" 
     quality=90,
   )
   let result = report([base], [edited], [current])
-  assert_eq(field(result, "status"), "conflict".to_json())
-  assert_eq(field(result, "conflict_count"), (8).to_json())
+  assert_eq(field(result, "status"), ToJson::to_json("conflict"))
+  assert_eq(field(result, "conflict_count"), ToJson::to_json(8))
   assert_true(field(result, "merged_goals") is Null)
   guard field(result, "conflicts") is Array(conflicts) else {
     fail("Expected conflicts")
   }
-  assert_eq(field(conflicts[0], "goal_id"), "watch".to_json())
-  assert_eq(field(conflicts[0], "field"), "title".to_json())
-  assert_eq(field(conflicts[0], "base_value"), "Title".to_json())
-  assert_eq(field(conflicts[0], "edited_value"), "Edited".to_json())
-  assert_eq(field(conflicts[0], "current_value"), "Current".to_json())
+  assert_eq(field(conflicts[0], "goal_id"), ToJson::to_json("watch"))
+  assert_eq(field(conflicts[0], "field"), ToJson::to_json("title"))
+  assert_eq(field(conflicts[0], "base_value"), ToJson::to_json("Title"))
+  assert_eq(field(conflicts[0], "edited_value"), ToJson::to_json("Edited"))
+  assert_eq(field(conflicts[0], "current_value"), ToJson::to_json("Current"))
   assert_true(field(conflicts[2], "base_value") is Null)
-  assert_eq(field(conflicts[2], "edited_value"), "a".to_json())
-  assert_eq(field(conflicts[2], "current_value"), "b".to_json())
-  assert_eq(field(conflicts[5], "base_value"), (180).to_json())
-  assert_eq(field(conflicts[5], "edited_value"), (200).to_json())
-  assert_eq(field(conflicts[5], "current_value"), (210).to_json())
+  assert_eq(field(conflicts[2], "edited_value"), ToJson::to_json("a"))
+  assert_eq(field(conflicts[2], "current_value"), ToJson::to_json("b"))
+  assert_eq(field(conflicts[5], "base_value"), ToJson::to_json(180))
+  assert_eq(field(conflicts[5], "edited_value"), ToJson::to_json(200))
+  assert_eq(field(conflicts[5], "current_value"), ToJson::to_json(210))
   assert_true(
     @goal_merge.merge_snapshots(
       bytes([base]),
@@ -202,8 +202,8 @@ test "independent deletions are retained but delete modify and independent add c
       fail("Expected conflicts")
     }
     assert_eq(conflicts.length(), 1)
-    assert_eq(field(conflicts[0], "field"), "$goal".to_json())
-    assert_eq(field(conflicts[0], "kind"), kind.to_json())
+    assert_eq(field(conflicts[0], "field"), ToJson::to_json("$goal"))
+    assert_eq(field(conflicts[0], "kind"), ToJson::to_json(kind))
     assert_true(field(result, "merged_goals") is Null)
   }
 }
@@ -270,22 +270,26 @@ test "optional conflicts expose exact scalar or null values on every side" {
         goal(book=Some("base"), last=Some(40)),
         goal(book=None, last=Some(0)),
         goal(book=Some(""), last=None),
-        ["base".to_json(), Json::null(), "".to_json()],
-        [(40).to_json(), (0).to_json(), Json::null()],
+        [ToJson::to_json("base"), Json::null(), ToJson::to_json("")],
+        [ToJson::to_json(40), ToJson::to_json(0), Json::null()],
       ),
       (
         goal(book=None, last=None),
         goal(book=Some(""), last=Some(-2147483648)),
         goal(book=Some("null"), last=Some(2147483647)),
-        [Json::null(), "".to_json(), "null".to_json()],
-        [Json::null(), (-2147483648).to_json(), (2147483647).to_json()],
+        [Json::null(), ToJson::to_json(""), ToJson::to_json("null")],
+        [
+          Json::null(),
+          ToJson::to_json(-2147483648),
+          ToJson::to_json(2147483647),
+        ],
       ),
       (
         goal(book=Some(""), last=Some(0)),
         goal(book=Some("null"), last=None),
         goal(book=None, last=Some(40)),
-        ["".to_json(), "null".to_json(), Json::null()],
-        [(0).to_json(), Json::null(), (40).to_json()],
+        [ToJson::to_json(""), ToJson::to_json("null"), Json::null()],
+        [ToJson::to_json(0), Json::null(), ToJson::to_json(40)],
       ),
     ] {
     let result = report([base], [edited], [current])

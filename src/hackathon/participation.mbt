@@ -196,6 +196,7 @@ fn remove_competition_member(
 }
 
 ///|
+#warnings("-deprecated")
 fn valid_material_url(url : String) -> Bool {
   let address = if url.has_prefix("https://") {
     url.substring(start=8).to_string()
@@ -226,7 +227,7 @@ fn submit_competition_package(
   now_ms : UInt64,
 ) -> HackathonState raise {
   let submission = { ..request.submission, submitted_ms: now_ms, }
-  let bundle = request.package
+  let bundle = request.pkg_val
   let team = participation_team(state, submission.team_id)
   let profile = participation_profile(state, team.id)
   guard state.programs

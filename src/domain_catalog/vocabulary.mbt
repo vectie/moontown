@@ -4,7 +4,7 @@ pub fn knowledge_domain_catalog_schema() -> String {
 }
 
 ///|
-pub fn knowledge_domain_catalog_version() -> Int {
+pub fn knowledge_domain_catalog_version() -> Int32 {
   1
 }
 

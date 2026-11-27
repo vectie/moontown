@@ -2,7 +2,7 @@
 async fn moonclaw_civic_communication_reduction(
   scenario : CivicCommunicationScenario,
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
   workspace_base : String,
   run_inline : Bool,
 ) -> CivicCommunicationReductionResult {

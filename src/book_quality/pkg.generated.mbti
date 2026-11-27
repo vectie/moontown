@@ -10,11 +10,11 @@ import {
 }
 
 // Values
-pub fn active_review_count_for_observations(Array[BookQualityReviewRunObservation], UInt64) -> Int
+pub fn active_review_count_for_observations(Array[BookQualityReviewRunObservation], UInt64) -> Int32
 
-pub fn active_review_dispatch_message(Int) -> String
+pub fn active_review_dispatch_message(Int32) -> String
 
-pub fn assess_structural_quality(Int, Array[String]) -> BookQualityStructuralAssessment
+pub fn assess_structural_quality(Int32, Array[String]) -> BookQualityStructuralAssessment
 
 pub fn audit_from_scores(String, Array[BookQualityScore]) -> BookQualityAudit
 
@@ -28,7 +28,7 @@ pub fn civic_base_required_paths() -> Array[BookQualityRequiredPath]
 
 pub fn civic_latest_result_assessment(Bool) -> BookQualitySignalAssessment
 
-pub fn clamp_score(Int) -> Int
+pub fn clamp_score(Int32) -> Int32
 
 pub fn context_pages_for_type(String) -> Array[String]
 
@@ -80,9 +80,9 @@ pub fn moonclaw_home(String) -> String
 
 pub fn moonclaw_home_from_run_path(String) -> String
 
-pub fn new_repair_standing_goal(BookQualityRepairBridgeItem, Int) -> @core.StandingGoal
+pub fn new_repair_standing_goal(BookQualityRepairBridgeItem, Int32) -> @core.StandingGoal
 
-pub fn next_action(String, Array[String], Int, Int?, semantic_repair_task? : String?) -> String
+pub fn next_action(String, Array[String], Int32, Int32?, semantic_repair_task? : String?) -> String
 
 pub fn no_pending_review_dispatch_message(String) -> String
 
@@ -102,29 +102,29 @@ pub fn operational_skill(String, String) -> String
 
 pub fn operational_ui_state(String, String, String) -> String
 
-pub fn parse_ai_quality_score(String) -> Int?
+pub fn parse_ai_quality_score(String) -> Int32?
 
-pub fn path_presence_assessment(String, Int, Bool) -> BookQualityPathAssessment
+pub fn path_presence_assessment(String, Int32, Bool) -> BookQualityPathAssessment
 
-pub fn path_set_assessment(Array[String], Array[String], Int) -> BookQualityPathSetAssessment
+pub fn path_set_assessment(Array[String], Array[String], Int32) -> BookQualityPathSetAssessment
 
 pub fn planbook_required_paths() -> Array[BookQualityRequiredPath]
 
 pub fn policy_output_path(@policy.BookPolicy) -> String
 
-pub fn policy_output_required_path(@policy.BookPolicy, Int) -> BookQualityRequiredPath
+pub fn policy_output_required_path(@policy.BookPolicy, Int32) -> BookQualityRequiredPath
 
 pub fn policy_spec_for_type(String) -> PolicySpec?
 
 pub fn policy_type_output_path(String) -> String
 
-pub fn policy_type_output_required_path(String, Int) -> BookQualityRequiredPath
+pub fn policy_type_output_required_path(String, Int32) -> BookQualityRequiredPath
 
 pub fn projection_state_path() -> String
 
 pub fn push_unique_note(Array[String], String) -> Unit
 
-pub fn quality_grade(Int) -> String
+pub fn quality_grade(Int32) -> String
 
 pub fn reconcile_review_run_from_observation(BookQualityReviewRun, result_exists~ : Bool, result_content? : String, process_alive~ : Bool, poll_summary~ : String, now_ms~ : UInt64) -> BookQualityReviewRunReconcileResult
 
@@ -134,13 +134,13 @@ pub fn render_audit_markdown(BookQualityAudit) -> String
 
 pub fn repair_action_for_type(String) -> String
 
-pub fn repair_bridge_item(BookQualityScore, String, String, Int, generated_at_ms~ : UInt64) -> BookQualityRepairBridgeItem
+pub fn repair_bridge_item(BookQualityScore, String, String, Int32, generated_at_ms~ : UInt64) -> BookQualityRepairBridgeItem
 
 pub fn repair_bridge_item_from_review_text(BookQualityScore, String, String, generated_at_ms~ : UInt64) -> BookQualityRepairBridgeItem?
 
 pub fn repair_bridge_summary(Array[BookQualityRepairBridgeItem], Array[String], Array[String]) -> String
 
-pub fn repair_goal_cadence_ticks() -> Int
+pub fn repair_goal_cadence_ticks() -> Int32
 
 pub fn repair_goal_generic_empty_review_summary(String) -> Bool
 
@@ -152,7 +152,7 @@ pub fn repair_goal_ids(Array[@core.StandingGoal]) -> Array[String]
 
 pub fn repair_goal_prompt(BookQualityRepairBridgeItem) -> String
 
-pub fn repair_goal_retirement_decision(String, Bool, has_target_book~ : Bool, score_exists~ : Bool, repairable_book~ : Bool, semantic_score~ : Int?) -> BookQualityRepairGoalRetirementDecision
+pub fn repair_goal_retirement_decision(String, Bool, has_target_book~ : Bool, score_exists~ : Bool, repairable_book~ : Bool, semantic_score~ : Int32?) -> BookQualityRepairGoalRetirementDecision
 
 pub fn repair_goal_retirement_decision_label(BookQualityRepairGoalRetirementDecision) -> String
 
@@ -166,19 +166,19 @@ pub fn repair_review_contract(String, BookQualityScore) -> BookQualityRepairRevi
 
 pub fn repair_review_page_markdown(BookQualityRepairBridgeItem, String) -> String
 
-pub fn repair_standing_goal(BookQualityRepairBridgeItem, next_due_tick~ : Int, last_run_tick~ : Int?) -> @core.StandingGoal
+pub fn repair_standing_goal(BookQualityRepairBridgeItem, next_due_tick~ : Int32, last_run_tick~ : Int32?) -> @core.StandingGoal
 
-pub fn required_path(String, Int) -> BookQualityRequiredPath
+pub fn required_path(String, Int32) -> BookQualityRequiredPath
 
 pub fn required_paths_for_book_type(String) -> Array[BookQualityRequiredPath]
 
-pub fn research_deep_report_word_assessment(Int) -> BookQualitySignalAssessment
+pub fn research_deep_report_word_assessment(Int32) -> BookQualitySignalAssessment
 
 pub fn research_required_paths() -> Array[BookQualityRequiredPath]
 
 pub fn review_external_proposal_spec_with_paths(BookQualityReviewPacket, String, String, String, String) -> BookQualityReviewProposalSpec
 
-pub fn review_moonclaw_jobs_json(String) -> Json
+pub fn review_moonclaw_jobs_json(String) -> @json.Json
 
 pub fn review_output_contract() -> String
 
@@ -194,7 +194,7 @@ pub fn review_result_path(String, String) -> String
 
 pub fn review_result_satisfies_contract(String) -> Bool
 
-pub fn review_role_runtime_json() -> Json
+pub fn review_role_runtime_json() -> @json.Json
 
 pub fn review_root(String) -> String
 
@@ -234,25 +234,25 @@ pub fn score_book_with_review_text(@moonbook.BookCatalogEntry, String) -> BookQu
 
 pub fn score_exists(Array[BookQualityScore], String) -> Bool
 
-pub fn semantic_quality_allows_ready(Int?) -> Bool
+pub fn semantic_quality_allows_ready(Int32?) -> Bool
 
-pub fn semantic_quality_assessment(Int?) -> BookQualitySemanticAssessment
+pub fn semantic_quality_assessment(Int32?) -> BookQualitySemanticAssessment
 
-pub fn semantic_ready_threshold() -> Int
+pub fn semantic_ready_threshold() -> Int32
 
 pub fn semantic_repair_action(semantic_repair_task? : String?) -> String
 
 pub fn semantic_repair_task_from_review_text(String) -> String?
 
-pub fn semantic_review_requires_repair(Int?) -> Bool
+pub fn semantic_review_requires_repair(Int32?) -> Bool
 
 pub fn stable_action() -> String
 
-pub fn structural_quality_is_stable(Array[String], Int) -> Bool
+pub fn structural_quality_is_stable(Array[String], Int32) -> Bool
 
 pub fn structural_required_relative_paths(@moonbook.BookCatalogEntry) -> Array[String]
 
-pub fn upsert_repair_standing_goal(Array[@core.StandingGoal], BookQualityRepairBridgeItem, Int) -> Unit
+pub fn upsert_repair_standing_goal(Array[@core.StandingGoal], BookQualityRepairBridgeItem, Int32) -> Unit
 
 pub fn weakest_score(Array[BookQualityScore]) -> BookQualityScore?
 
@@ -263,43 +263,49 @@ pub fn workspace_path(String, String) -> String
 // Errors
 
 // Types and methods
+#derive(Eq, @json.FromJson, @json.ToJson)
 pub(all) struct BookQualityAudit {
   generated_at : String
   catalog_path : String
-  total : Int
-  world_class_count : Int
-  ready_count : Int
+  total : Int32
+  world_class_count : Int32
+  ready_count : Int32
   weakest_book_id : String
-  weakest_score : Int
+  weakest_score : Int32
   scores : Array[BookQualityScore]
-} derive(Eq, ToJson, @json.FromJson)
+}
 
+#derive(Eq, @json.FromJson, @json.ToJson)
 pub(all) struct BookQualityContentObservation {
   semantic_review_text : String
-  research_deep_report_word_count : Int
+  research_deep_report_word_count : Int32
   course_index_text : String
   cookbook_audit_exists : Bool
-} derive(Eq, ToJson, @json.FromJson)
+}
 
-type BookQualityContextSpec derive(Eq, @debug.Debug)
+#derive(Eq, @debug.Debug)
+type BookQualityContextSpec
 
+#derive(Eq, @json.FromJson, @json.ToJson)
 pub(all) struct BookQualityPathAssessment {
-  score : Int
+  score : Int32
   strength : String?
   gap : String?
-} derive(Eq, ToJson, @json.FromJson)
+}
 
+#derive(Eq, @json.FromJson, @json.ToJson)
 pub(all) struct BookQualityPathSetAssessment {
-  score : Int
+  score : Int32
   strength : String?
   gap : String?
-} derive(Eq, ToJson, @json.FromJson)
+}
 
+#derive(Eq, @json.FromJson, @json.ToJson)
 pub(all) struct BookQualityRepairBridgeItem {
   book_id : String
   book_type : String
   workspace_root : String
-  semantic_score : Int
+  semantic_score : Int32
   semantic_grade : String
   repair_owner : String
   next_repair_task : String
@@ -308,12 +314,14 @@ pub(all) struct BookQualityRepairBridgeItem {
   standing_goal_id : String
   status : String
   generated_at_ms : UInt64
-} derive(Eq, ToJson, @json.FromJson)
+}
 
+#derive(Eq, @json.FromJson, @json.ToJson)
 pub(all) struct BookQualityRepairBridgeLedger {
   items : Array[BookQualityRepairBridgeItem]
-} derive(Eq, ToJson, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug)
 pub enum BookQualityRepairGoalRetirementDecision {
   NotRepairGoal
   MissingTargetBook
@@ -321,31 +329,35 @@ pub enum BookQualityRepairGoalRetirementDecision {
   NoLongerRepairableBook
   ReadySemanticReview
   StillNeedsRepair
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @json.FromJson, @json.ToJson)
 pub(all) struct BookQualityRepairReviewContract {
   semantic_grade : String
   repair_owner : String
   next_repair_task : String
-} derive(Eq, ToJson, @json.FromJson)
+}
 
+#derive(Eq, @json.FromJson, @json.ToJson)
 pub(all) struct BookQualityRequiredPath {
   relative : String
-  points : Int
-} derive(Eq, ToJson, @json.FromJson)
+  points : Int32
+}
 
+#derive(Eq, @json.FromJson, @json.ToJson)
 pub(all) struct BookQualityReviewPacket {
   book_id : String
   book_type : String
   policy : @policy.BookPolicy
   workspace_root : String
-  structural_score : Int
+  structural_score : Int32
   review_skill_path : String
   context_pages : Array[String]
   prompt : String
   output_contract : String
-} derive(Eq, ToJson, @json.FromJson)
+}
 
+#derive(@json.FromJson, @json.ToJson)
 pub(all) struct BookQualityReviewProposalSpec {
   packet_id : String
   title : String
@@ -357,9 +369,10 @@ pub(all) struct BookQualityReviewProposalSpec {
   skill_paths : Array[String]
   notes : Array[String]
   tags : Array[String]
-  metadata : Json
-} derive(ToJson, @json.FromJson)
+  metadata : @json.Json
+}
 
+#derive(Eq, @json.FromJson, @json.ToJson)
 pub(all) struct BookQualityReviewRun {
   book_id : String
   packet_path : String
@@ -369,17 +382,19 @@ pub(all) struct BookQualityReviewRun {
   status : String
   summary : String
   generated_at_ms : UInt64
-} derive(Eq, ToJson, @json.FromJson)
+}
 
+#derive(@json.FromJson, @json.ToJson)
 pub(all) struct BookQualityReviewRunLedger {
   runs : Array[BookQualityReviewRun]
-} derive(ToJson, @json.FromJson)
+}
 
+#derive(Eq)
 pub(all) struct BookQualityReviewRunObservation {
   run : BookQualityReviewRun
   has_result : Bool
   process_alive : Bool
-} derive(Eq)
+}
 
 pub(all) struct BookQualityReviewRunReconcileResult {
   run : BookQualityReviewRun
@@ -387,61 +402,68 @@ pub(all) struct BookQualityReviewRunReconcileResult {
   changed : Bool
 }
 
+#derive(Eq, @json.FromJson, @json.ToJson)
 pub(all) struct BookQualityScore {
   book_id : String
   title : String
   book_type : String
   workspace_root : String
-  structural_score : Int
+  structural_score : Int32
   structural_grade : String
-  semantic_score : Int?
+  semantic_score : Int32?
   semantic_grade : String
   quality_status : String
-  score : Int
+  score : Int32
   grade : String
   ready : Bool
   strengths : Array[String]
   gaps : Array[String]
   next_action : String
-} derive(Eq, ToJson, @json.FromJson)
+}
 
+#derive(Eq, @json.FromJson, @json.ToJson)
 pub(all) struct BookQualitySemanticAssessment {
-  score : Int?
+  score : Int32?
   grade : String
   status : String
   allows_ready : Bool
-} derive(Eq, ToJson, @json.FromJson)
+}
 
+#derive(Eq, @json.FromJson, @json.ToJson)
 pub(all) struct BookQualitySignalAssessment {
-  score : Int
+  score : Int32
   strengths : Array[String]
   gaps : Array[String]
-} derive(Eq, ToJson, @json.FromJson)
+}
 
+#derive(Eq, @json.FromJson, @json.ToJson)
 pub(all) struct BookQualityStructuralAssessment {
-  score : Int
+  score : Int32
   grade : String
   ready_without_semantic : Bool
-} derive(Eq, ToJson, @json.FromJson)
+}
 
+#derive(Eq, @json.FromJson, @json.ToJson)
 pub(all) struct BookQualityStructuralObservation {
   workspace_exists : Bool
   wiki_index_exists : Bool
   projection_state_exists : Bool
   existing_relative_paths : Array[String]
   civic_latest_result_exists : Bool
-} derive(Eq, ToJson, @json.FromJson)
+}
 
+#derive(Eq, @json.FromJson, @json.ToJson)
 pub(all) struct BookQualityWorkspaceAssessment {
-  score : Int
+  score : Int32
   strengths : Array[String]
   gaps : Array[String]
-} derive(Eq, ToJson, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug)
 pub struct PolicySpec {
   profile : @policy.PolicyProfile
   repair_action : String
-} derive(Eq, @debug.Debug)
+}
 
 // Type aliases
 

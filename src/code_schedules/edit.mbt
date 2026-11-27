@@ -4,12 +4,12 @@ pub async fn edit_code_schedule(
   prompt~ : String,
   model~ : String,
   title~ : String,
-  interval_seconds~ : Int,
+  interval_seconds~ : Int32,
   next_due_at~ : Int64,
   repeat~ : Bool,
-  recurrence? : String = "interval",
-  timezone? : String = "UTC",
-  path? : String = default_code_schedule_path(),
+  recurrence~ : String = "interval",
+  timezone~ : String = "UTC",
+  path~ : String = default_code_schedule_path(),
 ) -> CodeScheduleState {
   let lock = code_schedule_lock(path)
   defer lock.close()
@@ -44,7 +44,7 @@ pub async fn edit_code_schedule(
 pub async fn run_code_schedule_now(
   schedule_id : String,
   now : Int64,
-  path? : String = default_code_schedule_path(),
+  path~ : String = default_code_schedule_path(),
 ) -> CodeScheduleState {
   let lock = code_schedule_lock(path)
   defer lock.close()
@@ -69,7 +69,7 @@ pub async fn run_code_schedule_now(
 ///|
 pub async fn delete_code_schedule(
   schedule_id : String,
-  path? : String = default_code_schedule_path(),
+  path~ : String = default_code_schedule_path(),
 ) -> CodeScheduleState {
   let lock = code_schedule_lock(path)
   defer lock.close()

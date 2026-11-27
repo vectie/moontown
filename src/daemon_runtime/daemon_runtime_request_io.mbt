@@ -30,8 +30,8 @@ async fn write_daemon_stop_request(snapshot_path : String) -> Unit {
 
 ///|
 pub async fn write_daemon_restart_request(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  reason? : String = "reload requested",
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  reason~ : String = "reload requested",
 ) -> String {
   @support.write_text_file(
     default_daemon_restart_path(snapshot_path~),

@@ -151,7 +151,7 @@ pub fn OutcomeComparison::markdown(self : OutcomeComparison) -> String raise {
       comparison_context(self.fields, true),
     ),
     "Before key:\n\n" +
-    comparison_literal(self.before.to_json().stringify(indent=2)),
+    comparison_literal(ToJson::to_json(self.before).stringify(indent=2)),
     "Before dossier digest:\n\n" +
     comparison_literal(self.before_archive_digest),
     "After context:\n\n" +
@@ -162,7 +162,7 @@ pub fn OutcomeComparison::markdown(self : OutcomeComparison) -> String raise {
       comparison_context(self.fields, false),
     ),
     "After key:\n\n" +
-    comparison_literal(self.after.to_json().stringify(indent=2)),
+    comparison_literal(ToJson::to_json(self.after).stringify(indent=2)),
     "After dossier digest:\n\n" + comparison_literal(self.after_archive_digest),
     comparison_section(
       "Question and review context",

@@ -31,7 +31,7 @@ fn write_live_autonomy_digest_standing_watch_row(
 ) -> Unit {
   let latest = latest_record_for_goal(watcher_records, goal.id)
   let decision = match latest {
-    Some(record) => record.decision.to_string()
+    Some(record) => Show::to_string(record.decision)
     None => "not-run"
   }
   let evidence = match latest {
@@ -50,7 +50,7 @@ fn write_live_autonomy_digest_standing_watch_row(
 }
 
 ///|
-fn live_autonomy_due_in_label(ticks : Int) -> String {
+fn live_autonomy_due_in_label(ticks : Int32) -> String {
   let seconds = ticks * standing_goal_tick_seconds()
   if seconds <= 0 {
     "due now"

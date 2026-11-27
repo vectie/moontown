@@ -10,7 +10,8 @@ import {
 // Errors
 
 // Types and methods
-type Command derive(Eq, @debug.Debug)
+#derive(Eq, @debug.Debug)
+type Command
 
 // Type aliases
 

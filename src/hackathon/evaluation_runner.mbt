@@ -1,19 +1,21 @@
 ///|
 /// Trusted operator registry. Arguments are literal and never interpreted by
 /// a shell. Participant material URLs only appear in the request document.
+#derive(Debug, ToJson, FromJson)
 pub struct CompetitionRunner {
   key : String
   program : String
   args : Array[String]
   cwd : String
-  timeout_ms : Int
-} derive(Debug, ToJson, FromJson)
+  timeout_ms : Int32
+}
 
 ///|
+#derive(FromJson)
 struct RunnerOutput {
   metrics : Array[MetricValue]
   evidence : Array[String]
-} derive(FromJson)
+}
 
 ///|
 pub fn competition_runner_registry_path() -> String {
@@ -38,8 +40,8 @@ pub fn failed_benchmark_result(
   let run = find_benchmark_run(state, run_id)
   let submission = evaluation_submission(state, run.submission_id)
   let input : Json = {
-    "run": run.to_json(),
-    "submission": submission.to_json(),
+    "run": ToJson::to_json(run),
+    "submission": ToJson::to_json(submission),
   }
   let output : Json = { "reason": reason }
   {
@@ -71,12 +73,13 @@ async fn read_bounded_runner_output(
 }
 
 ///|
+#warnings("-reserved_keyword")
 async fn run_trusted_benchmark(
   runner : CompetitionRunner,
   request_path : String,
   out_bytes : Array[Byte],
   err_bytes : Array[Byte],
-) -> Int {
+) -> Int32 {
   @async.with_timeout(runner.timeout_ms, () => {
     @async.with_task_group(group => {
       let (stdout, stdout_target) = @process.read_from_process()
@@ -107,8 +110,8 @@ async fn run_trusted_benchmark(
 pub async fn execute_configured_benchmark(
   state : HackathonState,
   run_id : String,
-  registry_path? : String = competition_runner_registry_path(),
-  receipt_root? : String = @storage.moontown_product_state_dir() +
+  registry_path~ : String = competition_runner_registry_path(),
+  receipt_root~ : String = @storage.moontown_product_state_dir() +
     "/contest-express/benchmark-receipts",
 ) -> BenchmarkResult {
   let run = find_benchmark_run(state, run_id)
@@ -120,7 +123,7 @@ pub async fn execute_configured_benchmark(
   guard state.submission_packages
     .iter()
     .find_first(p => p.submission_id == submission.id)
-    is Some(package) &&
+    is Some(pkg_val) &&
     state.challenges.iter().find_first(c => c.id == submission.challenge_id)
     is Some(challenge) &&
     challenge.benchmark_version == run.benchmark_version else {
@@ -130,10 +133,10 @@ pub async fn execute_configured_benchmark(
     "schema": "moontown.contest-express.benchmark-request.v1",
     "run_id": run.id,
     "benchmark_version": run.benchmark_version,
-    "challenge": challenge.to_json(),
-    "track": track.to_json(),
-    "submission": submission.to_json(),
-    "package": package.to_json(),
+    "challenge": ToJson::to_json(challenge),
+    "track": ToJson::to_json(track),
+    "submission": ToJson::to_json(submission),
+    "package": ToJson::to_json(pkg_val),
   }
   let input = request.stringify(indent=2)
   let directory = receipt_root + "/" + run.id
@@ -218,7 +221,7 @@ pub async fn execute_configured_benchmark(
   }
   @fs.write_file(
     directory + "/receipt.json",
-    result.to_json().stringify(indent=2),
+    ToJson::to_json(result).stringify(indent=2),
     create_mode=CreateNew,
     permission=0o600,
     sync=Full,

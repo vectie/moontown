@@ -11,11 +11,11 @@ fn finish_answer(receipt : Json) -> String {
   let mut answer = ""
   for item in rows(field(receipt, "execution"), "tool_results") {
     if text(item, "tool") != "finish" ||
-      field(item, "accepted") != true.to_json() {
+      field(item, "accepted") != ToJson::to_json(true) {
       continue
     }
     let result = field(item, "result")
-    if field(result, "is_error") == true.to_json() {
+    if field(result, "is_error") == ToJson::to_json(true) {
       continue
     }
     let explicit = text(field(result, "metadata"), "answer")

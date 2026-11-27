@@ -237,11 +237,11 @@ async test "oneoff production Claw boundary outputs survive retry reopen and nam
     write_bytes(path + "/completed-root.txt", @utf8.encode(root))
     write_bytes(
       path + "/completed-work.json",
-      @utf8.encode(settled.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(settled).stringify(indent=2)),
     )
     write_bytes(
       path + "/revised-work.json",
-      @utf8.encode(next.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(next).stringify(indent=2)),
     )
   }
 }
@@ -288,7 +288,7 @@ async test "oneoff partial failure stays visible and frozen input substitution i
     write_bytes(path + "/partial-root.txt", @utf8.encode(root))
     write_bytes(
       path + "/partial-work.json",
-      @utf8.encode(result.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(result).stringify(indent=2)),
     )
   }
 }

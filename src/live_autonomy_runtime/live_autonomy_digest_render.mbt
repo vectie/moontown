@@ -5,7 +5,7 @@ fn render_live_autonomy_digest(
   standing_goals : Array[@core.StandingGoal],
   watcher_records : Array[@core.WatcherRunRecord],
 ) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   write_live_autonomy_digest_header(builder, spine)
   write_live_autonomy_digest_stable_blockers(builder, spine)
   write_live_autonomy_digest_standing_watches(

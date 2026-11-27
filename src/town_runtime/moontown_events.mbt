@@ -1,7 +1,7 @@
 ///|
 fn route_event(
   decision : @dispatch.RouteDecision,
-  index : Int,
+  index : Int32,
 ) -> @core.TownEvent {
   match decision {
     Assigned(plan) =>
@@ -30,13 +30,13 @@ fn route_event(
 ///|
 fn execution_event(
   execution : @core.TaskExecutionRecord,
-  index : Int,
+  index : Int32,
 ) -> @core.TownEvent {
   let proposal = execution.proposal_id.unwrap_or("draft")
   @core.TownEvent::new(
     id="event-exec-\{index}",
     kind="execution",
-    detail="\{execution.task_id} -> \{execution.status.to_string()} / proposal=\{proposal}",
+    detail="\{execution.task_id} -> \{execution.status} / proposal=\{proposal}",
     related_task_id=Some(execution.task_id),
     related_book_id=Some(execution.book_id),
     related_proposal_id=execution.proposal_id,

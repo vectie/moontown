@@ -242,7 +242,7 @@ async test "locked competition workflow keeps actor receipts and private books a
   assert_eq(reloaded.teams[0].members.length(), 2)
   assert_true(
     competition_workspace_sync_status(path~)
-    is { "ready": True, "book_count": Number(2), .. },
+    is { "ready": True, "book_count": Number(2, ..), .. },
   )
   let team_root = path + ".books/contest-team-builders"
   assert_true(@fs.exists(team_root + "/wiki/index.md"))
@@ -278,7 +278,7 @@ async test "event and team books use disjoint identities for ambiguous valid slu
   }
   assert_true(
     reconcile_competition_workspaces(state, path~)
-    is { "ready": True, "book_count": Number(3), .. },
+    is { "ready": True, "book_count": Number(3, ..), .. },
   )
   let catalog : Array[@moonbook.BookCatalogEntry] = @json.from_json(
     @json.parse(@fs.read_file(path + ".moonbooks.json").text()),
@@ -307,7 +307,7 @@ async test "book projection failure is visible and reconstructable without dupli
   @fs.write_file(path + ".books", "blocked directory", create_mode=CreateNew)
   let state = apply_hackathon_action(
     "publish",
-    { ..program_test_brief(), benchmark_version: 1, }.to_json(),
+    ToJson::to_json({ ..program_test_brief(), benchmark_version: 1, }),
     10UL,
     path~,
   )

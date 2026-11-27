@@ -4,9 +4,9 @@ fn setting_descriptor(
   group : String,
   label : String,
   description : String,
-  value : Int,
-  minimum : Int,
-  maximum : Int,
+  value : Int32,
+  minimum : Int32,
+  maximum : Int32,
   unit : String,
   apply_mode : String,
 ) -> Json {
@@ -371,11 +371,11 @@ pub fn system_settings_projection(state : SystemSettingsState) -> Json {
     "contract_id": "moontown.system-settings-management.v1",
     "schema": state.schema,
     "revision": state.revision,
-    "values": state.settings.to_json(),
-    "settings": system_settings_catalog(state.settings).to_json(),
+    "values": ToJson::to_json(state.settings),
+    "settings": ToJson::to_json(system_settings_catalog(state.settings)),
     "audit_events": state.audit_events
     .rev()
-    .map(event => event.to_json())
-    .to_json(),
+    .map(event => ToJson::to_json(event))
+    |> ToJson::to_json,
   }
 }

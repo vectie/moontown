@@ -4,9 +4,9 @@ priv struct CivicServiceLatestResultEvidence {
   found : Bool
   decision : String
   book_changed : String
-  pages_changed : Int
-  accepted_facts : Int
-  review_items : Int
+  pages_changed : Int32
+  accepted_facts : Int32
+  review_items : Int32
   next_check_hint : String
 }
 

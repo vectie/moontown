@@ -33,7 +33,7 @@ async fn main {
   run() catch {
     error => {
       @stdio.stderr.write("outcome_search: \{error}\n")
-      @sys.exit(1)
+      @env.exit(1)
     }
   }
 }

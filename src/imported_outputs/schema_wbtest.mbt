@@ -11,8 +11,8 @@ async fn replace_test_manifest(
   @fs.write_file(
     root + "/portable/outputs.manifest.v1.json",
     bytes,
-    create=0o600,
-    truncate=true,
+    create_mode=CreateOrTruncate,
+    permission=0o600,
   )
   let receipt_path = root + "/state/portable-source-binding.json"
   let receipt = @json.parse(@fs.read_file(receipt_path).text())
@@ -20,16 +20,21 @@ async fn replace_test_manifest(
     fields.get("source") is Some(Object(source)) else {
     fail("fixture")
   }
-  source["outputs_manifest_digest"] = hash(bytes).to_json()
+  source["outputs_manifest_digest"] = ToJson::to_json(hash(bytes))
   source["included_output_count"] = outputs
     .filter(output => output.included)
     .length()
-    .to_json()
+    |> ToJson::to_json
   source["reference_only_count"] = outputs
     .filter(output => !output.included)
     .length()
-    .to_json()
-  @fs.write_file(receipt_path, receipt.stringify(), create=0o600, truncate=true)
+    |> ToJson::to_json
+  @fs.write_file(
+    receipt_path,
+    receipt.stringify(),
+    create_mode=CreateOrTruncate,
+    permission=0o600,
+  )
 }
 
 ///|
@@ -78,9 +83,14 @@ async test "immutable selection rejects actual receipt source replacement" {
     fields.get("source") is Some(Object(source)) else {
     fail("fixture")
   }
-  source["package_sha256"] = hash(b"replacement-package").to_json()
-  source["agent_version"] = "v2".to_json()
-  @fs.write_file(receipt_path, receipt.stringify(), create=0o600, truncate=true)
+  source["package_sha256"] = ToJson::to_json(hash(b"replacement-package"))
+  source["agent_version"] = ToJson::to_json("v2")
+  @fs.write_file(
+    receipt_path,
+    receipt.stringify(),
+    create_mode=CreateOrTruncate,
+    permission=0o600,
+  )
   let current = discover(home + "/missing.json", home)
   assert_eq(current.books[0].source.unwrap().agent_version, "v2")
   assert_eq(
@@ -99,7 +109,12 @@ async test "catalog aliases malformed catalog and missing roots remain read only
   let (home, root, _) = fixture(b"original")
   defer @fs.rmdir(home, recursive=true)
   let catalog = home + "/catalog.json"
-  @fs.write_file(catalog, "not-json", create=0o600, truncate=true)
+  @fs.write_file(
+    catalog,
+    "not-json",
+    create_mode=CreateOrTruncate,
+    permission=0o600,
+  )
   let partial = discover(catalog, home)
   assert_eq(partial.state, "ready")
   assert_true(partial.message.contains("could not be read safely"))
@@ -115,8 +130,8 @@ async test "catalog aliases malformed catalog and missing roots remain read only
   @fs.write_file(
     root + "/state/portable-source-binding.json",
     "x".repeat(65537),
-    create=0o600,
-    truncate=true,
+    create_mode=CreateOrTruncate,
+    permission=0o600,
   )
   assert_eq(discover(missing, home).books[0].state, "unavailable")
 }

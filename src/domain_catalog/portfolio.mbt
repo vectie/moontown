@@ -1,10 +1,10 @@
 ///|
-pub fn domain_count(catalog : KnowledgeDomainCatalog) -> Int {
+pub fn domain_count(catalog : KnowledgeDomainCatalog) -> Int32 {
   catalog.domains.length()
 }
 
 ///|
-pub fn building_count(catalog : KnowledgeDomainCatalog) -> Int {
+pub fn building_count(catalog : KnowledgeDomainCatalog) -> Int32 {
   let building_ids : Array[String] = []
   for domain in catalog.domains {
     if !building_ids.contains(domain.building_id) {
@@ -15,12 +15,12 @@ pub fn building_count(catalog : KnowledgeDomainCatalog) -> Int {
 }
 
 ///|
-pub fn policy_count(catalog : KnowledgeDomainCatalog) -> Int {
+pub fn policy_count(catalog : KnowledgeDomainCatalog) -> Int32 {
   catalog.policies.length()
 }
 
 ///|
-pub fn book_count(catalog : KnowledgeDomainCatalog) -> Int {
+pub fn book_count(catalog : KnowledgeDomainCatalog) -> Int32 {
   let mut count = 0
   for domain in catalog.domains {
     count += domain.books.length()
@@ -32,7 +32,7 @@ pub fn book_count(catalog : KnowledgeDomainCatalog) -> Int {
 pub fn book_count_with_status(
   catalog : KnowledgeDomainCatalog,
   status : String,
-) -> Int {
+) -> Int32 {
   let mut count = 0
   for domain in catalog.domains {
     for book in domain.books {
@@ -45,12 +45,12 @@ pub fn book_count_with_status(
 }
 
 ///|
-pub fn active_book_count(catalog : KnowledgeDomainCatalog) -> Int {
+pub fn active_book_count(catalog : KnowledgeDomainCatalog) -> Int32 {
   book_count_with_status(catalog, "active")
 }
 
 ///|
-pub fn communication_scenario_count(catalog : KnowledgeDomainCatalog) -> Int {
+pub fn communication_scenario_count(catalog : KnowledgeDomainCatalog) -> Int32 {
   let scenario_ids : Array[String] = []
   for domain in catalog.domains {
     for scenario_id in domain.communication_scenario_ids {

@@ -33,9 +33,9 @@ fn wenyu_test_restore_env(key : String, old : String?) -> Unit {
 // Only a disposable /tmp synthetic repository is initialized and committed.
 // No remote is configured and no user source history is changed.
 async fn wenyu_launch_fixture(
-  allow_no_change? : Bool = true,
-  execution? : String = "native",
-  kind? : String = "code-patch",
+  allow_no_change~ : Bool = true,
+  execution~ : String = "native",
+  kind~ : String = "code-patch",
 ) -> WenyuLaunch {
   let root = @fs.realpath(@fs.tmpdir(prefix="wenyu-no-change-launch-"))
   let source = root + "/source"
@@ -116,7 +116,7 @@ fn wenyu_journey_event(
   id : String,
   tool : String,
   metadata : Json,
-  sequence : Int,
+  sequence : Int32,
 ) -> Json {
   let reservation = work.reservation.unwrap()
   {
@@ -265,6 +265,7 @@ fn wenyu_journey_evidence(
 }
 
 ///|
+#warnings("-reserved_keyword-unused_async")
 async fn wenyu_journey_completed(launch : WenyuLaunch) -> @native_work.Work {
   let path = launch.native_path
   let queued = @native_work.enqueue(launch.request, path~)
@@ -275,7 +276,7 @@ async fn wenyu_journey_completed(launch : WenyuLaunch) -> @native_work.Work {
     owner_workspace=launch.request.owner_workspace,
     instance_id="synthetic-wenyu-instance",
     config_path="/synthetic/unused-control.json",
-    request=async fn(method, route, body) {
+    request=async fn(method_val, route, body) {
       if route == "/v1/code/capabilities" {
         return Ok({
           "model_workspace_contract": "mooncode.model-workspace.v1",
@@ -290,7 +291,7 @@ async fn wenyu_journey_completed(launch : WenyuLaunch) -> @native_work.Work {
           "models": [{ "name": "moongate/fixture" }],
         })
       }
-      if method == "POST" {
+      if method_val == "POST" {
         posted.push(body)
         let command = @json.parse(body)
         return Ok({
@@ -326,8 +327,12 @@ async fn wenyu_journey_completed(launch : WenyuLaunch) -> @native_work.Work {
         ]
         wenyu_test_set(projection, "delivered_commands", delivered)
       } else if route.contains("runtime-events") {
-        wenyu_test_set(projection, "events", journal.to_json())
-        wenyu_test_set(projection, "event_count", journal.length().to_json())
+        wenyu_test_set(projection, "events", ToJson::to_json(journal))
+        wenyu_test_set(
+          projection,
+          "event_count",
+          ToJson::to_json(journal.length()),
+        )
       }
       Ok(projection)
     },
@@ -365,10 +370,13 @@ async fn wenyu_journey_completed(launch : WenyuLaunch) -> @native_work.Work {
     ]).stdout,
     head,
   )
-  assert_eq(@native_work.load(path~).work[0].to_json(), completed.to_json())
   assert_eq(
-    @native_work.sync(queued.id, 80000UL, path~, client~).to_json(),
-    completed.to_json(),
+    ToJson::to_json(@native_work.load(path~).work[0]),
+    ToJson::to_json(completed),
+  )
+  assert_eq(
+    ToJson::to_json(@native_work.sync(queued.id, 80000UL, path~, client~)),
+    ToJson::to_json(completed),
   )
   assert_eq(posted.length(), 1)
   completed

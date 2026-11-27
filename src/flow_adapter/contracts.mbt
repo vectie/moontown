@@ -29,7 +29,7 @@ pub fn output_schema_ref() -> String {
 }
 
 ///|
-pub fn capability_json(healthy? : Bool = false) -> Json {
+pub fn capability_json(healthy~ : Bool = false) -> Json {
   {
     "adapter_id": adapter_id(),
     "product_id": "moontown",
@@ -46,6 +46,7 @@ pub fn capability_json(healthy? : Bool = false) -> Json {
 }
 
 ///|
+#derive(Debug, Eq)
 struct FlowRequest {
   request_id : String
   run_id : String
@@ -60,9 +61,9 @@ struct FlowRequest {
   required_claim : String
   input_digest : String
   input_artifacts : Array[String]
-  timeout_ms : Int
+  timeout_ms : Int32
   created_at : String
-} derive(Debug, Eq)
+}
 
 ///|
 fn json_object(value : Json, label : String) -> Map[String, Json] raise {
@@ -81,7 +82,7 @@ fn json_string_field(fields : Map[String, Json], name : String) -> String raise 
 }
 
 ///|
-fn json_int_field(fields : Map[String, Json], name : String) -> Int raise {
+fn json_int_field(fields : Map[String, Json], name : String) -> Int32 raise {
   match fields.get(name) {
     Some(Number(value, ..)) => value.to_int()
     _ => fail("MoonTown Flow adapter requires integer \{name}")

@@ -12,7 +12,7 @@ fn local_wenyu_result_ready_for_projection(
 async fn finalize_goal_book_entry(
   state : @core.TownState,
   entry : @moonbook.BookCatalogEntry,
-  pending_review_baseline : Int,
+  pending_review_baseline : Int32,
   task_ids : Array[String],
 ) -> Unit {
   let local_outputs = !task_ids.is_empty() &&
@@ -50,7 +50,7 @@ async fn finalize_goal_book_entry(
 async fn build_goal_book_workspace_or_record_error(
   state : @core.TownState,
   entry : @moonbook.BookCatalogEntry,
-  local_outputs? : Bool = false,
+  local_outputs~ : Bool = false,
 ) -> String? {
   if local_outputs {
     // The materializer already attempted the projection before persistence.
@@ -116,7 +116,7 @@ async fn queue_goal_book_reviews_if_needed(
   state : @core.TownState,
   entry : @moonbook.BookCatalogEntry,
   summary : @moonbook.BookStateSummary,
-  pending_review_baseline : Int,
+  pending_review_baseline : Int32,
   task_ids : Array[String],
   quality_gaps : Array[String],
 ) -> Unit {
@@ -141,7 +141,7 @@ async fn queue_goal_book_reviews_if_needed(
 ///|
 fn goal_book_has_new_pending_reviews(
   summary : @moonbook.BookStateSummary,
-  pending_review_baseline : Int,
+  pending_review_baseline : Int32,
 ) -> Bool {
   summary.pending_review_count > pending_review_baseline
 }
@@ -153,7 +153,7 @@ fn record_goal_book_projection_events(
   generated_index : String,
   summary : @moonbook.BookStateSummary,
   quality_gaps : Array[String],
-  local_outputs? : Bool = false,
+  local_outputs~ : Bool = false,
 ) -> Unit {
   state.record_event(
     goal_book_projection_event(entry, generated_index, local_outputs~),
@@ -165,7 +165,7 @@ fn record_goal_book_projection_events(
 fn goal_book_projection_event(
   entry : @moonbook.BookCatalogEntry,
   generated_index : String,
-  local_outputs? : Bool = false,
+  local_outputs~ : Bool = false,
 ) -> @core.TownEvent {
   @core.TownEvent::new(
     id="event-build-\{entry.id}",

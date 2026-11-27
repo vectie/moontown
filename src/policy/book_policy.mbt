@@ -1,43 +1,48 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct SkillSpec {
   id : String
   lane : String
   cadence : String
   purpose : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct FileSpec {
   path : String
   required : Bool
   purpose : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct QualityCriteria {
-  threshold : Int
-  semantic_threshold : Int
+  threshold : Int32
+  semantic_threshold : Int32
   review_required : Bool
   description : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct OutputSpec {
   surface : String
   contract : String
   projection_path : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct BookPolicy {
   skills : Array[SkillSpec]
   required_files : Array[FileSpec]
   quality_criteria : QualityCriteria
   output : OutputSpec
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
-fn clamp_score(score : Int) -> Int {
+fn clamp_score(score : Int32) -> Int32 {
   if score < 0 {
     0
   } else if score > 100 {
@@ -64,8 +69,8 @@ pub fn file(path : String, required : Bool, purpose : String) -> FileSpec {
 
 ///|
 pub fn quality(
-  threshold : Int,
-  semantic_threshold : Int,
+  threshold : Int32,
+  semantic_threshold : Int32,
   review_required : Bool,
   description : String,
 ) -> QualityCriteria {
@@ -219,12 +224,12 @@ pub fn output_projection_path(policy : BookPolicy) -> String {
 }
 
 ///|
-fn structural_threshold(policy : BookPolicy) -> Int {
+fn structural_threshold(policy : BookPolicy) -> Int32 {
   policy.quality_criteria.threshold
 }
 
 ///|
-fn semantic_threshold(policy : BookPolicy) -> Int {
+fn semantic_threshold(policy : BookPolicy) -> Int32 {
   policy.quality_criteria.semantic_threshold
 }
 

@@ -22,8 +22,8 @@ async fn latest_planbook_change_summary(path : String) -> String {
 ///|
 fn normalized_planbook_latest_change_summary(
   latest : String,
-  planbook_open : Int,
-  planbook_repair_active : Int,
+  planbook_open : Int32,
+  planbook_repair_active : Int32,
 ) -> String {
   if planbook_open == 0 &&
     planbook_repair_active == 0 &&

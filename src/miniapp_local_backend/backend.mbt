@@ -3,7 +3,7 @@ pub fn miniapp_local_backend_dev_login(
   state : MiniappLocalBackendState,
   user_id : String,
   now_ms~ : UInt64,
-  ttl_ms? : UInt64 = 3600000UL,
+  ttl_ms~ : UInt64 = 3600000UL,
 ) -> MiniappLocalBackendResponse {
   match
     @miniapp_identity.miniapp_dev_login(state.identity, {

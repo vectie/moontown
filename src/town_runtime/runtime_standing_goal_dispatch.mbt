@@ -4,7 +4,7 @@ async fn dispatch_due_standing_goals(
   mayor : @roles.Mayor,
   catalog : Array[@moonbook.BookCatalogEntry],
   goals : Array[@core.StandingGoal],
-  tick : Int,
+  tick : Int32,
   snapshot_path : String,
 ) -> Array[@core.StandingGoal] {
   let updated : Array[@core.StandingGoal] = []
@@ -41,7 +41,7 @@ async fn dispatch_due_standing_goals(
 fn record_standing_goal_dispatch_deferred_for_budget(
   state : @core.TownState,
   goal : @core.StandingGoal,
-  tick : Int,
+  tick : Int32,
 ) -> Unit {
   state.record_event(
     @core.TownEvent::new(
@@ -57,7 +57,7 @@ fn record_standing_goal_dispatch_deferred_for_budget(
 fn record_standing_goal_dispatch_deferred_for_capacity(
   state : @core.TownState,
   goal : @core.StandingGoal,
-  tick : Int,
+  tick : Int32,
 ) -> Unit {
   state.record_event(
     @core.TownEvent::new(
@@ -73,7 +73,7 @@ fn record_standing_goal_dispatch_deferred_for_capacity(
 fn record_standing_goal_dispatched(
   state : @core.TownState,
   goal : @core.StandingGoal,
-  tick : Int,
+  tick : Int32,
 ) -> Unit {
   let target = goal.target_book_id.unwrap_or("mayor-selected-book")
   state.record_event(
@@ -88,10 +88,10 @@ fn record_standing_goal_dispatched(
 
 ///|
 fn standing_goal_dispatch_index(
-  offset : Int,
-  goal_count : Int,
-  tick : Int,
-) -> Int {
+  offset : Int32,
+  goal_count : Int32,
+  tick : Int32,
+) -> Int32 {
   if goal_count <= 0 {
     0
   } else {
@@ -100,7 +100,7 @@ fn standing_goal_dispatch_index(
 }
 
 ///|
-fn max_standing_goal_dispatches_per_tick() -> Int {
+fn max_standing_goal_dispatches_per_tick() -> Int32 {
   @system_settings.current_system_settings().standing_goal_dispatches_per_tick
 }
 

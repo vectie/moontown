@@ -11,7 +11,7 @@ The Mayor can continue publishing champion stories through announcements.
 ///|
 test "program lookup and migration" {
   let state = @hackathon.decode_hackathon_state(
-    @hackathon.empty_hackathon_state().to_json(),
+    ToJson::to_json(@hackathon.empty_hackathon_state()),
   )
   assert_eq(@hackathon.program_readiness(state, "river-ai"), [
     "Save a competition program",

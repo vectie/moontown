@@ -14,30 +14,34 @@ pub fn execution_view_stage_for_status(@core.TaskExecutionStatus) -> ExecutionVi
 
 pub fn render_dashboard(DashboardModel) -> String
 
-pub fn runtime_task_priority_for_id(String) -> Int
+pub fn runtime_task_priority_for_id(String) -> Int32
 
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub struct AlertBanner {
   level : String
   text : String
-} derive(Eq, @debug.Debug)
+}
 pub impl Show for AlertBanner
 
+#derive(Eq, @debug.Debug)
 pub struct DashboardModel {
   title : String
   alerts : Array[AlertBanner]
   sections : Array[DashboardSection]
-} derive(Eq, @debug.Debug)
+}
 pub impl Show for DashboardModel
 
+#derive(Eq, @debug.Debug)
 pub struct DashboardSection {
   title : String
   lines : Array[String]
-} derive(Eq, @debug.Debug)
+}
 pub impl Show for DashboardSection
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ExecutionViewStage {
   Packet
   Running
@@ -46,7 +50,7 @@ pub(all) enum ExecutionViewStage {
   Acceptance
   Completed
   Recovery
-} derive(Eq, @debug.Debug)
+}
 
 // Type aliases
 

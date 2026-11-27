@@ -37,10 +37,10 @@ async fn reconcile_persisted_standing_watch_records(
         let reconciled = copy_execution_with(
           execution,
           status~,
-          summary="\{record.detail}\nkeeper_auto_triage: reconciled_from_watcher_ledger\nreconciled_watcher_decision: \{record.decision.to_string()}",
+          summary="\{record.detail}\nkeeper_auto_triage: reconciled_from_watcher_ledger\nreconciled_watcher_decision: \{record.decision}",
           heartbeat_tick=supervision_tick(state),
           next_retry_tick=None,
-          result_decision=record.decision.to_string(),
+          result_decision=Show::to_string(record.decision),
           requires_review=record.decision == NeedsReview,
         )
         state.replace_execution(reconciled)
@@ -51,7 +51,7 @@ async fn reconcile_persisted_standing_watch_records(
             "event-watch-ledger-reconcile",
             state.events.length(),
             reconciled,
-            "Mayor reconciled `\{reconciled.task_id}` from the persisted watcher ledger as \{record.decision.to_string()}.",
+            "Mayor reconciled `\{reconciled.task_id}` from the persisted watcher ledger as \{record.decision}.",
           ),
         )
       }

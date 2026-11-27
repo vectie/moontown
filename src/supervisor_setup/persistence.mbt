@@ -15,7 +15,7 @@ fn migrate_supervisor_store_json(value : Json) -> Json {
           continue
         }
         if bindings.get("max_active_workers") is None {
-          bindings["max_active_workers"] = (3 : Int).to_json()
+          bindings["max_active_workers"] = ToJson::to_json((3 : Int32))
         }
       }
     _ => ()
@@ -27,18 +27,22 @@ fn migrate_supervisor_store_json(value : Json) -> Json {
         let action = json_string(handoff_fields, "action")
         let legacy_run_id = json_string(handoff_fields, "run_id")
         if handoff_fields.get("parent_run_id") is None {
-          handoff_fields["parent_run_id"] = legacy_run_id.to_json()
+          handoff_fields["parent_run_id"] = ToJson::to_json(legacy_run_id)
         }
         if handoff_fields.get("target_run_id") is None && action != "delegate" {
-          handoff_fields["target_run_id"] = legacy_run_id.to_json()
+          handoff_fields["target_run_id"] = ToJson::to_json(legacy_run_id)
         } else if handoff_fields.get("target_run_id") is Some(Null) {
           handoff_fields.remove("target_run_id")
         }
         if handoff_fields.get("command_kind") is None {
-          handoff_fields["command_kind"] = execution_command_kind(action).to_json()
+          handoff_fields["command_kind"] = ToJson::to_json(
+            execution_command_kind(action),
+          )
         }
         if handoff_fields.get("worker_bounds_source") is None {
-          handoff_fields["worker_bounds_source"] = "legacy_unbounded".to_json()
+          handoff_fields["worker_bounds_source"] = ToJson::to_json(
+            "legacy_unbounded",
+          )
         }
         for
           optional_field in [
@@ -61,18 +65,18 @@ fn migrate_supervisor_store_json(value : Json) -> Json {
         }
         match payload_fields.get("activated_at") {
           Some(Number(value, ..)) => {
-            payload_fields["activated_at"] = value
-              .to_uint64()
-              .to_string()
-              .to_json()
+            payload_fields["activated_at"] = value.to_uint64().to_string()
+              |> ToJson::to_json
             let prior_status = json_string(handoff_fields, "status")
             if prior_status == "runtime_acknowledged" {
-              handoff_fields["status"] = "runtime_acknowledged_legacy_timestamp".to_json()
+              handoff_fields["status"] = ToJson::to_json(
+                "runtime_acknowledged_legacy_timestamp",
+              )
             } else {
-              handoff_fields["request_digest"] = sha256_json(
-                Json::object(payload_fields),
-              ).to_json()
-              handoff_fields["status"] = "pending_transport".to_json()
+              handoff_fields["request_digest"] = ToJson::to_json(
+                sha256_json(Json::object(payload_fields)),
+              )
+              handoff_fields["status"] = ToJson::to_json("pending_transport")
               handoff_fields.remove("claimed_by")
               handoff_fields.remove("runtime_command")
               handoff_fields.remove("runtime_receipt")
@@ -136,7 +140,7 @@ async fn SupervisorSetupApplication::save_store(
   @support.ensure_parent_directory(path)
   @fs.write_file(
     temp,
-    store.to_json().stringify(indent=2) + "\n",
+    ToJson::to_json(store).stringify(indent=2) + "\n",
     create_mode=CreateOrTruncate,
     permission=0o600,
     sync=Full,

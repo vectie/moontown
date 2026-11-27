@@ -17,7 +17,7 @@ async fn[T] Store::read_locked(self : Store, operation : async () -> T) -> T {
 
 ///|
 /// Bound enumeration before allocation; never follow a directory symlink.
-async fn outcome_children(path : String, limit : Int) -> Array[String] {
+async fn outcome_children(path : String, limit : Int32) -> Array[String] {
   directory(path, false)
   let dir = @fs.opendir(path)
   defer dir.close()
@@ -35,7 +35,7 @@ async fn outcome_children(path : String, limit : Int) -> Array[String] {
 }
 
 ///|
-async fn outcome_bytes(root : String, path : String, limit : Int) -> Bytes {
+async fn outcome_bytes(root : String, path : String, limit : Int32) -> Bytes {
   guard @contract.safe_source_path(path) else {
     raise CollaborationError("Unsafe retained outcome path")
   }
@@ -58,7 +58,7 @@ async fn Store::retained_work(
     raise CollaborationError("Retained result has no attributed participants")
   }
   let participants : Array[@contract.ParticipantWork] = @json.from_json(
-    values.to_json(),
+    ToJson::to_json(values),
   )
   guard participants.length() == saved.draft.participants.length() &&
     participants.length() >= 2 else {
@@ -82,7 +82,7 @@ async fn Store::retained_work(
         outcome_bytes(root, "produced/" + p.book_id + "/terminal.json", 2097152),
       ),
     )
-    guard terminal == p.to_json() else {
+    guard terminal == ToJson::to_json(p) else {
       raise CollaborationError(
         "Retained participant receipt differs from the collected result",
       )
@@ -146,7 +146,7 @@ async fn Store::retained_review(
   self : Store,
   saved : @contract.SavedDraft,
   work : @contract.OneoffWork,
-  version : Int,
+  version : Int32,
 ) -> (@review.ConversationReviewBundle, Bytes) {
   guard version >= 0 && version <= 100 else {
     raise CollaborationError("Select a retained review version from 0 to 100")
@@ -178,9 +178,9 @@ async fn Store::retained_review(
 async fn Store::retained_review_versions(
   self : Store,
   saved : @contract.SavedDraft,
-) -> Array[Int] {
+) -> Array[Int32] {
   let names = outcome_children(self.work_root(saved) + "/review", 303)
-  let versions : Array[Int] = []
+  let versions : Array[Int32] = []
   for version in 0..<=100 {
     let name = version.to_string() + ".json"
     if names.contains(name) {

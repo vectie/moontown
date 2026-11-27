@@ -1,19 +1,19 @@
 ///|
 priv struct LiveAutonomyWriteMetadata {
-  tick : Int
-  planbook_open : Int
-  planbook_repair_active : Int
+  tick : Int32
+  planbook_open : Int32
+  planbook_repair_active : Int32
   planbook_change_log_path : String
   planbook_engineering_digest_path : String
   latest_change_summary : String
   book_template_request_status : @book_templates.BookTemplateRequestStatus
-  prior_stable_waiting_observation_streak : Int
+  prior_stable_waiting_observation_streak : Int32
 }
 
 ///|
 priv struct LiveAutonomyPlanbookMetadata {
-  planbook_open : Int
-  planbook_repair_active : Int
+  planbook_open : Int32
+  planbook_repair_active : Int32
   planbook_change_log_path : String
   planbook_engineering_digest_path : String
   latest_change_summary : String
@@ -44,7 +44,7 @@ async fn live_autonomy_planbook_metadata(
 async fn live_autonomy_write_metadata(
   state : @core.TownState,
   snapshot_path : String,
-  daemon_tick : Int?,
+  daemon_tick : Int32?,
 ) -> LiveAutonomyWriteMetadata {
   let planbook = live_autonomy_planbook_metadata(snapshot_path)
   let tick = match daemon_tick {

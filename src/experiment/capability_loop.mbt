@@ -6,13 +6,15 @@ pub fn capability_experiment_contract_version() -> String {
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CapabilityExperimentRecordRef {
   record_id : String
   record_version : String
   record_digest : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CapabilityExperimentPlan {
   contract_version : String
   experiment_id : String
@@ -21,12 +23,13 @@ pub(all) struct CapabilityExperimentPlan {
   challenger_capability : CapabilityExperimentRecordRef
   baseline_participant_ids : Array[String]
   challenger_participant_ids : Array[String]
-  minimum_observations_per_arm : Int
+  minimum_observations_per_arm : Int32
   minimum_accepted_rate_delta : Double
   maximum_challenger_rejection_rate : Double
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CapabilityExperimentAssignment {
   contract_version : String
   experiment_id : String
@@ -34,9 +37,10 @@ pub(all) struct CapabilityExperimentAssignment {
   participant_id : String
   assignment : String
   capability : CapabilityExperimentRecordRef
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CapabilityExperimentObservation {
   observation_id : String
   experiment_id : String
@@ -48,22 +52,23 @@ pub(all) struct CapabilityExperimentObservation {
   reward_evidence : CapabilityExperimentRecordRef
   accepted : Bool
   recorded_at : Int64
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CapabilityExperimentOutcome {
   contract_version : String
   experiment_id : String
   scope_id : String
-  baseline_observations : Int
-  challenger_observations : Int
+  baseline_observations : Int32
+  challenger_observations : Int32
   baseline_accepted_rate : Double
   challenger_accepted_rate : Double
   accepted_rate_delta : Double
   recommendation : String
   evidence_complete : Bool
   evaluated_at : Int64
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 fn capability_experiment_ref_valid(

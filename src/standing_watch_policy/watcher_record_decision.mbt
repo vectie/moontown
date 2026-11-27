@@ -72,7 +72,7 @@ fn watcher_record_same_terminal_identity(
 }
 
 ///|
-fn watcher_record_observation_quality(record : @core.WatcherRunRecord) -> Int {
+fn watcher_record_observation_quality(record : @core.WatcherRunRecord) -> Int32 {
   if record.decision == Deferred {
     return 0
   }

@@ -221,9 +221,9 @@ test "orderlist connects accounts while hiding other fulfillers' submissions" {
 
 ///|
 test "older marketplace store loads with an empty orderlist" {
-  let old = empty_marketplace_state().to_json()
+  let old = ToJson::to_json(empty_marketplace_state())
   guard old is Object(fields) else { fail("expected marketplace object") }
-  fields["schema"] = "moontown.marketplace-store.v2".to_json()
+  fields["schema"] = ToJson::to_json("moontown.marketplace-store.v2")
   fields.remove("orders")
   let migrated = migrate_marketplace_state_json(old)
   let state : MarketplaceState = @json.from_json(migrated)
@@ -248,7 +248,7 @@ async test "order API persists a cross-account fulfillment and decision" {
   let published = app.execute(
     "opaque-order-owner-token",
     "publish-order",
-    sample_order_draft("order.api-flow").to_json().stringify(),
+    ToJson::to_json(sample_order_draft("order.api-flow")).stringify(),
     "",
     now_ms=100UL,
   )
@@ -268,7 +268,7 @@ async test "order API persists a cross-account fulfillment and decision" {
   let submitted = app.execute(
     "opaque-order-worker-token",
     "fulfill-order",
-    fulfillment.to_json().stringify(),
+    ToJson::to_json(fulfillment).stringify(),
     "",
     now_ms=110UL,
   )
@@ -282,7 +282,7 @@ async test "order API persists a cross-account fulfillment and decision" {
   let decided = app.execute(
     "opaque-order-owner-token",
     "decide-order",
-    decision.to_json().stringify(),
+    ToJson::to_json(decision).stringify(),
     "",
     now_ms=120UL,
   )

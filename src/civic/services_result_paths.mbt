@@ -1,7 +1,7 @@
 ///|
 pub fn civic_service_result_path(
   service : CivicServiceDefinition,
-  root? : String = "",
+  root~ : String = "",
 ) -> String {
   if civic_service_uses_town_result_root(root) {
     @storage.moontown_product_artifact(

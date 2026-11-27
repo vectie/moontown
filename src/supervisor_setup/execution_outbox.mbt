@@ -149,7 +149,7 @@ fn validate_execution_transport_request(
       current.instruction
     }
     if json_string(request_fields, "reason") != reason ||
-      request_fields.get("force") != Some(false.to_json()) {
+      request_fields.get("force") != Some(ToJson::to_json(false)) {
       fail("transport supervisor stop request does not match Town")
     }
   } else if current.action == "supervisor_resume" {
@@ -175,7 +175,7 @@ fn validate_execution_transport_request(
     }
     if json_string(request_fields, "worker_run_id") !=
       current.target_run_id.unwrap_or("") ||
-      request_fields.get("force") != Some(false.to_json()) ||
+      request_fields.get("force") != Some(ToJson::to_json(false)) ||
       json_string(request_fields, "reason") != reason {
       fail("transport child stop request does not match Town")
     }
@@ -288,7 +288,7 @@ fn validate_delegate_result(
   match result_fields.get("provider_receipt") {
     Some(Null) | None =>
       provider_transition_evidence = provider_transition_evidence ||
-        receipt_fields.get("duplicate") == Some(true.to_json())
+        receipt_fields.get("duplicate") == Some(ToJson::to_json(true))
     Some(Object(provider_fields)) => {
       if json_string(provider_fields, "contract_id") !=
         "moonclaw.supervisor-command-receipt.v1" ||

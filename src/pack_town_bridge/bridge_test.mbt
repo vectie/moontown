@@ -8,6 +8,7 @@ fn activation(
     contract: "moonsuite.pack-host-activation.v1",
     pack_id,
     product_id,
+    app_runtime_identity: None,
     version: "1.0.0",
     required_runtime_extensions: [],
     book_templates: [],
@@ -16,8 +17,8 @@ fn activation(
     app_entrypoints: [],
     provider_ports: [
       @pack.contract_ref(
-        projection_provider_port_id(),
-        projection_provider_port_version(),
+        @pack_town_bridge.projection_provider_port_id(),
+        @pack_town_bridge.projection_provider_port_version(),
         "providers/moontown-pack-projection.json",
       ),
     ],
@@ -31,7 +32,7 @@ fn moonpoly_activation() -> @host.HostActivationProjection {
     @pack.tool_declaration(
       "policy.candidate.intake",
       "moonpoly",
-      candidate_input_schema_id(),
+      @pack_town_bridge.candidate_input_schema_id(),
       "policy-case",
       WorkspaceMutation,
       review_required=true,
@@ -60,7 +61,7 @@ fn mooncast_activation() -> @host.HostActivationProjection {
     @pack.tool_declaration(
       "creative.candidate.intake",
       "mooncast",
-      candidate_input_schema_id(),
+      @pack_town_bridge.candidate_input_schema_id(),
       "creative-brief",
       WorkspaceMutation,
       review_required=true,
@@ -84,9 +85,9 @@ fn mooncast_activation() -> @host.HostActivationProjection {
 }
 
 ///|
-fn moonpoly_projection() -> PackTownProjection {
+fn moonpoly_projection() -> @pack_town_bridge.PackTownProjection {
   {
-    contract_id: projection_contract_id(),
+    contract_id: @pack_town_bridge.projection_contract_id(),
     pack_id: "moonpoly",
     product_id: "moonpoly",
     version: "1.0.0",
@@ -115,9 +116,9 @@ fn moonpoly_projection() -> PackTownProjection {
 }
 
 ///|
-fn mooncast_projection() -> PackTownProjection {
+fn mooncast_projection() -> @pack_town_bridge.PackTownProjection {
   {
-    contract_id: projection_contract_id(),
+    contract_id: @pack_town_bridge.projection_contract_id(),
     pack_id: "mooncast",
     product_id: "mooncast",
     version: "1.0.0",
@@ -147,15 +148,15 @@ fn mooncast_projection() -> PackTownProjection {
 
 ///|
 test "unlike domain packs reconcile without shared domain types" {
-  let policy = reconcile_projection(
-    empty_registry(),
+  let policy = @pack_town_bridge.reconcile_projection(
+    @pack_town_bridge.empty_registry(),
     moonpoly_activation(),
     moonpoly_projection(),
   )
   guard policy is Ok(policy_registry) else {
     fail("expected MoonPoly projection to conform")
   }
-  let media = reconcile_projection(
+  let media = @pack_town_bridge.reconcile_projection(
     policy_registry,
     mooncast_activation(),
     mooncast_projection(),
@@ -164,8 +165,10 @@ test "unlike domain packs reconcile without shared domain types" {
     fail("expected MoonCast projection to conform")
   }
   assert_eq(registry.projections.length(), 2)
-  assert_eq(all_projected_subjects(registry).length(), 2)
-  guard subject_for_pack(registry, "moonpoly", "policy/cases/night-bus-access")
+  assert_eq(@pack_town_bridge.all_projected_subjects(registry).length(), 2)
+  guard @pack_town_bridge.subject_for_pack(
+      registry, "moonpoly", "policy/cases/night-bus-access",
+    )
     is Some(subject) else {
     fail("expected pack-owned policy subject")
   }
@@ -177,13 +180,13 @@ test "unlike domain packs reconcile without shared domain types" {
 
 ///|
 test "projection reconciliation is idempotent per pack" {
-  let first = reconcile_projection(
-    empty_registry(),
+  let first = @pack_town_bridge.reconcile_projection(
+    @pack_town_bridge.empty_registry(),
     moonpoly_activation(),
     moonpoly_projection(),
   )
   guard first is Ok(first_registry) else { fail("expected valid projection") }
-  let second = reconcile_projection(
+  let second = @pack_town_bridge.reconcile_projection(
     first_registry,
     moonpoly_activation(),
     moonpoly_projection(),
@@ -191,7 +194,7 @@ test "projection reconciliation is idempotent per pack" {
   guard second is Ok(second_registry) else { fail("expected valid projection") }
   assert_eq(second_registry.projections.length(), 1)
   assert_eq(
-    remove_pack_projection(second_registry, "moonpoly").projections.length(),
+    @pack_town_bridge.remove_pack_projection(second_registry, "moonpoly").projections.length(),
     0,
   )
 }
@@ -203,7 +206,10 @@ test "projection can expose only activated pack operations" {
     ..invalid.subjects[0],
     operation_ids: ["asset.generate"],
   }
-  let issues = projection_conformance_issues(moonpoly_activation(), invalid)
+  let issues = @pack_town_bridge.projection_conformance_issues(
+    moonpoly_activation(),
+    invalid,
+  )
   assert_true(
     issues.any(issue => {
       issue.path == "subjects[0].operation_ids[0]" &&
@@ -215,22 +221,22 @@ test "projection can expose only activated pack operations" {
 ///|
 test "projection requires explicit host discovery port" {
   let undiscoverable = { ..moonpoly_activation(), provider_ports: [], }
-  let issues = projection_conformance_issues(
+  let issues = @pack_town_bridge.projection_conformance_issues(
     undiscoverable,
     moonpoly_projection(),
   )
   assert_true(
     issues.any(issue => {
       issue.path == "activation.provider_ports" &&
-      issue.message.contains(projection_provider_port_id())
+      issue.message.contains(@pack_town_bridge.projection_provider_port_id())
     }),
   )
 }
 
 ///|
 test "bottom-up candidate resolves a route but does not grant authority" {
-  let candidate : TownPackCandidate = {
-    contract_id: candidate_contract_id(),
+  let candidate : @pack_town_bridge.TownPackCandidate = {
+    contract_id: @pack_town_bridge.candidate_contract_id(),
     candidate_ref: "town/candidates/river-memory",
     origin_ref: "town/ideas/river-memory",
     target_pack_id: "mooncast",
@@ -246,7 +252,11 @@ test "bottom-up candidate resolves a route but does not grant authority" {
       "community_owner": "river-neighborhood-book",
     },
   }
-  guard resolve_candidate_route(mooncast_activation(), candidate) is Ok(route) else {
+  guard @pack_town_bridge.resolve_candidate_route(
+      mooncast_activation(),
+      candidate,
+    )
+    is Ok(route) else {
     fail("expected candidate to resolve")
   }
   assert_eq(route.operation_id, "creative.candidate.intake")
@@ -256,8 +266,8 @@ test "bottom-up candidate resolves a route but does not grant authority" {
 
 ///|
 test "candidate cannot route directly into a non-intake domain action" {
-  let candidate : TownPackCandidate = {
-    contract_id: candidate_contract_id(),
+  let candidate : @pack_town_bridge.TownPackCandidate = {
+    contract_id: @pack_town_bridge.candidate_contract_id(),
     candidate_ref: "town/candidates/river-memory",
     origin_ref: "town/ideas/river-memory",
     target_pack_id: "mooncast",
@@ -270,19 +280,22 @@ test "candidate cannot route directly into a non-intake domain action" {
     evidence_refs: ["evidence/community-interviews.json"],
     domain_payload: {},
   }
-  let issues = candidate_conformance_issues(mooncast_activation(), candidate)
+  let issues = @pack_town_bridge.candidate_conformance_issues(
+    mooncast_activation(),
+    candidate,
+  )
   assert_true(
     issues.any(issue => {
       issue.path == "intake_operation_id" &&
-      issue.message.contains(candidate_input_schema_id())
+      issue.message.contains(@pack_town_bridge.candidate_input_schema_id())
     }),
   )
 }
 
 ///|
 test "candidate cannot exceed MoonTown claim authority or target an undeclared operation" {
-  let candidate : TownPackCandidate = {
-    contract_id: candidate_contract_id(),
+  let candidate : @pack_town_bridge.TownPackCandidate = {
+    contract_id: @pack_town_bridge.candidate_contract_id(),
     candidate_ref: "town/candidates/autonomous-release",
     origin_ref: "town/ideas/autonomous-release",
     target_pack_id: "mooncast",
@@ -295,7 +308,10 @@ test "candidate cannot exceed MoonTown claim authority or target an undeclared o
     evidence_refs: [],
     domain_payload: {},
   }
-  let issues = candidate_conformance_issues(mooncast_activation(), candidate)
+  let issues = @pack_town_bridge.candidate_conformance_issues(
+    mooncast_activation(),
+    candidate,
+  )
   assert_true(issues.any(issue => issue.path == "claim_ceiling"))
   assert_true(issues.any(issue => issue.path == "intake_operation_id"))
 }

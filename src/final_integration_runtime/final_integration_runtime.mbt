@@ -5,9 +5,9 @@ fn final_integration_status_path(manifest_id : String) -> String {
 
 ///|
 pub async fn install_wenyu_final_integration(
-  manifest_path? : String = "assets/templates/integration/wenyu-final-integration.json",
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  standing_goal_path? : String = @storage.default_standing_goal_path(),
+  manifest_path~ : String = "assets/templates/integration/wenyu-final-integration.json",
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  standing_goal_path~ : String = @storage.default_standing_goal_path(),
 ) -> String {
   let manifest = match load_final_integration_manifest(manifest_path) {
     Some(manifest) => manifest
@@ -59,9 +59,9 @@ pub async fn install_wenyu_final_integration(
 
 ///|
 pub async fn render_wenyu_final_integration_status(
-  manifest_path? : String = "assets/templates/integration/wenyu-final-integration.json",
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  standing_goal_path? : String = @storage.default_standing_goal_path(),
+  manifest_path~ : String = "assets/templates/integration/wenyu-final-integration.json",
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  standing_goal_path~ : String = @storage.default_standing_goal_path(),
 ) -> String {
   let manifest = match load_final_integration_manifest(manifest_path) {
     Some(manifest) => manifest
@@ -69,7 +69,7 @@ pub async fn render_wenyu_final_integration_status(
   }
   let current_tick = load_integration_daemon_tick(snapshot_path)
   let goals = @storage.load_or_create_standing_goals(path=standing_goal_path)
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string("# \{manifest.title} Status\n\n")
   builder.write_string("- Current daemon tick: \{current_tick}\n")
   builder.write_string(

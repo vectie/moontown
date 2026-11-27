@@ -1,4 +1,5 @@
 ///|
+#warnings("-reserved_keyword")
 async test "oneoff completed production participant result crosses real Book intake and exact readback" {
   guard @env.get_env_var("MOONTOWN_BOOK_OUTCOME_BIN") is Some(_) else {
     fail(
@@ -16,7 +17,7 @@ async test "oneoff completed production participant result crosses real Book int
       workspace_root=root + "/books/destination",
     ),
   )
-  @fs.write_file(store.catalog_path, catalog.to_json().stringify())
+  @fs.write_file(store.catalog_path, ToJson::to_json(catalog).stringify())
   let saved = store.save(fixture_draft(), "", "2026-10-07T03:00:00Z")
   ignore(store.prepare(saved.draft.draft_id, saved.revision))
   let work = store.start_oneoff(saved.draft.draft_id, saved.revision, runtime)
@@ -81,10 +82,10 @@ async test "oneoff completed production participant result crosses real Book int
   let outcome_root = store.work_root(saved) +
     "/outcomes/" +
     submitted.package_digest[7:].to_owned()
-  let package = @json.parse(
+  let pkg_val = @json.parse(
     text_bytes(read_bytes(outcome_root + "/package.json", 16777216)),
   )
-  guard package is { "payload_json": String(payload), .. } else {
+  guard pkg_val is { "payload_json": String(payload), .. } else {
     fail("Expected actual outcome package")
   }
   guard @json.parse(payload) is { "artifacts": Array(artifacts), .. } else {
@@ -117,7 +118,7 @@ async test "oneoff completed production participant result crosses real Book int
   assert_true(
     try {
       ignore(
-        checked_work_readback(package, {
+        checked_work_readback(pkg_val, {
           "contract_version": "moonbook.product-outcome-readback.v1",
           "package_digest": "wrong",
         }),
@@ -132,11 +133,11 @@ async test "oneoff completed production participant result crosses real Book int
     write_bytes(path + "/book-root.txt", @utf8.encode(root))
     write_bytes(
       path + "/book-work.json",
-      @utf8.encode(reopened.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(reopened).stringify(indent=2)),
     )
     write_bytes(
       path + "/town-outcome-package.json",
-      @utf8.encode(package.stringify(indent=2)),
+      @utf8.encode(pkg_val.stringify(indent=2)),
     )
   }
 }

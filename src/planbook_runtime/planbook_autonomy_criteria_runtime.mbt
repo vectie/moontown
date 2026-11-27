@@ -153,7 +153,7 @@ async fn planbook_civic_service_reconciliation_criterion(
 
 ///|
 priv struct PlanbookRuntimeFailureSummary {
-  count : Int
+  count : Int32
   sample : String
 }
 

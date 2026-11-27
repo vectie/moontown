@@ -1,6 +1,6 @@
 ///|
 fn render_wenyu_product_architecture(plan : @roles.MayorGoalPlan) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string(wenyu_product_architecture_intro())
   builder.write_string("\n\n")
   builder.write_string(render_wenyu_architecture_graph(plan))
@@ -20,7 +20,7 @@ fn wenyu_product_architecture_intro() -> String {
 
 ///|
 fn render_wenyu_architecture_graph(plan : @roles.MayorGoalPlan) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string("```mermaid\n")
   builder.write_string("flowchart TB\n")
   builder.write_string(wenyu_architecture_goal_edge())
@@ -42,7 +42,7 @@ fn wenyu_architecture_goal_edge() -> String {
 
 ///|
 fn wenyu_architecture_lane_edge(
-  index : Int,
+  index : Int32,
   lane : @roles.MayorGoalLane,
 ) -> String {
   "  Mayor --> Lane\{index}[\"\{lane.entry.name}\"]\n"

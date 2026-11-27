@@ -2,11 +2,11 @@
 priv struct CivicServiceProtocolEvidence {
   status : String
   ready : Bool
-  inbox_count : Int
-  contribution_count : Int
-  reduction_count : Int
-  outbox_count : Int
-  review_count : Int
+  inbox_count : Int32
+  contribution_count : Int32
+  reduction_count : Int32
+  outbox_count : Int32
+  review_count : Int32
   latest_summary : String
   history : Array[ProtocolHistoryEntry]
   history_state : String

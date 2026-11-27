@@ -2,9 +2,9 @@
 pub async fn poll_run(
   task_id : String,
   run_id : String,
-  home? : String = default_moonclaw_home(),
-  cwd? : String = ".",
-  detect_orphan? : Bool = true,
+  home~ : String = default_moonclaw_home(),
+  cwd~ : String = ".",
+  detect_orphan~ : Bool = true,
 ) -> ProposalPollResponse {
   let resolved_cwd = resolve_root_path(cwd)
   let resolved_home = resolve_home_path(home, resolved_cwd)
@@ -118,8 +118,8 @@ fn orphan_detectable_run_status(status : @core.TaskExecutionStatus) -> Bool {
 ///|
 pub async fn run_workspace_dir(
   run_id : String,
-  home? : String = default_moonclaw_home(),
-  cwd? : String = ".",
+  home~ : String = default_moonclaw_home(),
+  cwd~ : String = ".",
 ) -> String? {
   let resolved_cwd = resolve_root_path(cwd)
   let resolved_home = resolve_home_path(home, resolved_cwd)

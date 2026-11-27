@@ -1,8 +1,9 @@
 ///|
+#derive(Debug, Eq)
 pub struct PolicySpec {
   profile : @policy.PolicyProfile
   repair_action : String
-} derive(Debug, Eq)
+}
 
 ///|
 fn policy_spec(

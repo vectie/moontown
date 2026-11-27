@@ -11,7 +11,7 @@ pub fn codex_main_target_id() -> String {
 ///|
 pub fn codex_main_target_json(
   source_root : String,
-  label? : String = "Codex ACP Worker",
+  label~ : String = "Codex ACP Worker",
 ) -> Json {
   codex_acp_target_json(source_root, label, command(), args(), model())
 }
@@ -53,7 +53,7 @@ pub fn moontown_target_json() -> Json {
 pub fn upsert_codex_main_target_json(
   config : Json,
   source_root : String,
-  label? : String = "Codex ACP Worker",
+  label~ : String = "Codex ACP Worker",
 ) -> Json {
   upsert_acp_target_json(
     config,
@@ -67,7 +67,7 @@ pub fn upsert_moontown_target_json(config : Json, book_root : String) -> Json {
   let with_workspace = upsert_agent_default_json(
     config,
     "workspace",
-    book_root.to_json(),
+    ToJson::to_json(book_root),
   )
   upsert_acp_target_json(
     with_workspace,

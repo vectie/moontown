@@ -4,7 +4,7 @@
 fn table_zones_csv(
   table : DataTable,
   zones : Array[GeoFeature],
-  memberships : Array[Array[Int]],
+  memberships : Array[Array[Int32]],
   table_digest : String,
   zone_digest : String,
 ) -> Result[String, String] {

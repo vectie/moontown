@@ -1,8 +1,8 @@
 ///|
 pub async fn bootstrap_wenyu_game_design_course_book(
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  workspace_root? : String = @course_book.default_wenyu_course_workspace_root(),
-  source_workspace_root? : String = @course_book.default_wenyu_course_source_workspace_root(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  workspace_root~ : String = @course_book.default_wenyu_course_workspace_root(),
+  source_workspace_root~ : String = @course_book.default_wenyu_course_source_workspace_root(),
 ) -> String {
   let entry = @course_book.wenyu_course_catalog_entry(workspace_root)
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)

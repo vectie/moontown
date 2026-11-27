@@ -212,7 +212,7 @@ test "retained inquiry client cancel repeated selection stale callbacks and save
       cancelled.settle(
         pending.generation,
         "retained-inquiry",
-        reply.to_json().stringify(),
+        ToJson::to_json(reply).stringify(),
       ).draft,
       cancelled.draft,
     )
@@ -225,7 +225,7 @@ test "retained inquiry client cancel repeated selection stale callbacks and save
   let settled = pending.settle(
     pending.generation,
     "retained-inquiry",
-    reply.to_json().stringify(),
+    ToJson::to_json(reply).stringify(),
   )
   assert_eq(settled.draft, draft)
   assert_false(settled.dirty)
@@ -240,7 +240,7 @@ test "retained inquiry client cancel repeated selection stale callbacks and save
     pending.settle(
       pending.generation,
       "retained-inquiry",
-      forged.to_json().stringify(),
+      ToJson::to_json(forged).stringify(),
     ).draft,
     client.draft,
   )

@@ -11,7 +11,7 @@ async test "due civic salon rounds persist schedule and run ledger" {
   )
   @support.write_text_file(
     civic_communication_scenario_path(schedule.id, snapshot_path~),
-    daemon_civic_communication_scenario().to_json().stringify(indent=2),
+    ToJson::to_json(daemon_civic_communication_scenario()).stringify(indent=2),
   )
   let summary = run_due_civic_communication_patterns(
     snapshot_path~,
@@ -66,7 +66,7 @@ async test "stale civic salon projection refreshes without forcing another round
   let scenario = daemon_civic_communication_scenario()
   @support.write_text_file(
     civic_communication_scenario_path(schedule.id, snapshot_path~),
-    scenario.to_json().stringify(indent=2),
+    ToJson::to_json(scenario).stringify(indent=2),
   )
   @support.write_text_file(
     civic_communication_projection_path_for_scenario(scenario, snapshot_path),
@@ -75,7 +75,7 @@ async test "stale civic salon projection refreshes without forcing another round
   @support.write_text_file(
     "\{root}/books/wenyu-social-square/\{@civic.civic_reducer_output_relative_path()}",
     Json::object({
-      "ideas": daemon_civic_communication_scenario().ideas.to_json(),
+      "ideas": ToJson::to_json(daemon_civic_communication_scenario().ideas),
     }).stringify(indent=2),
   )
   let summary = run_due_civic_communication_patterns(
@@ -110,12 +110,16 @@ async test "persisted civic reducer prefers scenario-specific output over shared
   @support.write_text_file(
     "\{raw_root}/civic-communication-results.json",
     Json::object({
-      "ideas": [{ ..scenario.ideas[0], participating_books: ["other-book"], }].to_json(),
+      "ideas": ToJson::to_json([
+        { ..scenario.ideas[0], participating_books: ["other-book"], },
+      ]),
     }).stringify(indent=2),
   )
   @support.write_text_file(
     "\{raw_root}/future-energy-social-square-ideas.json",
-    Json::object({ "ideas": scenario.ideas.to_json() }).stringify(indent=2),
+    Json::object({ "ideas": ToJson::to_json(scenario.ideas) }).stringify(
+      indent=2,
+    ),
   )
   let reduction = reduce_civic_communication_outputs(
     scenario,
@@ -147,11 +151,13 @@ async test "active civic schedule reconciles completed persisted reducer output"
   )
   @support.write_text_file(
     civic_communication_scenario_path(schedule.id, snapshot_path~),
-    scenario.to_json().stringify(indent=2),
+    ToJson::to_json(scenario).stringify(indent=2),
   )
   @support.write_text_file(
     "\{root}/books/wenyu-social-square/raw/bootstrap/future-energy-social-square-ideas.json",
-    Json::object({ "ideas": scenario.ideas.to_json() }).stringify(indent=2),
+    Json::object({ "ideas": ToJson::to_json(scenario.ideas) }).stringify(
+      indent=2,
+    ),
   )
   let summary = run_due_civic_communication_patterns(
     snapshot_path~,

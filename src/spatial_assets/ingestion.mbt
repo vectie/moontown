@@ -1,10 +1,12 @@
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) struct SpatialAssetIssue {
   code : String
   message : String
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) struct TownPresentationAsset {
   building_id : String
   placement_id : String
@@ -21,7 +23,7 @@ pub(all) struct TownPresentationAsset {
   declared_losses : Array[String]
   assumptions : Array[String]
   authority_envelope_id : String
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
 fn issue(

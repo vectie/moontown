@@ -130,7 +130,7 @@ async fn write_planbook_repair_status(
     let prior = @support.read_text_or_empty(
       default_planbook_repair_path(snapshot_path~),
     )
-    let same = try @json.parse(prior) == task.to_json() catch {
+    let same = try @json.parse(prior) == ToJson::to_json(task) catch {
       _ => false
     }
     if same {
@@ -139,7 +139,7 @@ async fn write_planbook_repair_status(
   }
   @support.write_text_file(
     default_planbook_repair_path(snapshot_path~),
-    task.to_json().stringify(indent=2),
+    ToJson::to_json(task).stringify(indent=2),
   )
   @support.write_text_file(
     default_planbook_repair_markdown_path(snapshot_path~),

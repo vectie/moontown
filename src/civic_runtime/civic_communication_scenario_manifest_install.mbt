@@ -1,12 +1,13 @@
 ///|
+#derive(FromJson)
 priv struct CivicPatternScenarioManifest {
   templates : Array[String]
-} derive(FromJson)
+}
 
 ///|
 pub async fn install_civic_pattern_scenario_manifest(
   manifest_path : String,
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> String {
   if !@fs.exists(manifest_path) {
     return "Could not load civic communication pattern manifest: \{manifest_path}"

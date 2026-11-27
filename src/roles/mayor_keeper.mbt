@@ -4,7 +4,7 @@ pub fn Mayor::handoff_to_keeper(
   book : @core.BookRef,
   objective : String,
   scope_summary : String,
-  constraints? : Array[String] = [],
+  constraints~ : Array[String] = [],
 ) -> @moonclaw.EmbeddedRuntimeHandoff {
   ignore(self)
   @moonclaw.mayor_to_keeper_handoff(
@@ -20,7 +20,7 @@ pub async fn Mayor::prepare_keeper_packet(
   self : Mayor,
   entry : @moonbook.BookCatalogEntry,
   task : @moonbook.BookTask,
-  packet_dir? : String = @moonclaw.default_packet_directory(),
+  packet_dir~ : String = @moonclaw.default_packet_directory(),
 ) -> MayorKeeperPacket {
   let bundle = @moonbook.hydrate_worker_context(entry, task)
   let packet_id = keeper_packet_id(entry.id, task.id)
@@ -65,8 +65,8 @@ pub fn keeper_packet_id(book_id : String, task_id : String) -> String {
 }
 
 ///|
-fn compact_id_segment(text : String, limit : Int) -> String {
-  let builder = StringBuilder::new()
+fn compact_id_segment(text : String, limit : Int32) -> String {
+  let builder = StringBuilder()
   let mut emitted = 0
   let mut last_dash = false
   for char in text.to_lower() {

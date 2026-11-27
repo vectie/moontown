@@ -1,7 +1,7 @@
 ///|
 fn supervisor_route_fixture(
   default_model : String,
-  ready? : Bool = true,
+  ready~ : Bool = true,
 ) -> Json {
   {
     "contract": "moonclaw.moongate-route.v1",
@@ -60,7 +60,7 @@ test "activation uses configured identity and preserves explicit choice without 
   )
   assert_eq(supervisor_activation_model(explicit), "moongate/explicit")
   let persisted_explicit : SupervisorProfileActivationPayload = @json.from_json(
-    @json.parse(explicit.to_json().stringify()),
+    @json.parse(ToJson::to_json(explicit).stringify()),
   )
   assert_eq(
     resolve_supervisor_activation_model(
@@ -102,7 +102,7 @@ test "activation uses configured identity and preserves explicit choice without 
 }
 
 ///|
-fn supervisor_route_delegate(model : String, cursor : Int) -> Json {
+fn supervisor_route_delegate(model : String, cursor : Int32) -> Json {
   {
     "commandId": "delegate-route",
     "parentRunId": "run-route",

@@ -101,7 +101,7 @@ pub fn marketplace_notifications_for(
         "object_id": notification.object_id,
         "created_at_ms": notification.created_at_ms.to_string(),
         "read_at_ms": match notification.read_at_ms {
-          Some(value) => value.to_string().to_json()
+          Some(value) => ToJson::to_json(value.to_string())
           None => Json::null()
         },
       })
@@ -109,7 +109,7 @@ pub fn marketplace_notifications_for(
   }
   {
     "contract_id": "moontown.notifications.v1",
-    "notifications": notifications.to_json(),
+    "notifications": ToJson::to_json(notifications),
     "unread_count": unread,
   }
 }

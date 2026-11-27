@@ -1,11 +1,12 @@
 ///|
 /// The owner-bound portion of an editor feature selection.
+#derive(Debug, Eq)
 pub(all) struct NativeSelection {
   selected_feature : String
   title : String
   implementation_hint : String
   acceptance : Array[String]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Parse the selection fields required by native editor repair. Root keys must
@@ -52,7 +53,7 @@ pub fn parse_native_selection(content : String) -> NativeSelection? {
 fn native_selection_feature_token_valid(feature_id : String) -> Bool {
   let mut needs_character = true
   for character in feature_id {
-    if character is ('a'..='z' | '0'..='9') {
+    if character is ('a'..<='z' | '0'..<='9') {
       needs_character = false
     } else if character == '-' && !needs_character {
       needs_character = true
@@ -64,7 +65,7 @@ fn native_selection_feature_token_valid(feature_id : String) -> Bool {
 }
 
 ///|
-fn native_selection_root_member_count(content : String) -> Int {
+fn native_selection_root_member_count(content : String) -> Int32 {
   let mut depth = 0
   let mut quoted = false
   let mut escaped = false

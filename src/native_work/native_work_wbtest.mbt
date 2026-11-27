@@ -70,6 +70,7 @@ fn fixture_client(
 }
 
 ///|
+#warnings("-reserved_keyword")
 async fn fixture_configured_client(
   request : Request,
   handler : async (String, String, String) -> Result[Json, String],
@@ -98,7 +99,7 @@ async fn fixture_configured_client(
     "{\"port\":43123}",
   )
   @native_code_control.load(path~, owner_workspace=request.owner_workspace, exchange=async fn(
-    method,
+    method_val,
     uri,
     body,
     headers,
@@ -106,9 +107,17 @@ async fn fixture_configured_client(
     assert_true(uri.has_prefix("http://127.0.0.1:43123/v1/"))
     assert_eq(headers["X-MoonClaw-Execution-Token"], token)
     let route = uri["http://127.0.0.1:43123".length():].to_owned()
-    match handler(method, route, body) {
+    match handler(method_val, route, body) {
       Ok(result) =>
-        (if method == "POST" { 202 } else { 200 }, instance, result.stringify())
+        (
+          if method_val == "POST" {
+            202
+          } else {
+            200
+          },
+          instance,
+          result.stringify(),
+        )
       Err(reason) if reason == "native_not_found" => (404, instance, "{}")
       Err(reason) => fail(reason)
     }
@@ -121,8 +130,8 @@ fn fixture_event(
   id : String,
   tool : String,
   metadata : Json,
-  ok? : Bool = true,
-  sequence? : String = "1",
+  ok~ : Bool = true,
+  sequence~ : String = "1",
 ) -> Json {
   let reservation = work.reservation.unwrap()
   {
@@ -144,7 +153,7 @@ fn fixture_event(
 }
 
 ///|
-fn fixture_validation(work : Work, id : String, ok? : Bool = true) -> Json {
+fn fixture_validation(work : Work, id : String, ok~ : Bool = true) -> Json {
   fixture_event(
     work,
     id,
@@ -181,7 +190,7 @@ fn fixture_validation(work : Work, id : String, ok? : Bool = true) -> Json {
 ///|
 fn fixture_receipt(
   work : Work,
-  answer? : String = "repair_decision: accepted\nApplied source fix",
+  answer~ : String = "repair_decision: accepted\nApplied source fix",
 ) -> Json {
   let reservation = work.reservation.unwrap()
   {
@@ -204,6 +213,7 @@ fn fixture_receipt(
 }
 
 ///|
+#warnings("-unused_async")
 async fn fixture_reserved(request : Request) -> Work {
   let work = enqueue(request, path=request.owner_workspace + "/work.json")
   let client = fixture_client(request, async fn(_, _, _) { Err("not-used") })
@@ -216,6 +226,7 @@ async fn fixture_reserved(request : Request) -> Work {
 }
 
 ///|
+#warnings("-reserved_keyword-unused_async")
 async test "native queue is durable and freezes three roots model and exact retry bytes" {
   let request = fixture_request()
   let path = request.owner_workspace + "/state.json"
@@ -228,8 +239,8 @@ async test "native queue is durable and freezes three roots model and exact retr
   assert_eq(load(path~).work.length(), 1)
   let calls : Array[String] = []
   let posted : Array[String] = []
-  let client = fixture_client(request, async fn(method, route, body) {
-    calls.push(method + " " + route)
+  let client = fixture_client(request, async fn(method_val, route, body) {
+    calls.push(method_val + " " + route)
     if route == "/v1/code/capabilities" {
       return Ok({ "model_workspace_contract": "mooncode.model-workspace.v1" })
     }
@@ -241,7 +252,7 @@ async test "native queue is durable and freezes three roots model and exact retr
         "models": [{ "name": "moongate/one" }],
       })
     }
-    if method == "GET" {
+    if method_val == "GET" {
       return Err("native_not_found")
     }
     posted.push(body)
@@ -265,13 +276,14 @@ async test "native queue is durable and freezes three roots model and exact retr
   assert_eq(text(field(body, "payload"), "task_intent"), "workspace_change")
   assert_true(
     rows(field(body, "payload"), "planner_allowed_tools").contains(
-      "checkpoint".to_json(),
+      ToJson::to_json("checkpoint"),
     ),
   )
   assert_false(posted[0].contains("codex"))
 }
 
 ///|
+#warnings("-reserved_keyword-unused_async")
 async test "native pending capability and explicit source absence never choose ACP or cwd" {
   assert_true(
     source_binding(None) is Err(reason) &&
@@ -286,8 +298,8 @@ async test "native pending capability and explicit source absence never choose A
   let path = request.owner_workspace + "/pending.json"
   let work = enqueue(request, path~)
   let calls : Array[String] = []
-  let client = fixture_client(request, async fn(method, path, _) {
-    calls.push(method + " " + path)
+  let client = fixture_client(request, async fn(method_val, path, _) {
+    calls.push(method_val + " " + path)
     Ok({ "model_workspace_contract": "mooncode.model-workspace.v1" })
   })
   let pending = sync(work.id, 2UL, path~, client~)
@@ -414,6 +426,7 @@ async test "native repair accepts real final files and event proof without commi
 }
 
 ///|
+#warnings("-reserved_keyword-unused_async")
 async test "native repair no change is honest and prior commit requirement remains blocked" {
   let request = fixture_request()
   let work = fixture_reserved(request)
@@ -441,8 +454,8 @@ async test "native repair no change is honest and prior commit requirement remai
   let path = request.owner_workspace + "/commit.json"
   let work = enqueue(committed, path~)
   let calls : Array[String] = []
-  let client = fixture_client(request, async fn(method, _, _) {
-    calls.push(method)
+  let client = fixture_client(request, async fn(method_val, _, _) {
+    calls.push(method_val)
     Err("must-not-call")
   })
   let pending = sync(work.id, 2UL, path~, client~)

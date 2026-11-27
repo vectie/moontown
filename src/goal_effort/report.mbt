@@ -1,8 +1,8 @@
 ///|
 fn known_sum(
   periods : Array[EffortPeriod],
-  field : (EffortPeriod) -> Int?,
-) -> Int? {
+  field : (EffortPeriod) -> Int32?,
+) -> Int32? {
   if periods.is_empty() {
     return None
   }
@@ -78,7 +78,7 @@ pub fn report(
       }),
     }
     let output = if format == "json" {
-      report.to_json().stringify() + "\n"
+      ToJson::to_json(report).stringify() + "\n"
     } else {
       report_csv(report)
     }

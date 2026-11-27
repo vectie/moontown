@@ -129,7 +129,7 @@ async fn AccountApplication::save_state(
   @support.ensure_parent_directory(self.state_path)
   @fs.write_file(
     temp,
-    state.to_json().stringify(indent=2) + "\n",
+    ToJson::to_json(state).stringify(indent=2) + "\n",
     create_mode=CreateOrTruncate,
     permission=0o600,
     sync=Full,
@@ -186,7 +186,7 @@ pub async fn AccountApplication::create_visitor_session(
   opaque_token : String,
   visitor_id : String,
   now_ms~ : UInt64,
-  ttl_ms? : UInt64 = 0UL,
+  ttl_ms~ : UInt64 = 0UL,
 ) -> VisitorSessionResult {
   let ttl_ms = if ttl_ms == 0UL {
     @system_settings.current_system_settings().visitor_session_ttl_ms.to_uint64()

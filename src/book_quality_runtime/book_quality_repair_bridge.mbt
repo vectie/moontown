@@ -1,9 +1,9 @@
 ///|
 pub async fn reconcile_book_quality_repair_bridge(
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  result_dir? : String = @book_quality.default_review_result_dir(),
-  bridge_path? : String = @book_quality.default_repair_bridge_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  result_dir~ : String = @book_quality.default_review_result_dir(),
+  bridge_path~ : String = @book_quality.default_repair_bridge_path(),
 ) -> String {
   let context = load_book_quality_repair_bridge_context(
     book_catalog_path, snapshot_path,
@@ -32,7 +32,7 @@ pub async fn reconcile_book_quality_repair_bridge(
 priv struct BookQualityRepairBridgeContext {
   repairable_book_ids : Array[String]
   audit : @book_quality.BookQualityAudit
-  current_tick : Int
+  current_tick : Int32
   goals_path : String
   goals : Array[@core.StandingGoal]
 }
@@ -64,8 +64,8 @@ async fn persist_book_quality_repair_bridge(
   @support.write_text_file(
     bridge_path,
     @book_quality.BookQualityRepairBridgeLedger::{ items: repaired, }
-    .to_json()
-    .stringify(indent=2),
+    |> ToJson::to_json
+    |> Json::stringify(indent=2),
   )
 }
 
@@ -75,7 +75,7 @@ async fn apply_book_quality_repair_bridge_candidates(
   repairable_book_ids : Array[String],
   result_dir : String,
   goals : Array[@core.StandingGoal],
-  current_tick : Int,
+  current_tick : Int32,
 ) -> Array[@book_quality.BookQualityRepairBridgeItem] {
   let repaired : Array[@book_quality.BookQualityRepairBridgeItem] = []
   for score in scores {
@@ -99,7 +99,7 @@ async fn apply_book_quality_repair_bridge_candidates(
 async fn apply_book_quality_repair_bridge_candidate(
   goals : Array[@core.StandingGoal],
   candidate : BookQualityRepairBridgeCandidate,
-  current_tick : Int,
+  current_tick : Int32,
 ) -> @book_quality.BookQualityRepairBridgeItem {
   let item = candidate.item
   write_book_quality_repair_review_page(item, candidate.result_text)

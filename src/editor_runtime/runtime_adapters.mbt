@@ -31,7 +31,7 @@ fn planbook_repair_source_root() -> String {
 
 ///|
 fn default_planbook_repair_path(
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> String {
   "\{@storage.snapshot_base_dir(snapshot_path)}/planbook/repair-task.json"
 }
@@ -77,7 +77,7 @@ fn moontown_moonclaw_inline_enabled() -> Bool {
 
 ///|
 fn optional_env_text(key : String) -> String? {
-  match @sys.get_env_var(key) {
+  match @env.get_env_var(key) {
     Some(value) => {
       let trimmed = value.trim().to_owned()
       if trimmed.is_empty() {
@@ -93,15 +93,15 @@ fn optional_env_text(key : String) -> String? {
 ///|
 fn add_planbook_bounded_wait_policy(fields : Map[String, Json]) -> Unit {
   @moonclaw_runtime.add_moonclaw_no_input_policy(fields)
-  fields["best_effort_on_timeout"] = false.to_json()
-  fields["timeout_ms"] = (600000).to_json()
+  fields["best_effort_on_timeout"] = ToJson::to_json(false)
+  fields["timeout_ms"] = ToJson::to_json(600000)
 }
 
 ///|
 fn moonclaw_execution_metadata_fields(
   preferred_skills~ : Array[String],
   execution_mode~ : String,
-  execution_target? : String? = None,
+  execution_target~ : String? = None,
   output_contract~ : String,
 ) -> Map[String, Json] {
   @moonclaw_runtime.moonclaw_execution_metadata_fields(
@@ -116,7 +116,7 @@ fn moonclaw_execution_metadata_fields(
 fn planbook_bounded_step_metadata_json(
   preferred_skills~ : Array[String],
   execution_mode~ : String,
-  execution_target? : String? = None,
+  execution_target~ : String? = None,
   output_contract~ : String,
   source_root~ : String,
   target_files~ : Array[String],
@@ -131,12 +131,12 @@ fn planbook_bounded_step_metadata_json(
     execution_target~,
     output_contract~,
   )
-  fields["enable_tools"] = true.to_json()
-  fields["source_root"] = source_root.to_json()
-  fields["target_files"] = target_files.to_json()
-  fields["target_pages"] = target_pages.to_json()
-  fields["best_effort_on_timeout"] = false.to_json()
-  fields["timeout_ms"] = (600000).to_json()
+  fields["enable_tools"] = ToJson::to_json(true)
+  fields["source_root"] = ToJson::to_json(source_root)
+  fields["target_files"] = ToJson::to_json(target_files)
+  fields["target_pages"] = ToJson::to_json(target_pages)
+  fields["best_effort_on_timeout"] = ToJson::to_json(false)
+  fields["timeout_ms"] = ToJson::to_json(600000)
   fields["role_runtime"] = {
     "planning_layer": planning_layer,
     "runtime_mode": runtime_mode,

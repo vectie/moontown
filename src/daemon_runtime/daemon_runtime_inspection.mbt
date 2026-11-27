@@ -19,8 +19,8 @@ async fn cleanup_stale_daemon_runtime(
 
 ///|
 pub async fn inspect_daemon_runtime(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  stale_after_ms? : UInt64 = 900_000UL,
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  stale_after_ms~ : UInt64 = 900_000UL,
 ) -> DaemonRuntimeHealth {
   let path = default_daemon_runtime_path(snapshot_path~)
   let stop_requested = daemon_stop_requested(snapshot_path)

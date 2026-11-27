@@ -44,7 +44,7 @@ fn joined(
   table : String,
   zones : String,
   format : String,
-  delimiter? : Char = ',',
+  delimiter~ : Char = ',',
 ) -> String raise {
   match
     @imported_output_contract.table_zones_export(
@@ -87,6 +87,7 @@ test "separate source join preserves every overlap and unmatched original data r
 }
 
 ///|
+#warnings("-41")
 test "GeoJSON joined places retain ordered source cells and exact input identities" {
   let output = joined(join_table_source(), join_zones_source(), "geojson")
   let value = @json.parse(output)
@@ -111,7 +112,7 @@ test "GeoJSON joined places retain ordered source cells and exact input identiti
         },
         "table_source": {
           "digest": String(table_digest),
-          "size_bytes": Number(table_size),
+          "size_bytes": Number(table_size, ..),
         },
         "zone_source": { "digest": String(zone_digest), .. },
         ..

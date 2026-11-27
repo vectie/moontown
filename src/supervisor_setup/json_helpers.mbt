@@ -33,7 +33,7 @@ fn json_int_alias(
   fields : Map[String, Json],
   camel : String,
   snake : String,
-) -> Int {
+) -> Int32 {
   match fields.get(camel) {
     Some(Number(value, ..)) => value.to_int()
     _ =>

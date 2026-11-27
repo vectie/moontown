@@ -43,7 +43,12 @@ async test "actual vocabulary discovery UI candidate survives native mailbox rel
     )
     @installer.install_authorized(source, workspace, profile) |> ignore
     assert_true(
-      ingest_projection(workspace, state_path, projection.to_json(), "t2").accepted,
+      ingest_projection(
+        workspace,
+        state_path,
+        ToJson::to_json(projection),
+        "t2",
+      ).accepted,
     )
   }
   let before = load_runtime_state(state_path)
@@ -56,18 +61,21 @@ async test "actual vocabulary discovery UI candidate survives native mailbox rel
   let discovery = observation_fixture_field(context, "vocabulary_discovery")
   assert_eq(
     observation_fixture_field(discovery, "contract_id"),
-    "moontown.vocabulary-review.v1".to_json(),
+    ToJson::to_json("moontown.vocabulary-review.v1"),
   )
   assert_eq(
     observation_fixture_field(discovery, "accepted_knowledge"),
-    false.to_json(),
+    ToJson::to_json(false),
   )
   assert_eq(
     observation_fixture_field(discovery, "omitted_match_count"),
-    (1).to_json(),
+    ToJson::to_json(1),
   )
   let lens = observation_fixture_field(discovery, "lens")
-  assert_eq(observation_fixture_field(lens, "terms"), ["export"].to_json())
+  assert_eq(
+    observation_fixture_field(lens, "terms"),
+    ToJson::to_json(["export"]),
+  )
   let selected : Array[Json] = @json.from_json(
     observation_fixture_field(discovery, "selected_matches"),
   )
@@ -93,7 +101,7 @@ async test "actual vocabulary discovery UI candidate survives native mailbox rel
   assert_eq(@json.parse(@fs.read_file(inbox).text()), candidate)
   let reloaded = load_runtime_state(state_path)
   assert_eq(reloaded.candidate_envelopes.length(), 1)
-  assert_eq(reloaded.candidate_envelopes[0].to_json(), candidate)
+  assert_eq(ToJson::to_json(reloaded.candidate_envelopes[0]), candidate)
   assert_eq(reloaded.projections, before.projections)
   let replay = submit_candidate(workspace, state_path, candidate, "t4")
   assert_eq(replay.receipt, submitted.receipt)

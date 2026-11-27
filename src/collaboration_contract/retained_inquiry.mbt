@@ -1,13 +1,15 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct InquiryContribution {
   book_id : String
   quote : String
   challenge : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 /// An operator-authored new inquiry pinned to one historical dossier. The host
 /// obtains all output/source identities from its verified retained reader.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct RetainedInquiry {
   origin : OutcomeKey
   draft_id : String
@@ -21,7 +23,7 @@ pub(all) struct RetainedInquiry {
   objection_reviewer_id : String
   objection_reviewer_name : String
   contributions : Array[InquiryContribution]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 /// Produces only authored fields. Saving captures current Book files, while
@@ -135,9 +137,10 @@ fn inquiry_dossier_draft(
       "output_digest": candidate.output_digest,
       "exact_quote": selection.quote,
       "independent_challenge": selection.challenge,
-      "prior_source_snapshots": saved.sources
-      .filter(s => s.book_id == selection.book_id)
-      .to_json(),
+      "prior_source_snapshots": saved.sources.filter(s => {
+        s.book_id == selection.book_id
+      })
+      |> ToJson::to_json,
     })
     participants.push({
       ..originals[0],
@@ -150,11 +153,11 @@ fn inquiry_dossier_draft(
   let provenance : Json = {
     "contract_version": "moontown.retained-inquiry.v1",
     "scenario": "research-salon",
-    "origin": input.origin.to_json(),
+    "origin": ToJson::to_json(input.origin),
     "origin_archive_digest": outcome.archive_digest,
     "origin_question": saved.draft.question,
     "origin_review_status": outcome.review_status,
-    "prior_result_decisions": work.decisions.to_json(),
+    "prior_result_decisions": ToJson::to_json(work.decisions),
     "original_objection": saved.draft.objection,
     "original_objection_owner_id": saved.draft.objection_reviewer_id,
     "original_objection_owner_name": saved.draft.objection_reviewer_name,
@@ -162,14 +165,13 @@ fn inquiry_dossier_draft(
     "falsifier": input.falsifier,
     "dissent": input.dissent,
     "unresolved_assumptions": input.assumptions,
-    "contributions": bridges.to_json(),
+    "contributions": ToJson::to_json(bridges),
     "unselected_successful_books": salon_candidates(work)
     .filter(p => !seen.contains(p.book_id))
     .map(p => p.book_id)
-    .to_json(),
-    "failed_participants": work.participants
-    .filter(p => p.status == "failed")
-    .to_json(),
+    |> ToJson::to_json,
+    "failed_participants": work.participants.filter(p => p.status == "failed")
+    |> ToJson::to_json,
     "source_policy": "Historical excerpts retain their original input identities. This inquiry captures current files at the selected Books' original paths as new inputs; changed current sources do not rewrite historical evidence.",
     "authorship": "Operator-authored inquiry. No participant endorsement, consensus, synthesis or genuine emergence is claimed.",
     "authority": "research-salon is scenario configuration, not an operation or authority grant. Unrun draft only; prior decisions do not approve this inquiry. Use the existing explicit Prepare, run and named-owner review gates. Owning Books retain acceptance authority.",
@@ -193,7 +195,7 @@ fn inquiry_dossier_draft(
     objection_reviewer_name: input.objection_reviewer_name,
     participants,
   }
-  guard @utf8.encode(draft.to_json().stringify()).length() <= 65536 else {
+  guard @utf8.encode(ToJson::to_json(draft).stringify()).length() <= 65536 else {
     return Err(
       "Inquiry and retained context exceed the 64 KiB draft limit; narrow the selected excerpts",
     )

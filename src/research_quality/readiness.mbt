@@ -1,19 +1,21 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct ResearchReadiness {
   book_id : String
   root : String
-  source_page_count : Int
-  verified_source_count : Int
-  entity_page_count : Int
-  concept_page_count : Int
-  query_note_count : Int
-  evidence_count : Int
-  pending_review_count : Int
+  source_page_count : Int32
+  verified_source_count : Int32
+  entity_page_count : Int32
+  concept_page_count : Int32
+  query_note_count : Int32
+  evidence_count : Int32
+  pending_review_count : Int32
   substantive_coverage_ready : Bool
   gaps : Array[String]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ResearchQualityObservation {
   root : String
   missing_required_paths : Array[String]
@@ -34,12 +36,12 @@ pub(all) struct ResearchQualityObservation {
   generated_site_read_error : Bool
   site_entry : String?
   site_entry_read_error : Bool
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn ResearchReadiness::from_summary(
   summary : @moonbook.BookStateSummary,
-  extra_gaps? : Array[String] = [],
+  extra_gaps~ : Array[String] = [],
 ) -> ResearchReadiness {
   let gaps = extra_gaps.copy()
   if summary.verified_source_count == 0 {

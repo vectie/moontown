@@ -1,5 +1,6 @@
 ///|
 /// Contest Express adds its competition calendar and policies to a civic brief.
+#derive(Debug, ToJson, FromJson)
 pub struct CompetitionProgram {
   challenge_id : String
   state : String
@@ -9,8 +10,8 @@ pub struct CompetitionProgram {
   registration_close_ms : UInt64
   submission_open_ms : UInt64
   review_close_ms : UInt64
-  max_team_size : Int
-  daily_submission_limit : Int
+  max_team_size : Int32
+  daily_submission_limit : Int32
   contact_url : String
   tracks : Array[CompetitionTrack]
   prizes : Array[CompetitionPrize]
@@ -18,9 +19,10 @@ pub struct CompetitionProgram {
   faq : Array[CompetitionFAQ]
   announcements : Array[CompetitionAnnouncement]
   evaluator_ids : Array[String]
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct CompetitionTrack {
   id : String
   name : String
@@ -30,9 +32,10 @@ pub struct CompetitionTrack {
   required_materials : Array[String]
   metrics : Array[MetricRule]
   gates : Array[QualificationRule]
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct MetricRule {
   id : String
   label : String
@@ -40,67 +43,76 @@ pub struct MetricRule {
   direction : String
   baseline : Double
   weight : Double
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct QualificationRule {
   id : String
   label : String
   metric_id : String
   comparison : String
   threshold : Double
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct CompetitionPrize {
   track_id : String
   place : String
   description : String
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct CompetitionPartner {
   name : String
   url : String
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct CompetitionFAQ {
   category : String
   question : String
   answer : String
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct CompetitionAnnouncement {
   id : String
   title : String
   body : String
   published_ms : UInt64
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(FromJson)
 struct SaveProgramRequest {
   program : CompetitionProgram
   brief : Challenge
-} derive(FromJson)
+}
 
 ///|
+#derive(FromJson)
 struct ProgramIdentityRequest {
   challenge_id : String
-} derive(FromJson)
+}
 
 ///|
+#derive(FromJson)
 struct ProgramTransitionRequest {
   challenge_id : String
   state : String
   reason : String
-} derive(FromJson)
+}
 
 ///|
+#derive(FromJson)
 struct AnnouncementRequest {
   challenge_id : String
   id : String
   title : String
   body : String
-} derive(FromJson)
+}

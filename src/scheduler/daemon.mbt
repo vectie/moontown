@@ -1,6 +1,6 @@
 ///|
 pub fn next_tick(
-  sequence : Int,
+  sequence : Int32,
   actions : Array[SchedulerAction],
 ) -> SchedulerTick {
   { sequence, summary: "\{actions.length()} town actions planned", }
@@ -11,7 +11,7 @@ pub fn plan_daemon_tick(
   daemon : DaemonState,
   town : @core.TownState,
   report : @health.HealthReport,
-  standing_goals? : Array[@core.StandingGoal] = [],
+  standing_goals~ : Array[@core.StandingGoal] = [],
 ) -> (DaemonState, SchedulerTick, Array[SchedulerAction]) {
   let next_sequence = daemon.tick_sequence + 1
   let actions = plan_tick(town, report)

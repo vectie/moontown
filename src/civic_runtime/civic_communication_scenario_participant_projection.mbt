@@ -4,15 +4,17 @@ fn civic_communication_participant_projection(
   participant : CivicCommunicationParticipantBook,
   returned_ideas : Array[CivicCommunicationIdea],
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> Json {
-  let fields : Map[String, Json] = {}
-  fields["book_id"] = participant.book_id.to_json()
-  fields["visibility"] = "internal".to_json()
-  fields["projection_scope"] = "internal".to_json()
+  let fields : Map[String, Json] = Map([])
+  fields["book_id"] = ToJson::to_json(participant.book_id)
+  fields["visibility"] = ToJson::to_json("internal")
+  fields["projection_scope"] = ToJson::to_json("internal")
   fields["tags"] = civic_communication_participant_projection_tags(scenario)
-  fields["title"] = "\{scenario.domain_label} / \{participant.title}".to_json()
-  fields["summary"] = participant.contribution.to_json()
+  fields["title"] = ToJson::to_json(
+    "\{scenario.domain_label} / \{participant.title}",
+  )
+  fields["summary"] = ToJson::to_json(participant.contribution)
   fields["status_chips"] = civic_communication_participant_projection_status_chips(
     scenario, returned_ideas, round_number,
   )
@@ -38,22 +40,22 @@ fn civic_communication_participant_projection(
 fn civic_communication_participant_projection_tags(
   scenario : CivicCommunicationScenario,
 ) -> Json {
-  [
+  ToJson::to_json([
     "civic-communication-pattern",
     "internal",
     "participant-workspace",
     scenario.id,
     scenario.building_id,
-  ].to_json()
+  ])
 }
 
 ///|
 fn civic_communication_participant_projection_status_chips(
   scenario : CivicCommunicationScenario,
   returned_ideas : Array[CivicCommunicationIdea],
-  round_number : Int,
+  round_number : Int32,
 ) -> Json {
-  [
+  ToJson::to_json([
     participant_projection_chip(
       @civic.communication_pattern_label_for_scenario(scenario),
       "info",
@@ -64,7 +66,7 @@ fn civic_communication_participant_projection_status_chips(
       "returned outputs \{returned_ideas.length()}",
       "review",
     ),
-  ].to_json()
+  ])
 }
 
 ///|
@@ -73,7 +75,7 @@ fn civic_communication_participant_projection_metrics(
   participant : CivicCommunicationParticipantBook,
   returned_ideas : Array[CivicCommunicationIdea],
 ) -> Json {
-  [
+  ToJson::to_json([
     participant_projection_metric(
       "Focus",
       participant.focus_area,
@@ -86,33 +88,33 @@ fn civic_communication_participant_projection_metrics(
       "from \{scenario.building_id}",
       "healthy",
     ),
-  ].to_json()
+  ])
 }
 
 ///|
 fn civic_communication_participant_projection_readiness(
   scenario : CivicCommunicationScenario,
 ) -> Json {
-  [
+  ToJson::to_json([
     participant_projection_entry(
       "Returned pattern outputs",
       scenario.returned_ideas_path,
       "Reviewable",
     ),
-  ].to_json()
+  ])
 }
 
 ///|
 fn civic_communication_participant_projection_review_queue(
   scenario : CivicCommunicationScenario,
 ) -> Json {
-  [
+  ToJson::to_json([
     participant_projection_entry(
       "Review returned outputs",
       scenario.returned_ideas_path,
       "Pending",
     ),
-  ].to_json()
+  ])
 }
 
 ///|
@@ -120,22 +122,27 @@ fn civic_communication_participant_projection_journey(
   scenario : CivicCommunicationScenario,
   returned_ideas : Array[CivicCommunicationIdea],
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> Json {
-  [
+  ToJson::to_json([
     Json::object({
-      "title": "Pattern return-home \{round_id}".to_json(),
-      "stage": "distribute".to_json(),
-      "status": "review".to_json(),
-      "summary": "\{scenario.title} returned \{returned_ideas.length()} relevant pattern output(s) to this internal participant workspace in round \{round_number}.".to_json(),
+      "title": ToJson::to_json("Pattern return-home \{round_id}"),
+      "stage": ToJson::to_json("distribute"),
+      "status": ToJson::to_json("review"),
+      "summary": ToJson::to_json(
+        "\{scenario.title} returned \{returned_ideas.length()} relevant pattern output(s) to this internal participant workspace in round \{round_number}.",
+      ),
       "highlights": Json::array([]),
     }),
-  ].to_json()
+  ])
 }
 
 ///|
 fn participant_projection_chip(label : String, tone : String) -> Json {
-  Json::object({ "label": label.to_json(), "tone": tone.to_json() })
+  Json::object({
+    "label": ToJson::to_json(label),
+    "tone": ToJson::to_json(tone),
+  })
 }
 
 ///|
@@ -146,10 +153,10 @@ fn participant_projection_metric(
   tone : String,
 ) -> Json {
   Json::object({
-    "label": label.to_json(),
-    "value": value.to_json(),
-    "note": note.to_json(),
-    "tone": tone.to_json(),
+    "label": ToJson::to_json(label),
+    "value": ToJson::to_json(value),
+    "note": ToJson::to_json(note),
+    "tone": ToJson::to_json(tone),
   })
 }
 
@@ -160,9 +167,9 @@ fn participant_projection_entry(
   meta : String,
 ) -> Json {
   Json::object({
-    "title": title.to_json(),
-    "detail": detail.to_json(),
-    "meta": meta.to_json(),
+    "title": ToJson::to_json(title),
+    "detail": ToJson::to_json(detail),
+    "meta": ToJson::to_json(meta),
   })
 }
 
@@ -180,5 +187,5 @@ fn participant_returned_idea_page_families_json(
       participant_projection_entry(idea.title, idea.id, "Returned output"),
     )
   }
-  items.to_json()
+  ToJson::to_json(items)
 }

@@ -15,11 +15,12 @@ let usage : String =
   #|No command imports, installs or executes a Book or any output.
 
 ///|
+#derive(Debug, Eq)
 struct Command {
   base_url : String
   name : String
   args : Array[String]
-} derive(Debug, Eq)
+}
 
 ///|
 fn parse_args(args : Array[String]) -> Command raise {

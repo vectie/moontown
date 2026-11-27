@@ -85,7 +85,7 @@ fn fixture_book_tasks(
 }
 
 ///|
-fn desired_task_count(entry : @moonbook.BookCatalogEntry) -> Int {
+fn desired_task_count(entry : @moonbook.BookCatalogEntry) -> Int32 {
   match entry.id {
     "coding" => 2
     "finance" => 2

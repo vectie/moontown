@@ -1,11 +1,11 @@
 ///|
 fn json_string(text : String) -> String {
-  text.to_json().stringify()
+  ToJson::to_json(text).stringify()
 }
 
 ///|
 fn json_string_array(items : Array[String]) -> String {
-  items.to_json().stringify()
+  ToJson::to_json(items).stringify()
 }
 
 ///|

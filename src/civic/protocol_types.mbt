@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct BuildingProtocolDefinition {
   building_id : String
   service_id : String
@@ -19,9 +20,10 @@ pub(all) struct BuildingProtocolDefinition {
   moonbook_role : String
   skill_packs : Array[String]
   projection_contract : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct BuildingInputPacket {
   id : String
   building_id : String
@@ -36,9 +38,10 @@ pub(all) struct BuildingInputPacket {
   related_book_id : String
   related_task_id : String
   related_run_id : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct BuildingContribution {
   id : String
   building_id : String
@@ -50,9 +53,10 @@ pub(all) struct BuildingContribution {
   privacy_label : String
   review_status : String
   idempotency_key : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct BuildingReductionResult {
   id : String
   building_id : String
@@ -68,9 +72,10 @@ pub(all) struct BuildingReductionResult {
   review_status : String
   idempotency_key : String
   related_book_id : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct BuildingDistributionRecord {
   id : String
   building_id : String
@@ -80,9 +85,10 @@ pub(all) struct BuildingDistributionRecord {
   summary : String
   review_status : String
   idempotency_key : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct BuildingReviewGateRecord {
   id : String
   building_id : String
@@ -92,9 +98,10 @@ pub(all) struct BuildingReviewGateRecord {
   related_packet_id : String
   related_reduction_id : String
   owner : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct BuildingProtocolSnapshot {
   building_id : String
   title : String
@@ -104,24 +111,25 @@ pub(all) struct BuildingProtocolSnapshot {
   social_responsibility : String
   status : String
   ready : Bool
-  inbox_count : Int
-  contribution_count : Int
-  reduction_count : Int
-  outbox_count : Int
-  review_count : Int
+  inbox_count : Int32
+  contribution_count : Int32
+  reduction_count : Int32
+  outbox_count : Int32
+  review_count : Int32
   latest_reduction_summary : String
   latest_distribution_summary : String
   skill_packs : Array[String]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct BuildingProtocolPortfolio {
-  total : Int
-  ready_count : Int
-  active_count : Int
-  review_count : Int
-  blocked_count : Int
+  total : Int32
+  ready_count : Int32
+  active_count : Int32
+  review_count : Int32
+  blocked_count : Int32
   status_path : String
   registry_path : String
   protocols : Array[BuildingProtocolSnapshot]
-} derive(Debug, Eq, ToJson, FromJson)
+}

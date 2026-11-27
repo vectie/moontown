@@ -1,9 +1,10 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum AccountPlan {
   VisitorPlan
   PaidPlan
   EnterprisePlan
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///| The product-facing account kind. Billing remains represented by
 
@@ -13,32 +14,36 @@ pub(all) enum AccountPlan {
 
 ///|
 /// other while still providing four independently routed experiences.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum AccountKind {
   VisitorAccount
   SignedInAccount
   PaidUserAccount
   EnterpriseAccount
   AdminAccount
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum AccountRole {
   AccountMember
   AccountEditor
   AccountPublisher
   OrganizationAdmin
   PlatformAdmin
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum AccountHomeSurface {
   PublicTownHome
   PersonalTownHome
   EnterpriseTownHome
   AdminConsoleHome
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum AccountEntitlement {
   ExplorePublicTown
   DiscoverPublicServices
@@ -63,9 +68,10 @@ pub(all) enum AccountEntitlement {
   ViewPlatformAnalytics
   ViewAuditLog
   ManageSystemHealth
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AccountTenantAccess {
   tenant_id : String
   tenant_name : String
@@ -73,9 +79,10 @@ pub(all) struct AccountTenantAccess {
   roles : Array[AccountRole]
   active : Bool
   version : Int32
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AccountPrincipal {
   user_id : String
   display_name : String
@@ -84,9 +91,10 @@ pub(all) struct AccountPrincipal {
   tenant_access : Array[AccountTenantAccess]
   active : Bool
   version : Int32
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AccountSession {
   session_id : String
   token_digest : String
@@ -95,18 +103,20 @@ pub(all) struct AccountSession {
   expires_at_ms : UInt64
   revoked : Bool
   version : Int32
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AccountSubscription {
   principal_id : String
   plan : AccountPlan
   status : String
   changed_at_ms : UInt64
   version : Int32
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AccountAuditEvent {
   event_id : String
   actor_id : String
@@ -115,9 +125,10 @@ pub(all) struct AccountAuditEvent {
   detail : String
   occurred_at_ms : UInt64
   version : Int32
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AccountState {
   schema : String
   principals : Array[AccountPrincipal]
@@ -125,9 +136,10 @@ pub(all) struct AccountState {
   subscriptions : Array[AccountSubscription]
   audit_events : Array[AccountAuditEvent]
   version : Int32
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AccountContext {
   user_id : String
   display_name : String
@@ -140,18 +152,20 @@ pub(all) struct AccountContext {
   tenant_choices : Array[AccountTenantAccess]
   home_surface : AccountHomeSurface
   visitor : Bool
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) struct VisitorSessionResult {
   opaque_token : String
   context : AccountContext
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct AccountApplication {
   state_path : String
   bootstrap_principal : AccountPrincipal
   bootstrap_session_id : String
   bootstrap_token_digest : String
-} derive(Debug, Eq)
+}

@@ -21,7 +21,7 @@ pub fn Mayor::patrol(
 pub fn Mayor::supervise(
   self : Mayor,
   state : @core.TownState,
-  tick : Int,
+  tick : Int32,
 ) -> MayorSupervisionPacket {
   ignore(self)
   let directives : Array[MayorSupervisionDirective] = []

@@ -5,7 +5,7 @@ fn quote(text : String) -> String {
 
 ///|
 fn cell(text : String) -> String {
-  text.to_json().stringify()
+  ToJson::to_json(text).stringify()
 }
 
 ///|
@@ -39,7 +39,7 @@ fn csv(value : Outlook) -> String {
         view.effective_cadence_ticks.to_string(),
         view.goal.next_due_tick.to_string(),
         view.occurrence_count.to_string(),
-        view.occurrence_ticks.to_json().stringify(),
+        ToJson::to_json(view.occurrence_ticks).stringify(),
         value.start_tick.to_string(),
         value.end_tick_exclusive.to_string(),
         value.source_digest,
@@ -62,7 +62,7 @@ fn count(view : GoalView?) -> String {
 ///|
 fn ticks(view : GoalView?) -> String {
   match view {
-    Some(value) => value.occurrence_ticks.to_json().stringify()
+    Some(value) => ToJson::to_json(value.occurrence_ticks).stringify()
     None => "null"
   }
 }

@@ -1,31 +1,34 @@
 ///|
+#derive(Debug, Eq, Hash)
 pub(all) struct GridPosition {
-  column : Int
-  row : Int
-} derive(Debug, Eq, Hash)
+  column : Int32
+  row : Int32
+}
 
 ///|
-pub fn grid_position(column : Int, row : Int) -> GridPosition {
+pub fn grid_position(column : Int32, row : Int32) -> GridPosition {
   { column, row, }
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct WorldPoint {
   x : Double
   y : Double
   z : Double
-} derive(Debug, Eq)
+}
 
 ///|
-pub fn world_point(x : Double, y : Double, z? : Double = 0.0) -> WorldPoint {
+pub fn world_point(x : Double, y : Double, z~ : Double = 0.0) -> WorldPoint {
   { x, y, z, }
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct WorldBounds {
   minimum : WorldPoint
   maximum : WorldPoint
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn world_bounds(minimum : WorldPoint, maximum : WorldPoint) -> WorldBounds {

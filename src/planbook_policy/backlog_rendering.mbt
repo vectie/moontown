@@ -1,9 +1,9 @@
 ///|
 pub fn backlog_next_check_interval_ms(
-  open : Int,
-  completed : Int,
-  total : Int,
-) -> Int {
+  open : Int32,
+  completed : Int32,
+  total : Int32,
+) -> Int32 {
   if open > 0 {
     0
   } else if total == 0 || completed >= total {
@@ -15,11 +15,11 @@ pub fn backlog_next_check_interval_ms(
 
 ///|
 pub fn backlog_progress_markdown(
-  total : Int,
-  open : Int,
-  completed : Int,
-  blocked : Int,
-  interval_ms : Int,
+  total : Int32,
+  open : Int32,
+  completed : Int32,
+  blocked : Int32,
+  interval_ms : Int32,
 ) -> String {
   [
     "# Backlog Progress",

@@ -24,7 +24,8 @@ async fn render_cli_command(args : Array[String]) -> String {
     ["native-work", "show", id] => {
       let state = @native_work.load()
       match state.work.iter().find_first(work => work.id == id) {
-        Some(work) => @native_work.status(work).to_json().stringify(indent=2)
+        Some(work) =>
+          ToJson::to_json(@native_work.status(work)).stringify(indent=2)
         None => "Native work not found: " + id
       }
     }

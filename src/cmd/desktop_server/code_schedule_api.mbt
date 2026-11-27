@@ -7,7 +7,7 @@ fn code_schedule_api_string(fields : Map[String, Json], key : String) -> String 
 }
 
 ///|
-fn code_schedule_api_error_response(error : String) -> (Int, String) {
+fn code_schedule_api_error_response(error : String) -> (Int32, String) {
   if error.contains("identity already exists") {
     (409, "A Code schedule with this ID already exists.")
   } else if error.contains("Code schedule is running") {
@@ -89,32 +89,34 @@ async fn code_schedule_api_action(body : String) -> Json {
         code_schedule_api_string(fields, "recurrence"),
         code_schedule_api_string(fields, "timezone"),
       )
-      @code_schedules.create_code_schedule(schedule).to_json()
+      ToJson::to_json(@code_schedules.create_code_schedule(schedule))
     }
     "update" => {
       guard fields.get("interval_seconds") is Some(Number(interval, ..)) else {
         fail("Code schedule cadence is required")
       }
-      @code_schedules.edit_code_schedule(
-        id,
-        prompt=code_schedule_api_string(fields, "prompt"),
-        model=code_schedule_api_string(fields, "model"),
-        title=code_schedule_api_string(fields, "title"),
-        interval_seconds=interval.to_int(),
-        next_due_at=code_schedule_api_due(fields, now + interval.to_int64()),
-        repeat=code_schedule_api_repeat(fields),
-        recurrence=code_schedule_api_string(fields, "recurrence"),
-        timezone=code_schedule_api_string(fields, "timezone"),
-      ).to_json()
+      ToJson::to_json(
+        @code_schedules.edit_code_schedule(
+          id,
+          prompt=code_schedule_api_string(fields, "prompt"),
+          model=code_schedule_api_string(fields, "model"),
+          title=code_schedule_api_string(fields, "title"),
+          interval_seconds=interval.to_int(),
+          next_due_at=code_schedule_api_due(fields, now + interval.to_int64()),
+          repeat=code_schedule_api_repeat(fields),
+          recurrence=code_schedule_api_string(fields, "recurrence"),
+          timezone=code_schedule_api_string(fields, "timezone"),
+        ),
+      )
     }
-    "run-now" => @code_schedules.run_code_schedule_now(id, now).to_json()
-    "delete" => @code_schedules.delete_code_schedule(id).to_json()
+    "run-now" => ToJson::to_json(@code_schedules.run_code_schedule_now(id, now))
+    "delete" => ToJson::to_json(@code_schedules.delete_code_schedule(id))
     "pause" | "resume" => {
       let enabled = code_schedule_api_string(fields, "action") == "resume"
       guard @code_schedules.set_code_schedule_enabled(id, enabled, now) else {
         fail("Code schedule ID was not found")
       }
-      @code_schedules.load_code_schedule_state().to_json()
+      ToJson::to_json(@code_schedules.load_code_schedule_state())
     }
     _ => fail("unsupported Code schedule action")
   }

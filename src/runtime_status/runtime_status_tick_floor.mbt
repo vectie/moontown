@@ -5,7 +5,7 @@ pub async fn effective_daemon_tick(
   state : @core.TownState,
   standing_goals : Array[@core.StandingGoal],
   watcher_records : Array[@core.WatcherRunRecord],
-) -> Int {
+) -> Int32 {
   @support.max_int(
     @support.max_int(
       @support.max_int(
@@ -34,7 +34,7 @@ pub async fn daemon_tick_floor(
   standing_goals : Array[@core.StandingGoal],
   watcher_records : Array[@core.WatcherRunRecord],
   state : @core.TownState,
-) -> Int {
+) -> Int32 {
   let mut floor = daemon.tick_sequence
   for
     candidate in [
@@ -54,7 +54,7 @@ pub async fn daemon_tick_floor(
 ///|
 pub fn daemon_rebased_to_tick_floor(
   daemon : @scheduler.DaemonState,
-  tick_floor : Int,
+  tick_floor : Int32,
 ) -> @scheduler.DaemonState {
   if tick_floor <= daemon.tick_sequence {
     return daemon
@@ -70,7 +70,7 @@ pub fn daemon_rebased_to_tick_floor(
 }
 
 ///|
-fn latest_execution_task_tick(state : @core.TownState) -> Int {
+fn latest_execution_task_tick(state : @core.TownState) -> Int32 {
   let mut tick = 0
   for execution in state.executions {
     let value = @core.tick_from_task_id(execution.task_id)

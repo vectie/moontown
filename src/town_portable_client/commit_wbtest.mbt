@@ -68,6 +68,7 @@ async test "racing destinations at sidecar and package commit stay unchanged" {
 }
 
 ///|
+#warnings("-unreachable_code")
 async test "cancellation before commit removes partials but cancellation after commit keeps verified output" {
   with_temp(root => {
     let view = fixture_view()

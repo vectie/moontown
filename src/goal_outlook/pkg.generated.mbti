@@ -2,11 +2,11 @@
 package "vectie/moontown/goal_outlook"
 
 // Values
-pub fn compare(Bytes, Bytes, Int, Int, format~ : String) -> Result[String, String]
+pub fn compare(Bytes, Bytes, Int32, Int32, format~ : String) -> Result[String, String]
 
-pub fn report(Bytes, Int, Int, format~ : String) -> Result[String, String]
+pub fn report(Bytes, Int32, Int32, format~ : String) -> Result[String, String]
 
-pub fn stagger(Bytes, Bytes, Int, Int) -> Result[String, String]
+pub fn stagger(Bytes, Bytes, Int32, Int32) -> Result[String, String]
 
 // Errors
 

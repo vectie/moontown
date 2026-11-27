@@ -1,38 +1,43 @@
 ///|
+#derive(Debug, Eq)
 pub enum EmbeddedPlanningLayer {
   Strategic
   Domain
   Execution
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub enum EmbeddedRuntimeMode {
   PlannerOnly
   Executor
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub enum EmbeddedToolAccess {
   Disabled
   Limited
   Full
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub enum EmbeddedMemoryScope {
   Step
   Workspace
   Domain
   Global
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub enum EmbeddedHandoffKind {
   StrategicToDomain
   DomainToExecution
   ExecutionToDomain
   DomainToStrategic
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl Show for EmbeddedPlanningLayer with fn output(self, logger) {
@@ -81,6 +86,7 @@ pub impl Show for EmbeddedHandoffKind with fn output(self, logger) {
 }
 
 ///|
+#derive(Debug, Eq)
 pub struct EmbeddedMoonclawRuntime {
   runtime_id : String
   display_name : String
@@ -96,23 +102,23 @@ pub struct EmbeddedMoonclawRuntime {
   skills : Array[String]
   output_contract : String?
   authority_scope : String
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn EmbeddedMoonclawRuntime::new(
   runtime_id~ : String,
   display_name~ : String,
   role_id~ : String,
-  planning_layer? : EmbeddedPlanningLayer = Execution,
-  runtime_mode? : EmbeddedRuntimeMode = Executor,
-  tool_access? : EmbeddedToolAccess = Full,
-  memory_scope? : EmbeddedMemoryScope = Workspace,
-  allow_delegate? : Bool = false,
-  allow_workspace_write? : Bool = true,
-  allow_execution_tools? : Bool = true,
-  visible_tools? : Array[String] = [],
-  skills? : Array[String] = [],
-  output_contract? : String? = None,
+  planning_layer~ : EmbeddedPlanningLayer = Execution,
+  runtime_mode~ : EmbeddedRuntimeMode = Executor,
+  tool_access~ : EmbeddedToolAccess = Full,
+  memory_scope~ : EmbeddedMemoryScope = Workspace,
+  allow_delegate~ : Bool = false,
+  allow_workspace_write~ : Bool = true,
+  allow_execution_tools~ : Bool = true,
+  visible_tools~ : Array[String] = [],
+  skills~ : Array[String] = [],
+  output_contract~ : String? = None,
   authority_scope~ : String,
 ) -> EmbeddedMoonclawRuntime {
   {
@@ -134,6 +140,7 @@ pub fn EmbeddedMoonclawRuntime::new(
 }
 
 ///|
+#derive(Debug, Eq)
 pub struct EmbeddedRuntimeHandoff {
   kind : EmbeddedHandoffKind
   objective : String
@@ -141,15 +148,15 @@ pub struct EmbeddedRuntimeHandoff {
   constraints : Array[String]
   output_contract : String?
   target_role_id : String
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn EmbeddedRuntimeHandoff::new(
   kind~ : EmbeddedHandoffKind,
   objective~ : String,
   scope_summary~ : String,
-  constraints? : Array[String] = [],
-  output_contract? : String? = None,
+  constraints~ : Array[String] = [],
+  output_contract~ : String? = None,
   target_role_id~ : String,
 ) -> EmbeddedRuntimeHandoff {
   {

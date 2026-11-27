@@ -43,12 +43,14 @@ test "builtin awards use the sealed vote order and cannot be manually assigned" 
     "creative", "popular", "coffee",
   ])
   assert_eq(
-    Json::array(published.vote_events.map(event => event.to_json())),
-    Json::array(state.vote_events.map(event => event.to_json())),
+    Json::array(published.vote_events.map(event => ToJson::to_json(event))),
+    Json::array(state.vote_events.map(event => ToJson::to_json(event))),
   )
   assert_eq(
-    Json::array(published.voting_settlements.map(value => value.to_json())),
-    Json::array(state.voting_settlements.map(value => value.to_json())),
+    Json::array(
+      published.voting_settlements.map(value => ToJson::to_json(value)),
+    ),
+    Json::array(state.voting_settlements.map(value => ToJson::to_json(value))),
   )
   assert_true(
     try {

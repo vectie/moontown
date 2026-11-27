@@ -72,7 +72,9 @@ fn test_binding(
     verification_scope: "publisher_declared_expected_source",
     binding_digest: "",
   }
-  guard binding.to_json() is Object(fields) else { fail("binding object") }
+  guard ToJson::to_json(binding) is Object(fields) else {
+    fail("binding object")
+  }
   fields.remove("binding_digest")
   let binding = {
     ..binding,
@@ -94,7 +96,7 @@ async fn test_upload(
 }
 
 ///|
-async fn expect_code(code : Int, action : async () -> Unit) -> Unit {
+async fn expect_code(code : Int32, action : async () -> Unit) -> Unit {
   try action() catch {
     TransferError(actual, reason) => assert_eq(actual, code, msg=reason)
     error => fail("unexpected error: \{error}")
@@ -391,6 +393,7 @@ async test "cleanup failures stay durable charged and withdrawal never revives" 
 }
 
 ///|
+#warnings("-deprecated")
 async test "slow read total deadline cancellation truncation and mismatches expose no available record" {
   let root = @fs.realpath(@fs.tmpdir(prefix="town-store-abort-"))
   defer (@fs.rmdir(root, recursive=true) catch { _ => () })

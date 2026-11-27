@@ -10,8 +10,8 @@ pub fn default_planbook_workspace_root() -> String {
 
 ///|
 pub async fn bootstrap_moontown_planbook(
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  workspace_root? : String = default_planbook_workspace_root(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  workspace_root~ : String = default_planbook_workspace_root(),
 ) -> String {
   let entry = planbook_catalog_entry(workspace_root)
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
@@ -25,7 +25,7 @@ pub async fn bootstrap_moontown_planbook(
 
 ///|
 pub async fn render_moontown_planbook_status(
-  workspace_root? : String = default_planbook_workspace_root(),
+  workspace_root~ : String = default_planbook_workspace_root(),
 ) -> String {
   if @fs.exists("\{workspace_root}/wiki/index.md") {
     ensure_planbook_seed_files(workspace_root)

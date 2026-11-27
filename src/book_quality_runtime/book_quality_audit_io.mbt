@@ -6,7 +6,10 @@ async fn write_book_quality_audit_files(
 ) -> String {
   ignore(bootstrap_default_operational_books(book_catalog_path))
   let audit = inspect_book_quality(book_catalog_path~, snapshot_path~)
-  @support.write_text_file(audit_path, audit.to_json().stringify(indent=2))
+  @support.write_text_file(
+    audit_path,
+    ToJson::to_json(audit).stringify(indent=2),
+  )
   let markdown_path = @book_quality.audit_markdown_path(audit_path)
   @support.write_text_file(
     markdown_path,

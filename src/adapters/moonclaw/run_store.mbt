@@ -1,16 +1,18 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 struct RunsIndexFile {
   runs : Array[StoredRun]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 struct StoredRun {
   id : String
   workspace_dir : String?
   status : String
   summary : String?
   error : String?
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 fn run_store_root(home : String) -> String {

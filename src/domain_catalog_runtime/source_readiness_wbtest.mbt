@@ -233,7 +233,10 @@ async test "status is read-only and seed defers books until sources are configur
   let catalog_path = "\{root}/catalog.json"
   let snapshot_path = "\{root}/town.json"
   let catalog = source_readiness_catalog_fixture()
-  @support.write_text_file(catalog_path, catalog.to_json().stringify(indent=2))
+  @support.write_text_file(
+    catalog_path,
+    ToJson::to_json(catalog).stringify(indent=2),
+  )
   let book = catalog.domains[0].books[0]
   let config_path = knowledge_catalog_book_config_path(
     catalog,
@@ -270,7 +273,7 @@ async test "status is read-only and seed defers books until sources are configur
   }
   @support.write_text_file(
     config_path,
-    configured.to_json().stringify(indent=2),
+    ToJson::to_json(configured).stringify(indent=2),
   )
   let second_seed = seed_knowledge_domain_catalog(catalog_path~, snapshot_path~)
   assert_true(second_seed.contains("Newly pending template requests: `1`"))

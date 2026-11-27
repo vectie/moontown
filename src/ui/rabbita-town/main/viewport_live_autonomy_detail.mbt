@@ -50,7 +50,7 @@ fn LiveAutonomyStatusView::detail_label(
 
 ///|
 fn compact_single_line(summary : String, limit~ : Int32) -> String {
-  let normalized = StringBuilder::new()
+  let normalized = StringBuilder()
   for char in summary {
     if char == '\n' || char == '\r' || char == '\t' {
       normalized.write_char(' ')
@@ -62,7 +62,7 @@ fn compact_single_line(summary : String, limit~ : Int32) -> String {
   if one_line.length() <= limit {
     one_line
   } else {
-    let builder = StringBuilder::new()
+    let builder = StringBuilder()
     let mut emitted = 0
     for char in one_line {
       if emitted >= limit {

@@ -22,7 +22,7 @@ fn select_default_entry(
 fn mayor_goal_decomposition_prompt(
   catalog : Array[@moonbook.BookCatalogEntry],
   goal : String,
-  explicit_book_id? : String? = None,
+  explicit_book_id~ : String? = None,
 ) -> String {
   [
     mayor_goal_prompt_header(catalog, goal, explicit_book_id~),
@@ -38,7 +38,7 @@ fn mayor_goal_decomposition_prompt(
 fn mayor_goal_prompt_header(
   catalog : Array[@moonbook.BookCatalogEntry],
   goal : String,
-  explicit_book_id? : String? = None,
+  explicit_book_id~ : String? = None,
 ) -> String {
   [
     "You are the Mayor claw for MoonTown.",

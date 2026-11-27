@@ -1,5 +1,6 @@
 ///|
 /// User-authored assignments. Source paths are relative to the selected Book.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct Participant {
   book_id : String
   source_paths : Array[String]
@@ -7,10 +8,11 @@ pub(all) struct Participant {
   perspective : String
   contribution : String
   next_artifact : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 /// A draft is a plan, never an execution or acceptance receipt.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct Draft {
   draft_id : String
   title : String
@@ -22,21 +24,23 @@ pub(all) struct Draft {
   objection_reviewer_id : String
   objection_reviewer_name : String
   participants : Array[Participant]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 /// Public snapshot identity; never contains a local workspace root.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct SourceSnapshot {
   book_id : String
   book_title : String
   source_path : String
   artifact_ref : String
   digest : String
-  size_bytes : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  size_bytes : Int32
+}
 
 ///|
 /// An immutable saved draft with host-captured source bytes.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct SavedDraft {
   contract_version : String
   draft : Draft
@@ -44,32 +48,36 @@ pub(all) struct SavedDraft {
   previous_revision : String
   recorded_at : String
   sources : Array[SourceSnapshot]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CatalogBook {
   book_id : String
   title : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct Artifact {
   path : String
   digest : String
-  size_bytes : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  size_bytes : Int32
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct Prepared {
   contract_version : String
   draft_id : String
   revision : String
   review_status : String
   artifacts : Array[Artifact]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 /// Every response retains the request token for stale-callback rejection.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct Reply {
   contract_version : String
   request_id : String
@@ -84,7 +92,7 @@ pub(all) struct Reply {
   outcomes : Array[OutcomeEntry]
   outcome : RetainedOutcome?
   source_listing : SourceListing?
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn empty_draft(id : String) -> Draft {

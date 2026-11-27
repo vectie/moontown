@@ -21,7 +21,7 @@ async test "actual owner list exceeding 128KiB remains usable under feature-loca
   let large_view = { ..view, grants, }
   let payload : Json = {
     "ok": true,
-    "payload": { "packages": [large_view.to_json()] },
+    "payload": { "packages": [ToJson::to_json(large_view)] },
   }
   let bytes = @utf8.encode(payload.stringify())
   assert_true(bytes.length() > 128 * 1024)

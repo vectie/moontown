@@ -1,7 +1,7 @@
 ///|
 async fn inspect_wenyu_building_protocol(
   protocol : @civic.BuildingProtocolDefinition,
-  ledger_base_dir? : String = default_protocol_ledger_base_dir(),
+  ledger_base_dir~ : String = default_protocol_ledger_base_dir(),
 ) -> @civic.BuildingProtocolSnapshot {
   let inbox_count = count_protocol_jsonl_records(
     protocol.building_id,

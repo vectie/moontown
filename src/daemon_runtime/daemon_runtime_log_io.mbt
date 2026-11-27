@@ -16,7 +16,7 @@ pub async fn append_daemon_log(path : String, message : String) -> Unit {
 }
 
 ///|
-pub async fn latest_daemon_log_sequence(log_path : String) -> Int {
+pub async fn latest_daemon_log_sequence(log_path : String) -> Int32 {
   let text = @support.read_text_or_empty(log_path)
   let mut latest = 0
   for line in text.split("\n") {
@@ -37,7 +37,7 @@ pub async fn latest_daemon_log_sequence(log_path : String) -> Int {
 }
 
 ///|
-fn first_non_negative_int(text : String) -> Int? {
+fn first_non_negative_int(text : String) -> Int32? {
   let mut seen = false
   let mut value = 0
   for char in text {

@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq)
 pub struct CivicServiceDefinition {
   id : String
   title : String
@@ -22,4 +23,4 @@ pub struct CivicServiceDefinition {
   target_pages : Array[String]
   acceptance : Array[String]
   projection_summary : String
-} derive(Debug, Eq)
+}

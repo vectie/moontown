@@ -2,8 +2,8 @@
 // This is deliberately a bounded subset of RFC 5545, not an ICS scheduler.
 fn expand_occurrence_source(
   source : OccurrenceSource,
-  from : Int,
-  until : Int,
+  from : Int32,
+  until : Int32,
 ) -> Result[Array[CalendarEvent], String] {
   let props = source.properties
   for key in ["RDATE", "EXRULE", "RECURRENCE-ID", "DURATION"] {
@@ -64,7 +64,7 @@ fn expand_occurrence_source(
     if rule.params != "RRULE" {
       return Err("RRULE parameters are unsupported")
     }
-    let fields : Map[String, String] = {}
+    let fields : Map[String, String] = Map([])
     for part in rule.value.to_upper().split(";") {
       let pair = part.split("=").map(s => s.to_owned()).collect()
       if pair.length() != 2 ||
@@ -194,7 +194,7 @@ pub fn calendar_occurrences(
   text : String,
   from : String,
   until : String,
-  source_indices : Array[Int],
+  source_indices : Array[Int32],
 ) -> Result[Array[CalendarEvent], String] {
   guard occurrence_window_day(from) is Some(first) &&
     occurrence_window_day(until) is Some(last) else {
@@ -212,7 +212,7 @@ pub fn calendar_occurrences(
     Ok(s) => s
     Err(e) => return Err(e)
   }
-  let selected : Array[Int] = []
+  let selected : Array[Int32] = []
   for i in source_indices {
     if i < 0 || i >= sources.length() {
       return Err("Selected source index is invalid")
@@ -287,7 +287,7 @@ pub fn calendar_occurrences(
 }
 
 ///|
-fn occurrence_field_bytes(event : CalendarEvent) -> Int {
+fn occurrence_field_bytes(event : CalendarEvent) -> Int32 {
   let mut size = 0
   for
     field in [

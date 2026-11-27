@@ -1,13 +1,15 @@
 ///|
 /// Host-owned runtime configuration; never accepted from a browser request.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct OneoffRuntime {
   moonclaw_root : String
   home : String
   profile : String
   profile_config_path : String?
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 struct WorkInput {
   book_id : String
   packet_id : String
@@ -17,9 +19,10 @@ struct WorkInput {
   packet_path : String
   packet_digest : String
   inputs : Array[@contract.Artifact]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 struct WorkIntent {
   contract_version : String
   draft_id : String
@@ -28,7 +31,7 @@ struct WorkIntent {
   runtime : OneoffRuntime
   store_home : String
   participants : Array[WorkInput]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 fn Store::work_root(self : Store, saved : @contract.SavedDraft) -> String raise {
@@ -57,7 +60,7 @@ async fn Store::work_intent(
   let root = self.work_root(saved)
   let json = @json.parse(text_bytes(read_bytes(root + "/intent.json", 2097152)))
   let intent : WorkIntent = @json.from_json(json)
-  guard intent.to_json() == json &&
+  guard ToJson::to_json(intent) == json &&
     intent.contract_version == "moontown.oneoff-intent.v1" &&
     intent.draft_id == saved.draft.draft_id &&
     intent.revision == saved.revision &&
@@ -145,7 +148,7 @@ async fn Store::create_work_intent(
       files.push(("input/" + source.artifact_ref, bytes))
       let text = @utf8.decode(bytes)
       supplied_sources.push({
-        "source": source.to_json(),
+        "source": ToJson::to_json(source),
         "encoding": if @utf8.encode(text) == bytes {
           "utf-8"
         } else {
@@ -174,7 +177,7 @@ async fn Store::create_work_intent(
       key,
       participant_brief(saved, p) +
       "\nWork once using the exact captured source payloads below. Return the contribution as UTF-8 text with source paths and uncertainties. Binary content is explicitly hex; report any interpretation limitations. Do not claim human approval. Any configured tools remain subject to the existing runtime role, workspace scope and execution authority.\n" +
-      supplied_sources.to_json().stringify(indent=2),
+      ToJson::to_json(supplied_sources).stringify(indent=2),
       artifacts.filter(a => a.path.has_prefix("input/")).map(a => a.path),
     )
     let packet = @moonclaw.proposal_packet_from_bundle(
@@ -185,7 +188,7 @@ async fn Store::create_work_intent(
       packet_id=Some(key),
     )
     let packet_path = root + "/packets/" + p.book_id + ".json"
-    let packet_bytes = @utf8.encode(packet.to_json().stringify(indent=2))
+    let packet_bytes = @utf8.encode(ToJson::to_json(packet).stringify(indent=2))
     guard packet_bytes.length() <= 2097152 else {
       raise CollaborationError(
         "Exact participant input exceeds the bounded 2 MiB one-off request. Narrow the source selection; nothing was dispatched",
@@ -214,7 +217,7 @@ async fn Store::create_work_intent(
   }
   write_bytes(
     root + "/intent.json",
-    @utf8.encode(intent.to_json().stringify(indent=2)),
+    @utf8.encode(ToJson::to_json(intent).stringify(indent=2)),
   )
   intent
 }

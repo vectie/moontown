@@ -47,7 +47,7 @@ async fn Store::current_work_review(
   self : Store,
   saved : @contract.SavedDraft,
   work : @contract.OneoffWork,
-) -> (@review.ConversationReviewBundle, Int) {
+) -> (@review.ConversationReviewBundle, Int32) {
   let root = self.work_root(saved) + "/review"
   let initial = result_bundle(saved, work)
   write_bytes(
@@ -166,7 +166,7 @@ pub async fn Store::decide_oneoff(
     guard payload
       is {
         "result_digest": String(expected),
-        "review_version": Number(expected_version),
+        "review_version": Number(expected_version, ..),
         "decision_id": String(decision_id),
         "decision": String(decision),
         "rationale": String(rationale),
@@ -235,16 +235,16 @@ pub async fn Store::decide_oneoff(
       path + "-events.json",
       @utf8.encode(
         @review.review_events(settled, work.result_digest)
-        .to_json()
-        .stringify(indent=2),
+        |> ToJson::to_json
+        |> Json::stringify(indent=2),
       ),
     )
     write_bytes(
       path + "-record.json",
       @utf8.encode(
         @review.project_review_record(settled, work.result_digest, [])
-        .to_json()
-        .stringify(indent=2),
+        |> ToJson::to_json
+        |> Json::stringify(indent=2),
       ),
     )
     self.project_work_review(saved, work)

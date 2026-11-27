@@ -31,7 +31,7 @@ fn cookbook_item_json(
   title : String,
   detail : String,
   meta : String,
-  detail_is_json? : Bool = false,
+  detail_is_json~ : Bool = false,
 ) -> String {
   let detail_value = if detail_is_json { detail } else { json_string(detail) }
   "    {\"title\":\{json_string(title)},\"detail\":\{detail_value},\"meta\":\{json_string(meta)}}"

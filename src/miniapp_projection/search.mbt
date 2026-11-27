@@ -29,7 +29,7 @@ pub fn miniapp_search_buildings(
 fn miniapp_search_score(
   building : @miniapp_contracts.MiniappBuilding,
   needle : String,
-) -> Int {
+) -> Int32 {
   if needle == "" {
     1
   } else if building.title.to_lower().contains(needle) {
@@ -51,7 +51,7 @@ fn miniapp_search_score(
 fn miniapp_search_reason(
   building : @miniapp_contracts.MiniappBuilding,
   needle : String,
-  score : Int,
+  score : Int32,
 ) -> String {
   if needle == "" {
     "visible building"

@@ -11,7 +11,7 @@ fn parse_goals(bytes : Bytes) -> Array[@core.StandingGoal] raise {
   let text = decode_source(bytes, "Goals")
   let goals : Array[@core.StandingGoal] = @json.from_json(@json.parse(text))
   guard goals.length() <= 2000 else { fail("Goals exceed 2,000 entries") }
-  let seen : Map[String, Bool] = {}
+  let seen : Map[String, Bool] = Map([])
   for goal in goals {
     guard !goal.id.trim().is_empty() && !seen.contains(goal.id) else {
       fail("Saved goals must have distinct nonblank IDs")
@@ -22,7 +22,7 @@ fn parse_goals(bytes : Bytes) -> Array[@core.StandingGoal] raise {
 }
 
 ///|
-fn date_day(text : String) -> Int raise {
+fn date_day(text : String) -> Int32 raise {
   guard text.length() == 10 && text[4] == '-' && text[7] == '-' else {
     fail("Periods require YYYY-MM-DD dates")
   }
@@ -31,9 +31,9 @@ fn date_day(text : String) -> Int raise {
       fail("Periods require YYYY-MM-DD dates")
     }
   }
-  let year = @string.parse_int(try! text[0:4].to_string())
-  let month = @string.parse_int(try! text[5:7].to_string())
-  let day = @string.parse_int(try! text[8:10].to_string())
+  let year = @string.parse_int(text[0:4].to_owned())
+  let month = @string.parse_int(text[5:7].to_owned())
+  let day = @string.parse_int(text[8:10].to_owned())
   guard year >= 1 && month >= 1 && month <= 12 else {
     fail("Invalid period date")
   }
@@ -68,7 +68,7 @@ fn date_day(text : String) -> Int raise {
 }
 
 ///|
-fn minutes(value : String) -> Int? raise {
+fn minutes(value : String) -> Int32? raise {
   if value.is_empty() {
     return None
   }
@@ -102,13 +102,13 @@ fn parse_diary(
     fail("Diary columns must be exactly: " + headers.join(","))
   }
   guard table.rows.length() <= 2000 else { fail("Diary exceeds 2,000 periods") }
-  let indices : Map[String, Int] = {}
+  let indices : Map[String, Int32] = Map([])
   for i, goal in goals {
     indices[goal.id] = i
   }
   let periods : Array[Array[EffortPeriod]] = goals.map(_ => [])
-  let windows : Array[Array[(Int, Int)]] = goals.map(_ => [])
-  let manual_windows : Array[Array[(Int, Int)]] = goals.map(_ => [])
+  let windows : Array[Array[(Int32, Int32)]] = goals.map(_ => [])
+  let manual_windows : Array[Array[(Int32, Int32)]] = goals.map(_ => [])
   for i, row in table.rows {
     try {
       guard indices.get(row[0]) is Some(index) else {

@@ -2,8 +2,8 @@
 fn standing_watch_task(
   goal : @core.StandingGoal,
   target_book_id : String,
-  tick : Int,
-  no_change_streak : Int,
+  tick : Int32,
+  no_change_streak : Int32,
 ) -> @moonbook.BookTask {
   @moonbook.BookTask::new(
     id=@standing_watch_policy.standing_watch_task_id(goal.id, tick),

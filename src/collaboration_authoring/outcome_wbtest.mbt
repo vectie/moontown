@@ -5,8 +5,8 @@ test "retained outcome native browser request envelope decodes nullable optional
   assert_eq(request.action, "outcome-list")
   assert_eq(request.payload, None)
   assert_eq(
-    decode_request(request.to_json().stringify()).to_json(),
-    request.to_json(),
+    ToJson::to_json(decode_request(ToJson::to_json(request).stringify())),
+    ToJson::to_json(request),
   )
   let key : @contract.OutcomeKey = {
     draft_id: "draft",
@@ -24,7 +24,7 @@ test "retained outcome native browser request envelope decodes nullable optional
     "new_draft_id": "",
     "artifact_path": "",
     "draft": Json::null(),
-    "payload": key.to_json(),
+    "payload": ToJson::to_json(key),
   }
   assert_eq(outcome_request_key(decode_request(browser.stringify())), key)
 }
@@ -78,7 +78,7 @@ async fn retain_outcome_fixture(
     let root = store.work_root(saved) + "/produced/" + p.book_id
     write_bytes(
       root + "/terminal.json",
-      @utf8.encode(participant.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(participant).stringify(indent=2)),
     )
     if !failed {
       write_bytes(root + "/report.md", @utf8.encode(text))
@@ -104,7 +104,7 @@ async fn outcome_fixture_decision(
   saved : @contract.SavedDraft,
   work : @contract.OneoffWork,
   prior : @review.ConversationReviewBundle,
-  version : Int,
+  version : Int32,
   decision_id : String,
   decision : String,
 ) -> @review.ConversationReviewBundle {
@@ -278,7 +278,7 @@ async test "retained outcome library indexes multiple drafts revisions and exact
   guard manifest is { "artifacts": Array(items), "selection": selection, .. } else {
     fail("manifest")
   }
-  assert_eq(selection, partial.key().to_json())
+  assert_eq(selection, ToJson::to_json(partial.key()))
   assert_eq(items.length(), files.length() - 1)
   for value in items {
     let artifact : @contract.Artifact = @json.from_json(value)
@@ -334,7 +334,7 @@ async test "retained outcome library indexes multiple drafts revisions and exact
     write_bytes(path + "/root.txt", @utf8.encode(root))
     write_bytes(
       path + "/partial-outcome.json",
-      @utf8.encode(dossier.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(dossier).stringify(indent=2)),
     )
     write_bytes(path + "/partial.tar", archive)
     write_bytes(path + "/pending.tar", archive0)
@@ -346,27 +346,27 @@ async test "retained outcome library indexes multiple drafts revisions and exact
     )
     write_bytes(
       path + "/pending-key.json",
-      @utf8.encode(entry0.key().to_json().stringify()),
+      @utf8.encode(ToJson::to_json(entry0.key()).stringify()),
     )
     write_bytes(
       path + "/rejected-key.json",
-      @utf8.encode(key2.to_json().stringify()),
+      @utf8.encode(ToJson::to_json(key2).stringify()),
     )
     write_bytes(
       path + "/deferred-key.json",
-      @utf8.encode(key3.to_json().stringify()),
+      @utf8.encode(ToJson::to_json(key3).stringify()),
     )
     write_bytes(
       path + "/index.json",
-      @utf8.encode(entries.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(entries).stringify(indent=2)),
     )
     write_bytes(
       path + "/before.json",
-      @utf8.encode(before.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(before).stringify(indent=2)),
     )
     write_bytes(
       path + "/after.json",
-      @utf8.encode(outcome_tree(root).to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(outcome_tree(root)).stringify(indent=2)),
     )
   }
 }

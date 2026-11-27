@@ -18,8 +18,8 @@ pub fn standing_watch_marker_value(summary : String, key : String) -> String? {
 pub fn standing_watch_marker_int(
   summary : String,
   key : String,
-  fallback~ : Int,
-) -> Int {
+  fallback~ : Int32,
+) -> Int32 {
   let key_colon = "\{key}:"
   let key_equals = "\{key}="
   for raw in summary.to_lower().split("\n") {
@@ -91,7 +91,9 @@ pub fn standing_watch_execution_has_zero_material_delta(
 }
 
 ///|
-pub fn standing_watch_delta_score(execution : @core.TaskExecutionRecord) -> Int {
+pub fn standing_watch_delta_score(
+  execution : @core.TaskExecutionRecord,
+) -> Int32 {
   standing_watch_marker_int(
     execution.summary,
     "delta_score",
@@ -107,6 +109,6 @@ pub fn standing_watch_delta_score(execution : @core.TaskExecutionRecord) -> Int 
 ///|
 pub fn standing_watch_new_source_count(
   execution : @core.TaskExecutionRecord,
-) -> Int {
+) -> Int32 {
   standing_watch_marker_int(execution.summary, "new_source_count", fallback=0)
 }

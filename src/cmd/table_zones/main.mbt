@@ -1,5 +1,5 @@
 ///|
-fn column(value : String) -> Int raise {
+fn column(value : String) -> Int32 raise {
   let index = @string.parse_int(value) catch { _ => 0 }
   if index < 1 || index > 128 {
     fail("Columns must be 1-based positions from 1 to 128")
@@ -47,7 +47,7 @@ async fn main {
   run() catch {
     error => {
       @stdio.stderr.write("table_zones: \{error}\n")
-      @sys.exit(1)
+      @env.exit(1)
     }
   }
 }

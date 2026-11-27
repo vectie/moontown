@@ -1,6 +1,6 @@
 ///|
 fn snapshot(goals : Array[@core.StandingGoal]) -> Bytes {
-  @utf8.encode(goals.to_json().stringify())
+  @utf8.encode(ToJson::to_json(goals).stringify())
 }
 
 ///|
@@ -20,7 +20,7 @@ fn field(value : Json, key : String) -> Json raise {
 }
 
 ///|
-fn item(value : Json, index : Int) -> Json raise {
+fn item(value : Json, index : Int32) -> Json raise {
   guard value is Array(items) && items.get(index) is Some(found) else {
     fail("Missing item")
   }
@@ -73,27 +73,36 @@ test "outlook retains all goals and clusters chronological projected occurrences
   let result = @json.parse(
     success(@goal_outlook.report(snapshot(fixture()), 10, 16, format="json")),
   )
-  assert_eq(field(result, "occurrence_count"), (7).to_json())
-  assert_eq(field(result, "shared_tick_count"), (1).to_json())
-  assert_eq(field(result, "peak_goals_at_tick"), (2).to_json())
-  assert_eq(field(result, "occupied_tick_count"), (6).to_json())
+  assert_eq(field(result, "occurrence_count"), ToJson::to_json(7))
+  assert_eq(field(result, "shared_tick_count"), ToJson::to_json(1))
+  assert_eq(field(result, "peak_goals_at_tick"), ToJson::to_json(2))
+  assert_eq(field(result, "occupied_tick_count"), ToJson::to_json(6))
   let goals = field(result, "goals")
   for i, state in ["overdue", "due_now", "scheduled", "paused", "beyond_window"] {
-    assert_eq(field(item(goals, i), "state"), state.to_json())
-    assert_eq(field(item(goals, i), "goal"), fixture()[i].to_json())
+    assert_eq(field(item(goals, i), "state"), ToJson::to_json(state))
+    assert_eq(field(item(goals, i), "goal"), ToJson::to_json(fixture()[i]))
   }
-  assert_eq(field(item(goals, 0), "occurrence_ticks"), [10, 13].to_json())
-  assert_eq(field(item(goals, 1), "occurrence_ticks"), [10, 12, 14].to_json())
-  assert_eq(field(item(goals, 2), "occurrence_ticks"), [11, 15].to_json())
+  assert_eq(
+    field(item(goals, 0), "occurrence_ticks"),
+    ToJson::to_json([10, 13]),
+  )
+  assert_eq(
+    field(item(goals, 1), "occurrence_ticks"),
+    ToJson::to_json([10, 12, 14]),
+  )
+  assert_eq(
+    field(item(goals, 2), "occurrence_ticks"),
+    ToJson::to_json([11, 15]),
+  )
   assert_eq(
     field(item(goals, 3), "occurrence_ticks"),
-    ([] : Array[Int]).to_json(),
+    ToJson::to_json(([] : Array[Int32])),
   )
   let slots = field(result, "slots")
-  assert_eq(field(item(slots, 0), "tick"), (10).to_json())
-  assert_eq(field(item(slots, 0), "goal_positions"), [1, 2].to_json())
-  assert_eq(field(item(slots, 5), "tick"), (15).to_json())
-  assert_eq(field(item(slots, 5), "goal_positions"), [3].to_json())
+  assert_eq(field(item(slots, 0), "tick"), ToJson::to_json(10))
+  assert_eq(field(item(slots, 0), "goal_positions"), ToJson::to_json([1, 2]))
+  assert_eq(field(item(slots, 5), "tick"), ToJson::to_json(15))
+  assert_eq(field(item(slots, 5), "goal_positions"), ToJson::to_json([3]))
 }
 
 ///|
@@ -111,7 +120,7 @@ test "projection agrees with repeated core due and dispatch transitions without 
       let report = @json.parse(
         success(@goal_outlook.report(saved, 10, 25, format="json")),
       )
-      let ticks : Array[Int] = []
+      let ticks : Array[Int32] = []
       let mut simulation = goal
       for tick = 10; tick < 25; tick = tick + 1 {
         if simulation.is_due(tick) {
@@ -125,7 +134,7 @@ test "projection agrees with repeated core due and dispatch transitions without 
       }
       assert_eq(
         field(item(field(report, "goals"), 0), "occurrence_ticks"),
-        ticks.to_json(),
+        ToJson::to_json(ticks),
       )
       assert_eq(snapshot([goal]), saved)
     }
@@ -161,12 +170,18 @@ test "maximum tick arithmetic stays exact and nonpositive cadences are visibly n
     ),
   )
   let views = field(result, "goals")
-  assert_eq(field(item(views, 0), "effective_cadence_ticks"), (1).to_json())
+  assert_eq(
+    field(item(views, 0), "effective_cadence_ticks"),
+    ToJson::to_json(1),
+  )
   assert_eq(
     field(item(views, 0), "occurrence_ticks"),
-    [2147483644, 2147483645, 2147483646].to_json(),
+    ToJson::to_json([2147483644, 2147483645, 2147483646]),
   )
-  assert_eq(field(item(views, 1), "occurrence_ticks"), [2147483645].to_json())
+  assert_eq(
+    field(item(views, 1), "occurrence_ticks"),
+    ToJson::to_json([2147483645]),
+  )
 }
 
 ///|
@@ -196,24 +211,24 @@ test "compare matches exact IDs exposes additions removals edits and unchanged p
       ),
     ),
   )
-  assert_eq(field(result, "before_occurrences"), (7).to_json())
-  assert_eq(field(result, "after_occurrences"), (5).to_json())
-  assert_eq(field(result, "occurrence_delta"), (-2).to_json())
+  assert_eq(field(result, "before_occurrences"), ToJson::to_json(7))
+  assert_eq(field(result, "after_occurrences"), ToJson::to_json(5))
+  assert_eq(field(result, "occurrence_delta"), ToJson::to_json(-2))
   let changes = field(result, "changes")
   for
     i, state in [
       "changed", "changed", "removed", "unchanged", "unchanged", "added",
     ] {
-    assert_eq(field(item(changes, i), "state"), state.to_json())
+    assert_eq(field(item(changes, i), "state"), ToJson::to_json(state))
   }
-  assert_eq(field(item(changes, 0), "outlook_changed"), false.to_json())
-  assert_eq(field(item(changes, 0), "settings_changed"), true.to_json())
-  assert_eq(field(item(changes, 1), "outlook_changed"), true.to_json())
-  assert_eq(field(item(changes, 2), "occurrence_delta"), (-2).to_json())
-  assert_eq(field(item(changes, 5), "goal_id"), " Overdue ".to_json())
+  assert_eq(field(item(changes, 0), "outlook_changed"), ToJson::to_json(false))
+  assert_eq(field(item(changes, 0), "settings_changed"), ToJson::to_json(true))
+  assert_eq(field(item(changes, 1), "outlook_changed"), ToJson::to_json(true))
+  assert_eq(field(item(changes, 2), "occurrence_delta"), ToJson::to_json(-2))
+  assert_eq(field(item(changes, 5), "goal_id"), ToJson::to_json(" Overdue "))
   assert_eq(
     field(field(item(changes, 0), "after"), "source_position"),
-    (2).to_json(),
+    ToJson::to_json(2),
   )
 }
 
@@ -223,18 +238,18 @@ test "reorder and raw-byte differences do not invent settings changes" {
   let before = snapshot(goals)
   let after = @utf8.encode(
     "\n" +
-    [goals[4], goals[3], goals[2], goals[1], goals[0]].to_json().stringify() +
+    ToJson::to_json([goals[4], goals[3], goals[2], goals[1], goals[0]]).stringify() +
     "\n",
   )
   let report = @json.parse(
     success(@goal_outlook.compare(before, after, 10, 16, format="json")),
   )
   assert_true(field(report, "before_digest") != field(report, "after_digest"))
-  assert_eq(field(report, "occurrence_delta"), (0).to_json())
+  assert_eq(field(report, "occurrence_delta"), ToJson::to_json(0))
   guard field(report, "changes") is Array(changes) else { fail("changes") }
   for change in changes {
-    assert_eq(field(change, "state"), "unchanged".to_json())
-    assert_eq(field(change, "outlook_changed"), false.to_json())
+    assert_eq(field(change, "state"), ToJson::to_json("unchanged"))
+    assert_eq(field(change, "outlook_changed"), ToJson::to_json(false))
   }
 }
 
@@ -243,22 +258,25 @@ test "empty snapshots and all paused windows remain useful zero reports" {
   let result = @json.parse(
     success(@goal_outlook.report(b"[]", 0, 1000000, format="json")),
   )
-  assert_eq(field(result, "occurrence_count"), (0).to_json())
-  assert_eq(field(result, "peak_goals_at_tick"), (0).to_json())
-  assert_eq(field(result, "slots"), ([] : Array[Int]).to_json())
+  assert_eq(field(result, "occurrence_count"), ToJson::to_json(0))
+  assert_eq(field(result, "peak_goals_at_tick"), ToJson::to_json(0))
+  assert_eq(field(result, "slots"), ToJson::to_json(([] : Array[Int32])))
   let paused = snapshot([fixture()[3]])
   let result = @json.parse(
     success(@goal_outlook.report(paused, 0, 20, format="json")),
   )
-  assert_eq(field(item(field(result, "goals"), 0), "state"), "paused".to_json())
+  assert_eq(
+    field(item(field(result, "goals"), 0), "state"),
+    ToJson::to_json("paused"),
+  )
   let comparison = @json.parse(
     success(@goal_outlook.compare(paused, b"[]", 0, 20, format="json")),
   )
   assert_eq(
     field(item(field(comparison, "changes"), 0), "state"),
-    "removed".to_json(),
+    ToJson::to_json("removed"),
   )
-  assert_eq(field(comparison, "occurrence_delta"), (0).to_json())
+  assert_eq(field(comparison, "occurrence_delta"), ToJson::to_json(0))
 }
 
 ///|
@@ -290,7 +308,7 @@ test "window and occurrence bounds fail without partial projection" {
   let boundary = @json.parse(
     success(@goal_outlook.report(one, 0, 10000, format="json")),
   )
-  assert_eq(field(boundary, "occurrence_count"), (10000).to_json())
+  assert_eq(field(boundary, "occurrence_count"), ToJson::to_json(10000))
   assert_true(@goal_outlook.report(one, 0, 10001, format="json") is Err(_))
   assert_true(
     @goal_outlook.compare(b"[]", one, 0, 10001, format="json") is Err(_),
@@ -304,7 +322,7 @@ test "window and occurrence bounds fail without partial projection" {
 ///|
 test "shared exact decoder rejects malformed snapshots unknown fields identity and integer loss" {
   let goal = fixture()[0]
-  let text = goal.to_json().stringify()
+  let text = ToJson::to_json(goal).stringify()
   for
     bytes in [
       b"{}",
@@ -361,9 +379,11 @@ test "digests bind original bytes rather than canonical serialization" {
   )
   assert_eq(
     field(result, "source_digest"),
-    ("sha256:" + @crypto.bytes_to_hex_string(@crypto.sha256(bytes))).to_json(),
+    ToJson::to_json(
+      "sha256:" + @crypto.bytes_to_hex_string(@crypto.sha256(bytes)),
+    ),
   )
-  assert_eq(field(result, "source_size_bytes"), bytes.length().to_json())
+  assert_eq(field(result, "source_size_bytes"), ToJson::to_json(bytes.length()))
   let changed = @json.parse(
     success(
       @goal_outlook.report(
@@ -383,7 +403,7 @@ fn with_changes(
   goal : @core.StandingGoal,
   id? : String,
   title? : String,
-  cadence? : Int,
+  cadence? : Int32,
 ) -> @core.StandingGoal {
   @core.StandingGoal::new(
     id=id.unwrap_or(goal.id),

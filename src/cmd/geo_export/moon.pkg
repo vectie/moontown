@@ -1,5 +1,4 @@
 import {
-  "moonbitlang/async",
   "moonbitlang/async/fs",
   "moonbitlang/core/env",
   "vectie/moontown/imported_output_contract" @geo,

@@ -214,9 +214,9 @@ fn plan(
               now.id,
               "$goal",
               "deleted_modified",
-              before.to_json(),
+              ToJson::to_json(before),
               Json::null(),
-              now.to_json(),
+              ToJson::to_json(now),
             ),
           )
         }
@@ -230,8 +230,8 @@ fn plan(
               "$goal",
               "added_differently",
               Json::null(),
-              after.to_json(),
-              now.to_json(),
+              ToJson::to_json(after),
+              ToJson::to_json(now),
             ),
           )
         }
@@ -249,8 +249,8 @@ fn plan(
                 after.id,
                 "$goal",
                 "modified_deleted",
-                before.to_json(),
-                after.to_json(),
+                ToJson::to_json(before),
+                ToJson::to_json(after),
                 Json::null(),
               ),
             )
@@ -265,7 +265,7 @@ fn plan(
 }
 
 ///|
-fn bounded(text : String, limit : Int) -> String raise {
+fn bounded(text : String, limit : Int32) -> String raise {
   guard @utf8.encode(text).length() <= limit else {
     fail("Output exceeds " + limit.to_string() + " bytes; narrow the inputs")
   }
@@ -291,7 +291,7 @@ pub fn merge_snapshots(
         " conflict(s); run inspect with the same inputs for exact goal IDs, fields and values",
       )
     }
-    bounded(result.goals.to_json().stringify() + "\n", 1048576)
+    bounded(ToJson::to_json(result.goals).stringify() + "\n", 1048576)
   } catch {
     error => Err("\{error}")
   } noraise {
@@ -313,8 +313,8 @@ pub fn inspect_snapshots(
     let clean = result.conflicts.is_empty()
     let merged : Json = if clean {
       // A successful inspect must offer a candidate that also fits merge output.
-      ignore(bounded(result.goals.to_json().stringify() + "\n", 1048576))
-      result.goals.to_json()
+      ignore(bounded(ToJson::to_json(result.goals).stringify() + "\n", 1048576))
+      ToJson::to_json(result.goals)
     } else {
       Json::null()
     }

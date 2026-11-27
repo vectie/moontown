@@ -39,7 +39,7 @@ test "default operational site escapes title summary and workspace path" {
 
 ///|
 fn operational_projection_test_entry(
-  workspace_root? : String = "/tmp/moontown/ops-book",
+  workspace_root~ : String = "/tmp/moontown/ops-book",
 ) -> @moonbook.BookCatalogEntry {
   @moonbook.BookCatalogEntry::new(
     id="ops-book",

@@ -44,6 +44,6 @@ async test "public owner controls cancel unreserved work locally and expose save
   let shown = @native_work.status(stopped)
   assert_eq(shown.control_state, "none")
   assert_eq(shown.blocked_reason, "cancelled_before_reservation")
-  assert_false(shown.to_json().stringify().contains("private prompt"))
+  assert_false(ToJson::to_json(shown).stringify().contains("private prompt"))
   assert_false(@fs.exists(request.result_path))
 }

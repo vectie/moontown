@@ -8,7 +8,7 @@ import {
 // Values
 pub fn default_visual_decorator_manifest_path() -> String
 
-pub async fn persist_visual_projection(@core.TownState, String, tick? : Int, decorator_manifest_path? : String) -> Unit
+pub async fn persist_visual_projection(@core.TownState, String, tick? : Int32, decorator_manifest_path? : String) -> Unit
 
 // Errors
 

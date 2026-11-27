@@ -15,7 +15,7 @@ fn queue_service_ms(state : State) -> UInt64 {
   if durations.is_empty() {
     return 10000UL
   }
-  let recent = durations[(durations.length() - 10).max(0):].to_array()
+  let recent = durations[(durations.length() - 10).max(0):].to_owned()
   recent.sort()
   let median = recent[recent.length() / 2]
   (if median < 1000UL { 1000UL } else { median }) + 1000UL

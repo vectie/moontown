@@ -1,5 +1,5 @@
 ///|
-fn included_source_screen(source_count : Int) -> String {
+fn included_source_screen(source_count : Int32) -> String {
   let rows : Array[String] = []
   for index = 1 {
     if index > source_count {
@@ -30,10 +30,10 @@ fn opc_research_catalog_entry(root : String) -> @moonbook.BookCatalogEntry {
 
 ///|
 fn research_quality_observation_fixture(
-  root? : String = "/tmp/research-quality-observation",
-  missing_required_paths? : Array[String] = [],
-  has_research_source_marker? : Bool = true,
-  readiness? : ResearchReadiness? = Some({
+  root~ : String = "/tmp/research-quality-observation",
+  missing_required_paths~ : Array[String] = [],
+  has_research_source_marker~ : Bool = true,
+  readiness~ : ResearchReadiness? = Some({
     book_id: "research-opc",
     root,
     source_page_count: 1,
@@ -46,21 +46,21 @@ fn research_quality_observation_fixture(
     substantive_coverage_ready: true,
     gaps: [],
   }),
-  brief? : String? = None,
-  overview? : String? = None,
-  search_log? : String? = None,
-  source_screen? : String? = None,
-  tool_blockers? : String? = None,
-  deep_report? : String? = None,
-  reference_output? : String? = None,
-  has_runtime_entity_contamination? : Bool = false,
-  has_topic_entity_page? : Bool = true,
-  has_topic_concept_page? : Bool = true,
-  has_topic_source_page? : Bool = true,
-  generated_site? : String? = None,
-  generated_site_read_error? : Bool = false,
-  site_entry? : String? = None,
-  site_entry_read_error? : Bool = false,
+  brief~ : String? = None,
+  overview~ : String? = None,
+  search_log~ : String? = None,
+  source_screen~ : String? = None,
+  tool_blockers~ : String? = None,
+  deep_report~ : String? = None,
+  reference_output~ : String? = None,
+  has_runtime_entity_contamination~ : Bool = false,
+  has_topic_entity_page~ : Bool = true,
+  has_topic_concept_page~ : Bool = true,
+  has_topic_source_page~ : Bool = true,
+  generated_site~ : String? = None,
+  generated_site_read_error~ : Bool = false,
+  site_entry~ : String? = None,
+  site_entry_read_error~ : Bool = false,
 ) -> ResearchQualityObservation {
   {
     root,

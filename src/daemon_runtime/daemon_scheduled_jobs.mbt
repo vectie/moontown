@@ -4,7 +4,7 @@ pub async fn run_daemon_scheduled_jobs(
   jobs : Array[@scheduler.ScheduledJob],
   snapshot_path : String,
   book_catalog_path : String,
-  tick : Int,
+  tick : Int32,
   log_path : String,
 ) -> Unit {
   for job in @scheduler.merge_default_daemon_jobs(jobs) {
@@ -41,7 +41,7 @@ async fn run_daemon_scheduled_job(
   job : @scheduler.ScheduledJob,
   snapshot_path : String,
   book_catalog_path : String,
-  tick : Int,
+  tick : Int32,
 ) -> String? {
   if @scheduler.scheduled_job_runs_civic_communication(job) {
     Some(

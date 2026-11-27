@@ -1,7 +1,8 @@
 ///|
+#derive(Debug, Eq)
 pub struct RouteRequest {
   task : @core.TownTask
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn RouteRequest::new(task~ : @core.TownTask) -> RouteRequest {
@@ -9,11 +10,12 @@ pub fn RouteRequest::new(task~ : @core.TownTask) -> RouteRequest {
 }
 
 ///|
+#derive(Debug, Eq)
 pub enum RouteDecision {
   Assigned(@core.AssignmentPlan)
   Escalated(String)
   Deferred(String)
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn escalate(reason : String) -> RouteDecision {

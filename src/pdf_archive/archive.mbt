@@ -86,7 +86,7 @@ pub fn count_disabled_pdf_evidence_watch_book_standing_goals(
   before : Array[@core.StandingGoal],
   after : Array[@core.StandingGoal],
   book_id : String,
-) -> Int {
+) -> Int32 {
   let mut count = 0
   for goal in before {
     if goal.enabled &&
@@ -126,7 +126,7 @@ pub fn render_pdf_evidence_watch_archive_summary(
   reason : String,
   book_catalog_path : String,
   goal_id : String,
-  disabled_count : Int,
+  disabled_count : Int32,
   request_event_path : String,
   status : @pdf_evidence_watch.PdfEvidenceWatchBookStatus,
 ) -> String {

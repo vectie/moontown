@@ -1,5 +1,5 @@
 ///|
-pub fn count_live_workers(state : @core.TownState) -> Int {
+pub fn count_live_workers(state : @core.TownState) -> Int32 {
   let mut count = 0
   for worker in state.workers {
     if worker_is_live(worker) {
@@ -17,12 +17,12 @@ pub fn worker_is_live(worker : @core.WorkerRef) -> Bool {
 }
 
 ///|
-pub fn count_live_activity(state : @core.TownState) -> Int {
+pub fn count_live_activity(state : @core.TownState) -> Int32 {
   max_int(count_live_workers(state), count_live_active_executions(state))
 }
 
 ///|
-pub fn count_live_active_executions(state : @core.TownState) -> Int {
+pub fn count_live_active_executions(state : @core.TownState) -> Int32 {
   let mut count = 0
   for execution in state.executions {
     if @runtime_status_policy.runtime_status_active_execution_status(
@@ -35,7 +35,7 @@ pub fn count_live_active_executions(state : @core.TownState) -> Int {
 }
 
 ///|
-pub fn count_live_review_executions(state : @core.TownState) -> Int {
+pub fn count_live_review_executions(state : @core.TownState) -> Int32 {
   let mut count = 0
   for execution in state.executions {
     if @runtime_status_policy.runtime_status_review_execution_status(
@@ -48,7 +48,7 @@ pub fn count_live_review_executions(state : @core.TownState) -> Int {
 }
 
 ///|
-pub fn count_transient_infrastructure_debt(state : @core.TownState) -> Int {
+pub fn count_transient_infrastructure_debt(state : @core.TownState) -> Int32 {
   let mut count = 0
   for execution in state.executions {
     if execution_is_transient_infrastructure_debt(execution) {
@@ -66,7 +66,7 @@ pub fn execution_is_transient_infrastructure_debt(
 }
 
 ///|
-pub fn live_autonomy_tick(state : @core.TownState) -> Int {
+pub fn live_autonomy_tick(state : @core.TownState) -> Int32 {
   let mut tick = state.events.length()
   for execution in state.executions {
     if execution.heartbeat_tick > tick {
@@ -78,16 +78,16 @@ pub fn live_autonomy_tick(state : @core.TownState) -> Int {
 
 ///|
 pub fn live_autonomy_metric_counts(
-  active_workers~ : Int,
-  review~ : Int,
-  blocked~ : Int,
-  accepted_updates~ : Int,
-  no_change~ : Int,
-  failed~ : Int,
-  transient_infrastructure_debt~ : Int,
-  enabled_standing_goals~ : Int,
-  disabled_standing_goals~ : Int,
-  due_goals~ : Int,
+  active_workers~ : Int32,
+  review~ : Int32,
+  blocked~ : Int32,
+  accepted_updates~ : Int32,
+  no_change~ : Int32,
+  failed~ : Int32,
+  transient_infrastructure_debt~ : Int32,
+  enabled_standing_goals~ : Int32,
+  disabled_standing_goals~ : Int32,
+  due_goals~ : Int32,
 ) -> LiveAutonomyMetricCounts {
   {
     active_workers,
@@ -104,7 +104,7 @@ pub fn live_autonomy_metric_counts(
 }
 
 ///|
-fn max_int(left : Int, right : Int) -> Int {
+fn max_int(left : Int32, right : Int32) -> Int32 {
   if left > right {
     left
   } else {

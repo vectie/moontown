@@ -32,7 +32,6 @@ import {
   "vectie/moontown/domain_catalog",
   "vectie/moontown/hackathon",
   "vectie/moontown/adapters/moonbook",
-  "vectie/moontown/plugin/moongate",
 }
 
 supported_targets = "native"

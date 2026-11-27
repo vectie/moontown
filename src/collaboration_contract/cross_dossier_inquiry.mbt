@@ -1,17 +1,19 @@
 ///|
 /// A selection remains attached to the exact historical result/review version.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct InquiryDossier {
   origin : OutcomeKey
   contributions : Array[InquiryContribution]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 /// The first inquiry supplies operator-authored fields and its first selection;
 /// additional selections carry their own historical identities, never authority.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CrossDossierInquiry {
   inquiry : RetainedInquiry
   additional : Array[InquiryDossier]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn cross_dossier_inquiry_draft(
@@ -102,7 +104,7 @@ pub fn cross_dossier_inquiry_draft(
     .join("\n\n--- Next dossier objection ---\n\n"),
     participants,
   }
-  guard @utf8.encode(draft.to_json().stringify()).length() <= 65536 else {
+  guard @utf8.encode(ToJson::to_json(draft).stringify()).length() <= 65536 else {
     return Err(
       "Cross-dossier inquiry exceeds 64 KiB; narrow the selected excerpts",
     )

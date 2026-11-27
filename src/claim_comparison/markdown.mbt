@@ -1,9 +1,9 @@
 ///|
 fn safe(value : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   // JSON spelling makes line breaks and controls visible; Markdown punctuation
   // is escaped so untrusted source text cannot create links, headings or HTML.
-  for c in value.to_json().stringify() {
+  for c in ToJson::to_json(value).stringify() {
     if c
       is ('\\'
       | '`'
@@ -33,7 +33,7 @@ fn safe(value : String) -> String {
 
 ///|
 fn markdown(value : Comparison) -> String {
-  let out = StringBuilder::new()
+  let out = StringBuilder()
   out.write_string("# Cross-book claim comparison\n\nState: pending_review\n\n")
   out.write_string(value.policy + "\n\n")
   out.write_string(

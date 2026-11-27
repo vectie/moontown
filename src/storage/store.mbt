@@ -1,7 +1,8 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct EventCursor {
-  offset : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  offset : Int32
+}
 
 ///|
 pub impl Show for EventCursor with fn output(
@@ -12,11 +13,12 @@ pub impl Show for EventCursor with fn output(
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct Checkpoint {
   run_id : String
   summary : String
-  event_count : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  event_count : Int32
+}
 
 ///|
 pub impl Show for Checkpoint with fn output(self : Checkpoint, logger : &Logger) -> Unit {
@@ -26,10 +28,11 @@ pub impl Show for Checkpoint with fn output(self : Checkpoint, logger : &Logger)
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct TownSnapshot {
   town : @core.TownState
-  event_count : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  event_count : Int32
+}
 
 ///|
 pub fn snapshot_of(town : @core.TownState) -> TownSnapshot {
@@ -56,7 +59,7 @@ pub async fn save_snapshot_file(path : String, snapshot : TownSnapshot) -> Unit 
   ensure_parent_directory(path)
   @fs.write_file(
     path,
-    @encoding/utf8.encode(snapshot.to_json().stringify()),
+    @encoding/utf8.encode(ToJson::to_json(snapshot).stringify()),
     create_mode=CreateOrTruncate,
     permission=0o644,
   )

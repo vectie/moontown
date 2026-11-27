@@ -2,7 +2,7 @@
 fn civic_communication_output_sections(
   ideas : Array[CivicCommunicationIdea],
 ) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   for idea in ideas {
     builder.write_string("### ")
     builder.write_string(idea.title)

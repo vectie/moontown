@@ -1,11 +1,12 @@
 ///|
 /// The sole renderer-neutral spatial result of the Energy Valley compiler.
 /// All collections are read-only snapshots; runtime ledgers bind through IDs.
+#derive(Debug, Eq)
 pub(all) struct CompiledTownWorld {
   schema_version : String
   blueprint_id : StableId
   blueprint_digest : String
-  layout_seed : Int
+  layout_seed : Int32
   bounds : WorldBounds
   terrain_regions : ReadOnlyArray[TerrainRegion]
   road_network : RoadNetwork
@@ -19,14 +20,14 @@ pub(all) struct CompiledTownWorld {
   attention_targets : ReadOnlyArray[AttentionTarget]
   diagnostics : ReadOnlyArray[WorldDiagnostic]
   rejected_placements : ReadOnlyArray[RejectedPlacement]
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn compiled_town_world(
   schema_version : String,
   blueprint_id : StableId,
   blueprint_digest : String,
-  layout_seed : Int,
+  layout_seed : Int32,
   bounds : WorldBounds,
   terrain_regions : ArrayView[TerrainRegion],
   road_network : RoadNetwork,
@@ -34,12 +35,12 @@ pub fn compiled_town_world(
   parcels : ArrayView[Parcel],
   places : ArrayView[Place],
   attention_targets : ArrayView[AttentionTarget],
-  parcel_programs? : ArrayView[ParcelProgram] = [],
-  parcel_program_assignments? : ArrayView[ParcelProgramAssignment] = [],
-  place_relations? : ArrayView[PlaceRelation] = [],
-  installations? : ArrayView[Installation] = [],
-  diagnostics? : ArrayView[WorldDiagnostic] = [],
-  rejected_placements? : ArrayView[RejectedPlacement] = [],
+  parcel_programs~ : ArrayView[ParcelProgram] = [],
+  parcel_program_assignments~ : ArrayView[ParcelProgramAssignment] = [],
+  place_relations~ : ArrayView[PlaceRelation] = [],
+  installations~ : ArrayView[Installation] = [],
+  diagnostics~ : ArrayView[WorldDiagnostic] = [],
+  rejected_placements~ : ArrayView[RejectedPlacement] = [],
 ) -> CompiledTownWorld {
   {
     schema_version,
@@ -192,25 +193,26 @@ pub fn CompiledTownWorld::find_interaction_slot(
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct TownSnapshot {
   world : CompiledTownWorld
-  tick : Int
+  tick : Int32
   attention_signals : ReadOnlyArray[AttentionSignal]
   attention_focuses : ReadOnlyArray[AttentionFocus]
   actor_profiles : ReadOnlyArray[ActorProfile]
   actor_presences : ReadOnlyArray[ActorPresence]
   place_exchanges : ReadOnlyArray[PlaceExchange]
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn town_snapshot(
   world : CompiledTownWorld,
-  tick : Int,
+  tick : Int32,
   attention_signals : ArrayView[AttentionSignal],
   attention_focuses : ArrayView[AttentionFocus],
-  actor_profiles? : ArrayView[ActorProfile] = [],
-  actor_presences? : ArrayView[ActorPresence] = [],
-  place_exchanges? : ArrayView[PlaceExchange] = [],
+  actor_profiles~ : ArrayView[ActorProfile] = [],
+  actor_presences~ : ArrayView[ActorPresence] = [],
+  place_exchanges~ : ArrayView[PlaceExchange] = [],
 ) -> TownSnapshot {
   {
     world,

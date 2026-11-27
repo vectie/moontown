@@ -82,10 +82,10 @@ fn standing_watch_keeper_acceptance_summary(
   threshold_label~ : String,
   reason_label~ : String,
   decision~ : @core.WatcherDecisionKind,
-  threshold~ : Int,
+  threshold~ : Int32,
   reason~ : String,
 ) -> String {
-  "\{execution.summary}\n\{marker}: accepted\n\{decision_label}: \{decision.to_string()}\n\{threshold_label}: \{threshold}\n\{reason_label}: \{reason}"
+  "\{execution.summary}\n\{marker}: accepted\n\{decision_label}: \{decision}\n\{threshold_label}: \{threshold}\n\{reason_label}: \{reason}"
 }
 
 ///|

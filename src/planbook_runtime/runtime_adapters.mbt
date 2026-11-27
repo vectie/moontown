@@ -1,6 +1,6 @@
 ///|
 fn optional_env_text(key : String) -> String? {
-  match @sys.get_env_var(key) {
+  match @env.get_env_var(key) {
     Some(value) => {
       let trimmed = value.trim().to_owned()
       if trimmed.is_empty() {
@@ -17,7 +17,7 @@ fn optional_env_text(key : String) -> String? {
 fn moonclaw_execution_metadata_fields(
   preferred_skills~ : Array[String],
   execution_mode~ : String,
-  execution_target? : String? = None,
+  execution_target~ : String? = None,
   output_contract~ : String,
 ) -> Map[String, Json] {
   @moonclaw_runtime.moonclaw_execution_metadata_fields(

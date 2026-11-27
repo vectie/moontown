@@ -1,6 +1,6 @@
 ///|
 fn worker_avatar_initials(title : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let mut count = 0
   for token in title.split(" ") {
     if count >= 2 {

@@ -22,7 +22,7 @@ fn cancel_waiting(work : Work, reason : String, now : UInt64) -> Work {
 fn selected_work(
   state : State,
   id : String,
-  expected_revision : Int,
+  expected_revision : Int32,
 ) -> Work raise {
   if state.revision != expected_revision {
     fail("native_work_revision_conflict")
@@ -65,9 +65,9 @@ async fn saved_client(
 /// uncertain: cancellation must never resubmit the original to make it appear.
 pub async fn cancel(
   id : String,
-  expected_revision : Int,
+  expected_revision : Int32,
   now : UInt64,
-  path? : String = default_path(),
+  path~ : String = default_path(),
   client? : @native_code_control.Client,
 ) -> Work {
   let lock = lock_state(path)
@@ -156,7 +156,7 @@ async fn cancel_with_saved_client(
   let reply = client.request("POST", base + "/turns", control.request_body)
   let reason = match reply {
     Ok(value) if same_binding(value, reservation) &&
-      field(value, "accepted") == true.to_json() &&
+      field(value, "accepted") == ToJson::to_json(true) &&
       text(value, "command_id") == control.command_id =>
       "cancellation_awaiting_native_evidence"
     Ok(_) => "native_cancel_acceptance_identity_mismatch"
@@ -178,9 +178,9 @@ async fn cancel_with_saved_client(
 /// lookup, Book result application, or source edit occurs on this path.
 pub async fn refresh(
   id : String,
-  expected_revision : Int,
+  expected_revision : Int32,
   now : UInt64,
-  path? : String = default_path(),
+  path~ : String = default_path(),
   client? : @native_code_control.Client,
 ) -> Work {
   let lock = lock_state(path)
@@ -200,7 +200,7 @@ pub async fn refresh(
         waiting(original, "waiting_control", reason, now)
       }
   }
-  if observed.to_json() != original.to_json() {
+  if ToJson::to_json(observed) != ToJson::to_json(original) {
     save_unlocked(path, replace_work(state, observed))
   }
   observed

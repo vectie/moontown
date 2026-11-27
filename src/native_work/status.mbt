@@ -1,12 +1,13 @@
 ///|
 /// Saved-state projection omits prompt, native body, root/configuration
 /// fields, baseline and raw receipts. Ordinary source diagnostics are kept.
+#derive(ToJson)
 pub(all) struct Status {
   id : String
   kind : String
   book_id : String
   criterion_id : String
-  generation : Int
+  generation : Int32
   state : String
   control_state : String
   blocked_reason : String
@@ -17,7 +18,7 @@ pub(all) struct Status {
   command_id : String
   engineering_status : String
   output : String
-} derive(ToJson)
+}
 
 ///|
 pub fn status(work : Work) -> Status {

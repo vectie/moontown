@@ -198,7 +198,7 @@ async fn materialize_native_planbook_repair(
         }
         if relative == @planbook_policy.repair_plan_relative_path() {
           context.push(
-            "Plan criterion: " + criterion.to_json().stringify(indent=2),
+            "Plan criterion: " + ToJson::to_json(criterion).stringify(indent=2),
           )
           continue
         }
@@ -269,7 +269,7 @@ async fn materialize_native_planbook_repair(
   if !@fs.exists(packet_path) {
     @support.write_text_file(
       packet_path,
-      work.request.to_json().stringify(indent=2),
+      ToJson::to_json(work.request).stringify(indent=2),
     )
   }
   {

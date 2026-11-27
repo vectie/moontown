@@ -1,12 +1,13 @@
 ///|
+#derive(Eq, ToJson, FromJson)
 pub(all) struct BookQualityRepairReviewContract {
   semantic_grade : String
   repair_owner : String
   next_repair_task : String
-} derive(Eq, ToJson, FromJson)
+}
 
 ///|
-pub fn parse_ai_quality_score(text : String) -> Int? {
+pub fn parse_ai_quality_score(text : String) -> Int32? {
   for raw in text.split("\n") {
     let line = raw.trim()
     let owned = line.to_owned()
@@ -22,7 +23,7 @@ pub fn parse_ai_quality_score(text : String) -> Int? {
 }
 
 ///|
-fn first_int(text : String) -> Int? {
+fn first_int(text : String) -> Int32? {
   let mut value = 0
   let mut seen = false
   for char in text {

@@ -43,7 +43,7 @@ fn planbook_test_validation_lines() -> Array[String] {
 ///|
 fn planbook_test_valid_patch_receipt(
   criterion_id : String,
-  run_id? : String = "run-1",
+  run_id~ : String = "run-1",
 ) -> Json {
   {
     "contract": @planbook_policy.repair_patch_receipt_contract(),
@@ -214,8 +214,8 @@ async test "planbook source patch receipt survives repair result supersession th
         },
       ],
     }
-    .to_json()
-    .stringify(),
+    |> ToJson::to_json
+    |> Json::stringify(),
   )
   @support.write_text_file(
     "\{run_dir}/meta.json",
@@ -225,13 +225,13 @@ async test "planbook source patch receipt survives repair result supersession th
       "status": "Succeeded",
       "summary": "accepted source patch",
     }
-    .to_json()
-    .stringify(),
+    |> ToJson::to_json
+    |> Json::stringify(),
   )
   @support.write_text_file(
     "\{run_dir}/result.json",
     Json::object({
-      "content": content.to_json(),
+      "content": ToJson::to_json(content),
       "patch_receipt": planbook_test_valid_patch_receipt(criterion_id, run_id~),
     }).stringify(),
   )
@@ -270,8 +270,8 @@ async test "planbook repair recovers accepted run from proposal job id when last
         },
       ],
     }
-    .to_json()
-    .stringify(),
+    |> ToJson::to_json
+    |> Json::stringify(),
   )
   @support.write_text_file(
     planbook_repair_job_index_path(workspace_root),
@@ -284,8 +284,8 @@ async test "planbook repair recovers accepted run from proposal job id when last
         },
       ],
     }
-    .to_json()
-    .stringify(),
+    |> ToJson::to_json
+    |> Json::stringify(),
   )
   @support.write_text_file(
     "\{run_dir}/meta.json",
@@ -296,13 +296,13 @@ async test "planbook repair recovers accepted run from proposal job id when last
       "status": "Succeeded",
       "summary": "accepted source patch",
     }
-    .to_json()
-    .stringify(),
+    |> ToJson::to_json
+    |> Json::stringify(),
   )
   @support.write_text_file(
     "\{run_dir}/result.json",
     Json::object({
-      "content": content.to_json(),
+      "content": ToJson::to_json(content),
       "metadata": Json::object({
         "patch_receipt": planbook_test_valid_patch_receipt(
           criterion_id,

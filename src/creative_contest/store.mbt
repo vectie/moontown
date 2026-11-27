@@ -74,19 +74,19 @@ fn snapshot(
           "queue": generation_queue(job, state, config, now),
         } : Json)
     }),
-    "entries": mine.map(entry => entry.to_json()),
+    "entries": mine.map(entry => ToJson::to_json(entry)),
     "review_queue": queue.map(entry => {
-      "entry": entry.to_json(),
+      "entry": ToJson::to_json(entry),
       "generation": state.generations
       .iter()
       .find_first(job => job.id == entry.generation_id)
       .unwrap()
-      .to_json(),
+      |> ToJson::to_json,
     }),
     "reconcile_queue": if operator {
       state.generations
       .filter(job => job.state == "needs_reconcile")
-      .map(job => job.to_json())
+      .map(job => ToJson::to_json(job))
     } else {
       []
     },

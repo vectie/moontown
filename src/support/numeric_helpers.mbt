@@ -1,5 +1,5 @@
 ///|
-pub fn max_int(left : Int, right : Int) -> Int {
+pub fn max_int(left : Int32, right : Int32) -> Int32 {
   if left > right {
     left
   } else {
@@ -8,7 +8,7 @@ pub fn max_int(left : Int, right : Int) -> Int {
 }
 
 ///|
-pub fn min_int(left : Int, right : Int) -> Int {
+pub fn min_int(left : Int32, right : Int32) -> Int32 {
   if left < right {
     left
   } else {

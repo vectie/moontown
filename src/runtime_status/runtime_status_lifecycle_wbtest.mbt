@@ -64,10 +64,13 @@ test "runtime status API exposes deduped acceptance debt without claiming review
   assert_eq(status.completed_count, 0)
   assert_eq(status.daemon_actions.length(), 0)
   assert_true(status.summary.contains("awaiting_acceptance=1"))
-  guard status.to_json() is Object(fields) else {
+  guard ToJson::to_json(status) is Object(fields) else {
     fail("expected status object")
   }
-  assert_eq(fields.get("awaiting_acceptance_count"), Some((1 : Int).to_json()))
+  assert_eq(
+    fields.get("awaiting_acceptance_count"),
+    Some(ToJson::to_json((1 : Int32))),
+  )
 }
 
 ///|

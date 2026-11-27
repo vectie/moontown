@@ -14,7 +14,10 @@ async test "final integration daemon tick loads beside snapshot" {
   @support.ignore_checked_command("rm", ["-rf", root])
   let snapshot_path = "\{root}/town.json"
   let daemon = @scheduler.DaemonState::new(tick_sequence=87)
-  @support.write_text_file("\{root}/daemon.json", daemon.to_json().stringify())
+  @support.write_text_file(
+    "\{root}/daemon.json",
+    ToJson::to_json(daemon).stringify(),
+  )
   assert_eq(load_integration_daemon_tick(snapshot_path), 87)
 }
 

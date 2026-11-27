@@ -12,7 +12,7 @@ async fn run() -> Unit {
         Ok(s) => s
         Err(e) => fail(e)
       }
-      let indices : Array[Int] = []
+      let indices : Array[Int32] = []
       if selected == "all" {
         for i, _ in sources {
           indices.push(i)
@@ -55,7 +55,7 @@ async fn main {
   run() catch {
     error => {
       @stdio.stderr.write("calendar_itinerary: \{error}\n")
-      @sys.exit(1)
+      @env.exit(1)
     }
   }
 }

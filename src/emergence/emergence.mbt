@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CivicContribution {
   contribution_id : String
   participant_id : String
@@ -12,9 +13,10 @@ pub(all) struct CivicContribution {
   claim_ceiling : String
   supports : Array[String]
   proposal : Json
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CivicCritique {
   critique_id : String
   participant_id : String
@@ -23,48 +25,54 @@ pub(all) struct CivicCritique {
   evidence_refs : Array[String]
   severity : String
   resolved : Bool
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CivicRanking {
   voter_id : String
   ordered_contribution_ids : Array[String]
   rationale : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CivicReview {
   reviewer_id : String
   decision : String
   evidence_refs : Array[String]
   note : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CivicDeliveryReceipt {
   participant_id : String
   received : Bool
   returned_home : Bool
   receipt_ref : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CivicComparisonCriterion {
   criterion_id : String
   name : String
   definition : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CivicComparisonAssessment {
   contribution_id : String
   criterion_id : String
   rating : String
   rationale : String
   evidence_refs : Array[String]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AutonomousCivicRound {
   contract_id : String
   round_id : String
@@ -81,24 +89,27 @@ pub(all) struct AutonomousCivicRound {
   deliveries : Array[CivicDeliveryReceipt]
   requested_authority : String
   recorded_at : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CoalitionEdge {
   from_id : String
   to_contribution_id : String
   relation : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ContributionEvaluation {
   contribution_id : String
   qualified : Bool
-  ranking_score : Int
+  ranking_score : Int32
   reasons : Array[String]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AutonomousCivicRoundResult {
   contract_id : String
   round_id : String
@@ -120,7 +131,7 @@ pub(all) struct AutonomousCivicRoundResult {
   requested_authority : String
   proposal : Json
   recorded_at : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 fn safe_claim_ceiling(value : String) -> Bool {
@@ -148,7 +159,7 @@ fn contribution_by_id(
 }
 
 ///|
-fn ranking_score(round : AutonomousCivicRound, id : String) -> Int {
+fn ranking_score(round : AutonomousCivicRound, id : String) -> Int32 {
   let mut score = 0
   for ranking in round.rankings {
     let points = ranking.ordered_contribution_ids.length()

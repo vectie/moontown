@@ -1,8 +1,8 @@
 ///|
 fn test_standing_goal(
   id : String,
-  enabled? : Bool = true,
-  cadence_ticks? : Int = 60,
+  enabled~ : Bool = true,
+  cadence_ticks~ : Int32 = 60,
 ) -> StandingGoal {
   StandingGoal::new(
     id~,

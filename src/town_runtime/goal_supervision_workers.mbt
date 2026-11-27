@@ -53,7 +53,7 @@ fn release_orphaned_blocked_workers(state : @core.TownState) -> Unit {
           @core.TownEvent::new(
             id="event-worker-release-\{state.events.length()}-\{worker.id}",
             kind="recovery",
-            detail="Mayor released blocked worker \{worker.id} after terminal execution \{execution.task_id} reached \{execution.status.to_string()}.",
+            detail="Mayor released blocked worker \{worker.id} after terminal execution \{execution.task_id} reached \{execution.status}.",
             related_task_id=Some(execution.task_id),
             related_book_id=Some(execution.book_id),
             related_run_id=execution.run_id,

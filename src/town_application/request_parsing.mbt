@@ -38,11 +38,11 @@ fn json_string_list_field(
 fn json_int_field(
   fields : Map[String, Json],
   key : String,
-  fallback : Int,
-  minimum : Int,
-  maximum : Int,
-) -> Int {
-  let value : Int = match fields.get(key) {
+  fallback : Int32,
+  minimum : Int32,
+  maximum : Int32,
+) -> Int32 {
+  let value : Int32 = match fields.get(key) {
     Some(Number(value, ..)) => value.trunc().to_int()
     Some(String(value)) =>
       @string.parse_int(value.trim()) catch {
@@ -55,7 +55,7 @@ fn json_int_field(
 
 ///|
 fn safe_slug(value : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let mut last_dash = false
   for char in value.to_lower() {
     if (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') {

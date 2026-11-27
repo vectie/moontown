@@ -2,12 +2,12 @@
 pub fn render_runtime_status_report(
   status : TownRuntimeStatus,
   daemon_id~ : String,
-  saved_tick~ : Int,
+  saved_tick~ : Int32,
   lease_owner~ : String,
-  daemon_job_count~ : Int,
+  daemon_job_count~ : Int32,
   runtime_health_summary~ : String,
 ) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string("snapshot=\{status.snapshot_path}\n")
   builder.write_string(
     "daemon=\{daemon_id} tick=\{status.daemon_tick} saved_tick=\{saved_tick} lease=\{lease_owner} jobs=\{daemon_job_count}\n",
@@ -41,7 +41,7 @@ pub fn render_runtime_status_report(
 pub fn render_runtime_status_daemon_actions(
   actions : Array[@scheduler.SchedulerAction],
 ) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   for action in actions {
     builder.write_string("- \{action.kind}: \{action.detail}\n")
   }

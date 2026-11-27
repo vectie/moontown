@@ -5,7 +5,7 @@ async test "Wenyu launch opt in freezes exact existing commands and saved launch
   let policy = launch.request.acceptance_policy
   assert_eq(
     wenyu_test_field(policy, "required_validation_commands"),
-    wenyu_validation_commands().to_json(),
+    ToJson::to_json(wenyu_validation_commands()),
   )
   let completion = wenyu_test_field(policy, "completion_policy")
   assert_eq(
@@ -14,7 +14,7 @@ async test "Wenyu launch opt in freezes exact existing commands and saved launch
   )
   assert_eq(wenyu_test_rows(completion, "required_checks").length(), 6)
   assert_eq(wenyu_test_rows(completion, "alternative_milestone_ids"), [
-    "implementation".to_json(),
+    ToJson::to_json("implementation"),
   ])
   assert_true(launch.request.prompt.contains("Never create a fake edit"))
   assert_true(
@@ -37,7 +37,7 @@ async test "Wenyu launch opt in freezes exact existing commands and saved launch
     native_path=launch.native_path,
     catalog_path="/unused-catalog",
   )
-  assert_eq(saved.to_json(), launch.to_json())
+  assert_eq(ToJson::to_json(saved), ToJson::to_json(launch))
   assert_eq(
     @fs.read_file(wenyu_launch_path(launch.native_path, launch.task.id)).text(),
     saved_bytes,
@@ -56,7 +56,7 @@ async test "Wenyu launch opt in freezes exact existing commands and saved launch
     allow_no_change=true,
     native_path=legacy.native_path,
   )
-  assert_eq(replay.to_json(), legacy.to_json())
+  assert_eq(ToJson::to_json(replay), ToJson::to_json(legacy))
   let acp = wenyu_launch_fixture(allow_no_change=false, execution="acp")
   assert_eq(
     wenyu_test_field(acp.request.acceptance_policy, "completion_policy"),
@@ -82,6 +82,7 @@ async test "Wenyu launch opt in freezes exact existing commands and saved launch
 }
 
 ///|
+#warnings("-reserved_keyword-unused_async")
 async test "Wenyu opted launch negotiates capability before reservation and retries exact bytes" {
   let launch = wenyu_launch_fixture()
   let queued = @native_work.enqueue(launch.request, path=launch.native_path)
@@ -90,8 +91,8 @@ async test "Wenyu opted launch negotiates capability before reservation and retr
     owner_workspace=launch.request.owner_workspace,
     instance_id="fixture",
     config_path="/synthetic/unused.json",
-    request=async fn(method, route, _) {
-      calls.push(method + " " + route)
+    request=async fn(method_val, route, _) {
+      calls.push(method_val + " " + route)
       Ok({ "model_workspace_contract": "mooncode.model-workspace.v1" })
     },
   )
@@ -109,7 +110,7 @@ async test "Wenyu opted launch negotiates capability before reservation and retr
     owner_workspace=launch.request.owner_workspace,
     instance_id="fixture",
     config_path="/synthetic/unused.json",
-    request=async fn(method, route, body) {
+    request=async fn(method_val, route, body) {
       if route == "/v1/code/capabilities" {
         return Ok({
           "model_workspace_contract": "mooncode.model-workspace.v1",
@@ -124,7 +125,7 @@ async test "Wenyu opted launch negotiates capability before reservation and retr
           "models": [{ "name": "moongate/frozen" }],
         })
       }
-      if method == "GET" {
+      if method_val == "GET" {
         return Err("native_not_found")
       }
       posted.push(body)
@@ -146,11 +147,14 @@ async test "Wenyu opted launch negotiates capability before reservation and retr
   assert_eq(first.state, "dispatch_uncertain")
   assert_eq(posted.length(), 2)
   assert_eq(posted[0], posted[1])
-  assert_eq(first.reservation.to_json(), second.reservation.to_json())
+  assert_eq(
+    ToJson::to_json(first.reservation),
+    ToJson::to_json(second.reservation),
+  )
   assert_eq(first.request_digest, second.request_digest)
   assert_eq(
-    @native_work.load(path=launch.native_path).work[0].to_json(),
-    second.to_json(),
+    ToJson::to_json(@native_work.load(path=launch.native_path).work[0]),
+    ToJson::to_json(second),
   )
   let changed = @native_work.enqueue(
     {
@@ -160,6 +164,9 @@ async test "Wenyu opted launch negotiates capability before reservation and retr
     },
     path=launch.native_path,
   )
-  assert_eq(changed.request.to_json(), second.request.to_json())
-  assert_eq(changed.reservation.to_json(), second.reservation.to_json())
+  assert_eq(ToJson::to_json(changed.request), ToJson::to_json(second.request))
+  assert_eq(
+    ToJson::to_json(changed.reservation),
+    ToJson::to_json(second.reservation),
+  )
 }

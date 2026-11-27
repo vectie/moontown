@@ -150,7 +150,7 @@ test "marketplace execution closure exposes request decision and retry routes" {
 ///|
 test "miniapp fixture round-trips through json" {
   let snapshot = miniapp_fixture_snapshot()
-  let text = snapshot.to_json().stringify()
+  let text = ToJson::to_json(snapshot).stringify()
   assert_true(text.contains("snapshot-user-a-1"))
   assert_true(text.contains("policy-hall"))
   let parsed : MiniappTownSnapshot = @json.from_json(@json.parse(text)) catch {

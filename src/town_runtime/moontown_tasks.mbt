@@ -42,7 +42,10 @@ fn seed_catalog_tasks(
 }
 
 ///|
-fn provider_overview_task(book : @core.BookRef, index : Int) -> @core.TownTask {
+fn provider_overview_task(
+  book : @core.BookRef,
+  index : Int32,
+) -> @core.TownTask {
   let execution_status = execution_status_for_index(index)
   @core.TownTask::new(
     id="task-\{book.id}-overview",

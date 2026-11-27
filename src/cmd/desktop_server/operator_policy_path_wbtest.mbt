@@ -18,7 +18,7 @@ async test "desktop operator policy uses the source-tree template in development
 
 ///|
 async test "development policy accepts a long multilingual standing watch" {
-  let prompt_builder = StringBuilder::new()
+  let prompt_builder = StringBuilder()
   for _ in 0..<300 {
     prompt_builder.write_string(
       "能源谷居民协作研究：核验代理、任务、运行编号与证据链。",

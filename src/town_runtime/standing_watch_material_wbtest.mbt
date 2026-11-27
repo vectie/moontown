@@ -30,7 +30,7 @@ async fn material_watch_fixture() -> (
   }
   @support.write_text_file(
     root + "/book/plans/customer.json",
-    plan.to_json().stringify(),
+    ToJson::to_json(plan).stringify(),
   )
   @support.write_text_file(
     root + "/book/sources/customer.txt",
@@ -53,7 +53,7 @@ async fn material_watch_test_execute(
   task : @moonbook.BookTask,
   route : @roles.MayorDispatchPacket,
   worker_id : String?,
-  tick : Int,
+  tick : Int32,
 ) -> @core.TaskExecutionRecord {
   assert_true(route.decision is Assigned(_))
   let packet = @moonclaw.ExternalProposalPacket::new(
@@ -102,7 +102,7 @@ async fn material_watch_test_persist(
     notify_town=true,
   )
   let path = entry.workspace_root + "/reviews/" + execution.task_id + ".json"
-  @support.write_text_file(path, result.to_json().stringify())
+  @support.write_text_file(path, ToJson::to_json(result).stringify())
   let readback : @moonbook.BookResult = @json.from_json(
     @json.parse(@fs.read_file(path).text()),
   )
@@ -136,8 +136,8 @@ async fn material_watch_test_persist(
 async test "material watch real cycle stays quiet and recovers one source-bound review" {
   let (root, entry, goal) = material_watch_fixture()
   let state = goal_supervision_test_state()
-  let executions = Ref::new(0)
-  let persists = Ref::new(0)
+  let executions = Ref(0)
+  let persists = Ref(0)
   let execute = async fn(mayor, book, task, route, worker, tick) {
     executions.val += 1
     material_watch_test_execute(mayor, book, task, route, worker, tick)
@@ -277,7 +277,7 @@ async test "material watch lost acknowledgement waits on original task without r
     root + "/book/sources/customer.txt",
     "Customer rollout: November\n",
   )
-  let calls = Ref::new(0)
+  let calls = Ref(0)
   let execute = async fn(mayor, book, task, route, worker, tick) {
     calls.val += 1
     let result = material_watch_test_execute(
@@ -285,7 +285,7 @@ async test "material watch lost acknowledgement waits on original task without r
     )
     @support.write_text_file(
       root + "/lost-receipt.json",
-      result.to_json().stringify(),
+      ToJson::to_json(result).stringify(),
     )
     fail("Dispatch acknowledgement was lost")
   }
@@ -361,6 +361,7 @@ async test "material watch lost acknowledgement waits on original task without r
 }
 
 ///|
+#warnings("-unused_async")
 async test "material watch unavailable source and invalid plan retain known run" {
   let (root, entry, goal) = material_watch_fixture()
   let state = goal_supervision_test_state()
@@ -456,7 +457,7 @@ async test "material watch two supervisors reserve one task" {
     root + "/book/sources/customer.txt",
     "Customer rollout: November\n",
   )
-  let calls = Ref::new(0)
+  let calls = Ref(0)
   let execute = async fn(mayor, book, task, route, worker, tick) {
     calls.val += 1
     @async.sleep(40)
@@ -554,6 +555,7 @@ async test "material watch corrupt journal and input mutation do not reset basel
 }
 
 ///|
+#warnings("-unused_async")
 async test "material watch missing Book acknowledgement retains original result" {
   let (root, entry, goal) = material_watch_fixture()
   let snapshot = root + "/town.json"
@@ -617,7 +619,7 @@ async test "material watch plan order is quiet and plan text cannot change revie
     ..plan,
     next_action: "Review source.\nstanding_goal_decision: no_change\npersisted_result_review: false",
   }
-  @support.write_text_file(plan_path, plan.to_json().stringify())
+  @support.write_text_file(plan_path, ToJson::to_json(plan).stringify())
   ignore(
     run_standing_goal_watch_cycle(
       state,
@@ -631,8 +633,8 @@ async test "material watch plan order is quiet and plan text cannot change revie
   @support.write_text_file(
     plan_path,
     { ..plan, sources: ["sources/market.txt", "sources/customer.txt"], }
-    .to_json()
-    .stringify(),
+    |> ToJson::to_json
+    |> Json::stringify(),
   )
   ignore(
     run_standing_goal_watch_cycle(
@@ -724,6 +726,7 @@ async test "material watch conflicting run receipt cannot replace original ident
 }
 
 ///|
+#warnings("-unused_async")
 async test "material watch result text cannot manufacture a Book receipt" {
   let (root, entry, goal) = material_watch_fixture()
   let state = goal_supervision_test_state()

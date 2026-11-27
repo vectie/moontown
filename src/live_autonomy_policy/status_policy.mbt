@@ -1,20 +1,20 @@
 ///|
 pub(all) struct LiveAutonomyBlockerContext {
-  active_workers : Int
-  review : Int
-  blocked : Int
-  failed : Int
-  due_goals : Int
-  planbook_open : Int
-  planbook_repair_active : Int
-  pending_book_template_requests : Int
-  failed_book_template_requests : Int
+  active_workers : Int32
+  review : Int32
+  blocked : Int32
+  failed : Int32
+  due_goals : Int32
+  planbook_open : Int32
+  planbook_repair_active : Int32
+  pending_book_template_requests : Int32
+  failed_book_template_requests : Int32
 }
 
 ///|
 pub(all) struct LiveAutonomyWaitingState {
   stable_waiting : Bool
-  stable_waiting_observation_streak : Int
+  stable_waiting_observation_streak : Int32
   stable_waiting_blockers : Array[String]
 }
 
@@ -22,14 +22,14 @@ pub(all) struct LiveAutonomyWaitingState {
 pub(all) struct LiveAutonomyActionContext {
   blockers : LiveAutonomyBlockerContext
   latest_watcher_decision : @core.WatcherDecisionKind?
-  transient_infrastructure_debt : Int
+  transient_infrastructure_debt : Int32
 }
 
 ///|
 pub fn live_autonomy_status(
-  active_workers : Int,
-  review : Int,
-  blocked : Int,
+  active_workers : Int32,
+  review : Int32,
+  blocked : Int32,
 ) -> String {
   let _ = review
   if blocked > 0 {
@@ -44,7 +44,7 @@ pub fn live_autonomy_status(
 ///|
 pub fn live_autonomy_waiting_state(
   blockers : LiveAutonomyBlockerContext,
-  prior_stable_waiting_observation_streak : Int,
+  prior_stable_waiting_observation_streak : Int32,
 ) -> LiveAutonomyWaitingState {
   let stable_waiting_blockers = live_autonomy_stable_waiting_blockers_for(
     blockers,
@@ -62,8 +62,8 @@ pub fn live_autonomy_waiting_state(
 ///|
 pub fn next_live_autonomy_stable_waiting_observation_streak(
   stable_waiting : Bool,
-  prior_stable_waiting_observation_streak : Int,
-) -> Int {
+  prior_stable_waiting_observation_streak : Int32,
+) -> Int32 {
   if stable_waiting {
     prior_stable_waiting_observation_streak + 1
   } else {

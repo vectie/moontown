@@ -76,7 +76,7 @@ fn miniapp_run_by_id(
 fn miniapp_run_count_for_building(
   snapshot : @miniapp_contracts.MiniappTownSnapshot,
   building_id : String,
-) -> Int {
+) -> Int32 {
   let mut count = 0
   for run in snapshot.runs {
     if run.building_id == building_id {

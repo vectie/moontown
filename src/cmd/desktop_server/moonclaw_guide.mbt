@@ -121,7 +121,7 @@ fn moonclaw_guide_valid_session_id(value : String) -> Bool {
 fn moonclaw_guide_prompt(
   question : String,
   context : String,
-  policy_grounding? : String = "",
+  policy_grounding~ : String = "",
 ) -> String {
   if context == moonclaw_guide_policy_context {
     let grounding = if policy_grounding.trim().is_empty() {
@@ -193,14 +193,18 @@ async fn moonclaw_guide_headers(
 async fn moonclaw_guide_post_json(
   url : String,
   value : Json,
-) -> Result[(Int, String), String] noraise {
+) -> Result[(Int32, String), String] noraise {
   @async.with_timeout(55000, () => {
     let payload = @utf8.encode(value.stringify())
     let headers = match moonclaw_guide_headers(payload) {
       Ok(value) => value
       Err(error) => return Err(error)
     }
-    let client = @http.post_stream(url, headers~)
+    let ci_headers : Map[@http.CaseInsensitiveString, String] = Map([])
+    for k, v in headers {
+      ci_headers[@http.CaseInsensitiveString(k)] = v
+    }
+    let client = @http.post_stream(url, headers=ci_headers)
     defer client.close()
     client.write(payload)
     let response = client.end_request()
@@ -303,7 +307,7 @@ fn moonclaw_guide_agent_payload(
 }
 
 ///|
-async fn moonclaw_guide_chat(raw : String) -> (Int, Json) noraise {
+async fn moonclaw_guide_chat(raw : String) -> (Int32, Json) noraise {
   let parsed = @json.parse(raw) catch {
     _ => return (400, { "ok": false, "error": "invalid JSON request" })
   }

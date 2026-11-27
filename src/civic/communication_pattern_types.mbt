@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CivicCommunicationPattern {
   id : String
   title : String
@@ -12,4 +13,4 @@ pub(all) struct CivicCommunicationPattern {
   cadence_hint : String
   good_for : Array[String]
   civic_examples : Array[String]
-} derive(Debug, Eq, ToJson, FromJson)
+}

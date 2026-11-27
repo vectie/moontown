@@ -1,15 +1,15 @@
 ///|
 pub async fn bootstrap_pdf_evidence_watch_book(
-  book_id? : String = @pdf_evidence_watch.default_pdf_evidence_watch_book_id(),
-  title? : String = "PDF Evidence Watch",
-  purpose? : String = @pdf_evidence_watch.default_pdf_evidence_watch_purpose(),
-  websites? : Array[String] = [],
-  analysis_method? : String = "",
-  cadence_ticks? : Int = 60,
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  standing_goal_path? : String = @storage.default_standing_goal_path(),
-  workspace_root? : String = "",
-  template_root? : String = @pdf_evidence_watch.default_pdf_evidence_watch_template_root(),
+  book_id~ : String = @pdf_evidence_watch.default_pdf_evidence_watch_book_id(),
+  title~ : String = "PDF Evidence Watch",
+  purpose~ : String = @pdf_evidence_watch.default_pdf_evidence_watch_purpose(),
+  websites~ : Array[String] = [],
+  analysis_method~ : String = "",
+  cadence_ticks~ : Int32 = 60,
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  standing_goal_path~ : String = @storage.default_standing_goal_path(),
+  workspace_root~ : String = "",
+  template_root~ : String = @pdf_evidence_watch.default_pdf_evidence_watch_template_root(),
 ) -> String {
   let root = if workspace_root.is_empty() {
     @pdf_evidence_watch.default_pdf_evidence_watch_workspace_root(book_id~)

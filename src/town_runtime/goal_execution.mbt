@@ -3,11 +3,11 @@ async fn execute_goal_book_task(
   mayor : @roles.Mayor,
   entry : @moonbook.BookCatalogEntry,
   task : @moonbook.BookTask,
-  assigned_worker_id? : String? = None,
-  tick? : Int = 0,
-  run_inline? : Bool = moontown_moonclaw_inline_enabled(),
-  native_path? : String = @native_work.default_path(),
-  saved_legacy? : Bool = false,
+  assigned_worker_id~ : String? = None,
+  tick~ : Int32 = 0,
+  run_inline~ : Bool = moontown_moonclaw_inline_enabled(),
+  native_path~ : String = @native_work.default_path(),
+  saved_legacy~ : Bool = false,
 ) -> @core.TaskExecutionRecord {
   if @build_pipeline.is_wenyu_book(entry) &&
     @build_pipeline.is_local_wenyu_build_fallback_task(task.kind) {

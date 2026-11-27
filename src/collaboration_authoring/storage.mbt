@@ -6,9 +6,10 @@ pub(all) struct Store {
 }
 
 ///|
+#derive(Debug)
 pub suberror CollaborationError {
   CollaborationError(String)
-} derive(Debug)
+}
 
 ///|
 let mutex : @async.Mutex = Mutex()
@@ -56,7 +57,7 @@ async fn directory(path : String, create : Bool) -> Unit {
 }
 
 ///|
-async fn read_bytes(path : String, limit : Int) -> Bytes {
+async fn read_bytes(path : String, limit : Int32) -> Bytes {
   guard kind(path) is Some(Regular) else {
     raise CollaborationError(
       "Source or artifact is missing or is not a regular file",
@@ -158,7 +159,7 @@ async fn Store::current_revision(self : Store, id : String) -> String {
 ///|
 fn revision_for(saved : @contract.SavedDraft) -> String {
   "r-" +
-  digest(@utf8.encode({ ..saved, revision: "", }.to_json().stringify()))[7:].to_owned()
+  digest(@utf8.encode(ToJson::to_json({ ..saved, revision: "", }).stringify()))[7:].to_owned()
 }
 
 ///|
@@ -174,7 +175,7 @@ async fn Store::load_revision(
   directory(root, false)
   let json = @json.parse(@utf8.decode(read_bytes(root + "/draft.json", 524288)))
   let saved : @contract.SavedDraft = @json.from_json(json)
-  guard saved.to_json() == json &&
+  guard ToJson::to_json(saved) == json &&
     saved.contract_version == "moontown.collaboration-draft.v1" &&
     saved.draft.draft_id == id &&
     saved.revision == revision &&
@@ -205,7 +206,7 @@ async fn Store::load_revision(
 pub async fn Store::load(
   self : Store,
   id : String,
-  revision? : String = "",
+  revision~ : String = "",
 ) -> @contract.SavedDraft {
   self.locked(() => {
     self.load_revision(

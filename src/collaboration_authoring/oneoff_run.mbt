@@ -59,7 +59,7 @@ async fn Store::collect_participant(
     cwd=p.workspace,
     detect_orphan=false,
   )
-  let status = poll.to_json()
+  let status = ToJson::to_json(poll)
   let current = pending_participant(p, poll.summary)
   // poll_run is the production collector. Unknown is deliberately pending,
   // never a success inferred from a receipt, file name or provider summary.
@@ -125,7 +125,7 @@ async fn Store::collect_participant(
   }
   write_bytes(
     terminal_path,
-    @utf8.encode(terminal.to_json().stringify(indent=2)),
+    @utf8.encode(ToJson::to_json(terminal).stringify(indent=2)),
   )
   terminal
 }
@@ -189,8 +189,8 @@ fn collected_result(
     "revision": saved.revision,
     "question": saved.draft.question,
     "source_packet_digest": source_digest,
-    "sources": saved.sources.to_json(),
-    "participants": participants.to_json(),
+    "sources": ToJson::to_json(saved.sources),
+    "participants": ToJson::to_json(participants),
     "assembly": "Exact attributed participant outputs and failures. This is a collected dossier, not an invented consensus or model synthesis.",
     "all_participants_succeeded": participants.all(p => p.status == "completed"),
     "successful_participants": participants
@@ -208,7 +208,7 @@ pub async fn Store::start_oneoff(
   id : String,
   revision : String,
   runtime : OneoffRuntime,
-  background? : Bool = false,
+  background~ : Bool = false,
 ) -> @contract.OneoffWork {
   let (saved, intent) = self.locked(() => {
     let saved = self.load_revision(id, revision)

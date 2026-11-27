@@ -16,7 +16,7 @@ fn csv_cell(value : String) -> String {
 }
 
 ///|
-fn optional_minutes(value : Int?) -> String {
+fn optional_minutes(value : Int32?) -> String {
   match value {
     Some(n) => n.to_string()
     None => ""
@@ -55,20 +55,19 @@ fn report_csv(report : EffortReport) -> String {
       optional_minutes(t.followup_minutes),
       optional_minutes(t.town_minutes),
       optional_minutes(t.manual_minus_town_minutes),
-      goal.periods
-      .map(p => {
-        (
-          {
-            "source_data_row": p.source_data_row,
-            "period_start": p.period_start,
-            "period_end": p.period_end,
-            "manual_period_start": optional_text_json(p.manual_period_start),
-            "manual_period_end": optional_text_json(p.manual_period_end),
-            "outcome": p.outcome,
-          } : Json)
-      })
-      .to_json()
-      .stringify(),
+      ToJson::to_json(
+        goal.periods.map(p => {
+          (
+            {
+              "source_data_row": p.source_data_row,
+              "period_start": p.period_start,
+              "period_end": p.period_end,
+              "manual_period_start": optional_text_json(p.manual_period_start),
+              "manual_period_end": optional_text_json(p.manual_period_end),
+              "outcome": p.outcome,
+            } : Json)
+        }),
+      ).stringify(),
     ]
     lines.push(fields.map(csv_cell).join(","))
   }

@@ -33,7 +33,7 @@ test "oneoff client keeps forms and retained result across interruption but reje
   let ready = pending.settle(
     pending.generation,
     "oneoff-start",
-    reply.to_json().stringify(),
+    ToJson::to_json(reply).stringify(),
   )
   assert_eq(ready.work, Some(work))
   let form = ready.edit("work_rationale", "Retain the uncertainty")
@@ -53,9 +53,7 @@ test "oneoff client keeps forms and retained result across interruption but reje
   let stale = pending.settle(
     pending.generation,
     "oneoff-start",
-    { ..reply, work: Some({ ..work, revision: "r-other", }), }
-    .to_json()
-    .stringify(),
+    ToJson::to_json({ ..reply, work: Some({ ..work, revision: "r-other", }), }).stringify(),
   )
   assert_eq(stale.work, None)
   assert_true(stale.notice.contains("another"))

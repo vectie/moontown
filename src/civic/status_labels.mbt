@@ -67,7 +67,7 @@ pub fn civic_service_status_label(
   moonclaw_profile_ready~ : Bool,
   latest_result_found~ : Bool,
   latest_decision~ : String,
-  latest_review_items~ : Int,
+  latest_review_items~ : Int32,
 ) -> String {
   if !workspace_exists {
     "missing-workspace"
@@ -100,7 +100,7 @@ pub fn civic_health_notes(
   status~ : String,
   missing_required_paths~ : Array[String],
   latest_decision~ : String,
-  latest_review_items~ : Int,
+  latest_review_items~ : Int32,
 ) -> Array[String] {
   let notes : Array[String] = []
   if operable {
@@ -122,7 +122,7 @@ pub fn civic_health_notes(
 pub fn civic_status_note(
   status : String,
   latest_decision : String,
-  latest_review_items : Int,
+  latest_review_items : Int32,
 ) -> String? {
   match status {
     "seeded" =>
@@ -151,11 +151,11 @@ pub fn protocol_status_is_ready(status : String) -> Bool {
 
 ///|
 pub fn protocol_status_label(
-  inbox_count~ : Int,
-  contribution_count~ : Int,
-  reduction_count~ : Int,
-  outbox_count~ : Int,
-  review_count~ : Int,
+  inbox_count~ : Int32,
+  contribution_count~ : Int32,
+  reduction_count~ : Int32,
+  outbox_count~ : Int32,
+  review_count~ : Int32,
 ) -> String {
   if review_count > 0 {
     "review"

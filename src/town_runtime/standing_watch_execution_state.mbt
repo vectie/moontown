@@ -1,7 +1,7 @@
 ///|
 fn stabilize_deferred_standing_watch_execution(
   execution : @core.TaskExecutionRecord,
-  tick : Int,
+  tick : Int32,
 ) -> @core.TaskExecutionRecord {
   let decision = @standing_watch_policy.standing_watch_recovery_decision_from_execution(
     execution,
@@ -30,7 +30,7 @@ fn running_standing_watch_execution(
   entry : @moonbook.BookCatalogEntry,
   task : @moonbook.BookTask,
   worker_id : String,
-  tick : Int,
+  tick : Int32,
 ) -> @core.TaskExecutionRecord {
   let packet_id = @roles.keeper_packet_id(entry.id, task.id)
   let packet_path = @moonclaw.packet_file_path(
@@ -66,8 +66,8 @@ fn transient_deferred_standing_watch_execution_record(
   entry : @moonbook.BookCatalogEntry,
   task : @moonbook.BookTask,
   detail : String,
-  assigned_worker_id? : String? = None,
-  tick? : Int = 0,
+  assigned_worker_id~ : String? = None,
+  tick~ : Int32 = 0,
 ) -> @core.TaskExecutionRecord {
   let packet_id = @roles.keeper_packet_id(entry.id, task.id)
   let packet_path = @moonclaw.packet_file_path(
@@ -97,9 +97,9 @@ async fn publish_running_standing_watch_snapshot(
   task : @moonbook.BookTask,
   decision : @dispatch.RouteDecision,
   worker_id : String?,
-  tick : Int,
+  tick : Int32,
   snapshot_path : String,
-  material_change? : MaterialWatchChange? = None,
+  material_change~ : MaterialWatchChange? = None,
 ) -> Unit {
   match (decision, worker_id) {
     (Assigned(_), Some(worker_id)) => {

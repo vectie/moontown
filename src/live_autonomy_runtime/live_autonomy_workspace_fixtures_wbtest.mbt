@@ -19,13 +19,13 @@ fn live_autonomy_empty_test_state() -> @core.TownState {
 
 ///|
 fn live_autonomy_build_input_fixture(
-  state? : @core.TownState = live_autonomy_empty_test_state(),
-  standing_goals? : Array[@core.StandingGoal] = [],
-  watcher_records? : Array[@core.WatcherRunRecord] = [],
-  tick_summary? : String = "test tick",
-  daemon_tick? : Int? = None,
-  planbook_open? : Int = 0,
-  planbook_repair_active? : Int = 0,
+  state~ : @core.TownState = live_autonomy_empty_test_state(),
+  standing_goals~ : Array[@core.StandingGoal] = [],
+  watcher_records~ : Array[@core.WatcherRunRecord] = [],
+  tick_summary~ : String = "test tick",
+  daemon_tick~ : Int32? = None,
+  planbook_open~ : Int32 = 0,
+  planbook_repair_active~ : Int32 = 0,
 ) -> LiveAutonomyBuildInput {
   let snapshot_path = "/tmp/moontown-live-autonomy-build-input/town.json"
   {

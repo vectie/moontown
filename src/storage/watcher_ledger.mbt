@@ -6,7 +6,7 @@ pub fn default_watcher_ledger_dir() -> String {
 ///|
 pub fn watcher_ledger_path(
   goal_id : String,
-  dir? : String = default_watcher_ledger_dir(),
+  dir~ : String = default_watcher_ledger_dir(),
 ) -> String {
   "\{dir}/\{safe_watcher_goal_id(goal_id)}.jsonl"
 }
@@ -25,7 +25,7 @@ pub fn watcher_ledger_dir_for_snapshot(snapshot_path : String) -> String {
 pub async fn append_watcher_run_record(
   goal_id : String,
   record : @core.WatcherRunRecord,
-  dir? : String = default_watcher_ledger_dir(),
+  dir~ : String = default_watcher_ledger_dir(),
 ) -> Unit {
   append_watcher_run_record_file(watcher_ledger_path(goal_id, dir~), record)
 }
@@ -48,7 +48,7 @@ pub async fn append_watcher_run_record_file(
   } else {
     "\{previous}\n"
   }
-  let line = record.to_json().stringify()
+  let line = ToJson::to_json(record).stringify()
   @fs.write_file(
     path,
     @encoding/utf8.encode("\{prefix}\{line}\n"),
@@ -83,7 +83,7 @@ pub async fn load_watcher_run_records_file(
 ///|
 pub async fn load_watcher_run_records(
   goal_id : String,
-  dir? : String = default_watcher_ledger_dir(),
+  dir~ : String = default_watcher_ledger_dir(),
 ) -> Array[@core.WatcherRunRecord] {
   load_watcher_run_records_file(watcher_ledger_path(goal_id, dir~))
 }
@@ -91,7 +91,7 @@ pub async fn load_watcher_run_records(
 ///|
 pub fn consecutive_no_change_count(
   records : Array[@core.WatcherRunRecord],
-) -> Int {
+) -> Int32 {
   let mut count = 0
   for index = records.length(); index > 0; index = index - 1 {
     if records[index - 1].decision == NoChange {

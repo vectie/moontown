@@ -11,11 +11,11 @@ pub fn empty_marketplace_state() -> MarketplaceState
 
 pub fn listing_kind_name(ListingKind) -> String
 
-pub fn marketplace_action_request_projection(MarketplaceState, MarketplacePrincipal, String) -> Json raise
+pub fn marketplace_action_request_projection(MarketplaceState, MarketplacePrincipal, String) -> @json.Json raise
 
 pub fn marketplace_action_request_state_name(MarketplaceActionRequestState) -> String
 
-pub fn marketplace_active_sponsored(MarketplaceState, MarketplacePrincipal, UInt64) -> Array[Json]
+pub fn marketplace_active_sponsored(MarketplaceState, MarketplacePrincipal, UInt64) -> Array[@json.Json]
 
 pub fn marketplace_application(String, MarketplacePrincipal, String, String) -> MarketplaceApplication raise
 
@@ -31,19 +31,19 @@ pub fn marketplace_create_share_grant(MarketplaceState, MarketplacePrincipal, Sh
 
 pub fn marketplace_decide_action_request(MarketplaceState, MarketplacePrincipal, ActionRequestDecisionDraft, now_ms~ : UInt64) -> MarketplaceState raise
 
-pub fn marketplace_discovery_feed(MarketplaceState, MarketplacePrincipal, String, UInt64) -> Json
+pub fn marketplace_discovery_feed(MarketplaceState, MarketplacePrincipal, String, UInt64) -> @json.Json
 
 pub fn marketplace_emit_publication_notifications(MarketplaceState, ListingKind, String, now_ms~ : UInt64) -> MarketplaceState
 
-pub fn marketplace_listing_review_queue(MarketplaceState, MarketplacePrincipal) -> Json raise
+pub fn marketplace_listing_review_queue(MarketplaceState, MarketplacePrincipal) -> @json.Json raise
 
 pub fn marketplace_mark_notification_read(MarketplaceState, MarketplacePrincipal, String, now_ms~ : UInt64) -> MarketplaceState raise
 
-pub fn marketplace_notifications_for(MarketplaceState, MarketplacePrincipal) -> Json
+pub fn marketplace_notifications_for(MarketplaceState, MarketplacePrincipal) -> @json.Json
 
-pub fn marketplace_organic_search(MarketplaceState, String) -> Array[Json]
+pub fn marketplace_organic_search(MarketplaceState, String) -> Array[@json.Json]
 
-pub fn marketplace_prepare_action_handoff(MarketplaceState, MarketplacePrincipal, ActionRequestResumeDraft) -> Json raise
+pub fn marketplace_prepare_action_handoff(MarketplaceState, MarketplacePrincipal, ActionRequestResumeDraft) -> @json.Json raise
 
 pub fn marketplace_principal_for_session(MarketplaceState, String, now_ms~ : UInt64) -> MarketplacePrincipal?
 
@@ -63,9 +63,9 @@ pub fn marketplace_send_message(MarketplaceState, MarketplacePrincipal, ChannelM
 
 pub fn marketplace_set_subscription(MarketplaceState, MarketplacePrincipal, Subscription, now_ms~ : UInt64) -> MarketplaceState raise
 
-pub fn marketplace_share_preview(MarketplaceState, MarketplacePrincipal, String, String, String) -> Json raise
+pub fn marketplace_share_preview(MarketplaceState, MarketplacePrincipal, String, String, String) -> @json.Json raise
 
-pub fn marketplace_shared_listing_cards(MarketplaceState, MarketplacePrincipal, now_ms~ : UInt64) -> Array[Json]
+pub fn marketplace_shared_listing_cards(MarketplaceState, MarketplacePrincipal, now_ms~ : UInt64) -> Array[@json.Json]
 
 pub fn marketplace_token_digest(String) -> String
 
@@ -77,19 +77,19 @@ pub fn marketplace_upsert_building_draft(MarketplaceState, MarketplacePrincipal,
 
 pub fn marketplace_upsert_sponsored_placement(MarketplaceState, MarketplacePrincipal, SponsoredPlacement) -> MarketplaceState raise
 
-pub fn marketplace_visible_action_requests(MarketplaceState, MarketplacePrincipal) -> Json
+pub fn marketplace_visible_action_requests(MarketplaceState, MarketplacePrincipal) -> @json.Json
 
-pub fn marketplace_visible_channels(MarketplaceState, MarketplacePrincipal) -> Array[Json]
+pub fn marketplace_visible_channels(MarketplaceState, MarketplacePrincipal) -> Array[@json.Json]
 
-pub fn marketplace_visible_messages(MarketplaceState, MarketplacePrincipal, String) -> Array[Json] raise
+pub fn marketplace_visible_messages(MarketplaceState, MarketplacePrincipal, String) -> Array[@json.Json] raise
 
-pub fn public_agent_listing_card(AgentListingRecord) -> Json
+pub fn public_agent_listing_card(AgentListingRecord) -> @json.Json
 
-pub fn public_building_listing_card(BuildingListingRecord) -> Json
+pub fn public_building_listing_card(BuildingListingRecord) -> @json.Json
 
-pub fn public_listing_cards(MarketplaceState) -> Array[Json]
+pub fn public_listing_cards(MarketplaceState) -> Array[@json.Json]
 
-pub fn public_listing_index_export(MarketplaceState) -> Json
+pub fn public_listing_index_export(MarketplaceState) -> @json.Json
 
 pub fn publication_state_name(PublicationState) -> String
 
@@ -98,9 +98,10 @@ pub fn validate_portable_listing_binding(PortableListingBinding) -> Unit raise
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct ActionRequestDecisionDraft {
   request_id : String
-  expected_version : Int
+  expected_version : Int32
   decision : String
   decision_summary : String
   instruction : String
@@ -108,30 +109,34 @@ pub(all) struct ActionRequestDecisionDraft {
   max_cost_micro_usd : Int64
   max_runtime_ms : Int64
   max_tokens : Int64
-  max_artifacts : Int
+  max_artifacts : Int32
   web_search : Bool
   expires_at : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct ActionRequestHandoffDraft {
   request_id : String
-  expected_version : Int
+  expected_version : Int32
   handoff_id : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct ActionRequestResumeDraft {
   request_id : String
-  expected_version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  expected_version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct ActionRequestRuntimeDraft {
   handoff_id : String
   runtime_status : String
   worker_run_id : String
   result_summary : String
   result_evidence_refs : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AgentListingDraft {
   listing_id : String
   title : String
@@ -146,8 +151,9 @@ pub(all) struct AgentListingDraft {
   license_class : String
   rights_summary : String
   version_label : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AgentListingRecord {
   listing_id : String
   publisher_id : String
@@ -164,14 +170,15 @@ pub(all) struct AgentListingRecord {
   license_class : String
   rights_summary : String
   version_label : String
-  quality_score : Int
-  reliability_score : Int
+  quality_score : Int32
+  reliability_score : Int32
   content_digest : String
   lifecycle : PublicationLifecycle
   updated_at_ms : UInt64
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct BuildingListingDraft {
   listing_id : String
   title : String
@@ -184,8 +191,9 @@ pub(all) struct BuildingListingDraft {
   license_class : String
   rights_summary : String
   version_label : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct BuildingListingRecord {
   listing_id : String
   publisher_id : String
@@ -200,14 +208,15 @@ pub(all) struct BuildingListingRecord {
   license_class : String
   rights_summary : String
   version_label : String
-  quality_score : Int
-  reliability_score : Int
+  quality_score : Int32
+  reliability_score : Int32
   content_digest : String
   lifecycle : PublicationLifecycle
   updated_at_ms : UInt64
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct Channel {
   channel_id : String
   tenant_id : String
@@ -221,9 +230,10 @@ pub(all) struct Channel {
   members : Array[ChannelMember]
   created_at_ms : UInt64
   updated_at_ms : UInt64
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct ChannelDraft {
   channel_id : String
   title : String
@@ -233,24 +243,27 @@ pub(all) struct ChannelDraft {
   building_listing_id : String?
   agent_listing_id : String?
   member_principal_ids : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct ChannelMember {
   principal_id : String
   role : ChannelMemberRole
   joined_at_ms : UInt64
   active : Bool
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum ChannelMemberRole {
   ChannelOwner
   ChannelModerator
   ChannelParticipant
   ChannelObserver
   ChannelAgent
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct ChannelMessage {
   message_id : String
   channel_id : String
@@ -262,9 +275,10 @@ pub(all) struct ChannelMessage {
   reply_to_message_id : String?
   created_at_ms : UInt64
   edited_at_ms : UInt64?
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum ChannelVisibility {
   DirectChannel
   PrivateChannel
@@ -272,27 +286,31 @@ pub(all) enum ChannelVisibility {
   BuildingChannel
   AgentChannel
   PublicAnnouncementChannel
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct ListingActionDraft {
   listing_id : String
   listing_kind : String
   action_id : String
   message : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum ListingKind {
   AgentListing
   BuildingListing
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct ListingTransitionDraft {
   listing_id : String
   listing_kind : String
   target_state : String
   review_summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct MarketplaceActionRequest {
   request_id : String
   listing_kind : ListingKind
@@ -302,7 +320,7 @@ pub(all) struct MarketplaceActionRequest {
   publisher_principal_id : String
   request_message : String
   state : MarketplaceActionRequestState
-  expected_version : Int
+  expected_version : Int32
   decision_summary : String
   instruction : String
   execution_bounds : MarketplaceExecutionBounds?
@@ -314,9 +332,10 @@ pub(all) struct MarketplaceActionRequest {
   created_at_ms : UInt64
   decided_at_ms : UInt64?
   updated_at_ms : UInt64
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum MarketplaceActionRequestState {
   ActionRequested
   ActionRejected
@@ -326,29 +345,32 @@ pub(all) enum MarketplaceActionRequestState {
   ActionRunning
   ActionSucceeded
   ActionFailed
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct MarketplaceApplication {
   state_path : String
   bootstrap_principal : MarketplacePrincipal
   bootstrap_session_id : String
   bootstrap_token_digest : String
-} derive(Eq, @debug.Debug)
-pub async fn MarketplaceApplication::execute(Self, String, String, String, String, now_ms~ : UInt64) -> Json
+}
+pub async fn MarketplaceApplication::execute(Self, String, String, String, String, now_ms~ : UInt64) -> @json.Json
 pub async fn MarketplaceApplication::portable_transfer_binding(Self, String) -> PortableListingBinding?
-pub async fn MarketplaceApplication::reconcile_runtime_handoff(Self, ActionRequestRuntimeDraft, now_ms~ : UInt64) -> Json
+pub async fn MarketplaceApplication::reconcile_runtime_handoff(Self, ActionRequestRuntimeDraft, now_ms~ : UInt64) -> @json.Json
 pub async fn MarketplaceApplication::synchronize_account_session(Self, MarketplacePrincipal, String, now_ms~ : UInt64, expires_at_ms~ : UInt64) -> Unit
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct MarketplaceExecutionBounds {
   claim_ceiling : String
   max_cost_micro_usd : Int64
   max_runtime_ms : Int64
   max_tokens : Int64
-  max_artifacts : Int
+  max_artifacts : Int32
   web_search : Bool
   expires_at : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct MarketplacePrincipal {
   principal_id : String
   tenant_id : String
@@ -357,18 +379,20 @@ pub(all) struct MarketplacePrincipal {
   roles : Array[String]
   interest_tags : Array[String]
   active : Bool
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct MarketplaceSession {
   session_id : String
   token_digest : String
   principal_id : String
   expires_at_ms : UInt64
   revoked : Bool
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct MarketplaceState {
   schema : String
   principals : Array[MarketplacePrincipal]
@@ -384,15 +408,17 @@ pub(all) struct MarketplaceState {
   action_requests : Array[MarketplaceActionRequest]
   orders : Array[OrderRecord]
   portable_bindings : Array[PortableListingBinding]
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum MessageAudience {
   EntireChannel
   NamedPrincipals(Array[String])
   PublicAudience
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct MessageDraft {
   message_id : String
   channel_id : String
@@ -402,24 +428,28 @@ pub(all) struct MessageDraft {
   audience_principal_ids : Array[String]
   public_audience : Bool
   reply_to_message_id : String?
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct NotificationReadDraft {
   notification_id : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct OrderCancelDraft {
   order_id : String
-  expected_version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  expected_version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct OrderDecisionDraft {
   order_id : String
-  expected_version : Int
+  expected_version : Int32
   decision : String
   decision_summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct OrderDraft {
   order_id : String
   title : String
@@ -427,8 +457,9 @@ pub(all) struct OrderDraft {
   deliverable : String
   acceptance_criteria : String
   tags : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct OrderFulfillment {
   fulfiller_principal_id : String
   summary : String
@@ -437,15 +468,17 @@ pub(all) struct OrderFulfillment {
   decision : String
   decision_summary : String
   decided_at_ms : UInt64?
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct OrderFulfillmentDraft {
   order_id : String
-  expected_version : Int
+  expected_version : Int32
   summary : String
   evidence_refs : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct OrderRecord {
   order_id : String
   requester_principal_id : String
@@ -459,28 +492,31 @@ pub(all) struct OrderRecord {
   fulfillments : Array[OrderFulfillment]
   created_at_ms : UInt64
   updated_at_ms : UInt64
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum OrderState {
   OrderOpen
   OrderPendingReview
   OrderFulfilled
   OrderCancelled
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct PortableListingBinding {
   contract : String
   listing_id : String
   publisher_principal_id : String
   tenant_id : String
-  binding_revision : Int
+  binding_revision : Int32
   source : PortableSource
   reuse_mode : String
   verification_scope : String
   binding_digest : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct PortableSource {
   contract : String
   bundle_contract : String
@@ -489,19 +525,20 @@ pub(all) struct PortableSource {
   book_revision : String
   bundle_digest : String
   package_filename : String
-  package_size_bytes : Int
+  package_size_bytes : Int32
   package_sha256 : String
-  file_count : Int
-  total_decoded_bytes : Int
+  file_count : Int32
+  total_decoded_bytes : Int32
   outputs_manifest_path : String?
   outputs_manifest_digest : String?
-  included_output_count : Int
-  reference_only_count : Int
+  included_output_count : Int32
+  reference_only_count : Int32
   transport : String
-} derive(Eq, @debug.Debug)
-pub impl ToJson for PortableSource
+}
 pub impl @json.FromJson for PortableSource
+pub impl @json.ToJson for PortableSource
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct PublicationLifecycle {
   state : PublicationState
   shared_at_ms : UInt64?
@@ -510,22 +547,25 @@ pub(all) struct PublicationLifecycle {
   archived_at_ms : UInt64?
   reviewed_by : String?
   review_summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum PublicationState {
   PublicationDraft
   PublicationShared
   PublicationSubmitted
   PublicationPublished
   PublicationArchived
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct Recommendation {
-  listing : Json
-  score : Int
+  listing : @json.Json
+  score : Int32
   reason : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct ShareGrant {
   grant_id : String
   tenant_id : String
@@ -537,9 +577,10 @@ pub(all) struct ShareGrant {
   created_at_ms : UInt64
   expires_at_ms : UInt64?
   revoked_at_ms : UInt64?
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct ShareGrantDraft {
   grant_id : String
   resource_kind : String
@@ -547,18 +588,21 @@ pub(all) struct ShareGrantDraft {
   grantee_principal_id : String
   permission : String
   expires_at_ms : UInt64?
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct ShareGrantRevokeDraft {
   grant_id : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct SharePreviewDraft {
   resource_kind : String
   resource_id : String
   grantee_principal_id : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct SponsoredPlacement {
   placement_id : String
   sponsor_principal_id : String
@@ -570,9 +614,10 @@ pub(all) struct SponsoredPlacement {
   starts_at_ms : UInt64
   ends_at_ms : UInt64
   active : Bool
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct SponsoredPlacementDraft {
   placement_id : String
   listing_kind : String
@@ -582,8 +627,9 @@ pub(all) struct SponsoredPlacementDraft {
   starts_at_ms : UInt64
   ends_at_ms : UInt64
   active : Bool
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct Subscription {
   subscription_id : String
   principal_id : String
@@ -591,16 +637,18 @@ pub(all) struct Subscription {
   topic_id : String
   enabled : Bool
   created_at_ms : UInt64
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct SubscriptionDraft {
   subscription_id : String
   topic_kind : String
   topic_id : String
   enabled : Bool
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct TownNotification {
   notification_id : String
   principal_id : String
@@ -611,8 +659,8 @@ pub(all) struct TownNotification {
   object_id : String
   created_at_ms : UInt64
   read_at_ms : UInt64?
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
 // Type aliases
 

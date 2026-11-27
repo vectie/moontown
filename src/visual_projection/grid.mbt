@@ -4,7 +4,7 @@ fn visual_agent_grid(
   worker_id : String,
   phase : String,
   decorator : VisualDecoratorConfig,
-) -> (Int, Int) {
+) -> (Int32, Int32) {
   if visual_phase_is_recovery(phase) {
     return (142, 72)
   }
@@ -27,9 +27,9 @@ fn visual_agent_grid(
 ///|
 fn visual_book_grid(
   book_id : String,
-  seed : Int,
+  seed : Int32,
   decorator : VisualDecoratorConfig,
-) -> (Int, Int) {
+) -> (Int32, Int32) {
   match decorator.placement_for(book_id) {
     Some(placement) => (placement.grid_x, placement.grid_y)
     None => (72 + seed % 104, 42 + seed / 11 % 58)
@@ -42,7 +42,7 @@ fn visual_sprite_key(worker_id : String) -> String {
 }
 
 ///|
-fn visual_hash(text : String) -> Int {
+fn visual_hash(text : String) -> Int32 {
   let mut value = 17
   for char in text {
     value = (value * 31 + char.to_int()) % 1_000_003
@@ -55,7 +55,7 @@ fn visual_hash(text : String) -> Int {
 }
 
 ///|
-fn visual_clamp_grid_x(value : Int) -> Int {
+fn visual_clamp_grid_x(value : Int32) -> Int32 {
   if value < 0 {
     0
   } else if value > 255 {
@@ -66,7 +66,7 @@ fn visual_clamp_grid_x(value : Int) -> Int {
 }
 
 ///|
-fn visual_clamp_grid_y(value : Int) -> Int {
+fn visual_clamp_grid_y(value : Int32) -> Int32 {
   if value < 0 {
     0
   } else if value > 143 {

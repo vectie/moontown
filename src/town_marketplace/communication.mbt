@@ -383,8 +383,8 @@ pub fn marketplace_visible_messages(
         "channel_id": message.channel_id,
         "sender_principal_id": message.sender_principal_id,
         "body": message.body,
-        "attachment_refs": message.attachment_refs.to_json(),
-        "mentions": message.mentions.to_json(),
+        "attachment_refs": ToJson::to_json(message.attachment_refs),
+        "mentions": ToJson::to_json(message.mentions),
         "reply_to_message_id": optional_string_wire(message.reply_to_message_id),
         "created_at_ms": message.created_at_ms.to_string(),
         "version": message.version,
@@ -998,7 +998,7 @@ pub fn marketplace_share_preview(
     "grantee_principal_id": if grantee_principal_id.is_empty() {
       Json::null()
     } else {
-      grantee_principal_id.to_json()
+      ToJson::to_json(grantee_principal_id)
     },
     "projection": projection.unwrap_or_else(() => {
       fail("resource has no safe share projection")

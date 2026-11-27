@@ -1,5 +1,6 @@
 ///|
 /// Shared public brief for the Contest Express, including weekly showcases.
+#derive(Debug, ToJson, FromJson)
 pub(all) struct Challenge {
   id : String
   name : String
@@ -13,11 +14,12 @@ pub(all) struct Challenge {
   evaluation_materials : Array[String]
   rubric : Array[RubricCriterion]
   published : Bool
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, ToJson, FromJson)
 pub(all) struct RubricCriterion {
   id : String
   label : String
   max_points : Int32
-} derive(Debug, ToJson, FromJson)
+}

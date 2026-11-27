@@ -1,6 +1,6 @@
 ///|
 pub fn markdown_bullets(values : Array[String]) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   for value in values {
     builder.write_string("- ")
     builder.write_string(value)
@@ -11,7 +11,7 @@ pub fn markdown_bullets(values : Array[String]) -> String {
 
 ///|
 pub fn remove_first_markdown_title(report : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let mut skipped = false
   for line in report.split("\n") {
     let trimmed = line.trim().to_owned()
@@ -27,7 +27,7 @@ pub fn remove_first_markdown_title(report : String) -> String {
 
 ///|
 pub fn demote_markdown_headings(markdown : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   for line in markdown.split("\n") {
     if line.has_prefix("####") {
       builder.write_string("#\{line}\n")
@@ -45,7 +45,7 @@ pub fn demote_markdown_headings(markdown : String) -> String {
 
 ///|
 pub fn section_body(report : String, heading : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let mut in_section = false
   for line in report.split("\n") {
     let trimmed = line.trim().to_owned()
@@ -66,7 +66,7 @@ pub fn section_body(report : String, heading : String) -> String {
 
 ///|
 pub fn first_non_heading_paragraph(markdown : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let mut emitted = false
   let mut in_code_block = false
   for line in markdown.split("\n") {
@@ -95,7 +95,7 @@ pub fn first_non_heading_paragraph(markdown : String) -> String {
 }
 
 ///|
-pub fn markdown_excerpt(text : String, limit : Int) -> String {
+pub fn markdown_excerpt(text : String, limit : Int32) -> String {
   let trimmed = text.trim()
   if limit <= 0 {
     return "..."
@@ -103,7 +103,7 @@ pub fn markdown_excerpt(text : String, limit : Int) -> String {
   if trimmed.length() <= limit {
     return trimmed.to_owned()
   }
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let mut emitted = 0
   for char in trimmed {
     if emitted >= limit {

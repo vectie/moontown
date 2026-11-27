@@ -1,6 +1,6 @@
 ///|
 struct Recorded {
-  mut code : Int
+  mut code : Int32
   mut headers : Map[String, String]
   chunks : Array[Bytes]
   mut closed : Bool
@@ -13,15 +13,17 @@ fn recording() -> Recorded {
 }
 
 ///|
+#warnings("-alert_internal")
 struct ObservedReader {
   bytes : Bytes
-  read_calls : Ref[Int]
+  read_calls : Ref[Int32]
   buffer : @io.ReaderBuffer
-  mut position : Int
+  mut position : Int32
 }
 
 ///|
-fn observed_reader(bytes : Bytes, read_calls : Ref[Int]) -> ObservedReader {
+#warnings("-alert_internal")
+fn observed_reader(bytes : Bytes, read_calls : Ref[Int32]) -> ObservedReader {
   { bytes, read_calls, buffer: @io.ReaderBuffer::new(), position: 0, }
 }
 
@@ -38,7 +40,7 @@ impl @io.Reader for ObservedReader with fn _direct_read(
   max_len~,
 ) {
   self.read_calls.val = self.read_calls.val + 1
-  let count = Int::min(max_len, self.bytes.length() - self.position)
+  let count = Int32::min(max_len, self.bytes.length() - self.position)
   for i in 0..<count {
     target[offset + i] = self.bytes[self.position + i]
   }
@@ -60,10 +62,11 @@ fn Recorded::sink(self : Recorded) -> ResponseSink {
 }
 
 ///|
+#warnings("-deprecated")
 fn Recorded::bytes(self : Recorded) -> Bytes {
   let out = @buffer.new()
   for chunk in self.chunks {
-    out.write_bytes(chunk)
+    out.write_bytesview(chunk)
   }
   out.to_bytes()
 }
@@ -79,8 +82,8 @@ fn Recorded::payload(self : Recorded) -> Json raise {
 ///|
 fn test_account(
   id : String,
-  tenant? : String = "town-a",
-  publisher? : Bool = true,
+  tenant~ : String = "town-a",
+  publisher~ : Bool = true,
 ) -> @account_system.AccountPrincipal {
   {
     user_id: id,
@@ -109,7 +112,7 @@ fn test_account(
 ///|
 fn test_market_principal(
   id : String,
-  tenant? : String = "town-a",
+  tenant~ : String = "town-a",
 ) -> @town_marketplace.MarketplacePrincipal {
   {
     principal_id: id,
@@ -137,7 +140,7 @@ struct Fixture {
 
 ///|
 async fn fixture(
-  limits? : @town_portable_transfer.TransferLimits = @town_portable_transfer.default_limits(),
+  limits~ : @town_portable_transfer.TransferLimits = @town_portable_transfer.default_limits(),
 ) -> Fixture {
   let root = @fs.realpath(@fs.tmpdir(prefix="moontown-package-http-"))
   let clock = Ref(500UL)
@@ -175,7 +178,7 @@ async fn fixture(
   )
   @fs.write_file(
     root + "/accounts.json",
-    state.to_json().stringify(),
+    ToJson::to_json(state).stringify(),
     create_mode=CreateNew,
     permission=0o600,
   )
@@ -244,7 +247,7 @@ fn synthetic_source(bytes : Bytes) -> @town_marketplace.PortableSource {
 async fn Fixture::listing(
   self : Fixture,
   source : @town_marketplace.PortableSource,
-  id? : String = "agent.robot-guide",
+  id~ : String = "agent.robot-guide",
 ) -> @town_marketplace.PortableListingBinding {
   let payload : Json = {
     "listing_id": id,
@@ -260,7 +263,7 @@ async fn Fixture::listing(
     "license_class": "fixture-only",
     "rights_summary": "Synthetic data",
     "version_label": "v1",
-    "portable_source": source.to_json(),
+    "portable_source": ToJson::to_json(source),
   }
   ignore(
     self.service.marketplace.execute(
@@ -277,7 +280,7 @@ async fn Fixture::listing(
 ///|
 fn upload_request(
   binding : @town_marketplace.PortableListingBinding,
-  session? : String = token("publisher-a"),
+  session~ : String = token("publisher-a"),
 ) -> @http.Request {
   {
     meth: @http.Put,
@@ -296,7 +299,7 @@ fn upload_request(
 ///|
 fn download_request(
   binding : @town_marketplace.PortableListingBinding,
-  session? : String = token("reader-a"),
+  session~ : String = token("reader-a"),
 ) -> @http.Request {
   {
     meth: @http.Get,
@@ -314,7 +317,7 @@ fn download_request(
 async fn call(
   service : TransferService,
   request : @http.Request,
-  bytes? : Bytes = b"",
+  bytes~ : Bytes = b"",
 ) -> Recorded {
   let record = recording()
   let reader = @io.MemoryReader(writer => writer.write(bytes))
@@ -328,7 +331,7 @@ async fn post(
   service : TransferService,
   path : String,
   value : Json,
-  session? : String = token("publisher-a"),
+  session~ : String = token("publisher-a"),
 ) -> Recorded {
   let bytes = @utf8.encode(value.stringify())
   call(
@@ -349,9 +352,9 @@ async fn post(
 ///|
 fn draft(
   binding : @town_marketplace.PortableListingBinding,
-  id? : String = "grant-v1",
-  recipient? : String = "reader-a",
-  expiry? : UInt64 = 10000UL,
+  id~ : String = "grant-v1",
+  recipient~ : String = "reader-a",
+  expiry~ : UInt64 = 10000UL,
 ) -> @town_portable_transfer.GrantDraft {
   {
     grant_id: id,
@@ -375,27 +378,31 @@ fn fixture_exchange(
     if audit is Some(entries) {
       let safe_headers : Map[String, String] = Map([])
       for key, value in request.headers {
-        if key != "x-miniapp-session" {
-          safe_headers[key] = value
+        if key.0 != "x-miniapp-session" {
+          safe_headers[key.0] = value
         }
       }
       entries.push({
-        "request_method": request.meth.to_json(),
+        "request_method": ToJson::to_json(request.meth),
         "request_path": request.path,
-        "request_headers": safe_headers.to_json(),
+        "request_headers": ToJson::to_json(safe_headers),
         "session_source": "injected_synthetic_supplier",
         "response_status": record.code,
-        "response_headers": record.headers.to_json(),
+        "response_headers": ToJson::to_json(record.headers),
         "response_body_bytes": record.bytes().length(),
         "response_body_sha256": raw_sha(record.bytes()),
         "response_finished": record.finished,
         "connection_closed": record.closed,
       })
     }
+    let ci_headers : Map[@http.CaseInsensitiveString, String] = Map([])
+    for k, v in record.headers {
+      ci_headers[@http.CaseInsensitiveString(k)] = v
+    }
     let response : @http.Response = {
       code: record.code,
       reason: "synthetic transport",
-      headers: record.headers,
+      headers: ci_headers,
       cookies: [],
     }
     let reader = @io.MemoryReader(writer => {

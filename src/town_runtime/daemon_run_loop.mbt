@@ -1,11 +1,11 @@
 ///|
 pub async fn daemon_run_saved_town(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  max_ticks? : Int = 0,
-  sleep_ms? : Int = 30_000,
-  preserve_supervisor? : Bool = false,
-  inline_under_supervisor? : Bool = false,
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  max_ticks~ : Int32 = 0,
+  sleep_ms~ : Int32 = 30_000,
+  preserve_supervisor~ : Bool = false,
+  inline_under_supervisor~ : Bool = false,
 ) -> String {
   let settings = @system_settings_runtime.load_and_install_system_settings()
   let sleep_ms = if sleep_ms == 30_000 {

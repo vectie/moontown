@@ -1,4 +1,5 @@
 ///|
+#derive(ToJson, FromJson)
 pub(all) struct WenyuLaunch {
   schema : String
   execution : String
@@ -7,7 +8,7 @@ pub(all) struct WenyuLaunch {
   task : @moonbook.BookTask
   request : @native_work.Request
   output_before : Map[String, String]
-} derive(ToJson, FromJson)
+}
 
 ///|
 pub fn wenyu_native_task_kind(kind : String) -> Bool {
@@ -167,11 +168,11 @@ pub async fn freeze_wenyu_launch(
   task : @moonbook.BookTask,
   goal_id : String,
   objective : String,
-  execution? : String = "native",
-  model? : String = "",
-  allow_no_change? : Bool = false,
-  native_path? : String = @native_work.default_path(),
-  catalog_path? : String = @moonbook.default_catalog_path(),
+  execution~ : String = "native",
+  model~ : String = "",
+  allow_no_change~ : Bool = false,
+  native_path~ : String = @native_work.default_path(),
+  catalog_path~ : String = @moonbook.default_catalog_path(),
 ) -> WenyuLaunch {
   guard ["native", "acp"].contains(execution) && goal_id != "" else {
     fail("wenyu_launch_selection_invalid")
@@ -314,7 +315,7 @@ pub async fn freeze_wenyu_launch(
   @support.ensure_parent_directory(path)
   @fs.write_file(
     path,
-    launch.to_json().stringify(indent=2),
+    ToJson::to_json(launch).stringify(indent=2),
     create_mode=CreateNew,
     permission=0o600,
     sync=Full,

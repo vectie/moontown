@@ -11,13 +11,13 @@ import {
 // Values
 pub fn app_html(String, String, String, String) -> String
 
-pub fn bootstrap_summary(String, String, String, String, String, String, Int, AppToolBookStatus) -> String
+pub fn bootstrap_summary(String, String, String, String, String, String, Int32, AppToolBookStatus) -> String
 
 pub fn catalog_entry(String, String, String, String) -> @moonbook.BookCatalogEntry
 
-pub fn config(String, String, String, String, Array[String], Array[String], Array[String], String, Int) -> AppToolBookConfig
+pub fn config(String, String, String, String, Array[String], Array[String], Array[String], String, Int32) -> AppToolBookConfig
 
-pub fn config_with_catalog_identity(String, String, String, String, Array[String], String, Int) -> AppToolBookConfig
+pub fn config_with_catalog_identity(String, String, String, String, Array[String], String, Int32) -> AppToolBookConfig
 
 pub fn default_book_id() -> String
 
@@ -43,7 +43,7 @@ pub fn resolved_workspace_root(String, String) -> String
 
 pub fn site_index_html(String, String, String, String) -> String
 
-pub fn standing_goal(String, String, String, Array[String], String, Int) -> @core.StandingGoal
+pub fn standing_goal(String, String, String, Array[String], String, Int32) -> @core.StandingGoal
 
 pub fn standing_goal_enabled_in(Array[@core.StandingGoal], String) -> Bool
 
@@ -66,13 +66,15 @@ pub fn upsert_standing_goal(Array[@core.StandingGoal], @core.StandingGoal) -> Ar
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AppToolBookAnalysisSettings {
   method_path : String
   report_path : String
   data_path : String
   review_path : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AppToolBookAppSettings {
   tool_spec_path : String
   manifest_path : String
@@ -81,15 +83,17 @@ pub(all) struct AppToolBookAppSettings {
   generated_tool_path : String
   build_command : String
   review_status : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AppToolBookCivicSettings {
   building_id : String
   open_tool_action : String
   open_report_action : String
   configure_action : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AppToolBookConfig {
   template_id : String
   template_version : String
@@ -105,8 +109,9 @@ pub(all) struct AppToolBookConfig {
   app : AppToolBookAppSettings
   civic : AppToolBookCivicSettings
   moondesk : AppToolBookMoondeskSettings
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AppToolBookInstallSpec {
   book_id : String
   title : String
@@ -117,37 +122,41 @@ pub(all) struct AppToolBookInstallSpec {
   tool_spec : String
   tool_spec_path : String
   civic_building_id : String
-  cadence_ticks : Int
+  cadence_ticks : Int32
   workspace_root : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AppToolBookMoondeskSettings {
   create_mode : String
   editable_files : Array[String]
   output_files : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AppToolBookStatus {
   book_id : String
   workspace_root : String
-  required_count : Int
-  missing_count : Int
+  required_count : Int32
+  missing_count : Int32
   missing_paths : Array[String]
   has_catalog_entry : Bool
   has_standing_goal : Bool
   standing_goal_enabled : Bool
   has_tool_manifest : Bool
   ready : Bool
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AppToolBookWatchSettings {
   websites : Array[String]
-  cadence_ticks : Int
+  cadence_ticks : Int32
   source_policy : String
   notify_when : Array[String]
   required_outputs : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AppToolManifest {
   schema : String
   book_id : String
@@ -162,7 +171,7 @@ pub(all) struct AppToolManifest {
   build_command : String
   review_status : String
   last_successful_build_ms : UInt64?
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
 // Type aliases
 

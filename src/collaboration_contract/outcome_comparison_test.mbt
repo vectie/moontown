@@ -166,7 +166,7 @@ test "comparison preserves changed source digests and ignores revision-only path
   assert_eq(result.sources[0].after.unwrap().digest, "sha256:new")
   assert_true(result.contributions.all(row => row.change == "unchanged"))
   assert_eq(result.contributions[0].after.unwrap().run_id, "another-run")
-  let json = result.to_json()
+  let json = ToJson::to_json(result)
   let roundtrip : @collaboration_contract.OutcomeComparison = @json.from_json(
     json,
   )

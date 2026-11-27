@@ -256,7 +256,7 @@ test "request policy parses event lines and summarizes latest event" {
     30UL,
     id="event-1",
   )
-  let line = event.to_json().stringify()
+  let line = ToJson::to_json(event).stringify()
   match decode_request_event_line(line) {
     Some(decoded) => assert_eq(decoded.request_id, "request-a")
     None => fail("expected event line to decode")
@@ -281,7 +281,7 @@ test "request policy parses event lines and summarizes latest event" {
     line,
     "not-json",
     line,
-    failed_event.to_json().stringify(),
+    ToJson::to_json(failed_event).stringify(),
   ])
   assert_eq(ids.length(), 2)
   assert_eq(ids[0], "request-a")

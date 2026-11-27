@@ -1,8 +1,8 @@
 ///|
 pub async fn compact_moonclaw_job_store_if_needed(
   workspace_root : String,
-  tick : Int,
-  max_store_bytes? : Int64 = 50_000_000,
+  tick : Int32,
+  max_store_bytes~ : Int64 = 50_000_000,
 ) -> String {
   let jobs_root = @moonsuite.product_artifact_for_book_root(
     workspace_root, "moonclaw", "jobs",
@@ -41,10 +41,10 @@ pub async fn compact_moonclaw_job_store_if_needed(
 
 ///|
 pub async fn compact_registered_moonclaw_job_stores(
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  tick? : Int = 0,
-  max_store_bytes? : Int64 = 50_000_000,
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  tick~ : Int32 = 0,
+  max_store_bytes~ : Int64 = 50_000_000,
 ) -> String {
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
   let summaries = []
@@ -96,7 +96,7 @@ pub async fn compact_registered_moonclaw_job_stores(
 async fn compact_moonclaw_job_store_for_book(
   book_id : String,
   workspace_root : String,
-  tick : Int,
+  tick : Int32,
   max_store_bytes~ : Int64,
 ) -> String {
   let summary = compact_moonclaw_job_store_if_needed(
@@ -112,11 +112,12 @@ async fn compact_moonclaw_job_store_for_book(
 }
 
 ///|
+#derive(Eq, Debug)
 struct MoonClawStoreCompactionTarget {
   name : String
   path : String
   empty_json : String
-} derive(Eq, Debug)
+}
 
 ///|
 fn moonclaw_store_compaction_targets(

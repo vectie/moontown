@@ -108,7 +108,7 @@ async test "detached import oversized receipt is failed without parsing" {
   let root = @fs.tmpdir(prefix="moontown-oversized-receipt-test-")
   let packet_path = "\{root}/packet.json"
   let receipt_path = detached_import_receipt_path(packet_path)
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   for _ in 0..<1_010 {
     builder.write_string("0123456789".repeat(100))
     builder.write_char('\n')

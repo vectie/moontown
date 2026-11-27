@@ -58,7 +58,7 @@ async fn recover_observed_standing_watch_output(
       "event-watch-auto-recovery",
       state.events.length(),
       completed,
-      "Mayor recovered failed standing watch `\{completed.task_id}` as \{decision.to_string()} because MoonBook persisted a terminal keeper marker.",
+      "Mayor recovered failed standing watch `\{completed.task_id}` as \{decision} because MoonBook persisted a terminal keeper marker.",
     ),
   )
   let finalized = finalize_standing_watch_supervision_record(

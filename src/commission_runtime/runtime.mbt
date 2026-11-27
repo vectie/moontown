@@ -19,7 +19,7 @@ pub async fn evaluate_file(input_path : String, output_path : String) -> String 
     Err(error) =>
       ({ "accepted": false, "error": error } : Json).stringify(indent=2)
     Ok(promotion) => {
-      let rendered = promotion.to_json().stringify(indent=2) + "\n"
+      let rendered = ToJson::to_json(promotion).stringify(indent=2) + "\n"
       @fs.write_file(
         output_path,
         @encoding/utf8.encode(rendered),

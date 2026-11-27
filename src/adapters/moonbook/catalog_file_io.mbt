@@ -3,7 +3,7 @@ pub async fn save_catalog_file(
   path : String,
   catalog : Array[BookCatalogEntry],
 ) -> Unit {
-  write_workspace_text(path, catalog.to_json().stringify())
+  write_workspace_text(path, ToJson::to_json(catalog).stringify())
 }
 
 ///|
@@ -17,7 +17,7 @@ pub async fn load_catalog_file(path : String) -> Array[BookCatalogEntry]? {
 
 ///|
 pub async fn load_or_create_catalog(
-  path? : String = default_catalog_path(),
+  path~ : String = default_catalog_path(),
 ) -> Array[BookCatalogEntry] {
   match load_catalog_file(path) {
     Some(catalog) => {
@@ -37,7 +37,7 @@ pub async fn load_or_create_catalog(
 
 ///|
 pub async fn load_or_create_provider(
-  path? : String = default_catalog_path(),
+  path~ : String = default_catalog_path(),
 ) -> MoonbookCatalogProvider {
   MoonbookCatalogProvider::new(load_or_create_catalog(path~))
 }

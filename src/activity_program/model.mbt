@@ -1,12 +1,14 @@
 ///|
+#derive(Debug)
 pub(all) suberror ProgramError {
   Denied
   Invalid(String)
   Conflict(String)
   Unavailable
-} derive(Debug)
+}
 
 ///|
+#derive(ToJson, FromJson)
 struct Application {
   id : String
   actor : String
@@ -28,9 +30,10 @@ struct Application {
   review_note : String
   created_ms : UInt64
   updated_ms : UInt64
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 struct Grant {
   id : String
   application_id : String
@@ -52,9 +55,10 @@ struct Grant {
   template_hash : String
   status : String
   reason : String
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 struct Activity {
   id : String
   application_id : String
@@ -84,9 +88,10 @@ struct Activity {
   published_ms : UInt64
   created_ms : UInt64
   updated_ms : UInt64
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 struct Audit {
   action : String
   actor : String
@@ -94,9 +99,10 @@ struct Audit {
   revision : Int32
   at_ms : UInt64
   detail : String
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 struct Registry {
   schema : String
   revision : Int32
@@ -104,9 +110,10 @@ struct Registry {
   grants : Array[Grant]
   activities : Array[Activity]
   audit : Array[Audit]
-} derive(ToJson, FromJson)
+}
 
 ///|
+#warnings("-missing_priv")
 struct Template {
   raw : Json
   template_id : String

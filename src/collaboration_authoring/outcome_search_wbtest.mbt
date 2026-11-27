@@ -91,12 +91,12 @@ async test "retained search scans old source revisions and pins current or expli
     write_bytes(path + "/store-root.txt", @utf8.encode(store.root))
     write_bytes(
       path + "/query.json",
-      @utf8.encode(query.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(query).stringify(indent=2)),
     )
     write_bytes(
       path + "/historic-query.json",
       @utf8.encode(
-        { ..query, selections: [old_key], }.to_json().stringify(indent=2),
+        ToJson::to_json({ ..query, selections: [old_key], }).stringify(indent=2),
       ),
     )
     write_bytes(path + "/expected.json", @utf8.encode(result.json_text()))

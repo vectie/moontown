@@ -1,13 +1,15 @@
 ///|
+#derive(Debug, Eq)
 pub(all) enum WorldDeltaEntityKind {
   DeltaBuilding
   DeltaRoad
   DeltaPark
-} derive(Debug, Eq)
+}
 
 ///|
 /// Complete data required to add a player building before the world compiler
 /// derives portals, interaction slots, and renderer-specific geometry.
+#derive(Debug, Eq)
 pub(all) struct BuildingAddition {
   id : StableId
   name : String
@@ -22,7 +24,7 @@ pub(all) struct BuildingAddition {
   footprint : Polygon
   profile : BuildingProfile
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn building_addition(
@@ -32,9 +34,9 @@ pub fn building_addition(
   footprint : Polygon,
   profile : BuildingProfile,
   provenance : Provenance,
-  parcel_id? : StableId? = None,
-  module_key? : String? = None,
-  entrance_grid? : GridPosition? = None,
+  parcel_id~ : StableId? = None,
+  module_key~ : String? = None,
+  entrance_grid~ : GridPosition? = None,
 ) -> BuildingAddition {
   {
     id,
@@ -50,13 +52,14 @@ pub fn building_addition(
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct BuildingMovement {
   id : StableId
   grid_anchor : GridPosition
   entrance_grid : GridPosition?
   footprint : Polygon
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn building_movement(
@@ -64,16 +67,17 @@ pub fn building_movement(
   grid_anchor : GridPosition,
   footprint : Polygon,
   provenance : Provenance,
-  entrance_grid? : GridPosition? = None,
+  entrance_grid~ : GridPosition? = None,
 ) -> BuildingMovement {
   { id, grid_anchor, entrance_grid, footprint, provenance, }
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct BuildingDeletion {
   id : StableId
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn building_deletion(
@@ -86,6 +90,7 @@ pub fn building_deletion(
 ///|
 /// A grid-level road edit. Compilation resolves it into road nodes, segments,
 /// world-space centerlines, and connectivity.
+#derive(Debug, Eq)
 pub(all) struct RoadAddition {
   id : StableId
   grid_path : ReadOnlyArray[GridPosition]
@@ -93,7 +98,7 @@ pub(all) struct RoadAddition {
   width_meters : Double
   mobility : ReadOnlyArray[MobilityMode]
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn road_addition(
@@ -115,11 +120,12 @@ pub fn road_addition(
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct RoadMovement {
   id : StableId
   grid_path : ReadOnlyArray[GridPosition]
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn road_movement(
@@ -131,10 +137,11 @@ pub fn road_movement(
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct RoadDeletion {
   id : StableId
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn road_deletion(id : StableId, provenance : Provenance) -> RoadDeletion {
@@ -142,6 +149,7 @@ pub fn road_deletion(id : StableId, provenance : Provenance) -> RoadDeletion {
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct ParkAddition {
   id : StableId
   label : String
@@ -149,7 +157,7 @@ pub(all) struct ParkAddition {
   grid_anchor : GridPosition
   boundary : Polygon
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn park_addition(
@@ -158,18 +166,19 @@ pub fn park_addition(
   grid_anchor : GridPosition,
   boundary : Polygon,
   provenance : Provenance,
-  parcel_id? : StableId? = None,
+  parcel_id~ : StableId? = None,
 ) -> ParkAddition {
   { id, label, parcel_id, grid_anchor, boundary, provenance, }
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct ParkMovement {
   id : StableId
   grid_anchor : GridPosition
   boundary : Polygon
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn park_movement(
@@ -182,10 +191,11 @@ pub fn park_movement(
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct ParkDeletion {
   id : StableId
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn park_deletion(id : StableId, provenance : Provenance) -> ParkDeletion {
@@ -193,6 +203,7 @@ pub fn park_deletion(id : StableId, provenance : Provenance) -> ParkDeletion {
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum WorldDeltaOperation {
   AddBuilding(BuildingAddition)
   MoveBuilding(BuildingMovement)
@@ -203,7 +214,7 @@ pub(all) enum WorldDeltaOperation {
   AddPark(ParkAddition)
   MovePark(ParkMovement)
   DeletePark(ParkDeletion)
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn WorldDeltaOperation::entity_id(self : WorldDeltaOperation) -> StableId {
@@ -251,20 +262,21 @@ pub fn WorldDeltaOperation::provenance(
 ///|
 /// Versioned, blueprint-bound user edits. `revision` is monotonic within one
 /// saved town; it is not a simulation tick.
+#derive(Debug, Eq)
 pub(all) struct WorldDelta {
   schema_version : String
   base_blueprint_id : StableId
   base_blueprint_digest : String
-  revision : Int
+  revision : Int32
   operations : ReadOnlyArray[WorldDeltaOperation]
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn world_delta(
   schema_version : String,
   base_blueprint_id : StableId,
   base_blueprint_digest : String,
-  revision : Int,
+  revision : Int32,
   operations : ArrayView[WorldDeltaOperation],
 ) -> WorldDelta {
   {

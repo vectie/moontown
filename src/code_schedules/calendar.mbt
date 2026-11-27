@@ -1,4 +1,5 @@
 ///|
+#warnings("-deprecated")
 async fn code_schedule_zone(name : String) -> @time.Zone {
   if name == "UTC" || name == "Etc/UTC" {
     return @time.utc_zone
@@ -39,6 +40,7 @@ pub async fn CodeSchedule::with_calendar(
 }
 
 ///|
+#warnings("-deprecated")
 fn code_schedule_calendar_next(
   schedule : CodeSchedule,
   now : Int64,

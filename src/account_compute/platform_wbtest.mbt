@@ -53,7 +53,7 @@ test "admin projection contains exactly approved four nodes and redacts topology
     heartbeat_fixture(town_fleet()[0].0, now),
     heartbeat_fixture("outside-approved-fleet", now),
   ]
-  let machines = fleet_machines(rows.to_json(), now).unwrap()
+  let machines = fleet_machines(ToJson::to_json(rows), now).unwrap()
   assert_eq(machines.length(), 4)
   assert_true(
     machines[0]
@@ -61,7 +61,7 @@ test "admin projection contains exactly approved four nodes and redacts topology
   )
   assert_true(machines[3] is { "metrics_reported": False, .. })
   for hidden in ["outside-approved", "private-", "spark-"] {
-    assert_false(machines.to_json().stringify().contains(hidden))
+    assert_false(ToJson::to_json(machines).stringify().contains(hidden))
   }
   assert_true(fleet_machines([rows[0], rows[0]], now) is None)
   let stale = fleet_machines(

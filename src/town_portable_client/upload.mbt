@@ -11,7 +11,7 @@ async fn verify_original_file(
   }
   let hash = @crypto.SHA256::new()
   for offset = 0; offset < expected; {
-    let count = Int::min(limits.chunk_bytes, expected - offset)
+    let count = Int32::min(limits.chunk_bytes, expected - offset)
     let bytes = @async.with_timeout(limits.idle_timeout_ms, () => {
       file.read_exactly_at(count, position=offset.to_int64())
     })
@@ -55,10 +55,14 @@ pub async fn PortableClient::upload(
     headers["x-town-binding-digest"] = binding.binding_digest
     headers["accept"] = "application/json"
     let sent = Ref(false)
+    let ci_headers : Map[@http.CaseInsensitiveString, String] = Map([])
+    for k, v in headers {
+      ci_headers[@http.CaseInsensitiveString(k)] = v
+    }
     let request : @http.Request = {
       meth: Put,
       path: route_root + "/content?listing_id=" + listing_id,
-      headers,
+      headers: ci_headers,
     }
     (self.exchange)(
       request,

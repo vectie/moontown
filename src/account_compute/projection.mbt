@@ -12,9 +12,9 @@ fn account_compute_snapshot(
   organizations : Array[Json],
 ) -> Json {
   let scope = {
-    "state": state.to_json(),
-    "audience": "personal".to_json(),
-    "organizations": organizations.to_json(),
+    "state": ToJson::to_json(state),
+    "audience": ToJson::to_json("personal"),
+    "organizations": ToJson::to_json(organizations),
   }
   if account is Object(_) {
     scope["account"] = account

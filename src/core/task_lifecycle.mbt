@@ -72,7 +72,7 @@ pub fn active_work_execution_status(status : TaskExecutionStatus) -> Bool {
 }
 
 ///|
-pub fn execution_status_rank(status : TaskExecutionStatus) -> Int {
+pub fn execution_status_rank(status : TaskExecutionStatus) -> Int32 {
   match status {
     PacketReady => 1
     ProposalImported => 2
@@ -89,7 +89,7 @@ pub fn pollable_execution_status(status : TaskExecutionStatus) -> Bool {
 ///|
 pub fn polled_execution_stale_window_ticks(
   execution : TaskExecutionRecord,
-) -> Int {
+) -> Int32 {
   let settings = @system_settings.current_system_settings()
   match execution.run_id {
     Some(_) => settings.polled_execution_stale_window_ticks
@@ -98,14 +98,14 @@ pub fn polled_execution_stale_window_ticks(
 }
 
 ///|
-pub fn external_execution_stale_window_ticks() -> Int {
+pub fn external_execution_stale_window_ticks() -> Int32 {
   @system_settings.current_system_settings().external_execution_stale_window_ticks
 }
 
 ///|
 pub fn no_run_id_live_execution_stale(
   execution : TaskExecutionRecord,
-  tick : Int,
+  tick : Int32,
 ) -> Bool {
   if execution.output_contract == "wenyu.build.native-result.v1" {
     return false
@@ -122,7 +122,7 @@ pub fn no_run_id_live_execution_stale(
 }
 
 ///|
-pub fn live_external_execution_count(state : TownState) -> Int {
+pub fn live_external_execution_count(state : TownState) -> Int32 {
   let mut count = 0
   for execution in state.executions {
     match execution.status {
@@ -141,7 +141,7 @@ pub fn live_external_execution_count(state : TownState) -> Int {
 }
 
 ///|
-pub fn max_live_external_executions() -> Int {
+pub fn max_live_external_executions() -> Int32 {
   @system_settings.current_system_settings().max_live_external_executions
 }
 
@@ -166,7 +166,7 @@ pub fn has_active_work_executions(state : TownState) -> Bool {
 }
 
 ///|
-pub fn has_retry_pending_executions(state : TownState, tick : Int) -> Bool {
+pub fn has_retry_pending_executions(state : TownState, tick : Int32) -> Bool {
   ignore(tick)
   for execution in state.executions {
     match execution.status {
@@ -182,7 +182,7 @@ pub fn has_retry_pending_executions(state : TownState, tick : Int) -> Bool {
 }
 
 ///|
-pub fn tick_from_task_id(task_id : String) -> Int {
+pub fn tick_from_task_id(task_id : String) -> Int32 {
   match tick_marker_index(task_id) {
     Some(index) => first_non_negative_int(task_id[index + 5:].to_owned())
     None => 0
@@ -190,13 +190,13 @@ pub fn tick_from_task_id(task_id : String) -> Int {
 }
 
 ///|
-fn tick_marker_index(task_id : String) -> Int? {
+fn tick_marker_index(task_id : String) -> Int32? {
   let marker = "tick-"
   let limit = task_id.length() - marker.length()
   if limit < 0 {
     return None
   }
-  let mut found : Int? = None
+  let mut found : Int32? = None
   for index in 0..<=limit {
     if task_id[index:index + marker.length()].to_owned() == marker {
       found = Some(index)
@@ -206,7 +206,7 @@ fn tick_marker_index(task_id : String) -> Int? {
 }
 
 ///|
-fn first_non_negative_int(text : String) -> Int {
+fn first_non_negative_int(text : String) -> Int32 {
   let mut value = 0
   let mut seen = false
   for char in text {

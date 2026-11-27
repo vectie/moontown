@@ -1,6 +1,6 @@
 ///|
 pub async fn inspect_book_template_request_status(
-  request_path? : String = @book_templates.request_path_for_snapshot(
+  request_path~ : String = @book_templates.request_path_for_snapshot(
     @storage.default_snapshot_path(),
   ),
 ) -> @book_templates.BookTemplateRequestStatus {

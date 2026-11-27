@@ -13,7 +13,7 @@ async test "source picker public API observes registered relative files without 
   ]
   @fs.write_file(
     root + "/catalog.json",
-    catalog.to_json().stringify(),
+    ToJson::to_json(catalog).stringify(),
     create_mode=CreateNew,
   )
   let store : @collaboration_authoring.Store = {

@@ -2,14 +2,16 @@
 /// A renderer-neutral, canonical identity that remains stable across world
 /// recompilation. The representation is intentionally opaque so callers cannot
 /// bypass canonicalization.
+#derive(Debug, Eq, Hash)
 pub struct StableId {
   value : String
-} derive(Debug, Eq, Hash)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum ContractError {
   InvalidStableId(scope~ : String, key~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 fn normalize_id_part(raw : String) -> String {

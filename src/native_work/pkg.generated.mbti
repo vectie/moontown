@@ -10,7 +10,7 @@ import {
 // Values
 pub async fn accepted_repair(String, String, path? : String) -> Bool
 
-pub async fn cancel(String, Int, UInt64, path? : String, client? : @native_code_control.Client) -> Work
+pub async fn cancel(String, Int32, UInt64, path? : String, client? : @native_code_control.Client) -> Work
 
 pub fn default_path() -> String
 
@@ -42,27 +42,27 @@ pub fn path_for_snapshot(String) -> String
 
 pub async fn read_saved(path? : String) -> State
 
-pub async fn refresh(String, Int, UInt64, path? : String, client? : @native_code_control.Client) -> Work
+pub async fn refresh(String, Int32, UInt64, path? : String, client? : @native_code_control.Client) -> Work
 
 pub async fn render_status(path? : String) -> String
 
-pub async fn source_binding(String?) -> Result[Json, String]
+pub async fn source_binding(String?) -> Result[@json.Json, String]
 
-pub fn source_root(Json) -> String
+pub fn source_root(@json.Json) -> String
 
-pub async fn source_still_bound(Json, strict_digest? : Bool) -> Bool
+pub async fn source_still_bound(@json.Json, strict_digest? : Bool) -> Bool
 
 pub fn status(Work) -> Status
 
 pub fn summary(Work) -> String
 
-pub async fn supersede(String, Int, path? : String) -> Work
+pub async fn supersede(String, Int32, path? : String) -> Work
 
-pub async fn sync(String, UInt64, path? : String, client? : @native_code_control.Client, force? : Bool, expected_revision? : Int) -> Work
+pub async fn sync(String, UInt64, path? : String, client? : @native_code_control.Client, force? : Bool, expected_revision? : Int32) -> Work
 
 pub fn terminal(String) -> Bool
 
-pub fn wenyu_completion_policy(Array[String]) -> Json
+pub fn wenyu_completion_policy(Array[String]) -> @json.Json
 
 pub fn wenyu_mutation_receipt_satisfies_contract(Work) -> Bool
 
@@ -73,6 +73,7 @@ pub fn wenyu_result_satisfies_contract(Work, String, no_change? : Bool) -> Bool
 // Errors
 
 // Types and methods
+#derive(@json.FromJson, @json.ToJson)
 pub(all) struct CancelControl {
   command_id : String
   target_command_id : String
@@ -80,25 +81,29 @@ pub(all) struct CancelControl {
   body_digest : String
   status : String
   last_attempt_at_ms : UInt64
-  evidence : Json
-} derive(ToJson, @json.FromJson)
+  evidence : @json.Json
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct EditorAppliedFeature {
   selected_feature : String
   selection_content : String
   implementation_content : String
-} derive(Eq, @debug.Debug)
+}
 
+#derive(@json.FromJson, @json.ToJson)
 pub(all) struct EditorCapturedInput {
   book_id : String
   root : String
   relative : String
   content : String
   content_digest : String
-} derive(ToJson, @json.FromJson)
+}
 
-type EditorOutputPackage derive(ToJson, @json.FromJson)
+#derive(@json.FromJson, @json.ToJson)
+type EditorOutputPackage
 
+#derive(@json.FromJson, @json.ToJson)
 pub(all) struct EditorOwnerSpec {
   contract : String
   criterion_id : String
@@ -112,19 +117,20 @@ pub(all) struct EditorOwnerSpec {
   captured_inputs : Array[EditorCapturedInput]
   output_before : Map[String, String]
   missing_plan_template : String
-} derive(ToJson, @json.FromJson)
+}
 
+#derive(@json.FromJson, @json.ToJson)
 pub(all) struct Request {
   kind : String
   work_key : String
-  generation : Int
+  generation : Int32
   owner_workspace : String
   book_id : String
   book_root : String
   book_type : String
   catalog_path : String
   execution_root : String
-  source_binding : Json
+  source_binding : @json.Json
   criterion_id : String
   model_request : String
   prompt : String
@@ -132,10 +138,11 @@ pub(all) struct Request {
   input_digest : String
   output_contract : String
   result_path : String
-  acceptance_policy : Json
+  acceptance_policy : @json.Json
   created_at_ms : UInt64
-} derive(ToJson, @json.FromJson)
+}
 
+#derive(@json.FromJson, @json.ToJson)
 pub(all) struct Reservation {
   session_id : String
   command_id : String
@@ -146,20 +153,22 @@ pub(all) struct Reservation {
   request_body : String
   body_digest : String
   reserved_at_ms : UInt64
-} derive(ToJson, @json.FromJson)
+}
 
+#derive(@json.FromJson, @json.ToJson)
 pub(all) struct State {
   schema : String
-  revision : Int
+  revision : Int32
   work : Array[Work]
-} derive(ToJson, @json.FromJson)
+}
 
+#derive(@json.ToJson)
 pub(all) struct Status {
   id : String
   kind : String
   book_id : String
   criterion_id : String
-  generation : Int
+  generation : Int32
   state : String
   control_state : String
   blocked_reason : String
@@ -170,8 +179,9 @@ pub(all) struct Status {
   command_id : String
   engineering_status : String
   output : String
-} derive(ToJson)
+}
 
+#derive(@json.FromJson, @json.ToJson)
 pub(all) struct Work {
   id : String
   request : Request
@@ -180,13 +190,13 @@ pub(all) struct Work {
   blocked_reason : String
   reservation : Reservation?
   control : CancelControl?
-  baseline : Json
+  baseline : @json.Json
   observed_instances : Array[String]
   last_attempt_at_ms : UInt64
   retry_after_ms : UInt64
   output : String
-  receipt : Json
-} derive(ToJson, @json.FromJson)
+  receipt : @json.Json
+}
 
 // Type aliases
 

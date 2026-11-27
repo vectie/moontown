@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum WorkDomain {
   Coding
   Finance
@@ -6,16 +7,18 @@ pub(all) enum WorkDomain {
   Operations
   SocialExperiment
   Custom(String)
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum MemoryScope {
   SharedTown
   BookPrivate
   TaskEphemeral
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum WorkerRole {
   Harness
   Planner
@@ -24,18 +27,20 @@ pub(all) enum WorkerRole {
   MemoryKeeper
   Watcher
   Operator
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum WorkerStatus {
   Idle
   Running
   Waiting
   Blocked
   Offline
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum TownTaskStatus {
   Pending
   Planned
@@ -44,35 +49,38 @@ pub(all) enum TownTaskStatus {
   Blocked
   Done
   Failed
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum IsolationMode {
   SharedWorkspace
   BookWorkspace
   Worktree
   Sandboxed
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct TownConfig {
   id : String
   name : String
-  heartbeat_seconds : Int
-  max_concurrent_tasks : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  heartbeat_seconds : Int32
+  max_concurrent_tasks : Int32
+}
 
 ///|
 pub fn TownConfig::new(
   id~ : String,
   name~ : String,
-  heartbeat_seconds? : Int = 30,
-  max_concurrent_tasks? : Int = 12,
+  heartbeat_seconds~ : Int32 = 30,
+  max_concurrent_tasks~ : Int32 = 12,
 ) -> TownConfig {
   { id, name, heartbeat_seconds, max_concurrent_tasks, }
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct BookRef {
   id : String
   name : String
@@ -80,7 +88,7 @@ pub struct BookRef {
   workspace_root : String
   memory_scope : MemoryScope
   tags : Array[String]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn BookRef::new(
@@ -88,13 +96,14 @@ pub fn BookRef::new(
   name~ : String,
   purpose~ : String,
   workspace_root~ : String,
-  memory_scope? : MemoryScope = BookPrivate,
-  tags? : Array[String] = [],
+  memory_scope~ : MemoryScope = BookPrivate,
+  tags~ : Array[String] = [],
 ) -> BookRef {
   { id, name, purpose, workspace_root, memory_scope, tags, }
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct WorkerRef {
   id : String
   name : String
@@ -102,7 +111,7 @@ pub struct WorkerRef {
   role : WorkerRole
   capabilities : Array[String]
   status : WorkerStatus
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn WorkerRef::new(
@@ -110,13 +119,14 @@ pub fn WorkerRef::new(
   name~ : String,
   book_id~ : String,
   role~ : WorkerRole,
-  capabilities? : Array[String] = [],
-  status? : WorkerStatus = Idle,
+  capabilities~ : Array[String] = [],
+  status~ : WorkerStatus = Idle,
 ) -> WorkerRef {
   { id, name, book_id, role, capabilities, status, }
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct TownTask {
   id : String
   book_id : String
@@ -126,7 +136,7 @@ pub struct TownTask {
   required_role : WorkerRole?
   required_capabilities : Array[String]
   status : TownTaskStatus
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn TownTask::new(
@@ -135,9 +145,9 @@ pub fn TownTask::new(
   title~ : String,
   prompt~ : String,
   domain~ : WorkDomain,
-  required_role? : WorkerRole? = None,
-  required_capabilities? : Array[String] = [],
-  status? : TownTaskStatus = Pending,
+  required_role~ : WorkerRole? = None,
+  required_capabilities~ : Array[String] = [],
+  status~ : TownTaskStatus = Pending,
 ) -> TownTask {
   {
     id,
@@ -152,24 +162,26 @@ pub fn TownTask::new(
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct StandingGoal {
   id : String
   title : String
   prompt : String
   target_book_id : String?
-  cadence_ticks : Int
-  next_due_tick : Int
-  last_run_tick : Int?
+  cadence_ticks : Int32
+  next_due_tick : Int32
+  last_run_tick : Int32?
   enabled : Bool
   source_policy : String
-  quality_threshold : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  quality_threshold : Int32
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum WatcherDecisionKind {
   Update
   NoChange
   NeedsReview
   Failed
   Deferred
-} derive(Debug, Eq, ToJson, FromJson)
+}

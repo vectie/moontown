@@ -1,6 +1,6 @@
 ///|
 fn timestamp(value : UInt64) -> Json {
-  value.to_double().to_json()
+  ToJson::to_json(value.to_double())
 }
 
 ///|
@@ -53,11 +53,11 @@ fn owned_event(state : State, event : Event) -> Json {
   fields["registrations"] = state.registrations
     .filter(r => r.event_id == event.id)
     .map(private_registration)
-    .to_json()
+    |> ToJson::to_json
   fields["followups"] = state.followups
     .filter(f => f.event_id == event.id)
     .map(private_followup)
-    .to_json()
+    |> ToJson::to_json
   Json::object(fields)
 }
 
@@ -71,19 +71,19 @@ fn snapshot(state : State, actor : String?, can_host : Bool) -> Json {
         "stories": state.stories
         .filter(s => s.owner_id == actor)
         .map(public_story)
-        .to_json(),
+        |> ToJson::to_json,
         "events": state.events
         .filter(e => e.owner_id == actor)
         .map(e => owned_event(state, e))
-        .to_json(),
+        |> ToJson::to_json,
         "registrations": state.registrations
         .filter(r => r.participant_id == actor)
         .map(private_registration)
-        .to_json(),
+        |> ToJson::to_json,
         "followups": state.followups
         .filter(f => f.participant_id == actor)
         .map(private_followup)
-        .to_json(),
+        |> ToJson::to_json,
       }
     None => Json::null()
   }
@@ -93,13 +93,13 @@ fn snapshot(state : State, actor : String?, can_host : Bool) -> Json {
     "stories": state.stories
     .filter(s => s.state == "published")
     .map(public_story)
-    .to_json(),
+    |> ToJson::to_json,
     // Cancellation/end notices remain public only if publication was authorized.
     // A cancelled private draft must never become a public announcement.
     "events": state.events
     .filter(e => e.published_ms is Some(_))
     .map(e => public_event(state, e))
-    .to_json(),
+    |> ToJson::to_json,
     "mine": mine,
   }
 }

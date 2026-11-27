@@ -13,7 +13,7 @@ pub fn account_context_for(AccountPrincipal, String?) -> AccountContext
 
 pub fn account_context_for_session(AccountState, String, now_ms~ : UInt64) -> AccountContext?
 
-pub fn account_context_projection(AccountContext) -> Json
+pub fn account_context_projection(AccountContext) -> @json.Json
 
 pub fn account_entitlement_name(AccountEntitlement) -> String
 
@@ -44,19 +44,20 @@ pub fn empty_account_state() -> AccountState
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) struct AccountApplication {
   state_path : String
   bootstrap_principal : AccountPrincipal
   bootstrap_session_id : String
   bootstrap_token_digest : String
-} derive(Eq, @debug.Debug)
+}
 pub async fn AccountApplication::admin_create_account(Self, String, String, String, String, String, String, String, String, now_ms~ : UInt64, ttl_ms? : UInt64) -> VisitorSessionResult
-pub async fn AccountApplication::admin_set_account_active(Self, String, String, Bool, now_ms~ : UInt64) -> Json
-pub async fn AccountApplication::admin_snapshot(Self, String, now_ms~ : UInt64) -> Json
-pub async fn AccountApplication::billing_snapshot(Self, String, now_ms~ : UInt64) -> Json
+pub async fn AccountApplication::admin_set_account_active(Self, String, String, Bool, now_ms~ : UInt64) -> @json.Json
+pub async fn AccountApplication::admin_snapshot(Self, String, now_ms~ : UInt64) -> @json.Json
+pub async fn AccountApplication::billing_snapshot(Self, String, now_ms~ : UInt64) -> @json.Json
 pub async fn AccountApplication::create_visitor_session(Self, String, String, now_ms~ : UInt64, ttl_ms? : UInt64) -> VisitorSessionResult
-pub async fn AccountApplication::enterprise_remove_member(Self, String, String, now_ms~ : UInt64) -> Json
-pub async fn AccountApplication::enterprise_snapshot(Self, String, now_ms~ : UInt64) -> Json
+pub async fn AccountApplication::enterprise_remove_member(Self, String, String, now_ms~ : UInt64) -> @json.Json
+pub async fn AccountApplication::enterprise_snapshot(Self, String, now_ms~ : UInt64) -> @json.Json
 pub async fn AccountApplication::enterprise_upsert_member(Self, String, String, String, Bool, String, String, now_ms~ : UInt64, ttl_ms? : UInt64) -> VisitorSessionResult
 pub async fn AccountApplication::logout(Self, String, now_ms~ : UInt64) -> Unit
 pub async fn AccountApplication::portable_transfer_recipient_active(Self, AccountContext, String) -> Bool
@@ -65,6 +66,7 @@ pub async fn AccountApplication::resolve_portable_transfer(Self, String, now_ms~
 pub async fn AccountApplication::set_paid_subscription(Self, String, Bool, now_ms~ : UInt64) -> AccountContext
 pub async fn AccountApplication::switch_tenant(Self, String, String?, now_ms~ : UInt64) -> AccountContext
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AccountAuditEvent {
   event_id : String
   actor_id : String
@@ -72,9 +74,10 @@ pub(all) struct AccountAuditEvent {
   target_id : String
   detail : String
   occurred_at_ms : UInt64
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AccountContext {
   user_id : String
   display_name : String
@@ -87,9 +90,10 @@ pub(all) struct AccountContext {
   tenant_choices : Array[AccountTenantAccess]
   home_surface : AccountHomeSurface
   visitor : Bool
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub fn AccountContext::has_entitlement(Self, AccountEntitlement) -> Bool
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum AccountEntitlement {
   ExplorePublicTown
   DiscoverPublicServices
@@ -114,29 +118,33 @@ pub(all) enum AccountEntitlement {
   ViewPlatformAnalytics
   ViewAuditLog
   ManageSystemHealth
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum AccountHomeSurface {
   PublicTownHome
   PersonalTownHome
   EnterpriseTownHome
   AdminConsoleHome
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum AccountKind {
   VisitorAccount
   SignedInAccount
   PaidUserAccount
   EnterpriseAccount
   AdminAccount
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum AccountPlan {
   VisitorPlan
   PaidPlan
   EnterprisePlan
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AccountPrincipal {
   user_id : String
   display_name : String
@@ -144,17 +152,19 @@ pub(all) struct AccountPrincipal {
   platform_roles : Array[AccountRole]
   tenant_access : Array[AccountTenantAccess]
   active : Bool
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum AccountRole {
   AccountMember
   AccountEditor
   AccountPublisher
   OrganizationAdmin
   PlatformAdmin
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AccountSession {
   session_id : String
   token_digest : String
@@ -162,39 +172,43 @@ pub(all) struct AccountSession {
   active_tenant_id : String?
   expires_at_ms : UInt64
   revoked : Bool
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AccountState {
   schema : String
   principals : Array[AccountPrincipal]
   sessions : Array[AccountSession]
   subscriptions : Array[AccountSubscription]
   audit_events : Array[AccountAuditEvent]
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AccountSubscription {
   principal_id : String
   plan : AccountPlan
   status : String
   changed_at_ms : UInt64
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AccountTenantAccess {
   tenant_id : String
   tenant_name : String
   plan : AccountPlan
   roles : Array[AccountRole]
   active : Bool
-  version : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  version : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub(all) struct VisitorSessionResult {
   opaque_token : String
   context : AccountContext
-} derive(Eq, ToJson, @debug.Debug)
+}
 
 // Type aliases
 

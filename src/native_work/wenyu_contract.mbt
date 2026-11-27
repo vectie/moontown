@@ -16,8 +16,8 @@ fn wenyu_policy_valid(request : Request) -> Bool {
     text(policy, "task_kind") != "code-patch" ||
     text(policy, "commit_requirement") != "not_requested" ||
     field(policy, "preserve_preexisting_unrelated_dirty_files") !=
-    true.to_json() ||
-    field(policy, "push_requested") != false.to_json() {
+    ToJson::to_json(true) ||
+    field(policy, "push_requested") != ToJson::to_json(false) {
     return false
   }
   let commands = rows(policy, "required_validation_commands")
@@ -40,10 +40,11 @@ fn wenyu_policy_valid(request : Request) -> Bool {
 /// Validate the exact Wenyu answer against its owner-frozen permission and
 /// identities. Source mutation and checks are separately attested by the
 /// workspace-change evidence validator; this predicate alone grants no success.
+#warnings("-deprecated")
 pub fn wenyu_result_satisfies_contract(
   work : Work,
   answer : String,
-  no_change? : Bool = false,
+  no_change~ : Bool = false,
 ) -> Bool {
   if !wenyu_policy_valid(work.request) ||
     answer.length() > 1_000_000 ||

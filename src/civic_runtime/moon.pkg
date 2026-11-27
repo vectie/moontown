@@ -3,7 +3,6 @@ import {
   "moonbitlang/async/fs",
   "moonbitlang/core/env",
   "moonbitlang/core/json",
-  "moonbitlang/x/sys",
   "moonbitlang/x/path",
   "vectie/moontown/adapters/moonbook",
   "vectie/moontown/adapters/moonclaw",

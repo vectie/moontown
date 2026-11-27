@@ -3,8 +3,8 @@ fn contribution(
   id : String,
   participant : String,
   origin : String,
-  evidence? : Array[String] = ["evidence/\{id}.json"],
-  claim? : String = "accepted-knowledge",
+  evidence~ : Array[String] = ["evidence/\{id}.json"],
+  claim~ : String = "accepted-knowledge",
 ) -> CivicContribution {
   {
     contribution_id: id,

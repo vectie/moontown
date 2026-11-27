@@ -10,11 +10,11 @@ import {
 // Values
 pub async fn append_daemon_log(String, String) -> Unit
 
-pub async fn append_daemon_tick_phase_log(String, String, Int) -> Unit
+pub async fn append_daemon_tick_phase_log(String, String, Int32) -> Unit
 
 pub fn daemon_command_or_current(String) -> String
 
-pub async fn daemon_current_process_pid(String) -> Int
+pub async fn daemon_current_process_pid(String) -> Int32
 
 pub async fn daemon_doctor_saved_town(snapshot_path? : String, stale_after_ms? : UInt64) -> String
 
@@ -30,7 +30,7 @@ pub async fn daemon_stop_saved_town(snapshot_path? : String) -> String
 
 pub fn daemon_supervisor_should_run_inline_worker() -> Bool
 
-pub fn daemon_tick_log_line(String, Int) -> String
+pub fn daemon_tick_log_line(String, Int32) -> String
 
 pub fn daemon_tick_paths(String) -> DaemonTickPaths
 
@@ -54,7 +54,7 @@ pub fn default_standing_goal_state_path(String) -> String
 
 pub async fn inspect_daemon_runtime(snapshot_path? : String, stale_after_ms? : UInt64) -> @daemon_runtime_policy.DaemonRuntimeHealth
 
-pub async fn latest_daemon_log_sequence(String) -> Int
+pub async fn latest_daemon_log_sequence(String) -> Int32
 
 pub async fn load_daemon_runtime_state(String) -> @daemon_runtime_policy.DaemonRuntimeState?
 
@@ -62,7 +62,7 @@ pub async fn load_daemon_state(String) -> @scheduler.DaemonState
 
 pub async fn mark_daemon_stopped(String, String) -> Unit
 
-pub async fn mark_daemon_supervisor_started(String, Int, String) -> Unit
+pub async fn mark_daemon_supervisor_started(String, Int32, String) -> Unit
 
 pub async fn mark_daemon_tick_finished(String, Bool, String) -> Unit
 
@@ -70,13 +70,13 @@ pub async fn mark_daemon_tick_started(String, String) -> Unit
 
 pub async fn mark_daemon_worker_reload_requested(String, String) -> Unit
 
-pub async fn mark_daemon_worker_started(String, Int, String, clear_supervisor? : Bool) -> Unit
+pub async fn mark_daemon_worker_started(String, Int32, String, clear_supervisor? : Bool) -> Unit
 
-pub async fn run_daemon_scheduled_jobs(@core.TownState, Array[@scheduler.ScheduledJob], String, String, Int, String) -> Unit
+pub async fn run_daemon_scheduled_jobs(@core.TownState, Array[@scheduler.ScheduledJob], String, String, Int32, String) -> Unit
 
 pub async fn save_daemon_state(String, @scheduler.DaemonState) -> Unit
 
-pub async fn spawn_daemon_worker(String, String) -> Int
+pub async fn spawn_daemon_worker(String, String) -> Int32
 
 pub async fn touch_daemon_heartbeat(String, status? : String) -> Unit
 

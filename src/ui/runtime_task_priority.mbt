@@ -1,5 +1,5 @@
 ///|
-pub fn runtime_task_priority_for_id(task_id : String) -> Int {
+pub fn runtime_task_priority_for_id(task_id : String) -> Int32 {
   if task_id.contains("code-patch") {
     0
   } else if task_id.contains("implementation-backlog") {

@@ -25,7 +25,7 @@ pub fn listing_kind_name(kind : ListingKind) -> String {
 ///|
 fn published_at_wire(lifecycle : PublicationLifecycle) -> Json {
   match lifecycle.published_at_ms {
-    Some(value) => value.to_string().to_json()
+    Some(value) => ToJson::to_json(value.to_string())
     None => Json::null()
   }
 }
@@ -33,19 +33,19 @@ fn published_at_wire(lifecycle : PublicationLifecycle) -> Json {
 ///|
 fn optional_string_wire(value : String?) -> Json {
   match value {
-    Some(content) => content.to_json()
+    Some(content) => ToJson::to_json(content)
     None => Json::null()
   }
 }
 
 ///|
 fn agent_listing_digest(draft : AgentListingDraft) -> String {
-  sha256_text(draft.to_json().stringify())
+  sha256_text(ToJson::to_json(draft).stringify())
 }
 
 ///|
 fn building_listing_digest(draft : BuildingListingDraft) -> String {
-  sha256_text(draft.to_json().stringify())
+  sha256_text(ToJson::to_json(draft).stringify())
 }
 
 ///|
@@ -58,9 +58,9 @@ fn canonical_agent_listing_card(listing : AgentListingRecord) -> Json {
     "publisher_id": listing.publisher_id,
     "title": listing.title,
     "summary": listing.summary,
-    "capabilities": listing.capabilities.to_json(),
-    "tags": listing.tags.to_json(),
-    "action_ids": listing.action_ids.to_json(),
+    "capabilities": ToJson::to_json(listing.capabilities),
+    "tags": ToJson::to_json(listing.tags),
+    "action_ids": ToJson::to_json(listing.action_ids),
     "publication_state": "published",
     "published_at": published_at_wire(listing.lifecycle),
     "version": listing.version,
@@ -80,13 +80,13 @@ pub fn public_agent_listing_card(listing : AgentListingRecord) -> Json {
   }
   let canonical = canonical_agent_listing_card(listing)
   guard canonical is Object(fields) else { return Json::null() }
-  fields["image_ref"] = listing.image_ref.to_json()
-  fields["pricing_summary"] = listing.pricing_summary.to_json()
-  fields["authority_ceiling"] = listing.authority_ceiling.to_json()
-  fields["required_permissions"] = listing.required_permissions.to_json()
-  fields["quality_score"] = listing.quality_score.to_json()
-  fields["reliability_score"] = listing.reliability_score.to_json()
-  fields["version_label"] = listing.version_label.to_json()
+  fields["image_ref"] = ToJson::to_json(listing.image_ref)
+  fields["pricing_summary"] = ToJson::to_json(listing.pricing_summary)
+  fields["authority_ceiling"] = ToJson::to_json(listing.authority_ceiling)
+  fields["required_permissions"] = ToJson::to_json(listing.required_permissions)
+  fields["quality_score"] = ToJson::to_json(listing.quality_score)
+  fields["reliability_score"] = ToJson::to_json(listing.reliability_score)
+  fields["version_label"] = ToJson::to_json(listing.version_label)
   Json::object(fields)
 }
 
@@ -100,9 +100,9 @@ fn canonical_building_listing_card(listing : BuildingListingRecord) -> Json {
     "publisher_id": listing.publisher_id,
     "title": listing.title,
     "summary": listing.summary,
-    "capabilities": listing.capabilities.to_json(),
-    "tags": listing.tags.to_json(),
-    "action_ids": listing.action_ids.to_json(),
+    "capabilities": ToJson::to_json(listing.capabilities),
+    "tags": ToJson::to_json(listing.tags),
+    "action_ids": ToJson::to_json(listing.action_ids),
     "publication_state": "published",
     "published_at": published_at_wire(listing.lifecycle),
     "version": listing.version,
@@ -119,13 +119,13 @@ pub fn public_building_listing_card(listing : BuildingListingRecord) -> Json {
   }
   let canonical = canonical_building_listing_card(listing)
   guard canonical is Object(fields) else { return Json::null() }
-  fields["image_ref"] = listing.image_ref.to_json()
-  fields["pricing_summary"] = listing.pricing_summary.to_json()
-  fields["authority_ceiling"] = "building-service".to_json()
+  fields["image_ref"] = ToJson::to_json(listing.image_ref)
+  fields["pricing_summary"] = ToJson::to_json(listing.pricing_summary)
+  fields["authority_ceiling"] = ToJson::to_json("building-service")
   fields["required_permissions"] = Json::array([])
-  fields["quality_score"] = listing.quality_score.to_json()
-  fields["reliability_score"] = listing.reliability_score.to_json()
-  fields["version_label"] = listing.version_label.to_json()
+  fields["quality_score"] = ToJson::to_json(listing.quality_score)
+  fields["reliability_score"] = ToJson::to_json(listing.reliability_score)
+  fields["version_label"] = ToJson::to_json(listing.version_label)
   Json::object(fields)
 }
 
@@ -177,9 +177,9 @@ fn safe_private_listing_share_projection(
               "publisher_id": listing.publisher_id,
               "title": listing.title,
               "summary": listing.summary,
-              "capabilities": listing.capabilities.to_json(),
-              "tags": listing.tags.to_json(),
-              "action_ids": listing.action_ids.to_json(),
+              "capabilities": ToJson::to_json(listing.capabilities),
+              "tags": ToJson::to_json(listing.tags),
+              "action_ids": ToJson::to_json(listing.action_ids),
               "image_ref": listing.image_ref,
               "pricing_summary": listing.pricing_summary,
               "publication_state": publication_state_name(
@@ -200,9 +200,9 @@ fn safe_private_listing_share_projection(
             "publisher_id": listing.publisher_id,
             "title": listing.title,
             "summary": listing.summary,
-            "capabilities": listing.capabilities.to_json(),
-            "tags": listing.tags.to_json(),
-            "action_ids": listing.action_ids.to_json(),
+            "capabilities": ToJson::to_json(listing.capabilities),
+            "tags": ToJson::to_json(listing.tags),
+            "action_ids": ToJson::to_json(listing.action_ids),
             "image_ref": listing.image_ref,
             "pricing_summary": listing.pricing_summary,
             "publication_state": publication_state_name(listing.lifecycle.state),
@@ -246,6 +246,6 @@ pub fn public_listing_index_export(state : MarketplaceState) -> Json {
   }
   {
     "contract_id": "moontown.public-listing-export.v1",
-    "listings": listings.to_json(),
+    "listings": ToJson::to_json(listings),
   }
 }

@@ -1,12 +1,12 @@
 ///|
 pub async fn write_editor_pipeline_state(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  workspace_root? : String = default_planbook_workspace_root(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  workspace_root~ : String = default_planbook_workspace_root(),
 ) -> String {
   let state = inspect_editor_pipeline_state(snapshot_path, workspace_root)
   @support.write_text_file(
     default_editor_pipeline_path(snapshot_path~),
-    state.to_json().stringify(indent=2),
+    ToJson::to_json(state).stringify(indent=2),
   )
   @support.write_text_file(
     default_editor_pipeline_markdown_path(snapshot_path~),
@@ -17,8 +17,8 @@ pub async fn write_editor_pipeline_state(
 
 ///|
 pub async fn render_editor_pipeline_status(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  workspace_root? : String = default_planbook_workspace_root(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  workspace_root~ : String = default_planbook_workspace_root(),
 ) -> String {
   ignore(write_editor_pipeline_state(snapshot_path~, workspace_root~))
   render_editor_pipeline_markdown(

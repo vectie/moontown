@@ -9,7 +9,7 @@ async test "listing archive denies new transfers and restore never revives withd
     post(
       f.service,
       @town_contract.portable_package_grants_path(),
-      draft(binding).to_json(),
+      ToJson::to_json(draft(binding)),
     ).code,
     200,
   )
@@ -40,7 +40,7 @@ async test "listing archive denies new transfers and restore never revives withd
     post(
       f.service,
       @town_contract.portable_package_grants_path(),
-      draft(binding, id="archive-grant").to_json(),
+      ToJson::to_json(draft(binding, id="archive-grant")),
     ).code,
     403,
   )
@@ -85,7 +85,7 @@ async test "package identity binding and recipient mismatches are denied without
     post(
       f.service,
       @town_contract.portable_package_grants_path(),
-      draft(binding).to_json(),
+      ToJson::to_json(draft(binding)),
     ).code,
     200,
   )
@@ -97,7 +97,7 @@ async test "package identity binding and recipient mismatches are denied without
     post(
       f.service,
       @town_contract.portable_package_grants_path(),
-      draft(binding2).to_json(),
+      ToJson::to_json(draft(binding2)),
     ).code,
     409,
   )
@@ -105,7 +105,7 @@ async test "package identity binding and recipient mismatches are denied without
     post(
       f.service,
       @town_contract.portable_package_grants_path(),
-      draft(binding, recipient="unrelated-a").to_json(),
+      ToJson::to_json(draft(binding, recipient="unrelated-a")),
     ).code,
     409,
   )
@@ -128,7 +128,7 @@ async test "download preflight reauthorizes expiry and refuses corrupt or missin
     post(
       f.service,
       @town_contract.portable_package_grants_path(),
-      draft(binding).to_json(),
+      ToJson::to_json(draft(binding)),
     ).code,
     200,
   )

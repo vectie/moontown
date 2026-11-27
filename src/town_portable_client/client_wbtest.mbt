@@ -30,7 +30,7 @@ async test "production upload callback streams original bytes with exact per req
       assert_eq(writer.buffer.contents(), fixture_bytes)
       assert_true(writer.writes.all(size => size <= 3))
       assert_eq(writer.writes.length(), 4)
-      respond_json(view.to_json(), receive)
+      respond_json(ToJson::to_json(view), receive)
     }
     let client = PortableClient::new(
       () => {
@@ -139,7 +139,7 @@ async test "download fetches exact authorized list then streams selected bytes w
         assert_eq(writer.buffer.length(), 0)
         if calls.val == 1 {
           assert_eq(request.path, route_root)
-          respond_json({ "packages": [view.to_json()] }, receive)
+          respond_json({ "packages": [ToJson::to_json(view)] }, receive)
         } else {
           assert_eq(
             request.path,
@@ -171,11 +171,14 @@ async test "download denies absent duplicate mismatched and unreceipted list wit
     for
       packages in [
         [],
-        [view.to_json(), view.to_json()],
+        [ToJson::to_json(view), ToJson::to_json(view)],
         [
-          { ..view, binding: { ..view.binding, listing_id: "other", }, }.to_json(),
+          ToJson::to_json({
+            ..view,
+            binding: { ..view.binding, listing_id: "other", },
+          }),
         ],
-        [{ ..view, receipt: None, }.to_json()],
+        [ToJson::to_json({ ..view, receipt: None, })],
       ] {
       let calls = Ref(0)
       let client = PortableClient::new(
@@ -183,7 +186,7 @@ async test "download denies absent duplicate mismatched and unreceipted list wit
         (request, _, receive) => {
           calls.val += 1
           assert_eq(request.path, route_root)
-          respond_json({ "packages": packages.to_json() }, receive)
+          respond_json({ "packages": ToJson::to_json(packages) }, receive)
         },
         limits=fixture_limits(),
       )
@@ -242,19 +245,19 @@ async test "preview share revoke withdraw use bounded exact control wire without
       match calls.val {
         1 => {
           assert_eq(request.path, route_root + "/shares/preview")
-          assert_eq(json, draft.to_json())
+          assert_eq(json, ToJson::to_json(draft))
           respond_json({ "disclosure": "entire package" }, receive)
         }
         2 => {
           assert_eq(request.path, route_root + "/share-grants")
-          assert_eq(json, draft.to_json())
-          respond_json(grant.to_json(), receive)
+          assert_eq(json, ToJson::to_json(draft))
+          respond_json(ToJson::to_json(grant), receive)
         }
         3 => {
           assert_eq(request.path, route_root + "/share-grants/revoke")
           assert_eq(json, { "grant_id": draft.grant_id })
           respond_json(
-            { ..grant, revoked_at_ms: Some(200UL), }.to_json(),
+            ToJson::to_json({ ..grant, revoked_at_ms: Some(200UL), }),
             receive,
           )
         }
@@ -264,7 +267,10 @@ async test "preview share revoke withdraw use bounded exact control wire without
             "package_id": view.package_id,
             "binding_digest": view.binding.binding_digest,
           })
-          respond_json({ ..view, status: "withdrawn", }.to_json(), receive)
+          respond_json(
+            ToJson::to_json({ ..view, status: "withdrawn", }),
+            receive,
+          )
         }
       }
     },

@@ -15,9 +15,9 @@ pub fn copy_task_with_status(TownTask, TownTaskStatus) -> TownTask
 
 pub fn empty_state(TownConfig) -> TownState
 
-pub fn execution_status_rank(TaskExecutionStatus) -> Int
+pub fn execution_status_rank(TaskExecutionStatus) -> Int32
 
-pub fn external_execution_stale_window_ticks() -> Int
+pub fn external_execution_stale_window_ticks() -> Int32
 
 pub fn find_execution(TownState, String) -> TaskExecutionRecord?
 
@@ -27,21 +27,21 @@ pub fn has_active_work_executions(TownState) -> Bool
 
 pub fn has_live_executions(TownState) -> Bool
 
-pub fn has_retry_pending_executions(TownState, Int) -> Bool
+pub fn has_retry_pending_executions(TownState, Int32) -> Bool
 
-pub fn json_object_copy(Json?) -> Map[String, Json]
+pub fn json_object_copy(@json.Json?) -> Map[String, @json.Json]
 
 pub fn live_execution_status(TaskExecutionStatus) -> Bool
 
-pub fn live_external_execution_count(TownState) -> Int
+pub fn live_external_execution_count(TownState) -> Int32
 
-pub fn max_live_external_executions() -> Int
+pub fn max_live_external_executions() -> Int32
 
-pub fn no_run_id_live_execution_stale(TaskExecutionRecord, Int) -> Bool
+pub fn no_run_id_live_execution_stale(TaskExecutionRecord, Int32) -> Bool
 
 pub fn pollable_execution_status(TaskExecutionStatus) -> Bool
 
-pub fn polled_execution_stale_window_ticks(TaskExecutionRecord) -> Int
+pub fn polled_execution_stale_window_ticks(TaskExecutionRecord) -> Int32
 
 pub fn schedulable_task_status(TownTaskStatus) -> Bool
 
@@ -53,7 +53,7 @@ pub fn standing_goal_registry_replace_or_append(Array[StandingGoal], StandingGoa
 
 pub fn terminal_execution_status(TaskExecutionStatus) -> Bool
 
-pub fn tick_from_task_id(String) -> Int
+pub fn tick_from_task_id(String) -> Int32
 
 pub fn town_task_status_for_execution(TaskExecutionStatus) -> TownTaskStatus
 
@@ -61,23 +61,25 @@ pub fn unconfirmed_standing_watch_decision() -> String
 
 pub fn unconfirmed_standing_watch_dispatch(TaskExecutionRecord) -> Bool
 
-pub fn upsert_moonclaw_job_profile_json(Json, String, Json) -> Json
+pub fn upsert_moonclaw_job_profile_json(@json.Json, String, @json.Json) -> @json.Json
 
-pub fn upsert_nested_object_entry_json(Json, section_key~ : String, collection_key~ : String, entry_key~ : String, entry~ : Json) -> Json
+pub fn upsert_nested_object_entry_json(@json.Json, section_key~ : String, collection_key~ : String, entry_key~ : String, entry~ : @json.Json) -> @json.Json
 
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct AssignmentPlan {
   task_id : String
   worker_id : String
   book_id : String
   isolation : IsolationMode
   reason : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub fn AssignmentPlan::new(task_id~ : String, worker_id~ : String, book_id~ : String, isolation~ : IsolationMode, reason~ : String) -> Self
 pub impl Show for AssignmentPlan
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct BookRef {
   id : String
   name : String
@@ -85,51 +87,56 @@ pub struct BookRef {
   workspace_root : String
   memory_scope : MemoryScope
   tags : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub fn BookRef::new(id~ : String, name~ : String, purpose~ : String, workspace_root~ : String, memory_scope? : MemoryScope, tags? : Array[String]) -> Self
 pub impl Show for BookRef
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum IsolationMode {
   SharedWorkspace
   BookWorkspace
   Worktree
   Sandboxed
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub impl Show for IsolationMode
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum MemoryScope {
   SharedTown
   BookPrivate
   TaskEphemeral
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub impl Show for MemoryScope
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct StandingGoal {
   id : String
   title : String
   prompt : String
   target_book_id : String?
-  cadence_ticks : Int
-  next_due_tick : Int
-  last_run_tick : Int?
+  cadence_ticks : Int32
+  next_due_tick : Int32
+  last_run_tick : Int32?
   enabled : Bool
   source_policy : String
-  quality_threshold : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-pub fn StandingGoal::is_due(Self, Int) -> Bool
-pub fn StandingGoal::mark_dispatched(Self, Int) -> Self
-pub fn StandingGoal::mark_watcher_decision(Self, Int, WatcherDecisionKind, no_change_streak? : Int) -> Self
-pub fn StandingGoal::new(id~ : String, title~ : String, prompt~ : String, target_book_id? : String?, cadence_ticks? : Int, next_due_tick? : Int, last_run_tick? : Int?, enabled? : Bool, source_policy? : String, quality_threshold? : Int) -> Self
-pub fn StandingGoal::next_due_after_watcher_decision(Self, Int, WatcherDecisionKind, no_change_streak? : Int) -> Int
+  quality_threshold : Int32
+}
+pub fn StandingGoal::is_due(Self, Int32) -> Bool
+pub fn StandingGoal::mark_dispatched(Self, Int32) -> Self
+pub fn StandingGoal::mark_watcher_decision(Self, Int32, WatcherDecisionKind, no_change_streak? : Int32) -> Self
+pub fn StandingGoal::new(id~ : String, title~ : String, prompt~ : String, target_book_id? : String?, cadence_ticks? : Int32, next_due_tick? : Int32, last_run_tick? : Int32?, enabled? : Bool, source_policy? : String, quality_threshold? : Int32) -> Self
+pub fn StandingGoal::next_due_after_watcher_decision(Self, Int32, WatcherDecisionKind, no_change_streak? : Int32) -> Int32
 pub impl Show for StandingGoal
 
+#derive(Eq, @debug.Debug)
 pub struct StaticBookProvider {
   entries : Array[BookRef]
-} derive(Eq, @debug.Debug)
+}
 pub fn StaticBookProvider::new(Array[BookRef]) -> Self
 pub impl Show for StaticBookProvider
 pub impl BookProvider for StaticBookProvider
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct TaskExecutionRecord {
   task_id : String
   book_id : String
@@ -144,17 +151,18 @@ pub struct TaskExecutionRecord {
   skill_paths : Array[String]
   last_command : String?
   assigned_worker_id : String?
-  attempt : Int
-  heartbeat_tick : Int
-  stale_after_tick : Int
-  next_retry_tick : Int?
+  attempt : Int32
+  heartbeat_tick : Int32
+  stale_after_tick : Int32
+  next_retry_tick : Int32?
   result_decision : String
   requires_review : Bool
   notify_town : Bool
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-pub fn TaskExecutionRecord::new(task_id~ : String, book_id~ : String, packet_id~ : String, packet_path~ : String, proposal_id? : String?, run_id? : String?, status~ : TaskExecutionStatus, summary~ : String, output_contract~ : String, context_pages? : Array[String], skill_paths? : Array[String], last_command? : String?, assigned_worker_id? : String?, attempt? : Int, heartbeat_tick? : Int, stale_after_tick? : Int, next_retry_tick? : Int?, result_decision? : String, requires_review? : Bool, notify_town? : Bool) -> Self
+}
+pub fn TaskExecutionRecord::new(task_id~ : String, book_id~ : String, packet_id~ : String, packet_path~ : String, proposal_id? : String?, run_id? : String?, status~ : TaskExecutionStatus, summary~ : String, output_contract~ : String, context_pages? : Array[String], skill_paths? : Array[String], last_command? : String?, assigned_worker_id? : String?, attempt? : Int32, heartbeat_tick? : Int32, stale_after_tick? : Int32, next_retry_tick? : Int32?, result_decision? : String, requires_review? : Bool, notify_town? : Bool) -> Self
 pub impl Show for TaskExecutionRecord
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum TaskExecutionStatus {
   PacketReady
   ProposalImported
@@ -166,18 +174,20 @@ pub(all) enum TaskExecutionStatus {
   Stale
   Failed
   AwaitingAcceptance
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub impl Show for TaskExecutionStatus
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct TownConfig {
   id : String
   name : String
-  heartbeat_seconds : Int
-  max_concurrent_tasks : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-pub fn TownConfig::new(id~ : String, name~ : String, heartbeat_seconds? : Int, max_concurrent_tasks? : Int) -> Self
+  heartbeat_seconds : Int32
+  max_concurrent_tasks : Int32
+}
+pub fn TownConfig::new(id~ : String, name~ : String, heartbeat_seconds? : Int32, max_concurrent_tasks? : Int32) -> Self
 pub impl Show for TownConfig
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct TownEvent {
   id : String
   kind : String
@@ -186,10 +196,11 @@ pub struct TownEvent {
   related_book_id : String?
   related_proposal_id : String?
   related_run_id : String?
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub fn TownEvent::new(id~ : String, kind~ : String, detail~ : String, related_task_id? : String?, related_book_id? : String?, related_proposal_id? : String?, related_run_id? : String?) -> Self
 pub impl Show for TownEvent
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct TownState {
   config : TownConfig
   books : Array[BookRef]
@@ -197,7 +208,7 @@ pub struct TownState {
   tasks : Array[TownTask]
   executions : Array[TaskExecutionRecord]
   events : Array[TownEvent]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub fn TownState::bounded_read_projection(Self, TownStateProjectionLimits) -> TownStateProjection
 pub fn TownState::enqueue_task(Self, TownTask) -> Unit
 pub fn TownState::record_event(Self, TownEvent) -> Unit
@@ -210,36 +221,40 @@ pub fn TownState::set_worker_status(Self, String, WorkerStatus) -> Unit
 pub fn TownState::with_current_system_settings(Self) -> Self
 pub impl Show for TownState
 
+#derive(Eq, @debug.Debug)
 pub struct TownStateProjection {
   state : TownState
   evidence : TownStateProjectionEvidence
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct TownStateProjectionEvidence {
-  total_events : Int
-  retained_events : Int
-  omitted_events : Int
-  total_tasks : Int
-  retained_tasks : Int
-  omitted_tasks : Int
-  omitted_live_tasks : Int
-  omitted_terminal_tasks : Int
-  total_executions : Int
-  retained_executions : Int
-  omitted_executions : Int
-  omitted_live_executions : Int
-  omitted_terminal_executions : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  total_events : Int32
+  retained_events : Int32
+  omitted_events : Int32
+  total_tasks : Int32
+  retained_tasks : Int32
+  omitted_tasks : Int32
+  omitted_live_tasks : Int32
+  omitted_terminal_tasks : Int32
+  total_executions : Int32
+  retained_executions : Int32
+  omitted_executions : Int32
+  omitted_live_executions : Int32
+  omitted_terminal_executions : Int32
+}
 
+#derive(Eq, @debug.Debug)
 pub struct TownStateProjectionLimits {
-  recent_events : Int
-  live_tasks : Int
-  terminal_tasks : Int
-  live_executions : Int
-  terminal_executions : Int
-} derive(Eq, @debug.Debug)
-pub fn TownStateProjectionLimits::new(recent_events? : Int, live_tasks? : Int, terminal_tasks? : Int, live_executions? : Int, terminal_executions? : Int) -> Self
+  recent_events : Int32
+  live_tasks : Int32
+  terminal_tasks : Int32
+  live_executions : Int32
+  terminal_executions : Int32
+}
+pub fn TownStateProjectionLimits::new(recent_events? : Int32, live_tasks? : Int32, terminal_tasks? : Int32, live_executions? : Int32, terminal_executions? : Int32) -> Self
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct TownTask {
   id : String
   book_id : String
@@ -249,10 +264,11 @@ pub struct TownTask {
   required_role : WorkerRole?
   required_capabilities : Array[String]
   status : TownTaskStatus
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub fn TownTask::new(id~ : String, book_id~ : String, title~ : String, prompt~ : String, domain~ : WorkDomain, required_role? : WorkerRole?, required_capabilities? : Array[String], status? : TownTaskStatus) -> Self
 pub impl Show for TownTask
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum TownTaskStatus {
   Pending
   Planned
@@ -261,33 +277,36 @@ pub(all) enum TownTaskStatus {
   Blocked
   Done
   Failed
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub impl Show for TownTaskStatus
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum WatcherDecisionKind {
   Update
   NoChange
   NeedsReview
   Failed
   Deferred
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub impl Show for WatcherDecisionKind
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct WatcherRunRecord {
   goal_id : String
-  tick : Int
+  tick : Int32
   target_book_id : String
   decision : WatcherDecisionKind
-  delta_score : Int
-  new_source_count : Int
+  delta_score : Int32
+  new_source_count : Int32
   detail : String
   task_id : String?
   run_id : String?
-  next_due_tick : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-pub fn WatcherRunRecord::new(goal_id~ : String, tick~ : Int, target_book_id~ : String, decision~ : WatcherDecisionKind, delta_score? : Int, new_source_count? : Int, detail? : String, task_id? : String?, run_id? : String?, next_due_tick? : Int) -> Self
+  next_due_tick : Int32
+}
+pub fn WatcherRunRecord::new(goal_id~ : String, tick~ : Int32, target_book_id~ : String, decision~ : WatcherDecisionKind, delta_score? : Int32, new_source_count? : Int32, detail? : String, task_id? : String?, run_id? : String?, next_due_tick? : Int32) -> Self
 pub impl Show for WatcherRunRecord
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum WorkDomain {
   Coding
   Finance
@@ -295,9 +314,10 @@ pub(all) enum WorkDomain {
   Operations
   SocialExperiment
   Custom(String)
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub impl Show for WorkDomain
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct WorkerRef {
   id : String
   name : String
@@ -305,10 +325,11 @@ pub struct WorkerRef {
   role : WorkerRole
   capabilities : Array[String]
   status : WorkerStatus
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub fn WorkerRef::new(id~ : String, name~ : String, book_id~ : String, role~ : WorkerRole, capabilities? : Array[String], status? : WorkerStatus) -> Self
 pub impl Show for WorkerRef
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum WorkerRole {
   Harness
   Planner
@@ -317,16 +338,17 @@ pub(all) enum WorkerRole {
   MemoryKeeper
   Watcher
   Operator
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub impl Show for WorkerRole
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum WorkerStatus {
   Idle
   Running
   Waiting
   Blocked
   Offline
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub impl Show for WorkerStatus
 
 // Type aliases

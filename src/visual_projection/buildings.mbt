@@ -72,7 +72,7 @@ fn visual_count_book_phases(
   state : @core.TownState,
   book_id : String,
   predicate : (String) -> Bool,
-) -> Int {
+) -> Int32 {
   let mut count = 0
   for worker in state.workers {
     if worker.book_id == book_id {

@@ -1,14 +1,15 @@
 ///|
 /// A bounded live observation, never a captured source or revision identity.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct SourceListing {
   book_id : String
   paths : Array[String]
-  scanned_entries : Int
-  excluded_entries : Int
-  unreadable_entries : Int
+  scanned_entries : Int32
+  excluded_entries : Int32
+  unreadable_entries : Int32
   truncated : Bool
   detail : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn Client::select_source_book(self : Client, id : String) -> Client {

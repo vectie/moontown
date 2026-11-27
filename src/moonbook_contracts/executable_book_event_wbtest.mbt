@@ -12,7 +12,7 @@ test "executable book event contract keeps stable json shape" {
   )
   assert_eq(event.protocol, "moonbook.executable_event.v1")
   assert_true(event.should_notify_town())
-  let text = event.to_json().stringify()
+  let text = ToJson::to_json(event).stringify()
   for field in executable_book_event_core_fields() {
     assert_true(text.contains("\"\{field}\""))
   }

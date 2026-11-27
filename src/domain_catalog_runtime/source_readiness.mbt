@@ -1,7 +1,7 @@
 ///|
 priv struct KnowledgeBookSourceReadiness {
   status : String
-  configured_source_count : Int
+  configured_source_count : Int32
   next_action : String
 }
 

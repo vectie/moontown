@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq)
 pub(all) struct CalendarEvent {
   uid : String
   summary : String
@@ -10,7 +11,7 @@ pub(all) struct CalendarEvent {
   description : String
   url : String
   recurrence : String
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn calendar_file(path : String, mime : String) -> Bool {
@@ -53,9 +54,9 @@ fn calendar_time(value : String, params : String) -> (String, String, String)? {
   if day.length() != 8 || !day.iter().all(c => c >= '0' && c <= '9') {
     return None
   }
-  let year = try! day[0:4].to_string()
-  let month = try! day[4:6].to_string()
-  let date = try! day[6:8].to_string()
+  let year = day[0:4].to_owned()
+  let month = day[4:6].to_owned()
+  let date = day[6:8].to_owned()
   let m = @string.parse_int(month) catch { _ => 0 }
   let d = @string.parse_int(date) catch { _ => 0 }
   let y = @string.parse_int(year) catch { _ => 0 }
@@ -85,9 +86,9 @@ fn calendar_time(value : String, params : String) -> (String, String, String)? {
   if time.length() != 6 || !time.iter().all(c => c >= '0' && c <= '9') {
     return None
   }
-  let hh = try! time[0:2].to_string()
-  let mm = try! time[2:4].to_string()
-  let ss = try! time[4:6].to_string()
+  let hh = time[0:2].to_owned()
+  let mm = time[2:4].to_owned()
+  let ss = time[4:6].to_owned()
   if hh > "23" || mm > "59" || ss > "60" {
     return None
   }
@@ -95,7 +96,7 @@ fn calendar_time(value : String, params : String) -> (String, String, String)? {
   if !utc {
     for param in params.split(";") {
       if param.has_prefix("TZID=") {
-        zone = param.replace_all(old="TZID=", new="").to_string() +
+        zone = param.replace_all(old="TZID=", new="").to_owned() +
           " (unconverted)"
       }
     }
@@ -119,7 +120,7 @@ pub fn parse_calendar(text : String) -> Result[Array[CalendarEvent], String] {
       if lines.is_empty() {
         return Err("Folded line without a preceding property")
       }
-      lines[lines.length() - 1] += (try! raw.to_owned()[1:]).to_string()
+      lines[lines.length() - 1] += raw.to_owned()[1:].to_owned()
     } else {
       lines.push(raw.to_owned())
     }
@@ -129,8 +130,8 @@ pub fn parse_calendar(text : String) -> Result[Array[CalendarEvent], String] {
   let mut nested = 0
   let mut calendar = false
   let mut closed = false
-  let props : Map[String, String] = {}
-  let params : Map[String, String] = {}
+  let props : Map[String, String] = Map([])
+  let params : Map[String, String] = Map([])
   for line in lines {
     if line == "BEGIN:VCALENDAR" {
       calendar = true
@@ -232,8 +233,8 @@ pub fn calendar_matches(
   from : String,
   until : String,
   location : String,
-) -> Array[Int] {
-  let found : Array[Int] = []
+) -> Array[Int32] {
+  let found : Array[Int32] = []
   for i, event in events {
     if (from.is_empty() || event.date >= from) &&
       (until.is_empty() || event.date <= until) &&
@@ -267,7 +268,7 @@ fn calendar_markdown_text(value : String) -> String {
 ///|
 pub fn calendar_itinerary(
   events : Array[CalendarEvent],
-  indices : Array[Int],
+  indices : Array[Int32],
 ) -> String {
   calendar_itinerary_text(
     events, indices, "Source events only. Recurrences are not expanded. Local/TZID times are unconverted. All-day end dates are exclusive.",
@@ -278,7 +279,7 @@ pub fn calendar_itinerary(
 ///|
 fn calendar_itinerary_text(
   events : Array[CalendarEvent],
-  indices : Array[Int],
+  indices : Array[Int32],
   notice : String,
   provenance : String,
 ) -> String {
@@ -322,7 +323,7 @@ fn calendar_itinerary_text(
 ///|
 pub fn calendar_csv(
   events : Array[CalendarEvent],
-  indices : Array[Int],
+  indices : Array[Int32],
 ) -> String {
   calendar_csv_text(events, indices, "Recurrence (not expanded)")
 }
@@ -330,7 +331,7 @@ pub fn calendar_csv(
 ///|
 fn calendar_csv_text(
   events : Array[CalendarEvent],
-  indices : Array[Int],
+  indices : Array[Int32],
   provenance : String,
 ) -> String {
   let rows = [
@@ -367,7 +368,7 @@ fn calendar_csv_text(
 /// A selected subset of a bounded expansion, never a whole-calendar claim.
 pub fn calendar_occurrence_itinerary(
   events : Array[CalendarEvent],
-  indices : Array[Int],
+  indices : Array[Int32],
   from : String,
   until : String,
 ) -> String {
@@ -386,7 +387,7 @@ pub fn calendar_occurrence_itinerary(
 ///|
 pub fn calendar_occurrence_csv(
   events : Array[CalendarEvent],
-  indices : Array[Int],
+  indices : Array[Int32],
   from : String,
   until : String,
 ) -> String {

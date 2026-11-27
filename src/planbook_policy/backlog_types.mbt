@@ -1,9 +1,10 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct PlanbookImplementationBacklogItem {
   id : String
   title : String
   owner : String
-  priority : Int
+  priority : Int32
   status : String
   source_plan : String
   rationale : String
@@ -11,7 +12,7 @@ pub struct PlanbookImplementationBacklogItem {
   acceptance : Array[String]
   validation : Array[String]
   created_at_ms : UInt64
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn implementation_backlog_path(workspace_root : String) -> String {

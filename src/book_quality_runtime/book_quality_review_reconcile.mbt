@@ -8,9 +8,9 @@ priv struct BookQualityReviewRunRuntimeObservation {
 
 ///|
 pub async fn reconcile_book_quality_ai_review_results(
-  result_dir? : String = @book_quality.default_review_result_dir(),
-  run_path? : String = @book_quality.default_review_run_path(),
-) -> Int {
+  result_dir~ : String = @book_quality.default_review_result_dir(),
+  run_path~ : String = @book_quality.default_review_run_path(),
+) -> Int32 {
   let ledger = load_review_run_ledger_file(run_path)
   let root = @book_quality.review_root_from_run_path(run_path)
   let home = @book_quality.moonclaw_home_from_run_path(run_path)
@@ -44,7 +44,7 @@ pub async fn reconcile_book_quality_ai_review_results(
 async fn active_book_quality_review_count(
   result_dir : String,
   run_path : String,
-) -> Int {
+) -> Int32 {
   let ledger = load_review_run_ledger_file(run_path)
   let mut active = 0
   for run in ledger.runs {

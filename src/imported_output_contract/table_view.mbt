@@ -17,11 +17,11 @@ fn table_view_valid(table : DataTable) -> Bool {
 pub fn DataTable::view_rows(
   self : DataTable,
   query : String,
-  column? : Int,
-  exact? : Bool = false,
-  sort_column? : Int,
-  descending? : Bool = false,
-) -> Result[Array[Int], String] {
+  column? : Int32,
+  exact~ : Bool = false,
+  sort_column? : Int32,
+  descending~ : Bool = false,
+) -> Result[Array[Int32], String] {
   if !table_view_valid(self) {
     return Err("Invalid or oversized table")
   }
@@ -38,7 +38,7 @@ pub fn DataTable::view_rows(
       cell.to_lower().contains(needle)
     }
   }
-  let rows : Array[Int] = []
+  let rows : Array[Int32] = []
   for index, row in self.rows {
     let matched = match column {
       Some(c) => matches(row[c])
@@ -73,8 +73,8 @@ pub fn DataTable::view_rows(
 /// are preserved except existing formula-neutralization for derived CSV.
 pub fn DataTable::view_csv(
   self : DataTable,
-  rows : Array[Int],
-  columns : Array[Int],
+  rows : Array[Int32],
+  columns : Array[Int32],
 ) -> Result[String, String] {
   if !table_view_valid(self) {
     return Err("Invalid or oversized table")
@@ -82,7 +82,7 @@ pub fn DataTable::view_csv(
   if columns.is_empty() {
     return Err("Choose at least one output column")
   }
-  let seen_columns : Map[Int, Bool] = {}
+  let seen_columns : Map[Int32, Bool] = Map([])
   for c in columns {
     if c < 0 || c >= self.headers.length() || seen_columns.contains(c) {
       return Err(
@@ -91,7 +91,7 @@ pub fn DataTable::view_csv(
     }
     seen_columns[c] = true
   }
-  let seen_rows : Map[Int, Bool] = {}
+  let seen_rows : Map[Int32, Bool] = Map([])
   for r in rows {
     if r < 0 || r >= self.rows.length() || seen_rows.contains(r) {
       return Err(

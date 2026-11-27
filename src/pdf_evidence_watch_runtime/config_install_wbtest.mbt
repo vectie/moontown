@@ -19,7 +19,7 @@ async test "install pdf evidence watch book from moondesk config file" {
     cadence_ticks: 17,
     workspace_root,
   }
-  write_text_file(config_path, spec.to_json().stringify(indent=2))
+  write_text_file(config_path, ToJson::to_json(spec).stringify(indent=2))
   let summary = install_pdf_evidence_watch_book_config(
     config_path,
     book_catalog_path=catalog_path,

@@ -26,8 +26,8 @@ pub fn with_pdf_watch(policy : BookPolicy) -> BookPolicy {
 ///|
 pub fn with_web_tool_surface(
   policy : BookPolicy,
-  contract? : String = "moontown.book.tool.v1",
-  projection_path? : String = "book/site/generated/tool.html",
+  contract~ : String = "moontown.book.tool.v1",
+  projection_path~ : String = "book/site/generated/tool.html",
 ) -> BookPolicy {
   policy
   |> with_skill(

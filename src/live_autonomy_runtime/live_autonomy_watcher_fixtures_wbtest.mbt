@@ -4,7 +4,7 @@ fn live_autonomy_watch_goal(
   title~ : String,
   prompt~ : String,
   book_id~ : String,
-  next_due_tick? : Int = 0,
+  next_due_tick~ : Int32 = 0,
 ) -> @core.StandingGoal {
   @core.StandingGoal::new(
     id~,
@@ -19,15 +19,15 @@ fn live_autonomy_watch_goal(
 ///|
 fn live_autonomy_watcher_record(
   goal_id~ : String,
-  tick~ : Int,
+  tick~ : Int32,
   book_id~ : String,
   decision~ : @core.WatcherDecisionKind,
-  delta_score? : Int = 0,
-  new_source_count? : Int = 0,
-  detail? : String = "",
-  task_id? : String? = None,
-  run_id? : String? = None,
-  next_due_tick~ : Int,
+  delta_score~ : Int32 = 0,
+  new_source_count~ : Int32 = 0,
+  detail~ : String = "",
+  task_id~ : String? = None,
+  run_id~ : String? = None,
+  next_due_tick~ : Int32,
 ) -> @core.WatcherRunRecord {
   @core.WatcherRunRecord::new(
     goal_id~,
@@ -51,6 +51,6 @@ async fn write_live_autonomy_watcher_record_line(
 ) -> Unit {
   @support.write_text_file(
     "\{root}/watchers/\{goal_id}.jsonl",
-    record.to_json().stringify() + "\n",
+    ToJson::to_json(record).stringify() + "\n",
   )
 }

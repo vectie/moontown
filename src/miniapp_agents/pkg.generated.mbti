@@ -24,11 +24,13 @@ pub fn miniapp_send_agent_message(@miniapp_contracts.MiniappTownSnapshot, @minia
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct MiniappAgentAttachDraft {
   agent_id : String
   building_id : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct MiniappAgentDraft {
   id : String
   display_name : String
@@ -36,8 +38,9 @@ pub(all) struct MiniappAgentDraft {
   owner_id : String
   building_id : String?
   capabilities : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct MiniappAgentRuntimeChange {
   ok : Bool
   snapshot : @miniapp_contracts.MiniappTownSnapshot
@@ -45,8 +48,9 @@ pub(all) struct MiniappAgentRuntimeChange {
   agent_id : String?
   thread_id : String?
   run_id : String?
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct MiniappChatSendDraft {
   message_id : String
   run_id : String
@@ -55,12 +59,13 @@ pub(all) struct MiniappChatSendDraft {
   agent_id : String?
   body : String
   answer_summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct MiniappRunActionDraft {
   run_id : String
   summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
 // Type aliases
 

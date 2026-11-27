@@ -3,26 +3,26 @@ pub type PlanbookRepairTask = @planbook_policy.PlanbookRepairTask
 
 ///|
 pub fn default_planbook_repair_path(
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> String {
   "\{@storage.snapshot_base_dir(snapshot_path)}/planbook/repair-task.json"
 }
 
 ///|
 pub fn default_planbook_repair_markdown_path(
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> String {
   "\{@storage.snapshot_base_dir(snapshot_path)}/planbook/repair-task.md"
 }
 
 ///|
 pub async fn write_moontown_planbook_repair_task(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  workspace_root? : String = default_planbook_workspace_root(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  dispatch? : Bool = false,
-  run_inline? : Bool = planbook_repair_run_inline_enabled(),
-  execution? : String = "native",
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  workspace_root~ : String = default_planbook_workspace_root(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  dispatch~ : Bool = false,
+  run_inline~ : Bool = planbook_repair_run_inline_enabled(),
+  execution~ : String = "native",
 ) -> String {
   if execution != "native" && execution != "acp" {
     return "Unsupported PlanBook repair execution selection: " + execution
@@ -102,7 +102,7 @@ fn planbook_repair_run_inline_enabled_from_env(value : String?) -> Bool {
 
 ///|
 pub async fn render_moontown_planbook_repair_status(
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> String {
   let path = default_planbook_repair_path(snapshot_path~)
   if !@fs.exists(path) {
@@ -192,8 +192,8 @@ pub async fn render_moontown_planbook_repair_status(
 
 ///|
 pub async fn planbook_repair_active_count(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-) -> Int {
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+) -> Int32 {
   let path = default_planbook_repair_path(snapshot_path~)
   if !@fs.exists(path) {
     return 0

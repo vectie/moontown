@@ -1,11 +1,11 @@
 ///|
 pub fn building_protocol_snapshot(
   protocol : BuildingProtocolDefinition,
-  inbox_count~ : Int,
-  contribution_count~ : Int,
-  reduction_count~ : Int,
-  outbox_count~ : Int,
-  review_count~ : Int,
+  inbox_count~ : Int32,
+  contribution_count~ : Int32,
+  reduction_count~ : Int32,
+  outbox_count~ : Int32,
+  review_count~ : Int32,
   latest_reduction_summary~ : String,
   latest_distribution_summary~ : String,
 ) -> BuildingProtocolSnapshot {

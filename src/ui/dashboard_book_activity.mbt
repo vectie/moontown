@@ -1,8 +1,8 @@
 ///|
 priv struct BookHouseActivity {
-  worker_count : Int
-  task_count : Int
-  execution_count : Int
+  worker_count : Int32
+  task_count : Int32
+  execution_count : Int32
   active_stage : String
 }
 

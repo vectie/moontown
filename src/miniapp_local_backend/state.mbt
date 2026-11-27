@@ -12,7 +12,7 @@ pub fn miniapp_local_backend_fixture_state() -> MiniappLocalBackendState {
 fn miniapp_local_backend_accept(
   state : MiniappLocalBackendState,
   body : String,
-  session_id? : String = "",
+  session_id~ : String = "",
 ) -> MiniappLocalBackendResponse {
   {
     ok: true,
@@ -30,7 +30,7 @@ fn miniapp_local_backend_accept(
 ///|
 fn miniapp_local_backend_reject(
   state : MiniappLocalBackendState,
-  status : Int,
+  status : Int32,
   body : String,
 ) -> MiniappLocalBackendResponse {
   { ok: false, status, body, state, session_id: state.active_session_id, }

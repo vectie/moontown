@@ -70,7 +70,7 @@ fn miniapp_array_contains_text(items : Array[String], needle : String) -> Bool {
 }
 
 ///|
-fn miniapp_text_score(text : String, query : String, weight : Int) -> Int {
+fn miniapp_text_score(text : String, query : String, weight : Int32) -> Int32 {
   let needle = query.trim().to_owned().to_lower()
   if needle != "" && text.to_lower().contains(needle) {
     weight

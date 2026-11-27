@@ -5,7 +5,7 @@ async fn execute_dispatched_standing_watch_task(
   task : @moonbook.BookTask,
   route : @roles.MayorDispatchPacket,
   worker_id : String?,
-  tick : Int,
+  tick : Int32,
 ) -> @core.TaskExecutionRecord {
   let execution = match route.decision {
     Assigned(_) =>

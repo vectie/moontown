@@ -32,7 +32,7 @@ async fn main {
               "--within supports Point or all; routes and zones are not point locations",
             )
           }
-          let zones : Array[Int] = []
+          let zones : Array[Int32] = []
           for i, feature in features {
             if (i + 1).to_string() == number && feature.kind == "Polygon" {
               zones.push(i)

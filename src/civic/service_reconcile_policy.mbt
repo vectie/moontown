@@ -1,17 +1,17 @@
 ///|
 pub(all) struct CivicServiceReconcilePlan {
   decision : String
-  page_count : Int
-  review_items : Int
+  page_count : Int32
+  review_items : Int32
   next_check_hint : String
 }
 
 ///|
 pub fn civic_service_reconcile_plan(
   service : CivicServiceDefinition,
-  protocol_reduction_count~ : Int,
-  protocol_outbox_count~ : Int,
-  protocol_review_count~ : Int,
+  protocol_reduction_count~ : Int32,
+  protocol_outbox_count~ : Int32,
+  protocol_review_count~ : Int32,
 ) -> CivicServiceReconcilePlan {
   let review_items = protocol_review_count
   {
@@ -35,8 +35,8 @@ pub fn civic_service_reconcile_plan(
 ///|
 pub fn civic_service_has_reconcilable_protocol_work(
   protocol_ready~ : Bool,
-  protocol_reduction_count~ : Int,
-  protocol_outbox_count~ : Int,
+  protocol_reduction_count~ : Int32,
+  protocol_outbox_count~ : Int32,
 ) -> Bool {
   protocol_ready && protocol_reduction_count > 0 && protocol_outbox_count > 0
 }
@@ -45,8 +45,8 @@ pub fn civic_service_has_reconcilable_protocol_work(
 pub fn civic_service_reconciled_result_is_current(
   latest_result_found~ : Bool,
   latest_decision~ : String,
-  latest_pages_changed~ : Int,
-  latest_review_items~ : Int,
+  latest_pages_changed~ : Int32,
+  latest_review_items~ : Int32,
   plan : CivicServiceReconcilePlan,
 ) -> Bool {
   latest_result_found &&
@@ -59,8 +59,8 @@ pub fn civic_service_reconciled_result_is_current(
 pub fn civic_service_reconciled_summary(
   service : CivicServiceDefinition,
   latest_protocol_summary~ : String,
-  protocol_reduction_count~ : Int,
-  protocol_outbox_count~ : Int,
+  protocol_reduction_count~ : Int32,
+  protocol_outbox_count~ : Int32,
   plan : CivicServiceReconcilePlan,
 ) -> String {
   [
@@ -80,8 +80,8 @@ pub fn civic_service_reconciled_summary(
 ///|
 pub fn civic_service_reconciled_contract_block(
   plan : CivicServiceReconcilePlan,
-  protocol_reduction_count~ : Int,
-  protocol_outbox_count~ : Int,
+  protocol_reduction_count~ : Int32,
+  protocol_outbox_count~ : Int32,
 ) -> String {
   [
     "civic_service_decision: \{plan.decision}",
@@ -131,8 +131,8 @@ pub fn civic_service_reconciled_artifacts_line(
 
 ///|
 pub fn civic_service_reconciled_decision(
-  protocol_reduction_count~ : Int,
-  protocol_review_count~ : Int,
+  protocol_reduction_count~ : Int32,
+  protocol_review_count~ : Int32,
 ) -> String {
   if protocol_review_count > 0 {
     "needs_review"
@@ -146,8 +146,8 @@ pub fn civic_service_reconciled_decision(
 ///|
 pub fn civic_service_reconciled_page_count(
   service : CivicServiceDefinition,
-  protocol_outbox_count~ : Int,
-) -> Int {
+  protocol_outbox_count~ : Int32,
+) -> Int32 {
   if protocol_outbox_count == 0 {
     0
   } else {

@@ -1,10 +1,11 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum BookLane {
   Control
   Execute
   Tend
   Unknown(String)
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn lane_text(lane : BookLane) -> String {

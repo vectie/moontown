@@ -22,7 +22,9 @@ async test "native actual Book manual review readback keeps original goal accept
     @env.set_env_var("MOONTOWN_MOONBOOK_ROOT", cli_root)
     @env.set_env_var("MOONTOWN_MOONBOOK_BIN", binary)
     let result = wenyu_output_package(launch, work).result
-    let payload_digest = @native_work.digest(result.to_json().stringify())
+    let payload_digest = @native_work.digest(
+      ToJson::to_json(result).stringify(),
+    )
     let empty_files = @fs.readdir(launch.entry.workspace_root)
     let missing = @moonbook.read_native_wenyu_review(
       launch.entry,
@@ -35,7 +37,7 @@ async test "native actual Book manual review readback keeps original goal accept
     assert_eq(@fs.readdir(launch.entry.workspace_root), empty_files)
     @support.write_text_file(
       wenyu_launch_path(launch.native_path, launch.task.id),
-      launch.to_json().stringify(),
+      ToJson::to_json(launch).stringify(),
     )
     @support.write_text_file(
       launch.native_path,
@@ -43,7 +45,7 @@ async test "native actual Book manual review readback keeps original goal accept
         {
           "schema": "moontown.native-work.v1",
           "revision": 1,
-          "work": [work.to_json()],
+          "work": [ToJson::to_json(work)],
         } : Json).stringify(),
     )
     let payload_path = cli_root + "/import.json"
@@ -51,7 +53,7 @@ async test "native actual Book manual review readback keeps original goal accept
       payload_path,
       (
         {
-          "book_result": result.to_json(),
+          "book_result": ToJson::to_json(result),
           "native_import": {
             "contract": "moontown.wenyu.import.v1",
             "work_id": work.id,
@@ -114,7 +116,7 @@ async test "native actual Book manual review readback keeps original goal accept
     ).text()
     ignore(import_wenyu_native_result(launch, work))
     let reload : @core.TaskExecutionRecord = @json.from_json(
-      @json.parse(readback.to_json().stringify()),
+      @json.parse(ToJson::to_json(readback).stringify()),
     )
     let again = reconcile_wenyu_native_review(launch.entry, reload, 100)
     assert_eq(again, readback)

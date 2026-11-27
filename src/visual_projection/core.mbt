@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct VisualAgentProjection {
   worker_id : String
   worker_name : String
@@ -18,55 +19,58 @@ pub(all) struct VisualAgentProjection {
   effect : String
   visible_on_overworld : Bool
   message : String
-  grid_x : Int
-  grid_y : Int
-  z : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  grid_x : Int32
+  grid_y : Int32
+  z : Int32
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct VisualBuildingProjection {
   book_id : String
   title : String
   zone_key : String
-  running_count : Int
-  waiting_count : Int
-  review_count : Int
-  blocked_count : Int
-  completed_count : Int
+  running_count : Int32
+  waiting_count : Int32
+  review_count : Int32
+  blocked_count : Int32
+  completed_count : Int32
   effect : String
   message : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct VisualModuleProjection {
   module_id : String
   book_id : String
   title : String
   status : String
   source : String
-  running_count : Int
-  waiting_count : Int
-  review_count : Int
-  blocked_count : Int
-  completed_count : Int
-  active_agent_count : Int
+  running_count : Int32
+  waiting_count : Int32
+  review_count : Int32
+  blocked_count : Int32
+  completed_count : Int32
+  active_agent_count : Int32
   effect : String
   message : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct VisualProjection {
-  tick : Int
+  tick : Int32
   agents : Array[VisualAgentProjection]
   buildings : Array[VisualBuildingProjection]
   modules : Array[VisualModuleProjection]
   messages : Array[String]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn build_visual_projection(
   state : @core.TownState,
-  tick? : Int = visual_projection_tick(state),
+  tick~ : Int32 = visual_projection_tick(state),
 ) -> VisualProjection {
   build_visual_projection_with_decorator(
     state,
@@ -79,7 +83,7 @@ pub fn build_visual_projection(
 pub fn build_visual_projection_with_decorator(
   state : @core.TownState,
   decorator : VisualDecoratorConfig,
-  tick? : Int = visual_projection_tick(state),
+  tick~ : Int32 = visual_projection_tick(state),
 ) -> VisualProjection {
   let agents : Array[VisualAgentProjection] = []
   for worker in state.workers {

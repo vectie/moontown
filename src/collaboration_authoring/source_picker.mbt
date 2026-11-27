@@ -1,9 +1,9 @@
 ///|
 priv struct SourceScan {
   paths : Array[String]
-  mut scanned : Int
-  mut excluded : Int
-  mut unreadable : Int
+  mut scanned : Int32
+  mut excluded : Int32
+  mut unreadable : Int32
   mut truncated : Bool
 }
 
@@ -11,7 +11,7 @@ priv struct SourceScan {
 async fn scan_sources(
   root : String,
   relative : String,
-  depth : Int,
+  depth : Int32,
   scan : SourceScan,
 ) -> Unit {
   if depth > 8 || scan.scanned >= 2048 || scan.paths.length() >= 256 {

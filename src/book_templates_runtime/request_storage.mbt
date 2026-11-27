@@ -3,7 +3,7 @@ pub async fn save_request_ledger(
   request_path : String,
   ledger : @book_templates.BookTemplateRequestLedger,
 ) -> Unit {
-  write_text_file(request_path, ledger.to_json().stringify(indent=2))
+  write_text_file(request_path, ToJson::to_json(ledger).stringify(indent=2))
 }
 
 ///|

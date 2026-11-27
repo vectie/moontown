@@ -1,18 +1,20 @@
 ///|
+#derive(Debug, Eq)
 pub(all) enum RuntimeSystem {
   MoonBook
   MoonClaw
   TownRuntime
   External(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// A semantic link only. Runtime state remains authoritative in its own ledger.
+#derive(Debug, Eq)
 pub(all) struct RuntimeBinding {
   system : RuntimeSystem
   resource_id : String
   capability : String
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn runtime_binding(
@@ -24,6 +26,7 @@ pub fn runtime_binding(
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum PlaceKind {
   Building
   Park
@@ -33,9 +36,10 @@ pub(all) enum PlaceKind {
   Landmark
   Installation
   Custom(String)
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum PlaceTrait {
   Public
   Landmark
@@ -48,9 +52,10 @@ pub(all) enum PlaceTrait {
   NightActive
   Accessible
   Signature(String)
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum RoofKind {
   Flat
   Garden
@@ -58,29 +63,31 @@ pub(all) enum RoofKind {
   Glass
   Sculptural
   Custom(String)
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct BuildingProfile {
   archetype : String
-  floors : Int
+  floors : Int32
   height_meters : Double
   roof : RoofKind
-  interior_seed : Int
-} derive(Debug, Eq)
+  interior_seed : Int32
+}
 
 ///|
 pub fn building_profile(
   archetype : String,
-  floors : Int,
+  floors : Int32,
   height_meters : Double,
   roof : RoofKind,
-  interior_seed : Int,
+  interior_seed : Int32,
 ) -> BuildingProfile {
   { archetype, floors, height_meters, roof, interior_seed, }
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum InteractionKind {
   Workstation
   MeetingPoint
@@ -91,16 +98,17 @@ pub(all) enum InteractionKind {
   TransitGate
   ServicePoint
   Custom(String)
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct EntrancePortal {
   id : StableId
   position : WorldPoint
   road_node_id : StableId?
   mobility : ReadOnlyArray[MobilityMode]
   primary : Bool
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn entrance_portal(
@@ -108,21 +116,22 @@ pub fn entrance_portal(
   position : WorldPoint,
   road_node_id : StableId?,
   mobility : ArrayView[MobilityMode],
-  primary? : Bool = false,
+  primary~ : Bool = false,
 ) -> EntrancePortal {
   { id, position, road_node_id, mobility: freeze(mobility), primary, }
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct InteractionSlot {
   id : StableId
   kind : InteractionKind
   label : String
   position : WorldPoint
-  capacity : Int
+  capacity : Int32
   attention_target_id : StableId?
   runtime_binding : RuntimeBinding?
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn interaction_slot(
@@ -130,7 +139,7 @@ pub fn interaction_slot(
   kind : InteractionKind,
   label : String,
   position : WorldPoint,
-  capacity : Int,
+  capacity : Int32,
   attention_target_id : StableId?,
   runtime_binding : RuntimeBinding?,
 ) -> InteractionSlot {
@@ -140,6 +149,7 @@ pub fn interaction_slot(
 ///|
 /// A single spatial identity for buildings, parks, stations, and landmarks.
 /// `building` adds massing/interior identity without creating a second ID.
+#derive(Debug, Eq)
 pub(all) struct Place {
   id : StableId
   name : String
@@ -153,7 +163,7 @@ pub(all) struct Place {
   building : BuildingProfile?
   runtime_binding : RuntimeBinding?
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn place(
@@ -168,7 +178,7 @@ pub fn place(
   building : BuildingProfile?,
   runtime_binding : RuntimeBinding?,
   provenance : Provenance,
-  program_id? : StableId? = None,
+  program_id~ : StableId? = None,
 ) -> Place {
   {
     id,
@@ -210,14 +220,16 @@ pub fn Place::supports_runtime_work(self : Place) -> Bool {
 /// A renderer-neutral relationship between two accepted semantic places.
 /// These links describe stable town structure; time-varying traffic belongs in
 /// `PlaceExchange` on `TownSnapshot`.
+#derive(Debug, Eq)
 pub(all) enum PlaceRelationKind {
   Collaboration
   Dependency
   KnowledgeFlow
   Custom(String)
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct PlaceRelation {
   id : StableId
   source_place_id : StableId
@@ -225,7 +237,7 @@ pub(all) struct PlaceRelation {
   kind : PlaceRelationKind
   label : String
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn place_relation(

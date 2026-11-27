@@ -1,5 +1,5 @@
 ///|
-async fn read_source(path : String, limit : Int) -> Bytes {
+async fn read_source(path : String, limit : Int32) -> Bytes {
   guard @fs.kind(path) == Regular else {
     fail("Input must be a regular file: " + path)
   }
@@ -33,7 +33,7 @@ async fn run() -> Unit {
         fail("Source root must be a directory")
       }
       let prefix = if root == "/" { root } else { root + "/" }
-      let sources : Map[String, Bytes] = {}
+      let sources : Map[String, Bytes] = Map([])
       let mut total = 0
       for path in paths {
         let resolved = @fs.realpath(prefix + path)
@@ -61,7 +61,7 @@ async fn main {
   run() catch {
     error => {
       @stdio.stderr.write("claim_compare: \{error}\n")
-      @sys.exit(1)
+      @env.exit(1)
     }
   }
 }

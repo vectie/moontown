@@ -78,8 +78,8 @@ async test "civic latest result evidence parses contract markers" {
         "accepted_facts_count: 5", "review_items_created_count: 2", "next_check_hint: follow_up",
       ].join("\n"),
     )
-    .to_json()
-    .stringify(indent=2),
+    |> ToJson::to_json
+    |> Json::stringify(indent=2),
   )
   let parsed = inspect_civic_service_latest_result(service, root)
   assert_true(parsed.found)

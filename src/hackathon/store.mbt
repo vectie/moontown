@@ -34,7 +34,7 @@ async fn load_hackathon_unlocked(path : String) -> HackathonState {
 
 ///|
 pub async fn load_hackathons(
-  path? : String = default_hackathon_path(),
+  path~ : String = default_hackathon_path(),
 ) -> HackathonState {
   let lock = hackathon_lock(path)
   defer lock.close()
@@ -47,7 +47,7 @@ async fn save_hackathon_unlocked(path : String, state : HackathonState) -> Unit 
   let temporary = path + ".next"
   @fs.write_file(
     temporary,
-    state.to_json().stringify(indent=2) + "\n",
+    ToJson::to_json(state).stringify(indent=2) + "\n",
     create_mode=CreateOrTruncate,
     permission=0o600,
     sync=Full,
@@ -60,9 +60,9 @@ pub async fn apply_hackathon_action(
   action : String,
   payload : Json,
   now_ms : UInt64,
-  path? : String = default_hackathon_path(),
-  actor_id? : String? = None,
-  actor_is_operator? : Bool = false,
+  path~ : String = default_hackathon_path(),
+  actor_id~ : String? = None,
+  actor_is_operator~ : Bool = false,
 ) -> HackathonState {
   let lock = hackathon_lock(path)
   defer lock.close()
@@ -162,17 +162,17 @@ fn server_owned_hackathon_fields(
   match action {
     "submit" => {
       fields["version"] = ToJson::to_json(0)
-      fields["submitted_ms"] = now_ms.to_json()
+      fields["submitted_ms"] = ToJson::to_json(now_ms)
     }
     "evaluate" => {
       fields["total"] = ToJson::to_json(0)
-      fields["evaluated_ms"] = now_ms.to_json()
+      fields["evaluated_ms"] = ToJson::to_json(now_ms)
     }
     "submit-package" =>
       if fields.get("submission") is Some(Object(submission_fields)) {
         let submission = submission_fields.copy()
         submission["version"] = ToJson::to_json(0)
-        submission["submitted_ms"] = now_ms.to_json()
+        submission["submitted_ms"] = ToJson::to_json(now_ms)
         fields["submission"] = Json::object(submission)
       }
     _ => ()
@@ -181,15 +181,17 @@ fn server_owned_hackathon_fields(
 }
 
 ///|
+#derive(FromJson)
 struct BenchmarkRevision {
   challenge_id : String
   benchmark_materials : Array[String]
   evaluation_materials : Array[String]
   rubric : Array[RubricCriterion]
-} derive(FromJson)
+}
 
 ///|
+#derive(FromJson)
 struct JoinTeamRequest {
   team_id : String
   member_id : String
-} derive(FromJson)
+}

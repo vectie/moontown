@@ -21,7 +21,7 @@ fn Client::edit_retained_inquiry(
   }
   if field == "inquiry_remove_dossier" {
     let dossiers = self.inquiry_dossiers.filter(d => {
-      d.origin.to_json().stringify() != value
+      ToJson::to_json(d.origin).stringify() != value
     })
     return {
       ..self,

@@ -19,7 +19,7 @@ pub async fn evaluate_file(input_path : String, output_path : String) -> String 
     Err(error) =>
       ({ "accepted": false, "error": error } : Json).stringify(indent=2)
     Ok(result) => {
-      let rendered = result.to_json().stringify(indent=2) + "\n"
+      let rendered = ToJson::to_json(result).stringify(indent=2) + "\n"
       if @fs.exists(output_path) {
         let existing = @fs.read_file(output_path).text()
         if existing != rendered {

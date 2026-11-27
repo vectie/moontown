@@ -79,7 +79,7 @@ async test "metadata and byte grants revoke independently without recipient upgr
     post(
       f.service,
       @town_contract.portable_package_grants_path(),
-      draft(binding).to_json(),
+      ToJson::to_json(draft(binding)),
     ).code,
     200,
   )
@@ -163,7 +163,7 @@ async test "legacy view message collaborate artifact and public access never aut
   }
   @fs.write_file(
     f.root + "/marketplace.json",
-    before.to_json().stringify(),
+    ToJson::to_json(before).stringify(),
     create_mode=TruncateExisting,
   )
   let public_before = @town_marketplace.public_listing_index_export(before)
@@ -219,7 +219,7 @@ async test "explicit byte grants preview expiry immutable retry revoke and withd
       post(
         f.service,
         @town_contract.portable_package_grants_path(),
-        draft(binding, recipient~).to_json(),
+        ToJson::to_json(draft(binding, recipient~)),
       ).code,
       403,
     )
@@ -228,7 +228,7 @@ async test "explicit byte grants preview expiry immutable retry revoke and withd
   let preview = post(
     f.service,
     @town_contract.portable_package_preview_path(),
-    decision.to_json(),
+    ToJson::to_json(decision),
   )
   assert_eq(preview.code, 200)
   assert_true(preview.payload().stringify().contains("entire exact package"))
@@ -236,14 +236,14 @@ async test "explicit byte grants preview expiry immutable retry revoke and withd
   let grant = post(
     f.service,
     @town_contract.portable_package_grants_path(),
-    decision.to_json(),
+    ToJson::to_json(decision),
   )
   assert_eq(grant.code, 200)
   assert_eq(
     post(
       f.service,
       @town_contract.portable_package_grants_path(),
-      decision.to_json(),
+      ToJson::to_json(decision),
     ).payload(),
     grant.payload(),
   )
@@ -251,7 +251,7 @@ async test "explicit byte grants preview expiry immutable retry revoke and withd
     post(
       f.service,
       @town_contract.portable_package_grants_path(),
-      draft(binding, expiry=11000UL).to_json(),
+      ToJson::to_json(draft(binding, expiry=11000UL)),
     ).code,
     409,
   )
@@ -274,7 +274,7 @@ async test "explicit byte grants preview expiry immutable retry revoke and withd
     post(
       f.service,
       @town_contract.portable_package_grants_path(),
-      decision.to_json(),
+      ToJson::to_json(decision),
     ).code,
     409,
   )
@@ -283,7 +283,7 @@ async test "explicit byte grants preview expiry immutable retry revoke and withd
     post(
       f.service,
       @town_contract.portable_package_grants_path(),
-      short.to_json(),
+      ToJson::to_json(short),
     ).code,
     200,
   )
@@ -294,7 +294,7 @@ async test "explicit byte grants preview expiry immutable retry revoke and withd
     post(
       f.service,
       @town_contract.portable_package_grants_path(),
-      again.to_json(),
+      ToJson::to_json(again),
     ).code,
     200,
   )

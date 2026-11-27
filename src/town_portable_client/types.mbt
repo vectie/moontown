@@ -10,9 +10,10 @@ pub type Exchange = async (
 ///|
 /// Errors deliberately contain stable codes only: no sessions, paths or remote
 /// error bodies are reflected into diagnostics.
+#derive(Debug, Eq)
 pub(all) suberror ClientError {
   ClientError(String)
-} derive(Debug, Eq)
+}
 
 ///|
 pub struct PortableClient {
@@ -22,20 +23,21 @@ pub struct PortableClient {
 }
 
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) struct DownloadedPackage {
   package_path : String
   binding_path : String
   receipt_path : String
   package_id : String
   package_sha256 : String
-  package_size_bytes : Int
-} derive(Debug, Eq, ToJson)
+  package_size_bytes : Int32
+}
 
 ///|
 pub fn PortableClient::new(
   session_supplier : async () -> String,
   exchange : Exchange,
-  limits? : @transfer.TransferLimits = @transfer.default_limits(),
+  limits~ : @transfer.TransferLimits = @transfer.default_limits(),
 ) -> PortableClient raise {
   validate_limits(limits)
   { session_supplier, exchange, limits, }
@@ -104,7 +106,7 @@ fn validate_binding(
   // Roundtrip through the existing strict source parser, not a second package
   // format parser. This preserves the original v1 semantic authority.
   let _ : @marketplace.PortableSource = @json.from_json(
-    binding.source.to_json(),
+    ToJson::to_json(binding.source),
   ) catch {
     _ => raise ClientError("invalid_binding")
   }
@@ -124,7 +126,7 @@ fn validate_binding(
     "publisher_principal_id": binding.publisher_principal_id,
     "tenant_id": binding.tenant_id,
     "binding_revision": binding.binding_revision,
-    "source": binding.source.to_json(),
+    "source": ToJson::to_json(binding.source),
     "reuse_mode": binding.reuse_mode,
     "verification_scope": binding.verification_scope,
   }

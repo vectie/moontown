@@ -1,8 +1,10 @@
 ///|
 test "core state registers books workers and tasks" {
-  let state = empty_state(TownConfig::new(id="town", name="MoonTown"))
+  let state = @core.empty_state(
+    @core.TownConfig::new(id="town", name="MoonTown"),
+  )
   state.register_book(
-    BookRef::new(
+    @core.BookRef::new(
       id="coding",
       name="Coding",
       purpose="code",
@@ -10,7 +12,7 @@ test "core state registers books workers and tasks" {
     ),
   )
   state.register_worker(
-    WorkerRef::new(
+    @core.WorkerRef::new(
       id="worker-1",
       name="Harness",
       book_id="coding",
@@ -18,7 +20,7 @@ test "core state registers books workers and tasks" {
     ),
   )
   state.enqueue_task(
-    TownTask::new(
+    @core.TownTask::new(
       id="task-1",
       book_id="coding",
       title="Implement",
@@ -33,9 +35,11 @@ test "core state registers books workers and tasks" {
 
 ///|
 test "core state replaces all duplicate execution records for same task" {
-  let state = empty_state(TownConfig::new(id="town", name="MoonTown"))
+  let state = @core.empty_state(
+    @core.TownConfig::new(id="town", name="MoonTown"),
+  )
   state.register_execution(
-    TaskExecutionRecord::new(
+    @core.TaskExecutionRecord::new(
       task_id="task-1",
       book_id="coding",
       packet_id="packet-1",
@@ -46,7 +50,7 @@ test "core state replaces all duplicate execution records for same task" {
     ),
   )
   state.register_execution(
-    TaskExecutionRecord::new(
+    @core.TaskExecutionRecord::new(
       task_id="task-1",
       book_id="coding",
       packet_id="packet-1b",
@@ -57,7 +61,7 @@ test "core state replaces all duplicate execution records for same task" {
     ),
   )
   state.replace_execution(
-    TaskExecutionRecord::new(
+    @core.TaskExecutionRecord::new(
       task_id="task-1",
       book_id="coding",
       packet_id="packet-1-final",
@@ -75,9 +79,11 @@ test "core state replaces all duplicate execution records for same task" {
 
 ///|
 test "core state upserts duplicate task identities" {
-  let state = empty_state(TownConfig::new(id="town", name="MoonTown"))
+  let state = @core.empty_state(
+    @core.TownConfig::new(id="town", name="MoonTown"),
+  )
   state.enqueue_task(
-    TownTask::new(
+    @core.TownTask::new(
       id="task-1",
       book_id="coding",
       title="Initial",
@@ -86,7 +92,7 @@ test "core state upserts duplicate task identities" {
     ),
   )
   state.enqueue_task(
-    TownTask::new(
+    @core.TownTask::new(
       id="task-1",
       book_id="coding",
       title="Updated",
@@ -100,7 +106,7 @@ test "core state upserts duplicate task identities" {
 
 ///|
 test "standing goal marks next dispatch window" {
-  let goal = StandingGoal::new(
+  let goal = @core.StandingGoal::new(
     id="watch-opc-news",
     title="Watch OPC news",
     prompt="Research latest one person company news.",
@@ -118,7 +124,7 @@ test "standing goal marks next dispatch window" {
 
 ///|
 test "standing goal watcher decisions keep normal half-hour cadence on no-change" {
-  let goal = StandingGoal::new(
+  let goal = @core.StandingGoal::new(
     id="watch-opc-news",
     title="Watch OPC news",
     prompt="Research latest one person company news.",

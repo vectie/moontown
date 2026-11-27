@@ -119,7 +119,7 @@ async fn planbook_result_contract_criterion() -> PlanbookCriterionStatus {
 ///|
 async fn planbook_source_patch_loop_criterion(
   workspace_root : String,
-  native_state_path? : String = @native_work.default_path(),
+  native_state_path~ : String = @native_work.default_path(),
 ) -> PlanbookCriterionStatus {
   let native_ready = @native_work.accepted_repair(
     workspace_root,

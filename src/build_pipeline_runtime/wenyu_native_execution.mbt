@@ -9,8 +9,8 @@ pub fn wenyu_native_attention_record(
   task : @moonbook.BookTask,
   path : String,
   reason : String,
-  tick : Int,
-  assigned_worker_id? : String? = None,
+  tick : Int32,
+  assigned_worker_id~ : String? = None,
 ) -> @core.TaskExecutionRecord {
   @core.TaskExecutionRecord::new(
     task_id=task.id,
@@ -35,10 +35,10 @@ pub fn wenyu_native_attention_record(
 pub fn wenyu_native_execution_record(
   launch : WenyuLaunch,
   work : @native_work.Work,
-  tick : Int,
-  assigned_worker_id? : String? = None,
-  imported? : Bool = false,
-  import_blocker? : String = "",
+  tick : Int32,
+  assigned_worker_id~ : String? = None,
+  imported~ : Bool = false,
+  import_blocker~ : String = "",
 ) -> @core.TaskExecutionRecord {
   let status : @core.TaskExecutionStatus = if work.state == "completed" {
     if imported {
@@ -100,8 +100,8 @@ pub fn wenyu_native_execution_record(
 ///|
 pub async fn execute_wenyu_native(
   launch : WenyuLaunch,
-  tick : Int,
-  assigned_worker_id? : String? = None,
+  tick : Int32,
+  assigned_worker_id~ : String? = None,
 ) -> @core.TaskExecutionRecord {
   guard launch.execution == "native" else {
     fail("wenyu_native_route_mismatch")
@@ -115,8 +115,8 @@ pub async fn execute_wenyu_native(
 async fn project_wenyu_native_result(
   launch : WenyuLaunch,
   work : @native_work.Work,
-  tick : Int,
-  assigned_worker_id? : String? = None,
+  tick : Int32,
+  assigned_worker_id~ : String? = None,
 ) -> @core.TaskExecutionRecord {
   if !@native_work.terminal(work.state) || work.state == "superseded" {
     return wenyu_native_execution_record(
@@ -158,7 +158,7 @@ async fn project_wenyu_native_result(
 pub async fn sync_wenyu_native_execution(
   entry : @moonbook.BookCatalogEntry,
   execution : @core.TaskExecutionRecord,
-  tick : Int,
+  tick : Int32,
 ) -> @core.TaskExecutionRecord {
   let launch = load_wenyu_launch(execution.packet_path)
   guard launch.execution == "native" &&
@@ -198,7 +198,7 @@ pub async fn sync_wenyu_native_execution(
 /// daemon supervision. Observation-only refresh and saved GET never call this.
 pub async fn apply_wenyu_native_work_result(
   work : @native_work.Work,
-  native_path? : String = @native_work.default_path(),
+  native_path~ : String = @native_work.default_path(),
 ) -> Unit {
   if work.request.kind != "wenyu_build" ||
     !@native_work.terminal(work.state) ||

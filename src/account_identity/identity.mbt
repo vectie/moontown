@@ -292,7 +292,10 @@ pub fn Session::context(self : Session) -> @account_system.AccountContext {
   {
     user_id: "lunanexa:" +
     @account_system.account_token_digest(
-      Json::array([self.issuer.to_json(), self.account_id.to_json()]).stringify(),
+      Json::array([
+        ToJson::to_json(self.issuer),
+        ToJson::to_json(self.account_id),
+      ]).stringify(),
     ),
     display_name: self.display_name,
     account_kind: SignedInAccount,

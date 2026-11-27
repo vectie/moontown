@@ -1,6 +1,10 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "vectie/moontown/town_contract"
 
+import {
+  "moonbitlang/core/json",
+}
+
 // Values
 pub fn desktop_book_registration_path() -> String
 
@@ -8,7 +12,7 @@ pub fn desktop_code_schedules_path() -> String
 
 pub fn desktop_collaboration_path() -> String
 
-pub fn desktop_contract() -> Json
+pub fn desktop_contract() -> @json.Json
 
 pub fn desktop_contract_path() -> String
 
@@ -64,7 +68,7 @@ pub fn miniapp_bookkeeper_outbox_release_path() -> String
 
 pub fn miniapp_child_run_steer_path() -> String
 
-pub fn miniapp_contract() -> Json
+pub fn miniapp_contract() -> @json.Json
 
 pub fn miniapp_contract_path() -> String
 
@@ -184,7 +188,7 @@ pub fn portable_package_withdraw_path() -> String
 
 pub fn portable_packages_path() -> String
 
-pub fn portable_transfer_contract() -> Json
+pub fn portable_transfer_contract() -> @json.Json
 
 pub fn schema_version() -> String
 

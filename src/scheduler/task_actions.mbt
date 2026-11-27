@@ -36,10 +36,7 @@ pub fn plan_tick(
       Some(execution) =>
         match execution_action_kind(execution) {
           Some(kind) =>
-            actions.push({
-              kind,
-              detail: "\{task.id} / \{execution.status.to_string()}",
-            })
+            actions.push({ kind, detail: "\{task.id} / \{execution.status}", })
           None => ()
         }
       None =>

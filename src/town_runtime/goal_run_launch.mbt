@@ -3,7 +3,7 @@ async fn launch_goal_book(
   state : @core.TownState,
   mayor : @roles.Mayor,
   launch : GoalBookLaunch,
-  native_path? : String = @native_work.default_path(),
+  native_path~ : String = @native_work.default_path(),
 ) -> Unit {
   for task in launch.tasks {
     let tick = supervision_tick(state)
@@ -35,9 +35,9 @@ async fn launch_goal_book_task(
   entry : @moonbook.BookCatalogEntry,
   task : @moonbook.BookTask,
   planned_task : @core.TownTask,
-  tick : Int,
-  pending_review_baseline : Int,
-  native_path? : String = @native_work.default_path(),
+  tick : Int32,
+  pending_review_baseline : Int32,
+  native_path~ : String = @native_work.default_path(),
 ) -> Unit {
   let decision = mayor.decide_dispatch(state, planned_task)
   state.record_event(route_event(decision.decision, state.events.length()))
@@ -87,7 +87,7 @@ fn queue_goal_book_task(
   entry : @moonbook.BookCatalogEntry,
   task : @moonbook.BookTask,
   planned_task : @core.TownTask,
-  tick : Int,
+  tick : Int32,
 ) -> Unit {
   let queued_execution = queued_goal_execution_record(
     entry,
@@ -125,7 +125,7 @@ fn record_goal_execution(
 fn queued_goal_execution_record(
   entry : @moonbook.BookCatalogEntry,
   task : @moonbook.BookTask,
-  tick : Int,
+  tick : Int32,
   summary : String,
 ) -> @core.TaskExecutionRecord {
   @core.TaskExecutionRecord::new(

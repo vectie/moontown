@@ -85,11 +85,15 @@ async test "bad headers redirects partial response encoding and metadata are rej
       ] {
       let headers = fixture_headers(view)
       headers[header.0] = header.1
+      let ci_headers : Map[@http.CaseInsensitiveString, String] = Map([])
+      for k, v in headers {
+        ci_headers[@http.CaseInsensitiveString(k)] = v
+      }
       let reader = observed_reader(fixture_bytes)
       try
         receive_download(
           view,
-          { ..fixture_response(view), headers, },
+          { ..fixture_response(view), headers: ci_headers, },
           reader,
           root + "/file",
           limits=fixture_limits(),

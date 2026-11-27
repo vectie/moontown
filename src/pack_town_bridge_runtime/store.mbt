@@ -14,10 +14,10 @@ pub fn empty_runtime_state() -> PackBridgeRuntimeState {
 fn migrate_runtime_state_json(value : Json) -> Json {
   guard value is Object(fields) else { return value }
   if fields.get("capabilities") is None {
-    fields["capabilities"] = ([] : Array[Json]).to_json()
+    fields["capabilities"] = Json::array([])
   }
   if fields.get("candidate_envelopes") is None {
-    fields["candidate_envelopes"] = ([] : Array[Json]).to_json()
+    fields["candidate_envelopes"] = Json::array([])
   }
   Json::object(fields)
 }
@@ -56,7 +56,7 @@ pub async fn save_runtime_state(
   let temporary = path + ".next"
   @fs.write_file(
     temporary,
-    @encoding/utf8.encode(state.to_json().stringify(indent=2) + "\n"),
+    @encoding/utf8.encode(ToJson::to_json(state).stringify(indent=2) + "\n"),
     create_mode=CreateOrTruncate,
     permission=0o644,
     sync=Full,
@@ -65,7 +65,7 @@ pub async fn save_runtime_state(
 }
 
 ///|
-fn lifecycle_index(state : PackBridgeRuntimeState, pack_id : String) -> Int? {
+fn lifecycle_index(state : PackBridgeRuntimeState, pack_id : String) -> Int32? {
   for index, lifecycle in state.lifecycles {
     if lifecycle.pack_id == pack_id {
       return Some(index)
@@ -78,7 +78,7 @@ fn lifecycle_index(state : PackBridgeRuntimeState, pack_id : String) -> Int? {
 fn candidate_index(
   state : PackBridgeRuntimeState,
   candidate_ref : String,
-) -> Int? {
+) -> Int32? {
   for index, receipt in state.candidates {
     if receipt.candidate_ref == candidate_ref {
       return Some(index)
@@ -91,7 +91,7 @@ fn candidate_index(
 fn candidate_envelope_index(
   state : PackBridgeRuntimeState,
   candidate_ref : String,
-) -> Int? {
+) -> Int32? {
   for index, candidate in state.candidate_envelopes {
     if candidate.candidate_ref == candidate_ref {
       return Some(index)
@@ -128,7 +128,7 @@ fn lifecycle_event(
   kind : String,
   occurred_at : String,
   evidence_refs : Array[String],
-  issue? : String? = None,
+  issue~ : String? = None,
 ) -> @pack_town_bridge.PackLifecycleEvent {
   {
     contract_id: @pack_town_bridge.pack_lifecycle_event_contract_id(),

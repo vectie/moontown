@@ -1,17 +1,18 @@
 ///|
+#derive(Debug, Eq)
 pub(all) struct Response {
-  status : Int
+  status : Int32
   headers : Map[String, String]
   body : Bytes
-} derive(Debug, Eq)
+}
 
 ///|
 fn response(
-  status : Int,
+  status : Int32,
   body : Bytes,
   kind : String,
   head : Bool,
-  attachment? : Bool = false,
+  attachment~ : Bool = false,
 ) -> Response {
   let headers : Map[String, String] = {
     "Content-Type": kind,
@@ -31,7 +32,7 @@ fn response(
 }
 
 ///|
-fn json_response(status : Int, value : Json, head : Bool) -> Response {
+fn json_response(status : Int32, value : Json, head : Bool) -> Response {
   response(
     status,
     @utf8.encode(value.stringify()),
@@ -41,11 +42,11 @@ fn json_response(status : Int, value : Json, head : Bool) -> Response {
 }
 
 ///|
-fn hex_digit(c : UInt16) -> Int? {
+fn hex_digit(c : UInt16) -> Int32? {
   match c {
-    '0'..='9' => Some(c.to_int() - 48)
-    'a'..='f' => Some(c.to_int() - 87)
-    'A'..='F' => Some(c.to_int() - 55)
+    '0'..<='9' => Some(c.to_int() - 48)
+    'a'..<='f' => Some(c.to_int() - 87)
+    'A'..<='F' => Some(c.to_int() - 55)
     _ => None
   }
 }
@@ -123,6 +124,7 @@ fn selection_query(query : String) -> (@contract.Selection, String)? {
 }
 
 ///|
+#warnings("-reserved_keyword")
 async fn selected_bytes(
   selection : @contract.Selection,
   catalog_path : String,
@@ -172,13 +174,13 @@ async fn selected_bytes(
 /// Socket-free response core. The desktop adapter preserves its existing access
 /// gate and calls this before constructing any supervisor/runtime application.
 pub async fn respond(
-  method : String,
+  method_val : String,
   target : String,
   catalog_path : String,
   books_root : String,
 ) -> Response {
-  let head = method == "HEAD"
-  if method != "GET" && !head {
+  let head = method_val == "HEAD"
+  if method_val != "GET" && !head {
     let result = json_response(405, { "error": "GET or HEAD required" }, false)
     result.headers["Allow"] = "GET, HEAD"
     return result
@@ -190,7 +192,7 @@ pub async fn respond(
   if path == "/api/imported-outputs" && query == "" {
     return json_response(
       200,
-      discover(catalog_path, books_root).to_json(),
+      ToJson::to_json(discover(catalog_path, books_root)),
       head,
     )
   }
@@ -219,7 +221,7 @@ pub async fn respond(
         selection,
         content: None,
       }
-      return json_response(409, reply.to_json(), head)
+      return json_response(409, ToJson::to_json(reply), head)
     }
   }
   if mode == "download" {
@@ -262,5 +264,5 @@ pub async fn respond(
     selection,
     content,
   }
-  json_response(200, reply.to_json(), head)
+  json_response(200, ToJson::to_json(reply), head)
 }

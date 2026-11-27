@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ParticipantWork {
   book_id : String
   packet_id : String
@@ -9,9 +10,10 @@ pub(all) struct ParticipantWork {
   output_ref : String
   output_digest : String
   output_text : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct WorkDecision {
   decision_id : String
   reviewer_id : String
@@ -19,9 +21,10 @@ pub(all) struct WorkDecision {
   prompt : String
   decision : String
   rationale : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct OneoffWork {
   contract_version : String
   draft_id : String
@@ -33,12 +36,12 @@ pub(all) struct OneoffWork {
   result_text : String
   review_status : String
   decisions : Array[WorkDecision]
-  review_version : Int
+  review_version : Int32
   review_history_text : String
   operator_id : String
   package_digest : String
   book_status : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn empty_work(id : String, revision : String) -> OneoffWork {

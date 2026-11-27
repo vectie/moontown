@@ -6,7 +6,7 @@ fn civic_communication_building_synthesis(
   ideas : Array[CivicCommunicationIdea],
   metrics : CivicCommunicationMetric,
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> String {
   let pattern = @civic.communication_pattern_for_scenario(scenario)
   [
@@ -39,7 +39,7 @@ fn civic_communication_building_synthesis(
 ///|
 fn civic_communication_round_metadata(
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> String {
   ["- Round: `\{round_id}`", "- Round number: `\{round_number}`"].join("\n")
 }
@@ -63,7 +63,7 @@ fn civic_communication_review_queue(
   scenario : CivicCommunicationScenario,
   ideas : Array[CivicCommunicationIdea],
 ) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string("# \{scenario.title} Review\n\n")
   builder.write_string("| ID | Idea | Review Need | Status |\n")
   builder.write_string("| --- | --- | --- | --- |\n")

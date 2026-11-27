@@ -11,6 +11,7 @@ import {
 // Errors
 
 // Types and methods
+#derive(@debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct Challenge {
   id : String
   name : String
@@ -19,18 +20,19 @@ pub(all) struct Challenge {
   possibility_wiki : String
   first_person_solution : String
   deadline_ms : UInt64
-  benchmark_version : Int
+  benchmark_version : Int32
   benchmark_materials : Array[String]
   evaluation_materials : Array[String]
   rubric : Array[RubricCriterion]
   published : Bool
-} derive(ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(@debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct RubricCriterion {
   id : String
   label : String
-  max_points : Int
-} derive(ToJson, @debug.Debug, @json.FromJson)
+  max_points : Int32
+}
 
 // Type aliases
 

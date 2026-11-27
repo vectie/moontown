@@ -1,6 +1,6 @@
 ///|
 fn pinned_selection(
-  size : Int,
+  size : Int32,
   digest : String,
 ) -> @imported_output_contract.Selection {
   {

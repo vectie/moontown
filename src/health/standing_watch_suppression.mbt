@@ -104,7 +104,7 @@ fn standing_watch_task_prefix(task_id : String) -> String? {
 }
 
 ///|
-fn standing_watch_task_tick(task_id : String) -> Int? {
+fn standing_watch_task_tick(task_id : String) -> Int32? {
   let parts = task_id.split("-tick-").to_array()
   if parts.length() < 2 {
     return None

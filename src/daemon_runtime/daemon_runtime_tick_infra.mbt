@@ -15,7 +15,7 @@ pub fn daemon_tick_paths(snapshot_path : String) -> DaemonTickPaths {
 }
 
 ///|
-pub fn daemon_tick_log_line(phase : String, sequence : Int) -> String {
+pub fn daemon_tick_log_line(phase : String, sequence : Int32) -> String {
   "tick phase=\{phase} sequence=\{sequence}"
 }
 
@@ -23,7 +23,7 @@ pub fn daemon_tick_log_line(phase : String, sequence : Int) -> String {
 pub async fn append_daemon_tick_phase_log(
   log_path : String,
   phase : String,
-  sequence : Int,
+  sequence : Int32,
 ) -> Unit {
   append_daemon_log(log_path, daemon_tick_log_line(phase, sequence))
 }

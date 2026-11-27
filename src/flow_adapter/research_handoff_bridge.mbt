@@ -74,7 +74,7 @@ async fn ensure_research_handoff_flow_plan(
   let request_ref = base + "/flow-request.v1.json"
   let result_ref = base + "/flow-result.v1.json"
   let package_ref = base + "/result-package.v1.json"
-  ignore(immutable_json_ref(root, handoff_ref, handoff.to_json()))
+  ignore(immutable_json_ref(root, handoff_ref, ToJson::to_json(handoff)))
   let request = match read_optional_json_ref(root, request_ref) {
     Some(value) => decode_flow_request(value)
     None => {
@@ -156,7 +156,7 @@ async fn research_handoff_result_package(
     "idempotency_key": plan.request.idempotency_key,
     "handoff_id": plan.handoff.handoff_id,
     "producer_run_id": plan.handoff.producer_run_id,
-    "receipt": receipt.to_json(),
+    "receipt": ToJson::to_json(receipt),
     "output": output,
     "source": {
       "contract_id": "moontown.research-handoff-result-source.v1",

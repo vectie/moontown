@@ -1,28 +1,31 @@
 ///|
 /// Literal phrase search. Empty selections scan the latest retained review of
 /// every source revision; explicit keys search exactly those historical reviews.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct OutcomeSearchQuery {
   text : String
   case_sensitive : Bool
   book_id : String
   review_status : String
   selections : Array[OutcomeKey]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 /// One first-occurrence excerpt per matching field, with original UTF-16 offsets.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct OutcomeSearchMatch {
   field : String
   book_id : String
   identity : String
   digest : String
   excerpt : String
-  match_offset : Int
-  excerpt_offset : Int
-  field_length : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  match_offset : Int32
+  excerpt_offset : Int32
+  field_length : Int32
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct OutcomeSearchHit {
   key : OutcomeKey
   title : String
@@ -31,30 +34,32 @@ pub(all) struct OutcomeSearchHit {
   review_status : String
   archive_digest : String
   matches : Array[OutcomeSearchMatch]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 /// Coverage gaps are explicit, including unavailable evidence that cannot be
 /// classified by a Book or review filter. An empty hit list alone proves nothing.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct OutcomeSearchGap {
   draft_id : String
   revision : String
-  review_version : Int
+  review_version : Int32
   status : String
   detail : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct OutcomeSearch {
   contract_version : String
   query : OutcomeSearchQuery
   review_selection : String
-  candidate_count : Int
-  searched_count : Int
-  excluded_count : Int
+  candidate_count : Int32
+  searched_count : Int32
+  excluded_count : Int32
   gaps : Array[OutcomeSearchGap]
   hits : Array[OutcomeSearchHit]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn OutcomeSearchQuery::validate(self : OutcomeSearchQuery) -> Unit raise {
@@ -156,7 +161,7 @@ fn search_field(
       book_id,
       identity,
       digest,
-      excerpt: text[start:end].to_string(),
+      excerpt: text[start:end].to_owned(),
       match_offset: offset,
       excerpt_offset: start,
       field_length: text.length(),

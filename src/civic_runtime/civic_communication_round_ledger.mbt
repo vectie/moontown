@@ -2,7 +2,7 @@
 fn civic_communication_round_record(
   schedule : CivicCommunicationSchedule,
   round_id : String,
-  tick : Int,
+  tick : Int32,
   started_ms : UInt64,
   finished_ms : UInt64,
   metrics : CivicCommunicationMetric,
@@ -31,5 +31,8 @@ async fn append_civic_communication_round_record(
   } else {
     "\{previous}\n"
   }
-  @support.write_text_file(path, "\{prefix}\{record.to_json().stringify()}\n")
+  @support.write_text_file(
+    path,
+    "\{prefix}\{ToJson::to_json(record).stringify()}\n",
+  )
 }

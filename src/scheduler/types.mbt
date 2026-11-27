@@ -1,8 +1,9 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct SchedulerTick {
-  sequence : Int
+  sequence : Int32
   summary : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub impl Show for SchedulerTick with fn output(
@@ -15,11 +16,12 @@ pub impl Show for SchedulerTick with fn output(
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct ScheduledJob {
   id : String
   kind : String
-  interval_seconds : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  interval_seconds : Int32
+}
 
 ///|
 pub impl Show for ScheduledJob with fn output(
@@ -32,14 +34,15 @@ pub impl Show for ScheduledJob with fn output(
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct DaemonState {
   daemon_id : String
   lease_owner : String
-  tick_sequence : Int
-  last_heartbeat_event_count : Int
+  tick_sequence : Int32
+  last_heartbeat_event_count : Int32
   active_goal_ids : Array[String]
   jobs : Array[ScheduledJob]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub impl Show for DaemonState with fn output(
@@ -53,12 +56,12 @@ pub impl Show for DaemonState with fn output(
 
 ///|
 pub fn DaemonState::new(
-  daemon_id? : String = "moontown-daemon",
-  lease_owner? : String = "local",
-  tick_sequence? : Int = 0,
-  last_heartbeat_event_count? : Int = 0,
-  active_goal_ids? : Array[String] = [],
-  jobs? : Array[ScheduledJob] = default_daemon_jobs(),
+  daemon_id~ : String = "moontown-daemon",
+  lease_owner~ : String = "local",
+  tick_sequence~ : Int32 = 0,
+  last_heartbeat_event_count~ : Int32 = 0,
+  active_goal_ids~ : Array[String] = [],
+  jobs~ : Array[ScheduledJob] = default_daemon_jobs(),
 ) -> DaemonState {
   {
     daemon_id,
@@ -71,10 +74,11 @@ pub fn DaemonState::new(
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct SchedulerAction {
   kind : String
   detail : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub impl Show for SchedulerAction with fn output(

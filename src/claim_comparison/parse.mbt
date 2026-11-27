@@ -1,5 +1,5 @@
 ///|
-fn decode(bytes : Bytes, limit : Int, label : String) -> String raise {
+fn decode(bytes : Bytes, limit : Int32, label : String) -> String raise {
   guard bytes.length() <= limit else { fail(label + " exceeds byte limit") }
   @utf8.decode(bytes) catch {
     _ => fail(label + " must be valid UTF-8")
@@ -23,7 +23,7 @@ fn parse(bytes : Bytes, delimiter : Char) -> Array[Claim] raise {
   guard table.rows.length() > 0 && table.rows.length() <= 200 else {
     fail("Supply 1 to 200 claims")
   }
-  let ids : Map[String, Bool] = {}
+  let ids : Map[String, Bool] = Map([])
   table.rows.mapi((i, row) => {
     for cell in row {
       guard !cell.trim().is_empty() && cell.length() <= 16384 else {

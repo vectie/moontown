@@ -42,7 +42,7 @@ pub fn repair_patch_receipt_block_from_text(text : String) -> Json? {
   }
   for index in 0..<lines.length() {
     if lines[index].trim().to_owned() == "patch_receipt:" {
-      let builder = StringBuilder::new()
+      let builder = StringBuilder()
       for cursor in (index + 1)..<lines.length() {
         if cursor > index + 1 {
           builder.write_char('\n')
@@ -136,7 +136,7 @@ pub fn repair_patch_receipt_satisfies_contract(
   receipt : Json,
   criterion_id : String,
   source_root : String,
-  run_id? : String? = None,
+  run_id~ : String? = None,
 ) -> Bool {
   if json_string_field(receipt, "contract") !=
     Some(repair_patch_receipt_contract()) {

@@ -82,7 +82,10 @@ async test "versioned civic handoff writes a review-pending execution receipt" {
   }
   let handoff_path = "\{root}/handoff.json"
   let receipt_path = "\{root}/receipt.json"
-  @support.write_text_file(handoff_path, handoff.to_json().stringify(indent=2))
+  @support.write_text_file(
+    handoff_path,
+    ToJson::to_json(handoff).stringify(indent=2),
+  )
   let rendered = bootstrap_civic_communication_handoff_file(
     handoff_path,
     receipt_path,

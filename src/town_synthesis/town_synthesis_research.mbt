@@ -3,7 +3,7 @@ fn render_town_report_executive_summary(
   plan : @roles.MayorGoalPlan,
   lane_reports : Array[TownSynthesisLaneReport],
 ) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string(town_report_stack_thesis())
   builder.write_string(town_report_lane_evidence_summary())
   builder.write_string(town_report_ecosystem_conclusion())
@@ -17,7 +17,7 @@ fn render_town_report_executive_summary(
 
 ///|
 fn render_town_ecosystem_overview(plan : @roles.MayorGoalPlan) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string(town_report_skill_quality_shift())
   builder.write_string(town_report_separation_overview())
   builder.write_string(town_report_ecosystem_diagram())
@@ -27,7 +27,7 @@ fn render_town_ecosystem_overview(plan : @roles.MayorGoalPlan) -> String {
 
 ///|
 fn render_town_integration_section(plan : @roles.MayorGoalPlan) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string(town_report_integration_thesis())
   builder.write_string(town_report_integration_table_header())
   for topic in town_research_topics() {
@@ -44,7 +44,7 @@ fn render_town_integration_section(plan : @roles.MayorGoalPlan) -> String {
 
 ///|
 fn render_town_technical_resources(plan : @roles.MayorGoalPlan) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string(town_report_technical_evidence_policy())
   builder.write_string(town_report_technical_resource_table_header())
   for lane in plan.lanes {
@@ -70,7 +70,7 @@ fn render_town_status_and_trajectory(
   state : @core.TownState,
   plan : @roles.MayorGoalPlan,
 ) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let running_count = count_lanes_by_status(state, plan, "running")
   let complete_count = count_lanes_by_status(state, plan, "complete")
   let review_count = count_lanes_by_status(state, plan, "review queued")

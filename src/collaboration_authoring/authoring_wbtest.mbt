@@ -21,7 +21,7 @@ async fn fixture() -> (Store, String) {
   }
   @fs.write_file(
     root + "/catalog.json",
-    catalog.to_json().stringify(),
+    ToJson::to_json(catalog).stringify(),
     create_mode=CreateNew,
   )
   ({ root: root + "/state", catalog_path: root + "/catalog.json", }, root)
@@ -277,7 +277,7 @@ async test "collaboration retained portable producer fixture" {
     }
     write_bytes(
       output + "/manifest.json",
-      @utf8.encode(prepared.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(prepared).stringify(indent=2)),
     )
     write_bytes(
       output + "/collaboration.tar",
@@ -285,7 +285,7 @@ async test "collaboration retained portable producer fixture" {
     )
     write_bytes(
       output + "/fixture.json",
-      @utf8.encode(saved.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(saved).stringify(indent=2)),
     )
   }
 }
@@ -306,7 +306,7 @@ async test "collaboration API stores incomplete drafts and returns retryable fai
     draft: Some(@contract.empty_draft("incomplete")),
   }
   let saved = store.request(
-    decode_request(request.to_json().stringify()),
+    decode_request(ToJson::to_json(request).stringify()),
     "2026-10-06T16:00:00Z",
   )
   assert_true(saved.ok)
@@ -437,7 +437,7 @@ async test "collaboration prepared review and brief tampering cannot be hidden b
   }
   @fs.write_file(
     root + "/" + revision_prefix(saved) + "prepared.json",
-    tampered.to_json().stringify(indent=2),
+    ToJson::to_json(tampered).stringify(indent=2),
   )
   assert_true(
     try {

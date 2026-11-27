@@ -1,7 +1,7 @@
 ///|
 fn render_planbook_repair_markdown(
   task : PlanbookRepairTask,
-  result_text? : String = "",
+  result_text~ : String = "",
 ) -> String {
   let proposal = task.proposal_id.unwrap_or("none")
   let run = task.run_id.unwrap_or("none")

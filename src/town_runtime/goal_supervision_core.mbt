@@ -1,10 +1,10 @@
 ///|
-fn supervision_tick(state : @core.TownState) -> Int {
+fn supervision_tick(state : @core.TownState) -> Int32 {
   state.events.length() + state.executions.length() + 1
 }
 
 ///|
-fn resolved_supervision_tick(state : @core.TownState, tick : Int?) -> Int {
+fn resolved_supervision_tick(state : @core.TownState, tick : Int32?) -> Int32 {
   let fallback = supervision_tick(state)
   match tick {
     Some(value) => @support.max_int(fallback, value)
@@ -15,21 +15,21 @@ fn resolved_supervision_tick(state : @core.TownState, tick : Int?) -> Int {
 ///|
 fn copy_execution_with(
   execution : @core.TaskExecutionRecord,
-  status? : @core.TaskExecutionStatus = execution.status,
-  summary? : String = execution.summary,
-  attempt? : Int = execution.attempt,
-  heartbeat_tick? : Int = execution.heartbeat_tick,
-  stale_after_tick? : Int = execution.stale_after_tick,
-  next_retry_tick? : Int? = execution.next_retry_tick,
-  context_pages? : Array[String] = execution.context_pages,
-  skill_paths? : Array[String] = execution.skill_paths,
-  packet_id? : String = execution.packet_id,
-  packet_path? : String = execution.packet_path,
-  proposal_id? : String? = execution.proposal_id,
-  run_id? : String? = execution.run_id,
-  result_decision? : String = execution.result_decision,
-  requires_review? : Bool = execution.requires_review,
-  notify_town? : Bool = execution.notify_town,
+  status~ : @core.TaskExecutionStatus = execution.status,
+  summary~ : String = execution.summary,
+  attempt~ : Int32 = execution.attempt,
+  heartbeat_tick~ : Int32 = execution.heartbeat_tick,
+  stale_after_tick~ : Int32 = execution.stale_after_tick,
+  next_retry_tick~ : Int32? = execution.next_retry_tick,
+  context_pages~ : Array[String] = execution.context_pages,
+  skill_paths~ : Array[String] = execution.skill_paths,
+  packet_id~ : String = execution.packet_id,
+  packet_path~ : String = execution.packet_path,
+  proposal_id~ : String? = execution.proposal_id,
+  run_id~ : String? = execution.run_id,
+  result_decision~ : String = execution.result_decision,
+  requires_review~ : Bool = execution.requires_review,
+  notify_town~ : Bool = execution.notify_town,
 ) -> @core.TaskExecutionRecord {
   @core.TaskExecutionRecord::new(
     task_id=execution.task_id,

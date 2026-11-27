@@ -2,9 +2,9 @@
 pub async fn install_book_template_config(
   template_id : String,
   config_path : String,
-  registry_path? : String = @book_templates.default_registry_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  standing_goal_path? : String = @storage.default_standing_goal_path(),
+  registry_path~ : String = @book_templates.default_registry_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  standing_goal_path~ : String = @storage.default_standing_goal_path(),
 ) -> String {
   let registry = inspect_registry(registry_path~)
   match

@@ -8,11 +8,11 @@ import {
 }
 
 // Values
-pub async fn execute(String, Json, UInt64, String?, Bool, String, String, guest_actor? : String?) -> Json
+pub async fn execute(String, @json.Json, UInt64, String?, Bool, String, String, guest_actor? : String?) -> @json.Json
 
 pub async fn image(String, String?, String, String, operator? : Bool, manager? : Bool, variant? : ImageVariant) -> Bytes
 
-pub async fn import_image(Json, UInt64, String, Bool, String, String) -> Json
+pub async fn import_image(@json.Json, UInt64, String, Bool, String, String) -> @json.Json
 
 pub async fn load_config(String) -> Config
 
@@ -23,24 +23,27 @@ pub async fn process_next(String, String, allow_generation? : Bool) -> Bool
 pub async fn process_previews(String, String) -> Bool
 
 // Errors
+#derive(@debug.Debug)
 pub(all) suberror CreativeError {
   Denied
   Invalid(String)
   Conflict(String)
   Unavailable
-} derive(@debug.Debug)
+}
 
 // Types and methods
-type Award derive(ToJson, @json.FromJson)
+#derive(@json.FromJson, @json.ToJson)
+type Award
 
+#derive(@json.FromJson)
 pub struct Config {
   brief : @competition_brief.Challenge
   opens_ms : UInt64
   voting_opens_ms : UInt64
   voting_closes_ms : UInt64
   awards_ms : UInt64
-  participant_quota : Int
-  event_quota : Int
+  participant_quota : Int32
+  event_quota : Int32
   provider_origin : String
   provider_key_file : String
   model : String
@@ -48,31 +51,41 @@ pub struct Config {
   participant_account_ids : Array[String]?
   voting_mode : String?
   guest_generation : Bool?
-} derive(@json.FromJson)
+}
 
-type Entry derive(ToJson, @json.FromJson)
+#derive(@json.FromJson, @json.ToJson)
+type Entry
 
-type Generation derive(ToJson, @json.FromJson)
+#derive(@json.FromJson, @json.ToJson)
+type Generation
 
+#derive(Eq)
 pub(all) enum ImageVariant {
   Original
   Thumbnail
   Preview
-} derive(Eq)
+}
 
-type ReviewEvent derive(ToJson, @json.FromJson)
+#derive(@json.FromJson, @json.ToJson)
+type ReviewEvent
 
-type RosterEntry derive(ToJson, @json.FromJson)
+#derive(@json.FromJson, @json.ToJson)
+type RosterEntry
 
-type State derive(ToJson, @json.FromJson)
+#derive(@json.FromJson, @json.ToJson)
+type State
 
-type VoteCount derive(ToJson, @json.FromJson)
+#derive(@json.FromJson, @json.ToJson)
+type VoteCount
 
-type VoteEvent derive(ToJson, @json.FromJson)
+#derive(@json.FromJson, @json.ToJson)
+type VoteEvent
 
-type VotingRoster derive(ToJson, @json.FromJson)
+#derive(@json.FromJson, @json.ToJson)
+type VotingRoster
 
-type VotingSettlement derive(ToJson, @json.FromJson)
+#derive(@json.FromJson, @json.ToJson)
+type VotingSettlement
 
 // Type aliases
 

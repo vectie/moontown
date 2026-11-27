@@ -1,9 +1,9 @@
 ///|
 pub async fn inspect_pdf_evidence_watch_book(
-  book_id? : String = @pdf_evidence_watch.default_pdf_evidence_watch_book_id(),
-  workspace_root? : String = "",
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  standing_goal_path? : String = @storage.default_standing_goal_path(),
+  book_id~ : String = @pdf_evidence_watch.default_pdf_evidence_watch_book_id(),
+  workspace_root~ : String = "",
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  standing_goal_path~ : String = @storage.default_standing_goal_path(),
 ) -> @pdf_evidence_watch.PdfEvidenceWatchBookStatus {
   let root = @pdf_evidence_watch.pdf_evidence_watch_resolved_workspace_root(
     book_id, workspace_root,
@@ -39,10 +39,10 @@ pub async fn inspect_pdf_evidence_watch_book(
 
 ///|
 pub async fn render_pdf_evidence_watch_book_status(
-  book_id? : String = @pdf_evidence_watch.default_pdf_evidence_watch_book_id(),
-  workspace_root? : String = "",
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  standing_goal_path? : String = @storage.default_standing_goal_path(),
+  book_id~ : String = @pdf_evidence_watch.default_pdf_evidence_watch_book_id(),
+  workspace_root~ : String = "",
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  standing_goal_path~ : String = @storage.default_standing_goal_path(),
 ) -> String {
   @pdf_evidence_watch.render_pdf_evidence_watch_book_status(
     inspect_pdf_evidence_watch_book(

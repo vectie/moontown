@@ -1,10 +1,11 @@
 ///|
+#derive(FromJson)
 struct ResearchHandoffExecutionRequest {
   contract_version : String
   handoff_url : String
   expected_contract : String
   expected_handoff_id : String
-} derive(FromJson)
+}
 
 ///|
 fn research_handoff_execution_request_version(action : String) -> String {
@@ -34,7 +35,7 @@ fn research_handoff_execution_reply(
   execution_status : String,
   review_status : String,
   callback_status : String,
-  callback_http_status : Int,
+  callback_http_status : Int32,
   result_package : Json?,
   error : String,
 ) -> Json {
@@ -115,10 +116,14 @@ fn research_handoff_callback_payload(
 async fn deliver_research_handoff_result(
   callback_url : String,
   result_package : Json,
-) -> (String, Int, String) {
+) -> (String, Int32, String) {
   try {
     let (payload, headers) = research_handoff_callback_payload(result_package)
-    let client = @http.post_stream(callback_url, headers~)
+    let ci_headers : Map[@http.CaseInsensitiveString, String] = Map([])
+    for k, v in headers {
+      ci_headers[@http.CaseInsensitiveString(k)] = v
+    }
+    let client = @http.post_stream(callback_url, headers=ci_headers)
     defer client.close()
     client.write(payload)
     let response = client.end_request()

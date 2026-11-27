@@ -66,6 +66,7 @@ pub fn transition_candidate_receipt(PackCandidateReceipt, String, String, Array[
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CandidateRoute {
   pack_id : String
   product_id : String
@@ -73,8 +74,9 @@ pub(all) struct CandidateRoute {
   operation_id : String
   authority : @pack.AuthorityClass
   review_required : Bool
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct PackCandidateAcknowledgement {
   contract_id : String
   candidate_ref : String
@@ -84,20 +86,22 @@ pub(all) struct PackCandidateAcknowledgement {
   occurred_at : String
   evidence_refs : Array[String]
   issue : String?
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct PackCandidateReceipt {
   contract_id : String
   candidate_ref : String
   pack_id : String
   operation_id : String
   status : String
-  sequence : Int
+  sequence : Int32
   updated_at : String
   evidence_refs : Array[String]
   issue : String?
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct PackLifecycleEvent {
   contract_id : String
   event_id : String
@@ -107,30 +111,34 @@ pub(all) struct PackLifecycleEvent {
   occurred_at : String
   evidence_refs : Array[String]
   issue : String?
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct PackLifecycleRecord {
   contract_id : String
   pack_id : String
   version : String
   stage : String
-  sequence : Int
+  sequence : Int32
   updated_at : String
   last_projection_at : String?
   issue : String?
   evidence_refs : Array[String]
   applied_event_ids : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct PackProjectionRegistry {
   projections : Array[PackTownProjection]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct PackTownBridgeIssue {
   path : String
   message : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct PackTownProjection {
   contract_id : String
   pack_id : String
@@ -138,8 +146,9 @@ pub(all) struct PackTownProjection {
   version : String
   generated_at : String
   subjects : Array[PackTownSubject]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct PackTownSubject {
   subject_ref : String
   schema_id : String
@@ -153,9 +162,10 @@ pub(all) struct PackTownSubject {
   run_refs : Array[String]
   evidence_refs : Array[String]
   operation_ids : Array[String]
-  domain_payload : Json
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  domain_payload : @json.Json
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct TownPackCandidate {
   contract_id : String
   candidate_ref : String
@@ -168,8 +178,8 @@ pub(all) struct TownPackCandidate {
   rationale : String
   claim_ceiling : String
   evidence_refs : Array[String]
-  domain_payload : Json
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  domain_payload : @json.Json
+}
 
 // Type aliases
 

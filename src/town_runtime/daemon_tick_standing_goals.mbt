@@ -5,7 +5,7 @@ async fn run_daemon_standing_goal_phase(
   catalog : Array[@moonbook.BookCatalogEntry],
   paths : @daemon_runtime.DaemonTickPaths,
   snapshot_path : String,
-  tick : Int,
+  tick : Int32,
 ) -> Array[@core.StandingGoal] {
   let after_supervision = reconcile_and_save_standing_goals_after_supervision(
     state,

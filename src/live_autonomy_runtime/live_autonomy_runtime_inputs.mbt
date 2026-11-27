@@ -2,7 +2,7 @@
 priv struct LiveAutonomyRuntimeInputs {
   standing_goals : Array[@core.StandingGoal]
   watcher_records : Array[@core.WatcherRunRecord]
-  daemon_tick : Int
+  daemon_tick : Int32
 }
 
 ///|

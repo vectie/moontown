@@ -1,17 +1,17 @@
 ///|
 pub async fn bootstrap_app_tool_book(
-  book_id? : String = @app_tool_book.default_book_id(),
-  title? : String = "Data Watch ToolBook",
-  purpose? : String = @app_tool_book.default_purpose(),
-  websites? : Array[String] = [],
-  analysis_method? : String = "",
-  tool_spec? : String = "",
-  civic_building_id? : String = "data-watch-lab",
-  cadence_ticks? : Int = 60,
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  standing_goal_path? : String = @storage.default_standing_goal_path(),
-  workspace_root? : String = "",
-  template_root? : String = @app_tool_book.template_root(),
+  book_id~ : String = @app_tool_book.default_book_id(),
+  title~ : String = "Data Watch ToolBook",
+  purpose~ : String = @app_tool_book.default_purpose(),
+  websites~ : Array[String] = [],
+  analysis_method~ : String = "",
+  tool_spec~ : String = "",
+  civic_building_id~ : String = "data-watch-lab",
+  cadence_ticks~ : Int32 = 60,
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  standing_goal_path~ : String = @storage.default_standing_goal_path(),
+  workspace_root~ : String = "",
+  template_root~ : String = @app_tool_book.template_root(),
 ) -> String {
   let root = @app_tool_book.resolved_workspace_root(book_id, workspace_root)
   let entry = @app_tool_book.catalog_entry(book_id, title, purpose, root)
@@ -56,9 +56,9 @@ pub async fn bootstrap_app_tool_book(
 ///|
 pub async fn install_app_tool_book_config(
   config_path : String,
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  standing_goal_path? : String = @storage.default_standing_goal_path(),
-  template_root? : String = @app_tool_book.template_root(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  standing_goal_path~ : String = @storage.default_standing_goal_path(),
+  template_root~ : String = @app_tool_book.template_root(),
 ) -> String {
   match load_app_tool_book_install_spec(config_path) {
     Some(spec) =>

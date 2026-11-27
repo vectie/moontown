@@ -5,7 +5,7 @@ pub async fn Store::request_oneoff(
   runtime : OneoffRuntime?,
   actor_id : String?,
   timestamp : String,
-  observed_at : Int,
+  observed_at : Int32,
 ) -> @contract.Reply {
   let base : @contract.Reply = {
     contract_version: "moontown.collaboration.reply.v1",

@@ -28,10 +28,11 @@ pub fn town_synthesis_task_id(String) -> String
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct TownSynthesisLaneReport {
   book_id : String
   report_text : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
 // Type aliases
 

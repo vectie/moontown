@@ -26,7 +26,7 @@ fn native_work_api_route(path : String) -> (String, String)? {
 }
 
 ///|
-fn native_work_api_revision(body : String) -> Int raise {
+fn native_work_api_revision(body : String) -> Int32 raise {
   guard @utf8.encode(body).length() <= 4096 else {
     fail("native_work_body_too_large")
   }
@@ -46,7 +46,7 @@ fn native_work_api_revision(body : String) -> Int raise {
 }
 
 ///|
-fn native_work_api_error(error : String) -> (Int, String) {
+fn native_work_api_error(error : String) -> (Int32, String) {
   if error.contains("native_work_revision_conflict") {
     (409, "Native work changed. Reload saved status before trying again.")
   } else if error.contains("native_work_not_found") {
@@ -74,7 +74,7 @@ fn native_work_api_projection(
     return {
       "schema": @town_contract.native_work_status_schema(),
       "revision": state.revision,
-      "items": state.work.map(work => @native_work.status(work).to_json()),
+      "items": state.work.map(work => ToJson::to_json(@native_work.status(work))),
     }
   }
   for work in state.work {
@@ -82,7 +82,7 @@ fn native_work_api_projection(
       return {
         "schema": @town_contract.native_work_status_schema(),
         "revision": state.revision,
-        "item": @native_work.status(work).to_json(),
+        "item": ToJson::to_json(@native_work.status(work)),
       }
     }
   }
@@ -94,7 +94,7 @@ fn native_work_api_projection(
 /// takes its normal state lock; it cannot reserve, dispatch or apply a result.
 async fn native_work_api_read(
   id : String,
-  path? : String = @native_work.default_path(),
+  path~ : String = @native_work.default_path(),
 ) -> Json {
   native_work_api_projection(@native_work.load(path~), id)
 }
@@ -105,7 +105,7 @@ async fn native_work_api_action(
   action : String,
   body : String,
   now : UInt64,
-  path? : String = @native_work.default_path(),
+  path~ : String = @native_work.default_path(),
 ) -> Json {
   guard native_work_api_valid_id(id) else {
     fail("native_work_request_invalid")

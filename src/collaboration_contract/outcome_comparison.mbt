@@ -1,15 +1,17 @@
 ///|
 /// A keyed before/after observation. Missing sides mean added or removed,
 /// never failed execution. Both sides preserve their original attribution.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct OutcomeChange[T] {
   identity : String
   change : String
   before : T?
   after : T?
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 /// Local evidence comparison, not a new synthesis or acceptance receipt.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct OutcomeComparison {
   contract_version : String
   before : OutcomeKey
@@ -23,7 +25,7 @@ pub(all) struct OutcomeComparison {
   sources : Array[OutcomeChange[SourceSnapshot]]
   contributions : Array[OutcomeChange[ParticipantWork]]
   decisions : Array[OutcomeChange[WorkDecision]]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 fn[T] comparison_rows(

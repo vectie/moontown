@@ -140,12 +140,12 @@ async fn module_projections_json() -> Json {
       // A presentation document cannot self-assert acceptance. Re-project this
       // field only from MoonBook's durable bookkeeper state below.
       fields.remove("acceptance_receipt")
-      fields["book_id"] = name.to_json()
+      fields["book_id"] = ToJson::to_json(name)
       if json_string_field(fields, "title").is_empty() {
-        fields["title"] = name.replace(old="-", new=" ").to_json()
+        fields["title"] = ToJson::to_json(name.replace(old="-", new=" "))
       }
       if json_string_field(fields, "summary").is_empty() {
-        fields["summary"] = "MoonBook projection is available.".to_json()
+        fields["summary"] = ToJson::to_json("MoonBook projection is available.")
       }
       for
         key in [
@@ -189,7 +189,7 @@ fn array_field(fields : Map[String, Json], key : String) -> Array[Json] {
 
 ///|
 fn enum_key(value : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   for char in value.to_lower() {
     if (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') {
       builder.write_char(char)
@@ -240,7 +240,7 @@ fn durable_observed_at(runtime : Json?) -> String {
 ///|
 fn building_module_key(
   book_id : String,
-  bindings? : Map[String, String] = Map([]),
+  bindings~ : Map[String, String] = Map([]),
 ) -> String {
   if book_id.is_empty() {
     "unlocated"
@@ -348,7 +348,7 @@ async fn resolved_knowledge_domain_catalog() -> @domain_catalog.KnowledgeDomainC
 fn knowledge_domain_catalog_body(
   catalog : @domain_catalog.KnowledgeDomainCatalog,
 ) -> String {
-  catalog.to_json().stringify(indent=2)
+  ToJson::to_json(catalog).stringify(indent=2)
 }
 
 ///|
@@ -532,14 +532,14 @@ async fn latest_watchers_by_task() -> Map[String, Json] {
 }
 
 ///|
-fn execution_tick(fields : Map[String, Json]) -> Int {
+fn execution_tick(fields : Map[String, Json]) -> Int32 {
   json_int_field(fields, "heartbeat_tick", 0, 0, 2147483647)
 }
 
 ///|
 fn latest_executions(items : Array[Json]) -> Map[String, Json] {
   let latest : Map[String, Json] = Map([])
-  let ticks : Map[String, Int] = Map([])
+  let ticks : Map[String, Int32] = Map([])
   for item in items {
     guard item is Object(fields) else { continue }
     let task_id = json_string_field(fields, "task_id")
@@ -563,11 +563,11 @@ fn string_artifacts(fields : Map[String, Json]) -> Array[Json] {
   let artifacts : Array[Json] = []
   for value in array_field(fields, "artifacts") {
     guard value is String(path) && !path.trim().is_empty() else { continue }
-    artifacts.push(path.trim().to_owned().to_json())
+    artifacts.push(ToJson::to_json(path.trim().to_owned()))
   }
   let packet = json_string_field(fields, "packet_path")
   if !packet.is_empty() {
-    artifacts.push(packet.to_json())
+    artifacts.push(ToJson::to_json(packet))
   }
   artifacts
 }
@@ -579,14 +579,14 @@ fn optional_item_field(
   value : String,
 ) -> Unit {
   if !value.is_empty() {
-    fields[key] = value.to_json()
+    fields[key] = ToJson::to_json(value)
   }
 }
 
 ///|
 fn concise_summary(value : String) -> String {
   let trimmed = value.trim().to_owned()
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let mut count = 0
   for char in trimmed {
     if count >= 1200 {
@@ -624,7 +624,10 @@ fn watcher_detail_value(watcher : Map[String, Json], key : String) -> String? {
 }
 
 ///|
-fn watcher_non_negative_int(watcher : Map[String, Json], key : String) -> Int? {
+fn watcher_non_negative_int(
+  watcher : Map[String, Json],
+  key : String,
+) -> Int32? {
   guard watcher_detail_value(watcher, key) is Some(value) else { return None }
   let parsed = @string.parse_int(value) catch { _ => return None }
   if parsed >= 0 {
@@ -698,7 +701,7 @@ fn town_work_item(
   }
   if watcher.length() == 0 &&
     terminal_transient_handoff_is_history(task, execution) {
-    fields["recordScope"] = "history".to_json()
+    fields["recordScope"] = ToJson::to_json("history")
   }
   optional_item_field(fields, "bookId", book_id)
   optional_item_field(fields, "agentId", agent_id)
@@ -712,7 +715,7 @@ fn town_work_item(
     }
   }
   if !role.is_empty() {
-    fields["role"] = worker_role(role).to_json()
+    fields["role"] = ToJson::to_json(worker_role(role))
   }
   optional_item_field(
     fields,
@@ -784,11 +787,13 @@ fn town_work_item(
     }
   }
   if !request_id.is_empty() {
-    fields["correlationId"] = request_id.to_json()
+    fields["correlationId"] = ToJson::to_json(request_id)
   } else if !correlation_id.is_empty() {
-    fields["correlationId"] = correlation_id.to_json()
+    fields["correlationId"] = ToJson::to_json(correlation_id)
   } else if !standing_goal_id.is_empty() {
-    fields["correlationId"] = ("standing-goal:" + standing_goal_id).to_json()
+    fields["correlationId"] = ToJson::to_json(
+      "standing-goal:" + standing_goal_id,
+    )
   }
   if watcher.length() > 0 {
     let progress : Map[String, Json] = Map([])
@@ -802,13 +807,13 @@ fn town_work_item(
     for metric in metrics {
       let (source, target) = metric
       match watcher_non_negative_int(watcher, source) {
-        Some(value) => progress[target] = value.to_json()
+        Some(value) => progress[target] = ToJson::to_json(value)
         None => ()
       }
     }
     if !progress.contains("newSources") {
       match watcher_non_negative_int(watcher, "new_source_count") {
-        Some(value) => progress["newSources"] = value.to_json()
+        Some(value) => progress["newSources"] = ToJson::to_json(value)
         None => ()
       }
     }
@@ -816,15 +821,15 @@ fn town_work_item(
       watcher_detail_value(watcher, "book_changed").unwrap_or(""),
     )
     if changed == "yes" || changed == "true" || changed == "1" {
-      progress["bookChanged"] = true.to_json()
+      progress["bookChanged"] = ToJson::to_json(true)
     } else if changed == "no" || changed == "false" || changed == "0" {
-      progress["bookChanged"] = false.to_json()
+      progress["bookChanged"] = ToJson::to_json(false)
     } else {
       let decision = enum_key(json_string_field(watcher, "decision"))
       if decision == "update" || decision == "needsreview" {
-        progress["bookChanged"] = true.to_json()
+        progress["bookChanged"] = ToJson::to_json(true)
       } else if decision == "nochange" || decision == "failed" {
-        progress["bookChanged"] = false.to_json()
+        progress["bookChanged"] = ToJson::to_json(false)
       }
     }
     if progress.length() > 0 {
@@ -852,12 +857,12 @@ fn route_projected_work_item(
 }
 
 ///|
-fn energy_valley_runtime_history_projection_limit() -> Int {
+fn energy_valley_runtime_history_projection_limit() -> Int32 {
   @system_settings.current_system_settings().runtime_history_projection_limit
 }
 
 ///|
-fn projected_history_compare(left : Json, right : Json) -> Int {
+fn projected_history_compare(left : Json, right : Json) -> Int32 {
   let left_fields = object_fields(Some(left))
   let right_fields = object_fields(Some(right))
   let by_time = json_string_field(left_fields, "updatedAt").compare(
@@ -992,8 +997,8 @@ fn annotate_projected_task_activities(
       "recovering" => "town-shell"
       _ => json_string_field(fields, "buildingModuleKey")
     }
-    fields["activityKind"] = kind.to_json()
-    fields["activityLabel"] = label.to_json()
+    fields["activityKind"] = ToJson::to_json(kind)
+    fields["activityLabel"] = ToJson::to_json(label)
     optional_item_field(fields, "originBuildingModuleKey", home)
     optional_item_field(fields, "destinationBuildingModuleKey", destination)
   }
@@ -1293,8 +1298,8 @@ fn projected_agents(
         "destinationBuildingModuleKey",
         json_string_field(work, "destinationBuildingModuleKey"),
       )
-      fields["movementSource"] = "runtime-task-projection".to_json()
-      fields["workStatusSource"] = "runtime-execution-ledger".to_json()
+      fields["movementSource"] = ToJson::to_json("runtime-task-projection")
+      fields["workStatusSource"] = ToJson::to_json("runtime-execution-ledger")
     } else {
       optional_item_field(
         fields,
@@ -1304,8 +1309,8 @@ fn projected_agents(
           bindings=book_bindings,
         ),
       )
-      fields["movementSource"] = "not-observed".to_json()
-      fields["workStatusSource"] = "worker-snapshot".to_json()
+      fields["movementSource"] = ToJson::to_json("not-observed")
+      fields["workStatusSource"] = ToJson::to_json("worker-snapshot")
     }
     agents.push(Json::object(fields))
   }
@@ -1520,7 +1525,9 @@ async fn energy_valley_runtime_projection() -> Json {
                 "lineageStatus",
                 json_string_field(edge_fields, "status"),
               )
-              agent_fields["lineageSource"] = "supervisor-execution-handoff".to_json()
+              agent_fields["lineageSource"] = ToJson::to_json(
+                "supervisor-execution-handoff",
+              )
             }
           }
         }
@@ -1538,13 +1545,15 @@ async fn energy_valley_runtime_projection() -> Json {
   match read_optional_json(daemon_path) {
     Some(Object(daemon)) =>
       match daemon.get("tick_sequence") {
-        Some(Number(value, ..)) => fields["tick"] = value.to_json()
+        Some(Number(value, ..)) => fields["tick"] = ToJson::to_json(value)
         _ => ()
       }
     _ => ()
   }
   if town.length() == 0 {
-    fields["message"] = "Runtime ledgers are available, but the town worker snapshot is unavailable.".to_json()
+    fields["message"] = ToJson::to_json(
+      "Runtime ledgers are available, but the town worker snapshot is unavailable.",
+    )
   }
   Json::object(fields)
 }

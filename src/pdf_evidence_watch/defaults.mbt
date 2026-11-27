@@ -10,7 +10,7 @@ pub fn default_pdf_evidence_watch_book_id() -> String {
 
 ///|
 pub fn default_pdf_evidence_watch_workspace_root(
-  book_id? : String = default_pdf_evidence_watch_book_id(),
+  book_id~ : String = default_pdf_evidence_watch_book_id(),
 ) -> String {
   @moonbook.default_workspace_root(book_id)
 }

@@ -18,10 +18,10 @@ fn health_report_execution(
   book_id~ : String,
   status~ : @core.TaskExecutionStatus,
   summary~ : String,
-  output_contract? : String = "standing-watch",
-  packet_id? : String = "",
-  packet_path? : String = "",
-  context_pages? : Array[String] = [],
+  output_contract~ : String = "standing-watch",
+  packet_id~ : String = "",
+  packet_path~ : String = "",
+  context_pages~ : Array[String] = [],
 ) -> @core.TaskExecutionRecord {
   let resolved_packet_id = if packet_id == "" {
     "packet-\{task_id}"

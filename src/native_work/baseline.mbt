@@ -43,11 +43,11 @@ async fn source_snapshot(root : String) -> Json {
     let kind = @fs.kind(path, follow_symlink=false) catch { _ => @fs.Unknown }
     if kind is SymLink {
       let target = @integration.run_checked("readlink", ["--", path]).stdout
-      files[relative] = ("symlink:" + digest(target)).to_json()
+      files[relative] = ToJson::to_json("symlink:" + digest(target))
       continue
     }
     if !@fs.exists(path) {
-      files[relative] = "absent".to_json()
+      files[relative] = ToJson::to_json("absent")
       continue
     }
     if @fs.kind(path, follow_symlink=false) != Regular ||
@@ -59,8 +59,10 @@ async fn source_snapshot(root : String) -> Json {
     if file.size() > 64_000_000L {
       fail("source_snapshot_file_too_large: " + relative)
     }
-    files[relative] = native_fingerprint(file.read_all().binary()).to_json()
-    executable[relative] = @fs.can_execute(path).to_json()
+    files[relative] = ToJson::to_json(
+      native_fingerprint(file.read_all().binary()),
+    )
+    executable[relative] = ToJson::to_json(@fs.can_execute(path))
   }
   let dirty : Array[String] = []
   for

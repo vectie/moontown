@@ -168,7 +168,7 @@ pub async fn discover(
   let mut total_wire = 4096
   for root in candidates {
     if inspect_book(root) is Some(book) {
-      total_wire += @utf8.encode(book.to_json().stringify()).length() + 1
+      total_wire += @utf8.encode(ToJson::to_json(book).stringify()).length() + 1
       if total_wire > @contract.catalog_wire_limit() {
         return {
           contract: "moontown.imported_outputs.v1",

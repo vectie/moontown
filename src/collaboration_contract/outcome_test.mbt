@@ -11,7 +11,7 @@ fn outcome_key() -> @collaboration_contract.OutcomeKey {
 
 ///|
 fn outcome_reply(
-  generation : Int,
+  generation : Int32,
   key : @collaboration_contract.OutcomeKey,
 ) -> @collaboration_contract.Reply {
   let saved : @collaboration_contract.SavedDraft = {
@@ -67,9 +67,7 @@ test "retained outcome selection is separate from draft reuse and stale download
     pending.begin("outcome-inspect", "historic").generation,
     pending.generation,
   )
-  let reply = outcome_reply(pending.generation, outcome_key())
-    .to_json()
-    .stringify()
+  let reply = ToJson::to_json(outcome_reply(pending.generation, outcome_key())).stringify()
   let selected = pending.settle(pending.generation, "outcome-inspect", reply)
   assert_true(selected.outcome is Some(_))
   assert_true(selected.dirty)
@@ -105,12 +103,9 @@ test "retained outcome selection is separate from draft reuse and stale download
     newer.settle(pending.generation, "outcome-inspect", reply).outcome,
     None,
   )
-  let wrong = outcome_reply(pending.generation, {
-      ..outcome_key(),
-      revision: "r-other",
-    })
-    .to_json()
-    .stringify()
+  let wrong = ToJson::to_json(
+    outcome_reply(pending.generation, { ..outcome_key(), revision: "r-other", }),
+  ).stringify()
   assert_eq(
     pending.settle(pending.generation, "outcome-inspect", wrong).outcome,
     None,

@@ -8,7 +8,7 @@ fn detect_anomalies(
     if item.level != Healthy {
       anomalies.push({
         title: "worker-health",
-        detail: "\{item.worker_id} is \{item.level.to_string()}",
+        detail: "\{item.worker_id} is \{item.level}",
       })
     }
   }

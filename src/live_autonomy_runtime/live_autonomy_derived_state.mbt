@@ -1,6 +1,6 @@
 ///|
 priv struct LiveAutonomyDerivedState {
-  tick : Int
+  tick : Int32
   status : String
   metrics : LiveAutonomyMetricCounts
   template_request_counts : @book_templates.BookTemplateRuntimeCounts
@@ -73,7 +73,7 @@ fn live_autonomy_derived_state(
 }
 
 ///|
-fn live_autonomy_build_tick(input : LiveAutonomyBuildInput) -> Int {
+fn live_autonomy_build_tick(input : LiveAutonomyBuildInput) -> Int32 {
   match input.daemon_tick {
     Some(value) => value
     None => live_autonomy_tick(input.state)

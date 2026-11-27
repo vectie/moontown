@@ -42,7 +42,7 @@ fn safe_string_array(fields : Map[String, Json], key : String) -> Array[Json] {
   let values : Array[Json] = []
   for value in array_field(fields, key) {
     if value is String(text) {
-      values.push(text.to_json())
+      values.push(ToJson::to_json(text))
     }
   }
   values
@@ -83,7 +83,7 @@ fn public_building(value : Json) -> Json? {
 }
 
 ///|
-fn public_placement(value : Json, index : Int) -> Json? {
+fn public_placement(value : Json, index : Int32) -> Json? {
   guard value is Object(fields) else { return None }
   let id = string_field(fields, "id")
   if id.is_empty() {
@@ -346,17 +346,17 @@ pub async fn TownProjection::miniapp_snapshot(self : TownProjection) -> Json {
   }
   let snapshot = unavailable_snapshot()
   guard snapshot is Object(fields) else { return snapshot }
-  fields["mode"] = "live".to_json()
+  fields["mode"] = ToJson::to_json("live")
   fields["buildings"] = Json::array(buildings)
   fields["placements"] = Json::array(placements)
   fields["books"] = Json::array(books)
   fields["agents"] = Json::array(agents)
   fields["runs"] = Json::array(runs)
-  fields["standingGoalCount"] = standing_goal_count.to_json()
+  fields["standingGoalCount"] = ToJson::to_json(standing_goal_count)
   match @support.read_optional_json_file(self.state_root + "/daemon.json") {
     Some(Object(daemon)) =>
       match daemon.get("tick_sequence") {
-        Some(Number(value, ..)) => fields["tick"] = value.to_json()
+        Some(Number(value, ..)) => fields["tick"] = ToJson::to_json(value)
         _ => ()
       }
     _ => ()

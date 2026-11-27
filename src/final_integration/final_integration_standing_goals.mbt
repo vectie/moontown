@@ -2,7 +2,7 @@
 pub fn merge_final_integration_standing_goals(
   existing : Array[@core.StandingGoal],
   specs : Array[FinalIntegrationWatchSpec],
-  current_tick : Int,
+  current_tick : Int32,
 ) -> Array[@core.StandingGoal] {
   let mut merged = existing.copy()
   for spec in specs {

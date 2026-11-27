@@ -25,7 +25,7 @@ fn header(request : @http.Request, name : String) -> String {
 }
 
 ///|
-fn reject(code : Int, reason : String) -> Unit raise {
+fn reject(code : Int32, reason : String) -> Unit raise {
   raise @town_portable_transfer.TransferError(code, reason)
 }
 
@@ -66,7 +66,7 @@ fn query_id(raw : String, name : String) -> String raise {
 }
 
 ///|
-fn bounded_length(request : @http.Request, maximum : Int) -> Int raise {
+fn bounded_length(request : @http.Request, maximum : Int32) -> Int32 raise {
   let raw = header(request, "content-length")
   if raw.is_empty() {
     reject(411, "content_length_required")

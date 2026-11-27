@@ -3,9 +3,9 @@ async fn run_supervision_cycle(
   state : @core.TownState,
   mayor : @roles.Mayor,
   catalog : Array[@moonbook.BookCatalogEntry],
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  standing_goals? : Array[@core.StandingGoal] = [],
-  tick? : Int? = None,
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  standing_goals~ : Array[@core.StandingGoal] = [],
+  tick~ : Int32? = None,
 ) -> Unit {
   let cycle_tick = resolved_supervision_tick(state, tick)
   run_supervision_reconciliation_passes(
@@ -28,8 +28,8 @@ async fn wait_for_goal_settle(
   mayor : @roles.Mayor,
   catalog : Array[@moonbook.BookCatalogEntry],
   snapshot_path : String,
-  max_cycles? : Int = 120,
-  sleep_ms? : Int = 5_000,
+  max_cycles~ : Int32 = 120,
+  sleep_ms~ : Int32 = 5_000,
 ) -> Unit {
   let cycles = if max_cycles < 1 { 1 } else { max_cycles }
   for cycle = 0; cycle < cycles; cycle = cycle + 1 {

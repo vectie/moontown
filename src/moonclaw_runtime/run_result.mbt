@@ -6,7 +6,7 @@ pub fn moonclaw_run_result_path(workspace_dir : String) -> String {
 ///|
 pub async fn moonclaw_run_result_text_from_workspace(
   workspace_dir : String,
-  fallback_summary? : Bool = false,
+  fallback_summary~ : Bool = false,
 ) -> String {
   let parsed = match moonclaw_run_result_payload_from_workspace(workspace_dir) {
     Some(parsed) => parsed
@@ -38,7 +38,7 @@ pub async fn moonclaw_run_result_payload_from_workspace(
 pub async fn moonclaw_run_result_payload_from_run(
   run_id : String,
   cwd : String,
-  home? : String = @moonclaw.default_moonclaw_home(),
+  home~ : String = @moonclaw.default_moonclaw_home(),
 ) -> Json? {
   let workspace_dir = match @moonclaw.run_workspace_dir(run_id, cwd~, home~) {
     Some(workspace_dir) => workspace_dir
@@ -51,8 +51,8 @@ pub async fn moonclaw_run_result_payload_from_run(
 pub async fn moonclaw_run_result_text_from_run(
   run_id : String,
   cwd : String,
-  fallback_summary? : Bool = false,
-  home? : String = @moonclaw.default_moonclaw_home(),
+  fallback_summary~ : Bool = false,
+  home~ : String = @moonclaw.default_moonclaw_home(),
 ) -> String {
   let workspace_dir = match @moonclaw.run_workspace_dir(run_id, cwd~, home~) {
     Some(workspace_dir) => workspace_dir

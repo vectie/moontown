@@ -20,12 +20,12 @@ async test "editor producer freezes source-only command and full checks then syn
   assert_eq(request.input_digest, @native_work.digest(request.prompt))
   assert_eq(
     queued.request_digest,
-    @native_work.digest(request.to_json().stringify()),
+    @native_work.digest(ToJson::to_json(request).stringify()),
   )
   assert_eq(queued.id, "town-work-" + queued.request_digest[:32].to_owned())
   assert_eq(
     @json.parse(@fs.read_file(task.packet_path).text()),
-    request.to_json(),
+    ToJson::to_json(request),
   )
   let spec = native_editor_spec(queued)
   assert_eq(spec.selection_content, native_editor_selection())
@@ -48,14 +48,18 @@ async test "editor producer freezes source-only command and full checks then syn
     "required_validation_commands",
   )
   assert_eq(commands, [
-    "moon fmt".to_json(),
-    "moon info".to_json(),
-    "moon check --no-render".to_json(),
-    "moon test src/planbook_runtime/planbook_autonomy_wbtest.mbt src/live_autonomy_runtime/live_autonomy_wbtest.mbt --no-render".to_json(),
-    "moon test src/editor_pipeline src/editor_runtime src/native_work --no-render".to_json(),
-    "moon test --no-render".to_json(),
-    "moon -C src/ui/rabbita-town build --target js --release".to_json(),
-    "git diff --check".to_json(),
+    ToJson::to_json("moon fmt"),
+    ToJson::to_json("moon info"),
+    ToJson::to_json("moon check --no-render"),
+    ToJson::to_json(
+      "moon test src/planbook_runtime/planbook_autonomy_wbtest.mbt src/live_autonomy_runtime/live_autonomy_wbtest.mbt --no-render",
+    ),
+    ToJson::to_json(
+      "moon test src/editor_pipeline src/editor_runtime src/native_work --no-render",
+    ),
+    ToJson::to_json("moon test --no-render"),
+    ToJson::to_json("moon -C src/ui/rabbita-town build --target js --release"),
+    ToJson::to_json("git diff --check"),
   ])
   let checks = native_editor_rows(
     native_editor_field(request.acceptance_policy, "completion_policy"),
@@ -98,7 +102,7 @@ async test "editor producer freezes source-only command and full checks then syn
     native_editor_field(body, "payload"),
     "task_contract",
   )
-  assert_eq(native_editor_field(contract, "scope"), ["."].to_json())
+  assert_eq(native_editor_field(contract, "scope"), ToJson::to_json(["."]))
   assert_eq(native_editor_text(contract, "owner_work_id"), task.id)
   assert_eq(native_editor_text(contract, "owner_book_id"), request.book_id)
   assert_eq(
@@ -155,14 +159,14 @@ async test "editor producer freezes source-only command and full checks then syn
         native_editor_field(check, "sandbox_evidence"),
         "fixture_injected",
       ),
-      true.to_json(),
+      ToJson::to_json(true),
     )
     assert_eq(
       native_editor_field(
         native_editor_field(check, "sandbox_evidence"),
         "actual_compiler_execution",
       ),
-      false.to_json(),
+      ToJson::to_json(false),
     )
   }
   assert_true(
@@ -235,7 +239,7 @@ async test "editor producer freezes source-only command and full checks then syn
   )
 
   // Durable replay is byte-stable even after a later model, course or source edit.
-  let completed_request = completed.request.to_json()
+  let completed_request = ToJson::to_json(completed.request)
   models[0] = "moongate/editor-fixture-later"
   @support.write_text_file(
     fixture.course_root + "/wiki/course/exercises.md",
@@ -248,7 +252,7 @@ async test "editor producer freezes source-only command and full checks then syn
   let replay_task = native_editor_materialize(fixture)
   assert_eq(replay_task.id, task.id)
   let replay = @native_work.sync(task.id, 80000UL, path~, client~)
-  assert_eq(replay.request.to_json(), completed_request)
+  assert_eq(ToJson::to_json(replay.request), completed_request)
   assert_eq(replay.reservation.unwrap().request_body, posted[0])
   assert_eq(replay.reservation.unwrap().model, "moongate/editor-fixture-one")
   assert_eq(@fs.read_file(request.result_path).text(), result)
@@ -337,7 +341,7 @@ async test "same ID selection acceptance change blocks first owner apply and pen
       fixture.book_root,
     ),
   )
-  let saved_request = completed.request.to_json()
+  let saved_request = ToJson::to_json(completed.request)
   let saved_body = completed.reservation.unwrap().request_body
   // These invalid current inputs must not be recaptured ahead of pending work.
   @support.write_text_file(
@@ -359,7 +363,7 @@ async test "same ID selection acceptance change blocks first owner apply and pen
   assert_eq(pending.id, task.id)
   assert_eq(pending.status, "waiting_owner_output")
   let retained = native_editor_saved(fixture, task.id)
-  assert_eq(retained.request.to_json(), saved_request)
+  assert_eq(ToJson::to_json(retained.request), saved_request)
   assert_eq(retained.reservation.unwrap().request_body, saved_body)
   assert_eq(@native_work.load(path~).work.length(), 1)
   assert_eq(posted.length(), 1)

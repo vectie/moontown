@@ -18,7 +18,7 @@ async fn run() -> Unit {
     [root, "list"] => {
       let store : @authoring.Store = { root, catalog_path: "", }
       let entries = store.list_outcomes()
-      @stdio.stdout.write(entries.to_json().stringify(indent=2) + "\n")
+      @stdio.stdout.write(ToJson::to_json(entries).stringify(indent=2) + "\n")
     }
     [root, before, after, format] => {
       guard format == "markdown" || format == "json" else { fail(usage) }
@@ -29,7 +29,7 @@ async fn run() -> Unit {
       let output = if format == "markdown" {
         comparison.markdown()
       } else {
-        comparison.to_json().stringify(indent=2) + "\n"
+        ToJson::to_json(comparison).stringify(indent=2) + "\n"
       }
       guard output.length() <= 4194304 else {
         fail("Comparison output exceeds 4 Mi UTF-16 code units")
@@ -45,7 +45,7 @@ async fn main {
   run() catch {
     error => {
       @stdio.stderr.write("outcome_compare: \{error}\n")
-      @sys.exit(1)
+      @env.exit(1)
     }
   }
 }

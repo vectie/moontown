@@ -1,10 +1,10 @@
 ///|
 pub async fn archive_pdf_evidence_watch_book(
-  book_id? : String = @pdf_evidence_watch.default_pdf_evidence_watch_book_id(),
-  reason? : String = "Archived by operator.",
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  standing_goal_path? : String = @storage.default_standing_goal_path(),
-  request_event_path? : String = @book_templates.request_event_path_for_request(
+  book_id~ : String = @pdf_evidence_watch.default_pdf_evidence_watch_book_id(),
+  reason~ : String = "Archived by operator.",
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  standing_goal_path~ : String = @storage.default_standing_goal_path(),
+  request_event_path~ : String = @book_templates.request_event_path_for_request(
     @book_templates.request_path_for_snapshot(@storage.default_snapshot_path()),
   ),
 ) -> String {
@@ -41,7 +41,7 @@ async fn append_pdf_evidence_watch_archive_event(
   book_id : String,
   reason : String,
   goal_id : String,
-  disabled_count : Int,
+  disabled_count : Int32,
   status : @pdf_evidence_watch.PdfEvidenceWatchBookStatus,
   request_event_path : String,
 ) -> Unit {

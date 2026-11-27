@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AppToolBookInstallSpec {
   book_id : String
   title : String
@@ -9,23 +10,24 @@ pub(all) struct AppToolBookInstallSpec {
   tool_spec : String
   tool_spec_path : String
   civic_building_id : String
-  cadence_ticks : Int
+  cadence_ticks : Int32
   workspace_root : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AppToolBookStatus {
   book_id : String
   workspace_root : String
-  required_count : Int
-  missing_count : Int
+  required_count : Int32
+  missing_count : Int32
   missing_paths : Array[String]
   has_catalog_entry : Bool
   has_standing_goal : Bool
   standing_goal_enabled : Bool
   has_tool_manifest : Bool
   ready : Bool
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 priv struct AppToolBookPathSpec {
@@ -34,6 +36,7 @@ priv struct AppToolBookPathSpec {
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AppToolBookConfig {
   template_id : String
   template_version : String
@@ -49,26 +52,29 @@ pub(all) struct AppToolBookConfig {
   app : AppToolBookAppSettings
   civic : AppToolBookCivicSettings
   moondesk : AppToolBookMoondeskSettings
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AppToolBookWatchSettings {
   websites : Array[String]
-  cadence_ticks : Int
+  cadence_ticks : Int32
   source_policy : String
   notify_when : Array[String]
   required_outputs : Array[String]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AppToolBookAnalysisSettings {
   method_path : String
   report_path : String
   data_path : String
   review_path : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AppToolBookAppSettings {
   tool_spec_path : String
   manifest_path : String
@@ -77,24 +83,27 @@ pub(all) struct AppToolBookAppSettings {
   generated_tool_path : String
   build_command : String
   review_status : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AppToolBookCivicSettings {
   building_id : String
   open_tool_action : String
   open_report_action : String
   configure_action : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AppToolBookMoondeskSettings {
   create_mode : String
   editable_files : Array[String]
   output_files : Array[String]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct AppToolManifest {
   schema : String
   book_id : String
@@ -109,4 +118,4 @@ pub(all) struct AppToolManifest {
   build_command : String
   review_status : String
   last_successful_build_ms : UInt64?
-} derive(Debug, Eq, ToJson, FromJson)
+}

@@ -5,14 +5,14 @@ priv struct LiveAutonomyBuildInput {
   standing_goals : Array[@core.StandingGoal]
   watcher_records : Array[@core.WatcherRunRecord]
   tick_summary : String
-  daemon_tick : Int?
-  planbook_open : Int
-  planbook_repair_active : Int
+  daemon_tick : Int32?
+  planbook_open : Int32
+  planbook_repair_active : Int32
   planbook_change_log_path : String
   planbook_engineering_digest_path : String
   latest_change_summary : String
   book_template_request_status : @book_templates.BookTemplateRequestStatus
-  prior_stable_waiting_observation_streak : Int
+  prior_stable_waiting_observation_streak : Int32
 }
 
 ///|

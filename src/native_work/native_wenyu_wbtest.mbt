@@ -1,7 +1,7 @@
 ///|
 /// Pure source observations keep these regressions independent of Git history,
 /// runtime sockets, configured providers, and user source checkouts.
-fn wenyu_fixture_request(root? : String = "/synthetic-wenyu") -> Request {
+fn wenyu_fixture_request(root~ : String = "/synthetic-wenyu") -> Request {
   let prompt = "Implement the frozen Wenyu code patch"
   {
     kind: "wenyu_build",
@@ -36,7 +36,7 @@ fn wenyu_fixture_request(root? : String = "/synthetic-wenyu") -> Request {
 }
 
 ///|
-fn wenyu_fixture_snapshot(request : Request, after? : Bool = false) -> Json {
+fn wenyu_fixture_snapshot(request : Request, after~ : Bool = false) -> Json {
   {
     "root": request.execution_root,
     "head": "synthetic-base-head",
@@ -64,7 +64,7 @@ fn wenyu_fixture_snapshot(request : Request, after? : Bool = false) -> Json {
 ///|
 fn wenyu_fixture_queued(request : Request) -> Work {
   let request = { ..request, generation: 1, }
-  let hash = digest(request.to_json().stringify())
+  let hash = digest(ToJson::to_json(request).stringify())
   {
     id: "town-work-" + hash[:32].to_owned(),
     request,
@@ -83,6 +83,7 @@ fn wenyu_fixture_queued(request : Request) -> Work {
 }
 
 ///|
+#warnings("-unused_async")
 fn wenyu_fixture_reserved(request : Request) -> Work {
   let queued = wenyu_fixture_queued(request)
   reserve(
@@ -183,25 +184,30 @@ test "wenyu reserved body keeps original task and pins generated work identity" 
   assert_eq(text(contract, "owner_task_id"), "task")
   assert_eq(text(contract, "owner_goal_id"), "goal")
   assert_true(field(contract, "constraints").stringify().contains(work.id))
-  assert_eq(rows(contract, "scope"), ["source.mbt".to_json()])
+  assert_eq(rows(contract, "scope"), [ToJson::to_json("source.mbt")])
   assert_eq(field(contract, "completion_policy"), Json::null())
   assert_true(
-    rows(payload, "planner_allowed_tools").contains("checkpoint".to_json()),
+    rows(payload, "planner_allowed_tools").contains(
+      ToJson::to_json("checkpoint"),
+    ),
   )
   assert_true(
-    rows(payload, "planner_allowed_tools").contains("apply_patch".to_json()),
+    rows(payload, "planner_allowed_tools").contains(
+      ToJson::to_json("apply_patch"),
+    ),
   )
 }
 
 ///|
+#warnings("-reserved_keyword-unused_async")
 async test "wenyu uncertain dispatch replays saved model and exact bytes without fresh selection" {
   let request = wenyu_fixture_request()
   let work = wenyu_fixture_reserved(request)
   let calls : Array[String] = []
   let bodies : Array[String] = []
-  let client = fixture_client(request, async fn(method, route, body) {
-    calls.push(method + " " + route)
-    if method == "GET" {
+  let client = fixture_client(request, async fn(method_val, route, body) {
+    calls.push(method_val + " " + route)
+    if method_val == "GET" {
       return Err("native_not_found")
     }
     bodies.push(body)
@@ -230,6 +236,7 @@ async test "wenyu uncertain dispatch replays saved model and exact bytes without
 }
 
 ///|
+#warnings("-unresolved_type_variable")
 test "wenyu policy rejects permissive malformed or unsupported completion requirements" {
   for
     boundary in [
@@ -242,11 +249,11 @@ test "wenyu policy rejects permissive malformed or unsupported completion requir
   }
   for
     commands in [
-      [].to_json(),
-      [" "].to_json(),
-      ["moon check --no-render", "moon check --no-render"].to_json(),
-      ["git push"].to_json(),
-      [true].to_json(),
+      ToJson::to_json([]),
+      ToJson::to_json([" "]),
+      ToJson::to_json(["moon check --no-render", "moon check --no-render"]),
+      ToJson::to_json(["git push"]),
+      ToJson::to_json([true]),
     ] {
     let request = wenyu_fixture_request()
     no_change_set(
@@ -271,9 +278,9 @@ test "wenyu invalid output never grants a successful mutation receipt" {
       output,
       boundary,
       if boundary == "behavior" {
-        true.to_json()
+        ToJson::to_json(true)
       } else {
-        "".to_json()
+        ToJson::to_json("")
       },
     )
     let result = reconcile_repair_evidence(
@@ -314,7 +321,7 @@ test "wenyu rejects absent failed stale or unattributed evidence and all no chan
     match boundary {
       "missing-check" => {
         journal.pop() |> ignore
-        no_change_set(events, "event_count", (1).to_json())
+        no_change_set(events, "event_count", ToJson::to_json(1))
       }
       "failed-check" =>
         journal[1] = fixture_validation(work, "check-2", ok=false)
@@ -323,21 +330,25 @@ test "wenyu rejects absent failed stale or unattributed evidence and all no chan
         let check = journal[1]
         journal[0] = check
         journal[1] = mutation
-        no_change_set(check, "journal_sequence", "1".to_json())
-        no_change_set(mutation, "journal_sequence", "2".to_json())
+        no_change_set(check, "journal_sequence", ToJson::to_json("1"))
+        no_change_set(mutation, "journal_sequence", ToJson::to_json("2"))
       }
       "unattributed" => {
         journal.remove(0) |> ignore
-        no_change_set(events, "event_count", (1).to_json())
+        no_change_set(events, "event_count", ToJson::to_json(1))
       }
-      "head" => no_change_set(snapshot, "head", "changed-head".to_json())
+      "head" => no_change_set(snapshot, "head", ToJson::to_json("changed-head"))
       "index" =>
-        no_change_set(snapshot, "index_digest", "changed-index".to_json())
+        no_change_set(
+          snapshot,
+          "index_digest",
+          ToJson::to_json("changed-index"),
+        )
       "dirty" =>
         no_change_set(
           field(snapshot, "files"),
           "notes.txt",
-          native_fingerprint(b"touched").to_json(),
+          ToJson::to_json(native_fingerprint(b"touched")),
         )
       "no-change" => {
         no_change_set(snapshot, "files", field(work.baseline, "files"))
@@ -347,7 +358,7 @@ test "wenyu rejects absent failed stale or unattributed evidence and all no chan
           field(work.baseline, "source_digest"),
         )
         journal.remove(0) |> ignore
-        no_change_set(events, "event_count", (1).to_json())
+        no_change_set(events, "event_count", ToJson::to_json(1))
       }
       _ => ()
     }
@@ -423,12 +434,13 @@ async test "wenyu unreserved cancellation records no native execution and never 
 }
 
 ///|
+#warnings("-reserved_keyword-unused_async")
 async test "wenyu and PlanBook reserve one shared source at a time even when dispatch is uncertain" {
   let request = wenyu_fixture_request()
   let pending = wenyu_fixture_queued(request)
   let calls : Array[String] = []
-  let client = fixture_client(request, async fn(method, route, _) {
-    calls.push(method + " " + route)
+  let client = fixture_client(request, async fn(method_val, route, _) {
+    calls.push(method_val + " " + route)
     Err("must-not-call")
   })
   for kind in ["wenyu_build", "planbook_repair"] {

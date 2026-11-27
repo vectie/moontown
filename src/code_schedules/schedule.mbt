@@ -1,6 +1,7 @@
 ///|
 /// MoonTown owns the cadence and dispatch identity. MoonClaw owns the session
 /// and every resulting Code turn.
+#derive(Debug, ToJson, FromJson)
 pub struct CodeSchedule {
   id : String
   book_id : String
@@ -8,7 +9,7 @@ pub struct CodeSchedule {
   session_id : String
   prompt : String
   model : String
-  interval_seconds : Int
+  interval_seconds : Int32
   enabled : Bool
   next_due_at : Int64
   pending_command_id : String
@@ -21,9 +22,10 @@ pub struct CodeSchedule {
   recurrence : String?
   timezone : String?
   calendar_anchor_at : Int64?
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct CodeDispatchIntent {
   schedule_id : String
   command_id : String
@@ -33,7 +35,7 @@ pub struct CodeDispatchIntent {
   prompt : String
   model : String
   due_at : Int64
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
 fn valid_schedule_id(value : String) -> Bool {
@@ -52,7 +54,7 @@ pub fn CodeSchedule::new(
   session_id~ : String,
   prompt~ : String,
   model~ : String,
-  interval_seconds~ : Int,
+  interval_seconds~ : Int32,
   now~ : Int64,
 ) -> Result[CodeSchedule, String] {
   if !valid_schedule_id(id) ||
@@ -183,7 +185,7 @@ pub fn CodeSchedule::reschedule(
   prompt~ : String,
   model~ : String,
   title~ : String,
-  interval_seconds~ : Int,
+  interval_seconds~ : Int32,
   next_due_at~ : Int64,
   repeat~ : Bool,
 ) -> Result[CodeSchedule, String] {

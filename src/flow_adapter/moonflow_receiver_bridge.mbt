@@ -1,4 +1,5 @@
 ///|
+#warnings("-unused_field")
 priv struct MoonFlowResearchReceiver {
   intake : Json
   root : String
@@ -353,7 +354,7 @@ pub async fn prepare_moonflow_research_receipt(
   workspace : String,
   intake : Json,
   result_package : Json,
-  callback_http_status : Int,
+  callback_http_status : Int32,
   recorded_at : String,
 ) -> Json {
   guard callback_http_status >= 200 && callback_http_status < 300 else {

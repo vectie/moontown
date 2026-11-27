@@ -1,6 +1,6 @@
 ///|
 fn optional_env_text(key : String) -> String? {
-  match @sys.get_env_var(key) {
+  match @env.get_env_var(key) {
     Some(value) => {
       let trimmed = value.trim().to_owned()
       if trimmed.is_empty() {
@@ -61,8 +61,8 @@ fn merge_single_book(
 
 ///|
 async fn bootstrap_moontown_planbook(
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  workspace_root? : String = @moonbook.default_workspace_root(
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  workspace_root~ : String = @moonbook.default_workspace_root(
     default_planbook_book_id(),
   ),
 ) -> String {
@@ -186,9 +186,9 @@ async fn write_planbook_workspace(entry : @moonbook.BookCatalogEntry) -> Unit {
 
 ///|
 async fn bootstrap_wenyu_game_design_course_book(
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  workspace_root? : String = @course_book.default_wenyu_course_workspace_root(),
-  source_workspace_root? : String = "",
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  workspace_root~ : String = @course_book.default_wenyu_course_workspace_root(),
+  source_workspace_root~ : String = "",
 ) -> String {
   @course_book_runtime.bootstrap_wenyu_game_design_course_book(
     book_catalog_path~,

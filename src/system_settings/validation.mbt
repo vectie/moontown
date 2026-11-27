@@ -1,9 +1,9 @@
 ///|
 fn require_setting_range(
   key : String,
-  value : Int,
-  minimum : Int,
-  maximum : Int,
+  value : Int32,
+  minimum : Int32,
+  maximum : Int32,
 ) -> Unit raise {
   if value < minimum || value > maximum {
     fail("`\{key}` must be between \{minimum} and \{maximum}")

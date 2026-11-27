@@ -1,12 +1,13 @@
 ///|
+#derive(Debug, Eq)
 pub(all) struct CivicCommunicationMetricCounts {
-  participant_count : Int
-  idea_count : Int
-  research_question_count : Int
-  participant_idea_links : Int
-  participating_book_coverage_count : Int
-  idea_return_home_count : Int
-} derive(Debug, Eq)
+  participant_count : Int32
+  idea_count : Int32
+  research_question_count : Int32
+  participant_idea_links : Int32
+  participating_book_coverage_count : Int32
+  idea_return_home_count : Int32
+}
 
 ///|
 /// Computes structural exchange/reduction/distribution metrics.
@@ -97,13 +98,13 @@ fn civic_communication_average_books_per_output_label(
 
 ///|
 fn civic_communication_structural_score(
-  participant_count~ : Int,
-  idea_count~ : Int,
-  research_question_count~ : Int,
-  participating_book_coverage_count~ : Int,
-  idea_return_home_count~ : Int,
-  participant_idea_links~ : Int,
-) -> Int {
+  participant_count~ : Int32,
+  idea_count~ : Int32,
+  research_question_count~ : Int32,
+  participating_book_coverage_count~ : Int32,
+  idea_return_home_count~ : Int32,
+  participant_idea_links~ : Int32,
+) -> Int32 {
   // Score completion against the declared round, not an unrelated large-town
   // constant. A deliberately small cross-book salon can be structurally
   // complete; one-person input still receives only half of the exchange score.
@@ -125,10 +126,10 @@ fn civic_communication_structural_score(
 
 ///|
 fn civic_communication_score_component(
-  value : Int,
-  target : Int,
-  max : Int,
-) -> Int {
+  value : Int32,
+  target : Int32,
+  max : Int32,
+) -> Int32 {
   if target <= 0 {
     0
   } else if value >= target {
@@ -141,7 +142,7 @@ fn civic_communication_score_component(
 ///|
 fn civic_communication_follow_up_question_count(
   ideas : Array[CivicCommunicationIdea],
-) -> Int {
+) -> Int32 {
   let mut count = 0
   for idea in ideas {
     count += idea.research_questions.length()
@@ -152,7 +153,7 @@ fn civic_communication_follow_up_question_count(
 ///|
 fn civic_communication_participant_output_link_count(
   ideas : Array[CivicCommunicationIdea],
-) -> Int {
+) -> Int32 {
   let mut count = 0
   for idea in ideas {
     count += idea.participating_books.length()
@@ -163,7 +164,7 @@ fn civic_communication_participant_output_link_count(
 ///|
 fn civic_communication_covered_book_count(
   ideas : Array[CivicCommunicationIdea],
-) -> Int {
+) -> Int32 {
   let covered : Array[String] = []
   for idea in ideas {
     for book_id in idea.participating_books {

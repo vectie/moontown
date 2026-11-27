@@ -109,7 +109,7 @@ fn wenyu_build_review_step_json() -> Json {
 fn wenyu_build_step_metadata(
   preferred_skills~ : Array[String],
   board_lane~ : String,
-  board_order~ : Int,
+  board_order~ : Int32,
 ) -> Json {
   let fields = @moonclaw_runtime.moonclaw_step_metadata_fields(
     preferred_skills~,
@@ -119,7 +119,7 @@ fn wenyu_build_step_metadata(
     board_lane~,
     board_order~,
   )
-  fields["model"] = @codex.model().to_json()
+  fields["model"] = ToJson::to_json(@codex.model())
   Json::object(fields)
 }
 

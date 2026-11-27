@@ -3,7 +3,7 @@
 /// quote or changing imported source bytes. Position is one-based.
 pub fn MaterialNotebook::revise_excerpt(
   self : MaterialNotebook,
-  position : Int,
+  position : Int32,
   observation : String,
   challenge : String,
 ) -> MaterialNotebook raise {

@@ -11,8 +11,8 @@ fn failed_civic_communication_reduction(
   packet_id : String?,
   packet_path : String?,
   summary : String,
-  proposal_id? : String? = None,
-  run_id? : String? = None,
+  proposal_id~ : String? = None,
+  run_id~ : String? = None,
 ) -> CivicCommunicationReductionResult {
   {
     ideas: [],

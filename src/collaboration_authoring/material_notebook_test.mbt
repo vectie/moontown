@@ -17,7 +17,7 @@ async test "public material import returns editable source data without writing 
   ]
   @fs.write_file(
     root + "/catalog.json",
-    catalog.to_json().stringify(),
+    ToJson::to_json(catalog).stringify(),
     create_mode=CreateNew,
   )
   let store : @collaboration_authoring.Store = {

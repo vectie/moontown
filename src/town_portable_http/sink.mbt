@@ -1,17 +1,17 @@
 ///|
 /// The production adapter and socket-free tests use this exact response seam.
 pub struct ResponseSink {
-  start_response : async (Int, Map[String, String]) -> Unit
+  start_response : async (Int32, Map[String, String]) -> Unit
   write_bytes : async (Bytes) -> Unit
   end_response : async () -> Unit
   close_connection : () -> Unit
   mut started : Bool
-  mut idle_timeout_ms : Int
+  mut idle_timeout_ms : Int32
 }
 
 ///|
 pub fn response_sink(
-  start : async (Int, Map[String, String]) -> Unit,
+  start : async (Int32, Map[String, String]) -> Unit,
   write : async (Bytes) -> Unit,
   finish : async () -> Unit,
   close : () -> Unit,
@@ -42,7 +42,7 @@ pub impl @io.Writer for ResponseSink with fn write_once(
 ///|
 async fn ResponseSink::start(
   self : ResponseSink,
-  code : Int,
+  code : Int32,
   headers : Map[String, String],
 ) -> Unit {
   self.started = true
@@ -54,7 +54,7 @@ async fn ResponseSink::start(
 ///|
 async fn ResponseSink::json(
   self : ResponseSink,
-  code : Int,
+  code : Int32,
   value : Json,
 ) -> Unit {
   let bytes = @utf8.encode(value.stringify())

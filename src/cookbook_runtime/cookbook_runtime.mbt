@@ -1,8 +1,8 @@
 ///|
 pub async fn bootstrap_moontown_cookbook(
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  workspace_root? : String = @cookbook.default_cookbook_workspace_root(),
-  manifest_path? : String = @cookbook.default_cookbook_manifest_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  workspace_root~ : String = @cookbook.default_cookbook_workspace_root(),
+  manifest_path~ : String = @cookbook.default_cookbook_manifest_path(),
 ) -> String {
   let entry = @cookbook.book_entry(workspace_root)
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
@@ -15,7 +15,7 @@ pub async fn bootstrap_moontown_cookbook(
   )
   @support.write_text_file(
     manifest_path,
-    manifest.to_json().stringify(indent=2),
+    ToJson::to_json(manifest).stringify(indent=2),
   )
   write_moontown_cookbook_workspace(entry, manifest)
   let status = inspect_moontown_cookbook(workspace_root~, manifest_path~)
@@ -24,8 +24,8 @@ pub async fn bootstrap_moontown_cookbook(
 
 ///|
 pub async fn inspect_moontown_cookbook(
-  workspace_root? : String = @cookbook.default_cookbook_workspace_root(),
-  manifest_path? : String = @cookbook.default_cookbook_manifest_path(),
+  workspace_root~ : String = @cookbook.default_cookbook_workspace_root(),
+  manifest_path~ : String = @cookbook.default_cookbook_manifest_path(),
 ) -> @cookbook.MoontownCookbookStatus {
   let manifest = observe_moontown_cookbook_manifest(
     workspace_root, manifest_path,
@@ -41,8 +41,8 @@ pub async fn inspect_moontown_cookbook(
 
 ///|
 pub async fn render_moontown_cookbook_status(
-  workspace_root? : String = @cookbook.default_cookbook_workspace_root(),
-  manifest_path? : String = @cookbook.default_cookbook_manifest_path(),
+  workspace_root~ : String = @cookbook.default_cookbook_workspace_root(),
+  manifest_path~ : String = @cookbook.default_cookbook_manifest_path(),
 ) -> String {
   @cookbook.status_markdown(
     inspect_moontown_cookbook(workspace_root~, manifest_path~),

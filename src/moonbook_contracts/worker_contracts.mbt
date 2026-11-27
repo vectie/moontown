@@ -52,6 +52,7 @@ pub fn executable_book_event_protocol() -> String {
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct ExecutableBookLifecycleProof {
   contract_id : String
   owner : String
@@ -59,15 +60,16 @@ pub struct ExecutableBookLifecycleProof {
   book_root : String
   ready : Bool
   status : String
-  completed_step_count : Int
-  step_count : Int
-  blocked_step_count : Int
+  completed_step_count : Int32
+  step_count : Int32
+  blocked_step_count : Int32
   first_blocker_id : String
   first_blocker_label : String
   first_blocker_evidence : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct ExecutableBookEvent {
   protocol : String
   id : String
@@ -84,7 +86,7 @@ pub struct ExecutableBookEvent {
   evidence_id : String?
   review_path : String?
   lifecycle_proof : ExecutableBookLifecycleProof?
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn ExecutableBookEvent::new(
@@ -92,15 +94,15 @@ pub fn ExecutableBookEvent::new(
   book_id~ : String,
   result_id~ : String,
   summary~ : String,
-  artifacts? : Array[String] = [],
-  run_id? : String? = None,
-  event_type? : String = "knowledge_accepted",
-  accepted? : Bool = true,
-  requires_review? : Bool = false,
-  notify_town? : Bool = false,
-  evidence_id? : String? = None,
-  review_path? : String? = None,
-  lifecycle_proof? : ExecutableBookLifecycleProof? = None,
+  artifacts~ : Array[String] = [],
+  run_id~ : String? = None,
+  event_type~ : String = "knowledge_accepted",
+  accepted~ : Bool = true,
+  requires_review~ : Bool = false,
+  notify_town~ : Bool = false,
+  evidence_id~ : String? = None,
+  review_path~ : String? = None,
+  lifecycle_proof~ : ExecutableBookLifecycleProof? = None,
 ) -> ExecutableBookEvent {
   {
     protocol: executable_book_event_protocol(),
@@ -122,6 +124,7 @@ pub fn ExecutableBookEvent::new(
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct ExecutableBookEventRoute {
   town_event : @core.TownEvent
   notify_operator : Bool
@@ -129,7 +132,7 @@ pub struct ExecutableBookEventRoute {
   lifecycle_ready : Bool
   first_blocker_id : String
   route_reason : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn ExecutableBookEvent::lifecycle_status(
@@ -212,8 +215,8 @@ pub fn ExecutableBookEvent::route_reason(self : ExecutableBookEvent) -> String {
 ///|
 pub fn ExecutableBookEvent::to_town_event(
   self : ExecutableBookEvent,
-  index : Int,
-  proposal_id? : String? = None,
+  index : Int32,
+  proposal_id~ : String? = None,
 ) -> @core.TownEvent {
   let kind = self.town_event_kind()
   let evidence = self.evidence_id.unwrap_or("none")
@@ -238,8 +241,8 @@ pub fn ExecutableBookEvent::to_town_event(
 ///|
 pub fn ExecutableBookEvent::route_to_town(
   self : ExecutableBookEvent,
-  index : Int,
-  proposal_id? : String? = None,
+  index : Int32,
+  proposal_id~ : String? = None,
 ) -> ExecutableBookEventRoute {
   {
     town_event: self.to_town_event(index, proposal_id~),

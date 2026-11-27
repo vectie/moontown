@@ -1,5 +1,5 @@
 ///|
-pub fn semantic_ready_threshold() -> Int {
+pub fn semantic_ready_threshold() -> Int32 {
   80
 }
 
@@ -9,7 +9,7 @@ pub fn stable_action() -> String {
 }
 
 ///|
-pub fn semantic_repair_action(semantic_repair_task? : String? = None) -> String {
+pub fn semantic_repair_action(semantic_repair_task~ : String? = None) -> String {
   match semantic_repair_task {
     Some(task) if !task.trim().is_empty() =>
       "AI semantic review repair: \{task.trim()}"

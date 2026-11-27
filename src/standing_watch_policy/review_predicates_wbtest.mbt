@@ -1,8 +1,8 @@
 ///|
 fn standing_watch_review_predicate_execution(
-  task_id? : String = "standing-watch-opc-news-tick-1",
-  summary? : String = "standing_goal_decision: needs_review\ndelta_score: 0\nnew_source_count: 0",
-  status? : @core.TaskExecutionStatus = ReviewQueued,
+  task_id~ : String = "standing-watch-opc-news-tick-1",
+  summary~ : String = "standing_goal_decision: needs_review\ndelta_score: 0\nnew_source_count: 0",
+  status~ : @core.TaskExecutionStatus = ReviewQueued,
 ) -> @core.TaskExecutionRecord {
   @core.TaskExecutionRecord::new(
     task_id~,

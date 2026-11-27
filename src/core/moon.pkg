@@ -1,9 +1,8 @@
 import {
-  "moonbitlang/core/json",
   "moonbitlang/x/path",
   "vectie/moontown/system_settings",
 }
 
 import {
-  "moonbitlang/core/test",
+  "moonbitlang/core/json",
 } for "test"

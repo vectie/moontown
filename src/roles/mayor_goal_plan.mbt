@@ -3,7 +3,7 @@ pub fn Mayor::plan_goal(
   self : Mayor,
   catalog : Array[@moonbook.BookCatalogEntry],
   goal : String,
-  explicit_book_id? : String? = None,
+  explicit_book_id~ : String? = None,
 ) -> MayorGoalPlan {
   ignore(self)
   let prompt = mayor_goal_decomposition_prompt(catalog, goal, explicit_book_id~)

@@ -111,7 +111,7 @@ test "collective experiment rejects incomplete fabricated stale or single-book p
       @collaboration_contract.collective_followup(
         saved,
         work,
-        change_salon_field(fields, key, value.to_json()),
+        change_salon_field(fields, key, ToJson::to_json(value)),
       )
       is Err(_),
       msg=key,
@@ -277,7 +277,7 @@ test "collective notes survive retries while independent salon and new result in
   let settled = pending.settle(
     pending.generation,
     "oneoff-followup",
-    reply.to_json().stringify(),
+    ToJson::to_json(reply).stringify(),
   )
   assert_eq(settled.draft.draft_id, "combined-pilot")
   assert_eq(settled.revision, "r-next")
@@ -291,7 +291,11 @@ test "collective notes survive retries while independent salon and new result in
   assert_eq(
     pending
     .dismiss()
-    .settle(pending.generation, "oneoff-followup", reply.to_json().stringify()).draft,
+    .settle(
+      pending.generation,
+      "oneoff-followup",
+      ToJson::to_json(reply).stringify(),
+    ).draft,
     saved.draft,
   )
 }

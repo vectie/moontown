@@ -37,7 +37,7 @@ fn parse_json_from_command_text(text : String) -> Json raise {
         let start = count - offset - 1
         let line = lines[start].trim()
         if line.has_prefix("{") || line.has_prefix("[") {
-          let builder = StringBuilder::new()
+          let builder = StringBuilder()
           for index in start..<count {
             if index > start {
               builder.write_char('\n')

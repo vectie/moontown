@@ -26,7 +26,7 @@ async fn load_unlocked(path : String) -> State {
   let ids : Map[String, Bool] = Map([])
   for work in state.work {
     guard !ids.contains(work.id) &&
-      work.request_digest == digest(work.request.to_json().stringify()) &&
+      work.request_digest == digest(ToJson::to_json(work.request).stringify()) &&
       work.request.input_digest == digest(work.request.prompt) else {
       fail("native_work_identity_invalid")
     }
@@ -56,7 +56,7 @@ async fn save_unlocked(path : String, state : State) -> Unit {
   @support.ensure_parent_directory(path)
   @fs.write_file(
     path + ".next",
-    state.to_json().stringify(indent=2) + "\n",
+    ToJson::to_json(state).stringify(indent=2) + "\n",
     create_mode=CreateOrTruncate,
     permission=0o600,
     sync=Full,
@@ -92,7 +92,7 @@ async fn sync_state_directories(path : String) -> Unit {
 }
 
 ///|
-pub async fn load(path? : String = default_path()) -> State {
+pub async fn load(path~ : String = default_path()) -> State {
   let lock = lock_state(path)
   defer lock.close()
   defer lock.unlock()
@@ -104,7 +104,7 @@ pub async fn load(path? : String = default_path()) -> State {
 /// default or later producer input never changes pending work.
 pub async fn enqueue(
   request : Request,
-  path? : String = default_path(),
+  path~ : String = default_path(),
 ) -> Work {
   let lock = lock_state(path)
   defer lock.close()
@@ -150,7 +150,7 @@ pub async fn enqueue(
     generation = generation.max(existing.request.generation + 1)
   }
   let request = { ..request, generation, }
-  let hash = digest(request.to_json().stringify())
+  let hash = digest(ToJson::to_json(request).stringify())
   let work : Work = {
     id: "town-work-" + hash[:32].to_owned(),
     request,
@@ -197,8 +197,8 @@ fn replace_work(state : State, updated : Work) -> State {
 /// control surface; supersession cannot silently abandon their late effects.
 pub async fn supersede(
   id : String,
-  expected_revision : Int,
-  path? : String = default_path(),
+  expected_revision : Int32,
+  path~ : String = default_path(),
 ) -> Work {
   let lock = lock_state(path)
   defer lock.close()

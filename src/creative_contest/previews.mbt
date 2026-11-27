@@ -1,9 +1,10 @@
 ///|
+#derive(Eq)
 pub(all) enum ImageVariant {
   Original
   Thumbnail
   Preview
-} derive(Eq)
+}
 
 ///|
 // This remembers only derived files, never identities or visibility decisions.
@@ -15,6 +16,7 @@ fn preview_key(path : String, id : String) -> String {
 }
 
 ///|
+#warnings("-deprecated")
 fn remember_previews(path : String, id : String) -> Unit {
   if preview_files.length() >= 8192 {
     preview_files.clear()

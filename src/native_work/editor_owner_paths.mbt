@@ -49,7 +49,7 @@ fn editor_owner_directory(work_id : String) -> String raise {
     fail("editor_owner_work_id_invalid")
   }
   for character in work_id[10:].to_owned() {
-    guard character is ('0'..='9' | 'a'..='f') else {
+    guard character is ('0'..<='9' | 'a'..<='f') else {
       fail("editor_owner_work_id_invalid")
     }
   }

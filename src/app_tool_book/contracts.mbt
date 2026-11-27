@@ -43,7 +43,7 @@ pub fn config(
   skills : Array[String],
   websites : Array[String],
   civic_building_id : String,
-  cadence_ticks : Int,
+  cadence_ticks : Int32,
 ) -> AppToolBookConfig {
   {
     template_id: "app-tool-book",
@@ -116,7 +116,7 @@ pub fn config_with_catalog_identity(
   workspace_root : String,
   websites : Array[String],
   civic_building_id : String,
-  cadence_ticks : Int,
+  cadence_ticks : Int32,
 ) -> AppToolBookConfig {
   config(
     book_id,

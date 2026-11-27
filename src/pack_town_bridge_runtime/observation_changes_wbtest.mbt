@@ -54,7 +54,12 @@ async test "actual observation-change UI envelope survives native intake mailbox
     )
     @installer.install_authorized(source, workspace, profile) |> ignore
     assert_true(
-      ingest_projection(workspace, state_path, projection.to_json(), "t2").accepted,
+      ingest_projection(
+        workspace,
+        state_path,
+        ToJson::to_json(projection),
+        "t2",
+      ).accepted,
     )
   }
   let before = load_runtime_state(state_path)
@@ -67,11 +72,11 @@ async test "actual observation-change UI envelope survives native intake mailbox
   let changes = observation_fixture_field(context, "observation_changes")
   assert_eq(
     observation_fixture_field(changes, "contract_id"),
-    "moontown.observation-change-review.v1".to_json(),
+    ToJson::to_json("moontown.observation-change-review.v1"),
   )
   assert_eq(
     observation_fixture_field(changes, "accepted_knowledge"),
-    false.to_json(),
+    ToJson::to_json(false),
   )
   let selected : Array[Json] = @json.from_json(
     observation_fixture_field(changes, "selected_changes"),
@@ -79,11 +84,11 @@ async test "actual observation-change UI envelope survives native intake mailbox
   assert_eq(selected.length(), 2)
   assert_eq(
     observation_fixture_field(selected[0], "status"),
-    "changed".to_json(),
+    ToJson::to_json("changed"),
   )
   assert_eq(
     observation_fixture_field(selected[1], "status"),
-    "newly-projected".to_json(),
+    ToJson::to_json("newly-projected"),
   )
   let submitted = submit_candidate(workspace, state_path, candidate, "t3")
   assert_true(submitted.accepted)
@@ -95,7 +100,7 @@ async test "actual observation-change UI envelope survives native intake mailbox
   assert_eq(@json.parse(@fs.read_file(inbox).text()), candidate)
   let reloaded = load_runtime_state(state_path)
   assert_eq(reloaded.candidate_envelopes.length(), 1)
-  assert_eq(reloaded.candidate_envelopes[0].to_json(), candidate)
+  assert_eq(ToJson::to_json(reloaded.candidate_envelopes[0]), candidate)
   assert_eq(reloaded.projections, before.projections)
   let replay = submit_candidate(workspace, state_path, candidate, "t4")
   assert_eq(replay.receipt, submitted.receipt)

@@ -375,7 +375,7 @@ async fn operator_requests_json() -> Json {
     let value = @json.parse(trimmed) catch { _ => continue }
     push_json_projection_tail(rows, value, operator_request_projection_limit())
   }
-  rows.to_json()
+  ToJson::to_json(rows)
 }
 
 ///|
@@ -383,7 +383,7 @@ async fn watcher_records_json() -> Json {
   let rows : Array[Json] = []
   let directory = state_root() + "/watchers"
   guard @fs.exists(directory) && @fs.kind(directory) is Directory else {
-    return rows.to_json()
+    return ToJson::to_json(rows)
   }
   let dir = @fs.opendir(directory)
   defer dir.close()
@@ -401,7 +401,7 @@ async fn watcher_records_json() -> Json {
       push_watcher_record_projection(rows, value)
     }
   }
-  rows.to_json()
+  ToJson::to_json(rows)
 }
 
 ///|
@@ -482,7 +482,7 @@ fn bounded_town_snapshot_text(text : String) -> String? {
   let snapshot : @storage.TownSnapshot = @json.from_json(parsed) catch {
     _ => return None
   }
-  Some(@storage.project_town_snapshot(snapshot).to_json().stringify())
+  Some(ToJson::to_json(@storage.project_town_snapshot(snapshot)).stringify())
 }
 
 ///|
@@ -510,7 +510,7 @@ fn json_int_field(
 
 ///|
 fn safe_slug(value : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let mut last_dash = false
   for char in value.to_lower() {
     if (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') {
@@ -802,7 +802,7 @@ async fn handle_request(
     let goals = match
       read_optional_json(state_root() + "/standing-goals.json") {
       Some(value) => value
-      None => ([] : Array[Json]).to_json()
+      None => Json::array([])
     }
     send_json(conn, 200, goals)
     return
@@ -836,7 +836,11 @@ async fn handle_request(
       send_json(
         conn,
         200,
-        @moonbook.load_or_create_catalog(path=@moonbook.default_catalog_path()).to_json(),
+        ToJson::to_json(
+          @moonbook.load_or_create_catalog(
+            path=@moonbook.default_catalog_path(),
+          ),
+        ),
       )
       return
     }
@@ -863,7 +867,7 @@ async fn handle_request(
           return
         }
       }
-      send_json(conn, 200, state.to_json())
+      send_json(conn, 200, ToJson::to_json(state))
       return
     }
     if reject_unsafe_operator_write(request, conn) {

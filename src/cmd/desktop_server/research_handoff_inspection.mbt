@@ -1,10 +1,11 @@
 ///|
+#derive(FromJson)
 struct ResearchHandoffInspectionRequest {
   contract_version : String
   handoff_url : String
   expected_contract : String
   expected_handoff_id : String
-} derive(FromJson)
+}
 
 ///|
 fn research_handoff_inspection_request_version() -> String {
@@ -49,7 +50,7 @@ fn safe_loopback_research_handoff_url(url : String) -> Bool {
 fn research_handoff_inspection_reply(
   ok : Bool,
   requested_url : String,
-  upstream_status : Int,
+  upstream_status : Int32,
   handoff : Json?,
   error : String,
 ) -> Json {

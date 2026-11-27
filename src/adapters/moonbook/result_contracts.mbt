@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct WorkerContextBundle {
   book_id : String
   workspace_root : String
@@ -13,29 +14,31 @@ pub struct WorkerContextBundle {
   working_memory : Array[String]
   memory_summary : String
   output_contract : Array[String]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct MemoryCandidate {
   kind : String
   title : String
   detail : String
   durable : Bool
   target_page : String?
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn MemoryCandidate::new(
   kind~ : String,
   title~ : String,
   detail~ : String,
-  durable? : Bool = false,
-  target_page? : String? = None,
+  durable~ : Bool = false,
+  target_page~ : String? = None,
 ) -> MemoryCandidate {
   { kind, title, detail, durable, target_page, }
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct BookResult {
   result_id : String
   summary : String
@@ -43,16 +46,16 @@ pub struct BookResult {
   memory_candidates : Array[MemoryCandidate]
   requires_review : Bool
   notify_town : Bool
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn BookResult::new(
   result_id~ : String,
   summary~ : String,
-  artifacts? : Array[String] = [],
-  memory_candidates? : Array[MemoryCandidate] = [],
-  requires_review? : Bool = false,
-  notify_town? : Bool = false,
+  artifacts~ : Array[String] = [],
+  memory_candidates~ : Array[MemoryCandidate] = [],
+  requires_review~ : Bool = false,
+  notify_town~ : Bool = false,
 ) -> BookResult {
   {
     result_id,
@@ -93,9 +96,9 @@ fn decode_book_result_envelope(value : Json) -> BookResult? {
 pub fn BookResult::to_executable_book_event(
   self : BookResult,
   book_id~ : String,
-  evidence_id? : String? = None,
-  run_id? : String? = None,
-  review_path? : String? = None,
+  evidence_id~ : String? = None,
+  run_id~ : String? = None,
+  review_path~ : String? = None,
 ) -> @moonbook_contracts.ExecutableBookEvent {
   let evidence_part = evidence_id.unwrap_or(self.result_id)
   let event_type = if self.requires_review {
@@ -120,6 +123,7 @@ pub fn BookResult::to_executable_book_event(
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct PersistResultOutcome {
   log_path : String
   updated_pages : Array[String]
@@ -129,7 +133,7 @@ pub struct PersistResultOutcome {
   executable_event_path : String
   latest_executable_event_path : String
   executable_event : @moonbook_contracts.ExecutableBookEvent
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn PersistResultOutcome::new(

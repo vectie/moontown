@@ -1,15 +1,16 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct PdfEvidenceWatchBookStatus {
   book_id : String
   workspace_root : String
-  required_count : Int
-  missing_count : Int
+  required_count : Int32
+  missing_count : Int32
   missing_paths : Array[String]
   has_catalog_entry : Bool
   has_standing_goal : Bool
   standing_goal_enabled : Bool
   ready : Bool
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn render_pdf_evidence_watch_book_status(

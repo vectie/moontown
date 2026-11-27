@@ -1,14 +1,15 @@
 ///|
+#derive(FromJson)
 priv struct OperatorRequestRecord {
   status : String
   title : String
   prompt : String
   target_book_id : String
-  cadence_ticks : Int
+  cadence_ticks : Int32
   source_policy : String
-  quality_threshold : Int
+  quality_threshold : Int32
   standing_goal_id : String
-} derive(FromJson)
+}
 
 ///|
 fn default_operator_request_ledger_path() -> String {
@@ -56,7 +57,7 @@ async fn load_accepted_operator_request_goals_file(
 ///|
 pub async fn merge_accepted_operator_request_goals(
   goals : Array[@core.StandingGoal],
-  path? : String = default_operator_request_ledger_path(),
+  path~ : String = default_operator_request_ledger_path(),
 ) -> Array[@core.StandingGoal] {
   let merged = goals.copy()
   for recovered in load_accepted_operator_request_goals_file(path) {

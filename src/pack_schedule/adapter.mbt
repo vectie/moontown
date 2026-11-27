@@ -1,5 +1,6 @@
 ///|
 /// A generic schedule registration owned by a pack, not by a domain runtime.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ScheduleBinding {
   pack_id : String
   product_id : String
@@ -8,12 +9,13 @@ pub(all) struct ScheduleBinding {
   cadence : String
   timezone : String
   workflow_id : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ScheduleRegistry {
   schedules : Array[ScheduleBinding]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn empty_registry() -> ScheduleRegistry {

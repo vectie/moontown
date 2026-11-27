@@ -2,16 +2,16 @@
 async fn record_standing_watch_cycle_decision(
   state : @core.TownState,
   goal : @core.StandingGoal,
-  tick : Int,
+  tick : Int32,
   target_book_id : String,
   ledger_dir : String,
   decision : @core.WatcherDecisionKind,
   detail : String,
-  task_id? : String? = None,
-  run_id? : String? = None,
-  delta_score? : Int = 0,
-  new_source_count? : Int = 0,
-  no_change_streak? : Int = 0,
+  task_id~ : String? = None,
+  run_id~ : String? = None,
+  delta_score~ : Int32 = 0,
+  new_source_count~ : Int32 = 0,
+  no_change_streak~ : Int32 = 0,
 ) -> @core.StandingGoal {
   let updated = goal.mark_watcher_decision(tick, decision, no_change_streak~)
   let record = @core.WatcherRunRecord::new(
@@ -37,11 +37,11 @@ async fn record_standing_watch_cycle_decision(
 async fn record_completed_standing_watch_cycle(
   state : @core.TownState,
   goal : @core.StandingGoal,
-  tick : Int,
+  tick : Int32,
   target_book_id : String,
   ledger_dir : String,
   execution : @core.TaskExecutionRecord,
-  previous_no_change_streak : Int,
+  previous_no_change_streak : Int32,
 ) -> @core.StandingGoal {
   let decision = @standing_watch_policy.standing_watch_decision_from_execution(
     execution,

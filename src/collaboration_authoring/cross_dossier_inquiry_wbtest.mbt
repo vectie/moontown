@@ -37,7 +37,7 @@ async test "cross dossier API verifies two histories captures current sources sa
   let request = {
     ..retained_inquiry_request(input.inquiry),
     action: "cross-dossier-inquiry",
-    payload: Some(input.to_json()),
+    payload: Some(ToJson::to_json(input)),
   }
   let reply = store.request(request, "2026-10-20T03:02:00Z")
   assert_true(reply.ok, msg=reply.error)

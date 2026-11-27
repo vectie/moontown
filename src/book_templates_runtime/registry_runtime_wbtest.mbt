@@ -57,7 +57,10 @@ async test "generic book template installer dispatches pdf evidence watch" {
     cadence_ticks: 19,
     workspace_root,
   }
-  @support.write_text_file(config_path, spec.to_json().stringify(indent=2))
+  @support.write_text_file(
+    config_path,
+    ToJson::to_json(spec).stringify(indent=2),
+  )
   let summary = install_book_template_config(
     "pdf-evidence-watch",
     config_path,
@@ -97,7 +100,10 @@ async test "generic book template installer dispatches app tool book" {
     cadence_ticks: 29,
     workspace_root,
   }
-  @support.write_text_file(config_path, spec.to_json().stringify(indent=2))
+  @support.write_text_file(
+    config_path,
+    ToJson::to_json(spec).stringify(indent=2),
+  )
   let summary = install_book_template_config(
     "app-tool-book",
     config_path,

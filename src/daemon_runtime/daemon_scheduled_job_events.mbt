@@ -1,7 +1,7 @@
 ///|
 fn daemon_scheduled_job_event_for_summary(
   job : @scheduler.ScheduledJob,
-  tick : Int,
+  tick : Int32,
   summary : String,
 ) -> @core.TownEvent? {
   if @scheduler.scheduled_job_runs_civic_communication(job) &&
@@ -33,7 +33,7 @@ fn daemon_scheduled_job_event_for_summary(
 ///|
 fn daemon_scheduled_job_event(
   job : @scheduler.ScheduledJob,
-  tick : Int,
+  tick : Int32,
   summary : String,
 ) -> @core.TownEvent {
   @core.TownEvent::new(

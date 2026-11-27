@@ -1,7 +1,7 @@
 ///|
 async fn latest_protocol_reduction(
   building_id : String,
-  ledger_base_dir? : String = default_protocol_ledger_base_dir(),
+  ledger_base_dir~ : String = default_protocol_ledger_base_dir(),
 ) -> @civic.BuildingReductionResult? {
   match latest_protocol_json_line(building_id, "reductions", ledger_base_dir~) {
     Some(line) =>
@@ -13,7 +13,7 @@ async fn latest_protocol_reduction(
 ///|
 async fn latest_protocol_reduction_summary(
   building_id : String,
-  ledger_base_dir? : String = default_protocol_ledger_base_dir(),
+  ledger_base_dir~ : String = default_protocol_ledger_base_dir(),
 ) -> String {
   match latest_protocol_reduction(building_id, ledger_base_dir~) {
     Some(result) =>
@@ -40,7 +40,7 @@ async fn latest_protocol_reduction_summary(
 ///|
 async fn latest_protocol_distribution(
   building_id : String,
-  ledger_base_dir? : String = default_protocol_ledger_base_dir(),
+  ledger_base_dir~ : String = default_protocol_ledger_base_dir(),
 ) -> @civic.BuildingDistributionRecord? {
   match latest_protocol_json_line(building_id, "outbox", ledger_base_dir~) {
     Some(line) =>
@@ -52,7 +52,7 @@ async fn latest_protocol_distribution(
 ///|
 async fn latest_protocol_distribution_summary(
   building_id : String,
-  ledger_base_dir? : String = default_protocol_ledger_base_dir(),
+  ledger_base_dir~ : String = default_protocol_ledger_base_dir(),
 ) -> String {
   match latest_protocol_distribution(building_id, ledger_base_dir~) {
     Some(record) =>
@@ -80,7 +80,7 @@ async fn latest_protocol_distribution_summary(
 pub async fn latest_protocol_json_line(
   building_id : String,
   ledger : String,
-  ledger_base_dir? : String = default_protocol_ledger_base_dir(),
+  ledger_base_dir~ : String = default_protocol_ledger_base_dir(),
 ) -> String? {
   let text = @support.read_text_or_empty(
     protocol_ledger_path(building_id, ledger, ledger_base_dir~),
@@ -104,7 +104,7 @@ async fn latest_protocol_json_string_field(
   building_id : String,
   ledger : String,
   field : String,
-  ledger_base_dir? : String = default_protocol_ledger_base_dir(),
+  ledger_base_dir~ : String = default_protocol_ledger_base_dir(),
 ) -> String {
   let text = @support.read_text_or_empty(
     protocol_ledger_path(building_id, ledger, ledger_base_dir~),

@@ -1,23 +1,24 @@
 ///|
+#derive(Eq)
 priv struct OccurrenceTime {
-  day : Int
-  seconds : Int
+  day : Int32
+  seconds : Int32
   all_day : Bool
-} derive(Eq, Debug)
+}
 
 ///|
-fn occurrence_leap(year : Int) -> Bool {
+fn occurrence_leap(year : Int32) -> Bool {
   year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
 }
 
 ///|
-fn occurrence_year_days(year : Int) -> Int {
+fn occurrence_year_days(year : Int32) -> Int32 {
   let y = year - 1
   y * 365 + y / 4 - y / 100 + y / 400
 }
 
 ///|
-fn occurrence_month_days(year : Int, month : Int) -> Int {
+fn occurrence_month_days(year : Int32, month : Int32) -> Int32 {
   if month == 2 {
     if occurrence_leap(year) {
       29
@@ -32,13 +33,13 @@ fn occurrence_month_days(year : Int, month : Int) -> Int {
 }
 
 ///|
-fn occurrence_day(value : String) -> Int? {
+fn occurrence_day(value : String) -> Int32? {
   if value.length() != 8 || !value.iter().all(c => c >= '0' && c <= '9') {
     return None
   }
-  let year = @string.parse_int(try! value[0:4].to_string()) catch { _ => 0 }
-  let month = @string.parse_int(try! value[4:6].to_string()) catch { _ => 0 }
-  let date = @string.parse_int(try! value[6:8].to_string()) catch { _ => 0 }
+  let year = @string.parse_int(value[0:4].to_owned()) catch { _ => 0 }
+  let month = @string.parse_int(value[4:6].to_owned()) catch { _ => 0 }
+  let date = @string.parse_int(value[6:8].to_owned()) catch { _ => 0 }
   if year < 1 ||
     month < 1 ||
     month > 12 ||
@@ -54,7 +55,7 @@ fn occurrence_day(value : String) -> Int? {
 }
 
 ///|
-fn occurrence_pad(value : Int, width : Int) -> String {
+fn occurrence_pad(value : Int32, width : Int32) -> String {
   let mut text = value.to_string()
   while text.length() < width {
     text = "0" + text
@@ -63,7 +64,7 @@ fn occurrence_pad(value : Int, width : Int) -> String {
 }
 
 ///|
-fn occurrence_date(day : Int) -> String {
+fn occurrence_date(day : Int32) -> String {
   let mut year = day / 366 + 1
   while occurrence_year_days(year + 1) <= day {
     year += 1
@@ -82,11 +83,11 @@ fn occurrence_date(day : Int) -> String {
 }
 
 ///|
-fn occurrence_window_day(value : String) -> Int? {
+fn occurrence_window_day(value : String) -> Int32? {
   if value.length() != 10 ||
     !value.iter().all(c => (c >= '0' && c <= '9') || c == '-') ||
-    !(try! (value[4:5].to_string() == "-")) ||
-    !(try! (value[7:8].to_string() == "-")) {
+    !(value[4:5].to_owned() == "-") ||
+    !(value[7:8].to_owned() == "-") {
     return None
   }
   occurrence_day(value.replace_all(old="-", new=""))
@@ -116,23 +117,23 @@ fn occurrence_time(
   if value.length() != 16 ||
     !value.iter().all(c => (c >= '0' && c <= '9') || c == 'T' || c == 'Z') ||
     !value.has_suffix("Z") ||
-    !(try! (value[8:9].to_string() == "T")) ||
+    !(value[8:9].to_owned() == "T") ||
     params.contains("VALUE=DATE;") ||
     params.has_suffix("VALUE=DATE") {
     return Err(
       "Only UTC YYYYMMDDTHHMMSSZ or all-day YYYYMMDD are supported; floating/named-zone times are unsupported",
     )
   }
-  guard occurrence_day(try! value[0:8].to_string()) is Some(day) else {
+  guard occurrence_day(value[0:8].to_owned()) is Some(day) else {
     return Err("Invalid calendar date")
   }
-  let digits = try! value[9:15].to_string()
+  let digits = value[9:15].to_owned()
   if !digits.iter().all(c => c >= '0' && c <= '9') {
     return Err("Invalid UTC time")
   }
-  let hh = @string.parse_int(try! digits[0:2].to_string()) catch { _ => 99 }
-  let mm = @string.parse_int(try! digits[2:4].to_string()) catch { _ => 99 }
-  let ss = @string.parse_int(try! digits[4:6].to_string()) catch { _ => 99 }
+  let hh = @string.parse_int(digits[0:2].to_owned()) catch { _ => 99 }
+  let mm = @string.parse_int(digits[2:4].to_owned()) catch { _ => 99 }
+  let ss = @string.parse_int(digits[4:6].to_owned()) catch { _ => 99 }
   if hh > 23 || mm > 59 || ss > 59 {
     return Err("Invalid UTC time; leap seconds are unsupported")
   }

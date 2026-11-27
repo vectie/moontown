@@ -45,7 +45,7 @@ test "claim intake refuses inconsistent source summary duplicate claims schema a
     ] {
     assert_true(
       @collaboration_contract.decode_claim_comparison(
-        altered.to_json().stringify(),
+        ToJson::to_json(altered).stringify(),
       )
       is Err(_),
     )

@@ -77,17 +77,17 @@ fn marketplace_action_request_wire(
     "decision_summary": request.decision_summary,
     "instruction": request.instruction,
     "execution_bounds": match request.execution_bounds {
-      Some(bounds) => bounds.to_json()
+      Some(bounds) => ToJson::to_json(bounds)
       None => Json::null()
     },
     "execution_handoff_id": optional_string_wire(request.execution_handoff_id),
     "worker_run_id": optional_string_wire(request.worker_run_id),
     "runtime_status": request.runtime_status,
     "result_summary": request.result_summary,
-    "result_evidence_refs": request.result_evidence_refs.to_json(),
+    "result_evidence_refs": ToJson::to_json(request.result_evidence_refs),
     "created_at_ms": request.created_at_ms.to_string(),
     "decided_at_ms": match request.decided_at_ms {
-      Some(value) => value.to_string().to_json()
+      Some(value) => ToJson::to_json(value.to_string())
       None => Json::null()
     },
     "updated_at_ms": request.updated_at_ms.to_string(),

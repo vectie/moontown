@@ -57,7 +57,7 @@ fn save_application(
   })
   guard base.actor == actor else { raise Denied }
   let expected = integer(payload, "expected_revision", 0, 2147483646)
-  let merged = fields(base.to_json())
+  let merged = fields(ToJson::to_json(base))
   for (key, value) in fields(payload) {
     merged[key] = value
   }

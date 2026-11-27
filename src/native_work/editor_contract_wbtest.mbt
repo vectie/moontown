@@ -6,7 +6,7 @@ async test "editor finish schema preserves exact selection acceptance and reserv
   let contract = field(field(reserved, "payload"), "task_contract")
   assert_eq(text(reserved, "book_root"), work.request.execution_root)
   assert_eq(text(reserved, "model_workspace"), work.request.owner_workspace)
-  assert_eq(field(contract, "scope"), ["."].to_json())
+  assert_eq(field(contract, "scope"), ToJson::to_json(["."]))
   assert_true(field(contract, "constraints").stringify().contains(work.id))
   assert_true(
     field(contract, "constraints").stringify().contains("selection_digest"),
@@ -28,7 +28,7 @@ async test "editor finish schema preserves exact selection acceptance and reserv
       "outcome", "summary",
     ] {
     let answer = @json.parse(work.output)
-    no_change_set(answer, key, "".to_json())
+    no_change_set(answer, key, ToJson::to_json(""))
     assert_false(
       editor_result_satisfies_contract(work, answer.stringify(), false),
       msg=key,
@@ -36,14 +36,16 @@ async test "editor finish schema preserves exact selection acceptance and reserv
   }
   for
     changed in [
-      ([] : Array[Json]).to_json(),
-      [
+      Json::array([]),
+      ToJson::to_json([
         {
           "acceptance": "Different acceptance",
           "explanation": "Plausible prose is not a frozen requirement",
         },
-      ].to_json(),
-      [{ "acceptance": "A road can be edited", "explanation": "" }].to_json(),
+      ]),
+      ToJson::to_json([
+        { "acceptance": "A road can be edited", "explanation": "" },
+      ]),
     ] {
     let answer = @json.parse(work.output)
     no_change_set(answer, "acceptance_evidence", changed)
@@ -54,7 +56,7 @@ async test "editor finish schema preserves exact selection acceptance and reserv
   let duplicate = "{\"work_id\":\"other\"," + work.output[1:].to_owned()
   assert_false(editor_result_satisfies_contract(work, duplicate, false))
   let extra = @json.parse(work.output)
-  no_change_set(extra, "output_path", "../../human.md".to_json())
+  no_change_set(extra, "output_path", ToJson::to_json("../../human.md"))
   assert_false(editor_result_satisfies_contract(work, extra.stringify(), false))
 }
 
@@ -67,7 +69,7 @@ async test "editor owner unsupported request or receipt identities cannot create
       "output_digest", "session_id", "command_id", "model", "model_workspace", "request_body_digest",
     ] {
     let receipt = @json.parse(work.receipt.stringify())
-    no_change_set(receipt, key, "other".to_json())
+    no_change_set(receipt, key, ToJson::to_json("other"))
     let invalid = { ..work, receipt, }
     assert_false(editor_evidence_bound(invalid), msg=key)
     let blocked = apply_editor_owner_result(invalid)

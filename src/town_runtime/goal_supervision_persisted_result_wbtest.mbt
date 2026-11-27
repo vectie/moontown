@@ -32,7 +32,7 @@ async test "review queue closes when MoonBook already persisted non-review resul
   )
   @support.write_text_file(
     "\{root}/book-results/goal-course-bootstrap.json",
-    result.to_json().stringify(),
+    ToJson::to_json(result).stringify(),
   )
   let state = goal_supervision_test_state()
   state.register_execution(
@@ -70,7 +70,7 @@ async test "failed execution closes into review when MoonBook already persisted 
   )
   @support.write_text_file(
     "\{root}/book-results/goal-synthesis.json",
-    result.to_json().stringify(),
+    ToJson::to_json(result).stringify(),
   )
   let state = goal_supervision_test_state()
   state.register_execution(

@@ -1,19 +1,19 @@
 ///|
 test "mayor runtime is strategic planner only with constrained tools" {
-  let mayor = Mayor::new()
+  let mayor = @roles.Mayor::new()
   let runtime = mayor.runtime()
   assert_eq(runtime.role_id, "mayor")
-  assert_eq(runtime.planning_layer.to_string(), "Strategic")
-  assert_eq(runtime.runtime_mode.to_string(), "PlannerOnly")
-  assert_eq(runtime.tool_access.to_string(), "Limited")
-  assert_eq(runtime.memory_scope.to_string(), "Global")
+  assert_eq(Show::to_string(runtime.planning_layer), "Strategic")
+  assert_eq(Show::to_string(runtime.runtime_mode), "PlannerOnly")
+  assert_eq(Show::to_string(runtime.tool_access), "Limited")
+  assert_eq(Show::to_string(runtime.memory_scope), "Global")
   assert_true(!runtime.allow_execution_tools)
   assert_true(!runtime.allow_workspace_write)
 }
 
 ///|
 test "mayor dispatch delegates to town routing logic" {
-  let mayor = Mayor::new()
+  let mayor = @roles.Mayor::new()
   let state = @moontown.modeled_state()
   let packet = mayor.decide_dispatch(state, state.tasks[0])
   ignore(packet.decision)
@@ -23,7 +23,7 @@ test "mayor dispatch delegates to town routing logic" {
 
 ///|
 test "mayor handoff targets keeper role" {
-  let mayor = Mayor::new()
+  let mayor = @roles.Mayor::new()
   let state = @moontown.modeled_state()
   let handoff = mayor.handoff_to_keeper(
     state.books[0],
@@ -31,12 +31,12 @@ test "mayor handoff targets keeper role" {
     "coding book planning and memory scope",
   )
   assert_eq(handoff.target_role_id, "keeper:coding")
-  assert_eq(handoff.kind.to_string(), "StrategicToDomain")
+  assert_eq(Show::to_string(handoff.kind), "StrategicToDomain")
 }
 
 ///|
 test "mayor plans parallel research lanes for multi-subject goal" {
-  let mayor = Mayor::new()
+  let mayor = @roles.Mayor::new()
   let plan = mayor.plan_goal(
     @moonbook.default_catalog(),
     "research moontown, moonbook, and moonclaw",
@@ -59,7 +59,7 @@ test "mayor plans parallel research lanes for multi-subject goal" {
 
 ///|
 test "mayor uses policy research request vocabulary for parallel lanes" {
-  let mayor = Mayor::new()
+  let mayor = @roles.Mayor::new()
   let plan = mayor.plan_goal(
     @moonbook.default_catalog(),
     "compare moonbook and moonclaw",
@@ -72,7 +72,7 @@ test "mayor uses policy research request vocabulary for parallel lanes" {
 
 ///|
 test "mayor decomposes Wenyu Valley PRD build into civic lanes" {
-  let mayor = Mayor::new()
+  let mayor = @roles.Mayor::new()
   let plan = mayor.plan_goal(
     @moonbook.default_catalog(),
     "Build Wenyu Valley AI Innovation Town according to docs/WENYU_VALLEY_PRD.md",
@@ -104,7 +104,7 @@ test "mayor decomposes Wenyu Valley PRD build into civic lanes" {
 
 ///|
 test "mayor creates dynamic OPC research book for standing goal target" {
-  let mayor = Mayor::new()
+  let mayor = @roles.Mayor::new()
   let plan = mayor.plan_goal(
     @moonbook.default_catalog(),
     "Research the latest One Person Company OPC news.",
@@ -125,7 +125,7 @@ test "mayor creates dynamic OPC research book for standing goal target" {
 
 ///|
 test "mayor supervision marks stale executions for recovery" {
-  let mayor = Mayor::new()
+  let mayor = @roles.Mayor::new()
   let state = @moontown.modeled_state()
   let current = state.executions[0]
   let execution = @core.TaskExecutionRecord::new(
@@ -158,7 +158,7 @@ test "mayor supervision marks stale executions for recovery" {
 
 ///|
 test "mayor supervision does not repeat synced review queue directives" {
-  let mayor = Mayor::new()
+  let mayor = @roles.Mayor::new()
   let state = @core.empty_state(
     @core.TownConfig::new(id="test-town", name="Test Town"),
   )
@@ -180,7 +180,7 @@ test "mayor supervision does not repeat synced review queue directives" {
 
 ///|
 test "mayor supervision retries review queued research quality gaps in place" {
-  let mayor = Mayor::new()
+  let mayor = @roles.Mayor::new()
   let state = @core.empty_state(
     @core.TownConfig::new(id="test-town", name="Test Town"),
   )

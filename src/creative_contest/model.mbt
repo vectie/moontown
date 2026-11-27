@@ -1,14 +1,16 @@
 ///|
+#derive(Debug)
 pub(all) suberror CreativeError {
   Denied
   Invalid(String)
   Conflict(String)
   Unavailable
-} derive(Debug)
+}
 
 ///|
 /// The existing civic Challenge remains the public brief. Provider settings
 /// are trusted deployment configuration and are never returned to browsers.
+#derive(FromJson)
 pub struct Config {
   brief : @competition_brief.Challenge
   opens_ms : UInt64
@@ -25,9 +27,10 @@ pub struct Config {
   participant_account_ids : Array[String]?
   voting_mode : String?
   guest_generation : Bool?
-} derive(FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 struct Generation {
   id : String
   actor : String
@@ -40,9 +43,10 @@ struct Generation {
   sha256 : String
   reason : String
   provider_id : String
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 struct Entry {
   id : String
   generation_id : String
@@ -54,18 +58,20 @@ struct Entry {
   reviewed_ms : UInt64
   reviewer : String
   reason : String
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 struct Award {
   entry_id : String
   prize : String
   reason : String
   recorded_ms : UInt64
   operator : String
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 struct ReviewEvent {
   entry_id : String
   actor : String
@@ -75,9 +81,10 @@ struct ReviewEvent {
   resulting_state : String
   revision : Int32
   created_ms : UInt64
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 struct State {
   challenge_id : String
   revision : Int32
@@ -90,7 +97,7 @@ struct State {
   voting_rosters : Array[VotingRoster]
   voting_settlements : Array[VotingSettlement]
   review_events : Array[ReviewEvent]
-} derive(ToJson, FromJson)
+}
 
 ///|
 fn hash(value : String) -> String {
@@ -246,7 +253,7 @@ async fn save(path : String, state : State) -> Unit {
   }
   @fs.write_file(
     path + ".next",
-    state.to_json().stringify(),
+    ToJson::to_json(state).stringify(),
     create_mode=CreateOrTruncate,
     permission=0o600,
     sync=Full,

@@ -3,9 +3,10 @@
 /// production evidence reconciliation. Their check journals are injected, not
 /// claims that a compiler or provider ran. Producer/full-policy coverage lives
 /// in planbook_runtime/planbook_native_editor_wbtest.mbt.
+#warnings("-unused_async")
 async fn editor_owner_fixture(
-  no_change? : Bool = false,
-  real_pipeline? : Bool = false,
+  no_change~ : Bool = false,
+  real_pipeline~ : Bool = false,
 ) -> (Work, String) {
   let root = @fs.realpath(@fsx.mkdtemp("/tmp/town-editor-owner-XXXXXX"))
   let base = wenyu_fixture_request(root~)
@@ -128,16 +129,16 @@ async fn editor_owner_fixture(
   no_change_set(
     answer,
     "summary",
-    "Explicit synthetic owner replay fixture".to_json(),
+    ToJson::to_json("Explicit synthetic owner replay fixture"),
   )
   let receipt = if no_change {
-    no_change_set(answer, "outcome", "no_change".to_json())
+    no_change_set(answer, "outcome", ToJson::to_json("no_change"))
     let receipt = no_change_fixture_receipt(running)
     let metadata = field(
       field(rows(field(receipt, "execution"), "tool_results")[0], "result"),
       "metadata",
     )
-    no_change_set(metadata, "answer", answer.stringify().to_json())
+    no_change_set(metadata, "answer", ToJson::to_json(answer.stringify()))
     receipt
   } else {
     @support.write_text_file(request.execution_root + "/source.mbt", "after\n")
@@ -164,6 +165,7 @@ async fn editor_owner_fixture(
 }
 
 ///|
+#warnings("-reserved_keyword-unused_async")
 async test "editor owner interrupted package pages and receipt resume through terminal sync without transport" {
   for
     stop in [
@@ -189,12 +191,12 @@ async test "editor owner interrupted package pages and receipt resume through te
       work: [stopped],
     })
     let calls : Array[String] = []
-    let client = fixture_client(work.request, async fn(method, route, _) {
-      calls.push(method + route)
+    let client = fixture_client(work.request, async fn(method_val, route, _) {
+      calls.push(method_val + route)
       Err("must-not-call")
     })
     let observed = refresh(work.id, 2, 6UL, path~, client~)
-    assert_eq(observed.to_json(), stopped.to_json())
+    assert_eq(ToJson::to_json(observed), ToJson::to_json(stopped))
     let applied = sync(work.id, 7UL, path~, client~)
     assert_eq(owner_status(applied), "completed", msg=applied.blocked_reason)
     assert_eq(
@@ -206,9 +208,9 @@ async test "editor owner interrupted package pages and receipt resume through te
       Some("road-editor"),
     )
     let again = sync(work.id, 8UL, path~, client~)
-    assert_eq(again.to_json(), applied.to_json())
+    assert_eq(ToJson::to_json(again), ToJson::to_json(applied))
     assert_eq(calls.length(), 0)
-    assert_eq(applied.request.to_json(), work.request.to_json())
+    assert_eq(ToJson::to_json(applied.request), ToJson::to_json(work.request))
     assert_eq(
       applied.reservation.unwrap().request_body,
       work.reservation.unwrap().request_body,
@@ -217,6 +219,7 @@ async test "editor owner interrupted package pages and receipt resume through te
 }
 
 ///|
+#warnings("-reserved_keyword")
 async test "editor owner selection drift retains package and exact retry never accepts same ID changed acceptance" {
   let (work, path) = editor_owner_fixture()
   let selection_path = work.request.book_root +
@@ -226,7 +229,7 @@ async test "editor owner selection drift retains package and exact retry never a
   no_change_set(
     changed,
     "acceptance",
-    ["A different acceptance requirement"].to_json(),
+    ToJson::to_json(["A different acceptance requirement"]),
   )
   @support.write_text_file(selection_path, changed.stringify())
   let blocked = sync(work.id, 6UL, path~)
@@ -237,18 +240,18 @@ async test "editor owner selection drift retains package and exact retry never a
     editor_owner_directory(work.id) +
     "/output-package.json"
   assert_true(@fs.exists(package_path))
-  let package = @fs.read_file(package_path).text()
+  let pkg_val = @fs.read_file(package_path).text()
   assert_false(@fs.exists(work.request.result_path))
   assert_eq(editor_applied_feature(work.request.book_root), None)
   @support.write_text_file(selection_path, original_selection)
   let applied = sync(work.id, 7UL, path~)
   assert_eq(owner_status(applied), "completed", msg=applied.blocked_reason)
-  assert_eq(@fs.read_file(package_path).text(), package)
+  assert_eq(@fs.read_file(package_path).text(), pkg_val)
   assert_eq(editor_applied_feature(work.request.book_root), Some("road-editor"))
   @support.write_text_file(selection_path, changed.stringify())
   assert_eq(editor_applied_feature(work.request.book_root), None)
   let replay = sync(work.id, 8UL, path~)
-  assert_eq(replay.to_json(), applied.to_json())
+  assert_eq(ToJson::to_json(replay), ToJson::to_json(applied))
 }
 
 ///|
@@ -280,7 +283,10 @@ async test "editor owner preserves human or newer pages before first application
     proof_path,
     proof + "\nHuman edit after acceptance\n",
   )
-  assert_eq(sync(work.id, 7UL, path~).to_json(), applied.to_json())
+  assert_eq(
+    ToJson::to_json(sync(work.id, 7UL, path~)),
+    ToJson::to_json(applied),
+  )
   assert_eq(
     @fs.read_file(proof_path).text(),
     proof + "\nHuman edit after acceptance\n",

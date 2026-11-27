@@ -7,6 +7,7 @@ async fn write_bridge_fixture(root : String) -> Unit {
     version: "1.0.0",
     display_name: "Bridge fixture",
     product_id: "bridge-fixture",
+    app_runtime_identity: None,
     kind: DomainPack,
     required_runtime_extensions: [],
     book_templates: [],

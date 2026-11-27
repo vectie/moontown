@@ -6,7 +6,7 @@ fn civic_communication_building_projection_json(
   ideas : Array[CivicCommunicationIdea],
   metrics : CivicCommunicationMetric,
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> String {
   let pattern = @civic.communication_pattern_for_scenario(scenario)
   let pattern_label = @civic.communication_pattern_label_for_scenario(scenario)

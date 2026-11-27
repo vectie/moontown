@@ -11,11 +11,11 @@ fn profile_content_json(profile : SupervisorProfile) -> Json {
     "role": profile.role,
     "mission": profile.mission,
     "tone": profile.tone,
-    "capabilities": profile.capabilities.to_json(),
+    "capabilities": ToJson::to_json(profile.capabilities),
     "bindings": {
       "workspaceId": profile.bindings.workspace_id,
       "buildingId": profile.bindings.building_id,
-      "bookIds": profile.bindings.book_ids.to_json(),
+      "bookIds": ToJson::to_json(profile.bindings.book_ids),
       "maxActiveWorkers": profile.bindings.max_active_workers,
     },
     "authorityCeiling": profile.authority_ceiling.id(),
@@ -37,7 +37,7 @@ fn profile_content_json(profile : SupervisorProfile) -> Json {
 pub fn supervisor_profile_projection(profile : SupervisorProfile) -> Json {
   let content = profile_content_json(profile)
   guard content is Object(fields) else { return content }
-  fields["contentDigest"] = profile.content_digest.to_json()
+  fields["contentDigest"] = ToJson::to_json(profile.content_digest)
   // Runtime identity is evidence-backed and remains unknown until a reconciled
   // MoonClaw activation receipt is available.
   fields["activeRunId"] = Json::null()
@@ -81,10 +81,14 @@ fn apply_activation_runtime_projection(
     response_cursor == receipt_cursor else {
     return
   }
-  fields["activeRunId"] = active_run_id.to_json()
-  fields["runtimeCursor"] = receipt_cursor.to_json()
-  fields["runtimeEvidenceSource"] = "moonclaw.supervisor-command-receipt.v1".to_json()
-  fields["runtimeModel"] = supervisor_activation_model(item.payload).to_json()
+  fields["activeRunId"] = ToJson::to_json(active_run_id)
+  fields["runtimeCursor"] = ToJson::to_json(receipt_cursor)
+  fields["runtimeEvidenceSource"] = ToJson::to_json(
+    "moonclaw.supervisor-command-receipt.v1",
+  )
+  fields["runtimeModel"] = ToJson::to_json(
+    supervisor_activation_model(item.payload),
+  )
 }
 
 ///|
@@ -104,8 +108,8 @@ fn supervisor_profile_runtime_projection(
   apply_activation_runtime_projection(fields, activation)
   match observation {
     Some(item) => {
-      fields["runtimeCursor"] = item.runtime_cursor.to_json()
-      fields["runtimeEvidenceSource"] = item.schema.to_json()
+      fields["runtimeCursor"] = ToJson::to_json(item.runtime_cursor)
+      fields["runtimeEvidenceSource"] = ToJson::to_json(item.schema)
     }
     None => ()
   }
@@ -170,7 +174,9 @@ fn activation_runtime_run_id(
 }
 
 ///|
-fn activation_runtime_cursor(activation : SupervisorActivationHandoff?) -> Int? {
+fn activation_runtime_cursor(
+  activation : SupervisorActivationHandoff?,
+) -> Int32? {
   guard activation is Some(item) &&
     activation_acknowledged_status(item.status) &&
     item.runtime_receipt is Some(Object(receipt)) else {
@@ -249,12 +255,14 @@ fn profile_response(
             }
           None => Json::null()
         },
-        "executionLineage": execution_lineage_projection_from_store(
-          store,
-          supervisor_profile_id=Some(value.profile_id),
-        ).to_json(),
+        "executionLineage": ToJson::to_json(
+          execution_lineage_projection_from_store(
+            store,
+            supervisor_profile_id=Some(value.profile_id),
+          ),
+        ),
         "runtimeActivity": runtime_activity_projection(observation),
-        "conversationHistory": conversation_history.to_json(),
+        "conversationHistory": ToJson::to_json(conversation_history),
         "assistantResponse": latest_runtime_assistant_response(
           conversation_history, observation,
         ),
@@ -301,7 +309,7 @@ fn runtime_conversation_event(
   parent_run_id : String,
   evidence_source : String,
   observation_digest : String,
-  runtime_cursor : Int,
+  runtime_cursor : Int32,
 ) -> Json? {
   guard event is Object(event_fields) else { return None }
   let cursor = json_int_alias(event_fields, "cursor", "cursor")
@@ -556,8 +564,8 @@ pub async fn SupervisorSetupApplication::supervisor_agents_projection(
       "buildingModuleKey": profile.bindings.building_id,
       "workspaceId": profile.bindings.workspace_id,
       "bookId": wire_string_or_null(book_id),
-      "bookIds": profile.bindings.book_ids.to_json(),
-      "capabilities": profile.capabilities.to_json(),
+      "bookIds": ToJson::to_json(profile.bindings.book_ids),
+      "capabilities": ToJson::to_json(profile.capabilities),
       "authorityCeiling": profile.authority_ceiling.id(),
       "profileRevision": profile.revision,
       "profileDigest": profile.content_digest,
@@ -571,13 +579,13 @@ pub async fn SupervisorSetupApplication::supervisor_agents_projection(
     guard agent is Object(agent_fields) else { continue }
     apply_activation_runtime_projection(agent_fields, activation)
     match activation_runtime_run_id(activation) {
-      Some(run_id) => agent_fields["runId"] = run_id.to_json()
+      Some(run_id) => agent_fields["runId"] = ToJson::to_json(run_id)
       None => ()
     }
     match observation {
       Some(item) => {
-        agent_fields["runtimeCursor"] = item.runtime_cursor.to_json()
-        agent_fields["runtimeEvidenceSource"] = item.schema.to_json()
+        agent_fields["runtimeCursor"] = ToJson::to_json(item.runtime_cursor)
+        agent_fields["runtimeEvidenceSource"] = ToJson::to_json(item.schema)
         guard item.status_projection is Object(status_fields) else {
           agents.push(Json::object(agent_fields))
           continue
@@ -586,13 +594,12 @@ pub async fn SupervisorSetupApplication::supervisor_agents_projection(
           Some(Null) | None => ()
           Some(event) => {
             agent_fields["activity"] = event
-            agent_fields["activitySource"] = item.schema.to_json()
+            agent_fields["activitySource"] = ToJson::to_json(item.schema)
           }
         }
-        agent_fields["runtimeStatus"] = json_string(
-          json_object(status_fields, "state"),
-          "lifecycle",
-        ).to_json()
+        agent_fields["runtimeStatus"] = ToJson::to_json(
+          json_string(json_object(status_fields, "state"), "lifecycle"),
+        )
       }
       None => ()
     }
@@ -728,7 +735,7 @@ fn latest_observed_worker(
   store : SupervisorSetupStore,
   supervisor_profile_id : String,
   worker_run_id : String,
-) -> (Json, Int)? {
+) -> (Json, Int32)? {
   let observation = latest_runtime_observation(store, supervisor_profile_id)
   guard observation is Some(item) &&
     item.status_projection is Object(status_fields) else {
@@ -747,7 +754,7 @@ fn latest_observed_worker(
 fn child_lineage_projection(
   handoff : SupervisorExecutionHandoff,
   worker : Json?,
-  runtime_cursor : Int?,
+  runtime_cursor : Int32?,
 ) -> Json {
   let task = handoff.worker_task
   let metadata = task.map(item => item.metadata).unwrap_or(Json::null())
@@ -779,19 +786,19 @@ fn child_lineage_projection(
     "runId": if worker_run_id.is_empty() {
       Json::null()
     } else {
-      worker_run_id.to_json()
+      ToJson::to_json(worker_run_id)
     },
     "workerRunId": if worker_run_id.is_empty() {
       Json::null()
     } else {
-      worker_run_id.to_json()
+      ToJson::to_json(worker_run_id)
     },
     "workerJobId": {
       let value = json_string(worker_fields, "worker_job_id")
       if value.is_empty() {
         Json::null()
       } else {
-        value.to_json()
+        ToJson::to_json(value)
       }
     },
     "providerTaskId": {
@@ -799,7 +806,7 @@ fn child_lineage_projection(
       if value.is_empty() {
         Json::null()
       } else {
-        value.to_json()
+        ToJson::to_json(value)
       }
     },
     "supervisorProfileId": handoff.supervisor_profile_id,
@@ -810,7 +817,7 @@ fn child_lineage_projection(
     "runtimeExecutionStatus": if execution_status.is_empty() {
       Json::null()
     } else {
-      execution_status.to_json()
+      ToJson::to_json(execution_status)
     },
     "runtimeCursor": wire_int_or_null(runtime_cursor),
     "title": task.map(item => item.title).unwrap_or(""),

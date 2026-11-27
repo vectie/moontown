@@ -1,13 +1,13 @@
 ///|
 fn test_protocol_snapshot(
   status~ : String,
-  ready? : Bool = false,
-  inbox_count? : Int = 0,
-  contribution_count? : Int = 0,
-  reduction_count? : Int = 0,
-  outbox_count? : Int = 0,
-  review_count? : Int = 0,
-  latest_reduction_summary? : String = "",
+  ready~ : Bool = false,
+  inbox_count~ : Int32 = 0,
+  contribution_count~ : Int32 = 0,
+  reduction_count~ : Int32 = 0,
+  outbox_count~ : Int32 = 0,
+  review_count~ : Int32 = 0,
+  latest_reduction_summary~ : String = "",
 ) -> BuildingProtocolSnapshot {
   {
     building_id: "test-building-\{status}",

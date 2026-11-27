@@ -1,7 +1,7 @@
 ///|
 pub fn research_quality_gate_execution_summary(
   original_summary : String,
-  gap_count : Int,
+  gap_count : Int32,
   auto_retry : Bool,
 ) -> String {
   "\{original_summary} / quality_gate_failed=\{gap_count} / auto_retry=\{auto_retry}"
@@ -11,7 +11,7 @@ pub fn research_quality_gate_execution_summary(
 pub fn research_quality_gate_event_detail(
   book_id : String,
   gaps : Array[String],
-  marked_count : Int,
+  marked_count : Int32,
 ) -> String {
   let gap_summary = gaps.join("; ")
   "Research quality gate failed for \{book_id}: \{gap_summary}; mayor marked \{marked_count} task(s) as review-queued and scheduled in-place repair retries when attempts remain."

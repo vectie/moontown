@@ -10,7 +10,7 @@ fn goal_supervision_test_state() -> @core.TownState {
 }
 
 ///|
-fn detached_import_receipt_json(status? : String = "") -> String {
+fn detached_import_receipt_json(status~ : String = "") -> String {
   if status == "" {
     "{\"proposal_id\":\"proposal-detached\",\"run_id\":\"run-detached\"}"
   } else {
@@ -38,8 +38,8 @@ fn running_snapshot_execution_without_run_id(
   task_id : String,
   book_id : String,
   summary : String,
-  heartbeat_tick : Int,
-  stale_after_tick : Int,
+  heartbeat_tick : Int32,
+  stale_after_tick : Int32,
 ) -> @core.TaskExecutionRecord {
   @core.TaskExecutionRecord::new(
     task_id~,
@@ -69,7 +69,7 @@ fn research_opc_book_entry(book_root : String) -> @moonbook.BookCatalogEntry {
 ///|
 fn research_opc_book_ref(
   workspace_root : String,
-  purpose? : String = "Watch OPC",
+  purpose~ : String = "Watch OPC",
 ) -> @core.BookRef {
   @core.BookRef::new(
     id="research-opc",
@@ -95,8 +95,8 @@ fn standing_watch_goal_fixture(
   title~ : String,
   prompt~ : String,
   book_id~ : String,
-  cadence_ticks? : Int = 60,
-  quality_threshold? : Int = 80,
+  cadence_ticks~ : Int32 = 60,
+  quality_threshold~ : Int32 = 80,
 ) -> @core.StandingGoal {
   @core.StandingGoal::new(
     id~,
@@ -111,19 +111,19 @@ fn standing_watch_goal_fixture(
 ///|
 fn standing_watch_execution_fixture(
   task_id~ : String,
-  book_id? : String = "research-opc",
-  packet_id? : String = "packet",
+  book_id~ : String = "research-opc",
+  packet_id~ : String = "packet",
   packet_path~ : String,
   status~ : @core.TaskExecutionStatus,
   summary~ : String,
-  heartbeat_tick? : Int = 10,
-  stale_after_tick? : Int = 40,
-  result_decision? : String = "",
-  last_command? : String? = None,
-  run_id? : String? = None,
-  requires_review? : Bool = false,
-  assigned_worker_id? : String? = None,
-  next_retry_tick? : Int? = None,
+  heartbeat_tick~ : Int32 = 10,
+  stale_after_tick~ : Int32 = 40,
+  result_decision~ : String = "",
+  last_command~ : String? = None,
+  run_id~ : String? = None,
+  requires_review~ : Bool = false,
+  assigned_worker_id~ : String? = None,
+  next_retry_tick~ : Int32? = None,
 ) -> @core.TaskExecutionRecord {
   @core.TaskExecutionRecord::new(
     task_id~,
@@ -194,15 +194,15 @@ async fn write_standing_watch_history_marker(
   book_root : String,
   marker : String,
   decision : String,
-  delta_score : Int,
-  new_source_count : Int,
+  delta_score : Int32,
+  new_source_count : Int32,
   book_changed : String,
-  next_check_hint? : String = "slower",
-  checked_sources_count? : Int = 5,
-  new_sources_found? : Int = 1,
-  accepted_facts_count? : Int = 0,
-  rejected_facts_count? : Int = 1,
-  wiki_pages_changed_count? : Int = 0,
+  next_check_hint~ : String = "slower",
+  checked_sources_count~ : Int32 = 5,
+  new_sources_found~ : Int32 = 1,
+  accepted_facts_count~ : Int32 = 0,
+  rejected_facts_count~ : Int32 = 1,
+  wiki_pages_changed_count~ : Int32 = 0,
 ) -> Unit {
   @support.write_text_file(
     "\{book_root}/wiki/history/standing-watch.md",

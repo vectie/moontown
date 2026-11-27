@@ -2,27 +2,29 @@
 /// The direction in which a block is divided into parcels. `LongestAxis`
 /// keeps the authored outline authoritative while selecting the least narrow
 /// subdivision for irregular Wenyu blocks.
+#derive(Debug, Eq)
 pub(all) enum ParcelSplitAxis {
   LongestAxis
   VerticalBands
   HorizontalBands
-} derive(Debug, Eq)
+}
 
 ///|
 /// The bounded grammar applied inside one authored land block.
+#derive(Debug, Eq)
 pub(all) struct ParcelGrammar {
-  target_count : Int
+  target_count : Int32
   split_axis : ParcelSplitAxis
   variation : PreservationLevel
   minimum_area_sqm : Double
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn parcel_grammar(
-  target_count : Int,
-  split_axis? : ParcelSplitAxis = LongestAxis,
-  variation? : PreservationLevel = Bounded,
-  minimum_area_sqm? : Double = 1.0,
+  target_count : Int32,
+  split_axis~ : ParcelSplitAxis = LongestAxis,
+  variation~ : PreservationLevel = Bounded,
+  minimum_area_sqm~ : Double = 1.0,
 ) -> ParcelGrammar {
   { target_count, split_axis, variation, minimum_area_sqm, }
 }
@@ -30,6 +32,7 @@ pub fn parcel_grammar(
 ///|
 /// An authored block before parcel IDs and program assignments are compiled.
 /// Its outer boundary and frontage list always survive compilation unchanged.
+#derive(Debug, Eq)
 pub(all) struct LandBlockSeed {
   id : StableId
   boundary : Polygon
@@ -40,7 +43,7 @@ pub(all) struct LandBlockSeed {
   grammar : ParcelGrammar
   buildable_regions : ReadOnlyArray[BuildableRegion]
   parcelable : Bool
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn land_block_seed(
@@ -51,8 +54,8 @@ pub fn land_block_seed(
   preservation : PreservationLevel,
   provenance : Provenance,
   grammar : ParcelGrammar,
-  buildable_regions? : ArrayView[BuildableRegion] = [],
-  parcelable? : Bool = true,
+  buildable_regions~ : ArrayView[BuildableRegion] = [],
+  parcelable~ : Bool = true,
 ) -> LandBlockSeed {
   {
     id,
@@ -91,6 +94,7 @@ fn LandBlockSeed::effective_buildable_regions(
 /// A semantic use that may be assigned to a compatible parcel. The catalog is
 /// deliberately renderer-neutral: a later place compiler decides its visual
 /// archetype from this stable program identity.
+#derive(Debug, Eq)
 pub(all) struct ParcelProgram {
   id : StableId
   label : String
@@ -98,18 +102,18 @@ pub(all) struct ParcelProgram {
   minimum_area_sqm : Double
   maximum_area_sqm : Double?
   requires_frontage : Bool
-  weight : Int
-} derive(Debug, Eq)
+  weight : Int32
+}
 
 ///|
 pub fn parcel_program(
   id : StableId,
   label : String,
   compatible_land_uses : ArrayView[LandUse],
-  minimum_area_sqm? : Double = 0.0,
+  minimum_area_sqm~ : Double = 0.0,
   maximum_area_sqm? : Double,
-  requires_frontage? : Bool = false,
-  weight? : Int = 100,
+  requires_frontage~ : Bool = false,
+  weight~ : Int32 = 100,
 ) -> ParcelProgram {
   {
     id,
@@ -126,27 +130,29 @@ pub fn parcel_program(
 /// The compiler-owned selection and placement seed for a parcel. A renderer or
 /// place compiler can vary the building without inventing another land-use
 /// decision or frontage relationship.
+#derive(Debug, Eq)
 pub(all) struct ParcelProgramAssignment {
   id : StableId
   parcel_id : StableId
   program_id : StableId
   placement_anchor : WorldPoint
   frontage_segment_id : StableId?
-  variant_seed : Int
+  variant_seed : Int32
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 /// Deterministic land-block, parcel, and program output. Its first two arrays
 /// can be passed directly to `compiled_town_world`.
+#derive(Debug, Eq)
 pub(all) struct ParcelPlan {
   compiler_version : String
-  layout_seed : Int
+  layout_seed : Int32
   land_blocks : ReadOnlyArray[LandBlock]
   parcels : ReadOnlyArray[Parcel]
   programs : ReadOnlyArray[ParcelProgram]
   assignments : ReadOnlyArray[ParcelProgramAssignment]
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn ParcelPlan::find_assignment(
@@ -177,6 +183,7 @@ pub fn ParcelPlan::parcels_for(
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum ParcelCompileError {
   InvalidCompilerVersion
   DuplicateBlockId(StableId)
@@ -187,9 +194,9 @@ pub(all) enum ParcelCompileError {
   InvalidParcelGrammar(StableId)
   InvalidProgram(StableId)
   MissingFrontageSegment(block_id~ : StableId, segment_id~ : StableId)
-  GeneratedParcelTooSmall(block_id~ : StableId, parcel_index~ : Int)
+  GeneratedParcelTooSmall(block_id~ : StableId, parcel_index~ : Int32)
   NoCompatibleProgram(StableId)
-} derive(Debug, Eq)
+}
 
 ///|
 priv enum ParcelClipBoundary {
@@ -386,7 +393,7 @@ fn clip_polygon(
 }
 
 ///|
-fn deterministic_number(seed : Int, key : String) -> Int {
+fn deterministic_number(seed : Int32, key : String) -> Int32 {
   let modulus = 1000003
   let mut hash = seed % modulus
   if hash < 0 {
@@ -409,7 +416,7 @@ fn variation_amplitude(level : PreservationLevel) -> Double {
 }
 
 ///|
-fn effective_seed(seed : Int, level : PreservationLevel) -> Int {
+fn effective_seed(seed : Int32, level : PreservationLevel) -> Int32 {
   match level {
     Fixed => 0
     _ => seed
@@ -420,8 +427,8 @@ fn effective_seed(seed : Int, level : PreservationLevel) -> Int {
 fn parcel_cuts(
   minimum : Double,
   maximum : Double,
-  count : Int,
-  seed : Int,
+  count : Int32,
+  seed : Int32,
   key : String,
   variation : PreservationLevel,
 ) -> Array[Double] {
@@ -443,8 +450,8 @@ fn parcel_cuts(
 fn parcel_geometries_for_region(
   block : LandBlockSeed,
   region : BuildableRegion,
-  target_count : Int,
-  seed : Int,
+  target_count : Int32,
+  seed : Int32,
 ) -> Array[Polygon] {
   let bounds = polygon_bounds(region.boundary)
   let width = bounds.maximum_x - bounds.minimum_x
@@ -495,14 +502,14 @@ priv struct CompiledParcelGeometry {
   boundary : Polygon
   land_use : LandUse
   region_id : StableId
-  index_in_region : Int
+  index_in_region : Int32
   legacy_single_region : Bool
 }
 
 ///|
 fn compiled_parcel_geometries(
   block : LandBlockSeed,
-  seed : Int,
+  seed : Int32,
 ) -> Array[CompiledParcelGeometry] {
   let regions : Array[BuildableRegion] = []
   for region in block.effective_buildable_regions() {
@@ -631,7 +638,7 @@ fn program_is_compatible(
 ///|
 fn choose_program(
   candidates : ArrayView[ParcelProgram],
-  seed : Int,
+  seed : Int32,
   parcel_id : StableId,
 ) -> ParcelProgram {
   let mut total_weight = 0
@@ -675,7 +682,7 @@ fn generated_provenance(
 /// polygons are clipped to that boundary and can never extend beyond it.
 pub fn compile_parcel_plan(
   compiler_version : String,
-  layout_seed : Int,
+  layout_seed : Int32,
   road_network : RoadNetwork,
   block_seeds : ArrayView[LandBlockSeed],
   programs : ArrayView[ParcelProgram],

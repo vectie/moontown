@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct ExternalProposalPacket {
   packet_id : String
   title : String
@@ -11,7 +12,7 @@ pub struct ExternalProposalPacket {
   notes : Array[String]
   tags : Array[String]
   metadata : Json
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn ExternalProposalPacket::new(
@@ -21,11 +22,11 @@ pub fn ExternalProposalPacket::new(
   request_text~ : String,
   profile~ : String,
   output_contract~ : String,
-  context_pages? : Array[String] = [],
-  skill_paths? : Array[String] = [],
-  notes? : Array[String] = [],
-  tags? : Array[String] = [],
-  metadata? : Json = Json::object({}),
+  context_pages~ : Array[String] = [],
+  skill_paths~ : Array[String] = [],
+  notes~ : Array[String] = [],
+  tags~ : Array[String] = [],
+  metadata~ : Json = Json::object({}),
 ) -> ExternalProposalPacket {
   {
     packet_id,
@@ -43,6 +44,7 @@ pub fn ExternalProposalPacket::new(
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct ProposalImportReceipt {
   packet_id : String
   packet_path : String
@@ -51,9 +53,10 @@ pub struct ProposalImportReceipt {
   status : @core.TaskExecutionStatus
   command : String
   summary : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct ProposalPollResponse {
   task_id : String
   run_id : String
@@ -63,7 +66,7 @@ pub struct ProposalPollResponse {
   result_decision : String
   requires_review : Bool
   notify_town : Bool
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn timed_out_poll_response(
@@ -84,9 +87,10 @@ pub fn timed_out_poll_response(
 }
 
 ///|
+#derive(Debug, Eq)
 pub struct SpawnWorkerRequest {
   worker : @core.WorkerRef
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn SpawnWorkerRequest::new(worker~ : @core.WorkerRef) -> SpawnWorkerRequest {
@@ -94,29 +98,31 @@ pub fn SpawnWorkerRequest::new(worker~ : @core.WorkerRef) -> SpawnWorkerRequest 
 }
 
 ///|
+#derive(Debug, Eq)
 pub struct AssignTaskRequest {
   assignment : @core.AssignmentPlan
   workspace_root : String
   context_summary : String
   skills : Array[String]
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn AssignTaskRequest::new(
   assignment~ : @core.AssignmentPlan,
   workspace_root~ : String,
   context_summary~ : String,
-  skills? : Array[String] = [],
+  skills~ : Array[String] = [],
 ) -> AssignTaskRequest {
   { assignment, workspace_root, context_summary, skills, }
 }
 
 ///|
+#derive(Debug, Eq)
 pub struct PollWorkerResponse {
   worker_id : String
   status : @core.WorkerStatus
   detail : String
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn PollWorkerResponse::new(
@@ -128,19 +134,20 @@ pub fn PollWorkerResponse::new(
 }
 
 ///|
+#derive(Debug, Eq)
 pub struct TaskResultResponse {
   task_id : String
   status : @core.TownTaskStatus
   summary : String
   memory_candidates : Array[String]
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn TaskResultResponse::new(
   task_id~ : String,
   status~ : @core.TownTaskStatus,
   summary~ : String,
-  memory_candidates? : Array[String] = [],
+  memory_candidates~ : Array[String] = [],
 ) -> TaskResultResponse {
   { task_id, status, summary, memory_candidates, }
 }

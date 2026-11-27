@@ -71,7 +71,7 @@ fn moontown_moonclaw_inline_enabled() -> Bool {
 }
 
 ///|
-fn moontown_moonclaw_supervision_seconds() -> Int {
+fn moontown_moonclaw_supervision_seconds() -> Int32 {
   match optional_env_text("MOONTOWN_MOONCLAW_SUPERVISION_SECONDS") {
     Some(value) => parse_non_negative_seconds(value, fallback=0)
     None => 0

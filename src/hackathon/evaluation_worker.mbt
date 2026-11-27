@@ -2,9 +2,9 @@
 /// Claim one queued run under the Contest Express ledger lock. All callers use
 /// the same store claim, so two desktop workers cannot execute the same run.
 pub async fn process_next_competition_benchmark(
-  path? : String = default_hackathon_path(),
-  registry_path? : String = competition_runner_registry_path(),
-  receipt_root? : String = @storage.moontown_product_state_dir() +
+  path~ : String = default_hackathon_path(),
+  registry_path~ : String = competition_runner_registry_path(),
+  receipt_root~ : String = @storage.moontown_product_state_dir() +
     "/contest-express/benchmark-receipts",
 ) -> Bool {
   let state = load_hackathons(path~)
@@ -43,7 +43,7 @@ pub async fn process_next_competition_benchmark(
   }
   let _ = apply_hackathon_action(
     "record-benchmark-result",
-    result.to_json(),
+    ToJson::to_json(result),
     @env.now(),
     path~,
   )

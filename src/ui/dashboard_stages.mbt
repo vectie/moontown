@@ -1,7 +1,7 @@
 ///|
 priv struct DashboardStageRule {
   label : String
-  priority : Int
+  priority : Int32
   tokens : Array[String]
 }
 
@@ -15,7 +15,7 @@ fn highest_priority_stage(current : String, candidate : String) -> String {
 }
 
 ///|
-fn stage_priority(stage : String) -> Int {
+fn stage_priority(stage : String) -> Int32 {
   for rule in dashboard_stage_rules() {
     if stage == rule.label {
       return rule.priority

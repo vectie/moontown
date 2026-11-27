@@ -35,7 +35,7 @@ pub fn catalog_entry_transient(String, String, String) -> Bool
 
 pub fn catalog_entry_type(String, String, Array[String]) -> String
 
-pub fn catalog_policy_context_metadata(String, String, Array[String]) -> Json
+pub fn catalog_policy_context_metadata(String, String, Array[String]) -> @json.Json
 
 pub fn catalog_research_topic_hint(String, String, Array[String]) -> String?
 
@@ -59,7 +59,7 @@ pub fn default_generated_site_projection_path() -> String
 
 pub fn default_generated_site_surface() -> String
 
-pub fn evaluate_health(BookPolicy, Int, Int?, Array[String]) -> PolicyHealth
+pub fn evaluate_health(BookPolicy, Int32, Int32?, Array[String]) -> PolicyHealth
 
 pub fn execute_skills(BookPolicy) -> Array[SkillSpec]
 
@@ -113,9 +113,9 @@ pub fn planbook() -> BookPolicy
 
 pub fn planbook_type() -> String
 
-pub fn policy_context_metadata(String, BookPolicy) -> Json
+pub fn policy_context_metadata(String, BookPolicy) -> @json.Json
 
-pub fn policy_context_metadata_for_type(String) -> Json
+pub fn policy_context_metadata_for_type(String) -> @json.Json
 
 pub fn policy_for_type(String) -> BookPolicy
 
@@ -123,7 +123,7 @@ pub fn policy_profile_for_type(String) -> PolicyProfile?
 
 pub fn policy_profiles() -> Array[PolicyProfile]
 
-pub fn quality(Int, Int, Bool, String) -> QualityCriteria
+pub fn quality(Int32, Int32, Bool, String) -> QualityCriteria
 
 pub fn required_file_paths(BookPolicy) -> Array[String]
 
@@ -180,94 +180,106 @@ pub fn with_web_tool_surface(BookPolicy, contract? : String, projection_path? : 
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum BookLane {
   Control
   Execute
   Tend
   Unknown(String)
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub impl Show for BookLane
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct BookLoopPlan {
   steps : Array[BookLoopStep]
-  execute_step_count : Int
-  tend_step_count : Int
+  execute_step_count : Int32
+  tend_step_count : Int32
   required_record_contract : String
   health_gate : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct BookLoopStep {
-  order : Int
+  order : Int32
   phase : String
   lane : String
   subject : String
   summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct BookPolicy {
   skills : Array[SkillSpec]
   required_files : Array[FileSpec]
   quality_criteria : QualityCriteria
   output : OutputSpec
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct FileSpec {
   path : String
   required : Bool
   purpose : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) enum InternalDistanceLayer {
   Information
   Recognition
   Decisiveness
   Unknown(String)
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub impl Show for InternalDistanceLayer
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct InternalDistanceStep {
   layer : String
   distance : String
   bridge : String
   subjects : Array[String]
   summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct OutputSpec {
   surface : String
   contract : String
   projection_path : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct PolicyHealth {
-  structural_score : Int
-  semantic_score : Int?
+  structural_score : Int32
+  semantic_score : Int32?
   missing_required_files : Array[String]
-  execute_skill_count : Int
-  tend_skill_count : Int
+  execute_skill_count : Int32
+  tend_skill_count : Int32
   ready : Bool
   status : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug)
 pub struct PolicyProfile {
   book_type : String
   source_policy : String
   policy : BookPolicy
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct QualityCriteria {
-  threshold : Int
-  semantic_threshold : Int
+  threshold : Int32
+  semantic_threshold : Int32
   review_required : Bool
   description : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct SkillSpec {
   id : String
   lane : String
   cadence : String
   purpose : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
 // Type aliases
 

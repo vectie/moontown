@@ -1,7 +1,8 @@
 ///|
+#derive(Debug, Eq)
 pub struct MoonbookCatalogProvider {
   catalog : Array[BookCatalogEntry]
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn MoonbookCatalogProvider::new(

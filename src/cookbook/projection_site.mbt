@@ -148,7 +148,7 @@ fn cookbook_rendered_page_style_html() -> String {
 
 ///|
 fn markdown_to_html(markdown : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let mut in_code = false
   let mut in_list = false
   let mut in_table = false
@@ -255,7 +255,7 @@ fn markdown_to_html(markdown : String) -> String {
 
 ///|
 fn markdown_inline_html(text : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let mut code = false
   for part in text.split("`") {
     let owned = part.to_owned()
@@ -291,7 +291,7 @@ fn markdown_table_row_html(line : String) -> String {
   for cell in line.split("|") {
     cells.push(cell.trim().to_owned())
   }
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string("<tr>")
   for index in 0..<cells.length() {
     let cell = cells[index]
@@ -308,7 +308,7 @@ fn markdown_table_row_html(line : String) -> String {
 
 ///|
 fn html_escape(text : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   for char in text {
     match char {
       '&' => builder.write_string("&amp;")

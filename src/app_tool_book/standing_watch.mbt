@@ -41,7 +41,7 @@ pub fn standing_goal(
   purpose : String,
   websites : Array[String],
   civic_building_id : String,
-  cadence_ticks : Int,
+  cadence_ticks : Int32,
 ) -> @core.StandingGoal {
   @core.StandingGoal::new(
     id=standing_goal_id(book_id),

@@ -84,11 +84,11 @@ async test "oneoff host Start returns before work finishes and refresh reconcile
     write_bytes(path + "/background-root.txt", @utf8.encode(root))
     write_bytes(
       path + "/background-first.json",
-      @utf8.encode(first.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(first).stringify(indent=2)),
     )
     write_bytes(
       path + "/background-completed.json",
-      @utf8.encode(result.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(result).stringify(indent=2)),
     )
   }
 }

@@ -1,6 +1,6 @@
 ///|
 pub async fn refresh_live_autonomy_spine(
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> String {
   match @storage.load_snapshot_file(snapshot_path) {
     Some(snapshot) => {

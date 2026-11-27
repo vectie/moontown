@@ -34,7 +34,7 @@ fn retained_inquiry_request(input : @contract.RetainedInquiry) -> Request {
     new_draft_id: "",
     artifact_path: "",
     draft: None,
-    payload: Some(input.to_json()),
+    payload: Some(ToJson::to_json(input)),
   }
 }
 
@@ -59,7 +59,7 @@ async test "retained inquiry saves a historical subset with named failures then 
       ),
     )
   }
-  @fs.write_file(store.catalog_path, catalog.to_json().stringify())
+  @fs.write_file(store.catalog_path, ToJson::to_json(catalog).stringify())
   let original_draft = fixture_draft()
   let original = store.save(
     {
@@ -165,27 +165,27 @@ async test "retained inquiry saves a historical subset with named failures then 
     directory(path, true)
     write_bytes(
       path + "/input.json",
-      @utf8.encode(input.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(input).stringify(indent=2)),
     )
     write_bytes(
       path + "/request.json",
-      @utf8.encode(request.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(request).stringify(indent=2)),
     )
     write_bytes(
       path + "/origin.json",
-      @utf8.encode(outcome.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(outcome).stringify(indent=2)),
     )
     write_bytes(
       path + "/saved.json",
-      @utf8.encode(saved.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(saved).stringify(indent=2)),
     )
     write_bytes(
       path + "/edited.json",
-      @utf8.encode(edited.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(edited).stringify(indent=2)),
     )
     write_bytes(
       path + "/prepared.json",
-      @utf8.encode(prepared.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(prepared).stringify(indent=2)),
     )
     write_bytes(
       path + "/inquiry.tar",
@@ -222,11 +222,11 @@ async test "retained inquiry rejects changed evidence current sources identity c
     ] {
     assert_false(store.request(invalid, "2026-10-14T05:01:00Z").ok)
   }
-  let fields = match input.to_json() {
+  let fields = match ToJson::to_json(input) {
     Object(f) => f
     _ => abort("object")
   }
-  fields["output_digest"] = "forged".to_json()
+  fields["output_digest"] = ToJson::to_json("forged")
   assert_false(
     store.request(
       { ..request, payload: Some(Json::object(fields)), },

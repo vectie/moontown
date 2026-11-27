@@ -5,7 +5,7 @@ async fn Store::capture(
 ) -> Array[(@contract.SourceSnapshot, Bytes)] {
   guard @contract.safe_id(draft.draft_id) &&
     draft.participants.length() <= 16 &&
-    @utf8.encode(draft.to_json().stringify()).length() <= 65536 else {
+    @utf8.encode(ToJson::to_json(draft).stringify()).length() <= 65536 else {
     raise CollaborationError("Draft exceeds identity or size limits")
   }
   let catalog = if draft.participants.is_empty() {
@@ -129,7 +129,7 @@ async fn Store::save_internal(
     }
     write_bytes(
       revision_root + "/draft.json",
-      @utf8.encode(saved.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(saved).stringify(indent=2)),
     )
     let temporary = root + "/current.next"
     match kind(temporary) {

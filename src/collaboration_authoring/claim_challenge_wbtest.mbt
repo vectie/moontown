@@ -118,15 +118,15 @@ async test "source claim challenge actual report maps Books saves reopens and pr
     write_bytes(output + "/comparison.json", @utf8.encode(input.comparison))
     write_bytes(
       output + "/challenge-input.json",
-      @utf8.encode(input.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(input).stringify(indent=2)),
     )
     write_bytes(
       output + "/saved.json",
-      @utf8.encode(first.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(first).stringify(indent=2)),
     )
     write_bytes(
       output + "/prepared.json",
-      @utf8.encode(prepared.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(prepared).stringify(indent=2)),
     )
     write_bytes(
       output + "/challenge.tar",
@@ -180,7 +180,7 @@ async test "source claim challenge stale exact bytes missing quote wrong mapping
   }
   try
     store.save_claim_challenge(
-      { ..input, comparison: changed.to_json().stringify(), },
+      { ..input, comparison: ToJson::to_json(changed).stringify(), },
       "now",
     )
   catch {
@@ -221,10 +221,10 @@ async test "source claim challenge API uses new ordinary identity and protects e
     new_draft_id: "",
     artifact_path: "",
     draft: None,
-    payload: Some(input.to_json()),
+    payload: Some(ToJson::to_json(input)),
   }
   let reply = store.request(
-    decode_request(request.to_json().stringify()),
+    decode_request(ToJson::to_json(request).stringify()),
     "2026-10-14T00:00:00Z",
   )
   assert_true(reply.ok)

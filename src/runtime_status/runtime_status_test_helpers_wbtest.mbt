@@ -16,9 +16,9 @@ fn runtime_status_test_execution(
   packet_id : String,
   status : @core.TaskExecutionStatus,
   summary : String,
-  packet_path? : String = "",
-  run_id? : String? = None,
-  output_contract? : String = "test",
+  packet_path~ : String = "",
+  run_id~ : String? = None,
+  output_contract~ : String = "test",
 ) -> @core.TaskExecutionRecord {
   @core.TaskExecutionRecord::new(
     task_id~,
@@ -42,9 +42,9 @@ fn runtime_status_standing_goal(
   title~ : String,
   prompt~ : String,
   book_id~ : String,
-  next_due_tick? : Int = 0,
-  last_run_tick? : Int? = None,
-  cadence_ticks? : Int = 60,
+  next_due_tick~ : Int32 = 0,
+  last_run_tick~ : Int32? = None,
+  cadence_ticks~ : Int32 = 60,
 ) -> @core.StandingGoal {
   @core.StandingGoal::new(
     id~,
@@ -60,15 +60,15 @@ fn runtime_status_standing_goal(
 ///|
 fn runtime_status_watcher_record(
   goal_id~ : String,
-  tick~ : Int,
+  tick~ : Int32,
   book_id~ : String,
   decision~ : @core.WatcherDecisionKind,
-  detail? : String = "",
-  delta_score? : Int = 0,
-  new_source_count? : Int = 0,
-  task_id? : String? = None,
-  run_id? : String? = None,
-  next_due_tick~ : Int,
+  detail~ : String = "",
+  delta_score~ : Int32 = 0,
+  new_source_count~ : Int32 = 0,
+  task_id~ : String? = None,
+  run_id~ : String? = None,
+  next_due_tick~ : Int32,
 ) -> @core.WatcherRunRecord {
   @core.WatcherRunRecord::new(
     goal_id~,

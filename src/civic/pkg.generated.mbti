@@ -25,7 +25,7 @@ pub fn building_protocol_needs_review(BuildingProtocolSnapshot) -> Bool
 
 pub fn building_protocol_portfolio(Array[BuildingProtocolSnapshot], String, String) -> BuildingProtocolPortfolio
 
-pub fn building_protocol_snapshot(BuildingProtocolDefinition, inbox_count~ : Int, contribution_count~ : Int, reduction_count~ : Int, outbox_count~ : Int, review_count~ : Int, latest_reduction_summary~ : String, latest_distribution_summary~ : String) -> BuildingProtocolSnapshot
+pub fn building_protocol_snapshot(BuildingProtocolDefinition, inbox_count~ : Int32, contribution_count~ : Int32, reduction_count~ : Int32, outbox_count~ : Int32, review_count~ : Int32, latest_reduction_summary~ : String, latest_distribution_summary~ : String) -> BuildingProtocolSnapshot
 
 pub fn civic_communication_handoff_contract_version() -> String
 
@@ -47,13 +47,13 @@ pub fn civic_communication_returned_ideas_for_book(String, Array[CivicCommunicat
 
 pub fn civic_communication_round_id(CivicCommunicationSchedule) -> String
 
-pub fn civic_communication_round_record(CivicCommunicationSchedule, String, Int, UInt64, UInt64, CivicCommunicationMetric, String, String) -> CivicCommunicationRoundRecord
+pub fn civic_communication_round_record(CivicCommunicationSchedule, String, Int32, UInt64, UInt64, CivicCommunicationMetric, String, String) -> CivicCommunicationRoundRecord
 
 pub fn civic_generated_site_path() -> String
 
 pub fn civic_generated_site_workspace_path(String) -> String
 
-pub fn civic_health_notes(operable~ : Bool, status~ : String, missing_required_paths~ : Array[String], latest_decision~ : String, latest_review_items~ : Int) -> Array[String]
+pub fn civic_health_notes(operable~ : Bool, status~ : String, missing_required_paths~ : Array[String], latest_decision~ : String, latest_review_items~ : Int32) -> Array[String]
 
 pub fn civic_module_skill_text(CivicServiceDefinition) -> String
 
@@ -75,27 +75,27 @@ pub fn civic_reducer_profile_family() -> String
 
 pub fn civic_reducer_step_kind() -> String
 
-pub fn civic_service_has_reconcilable_protocol_work(protocol_ready~ : Bool, protocol_reduction_count~ : Int, protocol_outbox_count~ : Int) -> Bool
+pub fn civic_service_has_reconcilable_protocol_work(protocol_ready~ : Bool, protocol_reduction_count~ : Int32, protocol_outbox_count~ : Int32) -> Bool
 
-pub fn civic_service_reconcile_plan(CivicServiceDefinition, protocol_reduction_count~ : Int, protocol_outbox_count~ : Int, protocol_review_count~ : Int) -> CivicServiceReconcilePlan
+pub fn civic_service_reconcile_plan(CivicServiceDefinition, protocol_reduction_count~ : Int32, protocol_outbox_count~ : Int32, protocol_review_count~ : Int32) -> CivicServiceReconcilePlan
 
 pub fn civic_service_reconciled_artifacts_line(CivicServiceDefinition) -> String
 
-pub fn civic_service_reconciled_contract_block(CivicServiceReconcilePlan, protocol_reduction_count~ : Int, protocol_outbox_count~ : Int) -> String
+pub fn civic_service_reconciled_contract_block(CivicServiceReconcilePlan, protocol_reduction_count~ : Int32, protocol_outbox_count~ : Int32) -> String
 
-pub fn civic_service_reconciled_decision(protocol_reduction_count~ : Int, protocol_review_count~ : Int) -> String
+pub fn civic_service_reconciled_decision(protocol_reduction_count~ : Int32, protocol_review_count~ : Int32) -> String
 
 pub fn civic_service_reconciled_mode_line(CivicServiceDefinition) -> String
 
 pub fn civic_service_reconciled_narrative(CivicServiceDefinition) -> String
 
-pub fn civic_service_reconciled_page_count(CivicServiceDefinition, protocol_outbox_count~ : Int) -> Int
+pub fn civic_service_reconciled_page_count(CivicServiceDefinition, protocol_outbox_count~ : Int32) -> Int32
 
 pub fn civic_service_reconciled_protocol_summary(String) -> String
 
-pub fn civic_service_reconciled_result_is_current(latest_result_found~ : Bool, latest_decision~ : String, latest_pages_changed~ : Int, latest_review_items~ : Int, CivicServiceReconcilePlan) -> Bool
+pub fn civic_service_reconciled_result_is_current(latest_result_found~ : Bool, latest_decision~ : String, latest_pages_changed~ : Int32, latest_review_items~ : Int32, CivicServiceReconcilePlan) -> Bool
 
-pub fn civic_service_reconciled_summary(CivicServiceDefinition, latest_protocol_summary~ : String, protocol_reduction_count~ : Int, protocol_outbox_count~ : Int, CivicServiceReconcilePlan) -> String
+pub fn civic_service_reconciled_summary(CivicServiceDefinition, latest_protocol_summary~ : String, protocol_reduction_count~ : Int32, protocol_outbox_count~ : Int32, CivicServiceReconcilePlan) -> String
 
 pub fn civic_service_result_is_proven(String) -> Bool
 
@@ -115,11 +115,11 @@ pub fn civic_service_status_is_review(String) -> Bool
 
 pub fn civic_service_status_is_seeded(String) -> Bool
 
-pub fn civic_service_status_label(workspace_exists~ : Bool, missing_required_paths~ : Array[String], skill_ready~ : Bool, moonclaw_profile_ready~ : Bool, latest_result_found~ : Bool, latest_decision~ : String, latest_review_items~ : Int) -> String
+pub fn civic_service_status_label(workspace_exists~ : Bool, missing_required_paths~ : Array[String], skill_ready~ : Bool, moonclaw_profile_ready~ : Bool, latest_result_found~ : Bool, latest_decision~ : String, latest_review_items~ : Int32) -> String
 
 pub fn civic_service_task_prompt(CivicServiceDefinition, String) -> String
 
-pub fn civic_status_note(String, String, Int) -> String?
+pub fn civic_status_note(String, String, Int32) -> String?
 
 pub fn communication_building_intro(CivicCommunicationPattern, BuildingProtocolDefinition) -> String
 
@@ -137,7 +137,7 @@ pub fn communication_protocol_for_scenario(CivicCommunicationScenario) -> Buildi
 
 pub fn communication_reducer_contract_markdown(CivicCommunicationScenario) -> String
 
-pub fn communication_reducer_input_markdown(CivicCommunicationScenario, String, Int) -> String
+pub fn communication_reducer_input_markdown(CivicCommunicationScenario, String, Int32) -> String
 
 pub fn communication_reducer_skill_text(CivicCommunicationScenario) -> String
 
@@ -163,7 +163,7 @@ pub fn match_market_pattern() -> CivicCommunicationPattern
 
 pub fn protocol_status_is_ready(String) -> Bool
 
-pub fn protocol_status_label(inbox_count~ : Int, contribution_count~ : Int, reduction_count~ : Int, outbox_count~ : Int, review_count~ : Int) -> String
+pub fn protocol_status_label(inbox_count~ : Int32, contribution_count~ : Int32, reduction_count~ : Int32, outbox_count~ : Int32, review_count~ : Int32) -> String
 
 pub fn research_salon_pattern() -> CivicCommunicationPattern
 
@@ -216,6 +216,7 @@ pub fn workspace_index_text(@moonbook.BookCatalogEntry, CivicServiceDefinition) 
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct BuildingContribution {
   id : String
   building_id : String
@@ -227,8 +228,9 @@ pub(all) struct BuildingContribution {
   privacy_label : String
   review_status : String
   idempotency_key : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct BuildingDistributionRecord {
   id : String
   building_id : String
@@ -238,8 +240,9 @@ pub(all) struct BuildingDistributionRecord {
   summary : String
   review_status : String
   idempotency_key : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct BuildingInputPacket {
   id : String
   building_id : String
@@ -254,8 +257,9 @@ pub(all) struct BuildingInputPacket {
   related_book_id : String
   related_task_id : String
   related_run_id : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct BuildingProtocolDefinition {
   building_id : String
   service_id : String
@@ -276,19 +280,21 @@ pub(all) struct BuildingProtocolDefinition {
   moonbook_role : String
   skill_packs : Array[String]
   projection_contract : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct BuildingProtocolPortfolio {
-  total : Int
-  ready_count : Int
-  active_count : Int
-  review_count : Int
-  blocked_count : Int
+  total : Int32
+  ready_count : Int32
+  active_count : Int32
+  review_count : Int32
+  blocked_count : Int32
   status_path : String
   registry_path : String
   protocols : Array[BuildingProtocolSnapshot]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct BuildingProtocolSnapshot {
   building_id : String
   title : String
@@ -298,16 +304,17 @@ pub(all) struct BuildingProtocolSnapshot {
   social_responsibility : String
   status : String
   ready : Bool
-  inbox_count : Int
-  contribution_count : Int
-  reduction_count : Int
-  outbox_count : Int
-  review_count : Int
+  inbox_count : Int32
+  contribution_count : Int32
+  reduction_count : Int32
+  outbox_count : Int32
+  review_count : Int32
   latest_reduction_summary : String
   latest_distribution_summary : String
   skill_packs : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct BuildingReductionResult {
   id : String
   building_id : String
@@ -323,8 +330,9 @@ pub(all) struct BuildingReductionResult {
   review_status : String
   idempotency_key : String
   related_book_id : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct BuildingReviewGateRecord {
   id : String
   building_id : String
@@ -334,8 +342,9 @@ pub(all) struct BuildingReviewGateRecord {
   related_packet_id : String
   related_reduction_id : String
   owner : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CivicCommunicationExecutionReceipt {
   contract_version : String
   handoff_id : String
@@ -344,17 +353,18 @@ pub(all) struct CivicCommunicationExecutionReceipt {
   consumer : String
   scenario_id : String
   round_id : String
-  round_number : Int
+  round_number : Int32
   status : String
   reducer_kind : String
-  participant_count : Int
-  reviewable_output_count : Int
+  participant_count : Int32
+  reviewable_output_count : Int32
   review_status : String
   building_book_id : String
   artifact_refs : Array[String]
   summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CivicCommunicationHomeReturn {
   id : String
   building_id : String
@@ -363,8 +373,9 @@ pub(all) struct CivicCommunicationHomeReturn {
   target_path : String
   summary : String
   review_status : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CivicCommunicationIdea {
   id : String
   title : String
@@ -373,29 +384,32 @@ pub(all) struct CivicCommunicationIdea {
   research_questions : Array[String]
   why_it_matters : String
   next_experiment : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CivicCommunicationMetric {
-  participant_count : Int
-  idea_count : Int
-  research_question_count : Int
-  participant_idea_links : Int
-  participating_book_coverage_count : Int
-  idea_return_home_count : Int
+  participant_count : Int32
+  idea_count : Int32
+  research_question_count : Int32
+  participant_idea_links : Int32
+  participating_book_coverage_count : Int32
+  idea_return_home_count : Int32
   average_books_per_idea : String
-  structural_effectiveness_score : Int
+  structural_effectiveness_score : Int32
   summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct CivicCommunicationMetricCounts {
-  participant_count : Int
-  idea_count : Int
-  research_question_count : Int
-  participant_idea_links : Int
-  participating_book_coverage_count : Int
-  idea_return_home_count : Int
-} derive(Eq, @debug.Debug)
+  participant_count : Int32
+  idea_count : Int32
+  research_question_count : Int32
+  participant_idea_links : Int32
+  participating_book_coverage_count : Int32
+  idea_return_home_count : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CivicCommunicationParticipantBook {
   book_id : String
   title : String
@@ -405,8 +419,9 @@ pub(all) struct CivicCommunicationParticipantBook {
   current_question : String
   contribution : String
   next_artifact : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CivicCommunicationPattern {
   id : String
   title : String
@@ -420,32 +435,35 @@ pub(all) struct CivicCommunicationPattern {
   cadence_hint : String
   good_for : Array[String]
   civic_examples : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum CivicCommunicationReductionMode {
   MoonClawReducer
   PersistedReducer
   FixtureReducer
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CivicCommunicationRoundRecord {
   id : String
   scenario_id : String
   building_id : String
-  tick : Int
-  round_number : Int
+  tick : Int32
+  round_number : Int32
   started_ms : UInt64
   finished_ms : UInt64
-  participant_count : Int
-  idea_count : Int
-  research_question_count : Int
-  participant_idea_links : Int
-  idea_return_home_count : Int
-  structural_effectiveness_score : Int
+  participant_count : Int32
+  idea_count : Int32
+  research_question_count : Int32
+  participant_idea_links : Int32
+  idea_return_home_count : Int32
+  structural_effectiveness_score : Int32
   decision : String
   summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CivicCommunicationScenario {
   id : String
   title : String
@@ -475,16 +493,18 @@ pub(all) struct CivicCommunicationScenario {
   skill_rules : Array[String]
   participants : Array[CivicCommunicationParticipantBook]
   ideas : Array[CivicCommunicationIdea]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CivicCommunicationScenarioHandoff {
   contract_version : String
   handoff_id : String
   producer : String
   producer_run_id : String
   scenario : CivicCommunicationScenario
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CivicCommunicationSchedule {
   id : String
   title : String
@@ -495,12 +515,13 @@ pub(all) struct CivicCommunicationSchedule {
   enabled : Bool
   last_run_ms : UInt64
   next_due_ms : UInt64
-  round_count : Int
+  round_count : Int32
   latest_round_id : String
   latest_summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-pub fn CivicCommunicationSchedule::new(id~ : String, title~ : String, building_id~ : String, topic~ : String, interval_ms? : UInt64, participant_book_ids? : Array[String], enabled? : Bool, last_run_ms? : UInt64, next_due_ms? : UInt64, round_count? : Int, latest_round_id? : String, latest_summary? : String) -> Self
+}
+pub fn CivicCommunicationSchedule::new(id~ : String, title~ : String, building_id~ : String, topic~ : String, interval_ms? : UInt64, participant_book_ids? : Array[String], enabled? : Bool, last_run_ms? : UInt64, next_due_ms? : UInt64, round_count? : Int32, latest_round_id? : String, latest_summary? : String) -> Self
 
+#derive(Eq, @debug.Debug)
 pub struct CivicServiceDefinition {
   id : String
   title : String
@@ -524,12 +545,12 @@ pub struct CivicServiceDefinition {
   target_pages : Array[String]
   acceptance : Array[String]
   projection_summary : String
-} derive(Eq, @debug.Debug)
+}
 
 pub(all) struct CivicServiceReconcilePlan {
   decision : String
-  page_count : Int
-  review_items : Int
+  page_count : Int32
+  review_items : Int32
   next_check_hint : String
 }
 

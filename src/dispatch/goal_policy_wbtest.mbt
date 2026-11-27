@@ -2,7 +2,7 @@
 fn dispatch_goal_policy_test_task(
   id : String,
   kind : String,
-  priority : Int,
+  priority : Int32,
 ) -> @moonbook.BookTask {
   @moonbook.BookTask::new(
     id~,

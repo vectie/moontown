@@ -86,7 +86,9 @@ test "oversized Unicode result settles success without exposing private output" 
   assert_eq(draft.result_summary, private_output)
   let visible = marketplace_visible_action_requests(completed, reader).stringify()
   assert_false(visible.contains("结论"))
-  assert_false(completed.notifications.to_json().stringify().contains("结论"))
+  assert_false(
+    ToJson::to_json(completed.notifications).stringify().contains("结论"),
+  )
   assert_true(visible.contains("worker-summary-test"))
   assert_true(visible.contains("QuarterlyReport.PDF"))
 }
@@ -117,8 +119,7 @@ test "private-looking result prose cannot strand successful work or leak to proj
       .contains(raw),
     )
     assert_false(
-      completed.notifications
-      .to_json()
+      ToJson::to_json(completed.notifications)
       .stringify()
       .contains("synthetic-do-not-share"),
     )
@@ -196,7 +197,7 @@ test "terminal replay keeps the original exact result without duplicate notifica
   )
   assert_eq(replayed, first)
   let reloaded : MarketplaceState = @json.from_json(
-    @json.parse(replayed.to_json().stringify()),
+    @json.parse(ToJson::to_json(replayed).stringify()),
   )
   assert_eq(reloaded, first)
   assert_eq(

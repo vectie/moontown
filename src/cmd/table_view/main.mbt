@@ -1,5 +1,5 @@
 ///|
-fn column_position(value : String, count : Int) -> Int raise {
+fn column_position(value : String, count : Int32) -> Int32 raise {
   let position = @string.parse_int(value) catch { _ => 0 }
   if position < 1 || position > count {
     fail("Column positions must be valid 1-based source indices")
@@ -39,7 +39,7 @@ async fn run() -> Unit {
       let columns = if projection == "all" {
         table.headers.mapi((i, _) => i)
       } else {
-        let positions : Array[Int] = []
+        let positions : Array[Int32] = []
         for p in projection.split(",") {
           positions.push(column_position(p.to_owned(), table.headers.length()))
         }
@@ -71,7 +71,7 @@ async fn main {
   run() catch {
     error => {
       @stdio.stderr.write("table_view: \{error}\n")
-      @sys.exit(1)
+      @env.exit(1)
     }
   }
 }

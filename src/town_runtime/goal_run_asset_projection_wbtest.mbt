@@ -47,7 +47,7 @@ async test "configured default Wenyu asset task persists real Book projection li
   guard latest is { "artifacts": Array(artifacts), .. } else {
     fail("Book event did not retain artifact links")
   }
-  assert_eq(artifacts, expected.map(path => path.to_json()))
+  assert_eq(artifacts, expected.map(path => ToJson::to_json(path)))
   let html = @fs.read_file(root + "/book/site/generated/index.html").text()
   assert_true(html.contains("styles.css") && html.contains("app.js"))
   assert_false(
@@ -185,8 +185,8 @@ async test "configured missing local projection is not silently created after pe
     fail("Missing Book event")
   }
   assert_eq(artifacts, [
-    "build/ASSET_PROMPTS.md".to_json(),
-    "build/ASSET_MANIFEST.md".to_json(),
+    ToJson::to_json("build/ASSET_PROMPTS.md"),
+    ToJson::to_json("build/ASSET_MANIFEST.md"),
   ])
   // Remove only the empty fixture directory created above, simulating the
   // obstacle clearing after Book persistence. Finalization must stay read-only.
@@ -216,5 +216,7 @@ async test "configured missing local projection is not silently created after pe
   guard latest is { "artifacts": Array(artifacts), .. } else {
     fail("Missing recovered Book event")
   }
-  assert_true(artifacts.contains("book/site/generated/index.html".to_json()))
+  assert_true(
+    artifacts.contains(ToJson::to_json("book/site/generated/index.html")),
+  )
 }

@@ -1,5 +1,5 @@
 ///|
-fn count_text_lines(text : String) -> Int {
+fn count_text_lines(text : String) -> Int32 {
   if text.is_empty() {
     return 0
   }
@@ -21,7 +21,7 @@ fn line_is_section_heading(line : String) -> Bool {
 }
 
 ///|
-fn count_markdown_sections(markdown : String) -> Int {
+fn count_markdown_sections(markdown : String) -> Int32 {
   let mut count = 0
   for line in markdown.split("\n") {
     let trimmed = line.trim().to_owned()

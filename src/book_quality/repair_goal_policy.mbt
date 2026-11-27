@@ -1,5 +1,5 @@
 ///|
-pub fn repair_goal_cadence_ticks() -> Int {
+pub fn repair_goal_cadence_ticks() -> Int32 {
   60
 }
 
@@ -61,7 +61,7 @@ pub fn repair_goal_prompt(item : BookQualityRepairBridgeItem) -> String {
 pub fn upsert_repair_standing_goal(
   goals : Array[@core.StandingGoal],
   item : BookQualityRepairBridgeItem,
-  current_tick : Int,
+  current_tick : Int32,
 ) -> Unit {
   let replacement = new_repair_standing_goal(item, current_tick)
   let mut replaced = false
@@ -79,7 +79,7 @@ pub fn upsert_repair_standing_goal(
 ///|
 pub fn new_repair_standing_goal(
   item : BookQualityRepairBridgeItem,
-  current_tick : Int,
+  current_tick : Int32,
 ) -> @core.StandingGoal {
   repair_standing_goal(item, next_due_tick=current_tick + 1, last_run_tick=None)
 }
@@ -99,8 +99,8 @@ pub fn refreshed_repair_standing_goal(
 ///|
 pub fn repair_standing_goal(
   item : BookQualityRepairBridgeItem,
-  next_due_tick~ : Int,
-  last_run_tick~ : Int?,
+  next_due_tick~ : Int32,
+  last_run_tick~ : Int32?,
 ) -> @core.StandingGoal {
   @core.StandingGoal::new(
     id=item.standing_goal_id,

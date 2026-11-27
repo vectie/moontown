@@ -1,10 +1,11 @@
 ///|
 /// Immutable owner-composed work. Book context, model owner, and execution root
 /// deliberately have separate fields. Neither browser input nor cwd chooses roots.
+#derive(ToJson, FromJson)
 pub(all) struct Request {
   kind : String
   work_key : String
-  generation : Int
+  generation : Int32
   owner_workspace : String
   book_id : String
   book_root : String
@@ -21,9 +22,10 @@ pub(all) struct Request {
   result_path : String
   acceptance_policy : Json
   created_at_ms : UInt64
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 pub(all) struct Reservation {
   session_id : String
   command_id : String
@@ -34,9 +36,10 @@ pub(all) struct Reservation {
   request_body : String
   body_digest : String
   reserved_at_ms : UInt64
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 pub(all) struct Work {
   id : String
   request : Request
@@ -51,10 +54,11 @@ pub(all) struct Work {
   retry_after_ms : UInt64
   output : String
   receipt : Json
-} derive(ToJson, FromJson)
+}
 
 ///|
 /// A separately durable exact-target control, never a replacement prompt.
+#derive(ToJson, FromJson)
 pub(all) struct CancelControl {
   command_id : String
   target_command_id : String
@@ -63,14 +67,15 @@ pub(all) struct CancelControl {
   status : String
   last_attempt_at_ms : UInt64
   evidence : Json
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 pub(all) struct State {
   schema : String
-  revision : Int
+  revision : Int32
   work : Array[Work]
-} derive(ToJson, FromJson)
+}
 
 ///|
 pub fn digest(text : String) -> String {
@@ -117,7 +122,7 @@ pub fn summary(work : Work) -> String {
 }
 
 ///|
-pub async fn render_status(path? : String = default_path()) -> String {
+pub async fn render_status(path~ : String = default_path()) -> String {
   if !@fs.exists(path) {
     return "No native Town work"
   }

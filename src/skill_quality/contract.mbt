@@ -60,7 +60,7 @@ fn prefers_meaningful_length(text : String) -> Bool {
 }
 
 ///|
-fn english_word_count(text : String) -> Int {
+fn english_word_count(text : String) -> Int32 {
   let mut count = 0
   let mut in_word = false
   for char in text {

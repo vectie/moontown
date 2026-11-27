@@ -1,10 +1,10 @@
 ///|
 pub async fn daemon_supervise_saved_town(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  command? : String = "",
-  max_checks? : Int = 0,
-  sleep_ms? : Int = 30_000,
-  stale_after_ms? : UInt64 = 900_000UL,
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  command~ : String = "",
+  max_checks~ : Int32 = 0,
+  sleep_ms~ : Int32 = 30_000,
+  stale_after_ms~ : UInt64 = 900_000UL,
 ) -> String {
   let settings = @system_settings_runtime.load_and_install_system_settings()
   let sleep_ms = if sleep_ms == 30_000 {

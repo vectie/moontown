@@ -122,7 +122,12 @@ fn evaluation_measure(
     success: true,
     reason: "",
   }
-  evaluation_action(state, "record-benchmark-result", result.to_json(), 1300UL)
+  evaluation_action(
+    state,
+    "record-benchmark-result",
+    ToJson::to_json(result),
+    1300UL,
+  )
 }
 
 ///|
@@ -304,7 +309,7 @@ test "reviewer roster conflicts, incomplete metrics, stale versions and failed r
   let state = evaluation_action(
     state,
     "record-benchmark-result",
-    result.to_json(),
+    ToJson::to_json(result),
     1300UL,
   )
   assert_eq(state.benchmark_runs[0].state, "failed")
@@ -353,7 +358,7 @@ async test "trusted process worker creates hashed receipts, rejects missing regi
   }
   @fs.write_file(
     registry,
-    [runner].to_json().stringify(),
+    ToJson::to_json([runner]).stringify(),
     create_mode=CreateNew,
   )
   let result = execute_configured_benchmark(
@@ -376,7 +381,7 @@ async test "trusted process worker creates hashed receipts, rejects missing regi
   let sleepy = { ..runner, program: "/bin/sleep", args: ["5"], timeout_ms: 10, }
   @fs.write_file(
     registry,
-    [sleepy].to_json().stringify(),
+    ToJson::to_json([sleepy]).stringify(),
     create_mode=CreateOrTruncate,
   )
   let result = execute_configured_benchmark(
@@ -417,7 +422,7 @@ test "benchmark amendment closes stale worker results and accepts zero maximizin
   let state = evaluation_action(
     state,
     "record-benchmark-result",
-    result.to_json(),
+    ToJson::to_json(result),
     1300UL,
   )
   assert_eq(state.benchmark_runs[0].state, "failed")
@@ -455,7 +460,11 @@ async test "background worker claims queue and records review receipt without hu
     programs: [{ ..fixture.programs[0], review_close_ms: now + 60000UL, }],
     challenges: [{ ..fixture.challenges[0], deadline_ms: now + 30000UL, }],
   }
-  @fs.write_file(path, state.to_json().stringify(), create_mode=CreateNew)
+  @fs.write_file(
+    path,
+    ToJson::to_json(state).stringify(),
+    create_mode=CreateNew,
+  )
   let output : Json = {
     "metrics": [
       { "metric_id": "latency", "value": 50.0 },
@@ -472,7 +481,7 @@ async test "background worker claims queue and records review receipt without hu
   }
   @fs.write_file(
     registry,
-    [runner].to_json().stringify(),
+    ToJson::to_json([runner]).stringify(),
     create_mode=CreateNew,
   )
   assert_true(

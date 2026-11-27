@@ -60,6 +60,7 @@ test "weekly INTERVAL UNTIL is inclusive and preserves exclusive all-day duratio
 }
 
 ///|
+#warnings("-reserved_keyword")
 test "explicit mixed selection ignores unrelated unsupported sources but never a related override" {
   let source = "BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:floating\nDTSTART:20261002T100000\nSUMMARY:Floating\nEND:VEVENT\nBEGIN:VEVENT\nUID:daily\nDTSTART:20261001T090000Z\nSUMMARY:Supported\nRRULE:FREQ=DAILY;COUNT=3\nEND:VEVENT\nEND:VCALENDAR"
   guard @imported_output_contract.calendar_occurrences(
@@ -82,13 +83,13 @@ test "explicit mixed selection ignores unrelated unsupported sources but never a
     )
     is Err(_),
   )
-  let override = source.replace_all(
+  let override_val = source.replace_all(
     old="UID:floating",
     new="UID:daily\nRECURRENCE-ID:20261002T090000Z",
   )
   assert_true(
     @imported_output_contract.calendar_occurrences(
-      override,
+      override_val,
       "2026-10-01",
       "2026-10-03",
       [0],

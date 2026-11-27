@@ -3,9 +3,9 @@ pub fn runtime_status_summary(
   state : @core.TownState,
   execution_counts : RuntimeStatusExecutionCounts,
   standing_goal_counts : RuntimeStatusStandingGoalCounts,
-  watcher_record_count : Int,
+  watcher_record_count : Int32,
   template_request_counts : @book_templates.BookTemplateRuntimeCounts,
-  planned_action_count : Int,
+  planned_action_count : Int32,
 ) -> String {
   [
     runtime_status_inventory_summary(state),
@@ -64,6 +64,6 @@ fn runtime_status_template_request_summary(
 }
 
 ///|
-fn runtime_status_metric(key : String, value : Int) -> String {
+fn runtime_status_metric(key : String, value : Int32) -> String {
   "\{key}=\{value}"
 }

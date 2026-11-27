@@ -5,8 +5,8 @@ async fn seed_civic_communication_protocol_slice(
   participants : Array[CivicCommunicationParticipantBook],
   ideas : Array[CivicCommunicationIdea],
   round_id : String,
-  round_number : Int,
-  ledger_base_dir? : String = default_protocol_ledger_base_dir(),
+  round_number : Int32,
+  ledger_base_dir~ : String = default_protocol_ledger_base_dir(),
 ) -> Unit {
   let (inputs, contributions) = civic_communication_participant_protocol_records(
     scenario, protocol, participants, round_id, round_number,
@@ -17,13 +17,13 @@ async fn seed_civic_communication_protocol_slice(
   write_protocol_jsonl_records(
     protocol.building_id,
     "participants",
-    participants.map(fn(item) { item.to_json() }),
+    participants.map(fn(item) { ToJson::to_json(item) }),
     ledger_base_dir~,
   )
   write_protocol_jsonl_records(
     protocol.building_id,
     "ideas",
-    ideas.map(fn(item) { item.to_json() }),
+    ideas.map(fn(item) { ToJson::to_json(item) }),
     ledger_base_dir~,
   )
   write_protocol_jsonl_records(
@@ -58,7 +58,7 @@ async fn seed_civic_communication_protocol_slice(
       protocol.building_id,
       ideas,
       round_id~,
-    ).map(fn(item) { item.to_json() }),
+    ).map(fn(item) { ToJson::to_json(item) }),
     ledger_base_dir~,
   )
   write_protocol_jsonl_records(

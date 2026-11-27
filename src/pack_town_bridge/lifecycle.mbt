@@ -128,7 +128,7 @@ pub fn transition_candidate_receipt(
   event : String,
   occurred_at : String,
   evidence_refs : Array[String],
-  issue? : String? = None,
+  issue~ : String? = None,
 ) -> Result[PackCandidateReceipt, String] {
   if receipt.contract_id != candidate_receipt_contract_id() {
     return Err("unsupported candidate receipt contract")

@@ -9,7 +9,7 @@ pub fn ui_state_json(
   let runtime_value = json_string("\{summary.runtime_state_count}")
   let missing_value = json_string("\{summary.required_missing_count()}")
   let manifest_path_value = json_string(manifest.manifest_path)
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string("{\n")
   builder.write_string("  \"book_id\": \{json_string(entry.id)},\n")
   builder.write_string("  \"title\": \"MoonTown Stable-State Cookbook\",\n")

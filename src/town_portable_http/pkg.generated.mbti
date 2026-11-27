@@ -12,18 +12,18 @@ import {
 // Values
 pub fn is_transfer_path(String) -> Bool
 
-pub fn response_sink(async (Int, Map[String, String]) -> Unit, async (Bytes) -> Unit, async () -> Unit, () -> Unit) -> ResponseSink
+pub fn response_sink(async (Int32, Map[String, String]) -> Unit, async (Bytes) -> Unit, async () -> Unit, () -> Unit) -> ResponseSink
 
 // Errors
 
 // Types and methods
 pub struct ResponseSink {
-  start_response : async (Int, Map[String, String]) -> Unit
+  start_response : async (Int32, Map[String, String]) -> Unit
   write_bytes : async (Bytes) -> Unit
   end_response : async () -> Unit
   close_connection : () -> Unit
   mut started : Bool
-  mut idle_timeout_ms : Int
+  mut idle_timeout_ms : Int32
 }
 pub impl @io.Writer for ResponseSink
 

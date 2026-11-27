@@ -2,9 +2,9 @@
 package "vectie/moontown/image_preview"
 
 // Values
-pub fn dimensions(Bytes) -> (Int, Int)?
+pub fn dimensions(Bytes) -> (Int32, Int32)?
 
-pub fn make(Bytes, Int) -> Bytes?
+pub fn make(Bytes, Int32) -> Bytes?
 
 pub fn sanitize_upload(Bytes, String) -> Bytes?
 

@@ -14,11 +14,12 @@ pub async fn respond(String, String, String, String) -> Response
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) struct Response {
-  status : Int
+  status : Int32
   headers : Map[String, String]
   body : Bytes
-} derive(Eq, @debug.Debug)
+}
 
 // Type aliases
 

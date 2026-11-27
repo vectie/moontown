@@ -6,7 +6,7 @@ fn civic_communication_building_html(
   ideas : Array[CivicCommunicationIdea],
   metrics : CivicCommunicationMetric,
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> String {
   let pattern_label = @civic.communication_pattern_label_for_scenario(scenario)
   [
@@ -59,7 +59,7 @@ fn civic_communication_building_html(
 fn civic_communication_participant_cards(
   participants : Array[CivicCommunicationParticipantBook],
 ) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   for participant in participants {
     builder.write_string(
       "<article class=\"card\"><h3>\{participant.title}</h3><p><code>\{participant.book_id}</code></p><p>\{participant.focus_area}</p><p><strong>Question:</strong> \{participant.current_question}</p></article>",
@@ -72,7 +72,7 @@ fn civic_communication_participant_cards(
 fn civic_communication_output_cards(
   ideas : Array[CivicCommunicationIdea],
 ) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   for idea in ideas {
     builder.write_string(
       "<article class=\"card idea\"><h3>\{idea.title}</h3><p>\{idea.summary}</p><p><strong>Why:</strong> \{idea.why_it_matters}</p><p><strong>Next:</strong> \{idea.next_experiment}</p></article>",

@@ -107,9 +107,9 @@ fn civic_communication_returned_outputs_page(
   participant : CivicCommunicationParticipantBook,
   returned_ideas : Array[CivicCommunicationIdea],
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string("# Returned Outputs From \{scenario.title}\n\n")
   builder.write_string(
     "This page records which `\{scenario.building_id}` pattern reductions came back home to `\{participant.book_id}` in round `\{round_id}` (#\{round_number}).\n\n",

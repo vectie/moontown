@@ -1,12 +1,13 @@
 ///|
+#derive(Debug, Eq)
 struct VisualBuildingActivity {
-  running_count : Int
-  waiting_count : Int
-  acceptance_pending_count : Int
-  review_count : Int
-  blocked_count : Int
-  completed_count : Int
-} derive(Debug, Eq)
+  running_count : Int32
+  waiting_count : Int32
+  acceptance_pending_count : Int32
+  review_count : Int32
+  blocked_count : Int32
+  completed_count : Int32
+}
 
 ///|
 fn VisualBuildingActivity::for_book(

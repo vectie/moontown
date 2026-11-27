@@ -1,7 +1,7 @@
 ///|
 pub fn required_path(
   relative : String,
-  points : Int,
+  points : Int32,
 ) -> BookQualityRequiredPath {
   { relative, points, }
 }
@@ -62,7 +62,7 @@ fn required_path_present(
 fn include_policy_required_paths(
   book_type : String,
   paths : Array[BookQualityRequiredPath],
-  points : Int,
+  points : Int32,
 ) -> Array[BookQualityRequiredPath] {
   let result : Array[BookQualityRequiredPath] = []
   for path in paths {
@@ -80,7 +80,7 @@ fn include_policy_required_paths(
 pub fn path_set_assessment(
   relatives : Array[String],
   missing : Array[String],
-  points : Int,
+  points : Int32,
 ) -> BookQualityPathSetAssessment {
   if relatives.is_empty() {
     return { score: points, strength: None, gap: None, }
@@ -105,7 +105,7 @@ pub fn path_set_assessment(
 ///|
 pub fn path_presence_assessment(
   relative : String,
-  points : Int,
+  points : Int32,
   exists : Bool,
 ) -> BookQualityPathAssessment {
   if exists {
@@ -147,7 +147,7 @@ pub fn base_workspace_assessment(
 
 ///|
 pub fn research_deep_report_word_assessment(
-  words : Int,
+  words : Int32,
 ) -> BookQualitySignalAssessment {
   let strengths : Array[String] = []
   let gaps : Array[String] = []

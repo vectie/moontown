@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct MiniappEndpoint {
   id : String
   http_method : String
@@ -6,15 +7,15 @@ pub(all) struct MiniappEndpoint {
   writes : Bool
   auth_required : Bool
   summary : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn miniapp_endpoint(
   id~ : String,
   http_method~ : String,
   path~ : String,
-  writes? : Bool = false,
-  auth_required? : Bool = true,
+  writes~ : Bool = false,
+  auth_required~ : Bool = true,
   summary~ : String,
 ) -> MiniappEndpoint {
   { id, http_method, path, writes, auth_required, summary, }

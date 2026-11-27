@@ -26,9 +26,7 @@ fn dashboard_books_section(town : @core.TownState) -> DashboardSection {
 fn dashboard_workers_section(town : @core.TownState) -> DashboardSection {
   {
     title: "Workers",
-    lines: town.workers.map(worker => {
-      "\{worker.id}: \{worker.status.to_string()}"
-    }),
+    lines: town.workers.map(worker => "\{worker.id}: \{worker.status}"),
   }
 }
 
@@ -42,7 +40,7 @@ fn dashboard_tasks_section(town : @core.TownState) -> DashboardSection {
         Some({ status: AwaitingAcceptance, .. }) => " / Awaiting acceptance"
         _ => ""
       }
-      "\{task.id}: \{task.status.to_string()}\{acceptance} / stage=\{stage}"
+      "\{task.id}: \{task.status}\{acceptance} / stage=\{stage}"
     }),
   }
 }
@@ -60,7 +58,7 @@ fn dashboard_executions_section(town : @core.TownState) -> DashboardSection {
       let proposal = execution.proposal_id.unwrap_or("draft")
       let run = execution.run_id.unwrap_or("not-started")
       let stage = execution_stage_label(town, execution)
-      "\{execution.task_id}: \{execution.status.to_string()} / stage=\{stage} / proposal=\{proposal} / run=\{run}"
+      "\{execution.task_id}: \{execution.status} / stage=\{stage} / proposal=\{proposal} / run=\{run}"
     }),
   }
 }
@@ -71,7 +69,7 @@ fn build_pipeline_lines(town : @core.TownState) -> Array[String] {
   for task in town.tasks {
     let execution = find_execution_for_task(town, task.id)
     let status = execution
-      .map(fn(record) { record.status.to_string() })
+      .map(fn(record) { Show::to_string(record.status) })
       .unwrap_or("not-started")
     let stage = execution
       .map(fn(record) { execution_stage_label(town, record) })

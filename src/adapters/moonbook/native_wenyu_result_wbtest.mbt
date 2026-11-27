@@ -23,21 +23,25 @@ test "native Wenyu envelope binds exact unchanged BookResult and stable native i
   )
   assert_eq(first, second)
   guard first is Object(fields) else { fail("expected envelope") }
-  assert_eq(fields["book_result"], result.to_json())
+  assert_eq(fields["book_result"], ToJson::to_json(result))
   guard fields["native_import"] is Object(metadata) else {
     fail("expected identity")
   }
-  assert_eq(metadata["contract"], "moontown.wenyu.import.v1".to_json())
-  assert_eq(metadata["work_id"], "native-work-1".to_json())
-  assert_eq(metadata["request_digest"], request_digest.to_json())
+  assert_eq(metadata["contract"], ToJson::to_json("moontown.wenyu.import.v1"))
+  assert_eq(metadata["work_id"], ToJson::to_json("native-work-1"))
+  assert_eq(metadata["request_digest"], ToJson::to_json(request_digest))
   assert_eq(
     metadata["payload_digest"],
-    @crypto.bytes_to_hex_string(
-      @crypto.sha256(@encoding/utf8.encode(result.to_json().stringify())),
-    ).to_json(),
+    ToJson::to_json(
+      @crypto.bytes_to_hex_string(
+        @crypto.sha256(
+          @encoding/utf8.encode(ToJson::to_json(result).stringify()),
+        ),
+      ),
+    ),
   )
   assert_eq(decode_book_result_payload(first), Some(result))
-  assert_true(!result.to_json().stringify().contains("native_import"))
+  assert_true(!ToJson::to_json(result).stringify().contains("native_import"))
 }
 
 ///|
@@ -47,7 +51,7 @@ test "native Wenyu envelope rejects out of scope result without changing legacy 
     @crypto.sha256(@encoding/utf8.encode("request")),
   )
   let legacy = { ..result, requires_review: false, notify_town: false, }
-  assert_eq(decode_book_result_payload(legacy.to_json()), Some(legacy))
+  assert_eq(decode_book_result_payload(ToJson::to_json(legacy)), Some(legacy))
   try native_wenyu_result_envelope(legacy, "native-work-1", digest) catch {
     _ => ()
   } noraise {

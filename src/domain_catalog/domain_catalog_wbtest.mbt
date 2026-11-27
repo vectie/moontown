@@ -70,7 +70,7 @@ fn valid_catalog_fixture() -> KnowledgeDomainCatalog {
 ///|
 test "catalog JSON round-trip validates" {
   let fixture = valid_catalog_fixture()
-  let parsed = decode_knowledge_domain_catalog(fixture.to_json()) catch {
+  let parsed = decode_knowledge_domain_catalog(ToJson::to_json(fixture)) catch {
     error => fail("unexpected decode error: \{error}")
   }
   assert_eq(parsed, fixture)

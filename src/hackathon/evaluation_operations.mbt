@@ -49,6 +49,7 @@ pub fn require_competition_reviewer(
 }
 
 ///|
+#warnings("-reserved_keyword")
 fn evaluation_track(
   state : HackathonState,
   submission : Submission,
@@ -57,10 +58,10 @@ fn evaluation_track(
   guard state.submission_packages
     .iter()
     .find_first(p => p.submission_id == submission.id)
-    is Some(package) else {
+    is Some(pkg_val) else {
     fail("submission package was not found")
   }
-  match program.tracks.iter().find_first(t => t.id == package.track_id) {
+  match program.tracks.iter().find_first(t => t.id == pkg_val.track_id) {
     Some(track) => track
     None => fail("competition track was not found")
   }
@@ -70,7 +71,7 @@ fn evaluation_track(
 fn current_evaluation_version(
   state : HackathonState,
   submission_id : String,
-) -> Int raise {
+) -> Int32 raise {
   let submission = evaluation_submission(state, submission_id)
   guard state.challenges.iter().find_first(c => c.id == submission.challenge_id)
     is Some(challenge) else {
@@ -108,6 +109,7 @@ fn validate_measured_metrics(
 }
 
 ///|
+#warnings("-deprecated")
 fn benchmark_hash_valid(hash : String) -> Bool {
   let token = if hash.has_prefix("sha256:") {
     hash.substring(start=7).to_string()

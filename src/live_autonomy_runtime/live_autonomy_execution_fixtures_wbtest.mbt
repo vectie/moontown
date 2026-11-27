@@ -27,13 +27,13 @@ fn live_autonomy_standing_watch_execution(
 ///|
 fn live_autonomy_execution_fixture(
   task_id~ : String,
-  book_id? : String = "book",
-  packet_id? : String = "packet",
-  packet_path? : String = "/tmp/packet.json",
+  book_id~ : String = "book",
+  packet_id~ : String = "packet",
+  packet_path~ : String = "/tmp/packet.json",
   status~ : @core.TaskExecutionStatus,
   summary~ : String,
-  output_contract? : String = "result",
-  result_decision? : String = "",
+  output_contract~ : String = "result",
+  result_decision~ : String = "",
 ) -> @core.TaskExecutionRecord {
   @core.TaskExecutionRecord::new(
     task_id~,

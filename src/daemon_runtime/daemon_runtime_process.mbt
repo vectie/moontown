@@ -19,7 +19,7 @@ fn daemon_supervisor_should_run_inline_for_service_name(
 
 ///|
 pub fn daemon_supervisor_should_run_inline_worker() -> Bool {
-  match @sys.get_env_var("XPC_SERVICE_NAME") {
+  match @env.get_env_var("XPC_SERVICE_NAME") {
     Some(value) => daemon_supervisor_should_run_inline_for_service_name(value)
     None => false
   }
@@ -31,7 +31,7 @@ async fn spawn_daemon_detached(
   tail : Array[String],
   snapshot_path : String,
   kind : String,
-) -> Int {
+) -> Int32 {
   let base_dir = @daemon_runtime_policy.daemon_base_dir_for_snapshot(
     snapshot_path,
   )
@@ -58,7 +58,7 @@ async fn spawn_daemon_detached(
 pub async fn spawn_daemon_worker(
   command : String,
   snapshot_path : String,
-) -> Int {
+) -> Int32 {
   spawn_daemon_detached(
     command,
     ["daemon", "run", "--worker"],
@@ -71,7 +71,7 @@ pub async fn spawn_daemon_worker(
 async fn spawn_daemon_supervisor(
   command : String,
   snapshot_path : String,
-) -> Int {
+) -> Int32 {
   spawn_daemon_detached(
     command,
     ["daemon", "supervise", "--worker"],

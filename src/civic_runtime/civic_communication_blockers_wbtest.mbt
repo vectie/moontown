@@ -12,7 +12,7 @@ async test "invalid civic scenario blocks instead of crashing protocol seeding" 
   )
   @support.write_text_file(
     civic_communication_scenario_path(schedule.id, snapshot_path~),
-    scenario.to_json().stringify(indent=2),
+    ToJson::to_json(scenario).stringify(indent=2),
   )
   let summary = run_due_civic_communication_patterns(
     snapshot_path~,
@@ -54,7 +54,7 @@ async test "invalid civic idea participant reference is reviewable blocker" {
   )
   @support.write_text_file(
     civic_communication_scenario_path(schedule.id, snapshot_path~),
-    scenario.to_json().stringify(indent=2),
+    ToJson::to_json(scenario).stringify(indent=2),
   )
   let summary = run_due_civic_communication_patterns(
     snapshot_path~,

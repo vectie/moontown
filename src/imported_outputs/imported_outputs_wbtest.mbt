@@ -1,9 +1,9 @@
 ///|
 async fn fixture(
   bytes : Bytes,
-  name? : String = "recipient",
-  filename? : String = "content.txt",
-  mime? : String = "text/html",
+  name~ : String = "recipient",
+  filename~ : String = "content.txt",
+  mime~ : String = "text/html",
 ) -> (String, String, @contract.Selection) {
   let home = @fs.realpath(@fs.tmpdir(prefix="town-imported-output-"))
   let root = home + "/" + name
@@ -12,14 +12,14 @@ async fn fixture(
   @fs.write_file(
     root + "/book.toml",
     "[book]\ntitle = \"Recipient title\"\n",
-    create=0o600,
-    truncate=true,
+    create_mode=CreateOrTruncate,
+    permission=0o600,
   )
   @fs.write_file(
     root + "/portable/outputs/result/" + filename,
     bytes,
-    create=0o600,
-    truncate=true,
+    create_mode=CreateOrTruncate,
+    permission=0o600,
   )
   let output : @contract.Output = {
     artifact_id: "result",
@@ -46,8 +46,8 @@ async fn fixture(
   @fs.write_file(
     root + "/portable/outputs.manifest.v1.json",
     manifest_bytes,
-    create=0o600,
-    truncate=true,
+    create_mode=CreateOrTruncate,
+    permission=0o600,
   )
   let source : Json = {
     "contract": "moonbook.portable_source.v1",
@@ -84,8 +84,8 @@ async fn fixture(
   @fs.write_file(
     root + "/state/portable-source-binding.json",
     receipt.stringify(),
-    create=0o600,
-    truncate=true,
+    create_mode=CreateOrTruncate,
+    permission=0o600,
   )
   (
     home,
@@ -121,7 +121,9 @@ async test "exact source text download and HEAD are inert and read only" {
   assert_eq(catalog.books[0].book_id, "recipient 学习")
   assert_eq(catalog.books[0].name, "Recipient title")
   assert_eq(catalog.books[0].source.unwrap().agent_id, "sender-agent")
-  assert_true(@contract.parse_catalog(catalog.to_json().stringify()) is Some(_))
+  assert_true(
+    @contract.parse_catalog(ToJson::to_json(catalog).stringify()) is Some(_),
+  )
   let text = respond(
     "GET",
     @contract.content_path(selected, mode="text"),
@@ -219,15 +221,15 @@ async test "changed member source manifest and traversal fail closed" {
   @fs.write_file(
     root + "/" + selected.path,
     b"modified",
-    create=0o600,
-    truncate=true,
+    create_mode=CreateOrTruncate,
+    permission=0o600,
   )
   assert_eq(respond("GET", target, home + "/missing.json", home).status, 409)
   @fs.write_file(
     root + "/" + selected.path,
     b"original",
-    create=0o600,
-    truncate=true,
+    create_mode=CreateOrTruncate,
+    permission=0o600,
   )
   for
     changed in [
@@ -272,8 +274,8 @@ async test "changed member source manifest and traversal fail closed" {
   @fs.write_file(
     root + "/portable/outputs.manifest.v1.json",
     "{}",
-    create=0o600,
-    truncate=true,
+    create_mode=CreateOrTruncate,
+    permission=0o600,
   )
   assert_eq(respond("GET", target, home + "/missing.json", home).status, 409)
   assert_eq(
@@ -286,7 +288,12 @@ async test "changed member source manifest and traversal fail closed" {
 async test "symlink leaf and parent are rejected before read" {
   let (home, root, selected) = fixture(b"original")
   defer @fs.rmdir(home, recursive=true)
-  @fs.write_file(home + "/outside", b"original", create=0o600, truncate=true)
+  @fs.write_file(
+    home + "/outside",
+    b"original",
+    create_mode=CreateOrTruncate,
+    permission=0o600,
+  )
   @fs.remove(root + "/" + selected.path)
   @fs.symlink(target=home + "/outside", root + "/" + selected.path)
   assert_eq(
@@ -304,8 +311,8 @@ async test "symlink leaf and parent are rejected before read" {
   @fs.write_file(
     home + "/outside-dir/content.txt",
     b"original",
-    create=0o600,
-    truncate=true,
+    create_mode=CreateOrTruncate,
+    permission=0o600,
   )
   @fs.symlink(target=home + "/outside-dir", root + "/portable/outputs/result")
   assert_eq(
@@ -327,8 +334,8 @@ async test "ordinary installations are unsupported and catalog roots discovered 
   @fs.write_file(
     root + "/state/agent-installation.json",
     "{}",
-    create=0o600,
-    truncate=true,
+    create_mode=CreateOrTruncate,
+    permission=0o600,
   )
   let catalog_path = home + "/catalog.json"
   @fs.write_file(
@@ -341,8 +348,8 @@ async test "ordinary installations are unsupported and catalog roots discovered 
           "workspace_root": root,
         },
       ] : Json).stringify(),
-    create=0o600,
-    truncate=true,
+    create_mode=CreateOrTruncate,
+    permission=0o600,
   )
   let before = @fs.read_file(catalog_path).binary()
   let result = discover(catalog_path, home + "/unrelated")

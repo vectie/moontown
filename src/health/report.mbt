@@ -10,7 +10,7 @@ pub fn inspect_town(town : @core.TownState) -> HealthReport {
     worker_health.push({
       worker_id: worker.id,
       level,
-      note: worker.status.to_string(),
+      note: Show::to_string(worker.status),
     })
   }
   let book_health : Array[BookHealth] = []

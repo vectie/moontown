@@ -80,24 +80,28 @@ pub fn salon_selection(
     )
   }
   let statement : Map[String, Json] = {
-    "contract_version": "moontown.idea-salon-selection.v1".to_json(),
-    "draft_id": saved.draft.draft_id.to_json(),
-    "revision": saved.revision.to_json(),
-    "question": saved.draft.question.to_json(),
-    "result_digest": work.result_digest.to_json(),
-    "selected_book_id": selected.to_json(),
-    "comparison_kind": "operator-authored comparison of retained outputs".to_json(),
-    "genuine_emergence_verified": false.to_json(),
-    "authority": "Proposed outcome only. Result review covers the accurate source account; Book independently reviews this selection. Fixture outputs remain fixture rehearsals.".to_json(),
-    "authored_objection": saved.draft.objection.to_json(),
+    "contract_version": ToJson::to_json("moontown.idea-salon-selection.v1"),
+    "draft_id": ToJson::to_json(saved.draft.draft_id),
+    "revision": ToJson::to_json(saved.revision),
+    "question": ToJson::to_json(saved.draft.question),
+    "result_digest": ToJson::to_json(work.result_digest),
+    "selected_book_id": ToJson::to_json(selected),
+    "comparison_kind": ToJson::to_json(
+      "operator-authored comparison of retained outputs",
+    ),
+    "genuine_emergence_verified": ToJson::to_json(false),
+    "authority": ToJson::to_json(
+      "Proposed outcome only. Result review covers the accurate source account; Book independently reviews this selection. Fixture outputs remain fixture rehearsals.",
+    ),
+    "authored_objection": ToJson::to_json(saved.draft.objection),
     "failed_book_ids": work.participants
     .filter(p => p.status == "failed")
     .map(p => p.book_id)
-    .to_json(),
+    |> ToJson::to_json,
   }
   for key in ["basis", "rationale", "alternatives", "dissent", "assumptions"] {
     match salon_text(fields, "salon_" + key) {
-      Ok(value) => statement[key] = value.to_json()
+      Ok(value) => statement[key] = ToJson::to_json(value)
       Err(error) => return Err(error)
     }
   }
@@ -124,12 +128,13 @@ pub fn salon_selection(
       "run_id": candidate.run_id,
       "output_ref": candidate.output_ref,
       "output_digest": candidate.output_digest,
-      "source_snapshots": saved.sources
-      .filter(source => source.book_id == candidate.book_id)
-      .to_json(),
+      "source_snapshots": saved.sources.filter(source => {
+        source.book_id == candidate.book_id
+      })
+      |> ToJson::to_json,
     })
   }
-  statement["comparisons"] = comparisons.to_json()
+  statement["comparisons"] = ToJson::to_json(comparisons)
   Ok(Some(Json::object(statement)))
 }
 

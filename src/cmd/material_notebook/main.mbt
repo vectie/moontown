@@ -18,10 +18,9 @@ async fn run() -> Unit {
         input_json(path),
       )
       println(
-        notebook
-        .find_context(query, @string.parse_int(neighbors))
-        .to_json()
-        .stringify(indent=2),
+        notebook.find_context(query, @string.parse_int(neighbors))
+        |> ToJson::to_json
+        |> Json::stringify(indent=2),
       )
     }
     ["revise", path, position, observation, challenge] => {
@@ -29,10 +28,13 @@ async fn run() -> Unit {
         input_json(path),
       )
       println(
-        notebook
-        .revise_excerpt(@string.parse_int(position), observation, challenge)
-        .to_json()
-        .stringify(indent=2),
+        notebook.revise_excerpt(
+          @string.parse_int(position),
+          observation,
+          challenge,
+        )
+        |> ToJson::to_json
+        |> Json::stringify(indent=2),
       )
     }
     ["select", path, book_id, source_path, first, last, observation, challenge] => {
@@ -40,8 +42,7 @@ async fn run() -> Unit {
         input_json(path),
       )
       println(
-        notebook
-        .select_lines(
+        notebook.select_lines(
           book_id,
           source_path,
           @string.parse_int(first),
@@ -49,8 +50,8 @@ async fn run() -> Unit {
           observation,
           challenge,
         )
-        .to_json()
-        .stringify(indent=2),
+        |> ToJson::to_json
+        |> Json::stringify(indent=2),
       )
     }
     ["remove", path, position] => {
@@ -58,10 +59,9 @@ async fn run() -> Unit {
         input_json(path),
       )
       println(
-        notebook
-        .remove_excerpt(@string.parse_int(position))
-        .to_json()
-        .stringify(indent=2),
+        notebook.remove_excerpt(@string.parse_int(position))
+        |> ToJson::to_json
+        |> Json::stringify(indent=2),
       )
     }
     ["--help"] | ["-h"] => {
@@ -82,13 +82,13 @@ async fn run() -> Unit {
       )
       let store : @authoring.Store = { root: "", catalog_path, }
       let notebook = store.import_material(draft_id, selections)
-      println(notebook.to_json().stringify(indent=2))
+      println(ToJson::to_json(notebook).stringify(indent=2))
     }
     ["find", path, query] => {
       let notebook : @contract.MaterialNotebook = @json.from_json(
         input_json(path),
       )
-      println(notebook.find(query).to_json().stringify(indent=2))
+      println(ToJson::to_json(notebook.find(query)).stringify(indent=2))
     }
     ["read", path, book_id, source_path] => {
       let notebook : @contract.MaterialNotebook = @json.from_json(
@@ -109,7 +109,7 @@ async fn run() -> Unit {
       )
       let store : @authoring.Store = { root, catalog_path, }
       let saved = store.save_material_notebook(notebook, recorded_at)
-      println(saved.to_json().stringify(indent=2))
+      println(ToJson::to_json(saved).stringify(indent=2))
     }
     _ => fail(usage)
   }
@@ -130,7 +130,7 @@ async fn main {
   run() catch {
     error => {
       @stdio.stderr.write(error_output(error))
-      @sys.exit(1)
+      @env.exit(1)
     }
   }
 }

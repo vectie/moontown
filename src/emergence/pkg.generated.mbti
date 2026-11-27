@@ -12,6 +12,7 @@ pub fn evaluate_autonomous_civic_round(AutonomousCivicRound) -> Result[Autonomou
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AutonomousCivicRound {
   contract_id : String
   round_id : String
@@ -28,8 +29,9 @@ pub(all) struct AutonomousCivicRound {
   deliveries : Array[CivicDeliveryReceipt]
   requested_authority : String
   recorded_at : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct AutonomousCivicRoundResult {
   contract_id : String
   round_id : String
@@ -49,24 +51,27 @@ pub(all) struct AutonomousCivicRoundResult {
   review : CivicReview
   deliveries : Array[CivicDeliveryReceipt]
   requested_authority : String
-  proposal : Json
+  proposal : @json.Json
   recorded_at : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CivicComparisonAssessment {
   contribution_id : String
   criterion_id : String
   rating : String
   rationale : String
   evidence_refs : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CivicComparisonCriterion {
   criterion_id : String
   name : String
   definition : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CivicContribution {
   contribution_id : String
   participant_id : String
@@ -79,9 +84,10 @@ pub(all) struct CivicContribution {
   implementation_criteria : Array[String]
   claim_ceiling : String
   supports : Array[String]
-  proposal : Json
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  proposal : @json.Json
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CivicCritique {
   critique_id : String
   participant_id : String
@@ -90,40 +96,45 @@ pub(all) struct CivicCritique {
   evidence_refs : Array[String]
   severity : String
   resolved : Bool
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CivicDeliveryReceipt {
   participant_id : String
   received : Bool
   returned_home : Bool
   receipt_ref : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CivicRanking {
   voter_id : String
   ordered_contribution_ids : Array[String]
   rationale : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CivicReview {
   reviewer_id : String
   decision : String
   evidence_refs : Array[String]
   note : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct CoalitionEdge {
   from_id : String
   to_contribution_id : String
   relation : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct ContributionEvaluation {
   contribution_id : String
   qualified : Bool
-  ranking_score : Int
+  ranking_score : Int32
   reasons : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
 // Type aliases
 

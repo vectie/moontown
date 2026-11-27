@@ -1,7 +1,7 @@
 ///|
 pub fn miniapp_building_book_binding(
   building : @miniapp_contracts.MiniappBuilding,
-  support_book_ids? : Array[String] = [],
+  support_book_ids~ : Array[String] = [],
 ) -> MiniappBuildingBookBinding {
   {
     building_id: building.id,

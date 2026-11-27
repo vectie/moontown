@@ -126,7 +126,7 @@ pub fn civic_persist_memory_candidates(
 
 ///|
 fn civic_compact_markdown_for_candidate(text : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let mut wrote = false
   for raw in text.split("\n") {
     let line = raw.trim().to_owned()

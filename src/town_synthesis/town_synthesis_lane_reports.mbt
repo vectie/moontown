@@ -1,8 +1,9 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct TownSynthesisLaneReport {
   book_id : String
   report_text : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 fn first_deep_report_summary(

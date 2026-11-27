@@ -21,6 +21,7 @@ async fn apply_editor_owner_result(
 }
 
 ///|
+#warnings("-reserved_keyword")
 async fn apply_editor_owner_package(
   work : Work,
   after_step? : async (String) -> Unit,
@@ -52,14 +53,14 @@ async fn apply_editor_owner_package(
   lock.lock(Exclusive)
   defer lock.unlock()
   let expected = editor_owner_package(work, spec)
-  let package = if @fs.exists(package_path) {
+  let pkg_val = if @fs.exists(package_path) {
     guard @fs.kind(package_path, follow_symlink=false) is Regular else {
       fail("editor_output_package_not_regular")
     }
     let saved : EditorOutputPackage = @json.from_json(
       @json.parse(@fs.read_file(package_path).text()),
     )
-    guard saved.to_json() == expected.to_json() else {
+    guard ToJson::to_json(saved) == ToJson::to_json(expected) else {
       fail("editor_output_package_conflict")
     }
     saved
@@ -73,7 +74,7 @@ async fn apply_editor_owner_package(
     @support.ensure_parent_directory(package_path)
     @fs.write_file(
       package_path,
-      expected.to_json().stringify(indent=2),
+      ToJson::to_json(expected).stringify(indent=2),
       create_mode=CreateNew,
       permission=0o600,
       sync=Full,
@@ -81,7 +82,7 @@ async fn apply_editor_owner_package(
     sync_state_directories(package_path)
     expected
   }
-  let expected_receipt = editor_application_receipt(package)
+  let expected_receipt = editor_application_receipt(pkg_val)
   if @fs.exists(receipt_path) {
     guard @fs.kind(receipt_path, follow_symlink=false) is Regular &&
       @json.parse(@fs.read_file(receipt_path).text()) == expected_receipt else {
@@ -106,7 +107,7 @@ async fn apply_editor_owner_package(
   }
   // Validate all destinations before writing any one. The package is owner
   // generated and must contain only the fixed criterion-specific destination set.
-  for relative, content in package.pages {
+  for relative, content in pkg_val.pages {
     guard spec.output_before.contains(relative) &&
       [
         "raw/repair/repair-result.md",
@@ -117,18 +118,18 @@ async fn apply_editor_owner_package(
       fail("editor_owner_output_path_not_allowed")
     }
     let current = editor_owner_fingerprint(root, relative)
-    guard Some(current) == package.before.get(relative) ||
+    guard Some(current) == pkg_val.before.get(relative) ||
       current == digest(content) else {
       fail("editor_owner_output_changed_by_human_or_newer_work: " + relative)
     }
   }
-  for relative, content in package.pages {
+  for relative, content in pkg_val.pages {
     let desired = digest(content)
     let current = editor_owner_fingerprint(root, relative)
     if current == desired {
       continue
     }
-    guard Some(current) == package.before.get(relative) else {
+    guard Some(current) == pkg_val.before.get(relative) else {
       fail("editor_owner_output_changed_by_human_or_newer_work: " + relative)
     }
     let path = editor_owner_file(root, relative)
@@ -139,7 +140,7 @@ async fn apply_editor_owner_package(
     if before_replace == desired {
       continue
     }
-    guard Some(before_replace) == package.before.get(relative) else {
+    guard Some(before_replace) == pkg_val.before.get(relative) else {
       fail("editor_owner_output_changed_by_human_or_newer_work: " + relative)
     }
     if spec.selection_digest != "" &&
@@ -157,7 +158,7 @@ async fn apply_editor_owner_package(
     after_step("before_receipt")
   }
   // Receipt last, after checking the exact written documents once more.
-  for relative, content in package.pages {
+  for relative, content in pkg_val.pages {
     guard editor_owner_fingerprint(root, relative) == digest(content) else {
       fail("editor_owner_output_changed_before_receipt: " + relative)
     }

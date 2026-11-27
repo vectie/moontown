@@ -45,15 +45,15 @@ async test "retained comparison reads exact source revisions and failures withou
     write_bytes(path + "/store-root.txt", @utf8.encode(store.root))
     write_bytes(
       path + "/before-key.json",
-      @utf8.encode(before_key.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(before_key).stringify(indent=2)),
     )
     write_bytes(
       path + "/after-key.json",
-      @utf8.encode(after_key.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(after_key).stringify(indent=2)),
     )
     write_bytes(
       path + "/expected.json",
-      @utf8.encode(comparison.to_json().stringify(indent=2) + "\n"),
+      @utf8.encode(ToJson::to_json(comparison).stringify(indent=2) + "\n"),
     )
     write_bytes(path + "/expected.md", @utf8.encode(comparison.markdown()))
   }

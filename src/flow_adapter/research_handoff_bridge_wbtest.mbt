@@ -16,7 +16,7 @@ async test "MoonFind handoff bridge reuses one Flow attempt and stays pending re
     "handoff_id": "moonfind-bridge-test-research-salon",
     "producer": "moonfind",
     "producer_run_id": "bridge-test",
-    "scenario": scenario.to_json(),
+    "scenario": ToJson::to_json(scenario),
   }
   let plan = ensure_research_handoff_flow_plan(
     root, handoff, "2026-07-31T00:00:00Z", true,

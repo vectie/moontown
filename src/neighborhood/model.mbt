@@ -1,14 +1,16 @@
 ///|
 /// Errors safe for an HTTP adapter to map to 401/403/404/400/409.
+#derive(Debug, Eq)
 pub(all) suberror NeighborhoodError {
   Unauthenticated
   Forbidden
   NotFound
   InvalidRequest(String)
   Conflict(String)
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(ToJson, FromJson)
 priv struct Story {
   id : String
   owner_id : String
@@ -20,9 +22,10 @@ priv struct Story {
   created_ms : UInt64
   updated_ms : UInt64
   published_ms : UInt64?
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 priv struct Event {
   id : String
   owner_id : String
@@ -37,9 +40,10 @@ priv struct Event {
   created_ms : UInt64
   updated_ms : UInt64
   published_ms : UInt64?
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 priv struct Registration {
   id : String
   event_id : String
@@ -50,9 +54,10 @@ priv struct Registration {
   created_ms : UInt64
   updated_ms : UInt64
   checked_in_ms : UInt64?
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 priv struct Followup {
   id : String
   event_id : String
@@ -65,9 +70,10 @@ priv struct Followup {
   created_ms : UInt64
   updated_ms : UInt64
   resolved_ms : UInt64?
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 priv struct State {
   schema : String
   revision : Int32
@@ -75,7 +81,7 @@ priv struct State {
   events : Array[Event]
   registrations : Array[Registration]
   followups : Array[Followup]
-} derive(ToJson, FromJson)
+}
 
 ///|
 fn empty_state() -> State {

@@ -61,8 +61,10 @@ fn contest_reviewer_challenges(
   state : @hackathon.HackathonState,
   account_id : String,
 ) -> Array[String] {
-  contest_array(state.to_json(), "programs").filter_map(program => {
-    if contest_array(program, "evaluator_ids").contains(account_id.to_json()) {
+  contest_array(ToJson::to_json(state), "programs").filter_map(program => {
+    if contest_array(program, "evaluator_ids").contains(
+        ToJson::to_json(account_id),
+      ) {
       Some(contest_string(program, "challenge_id"))
     } else {
       None
@@ -93,7 +95,7 @@ fn contest_review_scope(
       "approve-benchmark", "reject-benchmark", "retry-benchmark", "execute-benchmark",
     ].contains(action) {
     let run_id = contest_string(payload, "run_id")
-    contest_array(state.to_json(), "benchmark_runs")
+    contest_array(ToJson::to_json(state), "benchmark_runs")
     .filter_map(run => {
       if contest_string(run, "id") == run_id {
         Some(contest_string(run, "submission_id"))
@@ -126,7 +128,7 @@ fn contest_captain(
   account_id : String,
   team_id : String,
 ) -> Bool {
-  contest_array(state.to_json(), "team_profiles").any(profile => {
+  contest_array(ToJson::to_json(state), "team_profiles").any(profile => {
     contest_string(profile, "team_id") == team_id &&
     contest_string(profile, "captain_id") == account_id
   })
@@ -171,7 +173,7 @@ fn hackathon_action_allowed(
       payload
       is { "team": { "members": Array(members), .. }, "profile": { .. }, .. } &&
       members.length() == 1 &&
-      members[0] == identity.account_id.to_json()
+      members[0] == ToJson::to_json(identity.account_id)
     "submit" | "submit-package" => {
       let submission = if action == "submit-package" {
         contest_fields(payload).get("submission").unwrap_or(Json::null())
@@ -191,7 +193,7 @@ fn hackathon_action_allowed(
         contest_string(payload, "team_id"),
       )
     "respond-invitation" =>
-      contest_array(state.to_json(), "invitations").any(invitation => {
+      contest_array(ToJson::to_json(state), "invitations").any(invitation => {
         contest_string(invitation, "id") ==
         contest_string(payload, "invitation_id") &&
         contest_string(invitation, "invitee_id") == identity.account_id
@@ -214,33 +216,35 @@ fn hackathon_actor_payload(
   if payload is Object(fields) {
     match action {
       "submit" => {
-        fields["version"] = (0).to_json()
-        fields["submitted_ms"] = 0UL.to_json()
+        fields["version"] = ToJson::to_json(0)
+        fields["submitted_ms"] = ToJson::to_json(0UL)
       }
       "submit-package" => {
         let submission = contest_fields(
           fields.get("submission").unwrap_or(Json::null()),
         )
-        submission["version"] = (0).to_json()
-        submission["submitted_ms"] = 0UL.to_json()
+        submission["version"] = ToJson::to_json(0)
+        submission["submitted_ms"] = ToJson::to_json(0UL)
         fields["submission"] = Json::object(submission)
       }
       "evaluate" => {
-        fields["reviewer"] = identity.account_id.to_json()
-        fields["total"] = (0).to_json()
-        fields["evaluated_ms"] = 0UL.to_json()
+        fields["reviewer"] = ToJson::to_json(identity.account_id)
+        fields["total"] = ToJson::to_json(0)
+        fields["evaluated_ms"] = ToJson::to_json(0UL)
       }
       "queue-benchmark" | "approve-benchmark" | "reject-benchmark" =>
-        fields["reviewer_id"] = identity.account_id.to_json()
+        fields["reviewer_id"] = ToJson::to_json(identity.account_id)
       "join-team" | "respond-invitation" | "open-appeal" =>
-        fields["member_id"] = identity.account_id.to_json()
-      "invite-member" => fields["inviter_id"] = identity.account_id.to_json()
-      "remove-member" => fields["captain_id"] = identity.account_id.to_json()
+        fields["member_id"] = ToJson::to_json(identity.account_id)
+      "invite-member" =>
+        fields["inviter_id"] = ToJson::to_json(identity.account_id)
+      "remove-member" =>
+        fields["captain_id"] = ToJson::to_json(identity.account_id)
       "register-competition-team" => {
         let profile = contest_fields(
           fields.get("profile").unwrap_or(Json::null()),
         )
-        profile["captain_id"] = identity.account_id.to_json()
+        profile["captain_id"] = ToJson::to_json(identity.account_id)
         fields["profile"] = Json::object(profile)
       }
       _ => ()
@@ -255,8 +259,8 @@ fn hackathon_actor_payload(
 fn hackathon_viewer(
   identity : PublicIdentity?,
   can_review : Bool,
-  local_operator? : Bool = false,
-  review_challenge_ids? : Array[String] = [],
+  local_operator~ : Bool = false,
+  review_challenge_ids~ : Array[String] = [],
 ) -> Json {
   let operator = identity is Some({ is_operator: true, .. })
   let signed_in = identity is Some(_)
@@ -287,6 +291,7 @@ fn hackathon_viewer(
 }
 
 ///|
+#warnings("-unused_value")
 fn hackathon_safe_projection(
   state : @hackathon.HackathonState,
   identity : PublicIdentity,
@@ -309,7 +314,9 @@ fn contest_review_run(run : Json) -> Json {
     }
   })
   fields["evidence"] = Json::array(safe_evidence)
-  fields["has_local_evidence"] = (safe_evidence.length() != evidence.length()).to_json()
+  fields["has_local_evidence"] = ToJson::to_json(
+    safe_evidence.length() != evidence.length(),
+  )
   Json::object(fields)
 }
 
@@ -329,10 +336,11 @@ fn contest_team_run_reason(run : Json) -> String {
 }
 
 ///|
+#warnings("-reserved_keyword")
 fn hackathon_competition_projection(
   state : @hackathon.HackathonState,
   identity : PublicIdentity?,
-  local_operator? : Bool = false,
+  local_operator~ : Bool = false,
 ) -> Json {
   let account_id = match identity {
     Some(principal) => principal.account_id
@@ -340,7 +348,7 @@ fn hackathon_competition_projection(
   }
   let operator = identity is Some({ is_operator: true, .. })
   let review_challenges = contest_reviewer_challenges(state, account_id)
-  let raw = state.to_json()
+  let raw = ToJson::to_json(state)
   let fields = contest_fields(raw)
   let visible_challenges : Array[String] = []
   let challenges : Array[Json] = []
@@ -353,13 +361,14 @@ fn hackathon_competition_projection(
     }
     visible_challenges.push(challenge.id)
     if operator {
-      readiness[challenge.id] = @hackathon.program_readiness(
-        state,
-        challenge.id,
-      ).to_json()
+      readiness[challenge.id] = ToJson::to_json(
+        @hackathon.program_readiness(state, challenge.id),
+      )
     }
-    leaderboards[challenge.id] = @hackathon.leaderboard(state, challenge.id).to_json()
-    let brief = contest_fields(challenge.to_json())
+    leaderboards[challenge.id] = ToJson::to_json(
+      @hackathon.leaderboard(state, challenge.id),
+    )
+    let brief = contest_fields(ToJson::to_json(challenge))
     if !operator && !review_challenges.contains(challenge.id) {
       brief.remove("evaluation_materials") |> ignore
     }
@@ -368,11 +377,9 @@ fn hackathon_competition_projection(
       if contest_string(program, "challenge_id") == challenge.id {
         for track in contest_array(program, "tracks") {
           let track_id = contest_string(track, "id")
-          boards[challenge.id + ":" + track_id] = @hackathon.competition_leaderboard(
-            state,
-            challenge.id,
-            track_id,
-          ).to_json()
+          boards[challenge.id + ":" + track_id] = ToJson::to_json(
+            @hackathon.competition_leaderboard(state, challenge.id, track_id),
+          )
         }
       }
     }
@@ -428,12 +435,12 @@ fn hackathon_competition_projection(
       if !visible_challenges.contains(team.challenge_id) {
         return None
       }
-      let member = own_teams.contains(team.id)
-      let team_fields = contest_fields(team.to_json())
-      if !member {
+      let member_val = own_teams.contains(team.id)
+      let team_fields = contest_fields(ToJson::to_json(team))
+      if !member_val {
         team_fields.remove("members") |> ignore
       }
-      team_fields["is_member"] = member.to_json()
+      team_fields["is_member"] = ToJson::to_json(member_val)
       Some(Json::object(team_fields))
     }),
   )
@@ -454,7 +461,7 @@ fn hackathon_competition_projection(
   fields["submissions"] = Json::array(
     state.submissions
     .filter(submission => readable_submissions.contains(submission.id))
-    .map(submission => submission.to_json()),
+    .map(submission => ToJson::to_json(submission)),
   )
   for key in ["submission_packages", "appeals"] {
     fields[key] = Json::array(
@@ -490,7 +497,7 @@ fn hackathon_competition_projection(
         return Some(contest_review_run(run))
       }
       let run_fields = contest_fields(run)
-      run_fields["reason"] = contest_team_run_reason(run).to_json()
+      run_fields["reason"] = ToJson::to_json(contest_team_run_reason(run))
       for
         key in [
           "reviewer_id", "worker_run_id", "input_hash", "output_hash", "evidence",
@@ -504,6 +511,7 @@ fn hackathon_competition_projection(
 }
 
 ///|
+#warnings("-unused_value")
 fn local_hackathon_projection(state : @hackathon.HackathonState) -> Json {
   hackathon_competition_projection(
     state,
@@ -517,14 +525,16 @@ fn local_hackathon_projection(state : @hackathon.HackathonState) -> Json {
 }
 
 ///|
-fn contest_workspace_sync_status(status : Json, revision : Int) -> Json {
+fn contest_workspace_sync_status(status : Json, revision : Int32) -> Json {
   if status is { "synced_revision": Number(synced_revision, ..), .. } &&
     synced_revision == revision.to_double() {
     return status
   }
   let fields = contest_fields(status).copy()
-  fields["ready"] = false.to_json()
-  fields["message"] = "Private MoonBook receipts need reconciliation for the current competition revision".to_json()
+  fields["ready"] = ToJson::to_json(false)
+  fields["message"] = ToJson::to_json(
+    "Private MoonBook receipts need reconciliation for the current competition revision",
+  )
   Json::object(fields)
 }
 
@@ -532,7 +542,7 @@ fn contest_workspace_sync_status(status : Json, revision : Int) -> Json {
 async fn hackathon_response(
   state : @hackathon.HackathonState,
   identity : PublicIdentity?,
-  local_operator? : Bool = false,
+  local_operator~ : Bool = false,
 ) -> Json {
   let fields = contest_fields(
     hackathon_competition_projection(state, identity, local_operator~),

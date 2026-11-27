@@ -7,7 +7,7 @@ fn material_setup_hash(value : String) -> String {
 async fn material_setup_write(
   path : String,
   value : Json,
-  replace? : Bool = true,
+  replace~ : Bool = true,
 ) -> Unit {
   @support.ensure_parent_directory(path)
   let pending = path + ".pending-" + request_nonce()
@@ -75,14 +75,14 @@ async fn RequestApplication::submit_material_watch(
   // An ordered JSON tuple makes restart identity independent of object-map
   // iteration order. Source selection order is intentionally canonicalized.
   let identity : Array[Json] = [
-    title.to_json(),
-    intent.to_json(),
-    book_id.to_json(),
-    normalized_sources.to_json(),
-    acceptance.to_json(),
-    next_action.to_json(),
-    cadence_ticks.to_json(),
-    quality_threshold.to_json(),
+    ToJson::to_json(title),
+    ToJson::to_json(intent),
+    ToJson::to_json(book_id),
+    ToJson::to_json(normalized_sources),
+    ToJson::to_json(acceptance),
+    ToJson::to_json(next_action),
+    ToJson::to_json(cadence_ticks),
+    ToJson::to_json(quality_threshold),
   ]
   let requested_goal_id = json_string_field(fields, "goal_id")
   guard requested_goal_id.is_empty() ||
@@ -90,7 +90,8 @@ async fn RequestApplication::submit_material_watch(
     fail("Explicit goal_id must be a safe lower-case identifier")
   }
   let goal_id = if requested_goal_id.is_empty() {
-    "standing-local-" + material_setup_hash(identity.to_json().stringify())
+    "standing-local-" +
+    material_setup_hash(ToJson::to_json(identity).stringify())
   } else {
     requested_goal_id
   }
@@ -175,7 +176,7 @@ async fn RequestApplication::submit_material_watch(
       fail("Saved material-watch plan differs; original plan retained")
     }
   } else {
-    material_setup_write(plan_path, plan.to_json(), replace=false)
+    material_setup_write(plan_path, ToJson::to_json(plan), replace=false)
   }
   guard @material_watch_plan.read_plan(entry, goal, relative_plan) == plan else {
     fail("Material-watch plan readback did not match")
@@ -185,7 +186,7 @@ async fn RequestApplication::submit_material_watch(
     "intent": plan.intent,
     "acceptance": plan.acceptance,
     "next_action": plan.next_action,
-    "sources": plan.sources.to_json(),
+    "sources": ToJson::to_json(plan.sources),
     "baseline_status": "pending_first_check",
   }
   let request_path = self.state_root +
@@ -210,8 +211,8 @@ async fn RequestApplication::submit_material_watch(
     "material_watch": material,
   }
   if !found_goal {
-    goals.push(goal.to_json())
-    material_setup_write(goals_path, goals.to_json())
+    goals.push(ToJson::to_json(goal))
+    material_setup_write(goals_path, ToJson::to_json(goals))
   }
   // The durable plan + goal are the commit point. A receipt/ledger failure is
   // repairable by the identical request, without resetting the runtime tick.

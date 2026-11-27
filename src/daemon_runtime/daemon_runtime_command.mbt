@@ -22,7 +22,7 @@ fn daemon_process_args(command : String, tail : Array[String]) -> Array[String] 
 
 ///|
 fn daemon_shell_quote(text : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_char('\'')
   for char in text {
     if char == '\'' {
@@ -52,13 +52,13 @@ pub fn daemon_command_or_current(command : String) -> String {
   if !command.is_empty() {
     return command
   }
-  match @sys.get_env_var("MOONTOWN_DAEMON_COMMAND") {
+  match @env.get_env_var("MOONTOWN_DAEMON_COMMAND") {
     Some(value) if !value.is_empty() => value
     _ =>
-      match @sys.get_env_var("MOON_BIN") {
+      match @env.get_env_var("MOON_BIN") {
         Some(value) if !value.is_empty() => value
         _ =>
-          match @sys.get_env_var("HOME") {
+          match @env.get_env_var("HOME") {
             Some(home) if !home.is_empty() => home + "/.moon/bin/moon"
             _ => "moon"
           }

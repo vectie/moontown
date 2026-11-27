@@ -1,5 +1,5 @@
 ///|
-fn daemon_parse_positive_int(text : String) -> Int {
+fn daemon_parse_positive_int(text : String) -> Int32 {
   let mut seen = false
   let mut value = 0
   for char in text.trim() {
@@ -18,7 +18,7 @@ fn daemon_parse_positive_int(text : String) -> Int {
 }
 
 ///|
-pub async fn daemon_current_process_pid(snapshot_path : String) -> Int {
+pub async fn daemon_current_process_pid(snapshot_path : String) -> Int32 {
   let tmp_path = "\{@daemon_runtime_policy.daemon_base_dir_for_snapshot(snapshot_path)}/daemon-current.pid.tmp"
   @support.ensure_parent_directory(tmp_path) catch {
     _ => return 0
@@ -38,7 +38,7 @@ pub async fn daemon_current_process_pid(snapshot_path : String) -> Int {
 }
 
 ///|
-async fn write_daemon_pid_file(path : String, pid : Int) -> Unit {
+async fn write_daemon_pid_file(path : String, pid : Int32) -> Unit {
   @support.write_text_file(path, "\{pid}\n") catch {
     _ => ()
   }
@@ -54,7 +54,7 @@ async fn remove_file_if_exists(path : String) -> Unit {
 }
 
 ///|
-async fn daemon_pid_alive(pid : Int) -> Bool {
+async fn daemon_pid_alive(pid : Int32) -> Bool {
   if pid <= 0 {
     return false
   }
@@ -72,7 +72,7 @@ async fn daemon_pid_alive(pid : Int) -> Bool {
 ///|
 fn daemon_pid_effectively_alive(
   probed_alive : Bool,
-  pid : Int,
+  pid : Int32,
   heartbeat_fresh : Bool,
   runtime_active : Bool,
 ) -> Bool {

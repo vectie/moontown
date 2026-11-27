@@ -3,7 +3,7 @@ pub fn miniapp_project_building_book_detail(
   snapshot : @miniapp_contracts.MiniappTownSnapshot,
   viewer : @miniapp_projection.MiniappViewerContext,
   building_id : String,
-  support_book_ids? : Array[String] = [],
+  support_book_ids~ : Array[String] = [],
 ) -> MiniappBuildingBookDetail? {
   match miniapp_book_building_by_id(snapshot, building_id) {
     None => None

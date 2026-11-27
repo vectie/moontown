@@ -20,10 +20,10 @@ fn mutation_proofs(
 ) -> Array[Json] {
   let proofs : Array[Json] = []
   if ["write", "edit", "apply_patch"].contains(tool) &&
-    field(metadata, "changed") != false.to_json() {
+    field(metadata, "changed") != ToJson::to_json(false) {
     let files = rows(metadata, "files")
     for item in (if files.is_empty() { [metadata] } else { files }) {
-      if field(item, "changed") == false.to_json() {
+      if field(item, "changed") == ToJson::to_json(false) {
         continue
       }
       proofs.push({

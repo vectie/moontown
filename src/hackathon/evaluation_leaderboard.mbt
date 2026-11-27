@@ -75,6 +75,7 @@ fn metric_score(
 ///|
 /// Only human-approved current-version receipts rank. Equal scores favor the
 /// earlier review, then the stable team ID, so polling cannot shuffle ties.
+#warnings("-reserved_keyword")
 pub fn competition_leaderboard(
   state : HackathonState,
   challenge_id : String,
@@ -102,8 +103,8 @@ pub fn competition_leaderboard(
       guard state.submission_packages
         .iter()
         .find_first(p => p.submission_id == submission.id)
-        is Some(package) &&
-        package.track_id == track_id else {
+        is Some(pkg_val) &&
+        pkg_val.track_id == track_id else {
         continue
       }
       let candidate : CompetitionBoardEntry? = if track.scoring_mode == "rubric" {
@@ -201,6 +202,7 @@ pub fn competition_leaderboard(
 }
 
 ///|
+#warnings("-reserved_keyword")
 pub fn competition_finalization_ready(
   state : HackathonState,
   challenge_id : String,
@@ -249,8 +251,8 @@ pub fn competition_finalization_ready(
     guard state.submission_packages
       .iter()
       .find_first(p => p.submission_id == submission.id)
-      is Some(package) &&
-      program.tracks.iter().find_first(t => t.id == package.track_id)
+      is Some(pkg_val) &&
+      program.tracks.iter().find_first(t => t.id == pkg_val.track_id)
       is Some(track) else {
       return false
     }

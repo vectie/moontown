@@ -23,7 +23,7 @@ async fn dispatch_next_book_quality_ai_review_run(
 
 ///|
 priv enum BookQualityReviewDispatchPreflight {
-  ActiveReview(Int)
+  ActiveReview(Int32)
   NoPendingReview
   PendingReview(@book_quality.BookQualityScore)
 }

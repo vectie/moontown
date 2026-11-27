@@ -6,7 +6,7 @@ fn render_wenyu_executive_summary(
   let complete_count = count_lanes_by_status(state, plan, "complete")
   let running_count = count_lanes_by_status(state, plan, "running")
   let failed_count = count_lanes_by_status(state, plan, "failed")
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string(wenyu_parallel_lane_summary(plan))
   builder.write_string(wenyu_lane_input_summary())
   builder.write_string(
@@ -37,9 +37,9 @@ fn wenyu_lane_input_summary() -> String {
 
 ///|
 fn wenyu_lane_status_summary(
-  complete_count : Int,
-  running_count : Int,
-  failed_count : Int,
+  complete_count : Int32,
+  running_count : Int32,
+  failed_count : Int32,
 ) -> String {
   "The fresh run completed \{complete_count} lanes, left \{running_count} running, and recorded \{failed_count} failed lanes."
 }

@@ -13,13 +13,13 @@ pub fn default_live_digest_path(snapshot_path? : String) -> String
 
 pub fn default_town_journal_path(snapshot_path? : String) -> String
 
-pub async fn latest_live_autonomy_journal_tick(String) -> Int
+pub async fn latest_live_autonomy_journal_tick(String) -> Int32
 
 pub async fn refresh_live_autonomy_spine(snapshot_path? : String) -> String
 
 pub async fn render_live_autonomy_status(snapshot_path? : String) -> String
 
-pub async fn write_live_autonomy_spine(@core.TownState, snapshot_path? : String, standing_goals? : Array[@core.StandingGoal], watcher_records? : Array[@core.WatcherRunRecord], tick_summary? : String, daemon_tick? : Int?) -> @live_autonomy_policy.LiveAutonomySpine
+pub async fn write_live_autonomy_spine(@core.TownState, snapshot_path? : String, standing_goals? : Array[@core.StandingGoal], watcher_records? : Array[@core.WatcherRunRecord], tick_summary? : String, daemon_tick? : Int32?) -> @live_autonomy_policy.LiveAutonomySpine
 
 // Errors
 

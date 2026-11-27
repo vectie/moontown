@@ -50,8 +50,8 @@ fn changed(before : GoalView?, after : GoalView?) -> Change {
 pub fn compare(
   before : Bytes,
   after : Bytes,
-  start : Int,
-  end : Int,
+  start : Int32,
+  end : Int32,
   format~ : String,
 ) -> Result[String, String] {
   try {
@@ -60,8 +60,8 @@ pub fn compare(
     }
     let a = project(before, start, end)
     let b = project(after, start, end)
-    let old : Map[String, GoalView] = {}
-    let next : Map[String, GoalView] = {}
+    let old : Map[String, GoalView] = Map([])
+    let next : Map[String, GoalView] = Map([])
     for goal in a.goals {
       old[goal.goal.id] = goal
     }
@@ -97,7 +97,7 @@ pub fn compare(
     }
     bounded(
       if format == "json" {
-        comparison.to_json().stringify() + "\n"
+        ToJson::to_json(comparison).stringify() + "\n"
       } else {
         comparison_csv(comparison)
       },

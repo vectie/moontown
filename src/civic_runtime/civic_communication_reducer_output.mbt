@@ -92,11 +92,11 @@ async fn persist_civic_communication_reducer_output(
 ) -> Unit {
   @support.write_text_file(
     civic_communication_reducer_output_path(scenario, workspace_base),
-    Json::object({ "ideas": ideas.to_json() }).stringify(indent=2),
+    Json::object({ "ideas": ToJson::to_json(ideas) }).stringify(indent=2),
   )
   @support.write_text_file(
     civic_communication_scenario_output_path(scenario, workspace_base),
-    Json::object({ "ideas": ideas.to_json() }).stringify(indent=2),
+    Json::object({ "ideas": ToJson::to_json(ideas) }).stringify(indent=2),
   )
 }
 

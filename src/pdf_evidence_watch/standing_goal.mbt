@@ -4,7 +4,7 @@ pub fn pdf_evidence_watch_standing_goal(
   title : String,
   purpose : String,
   websites : Array[String],
-  cadence_ticks : Int,
+  cadence_ticks : Int32,
 ) -> @core.StandingGoal {
   @core.StandingGoal::new(
     id=pdf_evidence_watch_goal_id(book_id),

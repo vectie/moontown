@@ -1,10 +1,10 @@
 ///|
 fn live_autonomy_blocker_context(
   metrics : LiveAutonomyMetricCounts,
-  planbook_open : Int,
-  planbook_repair_active : Int,
-  pending_book_template_requests : Int,
-  failed_book_template_requests : Int,
+  planbook_open : Int32,
+  planbook_repair_active : Int32,
+  pending_book_template_requests : Int32,
+  failed_book_template_requests : Int32,
 ) -> LiveAutonomyBlockerContext {
   {
     active_workers: metrics.active_workers,
@@ -23,10 +23,10 @@ fn live_autonomy_blocker_context(
 fn live_autonomy_action_context(
   metrics : LiveAutonomyMetricCounts,
   watcher_records : Array[@core.WatcherRunRecord],
-  planbook_open : Int,
-  planbook_repair_active : Int,
-  pending_book_template_requests : Int,
-  failed_book_template_requests : Int,
+  planbook_open : Int32,
+  planbook_repair_active : Int32,
+  pending_book_template_requests : Int32,
+  failed_book_template_requests : Int32,
 ) -> LiveAutonomyActionContext {
   {
     blockers: live_autonomy_blocker_context(

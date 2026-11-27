@@ -1,19 +1,21 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) enum InternalDistanceLayer {
   Information
   Recognition
   Decisiveness
   Unknown(String)
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct InternalDistanceStep {
   layer : String
   distance : String
   bridge : String
   subjects : Array[String]
   summary : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn internal_distance_layer_text(layer : InternalDistanceLayer) -> String {

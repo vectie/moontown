@@ -46,7 +46,7 @@ async fn sync_live_autonomy_planbook_counts(
     }
     @support.write_text_file(
       default_live_autonomy_path(snapshot_path~),
-      synced.to_json().stringify(indent=2),
+      ToJson::to_json(synced).stringify(indent=2),
     )
     synced
   }
@@ -55,7 +55,7 @@ async fn sync_live_autonomy_planbook_counts(
 ///|
 priv struct LiveAutonomySyncedWaitingState {
   stable_waiting : Bool
-  stable_waiting_observation_streak : Int
+  stable_waiting_observation_streak : Int32
   stable_waiting_blockers : Array[String]
 }
 
@@ -63,8 +63,8 @@ priv struct LiveAutonomySyncedWaitingState {
 async fn synced_live_autonomy_waiting_state(
   spine : LiveAutonomySpine,
   snapshot_path : String,
-  planbook_open : Int,
-  planbook_repair_active : Int,
+  planbook_open : Int32,
+  planbook_repair_active : Int32,
 ) -> LiveAutonomySyncedWaitingState {
   let stable_waiting_blockers = @live_autonomy_policy.live_autonomy_stable_waiting_blockers_for({
       active_workers: spine.active_worker_count,
@@ -93,7 +93,7 @@ async fn synced_live_autonomy_waiting_streak(
   spine : LiveAutonomySpine,
   snapshot_path : String,
   stable_waiting : Bool,
-) -> Int {
+) -> Int32 {
   if stable_waiting {
     @support.max_int(
       spine.stable_waiting_observation_streak,
@@ -112,8 +112,8 @@ async fn synced_live_autonomy_waiting_streak(
 fn synced_live_autonomy_next_actions(
   spine : LiveAutonomySpine,
   watcher_records : Array[@core.WatcherRunRecord],
-  planbook_open : Int,
-  planbook_repair_active : Int,
+  planbook_open : Int32,
+  planbook_repair_active : Int32,
 ) -> Array[String] {
   @live_autonomy_policy.live_autonomy_next_actions_for({
     blockers: {
@@ -137,13 +137,13 @@ fn synced_live_autonomy_next_actions(
 ///|
 fn synced_live_autonomy_summary(
   previous : String,
-  tick : Int,
-  active_workers : Int,
-  review : Int,
-  blocked : Int,
-  accepted_updates : Int,
-  no_change : Int,
-  planbook_open : Int,
+  tick : Int32,
+  active_workers : Int32,
+  review : Int32,
+  blocked : Int32,
+  accepted_updates : Int32,
+  no_change : Int32,
+  planbook_open : Int32,
 ) -> String {
   let mut prefix = ""
   for part in previous.split(";") {

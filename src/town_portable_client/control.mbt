@@ -6,7 +6,7 @@ pub async fn PortableClient::list(
   guard payload is { "packages": Array(packages), .. } else {
     raise ClientError("invalid_package_list")
   }
-  let seen : Map[String, Bool] = {}
+  let seen : Map[String, Bool] = Map([])
   let results = []
   for item in packages {
     let view : @transfer.PackageView = @json.from_json(item) catch {
@@ -39,7 +39,7 @@ pub async fn PortableClient::preview_share(
   draft : @transfer.GrantDraft,
 ) -> Json {
   validate_draft(draft)
-  self.control(route_root + "/shares/preview", Some(draft.to_json()))
+  self.control(route_root + "/shares/preview", Some(ToJson::to_json(draft)))
 }
 
 ///|
@@ -49,7 +49,7 @@ pub async fn PortableClient::share(
 ) -> @transfer.PortablePackageGrant {
   validate_draft(draft)
   let grant : @transfer.PortablePackageGrant = @json.from_json(
-    self.control(route_root + "/share-grants", Some(draft.to_json())),
+    self.control(route_root + "/share-grants", Some(ToJson::to_json(draft))),
   ) catch {
     _ => raise ClientError("invalid_grant_response")
   }

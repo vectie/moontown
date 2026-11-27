@@ -23,7 +23,7 @@ pub fn bootstrap_summary(
   standing_goal_id : String,
   standing_goal_path : String,
   civic_building_id : String,
-  website_count : Int,
+  website_count : Int32,
   status : AppToolBookStatus,
 ) -> String {
   [

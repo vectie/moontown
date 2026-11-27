@@ -29,7 +29,7 @@ pub fn daemon_runtime_mode(String) -> DaemonRuntimeMode
 
 pub fn daemon_runtime_path_for_snapshot(String) -> String
 
-pub fn daemon_runtime_should_keep_supervisor(Int, Bool, Bool) -> Bool
+pub fn daemon_runtime_should_keep_supervisor(Int32, Bool, Bool) -> Bool
 
 pub fn daemon_runtime_should_spawn_worker(DaemonRuntimeHealth) -> Bool
 
@@ -43,7 +43,7 @@ pub fn daemon_runtime_status_requires_worker(String) -> Bool
 
 pub fn daemon_runtime_stopped_state(DaemonRuntimeState, String, UInt64, String) -> DaemonRuntimeState
 
-pub fn daemon_runtime_supervisor_started_state(DaemonRuntimeState, Int, String, UInt64, String) -> DaemonRuntimeState
+pub fn daemon_runtime_supervisor_started_state(DaemonRuntimeState, Int32, String, UInt64, String) -> DaemonRuntimeState
 
 pub fn daemon_runtime_tick_finished_state(DaemonRuntimeState, Bool, String, UInt64, String) -> DaemonRuntimeState
 
@@ -51,7 +51,7 @@ pub fn daemon_runtime_tick_started_state(DaemonRuntimeState, String, UInt64, Str
 
 pub fn daemon_runtime_worker_reload_requested_state(DaemonRuntimeState, String, UInt64, String) -> DaemonRuntimeState
 
-pub fn daemon_runtime_worker_started_state(DaemonRuntimeState, Int, String, Bool, UInt64, String) -> DaemonRuntimeState
+pub fn daemon_runtime_worker_started_state(DaemonRuntimeState, Int32, String, Bool, UInt64, String) -> DaemonRuntimeState
 
 pub fn daemon_standing_goal_path_for_snapshot(String, String) -> String
 
@@ -64,35 +64,38 @@ pub fn daemon_supervisor_pid_path_for_snapshot(String) -> String
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct DaemonRuntimeHealth {
   status : String
-  supervisor_pid : Int
-  worker_pid : Int
+  supervisor_pid : Int32
+  worker_pid : Int32
   supervisor_alive : Bool
   worker_alive : Bool
   heartbeat_age_ms : UInt64
   stale : Bool
   stop_requested : Bool
-  tick_success_count : Int
-  tick_failure_count : Int
+  tick_success_count : Int32
+  tick_failure_count : Int32
   last_error : String
   log_path : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub fn DaemonRuntimeHealth::durable_worker_active(Self) -> Bool
 pub fn DaemonRuntimeHealth::healthy(Self) -> Bool
 pub fn DaemonRuntimeHealth::supervisor_active(Self) -> Bool
 
+#derive(Eq, @debug.Debug)
 pub enum DaemonRuntimeMode {
   WorkerRuntime
   SupervisorRuntime
   InactiveRuntime
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct DaemonRuntimeState {
   daemon_id : String
   status : String
-  supervisor_pid : Int
-  worker_pid : Int
+  supervisor_pid : Int32
+  worker_pid : Int32
   supervisor_run_id : String
   worker_run_id : String
   started_at_ms : UInt64
@@ -101,15 +104,15 @@ pub(all) struct DaemonRuntimeState {
   last_tick_finished_ms : UInt64
   last_success_ms : UInt64
   last_failure_ms : UInt64
-  tick_success_count : Int
-  tick_failure_count : Int
+  tick_success_count : Int32
+  tick_failure_count : Int32
   stop_requested : Bool
   last_error : String
   log_path : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub fn DaemonRuntimeState::heartbeat_age_ms(Self, UInt64) -> UInt64
 pub fn DaemonRuntimeState::is_stale(Self, UInt64, UInt64) -> Bool
-pub fn DaemonRuntimeState::new(daemon_id? : String, status? : String, supervisor_pid? : Int, worker_pid? : Int, supervisor_run_id? : String, worker_run_id? : String, started_at_ms? : UInt64, last_heartbeat_ms? : UInt64, last_tick_started_ms? : UInt64, last_tick_finished_ms? : UInt64, last_success_ms? : UInt64, last_failure_ms? : UInt64, tick_success_count? : Int, tick_failure_count? : Int, stop_requested? : Bool, last_error? : String, log_path? : String) -> Self
+pub fn DaemonRuntimeState::new(daemon_id? : String, status? : String, supervisor_pid? : Int32, worker_pid? : Int32, supervisor_run_id? : String, worker_run_id? : String, started_at_ms? : UInt64, last_heartbeat_ms? : UInt64, last_tick_started_ms? : UInt64, last_tick_finished_ms? : UInt64, last_success_ms? : UInt64, last_failure_ms? : UInt64, tick_success_count? : Int32, tick_failure_count? : Int32, stop_requested? : Bool, last_error? : String, log_path? : String) -> Self
 
 // Type aliases
 

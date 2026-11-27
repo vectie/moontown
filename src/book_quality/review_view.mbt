@@ -7,7 +7,7 @@ priv struct BookQualityReviewLedgerView {
 ///|
 fn book_quality_review_ledger_view(
   ledger : BookQualityReviewRunLedger,
-  active_book_ids? : Array[String] = [],
+  active_book_ids~ : Array[String] = [],
 ) -> BookQualityReviewLedgerView {
   let latest_runs = current_book_quality_review_runs(ledger)
   let current_runs : Array[BookQualityReviewRun] = []
@@ -87,7 +87,7 @@ fn book_quality_review_run_same_record(
 ///|
 fn historical_book_quality_problem_attempt_count(
   historical_runs : Array[BookQualityReviewRun],
-) -> Int {
+) -> Int32 {
   let mut count = 0
   for run in historical_runs {
     if review_run_problem_status(run.status) {

@@ -1,4 +1,5 @@
 ///|
+#warnings("-reserved_keyword-unused_async")
 async test "scheduled native semantic producer never seeds ACP and keeps one pending review" {
   let root = cleaned_book_quality_test_root(
     @fs.realpath("/tmp") + "/moontown-native-semantic-producer-wbtest",
@@ -24,8 +25,8 @@ async test "scheduled native semantic producer never seeds ACP and keeps one pen
     owner_workspace=@storage.moontown_active_workspace_root(),
     instance_id="fixture",
     config_path="/fixture/control/execution-sandbox/moonclaw.json",
-    request=async fn(method, path, _) {
-      calls.push(method + " " + path)
+    request=async fn(method_val, path, _) {
+      calls.push(method_val + " " + path)
       Ok({ "model_workspace_contract": "mooncode.model-workspace.v1" })
     },
   )

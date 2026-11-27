@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct MoonCodeBookResultImport {
   key : String
   session_id : String
@@ -13,7 +14,7 @@ pub struct MoonCodeBookResultImport {
   executable_event_path : String
   latest_executable_event_path : String
   executable_event : @moonbook_contracts.ExecutableBookEvent
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 fn mooncode_book_results_sessions_root(book_root : String) -> String {
@@ -30,7 +31,7 @@ fn mooncode_book_results_processed_ledger(entry : BookCatalogEntry) -> String {
 
 ///|
 fn safe_mooncode_book_result_id(book_id : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   for ch in book_id {
     if (ch >= 'a' && ch <= 'z') ||
       (ch >= 'A' && ch <= 'Z') ||
@@ -53,7 +54,7 @@ fn safe_mooncode_book_result_id(book_id : String) -> String {
 ///|
 pub async fn reconcile_mooncode_book_result_sidecars(
   entry : BookCatalogEntry,
-  moonbook_root? : String = default_moonbook_root(),
+  moonbook_root~ : String = default_moonbook_root(),
 ) -> Array[MoonCodeBookResultImport] {
   let root = resolved_workspace_root(entry.workspace_root)
   let sessions_root = mooncode_book_results_sessions_root(root)

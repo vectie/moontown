@@ -10,8 +10,8 @@ fn default_planbook_workspace_root() -> String {
 
 ///|
 async fn planbook_open_gap_count(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-) -> Int {
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+) -> Int32 {
   let parsed = match
     @support.read_optional_json_file(
       default_planbook_autonomy_path(snapshot_path),
@@ -24,8 +24,8 @@ async fn planbook_open_gap_count(
 
 ///|
 async fn planbook_repair_active_count(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-) -> Int {
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+) -> Int32 {
   if @support.read_optional_json_file(
       default_planbook_repair_path(snapshot_path),
     )
@@ -47,7 +47,7 @@ fn default_planbook_repair_path(snapshot_path : String) -> String {
 }
 
 ///|
-fn json_int_field(value : Json, key : String, fallback~ : Int) -> Int {
+fn json_int_field(value : Json, key : String, fallback~ : Int32) -> Int32 {
   match value {
     Object(object) =>
       match object.get(key) {

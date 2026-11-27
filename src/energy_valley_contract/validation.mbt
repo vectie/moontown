@@ -1,10 +1,12 @@
 ///|
+#derive(Debug, Eq)
 pub(all) enum IssueSeverity {
   Warning
   Error
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum ContractIssueCode {
   InvalidWorldMetadata
   InvalidBounds
@@ -58,15 +60,16 @@ pub(all) enum ContractIssueCode {
   InvalidWorldDelta
   WorldDeltaBlueprintMismatch
   InvalidWorldDeltaOperation
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct ContractIssue {
   severity : IssueSeverity
   code : ContractIssueCode
   entity_id : StableId?
   message : String
-} derive(Debug, Eq)
+}
 
 ///|
 fn report(
@@ -1089,7 +1092,7 @@ pub fn validate_snapshot_ledger(
     }
   }
   let active_presence_actors : Map[StableId, Unit] = Map([])
-  let active_inside_slot_counts : Map[StableId, Int] = Map([])
+  let active_inside_slot_counts : Map[StableId, Int32] = Map([])
   for presence in snapshot.actor_presences {
     if presence.is_active(snapshot.tick) {
       if active_presence_actors.contains(presence.actor_id) {
@@ -1326,7 +1329,7 @@ fn single_cell_road_delta_attaches_to_base(
 /// after Add, and Delete makes the stable identity terminal.
 pub fn validate_world_delta(
   delta : WorldDelta,
-  base_world? : CompiledTownWorld? = None,
+  base_world~ : CompiledTownWorld? = None,
 ) -> ReadOnlyArray[ContractIssue] {
   let issues : Array[ContractIssue] = []
   if delta.schema_version.trim().is_empty() ||
@@ -1354,7 +1357,7 @@ pub fn validate_world_delta(
   let entity_kinds : Map[StableId, WorldDeltaEntityKind] = Map([])
   // 1 = active after Add, 2 = terminally deleted. A stable identity is never
   // implicitly created by Move/Delete and is not silently resurrected.
-  let entity_lifecycle : Map[StableId, Int] = Map([])
+  let entity_lifecycle : Map[StableId, Int32] = Map([])
   for operation in delta.operations {
     let entity_id = operation.entity_id()
     let entity_kind = operation.entity_kind()

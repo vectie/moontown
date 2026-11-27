@@ -122,7 +122,7 @@ fn validate_activation(
 fn validate_subject(
   activation : @host.HostActivationProjection,
   subject : PackTownSubject,
-  index : Int,
+  index : Int32,
   issues : Array[PackTownBridgeIssue],
 ) -> Unit {
   let base = "subjects[\{index}]"

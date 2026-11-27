@@ -3,7 +3,7 @@ fn render_wenyu_lane_briefs(
   plan : @roles.MayorGoalPlan,
   lane_reports : Array[TownSynthesisLaneReport],
 ) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   for lane in plan.lanes {
     builder.write_string("### \{lane.entry.name}\n\n")
     builder.write_string("Objective: \{lane.objective}\n\n")

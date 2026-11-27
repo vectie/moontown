@@ -1,4 +1,5 @@
 ///|
+#warnings("-deprecated")
 async test "material setup actual form body persists exact plan and drives existing cycle after restart" {
   let (root, entry, _old_goal) = material_watch_fixture()
   @moonbook.save_catalog_file(root + "/moonbooks.json", [entry])
@@ -7,7 +8,7 @@ async test "material setup actual form body persists exact plan and drives exist
     root,
     root + "/unused-policy.json",
   )
-  let body = match @sys.get_env_var("MOONTOWN_MATERIAL_FORM_BODY") {
+  let body = match @env.get_env_var("MOONTOWN_MATERIAL_FORM_BODY") {
     Some(path) => @fs.read_file(path).text()
     None => {
       let request : Json = {

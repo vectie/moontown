@@ -1,17 +1,19 @@
 ///|
+#derive(Debug)
 pub(all) suberror TransferError {
-  TransferError(Int, String)
-} derive(Debug)
+  TransferError(Int32, String)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct TransferLimits {
-  max_package_bytes : Int
-  chunk_bytes : Int
-  max_retained_bytes : Int
-  idle_timeout_ms : Int
-  total_timeout_ms : Int
+  max_package_bytes : Int32
+  chunk_bytes : Int32
+  max_retained_bytes : Int32
+  idle_timeout_ms : Int32
+  total_timeout_ms : Int32
   lease_ms : UInt64
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn default_limits() -> TransferLimits {
@@ -27,11 +29,12 @@ pub fn default_limits() -> TransferLimits {
 
 ///|
 /// Trusted application value. Never decode identity from an HTTP payload.
+#derive(Debug, Eq)
 pub struct TransferActor {
   principal_id : String
   tenant_id : String
   publisher : Bool
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn actor_for_account(
@@ -51,6 +54,7 @@ pub fn actor_for_account(
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct PackageByteReceipt {
   contract : String
   package_id : String
@@ -59,13 +63,14 @@ pub(all) struct PackageByteReceipt {
   tenant_id : String
   binding_digest : String
   package_sha256 : String
-  package_size_bytes : Int
+  package_size_bytes : Int32
   stored_at_ms : UInt64
   byte_verification_scope : String
   delivery_transport : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct PortablePackageGrant {
   grant_id : String
   package_id : String
@@ -78,19 +83,21 @@ pub(all) struct PortablePackageGrant {
   created_at_ms : UInt64
   expires_at_ms : UInt64
   revoked_at_ms : UInt64?
-  version : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  version : Int32
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct GrantDraft {
   grant_id : String
   package_id : String
   binding_digest : String
   grantee_principal_id : String
   expires_at_ms : UInt64
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct PackageView {
   package_id : String
   binding : @town_marketplace.PortableListingBinding
@@ -99,7 +106,7 @@ pub(all) struct PackageView {
   access_basis : String
   cleanup_pending : Bool
   grants : Array[PortablePackageGrant]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub struct PortableStore {
@@ -112,7 +119,7 @@ pub struct PortableStore {
 /// The root is a trusted internal child of the product state directory.
 pub fn portable_store(
   root : String,
-  limits? : TransferLimits = default_limits(),
+  limits~ : TransferLimits = default_limits(),
 ) -> PortableStore {
   { root, limits, before_io: None, }
 }
@@ -137,6 +144,7 @@ pub struct PackageDownload {
 }
 
 ///|
+#derive(ToJson, FromJson)
 priv struct StoredPackage {
   package_id : String
   binding : @town_marketplace.PortableListingBinding
@@ -145,31 +153,33 @@ priv struct StoredPackage {
   tenant_id : String
   listing_id : String
   package_sha256 : String
-  package_size_bytes : Int
+  package_size_bytes : Int32
   status : String
   receipt : PackageByteReceipt?
   cleanup_pending : Bool
   object_retained : Bool
   revision : UInt64
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(Eq, ToJson, FromJson)
 priv struct Reservation {
   attempt_id : String
   package_id : String
-  reserved_bytes : Int
+  reserved_bytes : Int32
   lease_ends_ms : UInt64
   cleanup_pending : Bool
-} derive(Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson)
 priv struct StoreIndex {
   schema : String
   packages : Array[StoredPackage]
   grants : Array[PortablePackageGrant]
   reservations : Array[Reservation]
   revision : UInt64
-} derive(ToJson, FromJson)
+}
 
 ///|
 extend StoreIndex with ToJson::{to_json}

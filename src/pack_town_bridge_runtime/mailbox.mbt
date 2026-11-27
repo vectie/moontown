@@ -64,7 +64,7 @@ async fn deliver_candidate_to_pack(
   candidate : @pack_town_bridge.TownPackCandidate,
 ) -> String {
   let reference = candidate_inbox_ref(product_id, candidate.candidate_ref)
-  write_mailbox_json(workspace + "/" + reference, candidate.to_json())
+  write_mailbox_json(workspace + "/" + reference, ToJson::to_json(candidate))
   reference
 }
 

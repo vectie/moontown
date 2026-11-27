@@ -1,6 +1,6 @@
 ///|
 fn optional_env_text(key : String) -> String? {
-  match @sys.get_env_var(key) {
+  match @env.get_env_var(key) {
     Some(value) => {
       let trimmed = value.trim().to_owned()
       if trimmed.is_empty() {
@@ -14,7 +14,7 @@ fn optional_env_text(key : String) -> String? {
 }
 
 ///|
-fn parse_non_negative_seconds(text : String, fallback~ : Int) -> Int {
+fn parse_non_negative_seconds(text : String, fallback~ : Int32) -> Int32 {
   let mut seen = false
   let mut value = 0
   for char in text.trim() {
@@ -33,7 +33,7 @@ fn parse_non_negative_seconds(text : String, fallback~ : Int) -> Int {
 }
 
 ///|
-fn first_non_negative_int(text : String) -> Int? {
+fn first_non_negative_int(text : String) -> Int32? {
   let mut seen = false
   let mut value = 0
   for char in text.trim() {
@@ -73,7 +73,11 @@ pub fn civic_marker_value(
 }
 
 ///|
-pub fn civic_marker_int(summary : String, key : String, fallback~ : Int) -> Int {
+pub fn civic_marker_int(
+  summary : String,
+  key : String,
+  fallback~ : Int32,
+) -> Int32 {
   let value = civic_marker_value(summary, key, fallback="")
   match first_non_negative_int(value) {
     Some(parsed) => parsed

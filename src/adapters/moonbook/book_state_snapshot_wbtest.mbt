@@ -14,15 +14,15 @@ test "book state snapshot contract decodes MoonBook read model" {
       "tags": ["research"],
       "skills": ["wiki-review"],
     },
-    "summary": book_state_summary_contract_fixture().to_json(),
-    "health": book_health_contract_fixture().to_json(),
+    "summary": ToJson::to_json(book_state_summary_contract_fixture()),
+    "health": ToJson::to_json(book_health_contract_fixture()),
     "knowledge": {
       "contract": "moonbook.knowledge_bundle.v1",
       "book_id": "research-demo",
       "root": "/tmp/research-demo",
       "generated_at": 1790764420595,
-      "summary": book_state_summary_contract_fixture().to_json(),
-      "health": book_health_contract_fixture().to_json(),
+      "summary": ToJson::to_json(book_state_summary_contract_fixture()),
+      "health": ToJson::to_json(book_health_contract_fixture()),
       "pages": [],
       "graph": { "nodes": [], "edges": [] },
       "review_queue_path": "wiki/reviews/pending.md",
@@ -43,8 +43,7 @@ test "book state snapshot contract decodes MoonBook read model" {
   assert_true(valid_generated_at_millis(snapshot.knowledge.generated_at))
   let legacy : BookStateSnapshot = @json.from_json(
     @json.parse(
-      snapshot
-      .to_json()
+      ToJson::to_json(snapshot)
       .stringify()
       .replace_all(old="1790764420595", new="-236941825"),
     ),
@@ -55,7 +54,9 @@ test "book state snapshot contract decodes MoonBook read model" {
   assert_true(valid_generated_at_millis(legacy.knowledge.generated_at))
   let small : BookStateSnapshot = @json.from_json(
     @json.parse(
-      snapshot.to_json().stringify().replace_all(old="1790764420595", new="1"),
+      ToJson::to_json(snapshot)
+      .stringify()
+      .replace_all(old="1790764420595", new="1"),
     ),
   )
   assert_eq(small.generated_at, 1.0)
@@ -69,9 +70,9 @@ test "book state snapshot contract decodes MoonBook read model" {
 ///|
 test "MoonBook generated_at rejects non-integral and non-finite numeric values" {
   assert_false(valid_generated_at_millis(1790764420595.5))
-  assert_false(valid_generated_at_millis(@double.not_a_number))
-  assert_false(valid_generated_at_millis(@double.infinity))
-  assert_false(valid_generated_at_millis(@double.neg_infinity))
+  assert_false(valid_generated_at_millis(0.0 / 0.0))
+  assert_false(valid_generated_at_millis(1.0 / 0.0))
+  assert_false(valid_generated_at_millis(-1.0 / 0.0))
   assert_false(valid_generated_at_millis(9007199254740992.0))
 }
 

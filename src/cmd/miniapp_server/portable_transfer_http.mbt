@@ -29,6 +29,10 @@ async fn handle_portable_transfer_request(
   }
   let sink = @town_portable_http.response_sink(
     (code, headers) => {
+      let ci_headers : Map[@http.CaseInsensitiveString, String] = Map([])
+      for k, v in headers {
+        ci_headers[@http.CaseInsensitiveString(k)] = v
+      }
       conn.send_response(
         code,
         if code < 400 {
@@ -36,7 +40,7 @@ async fn handle_portable_transfer_request(
         } else {
           "Error"
         },
-        extra_headers=headers,
+        extra_headers=ci_headers,
       )
     },
     bytes => conn.write(bytes),

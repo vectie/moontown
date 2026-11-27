@@ -1,7 +1,7 @@
 ///|
 fn visual_projection_test_state(
-  worker_status? : @core.WorkerStatus = Running,
-  execution_status? : @core.TaskExecutionStatus = Running,
+  worker_status~ : @core.WorkerStatus = Running,
+  execution_status~ : @core.TaskExecutionStatus = Running,
 ) -> @core.TownState {
   let state = @core.empty_state(
     @core.TownConfig::new(id="visual-test-town", name="Visual Test Town"),

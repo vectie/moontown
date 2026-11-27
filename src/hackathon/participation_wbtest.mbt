@@ -47,7 +47,7 @@ fn participation_register_payload(id : String, captain : String) -> Json {
     affiliation: "Residents",
     track_id: "map",
   }
-  { "team": team.to_json(), "profile": profile.to_json() }
+  { "team": ToJson::to_json(team), "profile": ToJson::to_json(profile) }
 }
 
 ///|
@@ -97,8 +97,8 @@ fn participation_package_payload(id : String) -> Json {
     benchmark_version: 99,
   }
   {
-    "submission": sample_submission(id, "blue", 999999UL).to_json(),
-    "package": bundle.to_json(),
+    "submission": ToJson::to_json(sample_submission(id, "blue", 999999UL)),
+    "package": ToJson::to_json(bundle),
   }
 }
 
@@ -148,8 +148,8 @@ test "competition registration requires captain consent and a configured track" 
       state,
       "register-competition-team",
       {
-        "team": sample_team("red").to_json(),
-        "profile": invalid_profile.to_json(),
+        "team": ToJson::to_json(sample_team("red")),
+        "profile": ToJson::to_json(invalid_profile),
       },
       20UL,
     ),
@@ -276,7 +276,7 @@ test "packages validate required materials hashes track quota and benchmark snap
   )
   let payload = participation_package_payload("bad")
   let request : SubmissionPackageRequest = @json.from_json(payload)
-  let bundle = request.package
+  let bundle = request.pkg_val
   for
     invalid in [
       { ..bundle, track_id: "missing", },
@@ -301,8 +301,8 @@ test "packages validate required materials hashes track quota and benchmark snap
         state,
         "submit-package",
         {
-          "submission": request.submission.to_json(),
-          "package": invalid.to_json(),
+          "submission": ToJson::to_json(request.submission),
+          "package": ToJson::to_json(invalid),
         },
         100UL,
       ),

@@ -1,9 +1,10 @@
 ///|
+#derive(ToJson)
 priv struct BuildingProtocolRegistryDocument {
   generated_at : String
   description : String
   protocols : Array[@civic.BuildingProtocolDefinition]
-} derive(ToJson)
+}
 
 ///|
 pub fn default_wenyu_protocol_registry_path() -> String {
@@ -17,8 +18,8 @@ pub fn default_wenyu_protocol_status_path() -> String {
 
 ///|
 pub async fn bootstrap_wenyu_building_protocols(
-  registry_path? : String = default_wenyu_protocol_registry_path(),
-  status_path? : String = default_wenyu_protocol_status_path(),
+  registry_path~ : String = default_wenyu_protocol_registry_path(),
+  status_path~ : String = default_wenyu_protocol_status_path(),
 ) -> String {
   let protocols = @civic.wenyu_building_protocols()
   let ledger_base_dir = protocol_ledger_base_dir_for_status_path(status_path)
@@ -29,7 +30,7 @@ pub async fn bootstrap_wenyu_building_protocols(
   }
   @support.write_text_file(
     registry_path,
-    registry_document.to_json().stringify(indent=2),
+    ToJson::to_json(registry_document).stringify(indent=2),
   )
   for protocol in protocols {
     @support.write_text_file_if_missing(

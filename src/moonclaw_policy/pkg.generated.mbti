@@ -2,17 +2,18 @@
 package "vectie/moontown/moonclaw_policy"
 
 import {
+  "moonbitlang/core/json",
   "vectie/moontown/policy",
 }
 
 // Values
-pub fn add_no_input_policy(Map[String, Json]) -> Unit
+pub fn add_no_input_policy(Map[String, @json.Json]) -> Unit
 
-pub fn add_non_adaptive_no_input_policy(Map[String, Json]) -> Unit
+pub fn add_non_adaptive_no_input_policy(Map[String, @json.Json]) -> Unit
 
 pub fn civic_keeper_profile() -> String
 
-pub fn execution_metadata_fields(preferred_skills~ : Array[String], execution_mode~ : String, execution_target? : String?, output_contract~ : String) -> Map[String, Json]
+pub fn execution_metadata_fields(preferred_skills~ : Array[String], execution_mode~ : String, execution_target? : String?, output_contract~ : String) -> Map[String, @json.Json]
 
 pub fn keeper_profile_override_for_book_type(String) -> String?
 
@@ -20,15 +21,15 @@ pub fn keeper_profile_override_for_catalog_entry(String, String, Array[String]) 
 
 pub fn keeper_profile_override_for_policy(@policy.BookPolicy) -> String?
 
-pub fn no_input_policy_json() -> Json
+pub fn no_input_policy_json() -> @json.Json
 
-pub fn non_adaptive_no_input_policy_fields() -> Map[String, Json]
+pub fn non_adaptive_no_input_policy_fields() -> Map[String, @json.Json]
 
-pub fn non_adaptive_no_input_policy_json() -> Json
+pub fn non_adaptive_no_input_policy_json() -> @json.Json
 
 pub fn planbook_keeper_profile() -> String
 
-pub fn step_metadata_fields(preferred_skills~ : Array[String], enable_tools~ : Bool, web_search~ : Bool, timeout_ms~ : Int, board_lane~ : String, board_order~ : Int) -> Map[String, Json]
+pub fn step_metadata_fields(preferred_skills~ : Array[String], enable_tools~ : Bool, web_search~ : Bool, timeout_ms~ : Int32, board_lane~ : String, board_order~ : Int32) -> Map[String, @json.Json]
 
 // Errors
 

@@ -1,8 +1,9 @@
 ///|
+#derive(Debug, Eq)
 pub struct AlertBanner {
   level : String
   text : String
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl Show for AlertBanner with fn output(
@@ -13,10 +14,11 @@ pub impl Show for AlertBanner with fn output(
 }
 
 ///|
+#derive(Debug, Eq)
 pub struct DashboardSection {
   title : String
   lines : Array[String]
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl Show for DashboardSection with fn output(
@@ -29,11 +31,12 @@ pub impl Show for DashboardSection with fn output(
 }
 
 ///|
+#derive(Debug, Eq)
 pub struct DashboardModel {
   title : String
   alerts : Array[AlertBanner]
   sections : Array[DashboardSection]
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl Show for DashboardModel with fn output(

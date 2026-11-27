@@ -57,7 +57,7 @@ pub fn source_root(binding : Json) -> String {
 ///|
 pub async fn source_still_bound(
   binding : Json,
-  strict_digest? : Bool = true,
+  strict_digest~ : Bool = true,
 ) -> Bool {
   match source_binding(Some(source_root(binding))) {
     Ok(current) =>

@@ -1,8 +1,9 @@
 ///|
+#derive(Debug, Eq)
 struct BookQualityContextSpec {
   book_type : String
   pages : Array[String]
-} derive(Debug, Eq)
+}
 
 ///|
 fn context_spec(

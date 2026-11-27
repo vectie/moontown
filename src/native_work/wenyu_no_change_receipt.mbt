@@ -1,6 +1,7 @@
 ///|
 /// Check the owner-bound projection of an already validated native settlement.
 /// This grants no runtime permission and performs no product acceptance.
+#warnings("-reserved_keyword-unresolved_type_variable")
 pub fn wenyu_no_change_receipt_satisfies_contract(work : Work) -> Bool {
   if work.state != "completed" ||
     !wenyu_result_satisfies_contract(work, work.output, no_change=true) {
@@ -20,7 +21,7 @@ pub fn wenyu_no_change_receipt_satisfies_contract(work : Work) -> Bool {
     text(receipt, "completion_outcome") != "no_change" ||
     text(receipt, "acceptance_scope") != "engineering_only" ||
     text(receipt, "original_task_acceptance") != "unevaluated" ||
-    field(receipt, "changed_files") != [].to_json() ||
+    field(receipt, "changed_files") != ToJson::to_json([]) ||
     field(receipt, "baseline") != work.baseline ||
     text(receipt, "diff_check_status") != "passed" ||
     text(receipt, "commit_status") != "not_requested" ||
@@ -31,7 +32,7 @@ pub fn wenyu_no_change_receipt_satisfies_contract(work : Work) -> Bool {
     text(native, "status") != "runtime-completed" ||
     verdict != field(field(native, "execution"), "completion_verdict") ||
     text(verdict, "kind") != "mooncode-coding-completion-verdict" ||
-    field(verdict, "accepted") != true.to_json() ||
+    field(verdict, "accepted") != ToJson::to_json(true) ||
     text(verdict, "completion_contract") != "mooncode.completion-outcome.v1" ||
     text(verdict, "completion_outcome") != "no_change" ||
     text(verdict, "acceptance_scope") != "engineering_only" ||
@@ -44,15 +45,15 @@ pub fn wenyu_no_change_receipt_satisfies_contract(work : Work) -> Bool {
     finish_answer(native) != work.output {
     return false
   }
-  let final = field(receipt, "final_observation")
+  let final_val = field(receipt, "final_observation")
   for key in ["root", "head", "index_digest", "source_digest"] {
     if text(work.baseline, key) == "" ||
-      text(work.baseline, key) != text(final, key) {
+      text(work.baseline, key) != text(final_val, key) {
       return false
     }
   }
-  if text(final, "root") != work.request.execution_root ||
-    text(final, "source_digest") != text(receipt, "checked_source_digest") {
+  if text(final_val, "root") != work.request.execution_root ||
+    text(final_val, "source_digest") != text(receipt, "checked_source_digest") {
     return false
   }
   let required = rows(policy, "required_checks")
@@ -69,15 +70,17 @@ pub fn wenyu_no_change_receipt_satisfies_contract(work : Work) -> Bool {
     }
     let id = text(matching[0], "event_id")
     if id == "" ||
-      !rows(field(verdict, "no_change"), "evidence_refs").contains(id.to_json()) ||
-      !rows(receipt, "event_ids").contains(id.to_json()) {
+      !rows(field(verdict, "no_change"), "evidence_refs").contains(
+        ToJson::to_json(id),
+      ) ||
+      !rows(receipt, "event_ids").contains(ToJson::to_json(id)) {
       return false
     }
     let proofs = checks.filter(proof => text(proof, "event_id") == id)
     if proofs.length() != 1 ||
       text(proofs[0], "command") != text(check, "command") ||
       text(proofs[0], "cwd") != work.request.execution_root ||
-      field(proofs[0], "exit_code") != (0).to_json() {
+      field(proofs[0], "exit_code") != ToJson::to_json(0) {
       return false
     }
   }
@@ -87,6 +90,7 @@ pub fn wenyu_no_change_receipt_satisfies_contract(work : Work) -> Bool {
 ///|
 /// Existing mutation receipts may predate optional completion projections, but
 /// an explicit contradictory projection is never a valid mutation result.
+#warnings("-reserved_keyword")
 pub fn wenyu_mutation_receipt_satisfies_contract(work : Work) -> Bool {
   if work.state != "completed" ||
     !wenyu_result_satisfies_contract(work, work.output) ||
@@ -112,8 +116,8 @@ pub fn wenyu_mutation_receipt_satisfies_contract(work : Work) -> Bool {
     let mut finish = Json::null()
     for result in rows(field(native, "execution"), "tool_results") {
       if text(result, "tool") == "finish" &&
-        field(result, "accepted") == true.to_json() &&
-        field(field(result, "result"), "is_error") != true.to_json() {
+        field(result, "accepted") == ToJson::to_json(true) &&
+        field(field(result, "result"), "is_error") != ToJson::to_json(true) {
         finish = field(field(result, "result"), "metadata")
       }
     }
@@ -124,13 +128,13 @@ pub fn wenyu_mutation_receipt_satisfies_contract(work : Work) -> Bool {
   }
   if wenyu_no_change_enabled(work.request) {
     let baseline = field(receipt, "baseline")
-    let final = field(receipt, "final_observation")
+    let final_val = field(receipt, "final_observation")
     if native == Json::null() ||
       text(receipt, "result_decision") != "implemented" ||
       rows(receipt, "changed_files").is_empty() ||
       text(baseline, "source_digest") == "" ||
-      text(final, "source_digest") == "" ||
-      text(baseline, "source_digest") == text(final, "source_digest") {
+      text(final_val, "source_digest") == "" ||
+      text(baseline, "source_digest") == text(final_val, "source_digest") {
       return false
     }
   }

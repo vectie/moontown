@@ -1,5 +1,5 @@
 ///|
-fn count_included_screened_sources(text : String) -> Int {
+fn count_included_screened_sources(text : String) -> Int32 {
   let mut count = 0
   let mut in_included_section = false
   let mut in_non_included_source_section = false

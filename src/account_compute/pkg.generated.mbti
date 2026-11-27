@@ -2,17 +2,18 @@
 package "vectie/moontown/account_compute"
 
 import {
+  "moonbitlang/core/json",
   "vectie/moontown/account_identity",
 }
 
 // Values
-pub async fn for_session(@account_identity.Session, String) -> Json
+pub async fn for_session(@account_identity.Session, String) -> @json.Json
 
-pub async fn platform_for_session(@account_identity.Session, String, String) -> Json
+pub async fn platform_for_session(@account_identity.Session, String, String) -> @json.Json
 
-pub fn public_demo() -> Json
+pub fn public_demo() -> @json.Json
 
-pub async fn read(String, String) -> Json
+pub async fn read(String, String) -> @json.Json
 
 // Errors
 

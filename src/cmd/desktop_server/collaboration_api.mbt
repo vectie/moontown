@@ -87,9 +87,9 @@ async fn handle_collaboration_api(
       timestamp,
       (@env.now() / 1000UL).to_int(),
     )
-    send_json(conn, if result.ok { 200 } else { 409 }, result.to_json())
+    send_json(conn, if result.ok { 200 } else { 409 }, ToJson::to_json(result))
     return
   }
   let result = store.request(input, timestamp)
-  send_json(conn, if result.ok { 200 } else { 409 }, result.to_json())
+  send_json(conn, if result.ok { 200 } else { 409 }, ToJson::to_json(result))
 }

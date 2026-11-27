@@ -71,7 +71,7 @@ test "book quality generated site path follows policy projection default" {
 fn required_path_count_for_test(
   paths : Array[BookQualityRequiredPath],
   relative : String,
-) -> Int {
+) -> Int32 {
   let mut count = 0
   for path in paths {
     if path.relative == relative {
@@ -203,7 +203,7 @@ test "book quality package owns operational projection templates" {
 ///|
 fn review_candidate_score_for_test(
   book_id : String,
-  structural_score : Int,
+  structural_score : Int32,
 ) -> BookQualityScore {
   {
     book_id,

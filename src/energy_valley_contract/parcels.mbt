@@ -1,7 +1,8 @@
 ///|
+#derive(Debug, Eq)
 pub(all) struct Polygon {
   vertices : ReadOnlyArray[WorldPoint]
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn polygon(vertices : ArrayView[WorldPoint]) -> Polygon {
@@ -14,6 +15,7 @@ pub fn Polygon::is_well_formed(self : Polygon) -> Bool {
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum LandUse {
   Civic
   Research
@@ -24,18 +26,19 @@ pub(all) enum LandUse {
   Transit
   Utility
   Custom(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// One buildable fragment inside a stable road-derived land block. Fragments
 /// allow water, retained roads, and distinct park/research uses to coexist
 /// without splitting the authored top-level block identity.
+#derive(Debug, Eq)
 pub(all) struct BuildableRegion {
   id : StableId
   boundary : Polygon
   land_use : LandUse
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn buildable_region(
@@ -48,6 +51,7 @@ pub fn buildable_region(
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct LandBlock {
   id : StableId
   boundary : Polygon
@@ -58,7 +62,7 @@ pub(all) struct LandBlock {
   provenance : Provenance
   buildable_regions : ReadOnlyArray[BuildableRegion]
   parcelable : Bool
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn land_block(
@@ -69,8 +73,8 @@ pub fn land_block(
   frontage_segment_ids : ArrayView[StableId],
   preservation : PreservationLevel,
   provenance : Provenance,
-  buildable_regions? : ArrayView[BuildableRegion] = [],
-  parcelable? : Bool = true,
+  buildable_regions~ : ArrayView[BuildableRegion] = [],
+  parcelable~ : Bool = true,
 ) -> LandBlock {
   {
     id,
@@ -106,6 +110,7 @@ pub fn LandBlock::effective_buildable_regions(
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct Parcel {
   id : StableId
   block_id : StableId
@@ -115,7 +120,7 @@ pub(all) struct Parcel {
   allowed_programs : ReadOnlyArray[String]
   preservation : PreservationLevel
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn parcel(

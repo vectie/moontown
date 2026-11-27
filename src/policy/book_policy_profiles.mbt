@@ -1,9 +1,10 @@
 ///|
+#derive(Debug, Eq)
 pub struct PolicyProfile {
   book_type : String
   source_policy : String
   policy : BookPolicy
-} derive(Debug, Eq)
+}
 
 ///|
 fn profile(

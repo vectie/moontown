@@ -1,6 +1,6 @@
 ///|
 fn safe_profile_id(value : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   for char in value.to_lower() {
     if (char >= 'a' && char <= 'z') ||
       (char >= '0' && char <= '9') ||
@@ -29,10 +29,10 @@ fn profile_request_json(
     "role": draft.role,
     "mission": draft.mission,
     "tone": draft.tone,
-    "capabilities": draft.capabilities.to_json(),
+    "capabilities": ToJson::to_json(draft.capabilities),
     "workspaceId": draft.workspace_id,
     "buildingId": draft.building_id,
-    "bookIds": draft.book_ids.to_json(),
+    "bookIds": ToJson::to_json(draft.book_ids),
     "maxActiveWorkers": draft.max_active_workers,
     "authorityCeiling": draft.authority_ceiling.id(),
     "consent": {

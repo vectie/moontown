@@ -50,11 +50,11 @@ async test "actual exported package crosses production handler private store and
   assert_eq(downloaded, bytes)
   assert_eq(
     @json.parse(@fs.read_file(received.binding_path).text()),
-    binding.to_json(),
+    ToJson::to_json(binding),
   )
   assert_eq(
     @json.parse(@fs.read_file(received.receipt_path).text()),
-    uploaded.receipt.unwrap().to_json(),
+    ToJson::to_json(uploaded.receipt.unwrap()),
   )
   // A changed sender is a different immutable listing and has no old grants.
   let v2_bytes = @fs.read_file(input + "/sender-v2.moonbook-agent").binary()
@@ -88,7 +88,7 @@ async test "actual exported package crosses production handler private store and
   assert_eq(call(restarted_service, download_request(binding)).bytes(), bytes)
   @fs.write_file(
     f.root + "/transport-transcript.json",
-    transcript.to_json().stringify(indent=2),
+    ToJson::to_json(transcript).stringify(indent=2),
     create_mode=CreateNew,
     permission=0o600,
   )

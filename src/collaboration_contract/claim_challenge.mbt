@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ComparedClaim {
   claim_id : String
   book_id : String
@@ -7,35 +8,38 @@ pub(all) struct ComparedClaim {
   value : String
   source_path : String
   quote : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ComparedSource {
   path : String
   digest : String
-  size_bytes : Int
-} derive(Debug, Eq, ToJson, FromJson)
+  size_bytes : Int32
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ComparedGroup {
   topic : String
   context : String
   state : String
   books : Array[String]
   claims : Array[ComparedClaim]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 /// These are imported assertions, never catalog identities or authority.
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ClaimComparison {
   contract : String
   state : String
   policy : String
   table_digest : String
-  table_size_bytes : Int
+  table_size_bytes : Int32
   sources : Array[ComparedSource]
   groups : Array[ComparedGroup]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 fn claim_digest_valid(value : String) -> Bool {
@@ -50,7 +54,7 @@ fn claim_digest_valid(value : String) -> Bool {
 ///
 /// ```mbt check
 /// test {
-///   assert_true(decode_claim_comparison("{}") is Err(_))
+///   assert_true(@collaboration_contract.decode_claim_comparison("{}") is Err(_))
 /// }
 /// ```
 pub fn decode_claim_comparison(raw : String) -> Result[ClaimComparison, String] {
@@ -60,7 +64,7 @@ pub fn decode_claim_comparison(raw : String) -> Result[ClaimComparison, String] 
     }
     let json = @json.parse(raw)
     let report : ClaimComparison = @json.from_json(json)
-    guard report.to_json() == json &&
+    guard ToJson::to_json(report) == json &&
       report.contract == "moontown.claim-comparison.v1" &&
       report.state == "pending_review" &&
       claim_digest_valid(report.table_digest) &&
@@ -158,17 +162,19 @@ pub fn decode_claim_comparison(raw : String) -> Result[ClaimComparison, String] 
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ClaimSourceMapping {
   claim_id : String
   book_id : String
   source_path : String
   challenge : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct ClaimChallenge {
   comparison : String
-  group_index : Int
+  group_index : Int32
   draft_id : String
   title : String
   question : String
@@ -179,7 +185,7 @@ pub(all) struct ClaimChallenge {
   objection_reviewer_id : String
   objection_reviewer_name : String
   mappings : Array[ClaimSourceMapping]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 /// Make an ordinary editable Draft. Native save must additionally verify the
@@ -238,9 +244,9 @@ pub fn claim_challenge_draft(
       }
       let source = report.sources.filter(s => s.path == claim.source_path)[0]
       provenance.push({
-        "imported_claim": claim.to_json(),
-        "reported_source": source.to_json(),
-        "explicit_mapping": mapping.to_json(),
+        "imported_claim": ToJson::to_json(claim),
+        "reported_source": ToJson::to_json(source),
+        "explicit_mapping": ToJson::to_json(mapping),
       })
       if !seen.contains(mapping.book_id) {
         seen.push(mapping.book_id)
@@ -310,7 +316,7 @@ pub fn claim_challenge_draft(
       }),
     })
     guard issues.is_empty() else { fail(issues.join("; ")) }
-    guard @utf8.encode(draft.to_json().stringify()).length() <= 65536 else {
+    guard @utf8.encode(ToJson::to_json(draft).stringify()).length() <= 65536 else {
       fail(
         "Narrow the selected group and authored challenges to fit the ordinary draft limit",
       )

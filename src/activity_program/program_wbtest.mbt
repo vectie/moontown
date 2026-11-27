@@ -169,6 +169,7 @@ fn workbook(
 
 ///|
 // Explicit test double. Production must use the real Book import/provider bridge.
+#warnings("-unused_async")
 async fn fixture_prepare(
   id : String,
   dossier : Json,
@@ -192,6 +193,7 @@ async fn fixture_prepare(
 }
 
 ///|
+#warnings("-unused_async")
 async test "qualified native MoonBook 1.2 receipt passes full launch validation" {
   let (root, template) = fixture_root()
   defer @fs.rmdir(root, recursive=true)

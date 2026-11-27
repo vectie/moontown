@@ -4,7 +4,7 @@ async fn refresh_or_reconcile_civic_communication_schedule(
   schedule_path : String,
   snapshot_path : String,
   book_catalog_path : String,
-  tick : Int,
+  tick : Int32,
   now_ms : UInt64,
 ) -> String? {
   match
@@ -27,7 +27,7 @@ async fn reconcile_civic_communication_schedule_if_completed(
   schedule : CivicCommunicationSchedule,
   snapshot_path : String,
   book_catalog_path : String,
-  tick : Int,
+  tick : Int32,
   now_ms : UInt64,
 ) -> (CivicCommunicationSchedule, String)? {
   if !civic_communication_schedule_has_active_round(schedule) {
@@ -58,7 +58,7 @@ async fn reconcile_civic_communication_scenario_round(
   schedule : CivicCommunicationSchedule,
   snapshot_path : String,
   book_catalog_path : String,
-  tick : Int,
+  tick : Int32,
   now_ms : UInt64,
 ) -> (CivicCommunicationSchedule, String)? {
   let workspace_base = civic_communication_workspace_base(snapshot_path)

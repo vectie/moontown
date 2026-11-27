@@ -19,6 +19,7 @@ fn order_state_name(state : OrderState) -> String {
 }
 
 ///|
+#warnings("-unused_value")
 fn order_notification(
   principal_id : String,
   order_id : String,
@@ -26,7 +27,7 @@ fn order_notification(
   title : String,
   summary : String,
   now_ms : UInt64,
-  version : Int,
+  version : Int32,
 ) -> TownNotification {
   {
     notification_id: "order:{order_id}:{kind}:{principal_id}:{version}",
@@ -287,12 +288,12 @@ fn order_card(order : OrderRecord, principal : MarketplacePrincipal) -> Json {
       visible_fulfillments.push({
         "fulfiller_principal_id": fulfillment.fulfiller_principal_id,
         "summary": fulfillment.summary,
-        "evidence_refs": fulfillment.evidence_refs.to_json(),
+        "evidence_refs": ToJson::to_json(fulfillment.evidence_refs),
         "submitted_at_ms": fulfillment.submitted_at_ms.to_string(),
         "decision": fulfillment.decision,
         "decision_summary": fulfillment.decision_summary,
         "decided_at_ms": match fulfillment.decided_at_ms {
-          Some(value) => value.to_string().to_json()
+          Some(value) => ToJson::to_json(value.to_string())
           None => Json::null()
         },
       })
@@ -306,12 +307,12 @@ fn order_card(order : OrderRecord, principal : MarketplacePrincipal) -> Json {
     "description": order.description,
     "deliverable": order.deliverable,
     "acceptance_criteria": order.acceptance_criteria,
-    "tags": order.tags.to_json(),
+    "tags": ToJson::to_json(order.tags),
     "state": order_state_name(order.state),
     "version": order.version,
     "created_at_ms": order.created_at_ms.to_string(),
     "updated_at_ms": order.updated_at_ms.to_string(),
-    "fulfillments": visible_fulfillments.to_json(),
+    "fulfillments": ToJson::to_json(visible_fulfillments),
     "can_fulfill": order.state == OrderOpen && !owner,
     "can_cancel": order.state == OrderOpen && owner,
     "can_decide": order.state == OrderPendingReview && owner,

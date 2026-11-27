@@ -1,4 +1,5 @@
 ///|
+#warnings("-reserved_keyword-unused_async")
 async test "configured private control binds owner daemon and authenticated exact-byte transport without Desk" {
   let root = @fs.realpath(@fsx.mkdtemp("/tmp/town-native-control-XXXXXX"))
   let owner = root + "/owner"
@@ -23,14 +24,14 @@ async test "configured private control binds owner daemon and authenticated exac
   @support.write_text_file(daemon, "{\"port\":43123}")
   let seen : Array[String] = []
   let result = load(path~, owner_workspace=owner, exchange=async fn(
-    method,
+    method_val,
     uri,
     body,
     headers,
   ) {
     assert_eq(headers["X-MoonClaw-Execution-Token"], token)
     assert_eq(headers["X-MoonClaw-Instance-ID"], instance)
-    seen.push(method + " " + uri + " " + body)
+    seen.push(method_val + " " + uri + " " + body)
     (202, instance, "{\"accepted\":true}")
   })
   guard result is Ok(client) else { fail("fixture control should load") }

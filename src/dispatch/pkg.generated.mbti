@@ -33,15 +33,17 @@ pub fn wenyu_valley_goal_text(String) -> Bool
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub enum RouteDecision {
   Assigned(@core.AssignmentPlan)
   Escalated(String)
   Deferred(String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub struct RouteRequest {
   task : @core.TownTask
-} derive(Eq, @debug.Debug)
+}
 pub fn RouteRequest::new(task~ : @core.TownTask) -> Self
 
 // Type aliases

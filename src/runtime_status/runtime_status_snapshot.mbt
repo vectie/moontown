@@ -1,6 +1,6 @@
 ///|
 pub async fn inspect_saved_town(
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> TownRuntimeStatus {
   match @storage.load_snapshot_file(snapshot_path) {
     Some(snapshot) => {
@@ -38,10 +38,10 @@ pub async fn inspect_saved_town(
 pub fn runtime_status_from_state(
   state : @core.TownState,
   snapshot_path : String,
-  standing_goals? : Array[@core.StandingGoal] = [],
-  daemon_tick? : Int = 0,
-  watcher_records? : Array[@core.WatcherRunRecord] = [],
-  book_template_request_status? : @book_templates.BookTemplateRequestStatus? = None,
+  standing_goals~ : Array[@core.StandingGoal] = [],
+  daemon_tick~ : Int32 = 0,
+  watcher_records~ : Array[@core.WatcherRunRecord] = [],
+  book_template_request_status~ : @book_templates.BookTemplateRequestStatus? = None,
 ) -> TownRuntimeStatus {
   let report = @health.inspect_town(state)
   let actions = @scheduler.plan_tick(state, report)

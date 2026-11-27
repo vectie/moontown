@@ -10,7 +10,7 @@
 ///   ignore(observe)
 /// }
 /// ```
-pub async fn read_saved(path? : String = default_path()) -> State {
+pub async fn read_saved(path~ : String = default_path()) -> State {
   guard @fs.exists(path) else { fail("native_work_saved_state_missing") }
   load_unlocked(path)
 }

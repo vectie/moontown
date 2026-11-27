@@ -4,9 +4,9 @@ fn moonclaw_runtime_book_task(
   title~ : String,
   kind~ : String,
   prompt~ : String,
-  priority? : Int = 100,
-  requires_review? : Bool = true,
-  target_pages? : Array[String] = [],
+  priority~ : Int32 = 100,
+  requires_review~ : Bool = true,
+  target_pages~ : Array[String] = [],
 ) -> @moonbook.BookTask {
   @moonbook.BookTask::new(
     id~,
@@ -21,7 +21,7 @@ fn moonclaw_runtime_book_task(
 
 ///|
 fn moonclaw_runtime_bootstrap_ingest_task(
-  id? : String = "task-bootstrap",
+  id~ : String = "task-bootstrap",
 ) -> @moonbook.BookTask {
   moonclaw_runtime_book_task(
     id~,
@@ -37,8 +37,8 @@ fn moonclaw_runtime_standing_watch_task(
   id~ : String,
   title~ : String,
   prompt~ : String,
-  target_pages? : Array[String] = [],
-  priority? : Int = 95,
+  target_pages~ : Array[String] = [],
+  priority~ : Int32 = 95,
 ) -> @moonbook.BookTask {
   moonclaw_runtime_book_task(
     id~,

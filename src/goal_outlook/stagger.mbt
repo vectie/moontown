@@ -11,7 +11,7 @@ fn selected_ids(bytes : Bytes) -> Array[String] raise {
     fail("Select between 1 and 2,000 goals")
   }
   let ids : Array[String] = []
-  let seen : Map[String, Bool] = {}
+  let seen : Map[String, Bool] = Map([])
   for item in items {
     guard item is String(id) && !id.trim().is_empty() else {
       fail("Each selected ID must be a nonblank string")
@@ -31,8 +31,8 @@ fn selected_ids(bytes : Bytes) -> Array[String] raise {
 pub fn stagger(
   bytes : Bytes,
   selection : Bytes,
-  start : Int,
-  spacing : Int,
+  start : Int32,
+  spacing : Int32,
 ) -> Result[String, String] {
   try {
     guard start >= 0 && spacing > 0 else {
@@ -43,11 +43,11 @@ pub fn stagger(
       Err(error) => fail(error)
     }
     let ids = selected_ids(selection)
-    let by_id : Map[String, @core.StandingGoal] = {}
+    let by_id : Map[String, @core.StandingGoal] = Map([])
     for goal in goals {
       by_id[goal.id] = goal
     }
-    let due : Map[String, Int] = {}
+    let due : Map[String, Int32] = Map([])
     let mut next = start
     for i, id in ids {
       guard by_id.get(id) is Some(goal) else {
@@ -80,7 +80,7 @@ pub fn stagger(
           )
       }
     })
-    let output = candidate.to_json().stringify() + "\n"
+    let output = ToJson::to_json(candidate).stringify() + "\n"
     guard @utf8.encode(output).length() <= 1048576 else {
       fail("Candidate exceeds 1 MiB; no partial candidate is emitted")
     }

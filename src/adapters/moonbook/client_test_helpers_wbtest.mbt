@@ -4,15 +4,15 @@ fn moonbook_adapter_catalog_entry(
   name~ : String,
   purpose~ : String,
   workspace_root~ : String,
-  tags? : Array[String] = [],
-  skills? : Array[String] = [],
+  tags~ : Array[String] = [],
+  skills~ : Array[String] = [],
 ) -> BookCatalogEntry {
   BookCatalogEntry::new(id~, name~, purpose~, workspace_root~, tags~, skills~)
 }
 
 ///|
 fn moonbook_adapter_opc_research_entry(
-  workspace_root? : String = "/tmp/research-opc",
+  workspace_root~ : String = "/tmp/research-opc",
 ) -> BookCatalogEntry {
   moonbook_adapter_catalog_entry(
     id="research-opc",
@@ -38,10 +38,10 @@ fn moonbook_adapter_task(
   title~ : String,
   kind~ : String,
   prompt~ : String,
-  goal? : String? = None,
-  priority? : Int = 80,
-  requires_review? : Bool = true,
-  target_pages? : Array[String] = [],
+  goal~ : String? = None,
+  priority~ : Int32 = 80,
+  requires_review~ : Bool = true,
+  target_pages~ : Array[String] = [],
 ) -> BookTask {
   BookTask::new(
     id~,

@@ -12,13 +12,12 @@ fn source_packet(saved : @contract.SavedDraft) -> Bytes {
     "recorded_at": saved.recorded_at,
     "status": "pending_review",
     "execution": "not_started",
-    "draft": saved.draft.to_json(),
-    "sources": saved.sources
-    .map(source => {
+    "draft": ToJson::to_json(saved.draft),
+    "sources": saved.sources.map(source => {
       ..source,
       artifact_ref: revision_prefix(saved) + source.artifact_ref,
     })
-    .to_json(),
+    |> ToJson::to_json,
   }
   @utf8.encode(value.stringify(indent=2))
 }

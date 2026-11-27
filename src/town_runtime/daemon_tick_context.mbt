@@ -6,7 +6,7 @@ priv struct DaemonTickContext {
   state : @core.TownState
   daemon : @scheduler.DaemonState
   mayor : @roles.Mayor
-  next_tick_sequence : Int
+  next_tick_sequence : Int32
 }
 
 ///|

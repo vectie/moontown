@@ -1,62 +1,67 @@
 ///|
+#derive(ToJson)
 priv struct GoalView {
-  source_position : Int
+  source_position : Int32
   goal : @core.StandingGoal
   state : String
-  effective_cadence_ticks : Int
-  occurrence_count : Int
-  occurrence_ticks : Array[Int]
-} derive(ToJson)
+  effective_cadence_ticks : Int32
+  occurrence_count : Int32
+  occurrence_ticks : Array[Int32]
+}
 
 ///|
+#derive(ToJson)
 priv struct Slot {
-  tick : Int
-  goal_positions : Array[Int]
-} derive(ToJson)
+  tick : Int32
+  goal_positions : Array[Int32]
+}
 
 ///|
+#derive(ToJson)
 priv struct Outlook {
   contract : String
   policy : String
   source_digest : String
-  source_size_bytes : Int
-  start_tick : Int
-  end_tick_exclusive : Int
-  occurrence_count : Int
-  occupied_tick_count : Int
-  shared_tick_count : Int
-  peak_goals_at_tick : Int
+  source_size_bytes : Int32
+  start_tick : Int32
+  end_tick_exclusive : Int32
+  occurrence_count : Int32
+  occupied_tick_count : Int32
+  shared_tick_count : Int32
+  peak_goals_at_tick : Int32
   goals : Array[GoalView]
   slots : Array[Slot]
-} derive(ToJson)
+}
 
 ///|
+#derive(ToJson)
 priv struct Change {
   goal_id : String
   state : String
   settings_changed : Bool
   outlook_changed : Bool
-  occurrence_delta : Int
+  occurrence_delta : Int32
   before : GoalView?
   after : GoalView?
-} derive(ToJson)
+}
 
 ///|
+#derive(ToJson)
 priv struct Comparison {
   contract : String
   policy : String
-  start_tick : Int
-  end_tick_exclusive : Int
+  start_tick : Int32
+  end_tick_exclusive : Int32
   before_digest : String
   after_digest : String
-  before_size_bytes : Int
-  after_size_bytes : Int
-  before_occurrences : Int
-  after_occurrences : Int
-  occurrence_delta : Int
-  before_shared_ticks : Int
-  after_shared_ticks : Int
-  before_peak_goals : Int
-  after_peak_goals : Int
+  before_size_bytes : Int32
+  after_size_bytes : Int32
+  before_occurrences : Int32
+  after_occurrences : Int32
+  occurrence_delta : Int32
+  before_shared_ticks : Int32
+  after_shared_ticks : Int32
+  before_peak_goals : Int32
+  after_peak_goals : Int32
   changes : Array[Change]
-} derive(ToJson)
+}

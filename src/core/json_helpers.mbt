@@ -1,6 +1,6 @@
 ///|
 pub fn json_object_copy(value : Json?) -> Map[String, Json] {
-  let copied : Map[String, Json] = {}
+  let copied : Map[String, Json] = Map([])
   match value {
     Some(Object(obj)) =>
       for key, entry in obj {

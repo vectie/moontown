@@ -3,7 +3,7 @@ fn civic_communication_home_return_records(
   scenario : CivicCommunicationScenario,
   building_id : String,
   ideas : Array[CivicCommunicationIdea],
-  round_id? : String = "civic-salon-round-001",
+  round_id~ : String = "civic-salon-round-001",
 ) -> Array[CivicCommunicationHomeReturn] {
   let records : Array[CivicCommunicationHomeReturn] = []
   for idea in ideas {

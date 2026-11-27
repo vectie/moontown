@@ -3,6 +3,7 @@ package "vectie/moontown/spatial_assets"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
@@ -11,11 +12,13 @@ pub fn ingest_moonmold_presentation(String, building_id~ : String, placement_id~
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub(all) struct SpatialAssetIssue {
   code : String
   message : String
-} derive(Eq, ToJson, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub(all) struct TownPresentationAsset {
   building_id : String
   placement_id : String
@@ -32,7 +35,7 @@ pub(all) struct TownPresentationAsset {
   declared_losses : Array[String]
   assumptions : Array[String]
   authority_envelope_id : String
-} derive(Eq, ToJson, @debug.Debug)
+}
 
 // Type aliases
 

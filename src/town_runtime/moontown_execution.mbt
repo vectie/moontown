@@ -56,7 +56,7 @@ fn failed_execution_record(
   entry : @moonbook.BookCatalogEntry,
   task : @moonbook.BookTask,
   detail : String,
-  assigned_worker_id? : String? = None,
+  assigned_worker_id~ : String? = None,
 ) -> @core.TaskExecutionRecord {
   let packet_id = "keeper-\{entry.id}-\{task.id}"
   let packet_path = @moonclaw.packet_file_path(

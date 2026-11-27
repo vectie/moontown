@@ -1,5 +1,6 @@
 ///|
 /// A current Book review observation, never task or goal acceptance.
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct NativeWenyuReviewResolution {
   contract : String
   status : String
@@ -13,7 +14,7 @@ pub struct NativeWenyuReviewResolution {
   resolution_timestamp : String?
   original_task_acceptance : String
   reason : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn validate_native_wenyu_review_resolution(
@@ -76,7 +77,7 @@ pub async fn read_native_wenyu_review(
   request_digest : String,
   payload_digest : String,
   result_id : String,
-  moonbook_root? : String = default_moonbook_root(),
+  moonbook_root~ : String = default_moonbook_root(),
 ) -> NativeWenyuReviewResolution {
   let command = match installed_moonbook_command() {
     Some(command) => command

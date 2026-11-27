@@ -1,7 +1,7 @@
 ///|
 fn supervisor_test_draft(
   command_id : String,
-  expected_cursor : Int,
+  expected_cursor : Int32,
 ) -> SupervisorProfileDraft {
   {
     command_id,
@@ -82,7 +82,7 @@ fn supervisor_test_delegate_transport_request(
         "max_tokens": bounds.budget.max_tokens.to_string(),
         "max_artifacts": bounds.budget.max_artifacts,
       },
-      "artifact_prefixes": bounds.artifact_prefixes.to_json(),
+      "artifact_prefixes": ToJson::to_json(bounds.artifact_prefixes),
       "expires_at": bounds.expires_at,
     },
   }
@@ -248,7 +248,7 @@ async test "activation keeps profile identity stable and reconciles exact author
   assert_eq(json_string(command, "request_digest"), queued.request_digest)
   assert_eq(
     json_object(command, "authority").get("digest"),
-    Some(queued.request_digest.to_json()),
+    Some(ToJson::to_json(queued.request_digest)),
   )
   let receipt : Json = {
     "contract_id": "moonclaw.supervisor-command-receipt.v1",
@@ -262,7 +262,7 @@ async test "activation keeps profile identity stable and reconciles exact author
     "response": {
       "contract_id": "moonclaw.supervisor-state.v1",
       "supervisor_id": queued.payload.supervisor_id,
-      "profile": queued.payload.to_json(),
+      "profile": ToJson::to_json(queued.payload),
       "lifecycle": "Dormant",
       "active_run_id": "runtime-run-activate-1",
       "cursor": 10,
@@ -297,15 +297,15 @@ async test "activation keeps profile identity stable and reconciles exact author
   }
   assert_eq(
     acknowledged_profile.get("activeRunId"),
-    Some("runtime-run-activate-1".to_json()),
+    Some(ToJson::to_json("runtime-run-activate-1")),
   )
   assert_eq(
     acknowledged_profile.get("runtimeCursor"),
-    Some((10 : Int).to_json()),
+    Some(ToJson::to_json((10 : Int32))),
   )
   assert_eq(
     acknowledged_profile.get("runtimeEvidenceSource"),
-    Some("moonclaw.supervisor-command-receipt.v1".to_json()),
+    Some(ToJson::to_json("moonclaw.supervisor-command-receipt.v1")),
   )
   let supervisors = application.supervisor_agents_projection()
   guard supervisors[0] is Object(supervisor) else {
@@ -313,12 +313,15 @@ async test "activation keeps profile identity stable and reconciles exact author
   }
   assert_eq(
     supervisor.get("activeRunId"),
-    Some("runtime-run-activate-1".to_json()),
+    Some(ToJson::to_json("runtime-run-activate-1")),
   )
-  assert_eq(supervisor.get("runtimeCursor"), Some((10 : Int).to_json()))
+  assert_eq(
+    supervisor.get("runtimeCursor"),
+    Some(ToJson::to_json((10 : Int32))),
+  )
   assert_eq(
     supervisor.get("runtimeEvidenceSource"),
-    Some("moonclaw.supervisor-command-receipt.v1".to_json()),
+    Some(ToJson::to_json("moonclaw.supervisor-command-receipt.v1")),
   )
 }
 
@@ -379,7 +382,7 @@ async test "execution handoff preserves bounded pending-provider status evidence
           "response": {
             "contract_id": "moonclaw.supervisor-state.v1",
             "supervisor_id": activation.payload.supervisor_id,
-            "profile": activation.payload.to_json(),
+            "profile": ToJson::to_json(activation.payload),
             "lifecycle": "Running",
             "active_run_id": "supervisor-run-1",
             "cursor": 10,

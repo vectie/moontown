@@ -1,15 +1,17 @@
 ///|
 test "failed worker diagnostics stay in review while local evidence paths are hidden in every API response" {
-  let fields = contest_fields(competition_access_fixture().to_json())
+  let fields = contest_fields(ToJson::to_json(competition_access_fixture()))
   let run = contest_fields(
     contest_array(Json::object(fields), "benchmark_runs")[0],
   )
-  run["state"] = "failed".to_json()
-  run["reason"] = "Failure(src/hackathon/evaluation_runner.mbt:12: /tmp/runner-private/log.txt)".to_json()
+  run["state"] = ToJson::to_json("failed")
+  run["reason"] = ToJson::to_json(
+    "Failure(src/hackathon/evaluation_runner.mbt:12: /tmp/runner-private/log.txt)",
+  )
   run["evidence"] = Json::array([
-    "ledger:worker-receipt".to_json(),
-    "/tmp/runner-private/receipt.json".to_json(),
-    "/Users/operator/runner/log.txt".to_json(),
+    ToJson::to_json("ledger:worker-receipt"),
+    ToJson::to_json("/tmp/runner-private/receipt.json"),
+    ToJson::to_json("/Users/operator/runner/log.txt"),
   ])
   fields["benchmark_runs"] = Json::array([Json::object(run)])
   let state = @hackathon.decode_hackathon_state(Json::object(fields))
@@ -40,7 +42,7 @@ test "failed worker diagnostics stay in review while local evidence paths are hi
     let projected_run = contest_array(projection, "benchmark_runs")[0]
     assert_true(projected_run is { "has_local_evidence": True, .. })
     assert_eq(contest_array(projected_run, "evidence"), [
-      "ledger:worker-receipt".to_json(),
+      ToJson::to_json("ledger:worker-receipt"),
     ])
     assert_true(contest_string(projected_run, "reason").contains("Failure("))
   }

@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct BookCatalogEntry {
   id : String
   name : String
@@ -7,7 +8,7 @@ pub struct BookCatalogEntry {
   memory_scope : @core.MemoryScope
   tags : Array[String]
   skills : Array[String]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn BookCatalogEntry::new(
@@ -15,9 +16,9 @@ pub fn BookCatalogEntry::new(
   name~ : String,
   purpose~ : String,
   workspace_root~ : String,
-  memory_scope? : @core.MemoryScope = BookPrivate,
-  tags? : Array[String] = [],
-  skills? : Array[String] = [],
+  memory_scope~ : @core.MemoryScope = BookPrivate,
+  tags~ : Array[String] = [],
+  skills~ : Array[String] = [],
 ) -> BookCatalogEntry {
   { id, name, purpose, workspace_root, memory_scope, tags, skills, }
 }

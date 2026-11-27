@@ -91,7 +91,7 @@ async fn write_atomic(path : String, contents : String) -> Unit {
 
 ///|
 async fn save_registry(root : String, state : Registry) -> Unit {
-  write_atomic(root + "/registry.json", state.to_json().stringify())
+  write_atomic(root + "/registry.json", ToJson::to_json(state).stringify())
 }
 
 ///|

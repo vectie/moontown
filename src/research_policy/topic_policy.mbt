@@ -24,7 +24,7 @@ pub fn strip_research_attempt_suffix(topic : String) -> String {
     string_is_digits(last[1:].to_owned())) {
     return cleaned
   }
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   for index in 0..<(parts.length() - 1) {
     if index > 0 {
       builder.write_char('-')
@@ -49,7 +49,7 @@ fn string_is_digits(text : String) -> Bool {
 
 ///|
 fn compact_topic_segment(text : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let mut last_dash = false
   for char in text.to_lower() {
     if (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') {
@@ -78,7 +78,7 @@ pub fn display_topic_name(topic : String) -> String {
 
 ///|
 fn topic_id_to_words(topic : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   for char in topic {
     if char == '-' {
       builder.write_char(' ')

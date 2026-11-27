@@ -1,5 +1,5 @@
 ///|
-async fn book_quality_current_daemon_tick(snapshot_path : String) -> Int {
+async fn book_quality_current_daemon_tick(snapshot_path : String) -> Int32 {
   let path = @daemon_runtime_policy.daemon_state_path_for_snapshot(
     snapshot_path,
   )

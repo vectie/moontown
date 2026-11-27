@@ -5,7 +5,7 @@ async fn write_editor_feature_selection_status(
 ) -> Unit {
   @support.write_text_file(
     default_editor_feature_selection_path(snapshot_path~),
-    task.to_json().stringify(indent=2),
+    ToJson::to_json(task).stringify(indent=2),
   )
   @support.write_text_file(
     default_editor_feature_selection_markdown_path(snapshot_path~),

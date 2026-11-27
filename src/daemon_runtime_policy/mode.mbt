@@ -1,9 +1,10 @@
 ///|
+#derive(Debug, Eq)
 pub enum DaemonRuntimeMode {
   WorkerRuntime
   SupervisorRuntime
   InactiveRuntime
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn daemon_runtime_status_active(status : String) -> Bool {

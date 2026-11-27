@@ -1,5 +1,4 @@
 import {
-  "moonbitlang/core/json",
   "vectie/moontown/core",
   "vectie/moontown/policy",
   "vectie/moontown/skill_quality",
@@ -8,3 +7,7 @@ import {
 }
 
 supported_targets = "native"
+
+import {
+  "moonbitlang/core/json",
+} for "wbtest"

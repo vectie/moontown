@@ -156,7 +156,7 @@ async test "standing watch auto triage closes empty persisted book result" {
   )
   @support.write_text_file(
     "\{root}/book-results/standing-watch-empty-result-tick-12.json",
-    result.to_json().stringify(),
+    ToJson::to_json(result).stringify(),
   )
   let entry = research_opc_book_entry(book_root)
   let state = goal_supervision_test_state()

@@ -58,7 +58,7 @@ async test "reviewer uncertain dispatch must remain non-retriable through real s
     root + "/book/sources/customer.txt",
     "Customer rollout: November\n",
   )
-  let calls = Ref::new(0)
+  let calls = Ref(0)
   ignore(
     run_standing_goal_watch_cycle(
       state,
@@ -278,7 +278,10 @@ async test "reviewer duplicate and traversal plans do not replace baseline" {
       ["/absolute"],
       ["sources/./customer.txt"],
     ] {
-    @support.write_text_file(path, { ..plan, sources, }.to_json().stringify())
+    @support.write_text_file(
+      path,
+      ToJson::to_json({ ..plan, sources, }).stringify(),
+    )
     ignore(
       run_standing_goal_watch_cycle(
         state,

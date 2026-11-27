@@ -14,8 +14,11 @@ async test "profile GET emits optional identity and consent as scalar or null" {
     profile.get("consent") is Some(Object(consent)) else {
     fail("profile GET must expose identity and consent objects")
   }
-  assert_eq(identity.get("avatarUrl"), Some("avatar://otter-steward".to_json()))
-  assert_eq(consent.get("confirmedAtMs"), Some(1234UL.to_json()))
+  assert_eq(
+    identity.get("avatarUrl"),
+    Some(ToJson::to_json("avatar://otter-steward")),
+  )
+  assert_eq(consent.get("confirmedAtMs"), Some(ToJson::to_json(1234UL)))
 
   let absent = {
     ..application.load_store().profiles[0],
@@ -66,7 +69,7 @@ async test "activation execution lifecycle and review wires never wrap option va
     is Some(Object(pending)) else {
     fail("activation outbox must contain the queued handoff")
   }
-  assert_eq(pending.get("expected_cursor"), Some((9 : Int).to_json()))
+  assert_eq(pending.get("expected_cursor"), Some(ToJson::to_json((9 : Int32))))
   assert_eq(pending.get("claimed_by"), Some(Json::null()))
   assert_eq(pending.get("runtime_command"), Some(Json::null()))
   guard pending.get("payload") is Some(Object(payload)) &&
@@ -77,9 +80,9 @@ async test "activation execution lifecycle and review wires never wrap option va
   }
   assert_eq(
     runtime_identity.get("avatarUrl"),
-    Some("avatar://moon-lantern".to_json()),
+    Some(ToJson::to_json("avatar://moon-lantern")),
   )
-  assert_eq(runtime_consent.get("confirmedAtMs"), Some(1000UL.to_json()))
+  assert_eq(runtime_consent.get("confirmedAtMs"), Some(ToJson::to_json(1000UL)))
 
   let activation_claim = application.claim_activation_handoff(
     "moondesk-wire",
@@ -97,7 +100,7 @@ async test "activation execution lifecycle and review wires never wrap option va
   }
   assert_eq(
     activation_command.get("expected_cursor"),
-    Some((9 : Int).to_json()),
+    Some(ToJson::to_json((9 : Int32))),
   )
 
   let execution : SupervisorExecutionHandoff = {
@@ -139,8 +142,14 @@ async test "activation execution lifecycle and review wires never wrap option va
     is Some(Object(lifecycle)) else {
     fail("execution outbox must contain the lifecycle handoff")
   }
-  assert_eq(lifecycle.get("target_run_id"), Some("worker-run-1".to_json()))
-  assert_eq(lifecycle.get("expected_cursor"), Some((12 : Int).to_json()))
+  assert_eq(
+    lifecycle.get("target_run_id"),
+    Some(ToJson::to_json("worker-run-1")),
+  )
+  assert_eq(
+    lifecycle.get("expected_cursor"),
+    Some(ToJson::to_json((12 : Int32))),
+  )
   assert_eq(lifecycle.get("worker_task"), Some(Json::null()))
   assert_eq(lifecycle.get("worker_bounds"), Some(Json::null()))
 
@@ -172,19 +181,19 @@ async test "activation execution lifecycle and review wires never wrap option va
   }
   assert_eq(
     claimed_execution.get("target_run_id"),
-    Some("worker-run-1".to_json()),
+    Some(ToJson::to_json("worker-run-1")),
   )
   assert_eq(
     claimed_execution.get("transport_endpoint"),
-    Some("worker-stop".to_json()),
+    Some(ToJson::to_json("worker-stop")),
   )
   assert_eq(
     claimed_execution.get("claimed_by"),
-    Some("moondesk-wire".to_json()),
+    Some(ToJson::to_json("moondesk-wire")),
   )
   assert_eq(
     claimed_execution.get("expected_cursor"),
-    Some((12 : Int).to_json()),
+    Some(ToJson::to_json((12 : Int32))),
   )
 
   let review : BookkeeperExactReviewRequest = {
@@ -228,6 +237,6 @@ async test "activation execution lifecycle and review wires never wrap option va
   }
   assert_eq(
     review_claim_fields.get("resumeState"),
-    Some("pending_bookkeeper".to_json()),
+    Some(ToJson::to_json("pending_bookkeeper")),
   )
 }

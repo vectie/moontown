@@ -41,7 +41,7 @@ async test "source picker lists registered IDs nested unicode binary and capture
     payload: None,
   }
   let saved_reply = store.request(
-    decode_request(request.to_json().stringify()),
+    decode_request(ToJson::to_json(request).stringify()),
     "2026-10-08T00:00:00Z",
   )
   assert_true(saved_reply.ok)
@@ -89,8 +89,8 @@ async test "source picker lists registered IDs nested unicode binary and capture
   if @env.get_env_var("MOONTOWN_PICKER_EVIDENCE") is Some(path) {
     let evidence : Json = {
       "root": root,
-      "listing": listing.to_json(),
-      "saved": saved.to_json(),
+      "listing": ToJson::to_json(listing),
+      "saved": ToJson::to_json(saved),
       "captured_digest": digest(captured),
     }
     @fs.write_file(
@@ -213,8 +213,7 @@ async test "source picker request uses payload Book ID only and duplicate titles
   let entries = @moonbook.load_catalog_file(store.catalog_path).unwrap()
   @fs.write_file(
     store.catalog_path,
-    entries
-    .map(book => {
+    entries.map(book => {
       @moonbook.BookCatalogEntry::new(
         id=book.id,
         name="Same Book",
@@ -222,8 +221,8 @@ async test "source picker request uses payload Book ID only and duplicate titles
         workspace_root=book.workspace_root,
       )
     })
-    .to_json()
-    .stringify(),
+    |> ToJson::to_json
+    |> Json::stringify(),
   )
   for id in ["water", "mobility"] {
     let raw : Json = {
@@ -240,7 +239,7 @@ async test "source picker request uses payload Book ID only and duplicate titles
     let reply = store.request(decode_request(raw.stringify()), "now")
     assert_true(reply.ok)
     assert_eq(reply.source_listing.unwrap().book_id, id)
-    assert_false(reply.to_json().stringify().contains(root))
+    assert_false(ToJson::to_json(reply).stringify().contains(root))
   }
   @fs.rmdir(root, recursive=true)
 }

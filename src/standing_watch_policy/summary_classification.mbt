@@ -60,6 +60,6 @@ pub fn standing_watch_transient_dispatch_error(detail : String) -> Bool {
 }
 
 ///|
-pub fn standing_watch_stale_window_ticks() -> Int {
+pub fn standing_watch_stale_window_ticks() -> Int32 {
   @system_settings.current_system_settings().standing_watch_stale_window_ticks
 }

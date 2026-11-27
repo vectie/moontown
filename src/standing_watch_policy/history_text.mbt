@@ -18,7 +18,7 @@ fn standing_watch_history_field(
 ///|
 fn standing_watch_history_summary_text(lines : Array[String]) -> String {
   let prefix = "- Summary: "
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   let mut collecting = false
   let mut wrote = false
   for line in lines {

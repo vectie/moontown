@@ -1,11 +1,19 @@
 ///|
-fn program_world_test_id(scope : String, key : String) -> StableId {
-  stable_id(scope, key).unwrap()
+fn program_world_test_id(
+  scope : String,
+  key : String,
+) -> @energy_valley_contract.StableId {
+  @energy_valley_contract.stable_id(scope, key).unwrap()
 }
 
 ///|
-fn program_world_test_source() -> Provenance {
-  provenance("parcel-program-world-test", "v1", Derived, Fixed)
+fn program_world_test_source() -> @energy_valley_contract.Provenance {
+  @energy_valley_contract.provenance(
+    "parcel-program-world-test",
+    "v1",
+    Derived,
+    Fixed,
+  )
 }
 
 ///|
@@ -14,21 +22,21 @@ fn program_world_test_polygon(
   top : Double,
   right : Double,
   bottom : Double,
-) -> Polygon {
-  polygon([
-    world_point(left, top),
-    world_point(right, top),
-    world_point(right, bottom),
-    world_point(left, bottom),
+) -> @energy_valley_contract.Polygon {
+  @energy_valley_contract.polygon([
+    @energy_valley_contract.world_point(left, top),
+    @energy_valley_contract.world_point(right, top),
+    @energy_valley_contract.world_point(right, bottom),
+    @energy_valley_contract.world_point(left, bottom),
   ])
 }
 
 ///|
 fn program_world_test_program(
   key : String,
-  compatible_land_uses : ArrayView[LandUse],
-) -> ParcelProgram {
-  parcel_program(
+  compatible_land_uses : ArrayView[@energy_valley_contract.LandUse],
+) -> @energy_valley_contract.ParcelProgram {
+  @energy_valley_contract.parcel_program(
     program_world_test_id("parcel-program", key),
     key,
     compatible_land_uses,
@@ -39,14 +47,14 @@ fn program_world_test_program(
 ///|
 fn program_world_test_assignment(
   key : String,
-  parcel_id : StableId,
-  program_id : StableId,
-) -> ParcelProgramAssignment {
+  parcel_id : @energy_valley_contract.StableId,
+  program_id : @energy_valley_contract.StableId,
+) -> @energy_valley_contract.ParcelProgramAssignment {
   {
     id: program_world_test_id("parcel-program-assignment", key),
     parcel_id,
     program_id,
-    placement_anchor: world_point(12.0, 12.0),
+    placement_anchor: @energy_valley_contract.world_point(12.0, 12.0),
     frontage_segment_id: Some(program_world_test_id("road-segment", "main")),
     variant_seed: 27,
     provenance: program_world_test_source(),
@@ -55,11 +63,11 @@ fn program_world_test_assignment(
 
 ///|
 fn program_world_test_world(
-  programs : ArrayView[ParcelProgram],
-  assignments : ArrayView[ParcelProgramAssignment],
-  place_program_id : StableId?,
-  include_second_parcel? : Bool = false,
-) -> CompiledTownWorld {
+  programs : ArrayView[@energy_valley_contract.ParcelProgram],
+  assignments : ArrayView[@energy_valley_contract.ParcelProgramAssignment],
+  place_program_id : @energy_valley_contract.StableId?,
+  include_second_parcel~ : Bool = false,
+) -> @energy_valley_contract.CompiledTownWorld {
   let source = program_world_test_source()
   let node_a_id = program_world_test_id("road-node", "west")
   let node_b_id = program_world_test_id("road-node", "east")
@@ -67,9 +75,9 @@ fn program_world_test_world(
   let block_id = program_world_test_id("land-block", "research-core")
   let parcel_a_id = program_world_test_id("parcel", "research-a")
   let parcel_b_id = program_world_test_id("parcel", "research-b")
-  let parcel_ids : Array[StableId] = [parcel_a_id]
-  let parcels : Array[Parcel] = [
-    parcel(
+  let parcel_ids : Array[@energy_valley_contract.StableId] = [parcel_a_id]
+  let parcels : Array[@energy_valley_contract.Parcel] = [
+    @energy_valley_contract.parcel(
       parcel_a_id,
       block_id,
       program_world_test_polygon(5.0, 5.0, 25.0, 25.0),
@@ -86,7 +94,7 @@ fn program_world_test_world(
   if include_second_parcel {
     parcel_ids.push(parcel_b_id)
     parcels.push(
-      parcel(
+      @energy_valley_contract.parcel(
         parcel_b_id,
         block_id,
         program_world_test_polygon(25.0, 5.0, 45.0, 25.0),
@@ -102,16 +110,16 @@ fn program_world_test_world(
     )
   }
   let place_id = program_world_test_id("place", "knowledge-lab")
-  let place = place(
+  let place = @energy_valley_contract.place(
     place_id,
     "Knowledge Lab",
     Building,
     Some(parcel_a_id),
     program_world_test_polygon(8.0, 8.0, 20.0, 20.0),
     [
-      entrance_portal(
+      @energy_valley_contract.entrance_portal(
         program_world_test_id("portal", "knowledge-lab-main"),
-        world_point(20.0, 0.0),
+        @energy_valley_contract.world_point(20.0, 0.0),
         Some(node_b_id),
         [Pedestrian],
         primary=true,
@@ -119,34 +127,53 @@ fn program_world_test_world(
     ],
     [KnowledgeWork, Accessible],
     [],
-    Some(building_profile("knowledge-lab", 4, 18.0, Garden, 27)),
+    Some(
+      @energy_valley_contract.building_profile(
+        "knowledge-lab",
+        4,
+        18.0,
+        Garden,
+        27,
+      ),
+    ),
     None,
     source,
     program_id=place_program_id,
   )
-  compiled_town_world(
+  @energy_valley_contract.compiled_town_world(
     "energy-valley.world.v2",
     program_world_test_id("blueprint", "program-world"),
     "sha256:program-world",
     27,
-    world_bounds(world_point(0.0, 0.0), world_point(100.0, 100.0, z=50.0)),
+    @energy_valley_contract.world_bounds(
+      @energy_valley_contract.world_point(0.0, 0.0),
+      @energy_valley_contract.world_point(100.0, 100.0, z=50.0),
+    ),
     [],
-    road_network(
+    @energy_valley_contract.road_network(
       [
-        road_node(node_a_id, grid_position(0, 0), world_point(0.0, 0.0), source),
-        road_node(
+        @energy_valley_contract.road_node(
+          node_a_id,
+          @energy_valley_contract.grid_position(0, 0),
+          @energy_valley_contract.world_point(0.0, 0.0),
+          source,
+        ),
+        @energy_valley_contract.road_node(
           node_b_id,
-          grid_position(20, 0),
-          world_point(20.0, 0.0),
+          @energy_valley_contract.grid_position(20, 0),
+          @energy_valley_contract.world_point(20.0, 0.0),
           source,
         ),
       ],
       [
-        road_segment(
+        @energy_valley_contract.road_segment(
           segment_id,
           node_a_id,
           node_b_id,
-          [world_point(0.0, 0.0), world_point(20.0, 0.0)],
+          [
+            @energy_valley_contract.world_point(0.0, 0.0),
+            @energy_valley_contract.world_point(20.0, 0.0),
+          ],
           Local,
           6.0,
           [Pedestrian],
@@ -156,7 +183,7 @@ fn program_world_test_world(
       [node_a_id],
     ),
     [
-      land_block(
+      @energy_valley_contract.land_block(
         block_id,
         program_world_test_polygon(0.0, 0.0, 50.0, 30.0),
         Research,
@@ -176,9 +203,9 @@ fn program_world_test_world(
 
 ///|
 fn program_world_test_has_issue(
-  issues : ArrayView[ContractIssue],
-  code : ContractIssueCode,
-  entity_id : StableId,
+  issues : ArrayView[@energy_valley_contract.ContractIssue],
+  code : @energy_valley_contract.ContractIssueCode,
+  entity_id : @energy_valley_contract.StableId,
 ) -> Bool {
   issues.any(issue => issue.code == code && issue.entity_id == Some(entity_id))
 }
@@ -205,7 +232,7 @@ test "compiled world retains parcel programs and resolves assignments" {
     fail("compiled world lost its parcel assignment")
   }
   assert_eq(bound.id, program.id)
-  assert_true(validate_world(world).is_empty())
+  assert_true(@energy_valley_contract.validate_world(world).is_empty())
 }
 
 ///|
@@ -215,7 +242,9 @@ test "validation reports an assignment whose program is missing" {
   let assignment = program_world_test_assignment(
     "research-a", parcel_id, missing_program_id,
   )
-  let issues = validate_world(program_world_test_world([], [assignment], None))
+  let issues = @energy_valley_contract.validate_world(
+    program_world_test_world([], [assignment], None),
+  )
   assert_true(
     program_world_test_has_issue(issues, MissingParcelProgram, assignment.id),
   )
@@ -231,7 +260,7 @@ test "validation reports every parcel omitted from a nonempty assignment set" {
     parcel_a_id,
     program.id,
   )
-  let issues = validate_world(
+  let issues = @energy_valley_contract.validate_world(
     program_world_test_world(
       [program],
       [assignment],
@@ -257,7 +286,7 @@ test "validation rejects a program incompatible with parcel land use" {
     parcel_id,
     park_program.id,
   )
-  let issues = validate_world(
+  let issues = @energy_valley_contract.validate_world(
     program_world_test_world(
       [park_program],
       [assignment],
@@ -279,7 +308,7 @@ test "validation rejects a place program that differs from its parcel" {
     parcel_id,
     assigned.id,
   )
-  let issues = validate_world(
+  let issues = @energy_valley_contract.validate_world(
     program_world_test_world(
       [assigned, place_program],
       [assignment],
@@ -309,7 +338,7 @@ test "validation rejects more than one program assignment per parcel" {
     parcel_id,
     program.id,
   )
-  let issues = validate_world(
+  let issues = @energy_valley_contract.validate_world(
     program_world_test_world([program], [first, second], Some(program.id)),
   )
   assert_true(
@@ -330,7 +359,7 @@ test "validation enforces parcel program allow-list and area constraints" {
     parcel_id,
     disallowed.id,
   )
-  let disallowed_issues = validate_world(
+  let disallowed_issues = @energy_valley_contract.validate_world(
     program_world_test_world(
       [disallowed],
       [disallowed_assignment],
@@ -344,7 +373,7 @@ test "validation enforces parcel program allow-list and area constraints" {
       disallowed_assignment.id,
     ),
   )
-  let oversized_minimum = parcel_program(
+  let oversized_minimum = @energy_valley_contract.parcel_program(
     program_world_test_id("parcel-program", "knowledge-lab"),
     "Knowledge lab",
     [Research],
@@ -355,7 +384,7 @@ test "validation enforces parcel program allow-list and area constraints" {
     parcel_id,
     oversized_minimum.id,
   )
-  let area_issues = validate_world(
+  let area_issues = @energy_valley_contract.validate_world(
     program_world_test_world(
       [oversized_minimum],
       [area_assignment],
@@ -374,7 +403,7 @@ test "validation enforces parcel program allow-list and area constraints" {
 ///|
 test "validation enforces assignment frontage and placement geometry" {
   let parcel_id = program_world_test_id("parcel", "research-a")
-  let program = parcel_program(
+  let program = @energy_valley_contract.parcel_program(
     program_world_test_id("parcel-program", "knowledge-lab"),
     "Knowledge lab",
     [Research],
@@ -388,10 +417,10 @@ test "validation enforces assignment frontage and placement geometry" {
   )
   let assignment = {
     ..base,
-    placement_anchor: world_point(80.0, 80.0),
+    placement_anchor: @energy_valley_contract.world_point(80.0, 80.0),
     frontage_segment_id: None,
   }
-  let issues = validate_world(
+  let issues = @energy_valley_contract.validate_world(
     program_world_test_world([program], [assignment], Some(program.id)),
   )
   let assignment_mismatches = issues.filter(issue => {

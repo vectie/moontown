@@ -52,7 +52,9 @@ async test "civic salon reducer parses object ideas contract" {
   let path = civic_communication_reducer_output_path_in_workspace(root)
   @support.write_text_file(
     path,
-    Json::object({ "ideas": scenario.ideas.to_json() }).stringify(indent=2),
+    Json::object({ "ideas": ToJson::to_json(scenario.ideas) }).stringify(
+      indent=2,
+    ),
   )
   match load_civic_communication_outputs_file(path) {
     Some(ideas) => {

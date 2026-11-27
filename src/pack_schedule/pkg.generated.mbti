@@ -21,6 +21,7 @@ pub fn resolve(Array[ScheduleBinding], String) -> ScheduleBinding?
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct ScheduleBinding {
   pack_id : String
   product_id : String
@@ -29,11 +30,12 @@ pub(all) struct ScheduleBinding {
   cadence : String
   timezone : String
   workflow_id : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct ScheduleRegistry {
   schedules : Array[ScheduleBinding]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
 // Type aliases
 

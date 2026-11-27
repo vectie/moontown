@@ -18,7 +18,7 @@ async test "oneoff actual partial-failure account crosses Book without implying 
       workspace_root=root + "/books/destination",
     ),
   )
-  @fs.write_file(store.catalog_path, catalog.to_json().stringify())
+  @fs.write_file(store.catalog_path, ToJson::to_json(catalog).stringify())
   let saved = store.save(fixture_draft(), "", "2026-10-07T06:00:00Z")
   ignore(store.prepare(saved.draft.draft_id, saved.revision))
   let partial = store.start_oneoff(
@@ -134,7 +134,7 @@ async test "oneoff actual partial-failure account crosses Book without implying 
     )
     write_bytes(
       out + "/failure-learning-return.json",
-      @utf8.encode(returned.to_json().stringify(indent=2)),
+      @utf8.encode(ToJson::to_json(returned).stringify(indent=2)),
     )
   }
 }

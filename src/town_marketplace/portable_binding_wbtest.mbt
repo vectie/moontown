@@ -22,11 +22,11 @@ fn portable_fixture_source() -> PortableSource {
 
 ///|
 fn portable_fixture_payload(source : PortableSource) -> Json raise {
-  let fields = api_object(test_agent_draft().to_json())
-  fields["portable_source"] = source.to_json()
+  let fields = api_object(ToJson::to_json(test_agent_draft()))
+  fields["portable_source"] = ToJson::to_json(source)
   // Deliberate actor forgery: the application must derive the actual owner.
-  fields["publisher_principal_id"] = "forged-publisher".to_json()
-  fields["tenant_id"] = "forged-tenant".to_json()
+  fields["publisher_principal_id"] = ToJson::to_json("forged-publisher")
+  fields["tenant_id"] = ToJson::to_json("forged-tenant")
   Json::object(fields)
 }
 
@@ -145,9 +145,9 @@ async test "portable concurrent first attachments serialize and preserve the win
 ///|
 test "portable source strict wire requires exact keys integers null or string and canonical digests" {
   let source = portable_fixture_source()
-  assert_eq(parse_portable_source(source.to_json()), source)
+  assert_eq(parse_portable_source(ToJson::to_json(source)), source)
   assert_true(
-    api_object(source.to_json())["outputs_manifest_path"] is String(_),
+    api_object(ToJson::to_json(source))["outputs_manifest_path"] is String(_),
   )
   let no_outputs = {
     ..source,
@@ -156,31 +156,36 @@ test "portable source strict wire requires exact keys integers null or string an
     included_output_count: 0,
     reference_only_count: 0,
   }
-  assert_eq(parse_portable_source(no_outputs.to_json()), no_outputs)
-  assert_true(api_object(no_outputs.to_json())["outputs_manifest_path"] is Null)
+  assert_eq(parse_portable_source(ToJson::to_json(no_outputs)), no_outputs)
+  assert_true(
+    api_object(ToJson::to_json(no_outputs))["outputs_manifest_path"] is Null,
+  )
   for
     (key, value) in [
-      ("contract", "unknown.v1".to_json()),
-      ("bundle_contract", "unknown.v1".to_json()),
-      ("transport", "remote_download".to_json()),
-      ("package_sha256", "sha256:ABC".to_json()),
-      ("bundle_digest", "not-a-digest".to_json()),
-      ("book_revision", "not-a-digest".to_json()),
-      ("package_size_bytes", 1.5.to_json()),
-      ("file_count", (0).to_json()),
-      ("total_decoded_bytes", (-1).to_json()),
-      ("included_output_count", (4).to_json()),
-      ("reference_only_count", (-1).to_json()),
-      ("package_filename", "/home/sender/secret.moonbook-agent".to_json()),
-      ("outputs_manifest_path", "../private.json".to_json()),
-      ("outputs_manifest_path", "portable/other.json".to_json()),
+      ("contract", ToJson::to_json("unknown.v1")),
+      ("bundle_contract", ToJson::to_json("unknown.v1")),
+      ("transport", ToJson::to_json("remote_download")),
+      ("package_sha256", ToJson::to_json("sha256:ABC")),
+      ("bundle_digest", ToJson::to_json("not-a-digest")),
+      ("book_revision", ToJson::to_json("not-a-digest")),
+      ("package_size_bytes", ToJson::to_json(1.5)),
+      ("file_count", ToJson::to_json(0)),
+      ("total_decoded_bytes", ToJson::to_json(-1)),
+      ("included_output_count", ToJson::to_json(4)),
+      ("reference_only_count", ToJson::to_json(-1)),
+      (
+        "package_filename",
+        ToJson::to_json("/home/sender/secret.moonbook-agent"),
+      ),
+      ("outputs_manifest_path", ToJson::to_json("../private.json")),
+      ("outputs_manifest_path", ToJson::to_json("portable/other.json")),
       (
         "outputs_manifest_path",
-        Json::array(["portable/outputs.manifest.v1.json".to_json()]),
+        Json::array([ToJson::to_json("portable/outputs.manifest.v1.json")]),
       ),
       ("outputs_manifest_digest", Json::null()),
     ] {
-    let fields = api_object(source.to_json())
+    let fields = api_object(ToJson::to_json(source))
     fields[key] = value
     try parse_portable_source(Json::object(fields)) catch {
       _ => ()
@@ -188,8 +193,8 @@ test "portable source strict wire requires exact keys integers null or string an
       _ => fail("invalid portable field accepted: \{key}")
     }
   }
-  for key in api_object(source.to_json()).keys().to_array() {
-    let fields = api_object(source.to_json())
+  for key in api_object(ToJson::to_json(source)).keys().to_array() {
+    let fields = api_object(ToJson::to_json(source))
     fields.remove(key)
     try parse_portable_source(Json::object(fields)) catch {
       _ => ()
@@ -197,8 +202,8 @@ test "portable source strict wire requires exact keys integers null or string an
       _ => fail("missing portable field accepted: \{key}")
     }
   }
-  let extra = api_object(source.to_json())
-  extra["raw_memory"] = "must not be persisted".to_json()
+  let extra = api_object(ToJson::to_json(source))
+  extra["raw_memory"] = ToJson::to_json("must not be persisted")
   try parse_portable_source(Json::object(extra)) catch {
     _ => ()
   } noraise {
@@ -290,8 +295,8 @@ test "legacy v1 and v2 persisted states migrate without portable metadata or car
   let (state, _, _, _) = test_published_state()
   for
     schema in ["moontown.marketplace-store.v1", "moontown.marketplace-store.v2"] {
-    let fields = api_object(state.to_json())
-    fields["schema"] = schema.to_json()
+    let fields = api_object(ToJson::to_json(state))
+    fields["schema"] = ToJson::to_json(schema)
     fields.remove("portable_bindings")
     if schema == "moontown.marketplace-store.v1" {
       fields.remove("action_requests")
@@ -439,10 +444,10 @@ async test "portable application owner grant recipient restart and negative auth
   let binding_fields = api_object(binding)
   assert_eq(
     binding_fields["publisher_principal_id"],
-    owner.principal_id.to_json(),
+    ToJson::to_json(owner.principal_id),
   )
-  assert_eq(binding_fields["tenant_id"], owner.tenant_id.to_json())
-  assert_eq(binding_fields["source"], source.to_json())
+  assert_eq(binding_fields["tenant_id"], ToJson::to_json(owner.tenant_id))
+  assert_eq(binding_fields["source"], ToJson::to_json(source))
   let repeated = app.execute(
     "opaque-bootstrap-token",
     "upsert-agent",
@@ -519,8 +524,10 @@ async test "portable application owner grant recipient restart and negative auth
     ),
   )
   let cross_grant = api_object(grant)
-  cross_grant["grant_id"] = "cross-grant".to_json()
-  cross_grant["grantee_principal_id"] = cross_tenant.principal_id.to_json()
+  cross_grant["grant_id"] = ToJson::to_json("cross-grant")
+  cross_grant["grantee_principal_id"] = ToJson::to_json(
+    cross_tenant.principal_id,
+  )
   try
     app.execute(
       "opaque-bootstrap-token",
@@ -546,7 +553,7 @@ async test "portable application owner grant recipient restart and negative auth
   assert_eq(api_object(cards[0])["portable_binding"], binding)
   assert_eq(
     api_object(cards[0])["contract_id"],
-    "moontown.private-listing-share-preview.v2".to_json(),
+    ToJson::to_json("moontown.private-listing-share-preview.v2"),
   )
   for token in ["fixture-unrelated-token", "fixture-cross-tenant-token"] {
     assert_eq(
@@ -579,7 +586,7 @@ async test "portable application owner grant recipient restart and negative auth
       @json.parse(@fs.read_file(root + "/source-v2.json").text()),
     )
     let draft_v2 = api_object(portable_fixture_payload(source_v2))
-    draft_v2["listing_id"] = "agent.robot-guide-v2".to_json()
+    draft_v2["listing_id"] = ToJson::to_json("agent.robot-guide-v2")
     let saved_v2 = restarted.execute(
       "opaque-bootstrap-token",
       "upsert-agent",
@@ -588,7 +595,7 @@ async test "portable application owner grant recipient restart and negative auth
       now_ms=131UL,
     )
     let binding_v2 = portable_response_binding(saved_v2)
-    assert_eq(api_object(binding_v2)["source"], source_v2.to_json())
+    assert_eq(api_object(binding_v2)["source"], ToJson::to_json(source_v2))
     assert_true(binding_v2 != binding)
     let retained = restarted.execute(
       "fixture-recipient-token",

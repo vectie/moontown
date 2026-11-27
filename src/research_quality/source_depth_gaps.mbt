@@ -74,8 +74,8 @@ fn source_discovery_fallback_gaps(
 ///|
 priv struct ExternalSourceDepthGate {
   applies : Bool
-  included_sources : Int
-  minimum_sources : Int
+  included_sources : Int32
+  minimum_sources : Int32
 }
 
 ///|
@@ -91,7 +91,7 @@ fn inspect_external_source_depth_gate(
 }
 
 ///|
-fn reference_grade_source_threshold() -> Int {
+fn reference_grade_source_threshold() -> Int32 {
   6
 }
 

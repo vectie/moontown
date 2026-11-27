@@ -14,7 +14,7 @@ async fn write_test_civic_communication_template(root : String) -> String {
   let template_path = civic_protocol_test_template_path(root)
   @support.write_text_file(
     template_path,
-    test_civic_communication_scenario().to_json().stringify(indent=2),
+    ToJson::to_json(test_civic_communication_scenario()).stringify(indent=2),
   )
   template_path
 }
@@ -22,13 +22,13 @@ async fn write_test_civic_communication_template(root : String) -> String {
 ///|
 fn test_protocol_snapshot(
   status~ : String,
-  ready? : Bool = false,
-  inbox_count? : Int = 0,
-  contribution_count? : Int = 0,
-  reduction_count? : Int = 0,
-  outbox_count? : Int = 0,
-  review_count? : Int = 0,
-  latest_reduction_summary? : String = "",
+  ready~ : Bool = false,
+  inbox_count~ : Int32 = 0,
+  contribution_count~ : Int32 = 0,
+  reduction_count~ : Int32 = 0,
+  outbox_count~ : Int32 = 0,
+  review_count~ : Int32 = 0,
+  latest_reduction_summary~ : String = "",
 ) -> @civic.BuildingProtocolSnapshot {
   {
     building_id: "test-building-\{status}",

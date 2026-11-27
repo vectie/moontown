@@ -1,9 +1,9 @@
 ///|
 fn town_report_status_counts_sentence(
-  complete_count : Int,
-  running_count : Int,
-  review_count : Int,
-  failed_count : Int,
+  complete_count : Int32,
+  running_count : Int32,
+  review_count : Int32,
+  failed_count : Int32,
 ) -> String {
   "The latest town run has \{complete_count} completed lanes, \{running_count} running lanes, \{review_count} review-queued lanes, and \{failed_count} failed lanes. "
 }

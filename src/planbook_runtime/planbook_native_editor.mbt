@@ -128,7 +128,7 @@ fn native_editor_policy(
   spec : @native_work.EditorOwnerSpec,
 ) -> Json {
   if policy is Object(fields) {
-    fields["editor_owner_output"] = spec.to_json()
+    fields["editor_owner_output"] = ToJson::to_json(spec)
     // Both native editor criteria inspect UI source. Freeze its separate module
     // build along with focused owner/consumer tests before enqueue/reservation.
     let commands : Array[String] = [
@@ -137,10 +137,9 @@ fn native_editor_policy(
       "moon test --no-render", "moon -C src/ui/rabbita-town build --target js --release",
       "git diff --check",
     ]
-    fields["required_validation_commands"] = commands.to_json()
+    fields["required_validation_commands"] = ToJson::to_json(commands)
     if fields.get("completion_policy") is Some(Object(completion)) {
-      completion["required_checks"] = commands
-        .mapi((index, command) => {
+      completion["required_checks"] = commands.mapi((index, command) => {
           (
             {
               "id": "check-" + (index + 1).to_string(),
@@ -150,7 +149,7 @@ fn native_editor_policy(
               "exit_code": 0,
             } : Json)
         })
-        .to_json()
+        |> ToJson::to_json
     }
   }
   policy

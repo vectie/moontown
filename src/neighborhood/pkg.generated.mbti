@@ -3,21 +3,23 @@ package "vectie/moontown/neighborhood"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
 pub fn default_neighborhood_path() -> String
 
-pub async fn execute(String, Json, UInt64, String?, path? : String, can_host? : Bool) -> Json
+pub async fn execute(String, @json.Json, UInt64, String?, path? : String, can_host? : Bool) -> @json.Json
 
 // Errors
+#derive(Eq, @debug.Debug)
 pub(all) suberror NeighborhoodError {
   Unauthenticated
   Forbidden
   NotFound
   InvalidRequest(String)
   Conflict(String)
-} derive(Eq, @debug.Debug)
+}
 
 // Types and methods
 

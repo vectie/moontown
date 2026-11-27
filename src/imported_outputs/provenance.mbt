@@ -1,4 +1,5 @@
 ///|
+#derive(FromJson)
 priv struct ReceiptSource {
   contract : String
   bundle_contract : String
@@ -7,18 +8,19 @@ priv struct ReceiptSource {
   book_revision : String
   bundle_digest : String
   package_filename : String
-  package_size_bytes : Int
+  package_size_bytes : Int32
   package_sha256 : String
-  file_count : Int
-  total_decoded_bytes : Int
+  file_count : Int32
+  total_decoded_bytes : Int32
   outputs_manifest_path : String?
   outputs_manifest_digest : String?
-  included_output_count : Int
-  reference_only_count : Int
+  included_output_count : Int32
+  reference_only_count : Int32
   transport : String
-} derive(FromJson)
+}
 
 ///|
+#derive(FromJson)
 priv struct Receipt {
   contract : String
   source : ReceiptSource
@@ -32,13 +34,14 @@ priv struct Receipt {
   imported_at : Int64
   member_bytes_verified : Bool
   status : String
-} derive(FromJson)
+}
 
 ///|
+#derive(FromJson)
 priv struct Manifest {
   contract : String
   outputs : Array[@contract.Output]
-} derive(FromJson)
+}
 
 ///|
 fn validate_receipt(
@@ -88,6 +91,7 @@ fn validate_receipt(
 }
 
 ///|
+#warnings("-reserved_keyword")
 fn validate_manifest(manifest : Manifest, source : ReceiptSource) -> Unit raise {
   guard manifest.contract == "moonbook.portable_outputs.v1" &&
     manifest.outputs.length() <= 4096 else {
@@ -125,18 +129,20 @@ fn validate_manifest(manifest : Manifest, source : ReceiptSource) -> Unit raise 
       fail("Included output must contain members only")
     }
     let mut previous_path = ""
-    for member in output.files {
+    for member_val in output.files {
       total_members += 1
       guard total_members <= 8192 &&
-        @contract.relative_path_valid(member.path) &&
-        member.path.has_prefix("portable/outputs/" + output.artifact_id + "/") &&
-        previous_path.compare(member.path) < 0 &&
-        @contract.digest_valid(member.digest) &&
-        member.size_bytes >= 0 &&
-        member.size_bytes <= MemberLimit else {
+        @contract.relative_path_valid(member_val.path) &&
+        member_val.path.has_prefix(
+          "portable/outputs/" + output.artifact_id + "/",
+        ) &&
+        previous_path.compare(member_val.path) < 0 &&
+        @contract.digest_valid(member_val.digest) &&
+        member_val.size_bytes >= 0 &&
+        member_val.size_bytes <= MemberLimit else {
         fail("Invalid output member path, size, digest or ordering")
       }
-      previous_path = member.path
+      previous_path = member_val.path
     }
     for link in [output.preview_path, output.app_entrypoint] {
       if link is Some(path) && !output.files.any(file => file.path == path) {

@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, ToJson, FromJson)
 pub(all) struct Request {
   contract_version : String
   request_id : String
@@ -9,7 +10,7 @@ pub(all) struct Request {
   artifact_path : String
   draft : @contract.Draft?
   payload : Json?
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
 pub fn decode_request(raw : String) -> Request raise {
@@ -77,7 +78,7 @@ pub async fn Store::request(
           raise CollaborationError("Cross-dossier inquiry fields are missing")
         }
         let input : @contract.CrossDossierInquiry = @json.from_json(payload)
-        guard input.to_json() == payload &&
+        guard ToJson::to_json(input) == payload &&
           input.inquiry.draft_id == request.draft_id &&
           request.revision.is_empty() else {
           raise CollaborationError(
@@ -94,7 +95,7 @@ pub async fn Store::request(
           raise CollaborationError("Retained inquiry fields are missing")
         }
         let input : @contract.RetainedInquiry = @json.from_json(payload)
-        guard input.to_json() == payload &&
+        guard ToJson::to_json(input) == payload &&
           input.draft_id == request.draft_id &&
           request.revision.is_empty() else {
           raise CollaborationError(
@@ -111,7 +112,7 @@ pub async fn Store::request(
           raise CollaborationError("Claim challenge fields are missing")
         }
         let input : @contract.ClaimChallenge = @json.from_json(payload)
-        guard input.to_json() == payload &&
+        guard ToJson::to_json(input) == payload &&
           input.draft_id == request.draft_id &&
           request.revision.is_empty() else {
           raise CollaborationError(

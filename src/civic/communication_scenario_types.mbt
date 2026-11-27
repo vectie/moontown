@@ -1,11 +1,13 @@
 ///|
+#derive(Debug, Eq)
 pub(all) enum CivicCommunicationReductionMode {
   MoonClawReducer
   PersistedReducer
   FixtureReducer
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CivicCommunicationParticipantBook {
   book_id : String
   title : String
@@ -15,9 +17,10 @@ pub(all) struct CivicCommunicationParticipantBook {
   current_question : String
   contribution : String
   next_artifact : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CivicCommunicationIdea {
   id : String
   title : String
@@ -26,22 +29,24 @@ pub(all) struct CivicCommunicationIdea {
   research_questions : Array[String]
   why_it_matters : String
   next_experiment : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CivicCommunicationMetric {
-  participant_count : Int
-  idea_count : Int
-  research_question_count : Int
-  participant_idea_links : Int
-  participating_book_coverage_count : Int
-  idea_return_home_count : Int
+  participant_count : Int32
+  idea_count : Int32
+  research_question_count : Int32
+  participant_idea_links : Int32
+  participating_book_coverage_count : Int32
+  idea_return_home_count : Int32
   average_books_per_idea : String
-  structural_effectiveness_score : Int
+  structural_effectiveness_score : Int32
   summary : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CivicCommunicationHomeReturn {
   id : String
   building_id : String
@@ -50,9 +55,10 @@ pub(all) struct CivicCommunicationHomeReturn {
   target_path : String
   summary : String
   review_status : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct CivicCommunicationScenario {
   id : String
   title : String
@@ -82,4 +88,4 @@ pub(all) struct CivicCommunicationScenario {
   skill_rules : Array[String]
   participants : Array[CivicCommunicationParticipantBook]
   ideas : Array[CivicCommunicationIdea]
-} derive(Debug, Eq, ToJson, FromJson)
+}

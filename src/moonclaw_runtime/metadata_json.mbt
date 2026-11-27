@@ -12,7 +12,7 @@ pub fn add_moonclaw_no_input_policy(fields : Map[String, Json]) -> Unit {
 pub fn moonclaw_execution_metadata_fields(
   preferred_skills~ : Array[String],
   execution_mode~ : String,
-  execution_target? : String? = None,
+  execution_target~ : String? = None,
   output_contract~ : String,
 ) -> Map[String, Json] {
   @moonclaw_policy.execution_metadata_fields(
@@ -28,9 +28,9 @@ pub fn moonclaw_step_metadata_fields(
   preferred_skills~ : Array[String],
   enable_tools~ : Bool,
   web_search~ : Bool,
-  timeout_ms~ : Int,
+  timeout_ms~ : Int32,
   board_lane~ : String,
-  board_order~ : Int,
+  board_order~ : Int32,
 ) -> Map[String, Json] {
   @moonclaw_policy.step_metadata_fields(
     preferred_skills~,

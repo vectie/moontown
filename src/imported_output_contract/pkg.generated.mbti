@@ -7,41 +7,41 @@ import {
 }
 
 // Values
-pub fn calendar_csv(Array[CalendarEvent], Array[Int]) -> String
+pub fn calendar_csv(Array[CalendarEvent], Array[Int32]) -> String
 
 pub fn calendar_file(String, String) -> Bool
 
-pub fn calendar_itinerary(Array[CalendarEvent], Array[Int]) -> String
+pub fn calendar_itinerary(Array[CalendarEvent], Array[Int32]) -> String
 
-pub fn calendar_matches(Array[CalendarEvent], String, String, String, String) -> Array[Int]
+pub fn calendar_matches(Array[CalendarEvent], String, String, String, String) -> Array[Int32]
 
-pub fn calendar_occurrence_csv(Array[CalendarEvent], Array[Int], String, String) -> String
+pub fn calendar_occurrence_csv(Array[CalendarEvent], Array[Int32], String, String) -> String
 
-pub fn calendar_occurrence_itinerary(Array[CalendarEvent], Array[Int], String, String) -> String
+pub fn calendar_occurrence_itinerary(Array[CalendarEvent], Array[Int32], String, String) -> String
 
-pub fn calendar_occurrences(String, String, String, Array[Int]) -> Result[Array[CalendarEvent], String]
+pub fn calendar_occurrences(String, String, String, Array[Int32]) -> Result[Array[CalendarEvent], String]
 
-pub fn calendar_overlap_report(Array[CalendarEvent], Array[Int], String, String) -> Result[String, String]
+pub fn calendar_overlap_report(Array[CalendarEvent], Array[Int32], String, String) -> Result[String, String]
 
-pub fn calendar_overlap_review(Array[CalendarEvent], Array[Int]) -> Result[CalendarOverlapReview, String]
+pub fn calendar_overlap_review(Array[CalendarEvent], Array[Int32]) -> Result[CalendarOverlapReview, String]
 
-pub fn catalog_wire_limit() -> Int
+pub fn catalog_wire_limit() -> Int32
 
 pub fn content_path(Selection, mode~ : String) -> String
 
 pub fn digest_valid(String) -> Bool
 
-pub fn geo_csv(Array[GeoFeature], Array[Int]) -> String
+pub fn geo_csv(Array[GeoFeature], Array[Int32]) -> String
 
-pub fn geo_matches(Array[GeoFeature], String, String) -> Array[Int]
+pub fn geo_matches(Array[GeoFeature], String, String) -> Array[Int32]
 
-pub fn geo_places_in_zone(Array[GeoFeature], Int) -> Array[Int]
+pub fn geo_places_in_zone(Array[GeoFeature], Int32) -> Array[Int32]
 
 pub fn geo_rings(GeoFeature) -> Array[Array[GeoPoint]]
 
 pub fn geojson_file(String, String) -> Bool
 
-pub fn geojson_selection(Array[GeoFeature], Array[Int]) -> String
+pub fn geojson_selection(Array[GeoFeature], Array[Int32]) -> String
 
 pub fn parse_calendar(String) -> Result[Array[CalendarEvent], String]
 
@@ -63,15 +63,16 @@ pub fn selection_valid(Selection) -> Bool
 
 pub fn table_delimiter(String, String) -> Char?
 
-pub fn table_zones_export(Bytes, Bytes, Char, latitude~ : Int, longitude~ : Int, name~ : Int, category~ : Int, format~ : String) -> Result[String, String]
+pub fn table_zones_export(Bytes, Bytes, Char, latitude~ : Int32, longitude~ : Int32, name~ : Int32, category~ : Int32, format~ : String) -> Result[String, String]
 
-pub fn text_preview_limit() -> Int
+pub fn text_preview_limit() -> Int32
 
-pub fn text_wire_limit() -> Int
+pub fn text_wire_limit() -> Int32
 
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct Book {
   handle : String
   book_id : String
@@ -80,8 +81,9 @@ pub(all) struct Book {
   message : String
   source : Source?
   outputs : Array[Output]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct CalendarEvent {
   uid : String
   summary : String
@@ -93,52 +95,59 @@ pub(all) struct CalendarEvent {
   description : String
   url : String
   recurrence : String
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct CalendarOverlap {
-  first : Int
-  second : Int
+  first : Int32
+  second : Int32
   start : String
   end : String
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct CalendarOverlapReview {
   pairs : Array[CalendarOverlap]
-  unassessed : Array[Int]
-  assessed : Int
-} derive(Eq, @debug.Debug)
+  unassessed : Array[Int32]
+  assessed : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct Catalog {
   contract : String
   state : String
   message : String
   books : Array[Book]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct DataTable {
   headers : Array[String]
   rows : Array[Array[String]]
-} derive(Eq, @debug.Debug)
+}
 pub fn DataTable::filtered_csv(Self, String) -> String
-pub fn DataTable::matching_rows(Self, String) -> Array[Int]
-pub fn DataTable::places(Self, latitude~ : Int, longitude~ : Int, name~ : Int, category~ : Int) -> Result[Array[GeoFeature], String]
-pub fn DataTable::selection_csv(Self, Array[Int]) -> String
-pub fn DataTable::view_csv(Self, Array[Int], Array[Int]) -> Result[String, String]
-pub fn DataTable::view_rows(Self, String, column? : Int, exact? : Bool, sort_column? : Int, descending? : Bool) -> Result[Array[Int], String]
+pub fn DataTable::matching_rows(Self, String) -> Array[Int32]
+pub fn DataTable::places(Self, latitude~ : Int32, longitude~ : Int32, name~ : Int32, category~ : Int32) -> Result[Array[GeoFeature], String]
+pub fn DataTable::selection_csv(Self, Array[Int32]) -> String
+pub fn DataTable::view_csv(Self, Array[Int32], Array[Int32]) -> Result[String, String]
+pub fn DataTable::view_rows(Self, String, column? : Int32, exact? : Bool, sort_column? : Int32, descending? : Bool) -> Result[Array[Int32], String]
 
+#derive(Eq, @debug.Debug)
 pub(all) struct GeoFeature {
   name : String
   kind : String
   category : String
   points : Array[GeoPoint]
-  source : Json
-} derive(Eq, @debug.Debug)
+  source : @json.Json
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct GeoPoint {
   longitude : Double
   latitude : Double
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct Output {
   artifact_id : String
   label : String
@@ -149,14 +158,16 @@ pub(all) struct Output {
   files : Array[OutputFile]
   preview_path : String?
   app_entrypoint : String?
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct OutputFile {
   path : String
-  size_bytes : Int
+  size_bytes : Int32
   digest : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct Selection {
   book_handle : String
   package_sha256 : String
@@ -164,23 +175,25 @@ pub(all) struct Selection {
   artifact_id : String
   path : String
   digest : String
-  size_bytes : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  size_bytes : Int32
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct Source {
   agent_id : String
   agent_version : String
   package_sha256 : String
   outputs_manifest_digest : String?
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct TextReply {
   contract : String
   state : String
   message : String
   selection : Selection
   content : String?
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
 // Type aliases
 

@@ -29,7 +29,7 @@ fn project_wenyu_review_resolution(
   execution : @core.TaskExecutionRecord,
   work : @native_work.Work,
   resolution : @moonbook.NativeWenyuReviewResolution,
-  tick : Int,
+  tick : Int32,
 ) -> @core.TaskExecutionRecord {
   if resolution.status != "approved" && resolution.status != "rejected" {
     // If the Book evidence was removed or became inconsistent, do not preserve
@@ -83,11 +83,12 @@ fn project_wenyu_review_resolution(
 }
 
 ///|
+#warnings("-reserved_keyword")
 async fn read_wenyu_imported_review(
   launch : WenyuLaunch,
   work : @native_work.Work,
   execution : @core.TaskExecutionRecord,
-  tick : Int,
+  tick : Int32,
   query? : async (@moonbook.BookCatalogEntry, String, String, String, String) -> @moonbook.NativeWenyuReviewResolution,
 ) -> @core.TaskExecutionRecord {
   validate_wenyu_result_binding(launch, work)
@@ -114,8 +115,9 @@ async fn read_wenyu_imported_review(
   }
   let package_bytes = @fs.read_file(package_path).text()
   let receipt_bytes = @fs.read_file(receipt_path).text()
-  let package : WenyuOutputPackage = @json.from_json(@json.parse(package_bytes))
-  guard package.to_json() == wenyu_output_package(launch, work).to_json() else {
+  let pkg_val : WenyuOutputPackage = @json.from_json(@json.parse(package_bytes))
+  guard ToJson::to_json(pkg_val) ==
+    ToJson::to_json(wenyu_output_package(launch, work)) else {
     fail("wenyu_review_output_package_mismatch")
   }
   let receipt = @json.parse(receipt_bytes)
@@ -128,7 +130,7 @@ async fn read_wenyu_imported_review(
       ..
     } &&
     work_id == work.id &&
-    package_digest == @native_work.digest(package.to_json().stringify()) else {
+    package_digest == @native_work.digest(ToJson::to_json(pkg_val).stringify()) else {
     fail("wenyu_review_application_receipt_mismatch")
   }
   let imported : @moonbook.PersistResultOutcome = @json.from_json(outcome)
@@ -141,7 +143,9 @@ async fn read_wenyu_imported_review(
     !imported.executable_event.accepted else {
     fail("wenyu_review_original_outcome_mismatch")
   }
-  let payload_digest = @native_work.digest(package.result.to_json().stringify())
+  let payload_digest = @native_work.digest(
+    ToJson::to_json(pkg_val.result).stringify(),
+  )
   let resolution = match query {
     Some(query) =>
       query(
@@ -193,7 +197,7 @@ async fn read_wenyu_imported_review(
 pub async fn reconcile_wenyu_native_review(
   entry : @moonbook.BookCatalogEntry,
   execution : @core.TaskExecutionRecord,
-  tick : Int,
+  tick : Int32,
 ) -> @core.TaskExecutionRecord {
   reconcile_wenyu_native_review_with_query(entry, execution, tick)
 }
@@ -202,7 +206,7 @@ pub async fn reconcile_wenyu_native_review(
 async fn reconcile_wenyu_native_review_with_query(
   entry : @moonbook.BookCatalogEntry,
   execution : @core.TaskExecutionRecord,
-  tick : Int,
+  tick : Int32,
   query? : async (@moonbook.BookCatalogEntry, String, String, String, String) -> @moonbook.NativeWenyuReviewResolution,
 ) -> @core.TaskExecutionRecord {
   let launch = load_wenyu_launch(execution.packet_path)

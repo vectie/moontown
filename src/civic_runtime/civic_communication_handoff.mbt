@@ -2,12 +2,12 @@
 pub async fn bootstrap_civic_communication_handoff_file(
   handoff_path : String,
   receipt_path : String,
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  round_id? : String = "",
-  round_number? : Int = 1,
-  workspace_base? : String = "",
-  reducer_mode? : CivicCommunicationReductionMode = MoonClawReducer,
-  run_inline? : Bool = moontown_moonclaw_inline_enabled(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  round_id~ : String = "",
+  round_number~ : Int32 = 1,
+  workspace_base~ : String = "",
+  reducer_mode~ : CivicCommunicationReductionMode = MoonClawReducer,
+  run_inline~ : Bool = moontown_moonclaw_inline_enabled(),
 ) -> String {
   let handoff = match load_civic_communication_handoff_file(handoff_path) {
     Some(value) => value
@@ -31,7 +31,7 @@ pub async fn bootstrap_civic_communication_handoff_file(
       "Blocked civic communication handoff: \{errors.join("; ")}",
     )
     write_civic_communication_handoff_receipt(receipt_path, receipt)
-    return receipt.to_json().stringify(indent=2)
+    return ToJson::to_json(receipt).stringify(indent=2)
   }
   let summary = bootstrap_civic_communication_scenario(
     handoff.scenario,
@@ -75,7 +75,7 @@ pub async fn bootstrap_civic_communication_handoff_file(
     summary,
   )
   write_civic_communication_handoff_receipt(receipt_path, receipt)
-  receipt.to_json().stringify(indent=2)
+  ToJson::to_json(receipt).stringify(indent=2)
 }
 
 ///|
@@ -96,18 +96,18 @@ async fn write_civic_communication_handoff_receipt(
   path : String,
   receipt : @civic.CivicCommunicationExecutionReceipt,
 ) -> Unit {
-  @support.write_text_file(path, receipt.to_json().stringify(indent=2))
+  @support.write_text_file(path, ToJson::to_json(receipt).stringify(indent=2))
 }
 
 ///|
 fn civic_communication_handoff_receipt(
   handoff : @civic.CivicCommunicationScenarioHandoff,
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
   workspace_base : String,
   reducer_mode : CivicCommunicationReductionMode,
   status : String,
-  output_count : Int,
+  output_count : Int32,
   summary : String,
 ) -> @civic.CivicCommunicationExecutionReceipt {
   let scenario = handoff.scenario

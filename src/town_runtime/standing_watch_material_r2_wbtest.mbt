@@ -1,4 +1,5 @@
 ///|
+#warnings("-unused_async")
 async fn material_watch_unconfirmed_fixture() -> (
   String,
   @moonbook.BookCatalogEntry,
@@ -97,6 +98,7 @@ async test "material watch late detached receipt resumes the original reserved r
 }
 
 ///|
+#warnings("-unused_async")
 async test "material watch ignores a retry directive computed before reconciliation" {
   let (root, entry, goal, state) = material_watch_unconfirmed_fixture()
   let original = state.executions[0]
@@ -236,6 +238,7 @@ async test "legacy watch cycle keeps its unchanged-input dispatch behavior" {
 }
 
 ///|
+#warnings("-unused_async")
 async test "material watch transient deferred completion adopts a genuine late running receipt" {
   let (root, entry, goal) = material_watch_fixture()
   let state = goal_supervision_test_state()

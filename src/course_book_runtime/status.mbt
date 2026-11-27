@@ -1,6 +1,6 @@
 ///|
 pub async fn render_wenyu_game_design_course_status(
-  workspace_root? : String = @course_book.default_wenyu_course_workspace_root(),
+  workspace_root~ : String = @course_book.default_wenyu_course_workspace_root(),
 ) -> String {
   let missing = missing_wenyu_course_required_paths(workspace_root)
   [

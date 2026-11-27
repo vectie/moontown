@@ -19,7 +19,7 @@ pub async fn save_daemon_state(
   path : String,
   daemon : @scheduler.DaemonState,
 ) -> Unit {
-  @support.write_text_file(path, daemon.to_json().stringify())
+  @support.write_text_file(path, ToJson::to_json(daemon).stringify())
 }
 
 ///|
@@ -36,7 +36,7 @@ async fn save_daemon_runtime_state(
   path : String,
   state : DaemonRuntimeState,
 ) -> Unit {
-  @support.write_text_file(path, state.to_json().stringify()) catch {
+  @support.write_text_file(path, ToJson::to_json(state).stringify()) catch {
     _ => ()
   }
 }

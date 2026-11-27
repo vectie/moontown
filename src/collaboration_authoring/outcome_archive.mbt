@@ -133,8 +133,8 @@ async fn Store::outcome_snapshot(
     "review/selected-record.json",
     @utf8.encode(
       @review.project_review_record(history.bundle, work.result_digest, [])
-      .to_json()
-      .stringify(indent=2),
+      |> ToJson::to_json
+      |> Json::stringify(indent=2),
     ),
   )
   let artifacts : Array[@contract.Artifact] = files.map(pair => {
@@ -144,10 +144,10 @@ async fn Store::outcome_snapshot(
   })
   let manifest : Json = {
     "contract_version": "moontown.retained-outcome-manifest.v1",
-    "selection": key.to_json(),
+    "selection": ToJson::to_json(key),
     "outcome_status": work.status,
     "review_status": review_status,
-    "artifacts": artifacts.to_json(),
+    "artifacts": ToJson::to_json(artifacts),
     "book_submission_performed": false,
     "execution_performed": false,
     "integrity": "SHA-256 of exact raw bytes; unsigned local retained evidence. The manifest itself is covered by the archive digest, not recursively listed.",
@@ -183,6 +183,7 @@ async fn Store::outcome_snapshot(
 }
 
 ///|
+#warnings("-reserved_keyword")
 async fn Store::outcome_bound_members(
   self : Store,
   saved : @contract.SavedDraft,
@@ -195,7 +196,7 @@ async fn Store::outcome_bound_members(
   // replacements. Validate these exact buffers against the already pinned
   // snapshot before adding them; archive assembly never reopens them again.
   let draft_bytes = outcome_bytes(root, prefix + "draft.json", 524288)
-  guard @json.parse(text_bytes(draft_bytes)) == saved.to_json() else {
+  guard @json.parse(text_bytes(draft_bytes)) == ToJson::to_json(saved) else {
     raise CollaborationError(
       "Export member draft identity changed after verification",
     )
@@ -212,14 +213,14 @@ async fn Store::outcome_bound_members(
     outcome_add_file(files, source.artifact_ref, bytes)
   }
   for participant in work.participants {
-    let local = "produced/" + participant.book_id + "/"
+    let local_val = "produced/" + participant.book_id + "/"
     let output = "participants/" + participant.book_id + "/"
     let terminal = outcome_bytes(
       self.work_root(saved),
-      local + "terminal.json",
+      local_val + "terminal.json",
       2097152,
     )
-    guard @json.parse(text_bytes(terminal)) == participant.to_json() else {
+    guard @json.parse(text_bytes(terminal)) == ToJson::to_json(participant) else {
       raise CollaborationError(
         "Export member terminal attribution changed after verification",
       )
@@ -228,7 +229,7 @@ async fn Store::outcome_bound_members(
     if participant.status == "completed" {
       let report = outcome_bytes(
         self.work_root(saved),
-        local + "report.md",
+        local_val + "report.md",
         1048576,
       )
       guard digest(report) == participant.output_digest &&

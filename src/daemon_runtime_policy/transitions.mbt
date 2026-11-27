@@ -1,7 +1,7 @@
 ///|
 pub fn daemon_runtime_supervisor_started_state(
   previous : DaemonRuntimeState,
-  supervisor_pid : Int,
+  supervisor_pid : Int32,
   supervisor_run_id : String,
   now : UInt64,
   log_path : String,
@@ -21,7 +21,7 @@ pub fn daemon_runtime_supervisor_started_state(
 
 ///|
 pub fn daemon_runtime_should_keep_supervisor(
-  supervisor_pid : Int,
+  supervisor_pid : Int32,
   clear_supervisor : Bool,
   supervisor_alive : Bool,
 ) -> Bool {
@@ -31,7 +31,7 @@ pub fn daemon_runtime_should_keep_supervisor(
 ///|
 pub fn daemon_runtime_worker_started_state(
   previous : DaemonRuntimeState,
-  worker_pid : Int,
+  worker_pid : Int32,
   worker_run_id : String,
   keep_supervisor : Bool,
   now : UInt64,

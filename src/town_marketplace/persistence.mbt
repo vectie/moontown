@@ -7,7 +7,7 @@ fn migrate_marketplace_state_json(value : Json) -> Json {
   let schema = api_string(fields, "schema")
   if schema == "moontown.marketplace-store.v1" ||
     schema == "moontown.marketplace-store.v2" {
-    fields["schema"] = marketplace_schema().to_json()
+    fields["schema"] = ToJson::to_json(marketplace_schema())
   }
   if fields.get("action_requests") is None {
     fields["action_requests"] = Json::array([])
@@ -120,7 +120,7 @@ async fn MarketplaceApplication::save_state(
   @support.ensure_parent_directory(self.state_path)
   @fs.write_file(
     temp,
-    state.to_json().stringify(indent=2) + "\n",
+    ToJson::to_json(state).stringify(indent=2) + "\n",
     create_mode=CreateOrTruncate,
     permission=0o600,
     sync=Full,
@@ -203,13 +203,17 @@ pub async fn MarketplaceApplication::execute(
       application_ok(operation, {
         "contract_id": "moontown.discovery-search.v1",
         "query": query,
-        "organic_results": marketplace_organic_search(state, query).to_json(),
+        "organic_results": ToJson::to_json(
+          marketplace_organic_search(state, query),
+        ),
         "result_count": marketplace_organic_search(state, query).length(),
       })
     "recommendations" =>
       application_ok(operation, {
         "contract_id": "moontown.recommendations.v1",
-        "recommendations": marketplace_recommendations(state, principal).to_json(),
+        "recommendations": ToJson::to_json(
+          marketplace_recommendations(state, principal),
+        ),
       })
     "feed" =>
       application_ok(
@@ -226,13 +230,17 @@ pub async fn MarketplaceApplication::execute(
     "list-channels" =>
       application_ok(operation, {
         "contract_id": "moontown.channels.v1",
-        "channels": marketplace_visible_channels(state, principal).to_json(),
+        "channels": ToJson::to_json(
+          marketplace_visible_channels(state, principal),
+        ),
       })
     "list-messages" =>
       application_ok(operation, {
         "contract_id": "moontown.channel-messages.v1",
         "channel_id": query,
-        "messages": marketplace_visible_messages(state, principal, query).to_json(),
+        "messages": ToJson::to_json(
+          marketplace_visible_messages(state, principal, query),
+        ),
       })
     "notifications" =>
       application_ok(operation, marketplace_notifications_for(state, principal))
@@ -298,7 +306,9 @@ pub async fn MarketplaceApplication::execute(
     "shared-listings" =>
       application_ok(operation, {
         "contract_id": "moontown.shared-listings.v1",
-        "listings": marketplace_shared_listing_cards(state, principal, now_ms~).to_json(),
+        "listings": ToJson::to_json(
+          marketplace_shared_listing_cards(state, principal, now_ms~),
+        ),
       })
     "share-preview" => {
       let draft = parse_share_preview_draft(payload)

@@ -1,6 +1,6 @@
 ///|
 pub fn render_civic_communication_patterns() -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string("# Civic Communication Patterns\n\n")
   builder.write_string("| Pattern | Category | Protocol mode | Good for |\n")
   builder.write_string("| --- | --- | --- | --- |\n")

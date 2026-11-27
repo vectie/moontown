@@ -2,8 +2,8 @@
 pub async fn persist_visual_projection(
   state : @core.TownState,
   snapshot_path : String,
-  tick? : Int = @visual_projection.visual_projection_tick(state),
-  decorator_manifest_path? : String = default_visual_decorator_manifest_path(),
+  tick~ : Int32 = @visual_projection.visual_projection_tick(state),
+  decorator_manifest_path~ : String = default_visual_decorator_manifest_path(),
 ) -> Unit {
   let decorator = load_visual_decorator_config(decorator_manifest_path)
   let projection = @visual_projection.build_visual_projection_with_decorator(
@@ -13,7 +13,7 @@ pub async fn persist_visual_projection(
   )
   write_text_file(
     @visual_projection.default_visual_projection_path(snapshot_path),
-    projection.to_json().stringify(),
+    ToJson::to_json(projection).stringify(),
   )
 }
 

@@ -6,7 +6,7 @@ fn book_type_signal_score(
   structural : BookQualityStructuralObservation,
   strengths : Array[String],
   gaps : Array[String],
-) -> Int {
+) -> Int32 {
   let policy = @policy.policy_for_type(book_type)
   if @policy.has_capability(policy, @policy.research_evidence_capability()) {
     return apply_score_signal(
@@ -43,7 +43,7 @@ fn civic_book_signal_score(
   structural : BookQualityStructuralObservation,
   strengths : Array[String],
   gaps : Array[String],
-) -> Int {
+) -> Int32 {
   match @civic.wenyu_civic_service_for_book_id(entry.id) {
     Some(service) =>
       score_civic_service_definition(structural, service, strengths, gaps)

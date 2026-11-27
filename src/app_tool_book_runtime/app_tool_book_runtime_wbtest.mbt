@@ -64,7 +64,7 @@ async test "app tool book runtime config installer resolves method and spec file
     cadence_ticks: 37,
     workspace_root,
   }
-  write_text_file(config_path, spec.to_json().stringify(indent=2))
+  write_text_file(config_path, ToJson::to_json(spec).stringify(indent=2))
   let summary = install_app_tool_book_config(
     config_path,
     book_catalog_path=catalog_path,

@@ -274,12 +274,12 @@ pub async fn SupervisorSetupApplication::bookkeeper_outbox(
       seen.push(request.request_id)
       let projected = bookkeeper_review_request_wire_json(request)
       guard projected is Object(request_fields) else { continue }
-      request_fields["projection_state"] = bookkeeper_projection_state(
-        request.state,
-      ).to_json()
-      request_fields["pending_human_gate"] = bookkeeper_human_gate_state(
-        request.state,
-      ).to_json()
+      request_fields["projection_state"] = ToJson::to_json(
+        bookkeeper_projection_state(request.state),
+      )
+      request_fields["pending_human_gate"] = ToJson::to_json(
+        bookkeeper_human_gate_state(request.state),
+      )
       requests.push(Json::object(request_fields))
     }
   }
@@ -287,7 +287,7 @@ pub async fn SupervisorSetupApplication::bookkeeper_outbox(
     "ok": true,
     "schema": "moontown.bookkeeper-outbox.v1",
     "cursor": store.cursor,
-    "requests": requests.to_json(),
+    "requests": ToJson::to_json(requests),
   }
 }
 

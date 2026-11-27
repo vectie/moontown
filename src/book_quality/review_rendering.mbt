@@ -9,7 +9,7 @@ fn book_quality_review_run_table_header() -> String {
 fn review_status_summary_lines(
   run_path : String,
   result_dir : String,
-  active : Int,
+  active : Int32,
   ledger : BookQualityReviewRunLedger,
   view : BookQualityReviewLedgerView,
 ) -> Array[String] {
@@ -34,7 +34,7 @@ fn review_status_summary_lines(
 fn review_status_markdown(
   run_path : String,
   result_dir : String,
-  active : Int,
+  active : Int32,
   ledger : BookQualityReviewRunLedger,
   view : BookQualityReviewLedgerView,
   current_rows : Array[BookQualityReviewRunDisplayRow],

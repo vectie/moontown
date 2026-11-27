@@ -75,7 +75,7 @@ fn count_lanes_by_status(
   state : @core.TownState,
   plan : @roles.MayorGoalPlan,
   status : String,
-) -> Int {
+) -> Int32 {
   let mut count = 0
   for lane in plan.lanes {
     if lane_research_status(state, lane.entry.id) == status {

@@ -1,7 +1,7 @@
 ///|
-fn optional_int_json(value : Int?) -> Json {
+fn optional_int_json(value : Int32?) -> Json {
   match value {
-    Some(n) => n.to_json()
+    Some(n) => ToJson::to_json(n)
     None => Json::null()
   }
 }
@@ -9,7 +9,7 @@ fn optional_int_json(value : Int?) -> Json {
 ///|
 fn optional_text_json(value : String?) -> Json {
   match value {
-    Some(text) => text.to_json()
+    Some(text) => ToJson::to_json(text)
     None => Json::null()
   }
 }

@@ -2,8 +2,8 @@
 pub fn local_wenyu_build_execution_record(
   entry : @moonbook.BookCatalogEntry,
   task : @moonbook.BookTask,
-  assigned_worker_id? : String? = None,
-  tick? : Int = 0,
+  assigned_worker_id~ : String? = None,
+  tick~ : Int32 = 0,
 ) -> @core.TaskExecutionRecord {
   let packet_id = "local-\{entry.id}-\{task.id}"
   let status : @core.TaskExecutionStatus = if task.kind == "code-patch" {
@@ -36,6 +36,6 @@ pub fn local_wenyu_build_execution_record(
 }
 
 ///|
-pub fn local_wenyu_execution_stale_window_ticks() -> Int {
+pub fn local_wenyu_execution_stale_window_ticks() -> Int32 {
   3
 }

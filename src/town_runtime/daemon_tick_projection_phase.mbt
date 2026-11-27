@@ -4,7 +4,7 @@ async fn run_daemon_projection_phase(
   daemon : @scheduler.DaemonState,
   paths : @daemon_runtime.DaemonTickPaths,
   snapshot_path : String,
-  tick_sequence : Int,
+  tick_sequence : Int32,
   standing_goals : Array[@core.StandingGoal],
   planbook_phase : @planbook_runtime.PlanbookDaemonPhaseResult,
 ) -> String {
@@ -72,7 +72,7 @@ fn record_daemon_tick_events(
 ///|
 fn record_daemon_tick_event(
   state : @core.TownState,
-  sequence : Int,
+  sequence : Int32,
   kind : String,
   detail : String,
 ) -> Unit {

@@ -23,13 +23,14 @@ async fn write_book_quality_review_moonclaw_profile(
 }
 
 ///|
+#warnings("-unused_value")
 fn book_quality_review_acp_config_json(
   source_root : String,
   command : String,
   args : Array[String],
   model : String,
 ) -> Json {
-  let targets : Map[String, Json] = {}
+  let targets : Map[String, Json] = Map([])
   targets[@codex.codex_main_target_id()] = @codex.codex_acp_target_json(
     source_root, "Codex Book Quality Reviewer", command, args, model,
   )

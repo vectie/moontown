@@ -2,17 +2,19 @@
 /// Spatial lifecycle of an actor relative to a semantic place. A renderer may
 /// animate between these states, but it must not invent a separate occupancy
 /// truth.
+#derive(Debug, Eq)
 pub(all) enum PresencePhase {
   Approaching
   AtEntrance
   Inside
   Departing
   Away
-} derive(Debug, Eq)
+}
 
 ///|
 /// Semantic activity carried by a presence. Renderers may choose their own
 /// glyphs and colors, while every surface consumes the same activity meaning.
+#derive(Debug, Eq)
 pub(all) enum ActorActivityKind {
   ActorCoordinate
   ActorResearch
@@ -31,22 +33,24 @@ pub(all) enum ActorActivityKind {
   ActorFailed
   ActorIdle
   ActorCustom(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Evidence class of an actor descriptor. This keeps ambient simulation,
 /// runtime evidence, and the local embodied player visibly distinguishable
 /// without putting renderer-specific badges into the contract.
+#derive(Debug, Eq)
 pub(all) enum ActorSourceKind {
   AmbientSimulation
   RuntimeEvidence
   LocalEmbodiment
-} derive(Debug, Eq)
+}
 
 ///|
 /// Semantic state used by status-aware surfaces. Activity explains what an
 /// actor is doing; state explains whether the backing work is active, waiting,
 /// blocked, failed, completed, or merely available.
+#derive(Debug, Eq)
 pub(all) enum ActorStateKind {
   ActorStateActive
   ActorStateWaitingReview
@@ -55,23 +59,24 @@ pub(all) enum ActorStateKind {
   ActorStateCompleted
   ActorStateAssigned
   ActorStateIdle
-} derive(Debug, Eq)
+}
 
 ///|
 /// Renderer-neutral identity and appearance hints for an actor. `avatar_family`
 /// and the two variants are stable theme inputs rather than asset paths or CSS
 /// colors, so Canvas, DOM, and future renderers can resolve them independently.
+#derive(Debug, Eq)
 pub(all) struct ActorProfile {
   actor_id : StableId
   display_name : String
   role_label : String
   avatar_family : String
-  avatar_variant : Int
-  palette_variant : Int
+  avatar_variant : Int32
+  palette_variant : Int32
   source_kind : ActorSourceKind
   state : ActorStateKind
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn actor_profile(
@@ -79,8 +84,8 @@ pub fn actor_profile(
   display_name : String,
   role_label : String,
   avatar_family : String,
-  avatar_variant : Int,
-  palette_variant : Int,
+  avatar_variant : Int32,
+  palette_variant : Int32,
   source_kind : ActorSourceKind,
   state : ActorStateKind,
   provenance : Provenance,
@@ -102,23 +107,24 @@ pub fn actor_profile(
 /// Exact outdoor position of an actor along the authoritative road graph. The
 /// optional node endpoints make a movement leg inspectable while supporting a
 /// point fixture such as a plaza path or boardwalk.
+#derive(Debug, Eq)
 pub(all) struct ActorRoutePosition {
   position : WorldPoint
   road_segment_id : StableId?
   origin_node_id : StableId?
   destination_node_id : StableId?
-  progress_per_mille : Int
+  progress_per_mille : Int32
   heading_degrees : Double?
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn actor_route_position(
   position : WorldPoint,
-  progress_per_mille : Int,
-  road_segment_id? : StableId? = None,
-  origin_node_id? : StableId? = None,
-  destination_node_id? : StableId? = None,
-  heading_degrees? : Double? = None,
+  progress_per_mille : Int32,
+  road_segment_id~ : StableId? = None,
+  origin_node_id~ : StableId? = None,
+  destination_node_id~ : StableId? = None,
+  heading_degrees~ : Double? = None,
 ) -> ActorRoutePosition {
   {
     position,
@@ -133,6 +139,7 @@ pub fn actor_route_position(
 ///|
 /// One actor's current relationship to a place and, when known, the exact
 /// portal or interaction slot being used.
+#derive(Debug, Eq)
 pub(all) struct ActorPresence {
   actor_id : StableId
   place_id : StableId
@@ -140,12 +147,12 @@ pub(all) struct ActorPresence {
   interaction_slot_id : StableId?
   phase : PresencePhase
   intention : String
-  since_tick : Int
-  until_tick : Int?
+  since_tick : Int32
+  until_tick : Int32?
   provenance : Provenance
   route_position : ActorRoutePosition?
   activity_kind : ActorActivityKind
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn actor_presence(
@@ -155,11 +162,11 @@ pub fn actor_presence(
   interaction_slot_id : StableId?,
   phase : PresencePhase,
   intention : String,
-  since_tick : Int,
-  until_tick : Int?,
+  since_tick : Int32,
+  until_tick : Int32?,
   provenance : Provenance,
-  route_position? : ActorRoutePosition? = None,
-  activity_kind? : ActorActivityKind = ActorIdle,
+  route_position~ : ActorRoutePosition? = None,
+  activity_kind~ : ActorActivityKind = ActorIdle,
 ) -> ActorPresence {
   {
     actor_id,
@@ -226,7 +233,7 @@ pub fn ActorPresence::render_position(
 }
 
 ///|
-pub fn ActorPresence::is_active(self : ActorPresence, tick : Int) -> Bool {
+pub fn ActorPresence::is_active(self : ActorPresence, tick : Int32) -> Bool {
   if self.since_tick > tick || self.phase is Away {
     false
   } else {
@@ -238,6 +245,7 @@ pub fn ActorPresence::is_active(self : ActorPresence, tick : Int) -> Bool {
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum ExchangeKind {
   Knowledge
   Social
@@ -246,12 +254,13 @@ pub(all) enum ExchangeKind {
   Mobility
   Care
   Custom(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// A temporary, evidence-labelled relationship between two semantic places.
 /// It represents the reason activity moves through town, not a decorative
 /// line drawn by the canvas.
+#derive(Debug, Eq)
 pub(all) struct PlaceExchange {
   id : StableId
   source_place_id : StableId
@@ -259,11 +268,11 @@ pub(all) struct PlaceExchange {
   actor_id : StableId?
   kind : ExchangeKind
   label : String
-  intensity_per_mille : Int
-  started_tick : Int
-  expires_tick : Int?
+  intensity_per_mille : Int32
+  started_tick : Int32
+  expires_tick : Int32?
   provenance : Provenance
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn place_exchange(
@@ -273,9 +282,9 @@ pub fn place_exchange(
   actor_id : StableId?,
   kind : ExchangeKind,
   label : String,
-  intensity_per_mille : Int,
-  started_tick : Int,
-  expires_tick : Int?,
+  intensity_per_mille : Int32,
+  started_tick : Int32,
+  expires_tick : Int32?,
   provenance : Provenance,
 ) -> PlaceExchange {
   {
@@ -293,7 +302,7 @@ pub fn place_exchange(
 }
 
 ///|
-pub fn PlaceExchange::is_active(self : PlaceExchange, tick : Int) -> Bool {
+pub fn PlaceExchange::is_active(self : PlaceExchange, tick : Int32) -> Bool {
   if self.started_tick > tick {
     false
   } else {

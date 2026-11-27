@@ -1,4 +1,5 @@
 ///|
+#derive(Eq, Debug)
 pub enum BookQualityRepairGoalRetirementDecision {
   NotRepairGoal
   MissingTargetBook
@@ -6,7 +7,7 @@ pub enum BookQualityRepairGoalRetirementDecision {
   NoLongerRepairableBook
   ReadySemanticReview
   StillNeedsRepair
-} derive(Eq, Debug)
+}
 
 ///|
 pub fn score_exists(scores : Array[BookQualityScore], book_id : String) -> Bool {
@@ -25,7 +26,7 @@ pub fn repair_goal_retirement_decision(
   has_target_book~ : Bool,
   score_exists~ : Bool,
   repairable_book~ : Bool,
-  semantic_score~ : Int?,
+  semantic_score~ : Int32?,
 ) -> BookQualityRepairGoalRetirementDecision {
   if !enabled || !is_repair_goal_id(goal_id) {
     return NotRepairGoal

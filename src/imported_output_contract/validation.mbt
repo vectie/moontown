@@ -2,7 +2,7 @@
 pub fn digest_valid(value : String) -> Bool {
   value.length() == 71 &&
   value.has_prefix("sha256:") &&
-  value[7:].iter().all(c => c is ('0'..='9' | 'a'..='f'))
+  value[7:].iter().all(c => c is ('0'..<='9' | 'a'..<='f'))
 }
 
 ///|
@@ -19,7 +19,7 @@ pub fn relative_path_valid(value : String) -> Bool {
 pub fn selection_valid(value : Selection) -> Bool {
   value.book_handle.length() == 69 &&
   value.book_handle.has_prefix("book-") &&
-  value.book_handle[5:].iter().all(c => c is ('0'..='9' | 'a'..='f')) &&
+  value.book_handle[5:].iter().all(c => c is ('0'..<='9' | 'a'..<='f')) &&
   digest_valid(value.package_sha256) &&
   digest_valid(value.manifest_sha256) &&
   digest_valid(value.digest) &&
@@ -47,7 +47,7 @@ pub fn parse_catalog(text : String) -> Catalog? {
   for book in value.books {
     guard book.handle.length() == 69 &&
       book.handle.has_prefix("book-") &&
-      book.handle[5:].iter().all(c => c is ('0'..='9' | 'a'..='f')) &&
+      book.handle[5:].iter().all(c => c is ('0'..<='9' | 'a'..<='f')) &&
       !handles.contains(book.handle) &&
       !book.book_id.is_empty() &&
       ["ready", "empty", "unsupported", "unavailable"].contains(book.state) else {
@@ -172,7 +172,7 @@ pub fn query_encode(value : String) -> String {
   let hex = "0123456789ABCDEF"
   for byte in @utf8.encode(value) {
     let code = byte.to_int()
-    if code is (65..=90 | 97..=122 | 48..=57 | 45 | 46 | 95 | 126) {
+    if code is (65..<=90 | 97..<=122 | 48..<=57 | 45 | 46 | 95 | 126) {
       out.write_char(code.unsafe_to_char())
     } else {
       out.write_char('%')
@@ -184,18 +184,18 @@ pub fn query_encode(value : String) -> String {
 }
 
 ///|
-pub fn catalog_wire_limit() -> Int {
+pub fn catalog_wire_limit() -> Int32 {
   4 * 1024 * 1024
 }
 
 ///|
-pub fn text_preview_limit() -> Int {
+pub fn text_preview_limit() -> Int32 {
   4 * 1024 * 1024
 }
 
 ///|
 /// Includes the worst-case JSON escaping overhead and selection metadata.
-pub fn text_wire_limit() -> Int {
+pub fn text_wire_limit() -> Int32 {
   24 * 1024 * 1024 + 65536
 }
 

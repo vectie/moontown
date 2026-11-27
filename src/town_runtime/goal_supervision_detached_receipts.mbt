@@ -37,9 +37,9 @@ fn late_detached_import_receipt_candidate(
 async fn reconcile_detached_import_receipt_if_available(
   state : @core.TownState,
   execution : @core.TaskExecutionRecord,
-  tick : Int,
-  launch_confirmed_run? : Bool = true,
-  launch_command_override? : String? = None,
+  tick : Int32,
+  launch_confirmed_run~ : Bool = true,
+  launch_command_override~ : String? = None,
 ) -> Bool {
   let packet_id = detached_import_packet_id_for_execution(execution)
   let packet_path = detached_import_packet_path_for_execution(execution)

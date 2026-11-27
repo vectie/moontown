@@ -1,10 +1,10 @@
 ///|
 async fn reconcile_late_detached_import_receipts(
   state : @core.TownState,
-  tick : Int,
-  catalog? : Array[@moonbook.BookCatalogEntry] = [],
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  standing_goals? : Array[@core.StandingGoal] = [],
+  tick : Int32,
+  catalog~ : Array[@moonbook.BookCatalogEntry] = [],
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  standing_goals~ : Array[@core.StandingGoal] = [],
 ) -> Unit {
   let snapshot = state.executions.copy()
   for execution in snapshot {

@@ -76,14 +76,22 @@ async fn serve_product_asset(
     headers["Content-Encoding"] = "gzip"
   }
   if etag_matches(request_header(request, "if-none-match"), etag) {
-    conn.send_response(304, "Not Modified", extra_headers=headers)
+    let ci_headers : Map[@http.CaseInsensitiveString, String] = Map([])
+    for k, v in headers {
+      ci_headers[@http.CaseInsensitiveString(k)] = v
+    }
+    conn.send_response(304, "Not Modified", extra_headers=ci_headers)
     conn.end_response()
     return true
   }
   let file = @fs.open(if gzip { path + ".gz" } else { path }, mode=ReadOnly)
   defer file.close()
   headers["Content-Length"] = file.size().to_string()
-  conn.send_response(200, "OK", extra_headers=headers)
+  let ci_headers : Map[@http.CaseInsensitiveString, String] = Map([])
+  for k, v in headers {
+    ci_headers[@http.CaseInsensitiveString(k)] = v
+  }
+  conn.send_response(200, "OK", extra_headers=ci_headers)
   conn.write_reader(file)
   conn.end_response()
   true

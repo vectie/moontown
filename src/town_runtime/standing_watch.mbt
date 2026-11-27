@@ -4,17 +4,17 @@ async fn run_standing_goal_watch_cycle(
   mayor : @roles.Mayor,
   catalog : Array[@moonbook.BookCatalogEntry],
   goal : @core.StandingGoal,
-  tick : Int,
+  tick : Int32,
   snapshot_path : String,
-  execute? : async (
+  execute~ : async (
     @roles.Mayor,
     @moonbook.BookCatalogEntry,
     @moonbook.BookTask,
     @roles.MayorDispatchPacket,
     String?,
-    Int,
+    Int32,
   ) -> @core.TaskExecutionRecord = execute_dispatched_standing_watch_task,
-  persist? : async (
+  persist~ : async (
     @core.TownState,
     @moonbook.BookCatalogEntry,
     @core.TaskExecutionRecord,
@@ -112,18 +112,18 @@ async fn run_standing_goal_watch_cycle_unlocked(
   mayor : @roles.Mayor,
   catalog : Array[@moonbook.BookCatalogEntry],
   goal : @core.StandingGoal,
-  tick : Int,
+  tick : Int32,
   snapshot_path : String,
-  material_change? : MaterialWatchChange? = None,
-  execute? : async (
+  material_change~ : MaterialWatchChange? = None,
+  execute~ : async (
     @roles.Mayor,
     @moonbook.BookCatalogEntry,
     @moonbook.BookTask,
     @roles.MayorDispatchPacket,
     String?,
-    Int,
+    Int32,
   ) -> @core.TaskExecutionRecord = execute_dispatched_standing_watch_task,
-  persist? : async (
+  persist~ : async (
     @core.TownState,
     @moonbook.BookCatalogEntry,
     @core.TaskExecutionRecord,

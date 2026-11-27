@@ -787,7 +787,7 @@ async fn miniapp_installed_book_catalog() -> Array[Json] {
     entry in @moonbook.load_or_create_catalog(
       path=@moonbook.default_catalog_path(),
     ) {
-    guard entry.to_json() is Object(fields) else { continue }
+    guard ToJson::to_json(entry) is Object(fields) else { continue }
     let id = catalog_string(fields, "id")
     let declared_root = catalog_string(fields, "workspace_root")
     let workspace_root = @fs.realpath(declared_root) catch { _ => continue }
@@ -1316,7 +1316,7 @@ async fn handle_request(
     send_json(conn, 200, {
       "ok": true,
       "schema": "moontown.miniapp.book-catalog.v1",
-      "books": miniapp_installed_book_catalog().to_json(),
+      "books": ToJson::to_json(miniapp_installed_book_catalog()),
     })
     return
   }

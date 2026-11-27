@@ -1,8 +1,6 @@
 import {
   "vectie/moontown/flow_adapter",
-  "moonbitlang/async",
   "moonbitlang/core/env",
-  "moonbitlang/core/json",
 }
 
 supported_targets = "native"

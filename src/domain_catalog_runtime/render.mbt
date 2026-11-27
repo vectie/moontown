@@ -1,6 +1,6 @@
 ///|
 pub async fn render_knowledge_domain_catalog(
-  catalog_path? : String = default_knowledge_domain_catalog_path(),
+  catalog_path~ : String = default_knowledge_domain_catalog_path(),
 ) -> String {
   let (loaded, errors) = load_knowledge_domain_catalog_with_errors(catalog_path)
   let catalog = match loaded {
@@ -37,8 +37,8 @@ pub async fn render_knowledge_domain_catalog(
 
 ///|
 pub async fn render_knowledge_domain_catalog_status(
-  catalog_path? : String = default_knowledge_domain_catalog_path(),
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  catalog_path~ : String = default_knowledge_domain_catalog_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> String {
   let (loaded, errors) = load_knowledge_domain_catalog_with_errors(catalog_path)
   let catalog = match loaded {

@@ -1,7 +1,7 @@
 ///|
 test "json object copy ignores non-object values" {
-  assert_eq(json_object_copy(None).length(), 0)
-  assert_eq(json_object_copy(Some(Json::array([]))).length(), 0)
+  assert_eq(@core.json_object_copy(None).length(), 0)
+  assert_eq(@core.json_object_copy(Some(Json::array([]))).length(), 0)
 }
 
 ///|
@@ -11,7 +11,7 @@ test "nested json object upsert preserves sibling fields" {
   ) catch {
     _ => fail("expected base config to parse")
   }
-  let next = upsert_moonclaw_job_profile_json(base, "worker", {
+  let next = @core.upsert_moonclaw_job_profile_json(base, "worker", {
     "family": "new",
     "role": "worker",
   })

@@ -1,18 +1,24 @@
 ///|
 test "wenyu run defaults native and parses explicit route without adding flags to goal" {
-  assert_eq(parse(["Build", "Wenyu"]), (None, "native", "", "Build Wenyu"))
   assert_eq(
-    parse([
+    @goal_run_arguments.parse(["Build", "Wenyu"]),
+    (None, "native", "", "Build Wenyu"),
+  )
+  assert_eq(
+    @goal_run_arguments.parse([
       "--book", "wenyu-code", "--wenyu-execution", "native", "--wenyu-model", "moongate/exact",
       "Build", "district",
     ]),
     (Some("wenyu-code"), "native", "moongate/exact", "Build district"),
   )
   assert_eq(
-    parse(["--wenyu-execution", "acp", "old goal"]),
+    @goal_run_arguments.parse(["--wenyu-execution", "acp", "old goal"]),
     (None, "acp", "", "old goal"),
   )
-  assert_eq(parse(["--", "--literal"]), (None, "native", "", "--literal"))
+  assert_eq(
+    @goal_run_arguments.parse(["--", "--literal"]),
+    (None, "native", "", "--literal"),
+  )
 }
 
 ///|
@@ -25,7 +31,7 @@ test "wenyu run rejects missing unknown or contradictory flags" {
       ["--wenyu-execution", "acp", "--wenyu-model", "moongate/exact", "goal"],
     ] {
     let failed = try {
-      ignore(parse(args))
+      ignore(@goal_run_arguments.parse(args))
       false
     } catch {
       _ => true

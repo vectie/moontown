@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct TownEvent {
   id : String
   kind : String
@@ -7,17 +8,17 @@ pub struct TownEvent {
   related_book_id : String?
   related_proposal_id : String?
   related_run_id : String?
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn TownEvent::new(
   id~ : String,
   kind~ : String,
   detail~ : String,
-  related_task_id? : String? = None,
-  related_book_id? : String? = None,
-  related_proposal_id? : String? = None,
-  related_run_id? : String? = None,
+  related_task_id~ : String? = None,
+  related_book_id~ : String? = None,
+  related_proposal_id~ : String? = None,
+  related_run_id~ : String? = None,
 ) -> TownEvent {
   {
     id,
@@ -31,6 +32,7 @@ pub fn TownEvent::new(
 }
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct TownState {
   config : TownConfig
   books : Array[BookRef]
@@ -38,7 +40,7 @@ pub struct TownState {
   tasks : Array[TownTask]
   executions : Array[TaskExecutionRecord]
   events : Array[TownEvent]
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 pub fn empty_state(config : TownConfig) -> TownState {
@@ -169,9 +171,10 @@ pub(open) trait BookProvider {
 }
 
 ///|
+#derive(Debug, Eq)
 pub struct StaticBookProvider {
   entries : Array[BookRef]
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn StaticBookProvider::new(entries : Array[BookRef]) -> StaticBookProvider {

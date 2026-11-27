@@ -29,7 +29,7 @@ async fn write_book_quality_review_score_packets(
     packets.push(packet)
     @support.write_text_file(
       "\{review_dir}/\{score.book_id}.json",
-      packet.to_json().stringify(indent=2),
+      ToJson::to_json(packet).stringify(indent=2),
     )
   }
   packets

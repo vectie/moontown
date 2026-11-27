@@ -3,8 +3,8 @@ name = "vectie/moontown"
 version = "0.1.9"
 
 import {
-  "moonbitlang/async@0.16.6",
-  "moonbitlang/x@0.4.50",
+  "moonbitlang/async@0.22.11",
+  "moonbitlang/x@0.5.9",
   "vectie/lepusa@0.1.4",
   "vectie/moonlib@0.1.19",
   "vectie/moonchat@0.1.0",
@@ -23,15 +23,3 @@ description = ""
 preferred_target = "native"
 
 source = "src"
-
-// Runtime art and generated Rabbita output ship with the application release,
-// not the reusable MoonBit source package published to Mooncakes.
-
-options(
-  exclude: [
-    "src/ui/assets",
-    "src/ui/rabbita-town/_build",
-    "src/ui/rabbita-town/dist",
-    "src/ui/rabbita-town/node_modules",
-  ],
-)

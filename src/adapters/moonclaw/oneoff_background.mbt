@@ -8,7 +8,7 @@ pub async fn launch_oneoff(
   cwd~ : String,
   log_prefix~ : String,
   store_home~ : String,
-) -> Int {
+) -> Int32 {
   let (command, args) = moonclaw_runtime_invocation(moonclaw_root, [
     "proposal", "oneoff", packet_path, "--json", "--home", home, "--cwd", cwd, "--store-home",
     store_home,

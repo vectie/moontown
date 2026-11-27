@@ -3,7 +3,7 @@ pub async fn save_packet_file(
   path : String,
   packet : ExternalProposalPacket,
 ) -> Unit {
-  moonclaw_write_text_file(path, packet.to_json().stringify())
+  moonclaw_write_text_file(path, ToJson::to_json(packet).stringify())
 }
 
 ///|

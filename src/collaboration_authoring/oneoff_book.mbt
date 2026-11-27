@@ -30,7 +30,7 @@ fn outcome_gap(
     "present": severity > 0,
     "severity": severity,
     "summary": required_text(fields, name + "_summary"),
-    "evidence_refs": evidence.to_json(),
+    "evidence_refs": ToJson::to_json(evidence),
   }
 }
 
@@ -58,7 +58,7 @@ async fn Store::make_work_package(
   saved : @contract.SavedDraft,
   work : @contract.OneoffWork,
   fields : Json,
-  observed_at : Int,
+  observed_at : Int32,
 ) -> Json {
   guard ["completed", "partial"].contains(work.status) &&
     work.review_status == "accepted" else {
@@ -69,7 +69,7 @@ async fn Store::make_work_package(
   guard fields
     is {
       "result_digest": String(expected),
-      "review_version": Number(version),
+      "review_version": Number(version, ..),
       ..
     } &&
     expected == work.result_digest &&
@@ -90,7 +90,7 @@ async fn Store::make_work_package(
       1048576,
     )
     source_files.push({
-      "snapshot": source.to_json(),
+      "snapshot": ToJson::to_json(source),
       "encoding": "hex",
       "bytes_hex": @crypto.bytes_to_hex_string(bytes),
     })
@@ -98,8 +98,8 @@ async fn Store::make_work_package(
   let source_text = (
     {
       "contract_version": "moontown.retained-collaboration-source.v1",
-      "saved_draft": saved.to_json(),
-      "files": source_files.to_json(),
+      "saved_draft": ToJson::to_json(saved),
+      "files": ToJson::to_json(source_files),
       "note": "Exact original input bytes retained as hex, including binary sources; source digests refer to decoded original bytes.",
     } : Json).stringify(indent=2)
   let (bundle, _) = self.current_work_review(saved, work)
@@ -118,8 +118,10 @@ async fn Store::make_work_package(
   }
   let review_text = (
     {
-      "record": @review.project_review_record(bundle, work.result_digest, []).to_json(),
-      "history": history.to_json(),
+      "record": ToJson::to_json(
+        @review.project_review_record(bundle, work.result_digest, []),
+      ),
+      "history": ToJson::to_json(history),
       "authority": "Existing host operator identity matched to each named decision owner. This is not Book acceptance.",
     } : Json).stringify(indent=2)
   let prefix = "moontown-" + saved.draft.draft_id + "-" + saved.revision
@@ -133,14 +135,16 @@ async fn Store::make_work_package(
   let recognition = outcome_gap(fields, "recognition", evidence_ids)
   let decisiveness = outcome_gap(fields, "decisiveness", evidence_ids)
   let statement_fields : Map[String, Json] = {
-    "contract_version": "moontown.collaboration-outcome-statement.v1".to_json(),
-    "draft_id": saved.draft.draft_id.to_json(),
-    "revision": saved.revision.to_json(),
-    "result_digest": work.result_digest.to_json(),
-    "review_digest": digest(@utf8.encode(review_text)).to_json(),
-    "book_id": book_id.to_json(),
-    "outcome_summary": summary.to_json(),
-    "observed_at": observed_at.to_json(),
+    "contract_version": ToJson::to_json(
+      "moontown.collaboration-outcome-statement.v1",
+    ),
+    "draft_id": ToJson::to_json(saved.draft.draft_id),
+    "revision": ToJson::to_json(saved.revision),
+    "result_digest": ToJson::to_json(work.result_digest),
+    "review_digest": ToJson::to_json(digest(@utf8.encode(review_text))),
+    "book_id": ToJson::to_json(book_id),
+    "outcome_summary": ToJson::to_json(summary),
+    "observed_at": ToJson::to_json(observed_at),
     "information_gap": information,
     "recognition_gap": recognition,
     "decisiveness_gap": decisiveness,
@@ -149,16 +153,18 @@ async fn Store::make_work_package(
     g is { "present": True, .. }
   })
   if gaps_present {
-    statement_fields["capability_id"] = required_text(fields, "capability_id").to_json()
-    statement_fields["capability_version"] = required_text(
-      fields, "capability_version",
-    ).to_json()
-    statement_fields["capability_summary"] = required_text(
-      fields, "capability_summary",
-    ).to_json()
-    statement_fields["capability_change_digest"] = digest(
-      @utf8.encode(required_text(fields, "capability_summary")),
-    ).to_json()
+    statement_fields["capability_id"] = ToJson::to_json(
+      required_text(fields, "capability_id"),
+    )
+    statement_fields["capability_version"] = ToJson::to_json(
+      required_text(fields, "capability_version"),
+    )
+    statement_fields["capability_summary"] = ToJson::to_json(
+      required_text(fields, "capability_summary"),
+    )
+    statement_fields["capability_change_digest"] = ToJson::to_json(
+      digest(@utf8.encode(required_text(fields, "capability_summary"))),
+    )
   }
   let salon = match @contract.salon_selection(saved, work, fields) {
     Ok(value) => value
@@ -213,7 +219,7 @@ async fn Store::make_work_package(
     " failed. Exact inputs, outputs and failures are retained. Approval covers the account, not a claim of successful collaboration. Book makes its own independent decision.",
     "outcome_summary": routed_summary,
     "owner_route": route,
-    "evidence_refs": references.to_json(),
+    "evidence_refs": ToJson::to_json(references),
     "decision_evidence_id": evidence_ids[2],
     "observed_at": observed_at,
     "recorded_at": observed_at,
@@ -232,7 +238,7 @@ async fn Store::make_work_package(
     }
   }
   let payload = (
-    { "submission": submission, "artifacts": artifacts.to_json() } : Json).stringify(
+    { "submission": submission, "artifacts": ToJson::to_json(artifacts) } : Json).stringify(
     indent=2,
   )
   guard @utf8.encode(payload).length() <= 8388608 else {
@@ -248,12 +254,13 @@ async fn Store::make_work_package(
 }
 
 ///|
-fn checked_work_readback(package : Json, wrapper : Json) -> Json raise {
+#warnings("-reserved_keyword")
+fn checked_work_readback(pkg_val : Json, wrapper : Json) -> Json raise {
   let receipt = match wrapper {
     { "result": result, .. } => result
     _ => wrapper
   }
-  guard package
+  guard pkg_val
     is {
       "package_digest": String(expected),
       "payload_json": String(payload),
@@ -271,7 +278,7 @@ fn checked_work_readback(package : Json, wrapper : Json) -> Json raise {
       ..
     } &&
     actual == expected &&
-    returned == package &&
+    returned == pkg_val &&
     digest(@utf8.encode(payload)) == expected &&
     @json.parse(payload) is { "submission": { "submission": original, .. }, .. } &&
     reference == original &&
@@ -289,13 +296,14 @@ fn checked_work_readback(package : Json, wrapper : Json) -> Json raise {
 ///|
 /// Returned Book observations cannot replace the Town source/result/review.
 /// Revalidate every retained constituent against the owning revision on reopen.
+#warnings("-reserved_keyword")
 async fn Store::verify_work_package(
   self : Store,
   saved : @contract.SavedDraft,
   work : @contract.OneoffWork,
-  package : Json,
+  pkg_val : Json,
 ) -> Unit {
-  guard package
+  guard pkg_val
     is {
       "payload_json": String(payload),
       "package_digest": String(package_digest),
@@ -327,7 +335,7 @@ async fn Store::verify_work_package(
   guard texts[1] == work.result_text &&
     @json.parse(texts[0])
     is { "saved_draft": captured, "files": Array(files), .. } &&
-    captured == saved.to_json() &&
+    captured == ToJson::to_json(saved) &&
     files.length() == saved.sources.length() &&
     @json.parse(texts[3])
     is {
@@ -361,7 +369,7 @@ async fn Store::verify_work_package(
         "bytes_hex": String(hex),
         ..
       } &&
-      snapshot == source.to_json() &&
+      snapshot == ToJson::to_json(source) &&
       hex == @crypto.bytes_to_hex_string(bytes) else {
       raise CollaborationError(
         "Book package original source bytes do not match this collaboration",
@@ -393,7 +401,9 @@ async fn Store::verify_work_package(
     history[history.length() - 1].stringify(),
     @utf8.encode(work.result_text),
   )
-  guard @review.project_review_record(reviewed, work.result_digest, []).to_json() ==
+  guard ToJson::to_json(
+      @review.project_review_record(reviewed, work.result_digest, []),
+    ) ==
     record &&
     @review.review_status(reviewed) == "accepted" else {
     raise CollaborationError(
@@ -403,6 +413,7 @@ async fn Store::verify_work_package(
 }
 
 ///|
+#warnings("-reserved_keyword")
 async fn replace_work_pointer(path : String, text : String) -> Unit {
   guard kind(path) is (None | Some(Regular)) else {
     raise CollaborationError("Unsafe work pointer")
@@ -421,7 +432,7 @@ pub async fn Store::submit_oneoff(
   id : String,
   revision : String,
   fields : Json,
-  observed_at : Int,
+  observed_at : Int32,
 ) -> @contract.OneoffWork {
   self.locked(() => {
     let saved = self.load_revision(id, revision)
@@ -437,7 +448,7 @@ pub async fn Store::submit_oneoff(
       fields
       is {
         "result_digest": String(expected),
-        "review_version": Number(version),
+        "review_version": Number(version, ..),
         ..
       } &&
       expected == work.result_digest &&
@@ -451,21 +462,21 @@ pub async fn Store::submit_oneoff(
       "/outcome-requests/" +
       request_key +
       ".json"
-    let package = if kind(request_path) is Some(Regular) {
+    let pkg_val = if kind(request_path) is Some(Regular) {
       @json.parse(text_bytes(read_bytes(request_path, 16777216)))
     } else {
-      let package = self.make_work_package(saved, work, fields, observed_at)
-      write_bytes(request_path, @utf8.encode(package.stringify(indent=2)))
-      package
+      let pkg_val = self.make_work_package(saved, work, fields, observed_at)
+      write_bytes(request_path, @utf8.encode(pkg_val.stringify(indent=2)))
+      pkg_val
     }
-    guard package is { "package_digest": String(package_digest), .. } else {
+    guard pkg_val is { "package_digest": String(package_digest), .. } else {
       abort("constructed package")
     }
     let root = self.work_root(saved) +
       "/outcomes/" +
       package_digest[7:].to_owned()
     let path = root + "/package.json"
-    write_bytes(path, @utf8.encode(package.stringify(indent=2)))
+    write_bytes(path, @utf8.encode(pkg_val.stringify(indent=2)))
     write_bytes(
       root + "/destination.json",
       @utf8.encode(
@@ -475,7 +486,7 @@ pub async fn Store::submit_oneoff(
     // Book idempotently imports the exact source package; import never advances
     // Book's own review gates. A lost reply is recoverable with the same bytes.
     let receipt = checked_work_readback(
-      package,
+      pkg_val,
       @moonbook.product_outcome_operation(entry, "product-import", path),
     )
     self.retain_work_readback(saved, package_digest, receipt)
@@ -509,6 +520,7 @@ async fn Store::retain_work_readback(
 }
 
 ///|
+#warnings("-reserved_keyword")
 async fn Store::project_book_readback(
   self : Store,
   saved : @contract.SavedDraft,
@@ -530,12 +542,12 @@ async fn Store::project_book_readback(
     raise CollaborationError("Invalid Book receipt pointer")
   }
   let outcome_root = root + "/outcomes/" + package_digest[7:].to_owned()
-  let package = @json.parse(
+  let pkg_val = @json.parse(
     text_bytes(read_bytes(outcome_root + "/package.json", 16777216)),
   )
-  self.verify_work_package(saved, work, package)
+  self.verify_work_package(saved, work, pkg_val)
   let receipt = checked_work_readback(
-    package,
+    pkg_val,
     @json.parse(
       text_bytes(
         read_bytes(outcome_root + "/receipts/" + name + ".json", 16777216),
@@ -573,10 +585,10 @@ pub async fn Store::refresh_oneoff_book(
     let root = self.work_root(saved) +
       "/outcomes/" +
       current.package_digest[7:].to_owned()
-    let package = @json.parse(
+    let pkg_val = @json.parse(
       text_bytes(read_bytes(root + "/package.json", 16777216)),
     )
-    guard package is { "payload_json": String(payload), .. } &&
+    guard pkg_val is { "payload_json": String(payload), .. } &&
       @json.parse(payload)
       is { "submission": { "submission": reference, .. }, .. } &&
       @json.parse(text_bytes(read_bytes(root + "/destination.json", 4096)))
@@ -603,7 +615,7 @@ pub async fn Store::refresh_oneoff_book(
       saved,
       current.package_digest,
       checked_work_readback(
-        package,
+        pkg_val,
         @moonbook.product_outcome_operation(entry, "product-read", path),
       ),
     )

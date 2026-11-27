@@ -45,7 +45,7 @@ pub fn movement_loop_ready(EditorPipelineLifecycleRecord, Array[EditorPipelineMo
 
 pub fn movement_loop_record_for_module(EditorPipelineModulePlacement) -> EditorPipelineMovementLoopRecord
 
-pub fn movement_loop_records(Array[EditorPipelineModulePlacement], limit? : Int) -> Array[EditorPipelineMovementLoopRecord]
+pub fn movement_loop_records(Array[EditorPipelineModulePlacement], limit? : Int32) -> Array[EditorPipelineMovementLoopRecord]
 
 pub fn parse_native_selection(String) -> NativeSelection?
 
@@ -81,11 +81,12 @@ pub fn terrain_layers_for_modules(Array[EditorPipelineModulePlacement]) -> Array
 
 pub fn terrain_reason_for_module(EditorPipelineModulePlacement) -> EditorPipelineTerrainReasonRecord
 
-pub fn terrain_reason_records(Array[EditorPipelineModulePlacement], limit? : Int) -> Array[EditorPipelineTerrainReasonRecord]
+pub fn terrain_reason_records(Array[EditorPipelineModulePlacement], limit? : Int32) -> Array[EditorPipelineTerrainReasonRecord]
 
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct EditorFeatureSelectionTask {
   id : String
   status : String
@@ -96,8 +97,9 @@ pub(all) struct EditorFeatureSelectionTask {
   run_id : String?
   summary : String
   generated_at_ms : UInt64
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct EditorPipelineLifecycleRecord {
   change_id : String
   selected_feature : String
@@ -108,8 +110,9 @@ pub(all) struct EditorPipelineLifecycleRecord {
   plan_ref : String
   repair_ref : String
   output_ref : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct EditorPipelineModulePlacement {
   id : String
   enabled : Bool
@@ -117,15 +120,16 @@ pub(all) struct EditorPipelineModulePlacement {
   book_id : String
   district : String
   building_kind : String
-  grid_x : Int
-  grid_y : Int
-  footprint_w : Int
-  footprint_h : Int
-  entrance_x : Int
-  entrance_y : Int
+  grid_x : Int32
+  grid_y : Int32
+  footprint_w : Int32
+  footprint_h : Int32
+  entrance_x : Int32
+  entrance_y : Int32
   style_family : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct EditorPipelineMovementLoopRecord {
   module_id : String
   module_title : String
@@ -136,8 +140,9 @@ pub(all) struct EditorPipelineMovementLoopRecord {
   output_ref : String
   return_ref : String
   missing_reason : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct EditorPipelinePlacementDiffRecord {
   module_id : String
   module_title : String
@@ -148,15 +153,16 @@ pub(all) struct EditorPipelinePlacementDiffRecord {
   entrance_ref : String
   terrain_status : String
   reason : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct EditorPipelineStage {
   id : String
   title : String
   status : String
   summary : String
   evidence : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
 pub(all) struct EditorPipelineStageInputs {
   course_page : String
@@ -180,6 +186,7 @@ pub(all) struct EditorPipelineStageInputs {
   style_comparison_ready : Bool
 }
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct EditorPipelineState {
   contract : String
   status : String
@@ -199,8 +206,9 @@ pub(all) struct EditorPipelineState {
   terrain_reasons : Array[EditorPipelineTerrainReasonRecord]
   style_candidates : Array[EditorPipelineStyleCandidateRecord]
   style_selection : EditorPipelineStyleSelectionRecord
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct EditorPipelineStyleCandidateRecord {
   style_id : String
   title : String
@@ -210,8 +218,9 @@ pub(all) struct EditorPipelineStyleCandidateRecord {
   rationale : String
   tradeoff : String
   selected : Bool
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct EditorPipelineStyleSelectionRecord {
   target_module_id : String
   target_module_title : String
@@ -220,16 +229,18 @@ pub(all) struct EditorPipelineStyleSelectionRecord {
   status : String
   decision_ref : String
   critique : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct EditorPipelineTerrainLayerRecord {
   layer_id : String
   title : String
   status : String
   evidence_ref : String
   summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct EditorPipelineTerrainReasonRecord {
   module_id : String
   module_title : String
@@ -237,14 +248,15 @@ pub(all) struct EditorPipelineTerrainReasonRecord {
   status : String
   placement_ref : String
   reason : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct NativeSelection {
   selected_feature : String
   title : String
   implementation_hint : String
   acceptance : Array[String]
-} derive(Eq, @debug.Debug)
+}
 
 // Type aliases
 

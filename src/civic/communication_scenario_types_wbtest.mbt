@@ -51,7 +51,9 @@ test "salon scenario DTOs round-trip as civic package data" {
       },
     ],
   }
-  let parsed : CivicCommunicationScenario = @json.from_json(scenario.to_json()) catch {
+  let parsed : CivicCommunicationScenario = @json.from_json(
+    ToJson::to_json(scenario),
+  ) catch {
     _ => fail("expected scenario JSON to decode")
   }
   assert_eq(parsed.id, "robotics-salon")

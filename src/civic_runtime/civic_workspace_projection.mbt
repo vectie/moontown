@@ -5,7 +5,7 @@ async fn write_civic_projection(
 ) -> Unit {
   @support.write_text_file(
     "\{root}/book/moonbook-ui-state.json",
-    civic_projection_state(service).to_json().stringify(indent=2),
+    ToJson::to_json(civic_projection_state(service)).stringify(indent=2),
   )
 }
 

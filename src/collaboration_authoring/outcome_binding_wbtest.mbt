@@ -1,7 +1,8 @@
 ///|
+#warnings("-reserved_keyword")
 async test "retained outcome actual archive members reject same-size replacement after initial verification" {
   let escaped : Array[String] = []
-  for member in ["draft", "source", "terminal", "report"] {
+  for member_val in ["draft", "source", "terminal", "report"] {
     let (store, _) = fixture()
     let saved = store.save(fixture_draft(), "", "2026-10-07T07:00:00Z")
     ignore(retain_outcome_fixture(store, saved, false))
@@ -13,7 +14,7 @@ async test "retained outcome actual archive members reject same-size replacement
     let root = store.draft_root(saved.draft.draft_id) +
       "/" +
       revision_prefix(saved)
-    let (path, old, replacement) = match member {
+    let (path, old, replacement) = match member_val {
       "draft" => (root + "draft.json", "Which evidence", "Whose evidence")
       "source" =>
         (root + "sources/water/raw/nested/source.bin", "exact", "other")
@@ -31,13 +32,13 @@ async test "retained outcome actual archive members reject same-size replacement
         )
     }
     let original = read_bytes(path, 2097152)
-    let changed = if member == "source" {
+    let changed = if member_val == "source" {
       b"other\x00source\xff\n"
     } else {
       @utf8.encode(text_bytes(original).replace_all(old~, new=replacement))
     }
-    assert_eq(changed.length(), original.length(), msg=member)
-    assert_true(changed != original, msg=member)
+    assert_eq(changed.length(), original.length(), msg=member_val)
+    assert_true(changed != original, msg=member_val)
     @fs.write_file(path, changed)
     let refused = try {
       ignore(store.outcome_bound_members(saved, work))
@@ -47,7 +48,7 @@ async test "retained outcome actual archive members reject same-size replacement
       _ => false
     }
     if !refused {
-      escaped.push(member)
+      escaped.push(member_val)
     }
     @fs.write_file(path, original)
     assert_eq(store.outcome_bound_members(saved, work), before)

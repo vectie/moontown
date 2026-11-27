@@ -26,9 +26,9 @@ pub fn planbook_daemon_repair_deferred_for_live_work_message() -> String
 
 pub fn planbook_daemon_repair_duplicate_message() -> String
 
-pub async fn planbook_open_gap_count(snapshot_path? : String) -> Int
+pub async fn planbook_open_gap_count(snapshot_path? : String) -> Int32
 
-pub async fn planbook_repair_active_count(snapshot_path? : String) -> Int
+pub async fn planbook_repair_active_count(snapshot_path? : String) -> Int32
 
 pub async fn render_moontown_planbook_autonomy_status(snapshot_path? : String, workspace_root? : String, book_catalog_path? : String) -> String
 

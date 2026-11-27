@@ -1,6 +1,6 @@
 ///|
 pub async fn load_or_create_civic_communication_schedules(
-  path? : String = default_civic_communication_schedule_path(),
+  path~ : String = default_civic_communication_schedule_path(),
 ) -> Array[CivicCommunicationSchedule] {
   if @fs.exists(path) {
     let text = @fs.read_file(path).text() catch { _ => "" }
@@ -51,5 +51,5 @@ pub async fn save_civic_communication_schedules(
   path : String,
   schedules : Array[CivicCommunicationSchedule],
 ) -> Unit {
-  @support.write_text_file(path, schedules.to_json().stringify(indent=2))
+  @support.write_text_file(path, ToJson::to_json(schedules).stringify(indent=2))
 }

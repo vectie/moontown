@@ -22,6 +22,7 @@ async fn RequestApplication::operator_source_policy(
 }
 
 ///|
+#warnings("-fragile_catch_all")
 async fn RequestApplication::append_operator_request(
   self : RequestApplication,
   request : Json,
@@ -37,6 +38,7 @@ async fn RequestApplication::append_operator_request(
 }
 
 ///|
+#warnings("-fragile_catch_all")
 pub async fn RequestApplication::submit_standing_watch(
   self : RequestApplication,
   body : String,
@@ -117,7 +119,7 @@ pub async fn RequestApplication::submit_standing_watch(
   let goals_path = self.state_root + "/standing-goals.json"
   let goals_text = @support.read_text_or_empty(goals_path)
   let goals_json = if goals_text.trim().is_empty() {
-    ([] : Array[Json]).to_json()
+    ToJson::to_json(([] : Array[Json]))
   } else {
     @json.parse(goals_text)
   }
@@ -156,7 +158,10 @@ pub async fn RequestApplication::submit_standing_watch(
   @support.write_text_file(request_path, preparing.stringify(indent=2))
   let mut goal_activated = false
   try {
-    @support.write_text_file(goals_path, goals.to_json().stringify(indent=2))
+    @support.write_text_file(
+      goals_path,
+      ToJson::to_json(goals).stringify(indent=2),
+    )
     goal_activated = true
     @support.write_text_file(request_path, request.stringify(indent=2))
     self.append_operator_request(request)

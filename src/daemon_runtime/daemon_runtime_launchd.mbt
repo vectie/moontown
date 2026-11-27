@@ -10,7 +10,7 @@ fn daemon_launchd_stop_shell_line() -> String {
 
 ///|
 fn daemon_launchd_preferred() -> Bool {
-  match @sys.get_env_var("MOONTOWN_DAEMON_BACKEND") {
+  match @env.get_env_var("MOONTOWN_DAEMON_BACKEND") {
     Some("detached") | Some("shell") | Some("none") => false
     _ => true
   }

@@ -65,7 +65,7 @@ pub fn report(
     guard sources.length() == selected.length() else {
       fail("Supply exactly the selected source files")
     }
-    let text : Map[String, String] = {}
+    let text : Map[String, String] = Map([])
     let evidence : Array[Source] = []
     let mut total = 0
     for path in selected {
@@ -92,7 +92,7 @@ pub fn report(
       groups: compare(claims),
     }
     let output = if format == "json" {
-      value.to_json().stringify() + "\n"
+      ToJson::to_json(value).stringify() + "\n"
     } else {
       markdown(value)
     }

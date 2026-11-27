@@ -1,7 +1,7 @@
 ///|
 priv struct LiveAutonomyWatcherDecisionCounts {
-  accepted_updates : Int
-  no_change : Int
+  accepted_updates : Int32
+  no_change : Int32
 }
 
 ///|
@@ -9,7 +9,7 @@ fn live_autonomy_metric_counts(
   state : @core.TownState,
   standing_goals : Array[@core.StandingGoal],
   watcher_records : Array[@core.WatcherRunRecord],
-  tick : Int,
+  tick : Int32,
 ) -> LiveAutonomyMetricCounts {
   let health_report = @health.inspect_town(state)
   let goal_counts = @runtime_status_policy.runtime_status_standing_goal_counts(
@@ -36,19 +36,19 @@ fn live_autonomy_metric_counts(
 }
 
 ///|
-fn live_autonomy_active_worker_count(state : @core.TownState) -> Int {
+fn live_autonomy_active_worker_count(state : @core.TownState) -> Int32 {
   count_live_activity(state)
 }
 
 ///|
-fn live_autonomy_review_count(state : @core.TownState) -> Int {
+fn live_autonomy_review_count(state : @core.TownState) -> Int32 {
   @live_autonomy_policy.count_live_review_executions(state)
 }
 
 ///|
 fn live_autonomy_transient_infrastructure_debt_count(
   state : @core.TownState,
-) -> Int {
+) -> Int32 {
   count_transient_infrastructure_debt(state)
 }
 

@@ -88,8 +88,13 @@ async test "receipt current-root and local identity are distinct from sender ide
   let receipt_path = root + "/state/portable-source-binding.json"
   let receipt = @json.parse(@fs.read_file(receipt_path).text())
   guard receipt is Object(fields) else { fail("fixture") }
-  fields["local_book_id"] = "sender-agent".to_json()
-  @fs.write_file(receipt_path, receipt.stringify(), create=0o600, truncate=true)
+  fields["local_book_id"] = ToJson::to_json("sender-agent")
+  @fs.write_file(
+    receipt_path,
+    receipt.stringify(),
+    create_mode=CreateOrTruncate,
+    permission=0o600,
+  )
   assert_eq(
     discover(home + "/missing.json", home).books[0].state,
     "unavailable",
@@ -103,9 +108,14 @@ async test "receipt current-root and local identity are distinct from sender ide
     ).status,
     409,
   )
-  fields["local_book_id"] = "recipient".to_json()
-  fields["local_target_root"] = (home + "/another-recipient").to_json()
-  @fs.write_file(receipt_path, receipt.stringify(), create=0o600, truncate=true)
+  fields["local_book_id"] = ToJson::to_json("recipient")
+  fields["local_target_root"] = ToJson::to_json(home + "/another-recipient")
+  @fs.write_file(
+    receipt_path,
+    receipt.stringify(),
+    create_mode=CreateOrTruncate,
+    permission=0o600,
+  )
   assert_eq(
     discover(home + "/missing.json", home).books[0].state,
     "unavailable",
@@ -135,8 +145,8 @@ async test "reference-only manifest entries are never fetched or opened" {
   @fs.write_file(
     root + "/portable/outputs.manifest.v1.json",
     bytes,
-    create=0o600,
-    truncate=true,
+    create_mode=CreateOrTruncate,
+    permission=0o600,
   )
   let receipt_path = root + "/state/portable-source-binding.json"
   let receipt = @json.parse(@fs.read_file(receipt_path).text())
@@ -144,10 +154,15 @@ async test "reference-only manifest entries are never fetched or opened" {
     fields.get("source") is Some(Object(source)) else {
     fail("fixture")
   }
-  source["outputs_manifest_digest"] = hash(bytes).to_json()
-  source["included_output_count"] = (0).to_json()
-  source["reference_only_count"] = (1).to_json()
-  @fs.write_file(receipt_path, receipt.stringify(), create=0o600, truncate=true)
+  source["outputs_manifest_digest"] = ToJson::to_json(hash(bytes))
+  source["included_output_count"] = ToJson::to_json(0)
+  source["reference_only_count"] = ToJson::to_json(1)
+  @fs.write_file(
+    receipt_path,
+    receipt.stringify(),
+    create_mode=CreateOrTruncate,
+    permission=0o600,
+  )
   let catalog = discover(home + "/missing.json", home)
   assert_eq(catalog.books[0].outputs[0].reference, output.reference)
   assert_eq(catalog.books[0].state, "ready")

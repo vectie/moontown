@@ -1,6 +1,5 @@
 import {
   "moonbitlang/async/fs",
-  "moonbitlang/core/env",
   "moonbitlang/core/json",
   "moonbitlang/core/string",
   "moonbitlang/core/encoding/utf8",
@@ -27,4 +26,8 @@ import {
 
 import {
   "moonbitlang/async",
+} for "test"
+
+import {
+  "moonbitlang/core/env",
 } for "test"

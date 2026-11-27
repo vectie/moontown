@@ -2,7 +2,7 @@
 priv struct GoalBookLaunch {
   entry : @moonbook.BookCatalogEntry
   tasks : Array[@moonbook.BookTask]
-  pending_review_baseline : Int
+  pending_review_baseline : Int32
 }
 
 ///|
@@ -10,12 +10,12 @@ async fn prepare_goal_book_launch(
   state : @core.TownState,
   entry : @moonbook.BookCatalogEntry,
   objective : String,
-  task_limit : Int,
-  wenyu_execution? : String = "native",
-  wenyu_model? : String = "",
-  wenyu_allow_no_change? : Bool = false,
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
+  task_limit : Int32,
+  wenyu_execution~ : String = "native",
+  wenyu_model~ : String = "",
+  wenyu_allow_no_change~ : Bool = false,
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
 ) -> GoalBookLaunch? {
   let acceptance = @moonbook.accept_goal(entry, objective) catch {
     error => {
@@ -163,7 +163,7 @@ async fn goal_book_task_plan(
   objective : String,
   initial_summary : @moonbook.BookStateSummary,
   batch_tasks : Array[@moonbook.BookTask],
-  task_limit : Int,
+  task_limit : Int32,
 ) -> ResearchBootstrapPlan {
   match @civic.wenyu_civic_service_for_book_id(entry.id) {
     Some(service) => {
@@ -193,7 +193,7 @@ async fn goal_book_research_or_build_plan(
   objective : String,
   initial_summary : @moonbook.BookStateSummary,
   batch_tasks : Array[@moonbook.BookTask],
-  task_limit : Int,
+  task_limit : Int32,
 ) -> ResearchBootstrapPlan {
   let bootstrap = research_bootstrap_plan(
     entry, objective, initial_summary, batch_tasks, task_limit,
@@ -218,7 +218,7 @@ async fn goal_book_research_or_build_plan(
 fn goal_book_wenyu_build_plan(
   entry : @moonbook.BookCatalogEntry,
   objective : String,
-  task_limit : Int,
+  task_limit : Int32,
 ) -> ResearchBootstrapPlan {
   {
     tasks: @build_pipeline.wenyu_build_tasks(
@@ -238,7 +238,7 @@ fn goal_book_wenyu_civic_service_plan(
   entry : @moonbook.BookCatalogEntry,
   objective : String,
   tasks : Array[@moonbook.BookTask],
-  task_limit : Int,
+  task_limit : Int32,
 ) -> ResearchBootstrapPlan {
   {
     tasks: @build_pipeline.wenyu_civic_service_plan_tasks(
@@ -254,7 +254,7 @@ fn goal_book_wenyu_civic_service_plan(
 ///|
 fn select_goal_book_tasks(
   tasks : Array[@moonbook.BookTask],
-  task_limit : Int,
+  task_limit : Int32,
 ) -> Array[@moonbook.BookTask] {
   let selected : Array[@moonbook.BookTask] = []
   let mut emitted = 0

@@ -1,11 +1,12 @@
 ///|
 /// One geographic planning frame, independent of loading chunks. `south` is
 /// the projected south axis, not screen-down; both axes retain map shear.
+#derive(Debug, Eq)
 pub(all) struct CityFrame {
   origin : Point
   east : Point
   south : Point
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn CityFrame::ground(self : CityFrame, u : Double, v : Double) -> Point {

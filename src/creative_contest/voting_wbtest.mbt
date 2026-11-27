@@ -85,7 +85,7 @@ test "builtin votes change cancel and replay one choice without leaking voters" 
   let b = work_id(frozen, "creator-b")
   let first = vote_for(frozen, "private-voter-one", a, "private-intent-one")
   let replay = vote_for(first, "private-voter-one", a, "private-intent-one")
-  assert_eq(replay.to_json(), first.to_json())
+  assert_eq(ToJson::to_json(replay), ToJson::to_json(first))
   let changed = vote_for(replay, "private-voter-one", b, "change")
   assert_true(
     voting_projection(changed, config, 1110UL, Some("private-voter-one"))
@@ -106,8 +106,10 @@ test "builtin votes change cancel and replay one choice without leaking voters" 
     is { "total_votes": Number(0, ..), .. },
   )
   assert_eq(
-    vote_for(cancelled, "private-voter-one", a, "private-intent-one").to_json(),
-    cancelled.to_json(),
+    ToJson::to_json(
+      vote_for(cancelled, "private-voter-one", a, "private-intent-one"),
+    ),
+    ToJson::to_json(cancelled),
   )
   assert_true(
     try {
@@ -152,7 +154,10 @@ test "vote windows self-vote frozen roster and shared tie ranks are enforced" {
     },
   )
   let frozen = advance_voting(state, config, 1100UL)
-  assert_eq(advance_voting(frozen, config, 1101UL).to_json(), frozen.to_json())
+  assert_eq(
+    ToJson::to_json(advance_voting(frozen, config, 1101UL)),
+    ToJson::to_json(frozen),
+  )
   assert_true(
     try {
       ignore(vote_for(frozen, "creator-a", a, "self"))
@@ -277,8 +282,8 @@ test "withdrawals exclude open votes and later privacy changes do not rewrite se
   assert_false(exported.contains("private-prompt"))
   assert_true(exported.contains(digest))
   validate_voting_state(after, config)
-  let decoded : State = @json.from_json(after.to_json())
-  assert_eq(decoded.to_json(), after.to_json())
+  let decoded : State = @json.from_json(ToJson::to_json(after))
+  assert_eq(ToJson::to_json(decoded), ToJson::to_json(after))
 }
 
 ///|
@@ -449,7 +454,9 @@ async test "legacy state migration and real concurrent callers retain a single d
     create_mode=CreateOrTruncate,
   )
   let state = voting_works()
-  guard state.to_json() is Object(legacy) else { fail("invalid fixture") }
+  guard ToJson::to_json(state) is Object(legacy) else {
+    fail("invalid fixture")
+  }
   for
     key in [
       "vote_events", "voting_rosters", "voting_settlements", "review_events",
@@ -527,7 +534,7 @@ async test "legacy state migration and real concurrent callers retain a single d
     execute("settlement", {}, 130000UL, Some("host"), true, path, config_path),
     exported,
   )
-  assert_eq(read(path, config).to_json(), before.to_json())
+  assert_eq(ToJson::to_json(read(path, config)), ToJson::to_json(before))
 }
 
 ///|
@@ -574,6 +581,7 @@ async test "paused workers seal voting without dispatching a queued image" {
 }
 
 ///|
+#warnings("-reserved_keyword")
 async test "a vote blocked across closing seals first without an existing boundary marker" {
   let root = @fs.tmpdir(prefix="blocked-vote-close-")
   defer @fs.rmdir(root, recursive=true)
@@ -626,10 +634,10 @@ async test "a vote blocked across closing seals first without an existing bounda
     file.unlock()
     assert_true(vote.wait())
   })
-  let sealed = read(path, config)
-  assert_true(sealed.vote_events.is_empty())
-  assert_eq(sealed.voting_rosters.length(), 1)
-  assert_eq(sealed.voting_settlements.length(), 1)
+  let sealed_val = read(path, config)
+  assert_true(sealed_val.vote_events.is_empty())
+  assert_eq(sealed_val.voting_rosters.length(), 1)
+  assert_eq(sealed_val.voting_settlements.length(), 1)
 }
 
 ///|

@@ -64,20 +64,22 @@ fn competition_brief_markdown(challenge : Challenge) -> String {
 ///|
 fn workspace_receipt_event(
   book_id : String,
-  revision : Int,
+  revision : Int32,
   artifacts : Array[String],
 ) -> Json {
-  @moonbook_contracts.ExecutableBookEvent::new(
-    id="contest-revision-\{revision}",
-    book_id~,
-    result_id="contest-revision-\{revision}",
-    summary="Contest Express ledger revision \{revision} projected into private MoonBook receipts.",
-    artifacts~,
-    event_type="contest.receipt.projected",
-    accepted=false,
-    requires_review=false,
-    notify_town=false,
-  ).to_json()
+  ToJson::to_json(
+    @moonbook_contracts.ExecutableBookEvent::new(
+      id="contest-revision-\{revision}",
+      book_id~,
+      result_id="contest-revision-\{revision}",
+      summary="Contest Express ledger revision \{revision} projected into private MoonBook receipts.",
+      artifacts~,
+      event_type="contest.receipt.projected",
+      accepted=false,
+      requires_review=false,
+      notify_town=false,
+    ),
+  )
 }
 
 ///|
@@ -140,7 +142,7 @@ async fn ensure_contest_worker_profile(root : String) -> Unit {
 async fn materialize_competition_books(
   state : HackathonState,
   ledger_path : String,
-) -> Int {
+) -> Int32 {
   let base = ledger_path + ".books"
   if !@fs.exists(base) {
     @fs.mkdir(base, recursive=true, permission=0o700)
@@ -166,7 +168,7 @@ async fn materialize_competition_books(
     catalog.push(entry)
     write_private_book_file(
       root + "/moonbook.catalog.json",
-      entry.to_json().stringify(indent=2),
+      ToJson::to_json(entry).stringify(indent=2),
     )
     write_private_book_file(
       root + "/wiki/index.md",
@@ -253,7 +255,7 @@ async fn materialize_competition_books(
     catalog.push(entry)
     write_private_book_file(
       root + "/moonbook.catalog.json",
-      entry.to_json().stringify(indent=2),
+      ToJson::to_json(entry).stringify(indent=2),
     )
     if !@fs.exists(root + "/wiki/index.md") {
       write_private_book_file(
@@ -302,7 +304,7 @@ async fn materialize_competition_books(
   }
   write_private_book_file(
     ledger_path + ".moonbooks.json",
-    catalog.to_json().stringify(indent=2),
+    ToJson::to_json(catalog).stringify(indent=2),
   )
   catalog.length()
 }
@@ -312,7 +314,7 @@ async fn materialize_competition_books(
 /// already committed competition receipt or pretending that the book synced.
 pub async fn reconcile_competition_workspaces(
   state : HackathonState,
-  path? : String = default_hackathon_path(),
+  path~ : String = default_hackathon_path(),
 ) -> Json noraise {
   let status : Json = try {
     let count = materialize_competition_books(state, path)
@@ -342,7 +344,7 @@ pub async fn reconcile_competition_workspaces(
 
 ///|
 pub async fn competition_workspace_sync_status(
-  path? : String = default_hackathon_path(),
+  path~ : String = default_hackathon_path(),
 ) -> Json noraise {
   @json.parse(@fs.read_file(path + ".workspace-sync.json").text()) catch {
     _ =>

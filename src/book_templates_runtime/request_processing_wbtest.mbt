@@ -31,7 +31,10 @@ async test "book template request inbox processes pending requests" {
     cadence_ticks: 23,
     workspace_root,
   }
-  @support.write_text_file(config_path, spec.to_json().stringify(indent=2))
+  @support.write_text_file(
+    config_path,
+    ToJson::to_json(spec).stringify(indent=2),
+  )
   save_request_ledger(request_path, {
     requests: [
       {
@@ -89,7 +92,10 @@ async test "book template request inbox processes app tool book requests" {
     cadence_ticks: 41,
     workspace_root,
   }
-  @support.write_text_file(config_path, spec.to_json().stringify(indent=2))
+  @support.write_text_file(
+    config_path,
+    ToJson::to_json(spec).stringify(indent=2),
+  )
   save_request_ledger(request_path, {
     requests: [
       {

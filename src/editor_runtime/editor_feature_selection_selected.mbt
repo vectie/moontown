@@ -1,11 +1,12 @@
 ///|
+#derive(Debug, Eq)
 struct EditorSelectedFeature {
   selected_feature : String
   title : String
   score : String
   implementation_hint : String
   current_gap : String
-} derive(Debug, Eq)
+}
 
 ///|
 async fn editor_selected_feature_summary(

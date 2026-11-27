@@ -134,7 +134,7 @@ pub fn communication_reducer_skill_text(
 pub fn communication_reducer_input_markdown(
   scenario : CivicCommunicationScenario,
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> String {
   let pattern = communication_pattern_for_scenario(scenario)
   [
@@ -189,7 +189,7 @@ fn civic_skill_section(title : String, body : String) -> String {
 
 ///|
 fn markdown_bullets(values : Array[String]) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   for value in values {
     builder.write_string("- ")
     builder.write_string(value)

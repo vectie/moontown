@@ -115,7 +115,7 @@ test "civic portfolio counts operable and review services" {
     portfolio.markdown_path,
     ".moonsuite/products/moontown/civic/status.md",
   )
-  let json_text = portfolio.to_json().stringify()
+  let json_text = ToJson::to_json(portfolio).stringify()
   assert_true(json_text.contains("protocol_history"))
   assert_true(json_text.contains("protocol_history_state"))
 }

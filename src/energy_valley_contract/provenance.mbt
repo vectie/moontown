@@ -1,29 +1,32 @@
 ///|
+#derive(Debug, Eq)
 pub(all) enum ProvenanceKind {
   WenyuReference
   Procedural
   UserDelta
   RuntimeProjection
   Derived
-} derive(Debug, Eq)
+}
 
 ///|
 /// How strongly compilation must preserve a piece of the Wenyu plan.
+#derive(Debug, Eq)
 pub(all) enum PreservationLevel {
   Fixed
   Bounded
   Statistical
   Free
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct Provenance {
   source_id : String
   source_version : String
   kind : ProvenanceKind
   preservation : PreservationLevel
-  confidence_per_mille : Int
-} derive(Debug, Eq)
+  confidence_per_mille : Int32
+}
 
 ///|
 pub fn provenance(
@@ -31,7 +34,7 @@ pub fn provenance(
   source_version : String,
   kind : ProvenanceKind,
   preservation : PreservationLevel,
-  confidence_per_mille? : Int = 1000,
+  confidence_per_mille~ : Int32 = 1000,
 ) -> Provenance {
   { source_id, source_version, kind, preservation, confidence_per_mille, }
 }

@@ -1,5 +1,5 @@
 ///|
-async fn kill_daemon_pid(pid : Int) -> Bool {
+async fn kill_daemon_pid(pid : Int32) -> Bool {
   if pid <= 0 {
     return false
   }
@@ -10,7 +10,7 @@ async fn kill_daemon_pid(pid : Int) -> Bool {
 }
 
 ///|
-async fn kill_daemon_pid_force(pid : Int) -> Bool {
+async fn kill_daemon_pid_force(pid : Int32) -> Bool {
   if pid <= 0 {
     return false
   }

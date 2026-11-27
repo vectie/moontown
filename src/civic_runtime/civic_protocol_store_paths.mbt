@@ -1,7 +1,7 @@
 ///|
 pub fn protocol_contract_path(
   building_id : String,
-  ledger_base_dir? : String = default_protocol_ledger_base_dir(),
+  ledger_base_dir~ : String = default_protocol_ledger_base_dir(),
 ) -> String {
   "\{protocol_ledger_dir(building_id, ledger_base_dir~)}/PROTOCOL.md"
 }
@@ -10,7 +10,7 @@ pub fn protocol_contract_path(
 pub fn protocol_ledger_path(
   building_id : String,
   ledger : String,
-  ledger_base_dir? : String = default_protocol_ledger_base_dir(),
+  ledger_base_dir~ : String = default_protocol_ledger_base_dir(),
 ) -> String {
   "\{protocol_ledger_dir(building_id, ledger_base_dir~)}/\{ledger}.jsonl"
 }
@@ -18,7 +18,7 @@ pub fn protocol_ledger_path(
 ///|
 pub fn protocol_ledger_dir(
   building_id : String,
-  ledger_base_dir? : String = default_protocol_ledger_base_dir(),
+  ledger_base_dir~ : String = default_protocol_ledger_base_dir(),
 ) -> String {
   "\{ledger_base_dir}/\{building_id}"
 }

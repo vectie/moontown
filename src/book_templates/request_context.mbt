@@ -5,7 +5,7 @@ pub(all) struct BookTemplateRequestProcessContext {
   registry_path : String
   book_catalog_path : String
   standing_goal_path : String
-  tick : Int
+  tick : Int32
 }
 
 ///|
@@ -15,7 +15,7 @@ pub fn book_template_request_process_context(
   registry_path : String,
   book_catalog_path : String,
   standing_goal_path : String,
-  tick : Int,
+  tick : Int32,
 ) -> BookTemplateRequestProcessContext {
   {
     request_base_dir: @path.Path::dirname(request_path).to_string(),

@@ -42,7 +42,7 @@ fn grant_projection(grant : Grant, state : Registry) -> Json {
   let cash = reserved.fold(init=0, (sum, activity) => {
     sum + activity.cash_budget_cny
   })
-  let result = grant.to_json()
+  let result = ToJson::to_json(grant)
   let map = fields(result)
   // The approved template hash is public audit evidence; template bytes stay private.
   map["remaining_instances"] = Json::number(
@@ -186,7 +186,7 @@ fn snapshot(
       "max_grants": template.max_grants,
     },
     "applications": applications.map(app => {
-      let result = app.to_json()
+      let result = ToJson::to_json(app)
       fields(result)["grant"] = state.grants
         .iter()
         .find_first(g => g.application_id == app.id)
@@ -198,7 +198,7 @@ fn snapshot(
       activity_projection(activity, state, actor, owner, now)
     }),
     "audit": if owner {
-      state.audit.map(event => event.to_json())
+      state.audit.map(event => ToJson::to_json(event))
     } else {
       state.audit
       .filter(event => {
@@ -207,7 +207,7 @@ fn snapshot(
           activity.id == event.target && actor == Some(activity.organizer_id)
         })
       })
-      .map(event => event.to_json())
+      .map(event => ToJson::to_json(event))
     },
   }
 }

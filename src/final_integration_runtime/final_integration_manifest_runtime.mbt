@@ -12,7 +12,7 @@ async fn load_final_integration_manifest(
 }
 
 ///|
-async fn load_integration_daemon_tick(snapshot_path : String) -> Int {
+async fn load_integration_daemon_tick(snapshot_path : String) -> Int32 {
   let path = "\{@storage.snapshot_base_dir(snapshot_path)}/daemon.json"
   if !@fs.exists(path) {
     return 0

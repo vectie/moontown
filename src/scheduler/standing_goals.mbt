@@ -1,7 +1,7 @@
 ///|
 pub fn due_standing_goals(
   goals : Array[@core.StandingGoal],
-  tick : Int,
+  tick : Int32,
 ) -> Array[@core.StandingGoal] {
   let due : Array[@core.StandingGoal] = []
   for goal in goals {
@@ -15,7 +15,7 @@ pub fn due_standing_goals(
 ///|
 pub fn plan_standing_goal_actions(
   goals : Array[@core.StandingGoal],
-  tick : Int,
+  tick : Int32,
 ) -> Array[SchedulerAction] {
   let actions : Array[SchedulerAction] = []
   for goal in due_standing_goals(goals, tick) {

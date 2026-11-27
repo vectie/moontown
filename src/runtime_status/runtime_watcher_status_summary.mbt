@@ -8,9 +8,9 @@ pub fn watcher_status_summary(
   }
   let latest = latest_preferred_watcher_record(records)
   let current_next = current_goal_next_due_tick(latest.goal_id, goals)
-  let latest_decision = @standing_watch_policy.watcher_record_effective_decision(
-    latest,
-  ).to_string()
+  let latest_decision = Show::to_string(
+    @standing_watch_policy.watcher_record_effective_decision(latest),
+  )
   match current_next {
     Some(next_due_tick) =>
       if next_due_tick == latest.next_due_tick {
@@ -37,7 +37,7 @@ fn latest_preferred_watcher_record(
 }
 
 ///|
-fn latest_watcher_record_tick(records : Array[@core.WatcherRunRecord]) -> Int {
+fn latest_watcher_record_tick(records : Array[@core.WatcherRunRecord]) -> Int32 {
   let mut tick = 0
   for record in records {
     if record.tick > tick {
@@ -48,7 +48,7 @@ fn latest_watcher_record_tick(records : Array[@core.WatcherRunRecord]) -> Int {
 }
 
 ///|
-fn latest_standing_goal_tick(goals : Array[@core.StandingGoal]) -> Int {
+fn latest_standing_goal_tick(goals : Array[@core.StandingGoal]) -> Int32 {
   let mut tick = 0
   for goal in goals {
     match goal.last_run_tick {
@@ -63,7 +63,7 @@ fn latest_standing_goal_tick(goals : Array[@core.StandingGoal]) -> Int {
 fn current_goal_next_due_tick(
   goal_id : String,
   goals : Array[@core.StandingGoal],
-) -> Int? {
+) -> Int32? {
   match @core.standing_goal_registry_find(goals, goal_id) {
     Some(goal) => Some(goal.next_due_tick)
     None => None

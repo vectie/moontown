@@ -1,9 +1,9 @@
 ///|
 fn default_moonclaw_root() -> String {
-  match @sys.get_env_var("MOONTOWN_MOONCLAW_ROOT") {
+  match @env.get_env_var("MOONTOWN_MOONCLAW_ROOT") {
     Some(root) if !root.is_empty() => root
     _ =>
-      match @sys.get_env_var("MOONCLAW_ROOT") {
+      match @env.get_env_var("MOONCLAW_ROOT") {
         Some(root) if !root.is_empty() => root
         _ => @storage.moontown_product_artifact("external/moonclaw")
       }
@@ -12,10 +12,10 @@ fn default_moonclaw_root() -> String {
 
 ///|
 fn moon_command() -> String {
-  match @sys.get_env_var("MOON_BIN") {
+  match @env.get_env_var("MOON_BIN") {
     Some(value) if !value.is_empty() => value
     _ =>
-      match @sys.get_env_var("HOME") {
+      match @env.get_env_var("HOME") {
         Some(home) if !home.is_empty() => home + "/.moon/bin/moon"
         _ => "moon"
       }
@@ -24,12 +24,12 @@ fn moon_command() -> String {
 
 ///|
 async fn installed_moonclaw_command() -> String? {
-  match @sys.get_env_var("MOONTOWN_MOONCLAW_BIN") {
+  match @env.get_env_var("MOONTOWN_MOONCLAW_BIN") {
     Some(value) if !value.trim().is_empty() =>
       return Some(value.trim().to_owned())
     _ => ()
   }
-  match @sys.get_env_var("MOONCLAW_BIN") {
+  match @env.get_env_var("MOONCLAW_BIN") {
     Some(value) if !value.trim().is_empty() =>
       return Some(value.trim().to_owned())
     _ => ()
@@ -62,7 +62,7 @@ fn build_detached_shell_command(
   command : String,
   args : Array[String],
 ) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string("nohup ")
   builder.write_string(shell_quote(command))
   for arg in args {
@@ -80,7 +80,7 @@ fn build_detached_shell_command_with_output(
   stdout_path : String,
   stderr_path : String,
 ) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   // PID-qualified adjacent files avoid collisions. Only the final stdout
   // rename is a receipt-readiness signal; abandoned partials are ignored.
   builder.write_string("receipt_tmp=")

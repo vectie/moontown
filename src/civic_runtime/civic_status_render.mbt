@@ -1,6 +1,6 @@
 ///|
 fn render_wenyu_civic_portfolio(portfolio : CivicServicePortfolio) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string(civic_status_title_section())
   builder.write_string(civic_status_portfolio_summary_line(portfolio))
   builder.write_string(civic_status_table_header())

@@ -1,7 +1,7 @@
 ///|
 pub async fn build_workspace(
   entry : BookCatalogEntry,
-  moonbook_root? : String = default_moonbook_root(),
+  moonbook_root~ : String = default_moonbook_root(),
 ) -> String {
   ensure_workspace(entry, moonbook_root~)
   let root = resolved_workspace_root(entry.workspace_root)

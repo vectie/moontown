@@ -2,13 +2,14 @@
 package "vectie/moontown/marketplace_runtime_bridge"
 
 import {
+  "moonbitlang/core/json",
   "vectie/moontown/supervisor_setup",
 }
 
 // Values
-pub async fn sync_action_lineage(String, @supervisor_setup.SupervisorSetupApplication, now_ms~ : UInt64) -> Json
+pub async fn sync_action_lineage(String, @supervisor_setup.SupervisorSetupApplication, now_ms~ : UInt64) -> @json.Json
 
-pub async fn sync_execution_receipt(String, String, Json, now_ms~ : UInt64) -> Json
+pub async fn sync_execution_receipt(String, String, @json.Json, now_ms~ : UInt64) -> @json.Json
 
 // Errors
 

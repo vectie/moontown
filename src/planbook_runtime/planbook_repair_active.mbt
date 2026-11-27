@@ -97,8 +97,8 @@ fn planbook_repair_handoff_is_stale(
 ///|
 async fn planbook_repair_criterion_now_satisfied(
   task : PlanbookRepairTask,
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
 ) -> Bool {
   let status = inspect_moontown_planbook_autonomy(
     snapshot_path~,

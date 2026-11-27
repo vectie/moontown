@@ -3,6 +3,7 @@ package "vectie/moontown/integration"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
@@ -12,22 +13,24 @@ pub async fn run(String, Array[String], cwd? : String?) -> CompletedCommand
 
 pub async fn run_checked(String, Array[String], cwd? : String?) -> CompletedCommand
 
-pub async fn run_json(String, Array[String], cwd? : String?) -> Json
+pub async fn run_json(String, Array[String], cwd? : String?) -> @json.Json
 
 // Errors
+#derive(@json.ToJson)
 pub suberror CommandFailed {
   CommandFailed(CompletedCommand)
-} derive(ToJson)
+}
 pub impl Show for CommandFailed
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub struct CompletedCommand {
   command : String
   args : Array[String]
-  status : Int
+  status : Int32
   stdout : String
   stderr : String
-} derive(Eq, ToJson, @debug.Debug)
+}
 
 // Type aliases
 

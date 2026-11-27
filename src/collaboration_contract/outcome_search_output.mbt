@@ -1,6 +1,6 @@
 ///|
 pub fn OutcomeSearch::json_text(self : OutcomeSearch) -> String raise {
-  let output = self.to_json().stringify(indent=2) + "\n"
+  let output = ToJson::to_json(self).stringify(indent=2) + "\n"
   guard output.length() <= 4194304 else {
     fail("Search output exceeds 4 Mi UTF-16 code units; narrow the query")
   }
@@ -53,7 +53,7 @@ pub fn OutcomeSearch::markdown(self : OutcomeSearch) -> String raise {
         "\nArchive digest: " +
         hit.archive_digest +
         "\nExact OutcomeKey:\n" +
-        hit.key.to_json().stringify(indent=2),
+        ToJson::to_json(hit.key).stringify(indent=2),
       ),
     )
     for item in hit.matches {
@@ -84,7 +84,7 @@ pub fn OutcomeSearch::markdown(self : OutcomeSearch) -> String raise {
     sections.push("## Coverage gaps")
   }
   for gap in self.gaps {
-    sections.push(comparison_literal(gap.to_json().stringify(indent=2)))
+    sections.push(comparison_literal(ToJson::to_json(gap).stringify(indent=2)))
   }
   let output = sections.join("\n\n") + "\n"
   guard output.length() <= 4194304 else {

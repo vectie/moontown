@@ -227,7 +227,7 @@ fn miniapp_test_run_status(
 fn miniapp_test_thread_message_count(
   snapshot : @miniapp_contracts.MiniappTownSnapshot,
   thread_id : String,
-) -> Int {
+) -> Int32 {
   for thread in snapshot.threads {
     if thread.id == thread_id {
       return thread.message_count

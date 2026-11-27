@@ -3,7 +3,7 @@ async fn write_civic_communication_reducer_workspace(
   scenario : CivicCommunicationScenario,
   root : String,
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> Unit {
   @support.write_text_file(
     "\{root}/skills/\{scenario.skill_name}/SKILL.md",
@@ -11,7 +11,7 @@ async fn write_civic_communication_reducer_workspace(
   )
   @support.write_text_file(
     "\{root}/\{@civic.civic_reducer_participants_relative_path()}",
-    scenario.participants.to_json().stringify(indent=2),
+    ToJson::to_json(scenario.participants).stringify(indent=2),
   )
   @support.write_text_file(
     "\{root}/\{@civic.civic_reducer_input_relative_path()}",
@@ -94,7 +94,7 @@ fn civic_communication_reducer_step_metadata(
     board_lane=pattern.title,
     board_order=0,
   )
-  fields["communication_pattern_id"] = pattern.id.to_json()
+  fields["communication_pattern_id"] = ToJson::to_json(pattern.id)
   fields["role_runtime"] = civic_communication_reducer_role_runtime(pattern)
   Json::object(fields)
 }

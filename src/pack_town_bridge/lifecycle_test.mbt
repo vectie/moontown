@@ -3,10 +3,10 @@ fn lifecycle_event(
   id : String,
   kind : String,
   at : String,
-  issue? : String? = None,
-) -> PackLifecycleEvent {
+  issue~ : String? = None,
+) -> @pack_town_bridge.PackLifecycleEvent {
   {
-    contract_id: pack_lifecycle_event_contract_id(),
+    contract_id: @pack_town_bridge.pack_lifecycle_event_contract_id(),
     event_id: id,
     pack_id: "moonfind",
     version: "1.0.0",
@@ -19,23 +19,23 @@ fn lifecycle_event(
 
 ///|
 test "pack lifecycle follows validated install activation and projection" {
-  let draft = draft_pack_lifecycle("moonfind", "1.0.0", "t0")
-  let validated = reduce_pack_lifecycle(
+  let draft = @pack_town_bridge.draft_pack_lifecycle("moonfind", "1.0.0", "t0")
+  let validated = @pack_town_bridge.reduce_pack_lifecycle(
     draft,
     lifecycle_event("e1", "validated", "t1"),
   )
   guard validated is Ok(validated) else { fail("expected validation") }
-  let installed = reduce_pack_lifecycle(
+  let installed = @pack_town_bridge.reduce_pack_lifecycle(
     validated,
     lifecycle_event("e2", "installed", "t2"),
   )
   guard installed is Ok(installed) else { fail("expected installation") }
-  let active = reduce_pack_lifecycle(
+  let active = @pack_town_bridge.reduce_pack_lifecycle(
     installed,
     lifecycle_event("e3", "activated", "t3"),
   )
   guard active is Ok(active) else { fail("expected activation") }
-  let projecting = reduce_pack_lifecycle(
+  let projecting = @pack_town_bridge.reduce_pack_lifecycle(
     active,
     lifecycle_event("e4", "projection-accepted", "t4"),
   )
@@ -47,16 +47,19 @@ test "pack lifecycle follows validated install activation and projection" {
 
 ///|
 test "pack lifecycle rejects skipped transitions and is retry idempotent" {
-  let draft = draft_pack_lifecycle("moonfind", "1.0.0", "t0")
+  let draft = @pack_town_bridge.draft_pack_lifecycle("moonfind", "1.0.0", "t0")
   assert_true(
-    reduce_pack_lifecycle(draft, lifecycle_event("skip", "activated", "t1"))
+    @pack_town_bridge.reduce_pack_lifecycle(
+      draft,
+      lifecycle_event("skip", "activated", "t1"),
+    )
     is Err(_),
   )
   let event = lifecycle_event("e1", "validated", "t1")
-  guard reduce_pack_lifecycle(draft, event) is Ok(validated) else {
+  guard @pack_town_bridge.reduce_pack_lifecycle(draft, event) is Ok(validated) else {
     fail("expected validation")
   }
-  guard reduce_pack_lifecycle(validated, event) is Ok(retried) else {
+  guard @pack_town_bridge.reduce_pack_lifecycle(validated, event) is Ok(retried) else {
     fail("expected idempotent retry")
   }
   assert_eq(retried.sequence, 1)
@@ -65,19 +68,22 @@ test "pack lifecycle rejects skipped transitions and is retry idempotent" {
 
 ///|
 test "degraded projection requires an issue and can recover" {
-  let draft = draft_pack_lifecycle("moonfind", "1.0.0", "t0")
-  guard reduce_pack_lifecycle(draft, lifecycle_event("e1", "validated", "t1"))
+  let draft = @pack_town_bridge.draft_pack_lifecycle("moonfind", "1.0.0", "t0")
+  guard @pack_town_bridge.reduce_pack_lifecycle(
+      draft,
+      lifecycle_event("e1", "validated", "t1"),
+    )
     is Ok(validated) else {
     fail("expected validation")
   }
-  guard reduce_pack_lifecycle(
+  guard @pack_town_bridge.reduce_pack_lifecycle(
       validated,
       lifecycle_event("e2", "installed", "t2"),
     )
     is Ok(installed) else {
     fail("expected installation")
   }
-  guard reduce_pack_lifecycle(
+  guard @pack_town_bridge.reduce_pack_lifecycle(
       installed,
       lifecycle_event("e3", "activated", "t3"),
     )
@@ -85,13 +91,13 @@ test "degraded projection requires an issue and can recover" {
     fail("expected activation")
   }
   assert_true(
-    reduce_pack_lifecycle(
+    @pack_town_bridge.reduce_pack_lifecycle(
       active,
       lifecycle_event("bad", "projection-rejected", "t4"),
     )
     is Err(_),
   )
-  guard reduce_pack_lifecycle(
+  guard @pack_town_bridge.reduce_pack_lifecycle(
       active,
       lifecycle_event(
         "e4",
@@ -105,7 +111,7 @@ test "degraded projection requires an issue and can recover" {
   }
   assert_eq(degraded.stage, "degraded")
   assert_eq(degraded.issue, Some("stale schema"))
-  guard reduce_pack_lifecycle(
+  guard @pack_town_bridge.reduce_pack_lifecycle(
       degraded,
       lifecycle_event("e5", "projection-accepted", "t5"),
     )
@@ -118,8 +124,8 @@ test "degraded projection requires an issue and can recover" {
 
 ///|
 test "candidate receipt preserves bottom-up review boundary" {
-  let candidate : TownPackCandidate = {
-    contract_id: candidate_contract_id(),
+  let candidate : @pack_town_bridge.TownPackCandidate = {
+    contract_id: @pack_town_bridge.candidate_contract_id(),
     candidate_ref: "town/candidates/robotics-watch",
     origin_ref: "town/ideas/robotics-watch",
     target_pack_id: "moonfind",
@@ -132,17 +138,31 @@ test "candidate receipt preserves bottom-up review boundary" {
     evidence_refs: ["evidence/salon-12.json"],
     domain_payload: { "query": "dexterous manipulation" },
   }
-  let submitted = submitted_candidate_receipt(candidate, "t0")
-  guard transition_candidate_receipt(submitted, "route", "t1", []) is Ok(routed) else {
+  let submitted = @pack_town_bridge.submitted_candidate_receipt(candidate, "t0")
+  guard @pack_town_bridge.transition_candidate_receipt(
+      submitted,
+      "route",
+      "t1",
+      [],
+    )
+    is Ok(routed) else {
     fail("expected route")
   }
-  guard transition_candidate_receipt(routed, "request-review", "t2", [])
+  guard @pack_town_bridge.transition_candidate_receipt(
+      routed,
+      "request-review",
+      "t2",
+      [],
+    )
     is Ok(pending) else {
     fail("expected review")
   }
-  guard transition_candidate_receipt(pending, "accept", "t3", [
-      "receipts/moonfind-intake.json",
-    ])
+  guard @pack_town_bridge.transition_candidate_receipt(
+      pending,
+      "accept",
+      "t3",
+      ["receipts/moonfind-intake.json"],
+    )
     is Ok(accepted) else {
     fail("expected acceptance")
   }

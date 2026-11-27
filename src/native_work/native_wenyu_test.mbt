@@ -33,7 +33,7 @@ fn public_wenyu_work() -> @native_work.Work {
   {
     id: "work",
     request,
-    request_digest: @native_work.digest(request.to_json().stringify()),
+    request_digest: @native_work.digest(ToJson::to_json(request).stringify()),
     state: "queued",
     blocked_reason: "",
     reservation: None,
@@ -81,7 +81,7 @@ test "public wenyu result contract is exact identity bound and mutation only" {
   for outcome in ["blocked", "no_change", "accepted"] {
     let changed = @json.parse(valid.stringify())
     if changed is Object(fields) {
-      fields["outcome"] = outcome.to_json()
+      fields["outcome"] = ToJson::to_json(outcome)
     }
     assert_false(
       @native_work.wenyu_result_satisfies_contract(work, changed.stringify()),
@@ -94,7 +94,7 @@ test "public wenyu result contract is exact identity bound and mutation only" {
   }
   let extra = @json.parse(valid.stringify())
   if extra is Object(fields) {
-    fields["artifacts"] = ["../../foreign.md"].to_json()
+    fields["artifacts"] = ToJson::to_json(["../../foreign.md"])
   }
   assert_false(
     @native_work.wenyu_result_satisfies_contract(work, extra.stringify()),
@@ -103,7 +103,9 @@ test "public wenyu result contract is exact identity bound and mutation only" {
   assert_false(@native_work.wenyu_result_satisfies_contract(work, duplicate))
   let escaped = @json.parse(valid.stringify())
   if escaped is Object(fields) {
-    fields["summary"] = "Quoted \\\" text with { : } [ ] and \\ backslash".to_json()
+    fields["summary"] = ToJson::to_json(
+      "Quoted \\\" text with { : } [ ] and \\ backslash",
+    )
   }
   assert_true(
     @native_work.wenyu_result_satisfies_contract(work, escaped.stringify()),

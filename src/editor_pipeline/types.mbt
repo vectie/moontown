@@ -1,13 +1,15 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct EditorPipelineStage {
   id : String
   title : String
   status : String
   summary : String
   evidence : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct EditorPipelineLifecycleRecord {
   change_id : String
   selected_feature : String
@@ -18,9 +20,10 @@ pub(all) struct EditorPipelineLifecycleRecord {
   plan_ref : String
   repair_ref : String
   output_ref : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct EditorPipelineMovementLoopRecord {
   module_id : String
   module_title : String
@@ -31,9 +34,10 @@ pub(all) struct EditorPipelineMovementLoopRecord {
   output_ref : String
   return_ref : String
   missing_reason : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct EditorPipelineModulePlacement {
   id : String
   enabled : Bool
@@ -41,16 +45,17 @@ pub(all) struct EditorPipelineModulePlacement {
   book_id : String
   district : String
   building_kind : String
-  grid_x : Int
-  grid_y : Int
-  footprint_w : Int
-  footprint_h : Int
-  entrance_x : Int
-  entrance_y : Int
+  grid_x : Int32
+  grid_y : Int32
+  footprint_w : Int32
+  footprint_h : Int32
+  entrance_x : Int32
+  entrance_y : Int32
   style_family : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct EditorPipelinePlacementDiffRecord {
   module_id : String
   module_title : String
@@ -61,18 +66,20 @@ pub(all) struct EditorPipelinePlacementDiffRecord {
   entrance_ref : String
   terrain_status : String
   reason : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct EditorPipelineTerrainLayerRecord {
   layer_id : String
   title : String
   status : String
   evidence_ref : String
   summary : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct EditorPipelineTerrainReasonRecord {
   module_id : String
   module_title : String
@@ -80,9 +87,10 @@ pub(all) struct EditorPipelineTerrainReasonRecord {
   status : String
   placement_ref : String
   reason : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct EditorPipelineStyleCandidateRecord {
   style_id : String
   title : String
@@ -92,9 +100,10 @@ pub(all) struct EditorPipelineStyleCandidateRecord {
   rationale : String
   tradeoff : String
   selected : Bool
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct EditorPipelineStyleSelectionRecord {
   target_module_id : String
   target_module_title : String
@@ -103,9 +112,10 @@ pub(all) struct EditorPipelineStyleSelectionRecord {
   status : String
   decision_ref : String
   critique : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct EditorPipelineState {
   contract : String
   status : String
@@ -125,9 +135,10 @@ pub(all) struct EditorPipelineState {
   terrain_reasons : Array[EditorPipelineTerrainReasonRecord]
   style_candidates : Array[EditorPipelineStyleCandidateRecord]
   style_selection : EditorPipelineStyleSelectionRecord
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub(all) struct EditorFeatureSelectionTask {
   id : String
   status : String
@@ -138,4 +149,4 @@ pub(all) struct EditorFeatureSelectionTask {
   run_id : String?
   summary : String
   generated_at_ms : UInt64
-} derive(Debug, Eq, ToJson, FromJson)
+}

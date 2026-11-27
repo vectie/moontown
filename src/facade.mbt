@@ -36,16 +36,16 @@ pub fn modeled_dashboard() -> String {
 
 ///|
 pub async fn load_or_create_saved_state(
-  path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
+  path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
 ) -> @core.TownState {
   @town_runtime.load_or_create_saved_state(path~, book_catalog_path~)
 }
 
 ///|
 pub async fn load_or_create_modeled_state(
-  path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
+  path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
 ) -> @core.TownState {
   @town_runtime.load_or_create_modeled_state(path~, book_catalog_path~)
 }
@@ -53,15 +53,15 @@ pub async fn load_or_create_modeled_state(
 ///|
 pub async fn[Provider : @core.BookProvider] load_or_create_modeled_state_with_provider(
   provider : Provider,
-  path? : String = @storage.default_snapshot_path(),
+  path~ : String = @storage.default_snapshot_path(),
 ) -> @core.TownState {
   @town_runtime.load_or_create_modeled_state_with_provider(provider, path~)
 }
 
 ///|
 pub async fn load_or_create_saved_dashboard(
-  path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
+  path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
 ) -> String {
   @town_runtime.load_or_create_saved_dashboard(path~, book_catalog_path~)
 }
@@ -74,13 +74,13 @@ pub fn render_state_dashboard(state : @core.TownState) -> String {
 ///|
 pub async fn run_goal(
   goal : String,
-  book_id? : String? = None,
-  task_limit_per_book? : Int = 3,
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  wenyu_execution? : String = "native",
-  wenyu_model? : String = "",
-  wenyu_allow_no_change? : Bool = false,
+  book_id~ : String? = None,
+  task_limit_per_book~ : Int32 = 3,
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  wenyu_execution~ : String = "native",
+  wenyu_model~ : String = "",
+  wenyu_allow_no_change~ : Bool = false,
 ) -> @core.TownState {
   @town_runtime.run_goal(
     goal,
@@ -97,13 +97,13 @@ pub async fn run_goal(
 ///|
 pub async fn render_goal_run(
   goal : String,
-  book_id? : String? = None,
-  task_limit_per_book? : Int = 3,
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  wenyu_execution? : String = "native",
-  wenyu_model? : String = "",
-  wenyu_allow_no_change? : Bool = false,
+  book_id~ : String? = None,
+  task_limit_per_book~ : Int32 = 3,
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  wenyu_execution~ : String = "native",
+  wenyu_model~ : String = "",
+  wenyu_allow_no_change~ : Bool = false,
 ) -> String {
   @town_runtime.render_goal_run(
     goal,
@@ -119,17 +119,17 @@ pub async fn render_goal_run(
 
 ///|
 pub async fn supervise_saved_town(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
 ) -> String {
   @town_runtime.supervise_saved_town(snapshot_path~, book_catalog_path~)
 }
 
 ///|
 pub async fn daemon_tick_saved_town(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  respect_runtime_lock? : Bool = true,
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  respect_runtime_lock~ : Bool = true,
 ) -> String {
   @town_runtime.daemon_tick_saved_town(
     snapshot_path~,
@@ -140,11 +140,11 @@ pub async fn daemon_tick_saved_town(
 
 ///|
 pub async fn daemon_supervise_saved_town(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  command? : String = "",
-  max_checks? : Int = 0,
-  sleep_ms? : Int = 30000,
-  stale_after_ms? : UInt64 = 120000,
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  command~ : String = "",
+  max_checks~ : Int32 = 0,
+  sleep_ms~ : Int32 = 30000,
+  stale_after_ms~ : UInt64 = 120000,
 ) -> String {
   @town_runtime.daemon_supervise_saved_town(
     snapshot_path~,
@@ -157,12 +157,12 @@ pub async fn daemon_supervise_saved_town(
 
 ///|
 pub async fn daemon_run_saved_town(
-  snapshot_path? : String = @storage.default_snapshot_path(),
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  max_ticks? : Int = 0,
-  sleep_ms? : Int = 1800000,
-  preserve_supervisor? : Bool = false,
-  inline_under_supervisor? : Bool = false,
+  snapshot_path~ : String = @storage.default_snapshot_path(),
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  max_ticks~ : Int32 = 0,
+  sleep_ms~ : Int32 = 1800000,
+  preserve_supervisor~ : Bool = false,
+  inline_under_supervisor~ : Bool = false,
 ) -> String {
   @town_runtime.daemon_run_saved_town(
     snapshot_path~,

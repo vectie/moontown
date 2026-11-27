@@ -6,7 +6,7 @@
 /// ```mbt check
 /// test {
 ///   assert_eq(
-///     unconfirmed_standing_watch_decision(),
+///     @core.unconfirmed_standing_watch_decision(),
 ///     "standing-watch-dispatch-unconfirmed",
 ///   )
 /// }

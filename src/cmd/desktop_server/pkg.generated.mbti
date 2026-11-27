@@ -10,13 +10,16 @@ import {
 // Errors
 
 // Types and methods
-type MoonFlowResearchExecutionRequest derive(@json.FromJson)
+#derive(@json.FromJson)
+type MoonFlowResearchExecutionRequest
 
 type PublicIdentity
 
-type ResearchHandoffExecutionRequest derive(@json.FromJson)
+#derive(@json.FromJson)
+type ResearchHandoffExecutionRequest
 
-type ResearchHandoffInspectionRequest derive(@json.FromJson)
+#derive(@json.FromJson)
+type ResearchHandoffInspectionRequest
 
 // Type aliases
 

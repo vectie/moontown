@@ -7,23 +7,23 @@ import {
 }
 
 // Values
-pub fn active_book_count(KnowledgeDomainCatalog) -> Int
+pub fn active_book_count(KnowledgeDomainCatalog) -> Int32
 
 pub fn all_books(KnowledgeDomainCatalog) -> Array[KnowledgeDomainBook]
 
-pub fn book_count(KnowledgeDomainCatalog) -> Int
+pub fn book_count(KnowledgeDomainCatalog) -> Int32
 
-pub fn book_count_with_status(KnowledgeDomainCatalog, String) -> Int
+pub fn book_count_with_status(KnowledgeDomainCatalog, String) -> Int32
 
 pub fn books_for_building(KnowledgeDomainCatalog, String) -> Array[KnowledgeDomainBook]
 
-pub fn building_count(KnowledgeDomainCatalog) -> Int
+pub fn building_count(KnowledgeDomainCatalog) -> Int32
 
-pub fn communication_scenario_count(KnowledgeDomainCatalog) -> Int
+pub fn communication_scenario_count(KnowledgeDomainCatalog) -> Int32
 
-pub fn decode_knowledge_domain_catalog(Json) -> KnowledgeDomainCatalog raise
+pub fn decode_knowledge_domain_catalog(@json.Json) -> KnowledgeDomainCatalog raise
 
-pub fn domain_count(KnowledgeDomainCatalog) -> Int
+pub fn domain_count(KnowledgeDomainCatalog) -> Int32
 
 pub fn domains_of_kind(KnowledgeDomainCatalog, String) -> Array[KnowledgeDomain]
 
@@ -39,7 +39,7 @@ pub fn find_policy(KnowledgeDomainCatalog, String) -> KnowledgeDomainPolicy?
 
 pub fn knowledge_domain_catalog_schema() -> String
 
-pub fn knowledge_domain_catalog_version() -> Int
+pub fn knowledge_domain_catalog_version() -> Int32
 
 pub fn knowledge_domain_catalog_vocabulary() -> KnowledgeDomainCatalogVocabulary
 
@@ -47,7 +47,7 @@ pub fn knowledge_domain_portfolio(KnowledgeDomainCatalog) -> KnowledgeDomainPort
 
 pub fn parse_knowledge_domain_catalog(String) -> KnowledgeDomainCatalog raise
 
-pub fn policy_count(KnowledgeDomainCatalog) -> Int
+pub fn policy_count(KnowledgeDomainCatalog) -> Int32
 
 pub fn primary_book_for_building(KnowledgeDomainCatalog, String) -> KnowledgeDomainBook?
 
@@ -60,6 +60,7 @@ pub fn validate_knowledge_domain_catalog(KnowledgeDomainCatalog) -> Array[String
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct KnowledgeDomain {
   domain_id : String
   title : String
@@ -71,8 +72,9 @@ pub(all) struct KnowledgeDomain {
   communication_scenario_ids : Array[String]
   summary : String
   books : Array[KnowledgeDomainBook]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct KnowledgeDomainBook {
   book_id : String
   title : String
@@ -81,22 +83,24 @@ pub(all) struct KnowledgeDomainBook {
   template_id : String
   policy_id : String
   schedule_tier : String
-  cadence_ticks : Int
+  cadence_ticks : Int32
   tags : Array[String]
   source_policy : String
   status : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct KnowledgeDomainCatalog {
   schema : String
   catalog_id : String
-  version : Int
-  seed : Int
+  version : Int32
+  seed : Int32
   description : String
   policies : Array[KnowledgeDomainPolicy]
   domains : Array[KnowledgeDomain]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct KnowledgeDomainCatalogVocabulary {
   domain_kinds : Array[String]
   template_ids : Array[String]
@@ -109,35 +113,37 @@ pub(all) struct KnowledgeDomainCatalogVocabulary {
   review_roles : Array[String]
   book_roles : Array[String]
   book_statuses : Array[String]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct KnowledgeDomainPolicy {
   id : String
-  version : Int
+  version : Int32
   template_id : String
   source_policy : String
   evidence_policy : String
   cadence : String
-  cadence_ticks : Int
-  quality_threshold : Int
+  cadence_ticks : Int32
+  quality_threshold : Int32
   review_chain : Array[String]
-  max_revision_rounds : Int
+  max_revision_rounds : Int32
   schedule_tier : String
   budget_class : String
   completion_claim : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct KnowledgeDomainPortfolio {
-  domain_count : Int
-  building_count : Int
-  policy_count : Int
-  book_count : Int
-  active_book_count : Int
-  incubating_book_count : Int
-  paused_book_count : Int
-  archived_book_count : Int
-  communication_scenario_count : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  domain_count : Int32
+  building_count : Int32
+  policy_count : Int32
+  book_count : Int32
+  active_book_count : Int32
+  incubating_book_count : Int32
+  paused_book_count : Int32
+  archived_book_count : Int32
+  communication_scenario_count : Int32
+}
 
 // Type aliases
 

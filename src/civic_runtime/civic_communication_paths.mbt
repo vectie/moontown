@@ -1,6 +1,6 @@
 ///|
 pub fn default_civic_communication_schedule_path(
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> String {
   "\{civic_communication_base_dir(snapshot_path)}/pattern-schedules.json"
 }
@@ -8,7 +8,7 @@ pub fn default_civic_communication_schedule_path(
 ///|
 pub fn default_civic_communication_run_ledger_path(
   scenario_id : String,
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> String {
   "\{civic_communication_base_dir(snapshot_path)}/pattern-runs/\{safe_scenario_id(scenario_id)}.jsonl"
 }
@@ -16,7 +16,7 @@ pub fn default_civic_communication_run_ledger_path(
 ///|
 pub fn civic_communication_scenario_path(
   scenario_id : String,
-  snapshot_path? : String = @storage.default_snapshot_path(),
+  snapshot_path~ : String = @storage.default_snapshot_path(),
 ) -> String {
   "\{civic_communication_base_dir(snapshot_path)}/pattern-scenarios/\{safe_scenario_id(scenario_id)}.json"
 }
@@ -33,7 +33,7 @@ fn civic_communication_base_dir(snapshot_path : String) -> String {
 
 ///|
 fn safe_scenario_id(id : String) -> String {
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   for ch in id {
     if (ch >= 'a' && ch <= 'z') ||
       (ch >= 'A' && ch <= 'Z') ||

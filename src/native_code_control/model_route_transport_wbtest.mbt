@@ -21,13 +21,14 @@ fn hosted_route_override(route : Json, key : String, value : Json) -> Json {
 }
 
 ///|
+#warnings("-reserved_keyword-unused_async")
 async fn hosted_transport_fixture(
   text : String,
-  status? : Int = 503,
-  method? : String = "GET",
-  path? : String = "/v1/moongate-route",
-  body? : String = "",
-  instance? : String = "fixture-instance",
+  status~ : Int32 = 503,
+  method_val~ : String = "GET",
+  path~ : String = "/v1/moongate-route",
+  body~ : String = "",
+  instance~ : String = "fixture-instance",
 ) -> Result[Json, String] {
   let config : Config = {
     protocol_version: 1,
@@ -36,13 +37,13 @@ async fn hosted_transport_fixture(
     workspace_id: "fixture",
     workspace_root: "/unused-fixture",
   }
-  request_existing(config, "http://unused.invalid", method, path, body, exchange=async fn(
+  request_existing(config, "http://unused.invalid", method_val, path, body, exchange=async fn(
     sent_method,
     uri,
     sent_body,
     headers,
   ) {
-    assert_eq(sent_method, method)
+    assert_eq(sent_method, method_val)
     assert_eq(uri, "http://unused.invalid" + path)
     assert_eq(sent_body, body)
     assert_eq(headers["X-MoonClaw-Instance-ID"], config.instance_id)
@@ -64,6 +65,7 @@ async test "hosted route 503 reaches exact explicit selection without a default"
 }
 
 ///|
+#warnings("-reserved_keyword")
 async test "hosted route exception is limited to exact read-only endpoint and status" {
   let text = hosted_route_fixture().stringify()
   for status in [401, 403, 404, 409, 500, 502, 202] {
@@ -76,8 +78,8 @@ async test "hosted route exception is limited to exact read-only endpoint and st
     ] {
     assert_true(hosted_transport_fixture(text, path~) is Err(_))
   }
-  for method in ["POST", "PUT", "DELETE", "PATCH"] {
-    assert_true(hosted_transport_fixture(text, method~) is Err(_))
+  for method_val in ["POST", "PUT", "DELETE", "PATCH"] {
+    assert_true(hosted_transport_fixture(text, method_val~) is Err(_))
   }
   assert_true(hosted_transport_fixture(text, body="{}") is Err(_))
 }

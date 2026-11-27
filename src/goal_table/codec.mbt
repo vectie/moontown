@@ -62,7 +62,7 @@ fn snapshot_goals(bytes : Bytes) -> Array[@core.StandingGoal] raise {
         "cadence_ticks", "next_due_tick", "quality_threshold", "last_run_tick",
       ] {
       match values.get(key) {
-        Some(Number(n)) => {
+        Some(Number(n, ..)) => {
           guard n >= -2147483648.0 &&
             n <= 2147483647.0 &&
             n == n.to_int().to_double() else {
@@ -101,7 +101,7 @@ fn quoted_cell(text : String) -> String {
 
 ///|
 fn text_cell(value : String) -> String {
-  value.to_json().stringify()
+  ToJson::to_json(value).stringify()
 }
 
 ///|
@@ -113,7 +113,7 @@ fn optional_text_cell(value : String?) -> String {
 }
 
 ///|
-fn optional_int_cell(value : Int?) -> String {
+fn optional_int_cell(value : Int32?) -> String {
   match value {
     Some(number) => number.to_string()
     None => "null"
@@ -139,7 +139,7 @@ fn optional_string_value(text : String) -> String? raise {
 }
 
 ///|
-fn int_value(text : String) -> Int raise {
+fn int_value(text : String) -> Int32 raise {
   let digits = if text.has_prefix("-") { text[1:].to_owned() } else { text }
   guard !digits.is_empty() && digits.iter().all(c => c >= '0' && c <= '9') else {
     fail(
@@ -152,7 +152,7 @@ fn int_value(text : String) -> Int raise {
 }
 
 ///|
-fn optional_int_value(text : String) -> Int? raise {
+fn optional_int_value(text : String) -> Int32? raise {
   if text == "null" {
     None
   } else {

@@ -78,7 +78,7 @@ fn response_identity(response : @http.Response) -> Unit raise {
 }
 
 ///|
-fn decimal_length(raw : String, limit : Int) -> Int raise {
+fn decimal_length(raw : String, limit : Int32) -> Int32 raise {
   if raw.is_empty() {
     raise ClientError("invalid_content_length")
   }
@@ -97,7 +97,7 @@ fn decimal_length(raw : String, limit : Int) -> Int raise {
 }
 
 ///|
-fn response_length(response : @http.Response, limit : Int) -> Int raise {
+fn response_length(response : @http.Response, limit : Int32) -> Int32 raise {
   guard response.headers.get("content-length") is Some(length) else {
     raise ClientError("missing_content_length")
   }
@@ -107,19 +107,19 @@ fn response_length(response : @http.Response, limit : Int) -> Int raise {
 ///|
 async fn read_bounded(
   reader : &@io.Reader,
-  limit : Int,
-  idle_ms : Int,
+  limit : Int32,
+  idle_ms : Int32,
 ) -> Bytes {
   let buffer = Buffer()
   for ;; {
     let bytes = @async.with_timeout(idle_ms, () => {
-      reader.read_some(max_len=Int::min(8192, limit - buffer.length() + 1))
+      reader.read_some(max_len=Int32::min(8192, limit - buffer.length() + 1))
     })
     guard bytes is Some(bytes) else { break }
     if bytes.length() > limit - buffer.length() {
       raise ClientError("metadata_too_large")
     }
-    buffer.write_bytes(bytes)
+    buffer.write_bytesview(bytes)
   }
   buffer.contents()
 }
@@ -127,13 +127,13 @@ async fn read_bounded(
 ///|
 /// Feature-local read bound, matching the private transfer index. Control
 /// request bodies and explicit binding files retain their 128 KiB bounds.
-let response_metadata_limit : Int = 8 * 1024 * 1024
+let response_metadata_limit : Int32 = 8 * 1024 * 1024
 
 ///|
 async fn read_payload(
   response : @http.Response,
   reader : &@io.Reader,
-  idle_ms : Int,
+  idle_ms : Int32,
 ) -> Json {
   response_identity(response)
   if response.code < 200 || response.code >= 300 {
@@ -178,6 +178,10 @@ async fn PortableClient::control(
   if body is Some(_) {
     headers["content-type"] = "application/json"
   }
+  let ci_headers : Map[@http.CaseInsensitiveString, String] = Map([])
+  for k, v in headers {
+    ci_headers[@http.CaseInsensitiveString(k)] = v
+  }
   let request : @http.Request = {
     meth: if body is Some(_) {
       Post
@@ -185,7 +189,7 @@ async fn PortableClient::control(
       Get
     },
     path,
-    headers,
+    headers: ci_headers,
   }
   let result : Ref[Json?] = Ref(None)
   @async.with_timeout(self.limits.total_timeout_ms, () => {

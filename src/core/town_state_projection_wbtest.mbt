@@ -27,7 +27,7 @@ fn projection_test_execution(
 }
 
 ///|
-fn projection_test_event(index : Int) -> TownEvent {
+fn projection_test_event(index : Int32) -> TownEvent {
   TownEvent::new(id="event-\{index}", kind="test", detail="event \{index}")
 }
 

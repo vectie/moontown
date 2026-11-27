@@ -1,10 +1,12 @@
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct MetricValue {
   metric_id : String
   value : Double
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct BenchmarkRun {
   id : String
   submission_id : String
@@ -14,14 +16,15 @@ pub struct BenchmarkRun {
   reason : String
   input_hash : String
   output_hash : String
-  benchmark_version : Int
+  benchmark_version : Int32
   metrics : Array[MetricValue]
   evidence : Array[String]
   queued_ms : UInt64
   finished_ms : UInt64
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct CompetitionAppeal {
   id : String
   submission_id : String
@@ -31,11 +34,12 @@ pub struct CompetitionAppeal {
   resolution : String
   created_ms : UInt64
   resolved_ms : UInt64
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct CompetitionBoardEntry {
-  rank : Int
+  rank : Int32
   team_id : String
   team_name : String
   submission_id : String
@@ -43,16 +47,18 @@ pub struct CompetitionBoardEntry {
   metrics : Array[MetricValue]
   reviewed_ms : UInt64
   status : String
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(FromJson)
 struct QueueBenchmarkRequest {
   id : String
   submission_id : String
   reviewer_id : String
-} derive(FromJson)
+}
 
 ///|
+#derive(Debug, ToJson, FromJson)
 pub struct BenchmarkResult {
   run_id : String
   worker_run_id : String
@@ -62,35 +68,40 @@ pub struct BenchmarkResult {
   output_hash : String
   success : Bool
   reason : String
-} derive(Debug, ToJson, FromJson)
+}
 
 ///|
+#derive(FromJson)
 struct ApproveBenchmarkRequest {
   run_id : String
   reviewer_id : String
-} derive(FromJson)
+}
 
 ///|
+#derive(FromJson)
 struct RunIdRequest {
   run_id : String
-} derive(FromJson)
+}
 
 ///|
+#derive(FromJson)
 struct RecoverBenchmarkRequest {
   run_id : String
   reason : String
-} derive(FromJson)
+}
 
 ///|
+#derive(FromJson)
 struct AppealRequest {
   id : String
   submission_id : String
   member_id : String
   reason : String
-} derive(FromJson)
+}
 
 ///|
+#derive(FromJson)
 struct ResolveAppealRequest {
   appeal_id : String
   resolution : String
-} derive(FromJson)
+}

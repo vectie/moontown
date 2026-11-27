@@ -57,7 +57,7 @@ async fn main {
   run() catch {
     error => {
       @stdio.stderr.write("places_export: \{error}\n")
-      @sys.exit(1)
+      @env.exit(1)
     }
   }
 }

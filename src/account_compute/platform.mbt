@@ -38,10 +38,10 @@ fn platform_snapshot(
     abort("snapshot must be object")
   }
   guard fields["scope"] is Object(scope) else { abort("scope must be object") }
-  scope["audience"] = audience.to_json()
+  scope["audience"] = ToJson::to_json(audience)
   if audience == "public" {
-    fields["mode"] = "demo".to_json()
-    fields["observed_at"] = "".to_json()
+    fields["mode"] = ToJson::to_json("demo")
+    fields["observed_at"] = ToJson::to_json("")
     fields["authority"] = {
       "agent_boundary": "MoonGate",
       "local_control_plane": "LunaNexa",
@@ -64,31 +64,35 @@ pub fn public_demo() -> Json {
 }
 
 ///|
+#derive(FromJson)
 priv struct FleetAccelerator {
   architecture : String
   memory_total_mib : Int32
   memory_free_mib : Int32
   healthy : Bool
-} derive(FromJson)
+}
 
 ///|
+#derive(FromJson)
+#warnings("-unused_field")
 priv struct FleetHeartbeat {
   node_id : String
   state : String
   timestamp_unix_ms : Int64
   inventory : FleetInventory
   running_deployments : Array[String]
-} derive(FromJson)
+}
 
 ///|
+#derive(FromJson)
 priv struct FleetInventory {
   accelerators : Array[FleetAccelerator]
-} derive(FromJson)
+}
 
 ///|
 fn fleet_machines(value : Json, now : Int64) -> Array[Json]? {
   guard value is Array(rows) && rows.length() <= 1024 else { return None }
-  let known : Map[String, FleetHeartbeat] = {}
+  let known : Map[String, FleetHeartbeat] = Map([])
   let fleet = town_fleet()
   for row in rows {
     guard row is { "node_id": String(id), .. } else { return None }

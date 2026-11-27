@@ -34,7 +34,7 @@ fn control_fixture_receipt(work : Work, status : String) -> Json {
   no_change_set(
     value,
     "command_id",
-    work.reservation.unwrap().command_id.to_json(),
+    ToJson::to_json(work.reservation.unwrap().command_id),
   )
   no_change_set(
     value,
@@ -43,8 +43,12 @@ fn control_fixture_receipt(work : Work, status : String) -> Json {
       _ => Json::null()
     },
   )
-  no_change_set(value, "status", status.to_json())
-  no_change_set(value, "control_command_id", (work.id + "-cancel").to_json())
+  no_change_set(value, "status", ToJson::to_json(status))
+  no_change_set(
+    value,
+    "control_command_id",
+    ToJson::to_json(work.id + "-cancel"),
+  )
   value
 }
 
@@ -76,7 +80,7 @@ fn control_fixture_claim(
       })
     }
   }
-  no_change_set(result, "delivered_commands", commands.to_json())
+  no_change_set(result, "delivered_commands", ToJson::to_json(commands))
   result
 }
 
@@ -84,7 +88,7 @@ fn control_fixture_claim(
 fn control_fixture_delivered(work : Work) -> Json {
   let control = work.control.unwrap()
   let result = no_change_fixture_binding(work)
-  no_change_set(result, "command_id", control.command_id.to_json())
+  no_change_set(result, "command_id", ToJson::to_json(control.command_id))
   no_change_set(
     result,
     "command",
@@ -92,12 +96,12 @@ fn control_fixture_delivered(work : Work) -> Json {
       _ => Json::null()
     },
   )
-  no_change_set(result, "status", "runtime-completed".to_json())
-  no_change_set(result, "control", "cancel".to_json())
+  no_change_set(result, "status", ToJson::to_json("runtime-completed"))
+  no_change_set(result, "control", ToJson::to_json("cancel"))
   no_change_set(
     result,
     "target_command_id",
-    control.target_command_id.to_json(),
+    ToJson::to_json(control.target_command_id),
   )
   result
 }
@@ -121,10 +125,13 @@ async test "cancel persists separate exact control before POST and accepts only 
       assert_true(control.command_id != work.reservation.unwrap().command_id)
       assert_eq(control.target_command_id, work.reservation.unwrap().command_id)
       assert_eq(control.last_attempt_at_ms, 10UL)
-      assert_eq(saved.work[0].reservation.to_json(), work.reservation.to_json())
+      assert_eq(
+        ToJson::to_json(saved.work[0].reservation),
+        ToJson::to_json(work.reservation),
+      )
       posted.push(body)
-      no_change_set(base, "accepted", true.to_json())
-      no_change_set(base, "command_id", control.command_id.to_json())
+      no_change_set(base, "accepted", ToJson::to_json(true))
+      no_change_set(base, "command_id", ToJson::to_json(control.command_id))
       return Ok(base)
     }
     assert_true(
@@ -156,15 +163,19 @@ async test "cancel persists separate exact control before POST and accepts only 
   assert_eq(done.state, "cancelled")
   assert_eq(done.control.unwrap().status, "cancelled")
   assert_eq(posted.length(), 1)
-  assert_eq(done.reservation.to_json(), work.reservation.to_json())
+  assert_eq(
+    ToJson::to_json(done.reservation),
+    ToJson::to_json(work.reservation),
+  )
   assert_eq(done.request_digest, work.request_digest)
   let repeated = cancel(work.id, load(path~).revision, 20UL, path~, client~)
-  assert_eq(repeated.to_json(), done.to_json())
+  assert_eq(ToJson::to_json(repeated), ToJson::to_json(done))
   assert_eq(posted.length(), 1)
   assert_false(@fs.exists(work.request.result_path))
 }
 
 ///|
+#warnings("-unused_async")
 async test "uncertain cancel survives restart and sync never posts a prompt or rechecks launch inputs" {
   let request = fixture_request()
   let request = {
@@ -200,7 +211,7 @@ async test "uncertain cancel survives restart and sync never posts a prompt or r
   let first = cancel(work.id, 1, 10UL, path~, client~)
   assert_eq(first.state, "cancel_pending")
   let reloaded = load(path~).work[0]
-  assert_eq(reloaded.to_json(), first.to_json())
+  assert_eq(ToJson::to_json(reloaded), ToJson::to_json(first))
   let second = sync(work.id, 40000UL, path~, client~)
   let third = sync(work.id, 40001UL, path~, client~, force=true)
   assert_eq(second.state, "cancel_pending")
@@ -208,7 +219,10 @@ async test "uncertain cancel survives restart and sync never posts a prompt or r
   assert_eq(posted.length(), 3)
   assert_eq(posted[0], posted[1])
   assert_eq(posted[1], posted[2])
-  assert_eq(third.reservation.to_json(), work.reservation.to_json())
+  assert_eq(
+    ToJson::to_json(third.reservation),
+    ToJson::to_json(work.reservation),
+  )
   assert_eq(
     third.control.unwrap().target_command_id,
     work.reservation.unwrap().command_id,
@@ -223,6 +237,7 @@ async test "uncertain cancel survives restart and sync never posts a prompt or r
 }
 
 ///|
+#warnings("-unused_async")
 async test "unfamiliar runtime absence never sends cancellation without original continuity" {
   let work = fixture_reserved(fixture_request())
   let path = control_fixture_store(work)
@@ -245,6 +260,7 @@ async test "unfamiliar runtime absence never sends cancellation without original
 }
 
 ///|
+#warnings("-unused_async")
 async test "refresh observes exact completed work but never submits or applies Book output" {
   let work = no_change_fixture_work()
   let path = control_fixture_store(work)
@@ -270,12 +286,12 @@ async test "refresh observes exact completed work but never submits or applies B
   assert_false(@fs.exists(work.request.result_path + ".native-receipt.json"))
   let revision = load(path~).revision
   assert_eq(
-    refresh(work.id, revision, 20UL, path~, client~).to_json(),
-    done.to_json(),
+    ToJson::to_json(refresh(work.id, revision, 20UL, path~, client~)),
+    ToJson::to_json(done),
   )
   assert_eq(
-    cancel(work.id, revision, 20UL, path~, client~).to_json(),
-    done.to_json(),
+    ToJson::to_json(cancel(work.id, revision, 20UL, path~, client~)),
+    ToJson::to_json(done),
   )
   assert_eq(load(path~).revision, revision)
   assert_eq(calls.length(), 3)
@@ -285,6 +301,7 @@ async test "refresh observes exact completed work but never submits or applies B
 }
 
 ///|
+#warnings("-unused_async")
 async test "completion during cancel wins with full result and receipt without implicit Book output" {
   let work = no_change_fixture_work()
   let path = control_fixture_store(work)
@@ -320,6 +337,7 @@ async test "completion during cancel wins with full result and receipt without i
 }
 
 ///|
+#warnings("-unused_async")
 async test "unreserved cancellation and passive projection need no native access and stale revisions fail" {
   let request = fixture_request()
   let path = request.owner_workspace + "/queued.json"
@@ -340,8 +358,11 @@ async test "unreserved cancellation and passive projection need no native access
     _ => fail("expected revision conflict")
   }
   assert_eq(load(path~).revision, 1)
-  assert_eq(refresh(work.id, 1, 10UL, path~, client~).to_json(), work.to_json())
-  let projection = status(work).to_json().stringify()
+  assert_eq(
+    ToJson::to_json(refresh(work.id, 1, 10UL, path~, client~)),
+    ToJson::to_json(work),
+  )
+  let projection = ToJson::to_json(status(work)).stringify()
   assert_false(projection.contains(request.prompt))
   assert_false(projection.contains(request.owner_workspace))
   assert_false(
@@ -359,7 +380,7 @@ async test "unreserved cancellation and passive projection need no native access
 ///|
 async test "legacy v1 work missing optional control still loads with immutable reservation" {
   let work = fixture_reserved(fixture_request())
-  let json = work.to_json()
+  let json = ToJson::to_json(work)
   if json is Object(fields) {
     fields.remove("control")
   }
@@ -373,10 +394,14 @@ async test "legacy v1 work missing optional control still loads with immutable r
   let legacy = load(path~)
   assert_eq(legacy.revision, 7)
   assert_true(legacy.work[0].control is None)
-  assert_eq(legacy.work[0].reservation.to_json(), work.reservation.to_json())
+  assert_eq(
+    ToJson::to_json(legacy.work[0].reservation),
+    ToJson::to_json(work.reservation),
+  )
 }
 
 ///|
+#warnings("-unused_async")
 async test "cancelled original needs exact separate delivered control body target owner and identity" {
   let work = control_fixture_pending(fixture_reserved(fixture_request()))
   for
@@ -385,7 +410,7 @@ async test "cancelled original needs exact separate delivered control body targe
       "control", "status",
     ] {
     let receipt = control_fixture_delivered(work)
-    no_change_set(receipt, key, "wrong".to_json())
+    no_change_set(receipt, key, ToJson::to_json("wrong"))
     let client = fixture_client(work.request, async fn(_, route, _) {
       Ok(
         if route.contains("runtime-claim") {
@@ -407,7 +432,7 @@ async test "cancelled original needs exact separate delivered control body targe
     )
   }
   let target = control_fixture_receipt(work, "runtime-cancelled")
-  no_change_set(target, "control_command_id", "other-cancel".to_json())
+  no_change_set(target, "control_command_id", ToJson::to_json("other-cancel"))
   let client = fixture_client(work.request, async fn(_, route, _) {
     Ok(
       if route.contains("runtime-claim") {
@@ -424,12 +449,13 @@ async test "cancelled original needs exact separate delivered control body targe
 }
 
 ///|
+#warnings("-unused_async")
 async test "cancellation never posts against contradictory original command or terminal receipt identity" {
   let work = fixture_reserved(fixture_request())
   for key in ["command", "owner", "session_id", "command_id", "book_root"] {
     let path = control_fixture_store(work)
     let receipt = control_fixture_receipt(work, "runtime-cancelled")
-    no_change_set(receipt, key, "wrong".to_json())
+    no_change_set(receipt, key, ToJson::to_json("wrong"))
     let posts : Array[String] = []
     let client = fixture_client(work.request, async fn(verb, route, body) {
       if verb == "POST" {
@@ -450,6 +476,7 @@ async test "cancellation never posts against contradictory original command or t
 }
 
 ///|
+#warnings("-unused_async")
 async test "native completion before cancellation is a no-op even while owner result reconciliation is blocked" {
   let work = fixture_reserved(fixture_request())
   let path = control_fixture_store(work)
@@ -480,6 +507,7 @@ async test "native completion before cancellation is a no-op even while owner re
 }
 
 ///|
+#warnings("-unused_async")
 async test "refresh with pending cancellation observes only and retains exact control under absence" {
   let work = control_fixture_pending(fixture_reserved(fixture_request()))
   let path = control_fixture_store(work)
@@ -489,12 +517,16 @@ async test "refresh with pending cancellation observes only and retains exact co
   })
   let result = refresh(work.id, 1, 10UL, path~, client~)
   assert_eq(result.state, "cancel_pending")
-  assert_eq(result.control.to_json(), work.control.to_json())
-  assert_eq(result.reservation.to_json(), work.reservation.to_json())
+  assert_eq(ToJson::to_json(result.control), ToJson::to_json(work.control))
+  assert_eq(
+    ToJson::to_json(result.reservation),
+    ToJson::to_json(work.reservation),
+  )
   assert_false(@fs.exists(work.request.result_path))
 }
 
 ///|
+#warnings("-unused_async")
 async test "replacement runtime with exact original continuity can settle the same saved control" {
   let work = fixture_reserved(fixture_request())
   let path = control_fixture_store(work)
@@ -509,11 +541,11 @@ async test "replacement runtime with exact original continuity can settle the sa
       if verb == "POST" {
         posts.push(body)
         assert_eq(body, pending.control.unwrap().request_body)
-        no_change_set(base, "accepted", true.to_json())
+        no_change_set(base, "accepted", ToJson::to_json(true))
         no_change_set(
           base,
           "command_id",
-          pending.control.unwrap().command_id.to_json(),
+          ToJson::to_json(pending.control.unwrap().command_id),
         )
         return Ok(base)
       }
@@ -571,8 +603,7 @@ async test "safe saved status redacts path bearing blockers without changing pri
     render_status(path~).contains(work.reservation.unwrap().config_path),
   )
   assert_false(
-    status(blocked)
-    .to_json()
+    ToJson::to_json(status(blocked))
     .stringify()
     .contains(work.reservation.unwrap().config_path),
   )
@@ -628,6 +659,7 @@ async test "completion during cancel preserves unreconciled owner blocker rather
 }
 
 ///|
+#warnings("-unused_async")
 async test "late original acceptance settles persisted cancellation without resubmitting original" {
   let work = fixture_reserved(fixture_request())
   let path = control_fixture_store(work)
@@ -679,6 +711,7 @@ async test "late original acceptance settles persisted cancellation without resu
 }
 
 ///|
+#warnings("-unused_async")
 async test "concurrent cancel and forced sync preserve one durable control and reject stale revision" {
   let work = control_fixture_pending(fixture_reserved(fixture_request()))
   let path = control_fixture_store(work)
@@ -740,7 +773,10 @@ async test "concurrent cancel and forced sync preserve one durable control and r
     saved.work[0].control.unwrap().command_id,
     work.control.unwrap().command_id,
   )
-  assert_eq(saved.work[0].reservation.to_json(), work.reservation.to_json())
+  assert_eq(
+    ToJson::to_json(saved.work[0].reservation),
+    ToJson::to_json(work.reservation),
+  )
 }
 
 ///|
@@ -797,6 +833,7 @@ async test "completed applied repair during cancellation retains engineering rec
 }
 
 ///|
+#warnings("-unused_async")
 async test "revision checked sync rejects stale dispatch before any native access or durable change" {
   let work = fixture_reserved(fixture_request())
   let path = control_fixture_store(work)
@@ -820,6 +857,7 @@ async test "revision checked sync rejects stale dispatch before any native acces
 }
 
 ///|
+#warnings("-unused_async")
 async test "revision checked sync rejects stale terminal result application but preserves omitted callers" {
   let work = no_change_fixture_work()
   let done = observe(
@@ -848,17 +886,21 @@ async test "revision checked sync rejects stale terminal result application but 
   assert_false(@fs.exists(work.request.result_path + ".native-receipt.json"))
   assert_eq(@fs.read_file(path).text(), before)
   assert_eq(
-    sync(done.id, 11UL, path~, client~, expected_revision=1).to_json(),
-    done.to_json(),
+    ToJson::to_json(sync(done.id, 11UL, path~, client~, expected_revision=1)),
+    ToJson::to_json(done),
   )
   assert_true(@fs.exists(work.request.result_path))
   @fs.remove(work.request.result_path)
-  assert_eq(sync(done.id, 12UL, path~, client~).to_json(), done.to_json())
+  assert_eq(
+    ToJson::to_json(sync(done.id, 12UL, path~, client~)),
+    ToJson::to_json(done),
+  )
   assert_true(@fs.exists(work.request.result_path))
   assert_eq(calls.length(), 0)
 }
 
 ///|
+#warnings("-unused_async")
 async test "concurrent revision checked sync allows one control attempt and rejects the stale contender" {
   let work = control_fixture_pending(fixture_reserved(fixture_request()))
   let path = control_fixture_store(work)

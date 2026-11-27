@@ -19,7 +19,7 @@ async fn resolved_generated_site_index_after_build(root : String) -> String {
 
 ///|
 fn moonbook_moon_command() -> String {
-  let configured = @sys.get_env_var("MOON").unwrap_or("")
+  let configured = @env.get_env_var("MOON").unwrap_or("")
   if configured.trim().is_empty() {
     "moon"
   } else {
@@ -29,12 +29,12 @@ fn moonbook_moon_command() -> String {
 
 ///|
 async fn installed_moonbook_command() -> String? {
-  match @sys.get_env_var("MOONTOWN_MOONBOOK_BIN") {
+  match @env.get_env_var("MOONTOWN_MOONBOOK_BIN") {
     Some(value) if !value.trim().is_empty() =>
       return Some(value.trim().to_owned())
     _ => ()
   }
-  match @sys.get_env_var("MOONBOOK_BIN") {
+  match @env.get_env_var("MOONBOOK_BIN") {
     Some(value) if !value.trim().is_empty() =>
       return Some(value.trim().to_owned())
     _ => ()
@@ -84,7 +84,7 @@ async fn save_result_payload_file(path : String, payload : Json) -> Unit {
 ///|
 async fn ensure_workspace(
   entry : BookCatalogEntry,
-  moonbook_root? : String = default_moonbook_root(),
+  moonbook_root~ : String = default_moonbook_root(),
 ) -> Unit {
   let root = resolved_workspace_root(entry.workspace_root)
   let resolved_moonbook_root = resolved_root_path(moonbook_root)
@@ -118,7 +118,7 @@ async fn ensure_workspace(
 async fn run_book_json_command(
   entry : BookCatalogEntry,
   args : Array[String],
-  moonbook_root? : String = default_moonbook_root(),
+  moonbook_root~ : String = default_moonbook_root(),
 ) -> Json {
   ensure_workspace(entry, moonbook_root~)
   let root = resolved_workspace_root(entry.workspace_root)

@@ -56,6 +56,7 @@ async fn wenyu_journey_persist(
 }
 
 ///|
+#warnings("-reserved_keyword-unused_async")
 async test "Wenyu no change actual source sync and owner pages survive every persistence boundary" {
   for stop in ["package", "code-page", "test-page", "book-commit"] {
     let launch = wenyu_launch_fixture()
@@ -63,15 +64,15 @@ async test "Wenyu no change actual source sync and owner pages survive every per
     let root = launch.entry.workspace_root
     let blockers = root + "/build/CODE_BLOCKERS.md"
     @support.write_text_file(blockers, "Unrelated older blocker stays\n")
-    let package = wenyu_output_package(launch, work)
-    assert_eq(package.pages.length(), 2)
-    assert_true(package.result.memory_candidates.is_empty())
-    assert_true(package.result.requires_review && package.result.notify_town)
+    let pkg_val = wenyu_output_package(launch, work)
+    assert_eq(pkg_val.pages.length(), 2)
+    assert_true(pkg_val.result.memory_candidates.is_empty())
+    assert_true(pkg_val.result.requires_review && pkg_val.result.notify_town)
     let directory = root + "/raw/build/native/" + work.id
     if stop == "package" {
       @support.write_text_file(
         directory + "/output-package.json",
-        package.to_json().stringify(indent=2),
+        ToJson::to_json(pkg_val).stringify(indent=2),
       )
     }
     let calls = [0]
@@ -108,8 +109,8 @@ async test "Wenyu no change actual source sync and owner pages survive every per
     let application = @fs.read_file(directory + "/application-receipt.json").text()
     let count = calls[0]
     assert_eq(
-      import_wenyu_native_result(launch, work, persist~).to_json(),
-      outcome.to_json(),
+      ToJson::to_json(import_wenyu_native_result(launch, work, persist~)),
+      ToJson::to_json(outcome),
     )
     assert_eq(calls[0], count)
     assert_eq(
@@ -160,9 +161,9 @@ async test "Wenyu no change actual source sync and owner pages survive every per
       )
       assert_eq(@fs.read_file(latest).text(), "{\"newer-human-event\":true}")
       assert_eq(calls[0], count)
-      let event = outcome.executable_event.to_json()
+      let event = ToJson::to_json(outcome.executable_event)
       assert_eq(native_json_text(event, "event_type"), "review_required")
-      assert_eq(wenyu_test_field(event, "accepted"), false.to_json())
+      assert_eq(wenyu_test_field(event, "accepted"), ToJson::to_json(false))
       assert_eq(wenyu_test_field(event, "lifecycle_proof"), Json::null())
       println("WENYU_REAL_BOOK_ADAPTER_PROOF " + stop + " " + work.id)
     }
@@ -170,6 +171,7 @@ async test "Wenyu no change actual source sync and owner pages survive every per
 }
 
 ///|
+#warnings("-unused_async")
 async test "Wenyu no change owner rejects edited receipt human outputs and symlinks" {
   let launch = wenyu_launch_fixture()
   let work = wenyu_journey_completed(launch)
@@ -181,7 +183,7 @@ async test "Wenyu no change owner rejects edited receipt human outputs and symli
       "final_observation", "native_completion_verdict",
     ] {
     let changed : @native_work.Work = @json.from_json(
-      @json.parse(work.to_json().stringify()),
+      @json.parse(ToJson::to_json(work).stringify()),
     )
     wenyu_test_set(changed.receipt, key, Json::null())
     try {

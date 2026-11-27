@@ -131,7 +131,7 @@ async fn PortableStore::copy_upload(
   self : PortableStore,
   body : &@io.Reader,
   file : @fs.File,
-  expected : Int,
+  expected : Int32,
   digest : String,
 ) -> Unit {
   let hasher = @crypto.SHA256::new()
@@ -225,6 +225,7 @@ async fn PortableStore::commit_upload(
 
 ///|
 /// fails, the durable reservation continues charging its full bounded size.
+#warnings("-deprecated")
 async fn PortableStore::fail_attempt(
   self : PortableStore,
   attempt : Reservation,
@@ -297,11 +298,7 @@ pub async fn PortableStore::upload(
       if error is TransferError(_, _) {
         raise error
       }
-      if @async.is_cancellation_error(error) {
-        raise error
-      } else {
-        raise TransferError(503, "package_upload_failed")
-      }
+      raise TransferError(503, "package_upload_failed")
     }
   }
 }

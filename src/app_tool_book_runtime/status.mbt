@@ -1,9 +1,9 @@
 ///|
 pub async fn inspect_app_tool_book(
-  book_id? : String = @app_tool_book.default_book_id(),
-  workspace_root? : String = "",
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  standing_goal_path? : String = @storage.default_standing_goal_path(),
+  book_id~ : String = @app_tool_book.default_book_id(),
+  workspace_root~ : String = "",
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  standing_goal_path~ : String = @storage.default_standing_goal_path(),
 ) -> @app_tool_book.AppToolBookStatus {
   let root = @app_tool_book.resolved_workspace_root(book_id, workspace_root)
   let missing = missing_required_paths(root)
@@ -30,10 +30,10 @@ pub async fn inspect_app_tool_book(
 
 ///|
 pub async fn render_app_tool_book_status(
-  book_id? : String = @app_tool_book.default_book_id(),
-  workspace_root? : String = "",
-  book_catalog_path? : String = @moonbook.default_catalog_path(),
-  standing_goal_path? : String = @storage.default_standing_goal_path(),
+  book_id~ : String = @app_tool_book.default_book_id(),
+  workspace_root~ : String = "",
+  book_catalog_path~ : String = @moonbook.default_catalog_path(),
+  standing_goal_path~ : String = @storage.default_standing_goal_path(),
 ) -> String {
   let status = inspect_app_tool_book(
     book_id~,

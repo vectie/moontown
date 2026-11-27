@@ -94,13 +94,13 @@ test "native selection refuses unsafe feature paths and malformed kebab tokens" 
       "road\rnext", "road\u{0000}next", " road", "road ", "road editor", "Road",
       "道路", "-road", "road-", "road--editor", "road_editor", "",
     ] {
-    fields["selected_feature"] = feature_id.to_json()
+    fields["selected_feature"] = ToJson::to_json(feature_id)
     assert_true(
       @editor_pipeline.parse_native_selection(fixture.stringify()) is None,
     )
   }
   for feature_id in ["x", "2", "editor-2", "2d-road-editor"] {
-    fields["selected_feature"] = feature_id.to_json()
+    fields["selected_feature"] = ToJson::to_json(feature_id)
     assert_true(
       @editor_pipeline.parse_native_selection(fixture.stringify()) is Some(_),
     )

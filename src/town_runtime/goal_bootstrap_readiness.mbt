@@ -3,7 +3,7 @@ async fn research_goal_needs_bootstrap(
   entry : @moonbook.BookCatalogEntry,
   goal : String,
   summary : @moonbook.BookStateSummary,
-  quality_gaps? : Array[String] = [],
+  quality_gaps~ : Array[String] = [],
 ) -> Bool {
   if !@dispatch.research_goal_text(goal) {
     return false

@@ -21,7 +21,7 @@ fn migrate_account_state_json(value : Json) -> Json {
   guard value is Object(fields) else { return value }
   match fields.get("schema") {
     Some(String("moontown.account-store.v1")) =>
-      fields["schema"] = account_state_schema().to_json()
+      fields["schema"] = ToJson::to_json(account_state_schema())
     _ => ()
   }
   if fields.get("subscriptions") is None {
@@ -64,7 +64,7 @@ fn normalize_account_state(state : AccountState) -> AccountState {
 ///|
 fn optional_account_string_projection(value : String?) -> Json {
   match value {
-    Some(text) => text.to_json()
+    Some(text) => ToJson::to_json(text)
     None => Json::null()
   }
 }
@@ -83,8 +83,10 @@ pub fn account_context_projection(context : AccountContext) -> Json {
     "display_name": context.display_name,
     "account_kind": account_kind_name(context.account_kind),
     "plan": account_plan_name(context.plan),
-    "roles": context.roles.map(account_role_name).to_json(),
-    "entitlements": context.entitlements.map(account_entitlement_name).to_json(),
+    "roles": ToJson::to_json(context.roles.map(account_role_name)),
+    "entitlements": ToJson::to_json(
+      context.entitlements.map(account_entitlement_name),
+    ),
     "active_tenant_id": optional_account_string_projection(
       context.active_tenant_id,
     ),

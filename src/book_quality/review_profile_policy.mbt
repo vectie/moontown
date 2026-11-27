@@ -24,7 +24,7 @@ pub fn review_role_runtime_json() -> Json {
 
 ///|
 pub fn review_moonclaw_jobs_json(execution_target : String) -> Json {
-  let profiles : Map[String, Json] = {}
+  let profiles : Map[String, Json] = Map([])
   profiles[review_profile_id()] = review_profile_json(execution_target)
   { "jobs": { "profiles": Json::object(profiles) } }
 }
@@ -37,7 +37,7 @@ fn review_packet_step_metadata_json(
   let metadata = review_execution_metadata_fields(
     output_contract, execution_target,
   )
-  metadata["kind"] = "book_quality_ai_review".to_json()
+  metadata["kind"] = ToJson::to_json("book_quality_ai_review")
   Json::object(metadata)
 }
 
@@ -73,7 +73,7 @@ fn review_profile_step_metadata_json(execution_target : String) -> Json {
     review_output_contract(),
     execution_target,
   )
-  metadata["enable_tools"] = true.to_json()
+  metadata["enable_tools"] = ToJson::to_json(true)
   metadata["role_runtime"] = review_role_runtime_json()
   Json::object(metadata)
 }
@@ -83,11 +83,11 @@ fn review_execution_metadata_fields(
   output_contract : String,
   execution_target : String,
 ) -> Map[String, Json] {
-  let fields : Map[String, Json] = {}
-  fields["preferred_skills"] = review_preferred_skills().to_json()
-  fields["execution_mode"] = "acp".to_json()
-  fields["execution_target"] = execution_target.to_json()
-  fields["output_contract"] = output_contract.to_json()
+  let fields : Map[String, Json] = Map([])
+  fields["preferred_skills"] = ToJson::to_json(review_preferred_skills())
+  fields["execution_mode"] = ToJson::to_json("acp")
+  fields["execution_target"] = ToJson::to_json(execution_target)
+  fields["output_contract"] = ToJson::to_json(output_contract)
   @moonclaw_policy.add_no_input_policy(fields)
   fields
 }

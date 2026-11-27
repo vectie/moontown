@@ -1,5 +1,7 @@
 ///|
-async fn bootstrap_default_operational_books(book_catalog_path : String) -> Int {
+async fn bootstrap_default_operational_books(
+  book_catalog_path : String,
+) -> Int32 {
   let catalog = @moonbook.load_or_create_catalog(path=book_catalog_path)
   let mut count = 0
   for entry in catalog {

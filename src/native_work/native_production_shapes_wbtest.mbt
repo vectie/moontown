@@ -4,7 +4,7 @@ fn fixture_process(
   command : String,
   changes : Array[Json],
   sequence : String,
-  exit_code? : Int = 0,
+  exit_code~ : Int32 = 0,
   sandbox? : Json,
 ) -> Json {
   fixture_event(
@@ -275,7 +275,7 @@ async test "historical approvals resolve and terminal completion outranks old ch
   }
   let receipt = fixture_receipt(work)
   guard receipt is Object(receipt_fields) else { abort("receipt") }
-  receipt_fields["protocol"] = "mooncode.v1".to_json()
+  receipt_fields["protocol"] = ToJson::to_json("mooncode.v1")
   receipt_fields["command"] = command
   let claim : Json = {
     "protocol": "mooncode.v1",
@@ -297,13 +297,13 @@ async test "historical approvals resolve and terminal completion outranks old ch
     "after_fingerprint": native_fingerprint(b"after\n"),
   })
   guard base is Object(fields) else { abort("base") }
-  fields["events"] = [
+  fields["events"] = ToJson::to_json([
     checkpoint,
     approved,
     mutation,
     fixture_validation(work, "check-2"),
-  ].to_json()
-  fields["event_count"] = (4).to_json()
+  ])
+  fields["event_count"] = ToJson::to_json(4)
   let result = observe(
     work,
     claim,
@@ -463,12 +463,12 @@ async test "authorized assurance does not weaken required command identity or te
   })
   for
     (key, value) in [
-      ("cmd", "moon check".to_json()),
-      ("cwd", "/unrelated".to_json()),
-      ("approval_id", "".to_json()),
-      ("run_id", "".to_json()),
-      ("execution_sandbox_policy", "missing".to_json()),
-      ("exit_code", (1).to_json()),
+      ("cmd", ToJson::to_json("moon check")),
+      ("cwd", ToJson::to_json("/unrelated")),
+      ("approval_id", ToJson::to_json("")),
+      ("run_id", ToJson::to_json("")),
+      ("execution_sandbox_policy", ToJson::to_json("missing")),
+      ("exit_code", ToJson::to_json(1)),
       ("sandbox_evidence", ({ "cleanup_verified": false } : Json)),
     ] {
     let validation = fixture_validation(work, "check-2")

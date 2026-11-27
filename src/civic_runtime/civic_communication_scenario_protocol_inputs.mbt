@@ -4,7 +4,7 @@ fn civic_communication_participant_protocol_records(
   protocol : @civic.BuildingProtocolDefinition,
   participants : Array[CivicCommunicationParticipantBook],
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> (Array[Json], Array[Json]) {
   let inputs : Array[Json] = []
   let contributions : Array[Json] = []
@@ -42,9 +42,9 @@ fn civic_communication_input_packet_json(
   participant : CivicCommunicationParticipantBook,
   input_id : String,
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> Json {
-  @civic.BuildingInputPacket::{
+  ToJson::to_json(@civic.BuildingInputPacket::{
     id: input_id,
     building_id: protocol.building_id,
     source_kind: "participant_workspace",
@@ -58,7 +58,7 @@ fn civic_communication_input_packet_json(
     related_book_id: participant.book_id,
     related_task_id: round_id,
     related_run_id: "protocol-seed",
-  }.to_json()
+  })
 }
 
 ///|
@@ -68,9 +68,9 @@ fn civic_communication_contribution_json(
   participant : CivicCommunicationParticipantBook,
   input_id : String,
   round_id : String,
-  round_number : Int,
+  round_number : Int32,
 ) -> Json {
-  @civic.BuildingContribution::{
+  ToJson::to_json(@civic.BuildingContribution::{
     id: "ctr-\{scenario.id}-\{round_id}-\{participant.book_id}",
     building_id: protocol.building_id,
     contribution_kind: "participant_perspective",
@@ -85,5 +85,5 @@ fn civic_communication_contribution_json(
     privacy_label: "book-public",
     review_status: "accepted",
     idempotency_key: "\{scenario.id}/contribution/\{participant.book_id}/round-\{round_number}",
-  }.to_json()
+  })
 }

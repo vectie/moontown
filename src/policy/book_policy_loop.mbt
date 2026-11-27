@@ -1,24 +1,26 @@
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct BookLoopStep {
-  order : Int
+  order : Int32
   phase : String
   lane : String
   subject : String
   summary : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson, FromJson)
 pub struct BookLoopPlan {
   steps : Array[BookLoopStep]
-  execute_step_count : Int
-  tend_step_count : Int
+  execute_step_count : Int32
+  tend_step_count : Int32
   required_record_contract : String
   health_gate : String
-} derive(Debug, Eq, ToJson, FromJson)
+}
 
 ///|
 fn loop_step(
-  order : Int,
+  order : Int32,
   phase : String,
   lane : String,
   subject : String,
@@ -30,10 +32,10 @@ fn loop_step(
 ///|
 fn append_skill_steps(
   steps : Array[BookLoopStep],
-  order : Int,
+  order : Int32,
   phase : String,
   skills : Array[SkillSpec],
-) -> Int {
+) -> Int32 {
   let mut next_order = order
   for item in skills {
     steps.push(loop_step(next_order, phase, item.lane, item.id, item.purpose))

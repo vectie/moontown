@@ -43,7 +43,7 @@ pub fn civic_communication_round_id(
 pub fn civic_communication_round_record(
   schedule : CivicCommunicationSchedule,
   round_id : String,
-  tick : Int,
+  tick : Int32,
   started_ms : UInt64,
   finished_ms : UInt64,
   metrics : CivicCommunicationMetric,

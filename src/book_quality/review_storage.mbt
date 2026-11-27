@@ -100,7 +100,7 @@ pub fn review_run_ledger_from_text(text : String) -> BookQualityReviewRunLedger 
 
 ///|
 pub fn review_run_ledger_to_text(ledger : BookQualityReviewRunLedger) -> String {
-  ledger.to_json().stringify(indent=2)
+  ToJson::to_json(ledger).stringify(indent=2)
 }
 
 ///|

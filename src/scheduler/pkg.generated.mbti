@@ -39,7 +39,7 @@ pub fn collect_due_tasks(@core.TownState) -> Array[@core.TownTask]
 
 pub fn default_daemon_jobs() -> Array[ScheduledJob]
 
-pub fn due_standing_goals(Array[@core.StandingGoal], Int) -> Array[@core.StandingGoal]
+pub fn due_standing_goals(Array[@core.StandingGoal], Int32) -> Array[@core.StandingGoal]
 
 pub fn health_job_id() -> String
 
@@ -47,13 +47,13 @@ pub fn health_job_kind() -> String
 
 pub fn merge_default_daemon_jobs(Array[ScheduledJob]) -> Array[ScheduledJob]
 
-pub fn next_tick(Int, Array[SchedulerAction]) -> SchedulerTick
+pub fn next_tick(Int32, Array[SchedulerAction]) -> SchedulerTick
 
 pub fn persist_result_action_kind() -> String
 
 pub fn plan_daemon_tick(DaemonState, @core.TownState, @health.HealthReport, standing_goals? : Array[@core.StandingGoal]) -> (DaemonState, SchedulerTick, Array[SchedulerAction])
 
-pub fn plan_standing_goal_actions(Array[@core.StandingGoal], Int) -> Array[SchedulerAction]
+pub fn plan_standing_goal_actions(Array[@core.StandingGoal], Int32) -> Array[SchedulerAction]
 
 pub fn plan_tick(@core.TownState, @health.HealthReport) -> Array[SchedulerAction]
 
@@ -112,34 +112,38 @@ pub fn supervision_job_kind() -> String
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct DaemonState {
   daemon_id : String
   lease_owner : String
-  tick_sequence : Int
-  last_heartbeat_event_count : Int
+  tick_sequence : Int32
+  last_heartbeat_event_count : Int32
   active_goal_ids : Array[String]
   jobs : Array[ScheduledJob]
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
-pub fn DaemonState::new(daemon_id? : String, lease_owner? : String, tick_sequence? : Int, last_heartbeat_event_count? : Int, active_goal_ids? : Array[String], jobs? : Array[ScheduledJob]) -> Self
+}
+pub fn DaemonState::new(daemon_id? : String, lease_owner? : String, tick_sequence? : Int32, last_heartbeat_event_count? : Int32, active_goal_ids? : Array[String], jobs? : Array[ScheduledJob]) -> Self
 pub impl Show for DaemonState
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct ScheduledJob {
   id : String
   kind : String
-  interval_seconds : Int
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+  interval_seconds : Int32
+}
 pub impl Show for ScheduledJob
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct SchedulerAction {
   kind : String
   detail : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub impl Show for SchedulerAction
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub struct SchedulerTick {
-  sequence : Int
+  sequence : Int32
   summary : String
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub impl Show for SchedulerTick
 
 // Type aliases

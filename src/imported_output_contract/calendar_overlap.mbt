@@ -1,17 +1,19 @@
 ///|
+#derive(Debug, Eq)
 pub(all) struct CalendarOverlap {
-  first : Int
-  second : Int
+  first : Int32
+  second : Int32
   start : String
   end : String
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct CalendarOverlapReview {
   pairs : Array[CalendarOverlap]
-  unassessed : Array[Int]
-  assessed : Int
-} derive(Debug, Eq)
+  unassessed : Array[Int32]
+  assessed : Int32
+}
 
 ///|
 fn overlap_utc_stamp(value : String) -> Bool {
@@ -34,12 +36,12 @@ fn overlap_utc_stamp(value : String) -> Bool {
 /// all-day markers and missing durations are explicitly unassessed.
 pub fn calendar_overlap_review(
   events : Array[CalendarEvent],
-  indices : Array[Int],
+  indices : Array[Int32],
 ) -> Result[CalendarOverlapReview, String] {
   if events.length() > 2000 {
     return Err("Overlap review supports at most 2,000 occurrences")
   }
-  let selected : Array[Int] = []
+  let selected : Array[Int32] = []
   for i in indices {
     if i < 0 || i >= events.length() || selected.contains(i) {
       return Err("Select unique valid occurrence indices")
@@ -50,8 +52,8 @@ pub fn calendar_overlap_review(
     selected.push(i)
   }
   selected.sort()
-  let known : Array[(Int, String)] = []
-  let unassessed : Array[Int] = []
+  let known : Array[(Int32, String)] = []
+  let unassessed : Array[Int32] = []
   for i in selected {
     let e = events[i]
     let parts = e.end.split(" · ").map(s => s.to_owned()).collect()
@@ -94,7 +96,7 @@ pub fn calendar_overlap_review(
 /// Produce a portable review with source identities and explicit coverage gaps.
 pub fn calendar_overlap_report(
   events : Array[CalendarEvent],
-  indices : Array[Int],
+  indices : Array[Int32],
   from : String,
   until : String,
 ) -> Result[String, String] {

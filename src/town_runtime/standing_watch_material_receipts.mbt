@@ -1,9 +1,10 @@
 ///|
+#derive(ToJson, FromJson)
 priv struct MaterialWatchPendingReceipt {
   contract : String
   execution : @core.TaskExecutionRecord
   receipt : @moonbook.PersistResultOutcome
-} derive(ToJson, FromJson)
+}
 
 ///|
 async fn stage_material_watch_receipt(

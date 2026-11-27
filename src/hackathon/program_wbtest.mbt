@@ -69,8 +69,8 @@ test "competition draft preview publication and final freeze" {
     empty_hackathon_state(),
     "save-program",
     {
-      "program": program_test_program().to_json(),
-      "brief": program_test_brief().to_json(),
+      "program": ToJson::to_json(program_test_program()),
+      "brief": ToJson::to_json(program_test_brief()),
     },
     10UL,
   )
@@ -146,8 +146,8 @@ test "competition draft preview publication and final freeze" {
       state,
       "save-program",
       {
-        "program": program_test_program().to_json(),
-        "brief": program_test_brief().to_json(),
+        "program": ToJson::to_json(program_test_program()),
+        "brief": ToJson::to_json(program_test_brief()),
       },
       6001UL,
     )
@@ -176,7 +176,7 @@ test "competition draft preview publication and final freeze" {
         "challenge_id": "river-ai",
         "benchmark_materials": ["https://example.org/new"],
         "evaluation_materials": ["https://example.org/rules"],
-        "rubric": program_test_brief().rubric.to_json(),
+        "rubric": ToJson::to_json(program_test_brief().rubric),
       },
       6001UL,
     )
@@ -197,7 +197,10 @@ test "competition draft preview publication and final freeze" {
     6001UL,
   )
   assert_eq(announced.programs[0].state, "final")
-  assert_eq(announced.challenges.to_json(), state.challenges.to_json())
+  assert_eq(
+    ToJson::to_json(announced.challenges),
+    ToJson::to_json(state.challenges),
+  )
   assert_eq(
     announced.programs[0].announcements.last().unwrap().published_ms,
     6001UL,
@@ -216,7 +219,7 @@ test "preview retains incomplete drafts and rejects invalid metric contracts" {
   let state = program_test_action(
     empty_hackathon_state(),
     "save-program",
-    { "program": program.to_json(), "brief": brief.to_json() },
+    { "program": ToJson::to_json(program), "brief": ToJson::to_json(brief) },
     10UL,
   )
   assert_eq(program_readiness(state, "river-ai").length(), 3)
@@ -256,7 +259,10 @@ test "preview retains incomplete drafts and rejects invalid metric contracts" {
     let _ = program_test_action(
       state,
       "save-program",
-      { "program": program.to_json(), "brief": program_test_brief().to_json() },
+      {
+        "program": ToJson::to_json(program),
+        "brief": ToJson::to_json(program_test_brief()),
+      },
       20UL,
     )
     false
@@ -272,8 +278,8 @@ test "published amendments preserve lifecycle and archive benchmark versions" {
     empty_hackathon_state(),
     "save-program",
     {
-      "program": program_test_program().to_json(),
-      "brief": program_test_brief().to_json(),
+      "program": ToJson::to_json(program_test_program()),
+      "brief": ToJson::to_json(program_test_brief()),
     },
     10UL,
   )
@@ -287,11 +293,11 @@ test "published amendments preserve lifecycle and archive benchmark versions" {
     state,
     "save-program",
     {
-      "program": program_test_program().to_json(),
-      "brief": {
+      "program": ToJson::to_json(program_test_program()),
+      "brief": ToJson::to_json({
         ..program_test_brief(),
         benchmark_materials: ["https://example.org/data-v2"],
-      }.to_json(),
+      }),
     },
     30UL,
   )
@@ -310,9 +316,13 @@ test "published amendments preserve lifecycle and archive benchmark versions" {
     "revise-benchmark",
     {
       "challenge_id": "river-ai",
-      "benchmark_materials": state.challenges[0].benchmark_materials.to_json(),
-      "evaluation_materials": state.challenges[0].evaluation_materials.to_json(),
-      "rubric": state.challenges[0].rubric.to_json(),
+      "benchmark_materials": ToJson::to_json(
+        state.challenges[0].benchmark_materials,
+      ),
+      "evaluation_materials": ToJson::to_json(
+        state.challenges[0].evaluation_materials,
+      ),
+      "rubric": ToJson::to_json(state.challenges[0].rubric),
     },
     40UL,
   )
@@ -329,8 +339,8 @@ test "registered team contracts and active benchmark receipts survive amendments
     empty_hackathon_state(),
     "save-program",
     {
-      "program": program_test_program().to_json(),
-      "brief": program_test_brief().to_json(),
+      "program": ToJson::to_json(program_test_program()),
+      "brief": ToJson::to_json(program_test_brief()),
     },
     10UL,
   )
@@ -346,8 +356,11 @@ test "registered team contracts and active benchmark receipts survive amendments
       state,
       "save-program",
       {
-        "program": { ..program_test_program(), daily_submission_limit: 9, }.to_json(),
-        "brief": program_test_brief().to_json(),
+        "program": ToJson::to_json({
+          ..program_test_program(),
+          daily_submission_limit: 9,
+        }),
+        "brief": ToJson::to_json(program_test_brief()),
       },
       30UL,
     )
@@ -361,8 +374,11 @@ test "registered team contracts and active benchmark receipts survive amendments
       state,
       "save-program",
       {
-        "program": program_test_program().to_json(),
-        "brief": { ..program_test_brief(), deadline_ms: 4000UL, }.to_json(),
+        "program": ToJson::to_json(program_test_program()),
+        "brief": ToJson::to_json({
+          ..program_test_brief(),
+          deadline_ms: 4000UL,
+        }),
       },
       30UL,
     )
@@ -397,11 +413,11 @@ test "registered team contracts and active benchmark receipts survive amendments
       state,
       "save-program",
       {
-        "program": program_test_program().to_json(),
-        "brief": {
+        "program": ToJson::to_json(program_test_program()),
+        "brief": ToJson::to_json({
           ..program_test_brief(),
           benchmark_materials: ["https://example.org/v2"],
-        }.to_json(),
+        }),
       },
       30UL,
     )
@@ -418,7 +434,7 @@ test "registered team contracts and active benchmark receipts survive amendments
         "challenge_id": "river-ai",
         "benchmark_materials": ["https://example.org/v2"],
         "evaluation_materials": ["https://example.org/rules"],
-        "rubric": program_test_brief().rubric.to_json(),
+        "rubric": ToJson::to_json(program_test_brief().rubric),
       },
       30UL,
     )
@@ -432,8 +448,11 @@ test "registered team contracts and active benchmark receipts survive amendments
       state,
       "save-program",
       {
-        "program": { ..program_test_program(), evaluator_ids: ["replacement"], }.to_json(),
-        "brief": program_test_brief().to_json(),
+        "program": ToJson::to_json({
+          ..program_test_program(),
+          evaluator_ids: ["replacement"],
+        }),
+        "brief": ToJson::to_json(program_test_brief()),
       },
       30UL,
     )
@@ -446,8 +465,11 @@ test "registered team contracts and active benchmark receipts survive amendments
     state,
     "save-program",
     {
-      "program": { ..program_test_program(), registration_close_ms: 3500UL, }.to_json(),
-      "brief": program_test_brief().to_json(),
+      "program": ToJson::to_json({
+        ..program_test_program(),
+        registration_close_ms: 3500UL,
+      }),
+      "brief": ToJson::to_json(program_test_brief()),
     },
     30UL,
   )
@@ -462,8 +484,11 @@ test "program calendar and legacy conversion cannot invalidate an existing chall
       empty_hackathon_state(),
       "save-program",
       {
-        "program": { ..program_test_program(), submission_open_ms: 50UL, }.to_json(),
-        "brief": program_test_brief().to_json(),
+        "program": ToJson::to_json({
+          ..program_test_program(),
+          submission_open_ms: 50UL,
+        }),
+        "brief": ToJson::to_json(program_test_brief()),
       },
       10UL,
     )
@@ -477,11 +502,11 @@ test "program calendar and legacy conversion cannot invalidate an existing chall
       empty_hackathon_state(),
       "save-program",
       {
-        "program": {
+        "program": ToJson::to_json({
           ..program_test_program(),
           timezone: "Shanghai Standard Time",
-        }.to_json(),
-        "brief": program_test_brief().to_json(),
+        }),
+        "brief": ToJson::to_json(program_test_brief()),
       },
       10UL,
     )
@@ -496,8 +521,8 @@ test "program calendar and legacy conversion cannot invalidate an existing chall
       legacy,
       "save-program",
       {
-        "program": program_test_program().to_json(),
-        "brief": program_test_brief().to_json(),
+        "program": ToJson::to_json(program_test_program()),
+        "brief": ToJson::to_json(program_test_brief()),
       },
       10UL,
     )
@@ -511,8 +536,8 @@ test "program calendar and legacy conversion cannot invalidate an existing chall
       empty_hackathon_state(),
       "save-program",
       {
-        "program": program_test_program().to_json(),
-        "brief": { ..program_test_brief(), id: "other-event", }.to_json(),
+        "program": ToJson::to_json(program_test_program()),
+        "brief": ToJson::to_json({ ..program_test_brief(), id: "other-event", }),
       },
       10UL,
     )
@@ -525,7 +550,7 @@ test "program calendar and legacy conversion cannot invalidate an existing chall
 
 ///|
 test "legacy ledger decoding defaults competition arrays and retains receipts" {
-  let json = empty_hackathon_state().to_json()
+  let json = ToJson::to_json(empty_hackathon_state())
   guard json is Object(fields) else { fail("state object expected") }
   for
     key in [
@@ -534,8 +559,8 @@ test "legacy ledger decoding defaults competition arrays and retains receipts" {
     ] {
     fields.remove(key)
   }
-  fields["revision"] = (42).to_json()
-  fields["challenges"] = [program_test_brief()].to_json()
+  fields["revision"] = ToJson::to_json(42)
+  fields["challenges"] = ToJson::to_json([program_test_brief()])
   let state = decode_hackathon_state(json)
   assert_eq(state.revision, 42)
   assert_eq(state.challenges[0].name, "River AI Sprint")

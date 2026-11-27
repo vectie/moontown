@@ -3,7 +3,7 @@ pub fn miniapp_validate_publication(
   snapshot : @miniapp_contracts.MiniappTownSnapshot,
   viewer : @miniapp_projection.MiniappViewerContext,
   request : MiniappPublicationRequest,
-  policy? : MiniappPublicationPolicy = miniapp_default_publication_policy(),
+  policy~ : MiniappPublicationPolicy = miniapp_default_publication_policy(),
 ) -> MiniappPublicationValidation {
   match miniapp_publishing_building_by_id(snapshot, request.building_id) {
     None =>

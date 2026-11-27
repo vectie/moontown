@@ -66,7 +66,7 @@ pub fn table_to_snapshot(
       }
     })
     check_goals(goals)
-    bounded_output(goals.to_json().stringify() + "\n")
+    bounded_output(ToJson::to_json(goals).stringify() + "\n")
   } catch {
     error => Err("\{error}")
   } noraise {

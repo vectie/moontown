@@ -1,8 +1,8 @@
 ///|
 fn civic_communication_schedule_for_scenario(
   scenario : CivicCommunicationScenario,
-  existing? : CivicCommunicationSchedule? = None,
-  now_ms? : UInt64 = @env.now(),
+  existing~ : CivicCommunicationSchedule? = None,
+  now_ms~ : UInt64 = @env.now(),
 ) -> CivicCommunicationSchedule {
   match existing {
     Some(schedule) =>
@@ -41,8 +41,8 @@ fn civic_communication_scenario_interval_ms(
 ///|
 pub async fn upsert_civic_communication_schedule_for_scenario(
   scenario : CivicCommunicationScenario,
-  path? : String = default_civic_communication_schedule_path(),
-  now_ms? : UInt64 = @env.now(),
+  path~ : String = default_civic_communication_schedule_path(),
+  now_ms~ : UInt64 = @env.now(),
 ) -> CivicCommunicationSchedule {
   let schedules = load_or_create_civic_communication_schedules(path~)
   let updated : Array[CivicCommunicationSchedule] = []

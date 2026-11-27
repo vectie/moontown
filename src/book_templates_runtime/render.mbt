@@ -1,6 +1,6 @@
 ///|
 pub async fn render_book_template_registry(
-  registry_path? : String = @book_templates.default_registry_path(),
+  registry_path~ : String = @book_templates.default_registry_path(),
 ) -> String {
   let registry = inspect_registry(registry_path~)
   @book_templates.render_registry_markdown(registry)
@@ -8,7 +8,7 @@ pub async fn render_book_template_registry(
 
 ///|
 pub async fn render_book_template_request_status(
-  request_path? : String = @book_templates.request_path_for_snapshot(
+  request_path~ : String = @book_templates.request_path_for_snapshot(
     @storage.default_snapshot_path(),
   ),
 ) -> String {

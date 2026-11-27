@@ -2,7 +2,7 @@
 fn test_principal(
   principal_id : String,
   roles : Array[String],
-  interests? : Array[String] = [],
+  interests~ : Array[String] = [],
 ) -> MarketplacePrincipal {
   {
     principal_id,
@@ -618,8 +618,8 @@ test "agent channel binds a real published agent listing" {
   }
   let next = marketplace_create_channel(state, owner, agent_room, now_ms=200UL)
   let projection = marketplace_visible_channels(next, reader)
-    .to_json()
-    .stringify()
+    |> ToJson::to_json
+    |> Json::stringify()
   assert_true(projection.contains("\"visibility\":\"agent\""))
   assert_true(projection.contains("agent.robot-guide"))
 }
@@ -817,7 +817,7 @@ test "active grants expose only sanitized private listings and revocation closes
   assert_true(granted.agent_listings[0].lifecycle.state == PublicationShared)
   let visible = marketplace_shared_listing_cards(granted, reader, now_ms=300UL)
   assert_eq(visible.length(), 1)
-  let wire = visible.to_json().stringify()
+  let wire = ToJson::to_json(visible).stringify()
   assert_true(wire.contains("moontown.private-listing-share-preview.v1"))
   assert_false(wire.contains("opaque-owner-token"))
   assert_eq(
@@ -1096,7 +1096,7 @@ async test "application persists drafts across restart" {
     app.execute(
       "opaque-bootstrap-token",
       "upsert-agent",
-      test_agent_draft().to_json().stringify(),
+      ToJson::to_json(test_agent_draft()).stringify(),
       "",
       now_ms=100UL,
     ),

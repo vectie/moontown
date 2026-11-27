@@ -3,7 +3,7 @@ test "no-input policy helper emits both nonblocking flags" {
   let text = no_input_policy_json().stringify()
   assert_true(text.contains("\"disable_waiting_for_input\":true"))
   assert_true(text.contains("\"best_effort_on_missing_input\":true"))
-  let fields : Map[String, Json] = { "kind": "packet".to_json() }
+  let fields : Map[String, Json] = { "kind": ToJson::to_json("packet") }
   add_no_input_policy(fields)
   let merged = Json::object(fields).stringify()
   assert_true(merged.contains("\"kind\":\"packet\""))
@@ -17,7 +17,7 @@ test "non-adaptive no-input policy helper emits adaptive and missing-input contr
   assert_true(text.contains("\"disable_adaptive\":true"))
   assert_true(text.contains("\"disable_waiting_for_input\":true"))
   assert_true(text.contains("\"best_effort_on_missing_input\":true"))
-  let fields : Map[String, Json] = { "profile": "research".to_json() }
+  let fields : Map[String, Json] = { "profile": ToJson::to_json("research") }
   add_non_adaptive_no_input_policy(fields)
   let merged = Json::object(fields).stringify()
   assert_true(merged.contains("\"profile\":\"research\""))

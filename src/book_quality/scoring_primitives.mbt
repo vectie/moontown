@@ -3,7 +3,7 @@ priv struct ScoreDraft {
   root : String
   strengths : Array[String]
   gaps : Array[String]
-  base_score : Int
+  base_score : Int32
 }
 
 ///|
@@ -28,7 +28,7 @@ fn finalize_score_draft(
   book_type : String,
   draft : ScoreDraft,
   structural : BookQualityStructuralObservation,
-  raw_score : Int,
+  raw_score : Int32,
   semantic_review_text : String,
 ) -> BookQualityScore {
   finalize_score(
@@ -49,7 +49,7 @@ fn finalize_score(
   book_type : String,
   root : String,
   structural : BookQualityStructuralObservation,
-  raw_score : Int,
+  raw_score : Int32,
   strengths : Array[String],
   gaps : Array[String],
   semantic_review_text : String,
@@ -123,7 +123,7 @@ fn apply_score_signal(
   assessment : BookQualitySignalAssessment,
   strengths : Array[String],
   gaps : Array[String],
-) -> Int {
+) -> Int32 {
   for strength in assessment.strengths {
     strengths.push(strength)
   }
@@ -138,7 +138,7 @@ fn base_workspace_score(
   structural : BookQualityStructuralObservation,
   strengths : Array[String],
   gaps : Array[String],
-) -> Int {
+) -> Int32 {
   let assessment = base_workspace_assessment(
     structural.workspace_exists,
     structural.wiki_index_exists,
@@ -157,10 +157,10 @@ fn base_workspace_score(
 fn path_score(
   structural : BookQualityStructuralObservation,
   relative : String,
-  points : Int,
+  points : Int32,
   strengths : Array[String],
   gaps : Array[String],
-) -> Int {
+) -> Int32 {
   let assessment = path_presence_assessment(
     relative,
     points,
@@ -183,7 +183,7 @@ fn required_paths_score(
   paths : Array[BookQualityRequiredPath],
   strengths : Array[String],
   gaps : Array[String],
-) -> Int {
+) -> Int32 {
   let mut score = 0
   for path in paths {
     score += path_score(structural, path.relative, path.points, strengths, gaps)
@@ -195,10 +195,10 @@ fn required_paths_score(
 fn paths_score(
   structural : BookQualityStructuralObservation,
   relatives : Array[String],
-  points : Int,
+  points : Int32,
   strengths : Array[String],
   gaps : Array[String],
-) -> Int {
+) -> Int32 {
   if relatives.is_empty() {
     return path_set_assessment(relatives, [], points).score
   }

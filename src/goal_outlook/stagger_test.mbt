@@ -1,5 +1,5 @@
 ///|
-fn rescheduled(goal : @core.StandingGoal, due : Int) -> @core.StandingGoal {
+fn rescheduled(goal : @core.StandingGoal, due : Int32) -> @core.StandingGoal {
   @core.StandingGoal::new(
     id=goal.id,
     title=goal.title,
@@ -71,10 +71,10 @@ test "stagger and compare complete a useful cluster revision without changing ca
   let comparison = @json.parse(
     success(@goal_outlook.compare(before, after, 100, 130, format="json")),
   )
-  assert_eq(field(comparison, "before_shared_ticks"), (1).to_json())
-  assert_eq(field(comparison, "after_shared_ticks"), (0).to_json())
-  assert_eq(field(comparison, "before_occurrences"), (3).to_json())
-  assert_eq(field(comparison, "after_occurrences"), (3).to_json())
+  assert_eq(field(comparison, "before_shared_ticks"), ToJson::to_json(1))
+  assert_eq(field(comparison, "after_shared_ticks"), ToJson::to_json(0))
+  assert_eq(field(comparison, "before_occurrences"), ToJson::to_json(3))
+  assert_eq(field(comparison, "after_occurrences"), ToJson::to_json(3))
   let candidate = decoded_candidate(
     @goal_outlook.stagger(before, b"[\"c\",\"a\",\"b\"]", 100, 5),
   )
@@ -144,7 +144,7 @@ test "stagger validates every selection item type count and byte bound" {
       b"[",
       Bytes::from_array([0xff]),
       @utf8.encode(" ".repeat(1048577)),
-      @utf8.encode(Array::make(2001, "overdue").to_json().stringify()),
+      @utf8.encode(ToJson::to_json(Array::make(2001, "overdue")).stringify()),
     ] {
     assert_true(@goal_outlook.stagger(bytes, selection, 100, 5) is Err(_))
   }
@@ -189,7 +189,9 @@ test "stagger retains complete snapshot validation including unselected goals" {
   let goals = Array::makei(2000, i => {
     @core.StandingGoal::new(id=i.to_string(), title="", prompt="")
   })
-  let selection = @utf8.encode(goals.map(g => g.id).to_json().stringify())
+  let selection = @utf8.encode(
+    ToJson::to_json(goals.map(g => g.id)).stringify(),
+  )
   let candidate = decoded_candidate(
     @goal_outlook.stagger(snapshot(goals), selection, 0, 1),
   )

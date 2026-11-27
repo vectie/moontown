@@ -1,6 +1,6 @@
 ///|
 async fn render_moontown_planbook_status(
-  workspace_root? : String = @moonbook.default_workspace_root(
+  workspace_root~ : String = @moonbook.default_workspace_root(
     default_planbook_book_id(),
   ),
 ) -> String {
@@ -57,7 +57,7 @@ async fn missing_planbook_workspace_required_paths(
 
 ///|
 async fn render_wenyu_game_design_course_status(
-  workspace_root? : String = @course_book.default_wenyu_course_workspace_root(),
+  workspace_root~ : String = @course_book.default_wenyu_course_workspace_root(),
 ) -> String {
   @course_book_runtime.render_wenyu_game_design_course_status(workspace_root~)
 }

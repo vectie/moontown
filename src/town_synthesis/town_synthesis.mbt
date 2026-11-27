@@ -10,7 +10,7 @@ pub async fn render_town_goal_synthesis(
   if is_wenyu_town_synthesis_plan(goal, plan) {
     return render_wenyu_town_goal_synthesis(state, goal, plan, lane_reports)
   }
-  let builder = StringBuilder::new()
+  let builder = StringBuilder()
   builder.write_string(
     "# MoonTown, MoonBook, and MoonClaw: Deep Research Analysis\n\n",
   )

@@ -14,11 +14,11 @@ pub fn proposal_packet_from_bundle(
   title : String,
   summary : String,
   profile : String,
-  packet_id? : String? = None,
-  task? : @moonbook.BookTask? = None,
-  entry? : @moonbook.BookCatalogEntry? = None,
-  notes? : Array[String] = [],
-  tags? : Array[String] = [],
+  packet_id~ : String? = None,
+  task~ : @moonbook.BookTask? = None,
+  entry~ : @moonbook.BookCatalogEntry? = None,
+  notes~ : Array[String] = [],
+  tags~ : Array[String] = [],
 ) -> ExternalProposalPacket {
   let resolved_packet_id = packet_id.unwrap_or("packet-\{bundle.task_id}")
   {
@@ -43,11 +43,11 @@ fn packet_bundle_metadata(
   entry : @moonbook.BookCatalogEntry?,
 ) -> Json {
   let fields = packet_no_input_policy_fields()
-  fields["producer"] = "moontown".to_json()
-  fields["book_id"] = bundle.book_id.to_json()
-  fields["workspace_root"] = bundle.workspace_root.to_json()
-  fields["task_id"] = bundle.task_id.to_json()
-  fields["memory_summary"] = bundle.memory_summary.to_json()
+  fields["producer"] = ToJson::to_json("moontown")
+  fields["book_id"] = ToJson::to_json(bundle.book_id)
+  fields["workspace_root"] = ToJson::to_json(bundle.workspace_root)
+  fields["task_id"] = ToJson::to_json(bundle.task_id)
+  fields["memory_summary"] = ToJson::to_json(bundle.memory_summary)
   fields["profile_metadata"] = packet_no_input_policy_json()
   fields["step_metadata"] = packet_step_metadata(task)
   set_policy_metadata(fields, entry)
@@ -85,19 +85,27 @@ fn packet_step_metadata(task : @moonbook.BookTask?) -> Json {
     Some(task) => {
       let route = packet_task_route(task)
       let task_spec = packet_task_spec_json(task, route)
-      set_extension_step_metadata(fields, "task_id", task.id.to_json())
+      set_extension_step_metadata(fields, "task_id", ToJson::to_json(task.id))
       set_extension_step_metadata(fields, "task_spec", task_spec)
-      set_extension_step_metadata(fields, "task_kind", route.kind.to_json())
-      set_extension_step_metadata(fields, "priority", task.priority.to_json())
+      set_extension_step_metadata(
+        fields,
+        "task_kind",
+        ToJson::to_json(route.kind),
+      )
+      set_extension_step_metadata(
+        fields,
+        "priority",
+        ToJson::to_json(task.priority),
+      )
       set_extension_step_metadata(
         fields,
         "requires_review",
-        task.requires_review.to_json(),
+        ToJson::to_json(task.requires_review),
       )
       set_extension_step_metadata(
         fields,
         "target_pages",
-        route.target_pages.to_json(),
+        ToJson::to_json(route.target_pages),
       )
     }
     None => ()
