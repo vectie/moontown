@@ -1,0 +1,149 @@
+----
+import {
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.4/fs",
+  "moonbitlang/async@0.22.4/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+----
+
+///|
+async fn output(name : String, args : Array[String]) -> String {
+  let result = @shell.Cmd(name, args).output()
+  result.check()
+  result.stdout()
+}
+
+///|
+async fn ax(args : Array[String]) -> Json {
+  @json.parse(
+    output(
+      "busctl",
+      ["--address=unix:path=/run/user/1000/at-spi/bus", "--json=short", ..args],
+    ),
+  )
+}
+
+///|
+async fn report() -> Json {
+  for _ in 0..<35 {
+    if ax([
+        "call", "org.a11y.atspi.Registry", "/org/a11y/atspi/accessible/root", "org.a11y.atspi.Accessible",
+        "GetChildren",
+      ])
+      is { "data": [Array(apps)], .. } {
+      for app in apps {
+        if app is [String(bus), String(path)] &&
+          ax(["get-property", bus, path, "org.a11y.atspi.Accessible", "Name"])
+          is { "data": "lepusa-runtime", .. } &&
+          ax(["call", bus, path, "org.a11y.atspi.Accessible", "GetChildren"])
+          is { "data": [Array(windows)], .. } {
+          for window in windows {
+            if window is [String(owner), String(frame)] &&
+              ax([
+                "get-property", owner, frame, "org.a11y.atspi.Accessible", "Name",
+              ])
+              is { "data": String(title), .. } &&
+              title.has_prefix("DISPLAY_QA:") {
+              return @json.parse(title[11:].to_owned())
+            }
+          }
+        }
+      }
+    }
+    @async.sleep(1000)
+  }
+  fail("Native WebView did not report playback within 35 seconds")
+}
+
+///|
+async fn main {
+  guard @env.args() is [_, receipt] && receipt.has_prefix("/") else {
+    fail("Supply an absolute receipt path on the ELF board")
+  }
+  let path = "/home/elf/.local/opt/future-community-display/lepusa/runtime.json"
+  let original = @fs.read_file(path).binary()
+  let manifest = @json.parse(@fs.read_file(path).text())
+  guard manifest
+    is {
+      "identifier": "dev.vectie.future-community-display",
+      "runtime": { "webviews": [Object(view)], .. },
+      ..
+    } &&
+    view.get("initializationScripts") is Some(Array(scripts)) else {
+    fail("Unexpected installed application manifest")
+  }
+  // Temporary frontend probe uses only the app's existing setTitle permission.
+  // Read the actual native frame via AT-SPI, then restore the exact manifest.
+  let probe =
+    #|(() => {
+    #| let attempts=0;
+    #| const check=() => {
+    #|  const image=document.querySelector('#hero-art'), track=document.querySelector('#track'), stage=document.querySelector('.display');
+    #|  if(!image?.complete || !image.naturalWidth || !track?.firstElementChild || !stage?.dataset.paused){
+    #|   if(++attempts<100)setTimeout(check,200);return;
+    #|  }
+    #|  const before=track.getBoundingClientRect().left;
+    #|  setTimeout(async()=>{
+    #|   const after=track.getBoundingClientRect().left;
+    #|   const state={viewport:[innerWidth,innerHeight],cover:[image.naturalWidth,image.naturalHeight],source:image.currentSrc,
+    #|    before,after,moved:before-after,paused:stage.dataset.paused,reason:stage.dataset.pauseReason||'',
+    #|    playState:getComputedStyle(track).animationPlayState,nativeBridge:typeof window.lepusa?.invoke==='function',
+    #|    reduced:matchMedia('(prefers-reduced-motion:reduce)').matches,
+    #|    revision:[...document.scripts].find(script=>script.src.includes('display-week04-4k-v2'))?.src||''};
+    #|   await window.lepusa.invoke('window.setTitle',{windowLabel:'main',title:'DISPLAY_QA:'+JSON.stringify(state)});
+    #|  },1600);
+    #| };
+    #| if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(check,1500),{once:true});
+    #| else setTimeout(check,1500);
+    #|})();
+  scripts.push(Json::string(probe))
+  @fs.write_file(
+    receipt + ".manifest-before",
+    original,
+    permission=0o600,
+    create_mode=CreateNew,
+  )
+  @fs.write_file(path, manifest.stringify(indent=2), permission=0o644)
+  let result : Result[Json, Error] = try {
+    ignore(
+      output("systemctl", [
+        "--user", "restart", "future-community-display.service",
+      ]),
+    )
+    Ok(report())
+  } catch {
+    error => Err(error)
+  }
+  @fs.write_file(path, original, permission=0o644)
+  ignore(
+    output("systemctl", [
+      "--user", "restart", "future-community-display.service",
+    ]),
+  )
+  match result {
+    Err(error) => raise error
+    Ok(value) => {
+      @fs.write_file(receipt, value.stringify(indent=2), permission=0o600)
+      guard value
+        is {
+          "moved": Number(distance, ..),
+          "paused": "false",
+          "playState": "running",
+          "nativeBridge": true,
+          "revision": String(revision),
+          ..
+        } &&
+        distance > 20.0 &&
+        revision.contains("display-week04-4k-v2") else {
+        fail(
+          "Native playback did not advance; original manifest restored and app restarted",
+        )
+      }
+      println(
+        "Actual native WebView ticker advanced; original manifest restored and app restarted",
+      )
+    }
+  }
+}

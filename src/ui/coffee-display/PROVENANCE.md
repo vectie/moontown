@@ -1,5 +1,7 @@
 # 半醒咖啡转杯展示
 
+2026-11-27第四期4K展示更新：`assets/winter-cover-4k-v2.webp`为已确认封面的内置ImageGen细节恢复后放大导出，3840×2160、1095174字节，非原生4K生成。SHA256 `9a6e3366e0b86d8ad553e535236ddc468942e0c94dfafe22ec10357fb6182730`；原稿、提示词和处理记录见 `docs/project/COFFEE_DISPLAY_4K_2026-11-27.md`。手机仍用原轻量图，logo与二维码未重新生成。
+
 原稿：用户指定的
 `/Users/kq/.codex/visualizations/2026/11/05/01a1aa9b-7627-7c03-b1a0-e89dc3132ab0/output/rotating-cup-opposed-rows`。
 

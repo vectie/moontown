@@ -40,6 +40,7 @@ test('thumbnails and cover derivatives have bounded eager-loading cost',async()=
  let thumbBytes=0;for(const g of awardGroups)for(const w of g.works){const bytes=(await stat(new URL(w.thumb,here))).size;assert.ok(bytes<100*1024,w.thumb);thumbBytes+=bytes}assert.ok(thumbBytes<1024*1024);
  assert.ok((await stat(new URL('assets/winter-cover-v1.webp',here))).size<700*1024);
  assert.ok((await stat(new URL('assets/winter-cover-mobile-v1.webp',here))).size<250*1024);
+ assert.ok((await stat(new URL('assets/winter-cover-4k-v2.webp',here))).size<1500*1024);
 });
 test('fourth cover gives an upcoming entry while preserving the stable participation QR',async()=>{
  const html=await readFile(new URL('index.html',here),'utf8');assert.match(html,/<h1>把冬天泡开<\/h1>/);assert.match(html,/<title>未来社区创意活动 第四期：把冬天泡开<\/title>/);assert.match(html,/data-opens-ms="1795968000000"/);assert.match(html,/查看赛题 · 11月30日开赛/);assert.match(html,/进入第四期把冬天泡开活动/);assert.match(html,/type="module"/);
@@ -51,6 +52,7 @@ test('current cover UTF-8, local assets and module dependencies resolve from a c
  const html=new TextDecoder('utf-8',{fatal:true}).decode(await readFile(new URL('index.html',here)));assert.ok(html.startsWith('<!doctype html>'));
  const local=[...html.matchAll(/(?:src|srcset|href)="((?:assets\/|display\.)[^"?]+)(?:\?[^" ]*)?"/g)].map(m=>m[1]);
  assert.ok(local.includes('assets/winter-cover-v1.webp'));assert.ok(local.includes('assets/winter-cover-mobile-v1.webp'));
+ assert.equal(local.filter(path=>path==='assets/winter-cover-4k-v2.webp').length,1);
  for(const path of local)assert.ok((await stat(new URL(path,here))).size>0,path);
  const js=await readFile(new URL('display.js',here),'utf8');assert.match(js,/from '\.\/display-awards\.js\?v=3'/);
 });

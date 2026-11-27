@@ -1,5 +1,22 @@
 # MoonTown handoff notes
 
+## 2026-11-27 · 4K display asset and native ticker repair
+
+- Responsive4K layout still served1672×941 artwork. Desktop>=1800px now
+  selects `winter-cover-4k-v2.webp`3840×2160, about1.04MiB. This is an
+  ImageGen restoration exported/upscaled to4K, not native4K generation;
+  the tool still returned1672×941. Mobile retains its100KiB source.
+  Exact prompt/hashes: `COFFEE_DISPLAY_4K_2026-11-27.md`.
+- CSS hover paused the ticker even while data-paused=false. Remove that
+  hidden pause; retain explicit pause/dialog/keyboard reading behavior.
+  Native exhibition autoplays despite desktop reduced-motion; ordinary
+  browsers honor it. Pointer/programmatic focus must not freeze playback.
+- Actual WebView on .23 measured76.944px movement in1.6s. Original runtime
+  manifest restored after the temporary title-based probe; normal topic and
+  fullscreen checks passed again. Public Chromium/WebKit4K and mobile tests
+  passed. Board still exposes only1024×600 DSI; physical4K awaits a screen.
+  The5-minute app updater needs internet and defers while paused/enlarging.
+
 ## 2026-11-27 · ELF 2 native exhibition app
 
 - Correct board is `192.168.2.23`, hardware `ELF 2 Board`, hostname
