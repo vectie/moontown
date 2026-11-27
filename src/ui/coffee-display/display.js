@@ -4,6 +4,20 @@ const dialog=document.querySelector('#detail'),detailImage=document.querySelecto
 // The installed app is an unattended exhibition, with its own Pause control.
 // Ordinary browser visits continue to respect the visitor's reduced-motion preference.
 const exhibition=typeof window.lepusa?.invoke==='function';
+if(exhibition){
+ const root=document.documentElement;let timer,lastPointer;
+ const hide=()=>{if(root.dataset.cursorHidden!=='true')root.dataset.cursorHidden='true'};
+ const reveal=()=>{if(root.dataset.cursorHidden!=='false')root.dataset.cursorHidden='false';clearTimeout(timer);timer=setTimeout(hide,1800)};
+ document.addEventListener('pointermove',event=>{
+  if(event.pointerType!=='mouse')return;
+  if(lastPointer&&Math.hypot(event.clientX-lastPointer.x,event.clientY-lastPointer.y)<4)return;
+  lastPointer={x:event.clientX,y:event.clientY};reveal();
+ },{passive:true});
+ document.addEventListener('pointerdown',event=>{if(event.pointerType==='mouse')reveal();else hide()},{passive:true});
+ document.addEventListener('keydown',hide);
+ document.addEventListener('visibilitychange',()=>{if(document.hidden){clearTimeout(timer);hide()}});
+ hide();
+}
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');let manualPaused=!exhibition&&reduced.matches,focused=false,playbackChosen=false,keyboardNavigation=false;
 if(document.body.dataset.opensMs){const startsAt=Number(document.body.dataset.opensMs),entry=document.querySelector('.join-direct'),caption=document.querySelector('.entry figcaption');const syncEntry=()=>{const waiting=Date.now()<startsAt;entry.textContent=waiting?'查看赛题 · 11月30日开赛':'创作参赛';caption.textContent=waiting?'扫码查看赛题':'一键参赛有奖'};syncEntry();setInterval(syncEntry,60000);document.addEventListener('visibilitychange',syncEntry)}
 const positions={figure:'0% 50%',tote:'50% 50%',coffee:'100% 50%'},items=[];

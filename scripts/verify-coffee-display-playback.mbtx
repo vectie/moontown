@@ -59,9 +59,13 @@ async fn report() -> Json {
 
 ///|
 async fn main {
-  guard @env.args() is [_, receipt] && receipt.has_prefix("/") else {
-    fail("Supply an absolute receipt path on the ELF board")
+  let args = @env.args()
+  guard args is [_, receipt, ..] && receipt.has_prefix("/") else {
+    fail(
+      "Supply an absolute receipt path on the ELF board, optionally a script revision",
+    )
   }
+  let expected_revision = args.get(2).unwrap_or("display-week04-4k-v2")
   let path = "/home/elf/.local/opt/future-community-display/lepusa/runtime.json"
   let original = @fs.read_file(path).binary()
   let manifest = @json.parse(@fs.read_file(path).text())
@@ -91,7 +95,9 @@ async fn main {
     #|    before,after,moved:before-after,paused:stage.dataset.paused,reason:stage.dataset.pauseReason||'',
     #|    playState:getComputedStyle(track).animationPlayState,nativeBridge:typeof window.lepusa?.invoke==='function',
     #|    reduced:matchMedia('(prefers-reduced-motion:reduce)').matches,
-    #|    revision:[...document.scripts].find(script=>script.src.includes('display-week04-4k-v2'))?.src||''};
+    #|    cursorHidden:document.documentElement.dataset.cursorHidden||'',cursor:getComputedStyle(document.querySelector('.slide')).cursor,
+    #|    stylesheet:[...document.querySelectorAll('link[rel=stylesheet]')].map(link=>link.href),
+    #|    revision:[...document.scripts].find(script=>script.src.includes('display-week04-'))?.src||''};
     #|   await window.lepusa.invoke('window.setTitle',{windowLabel:'main',title:'DISPLAY_QA:'+JSON.stringify(state)});
     #|  },1600);
     #| };
@@ -136,10 +142,15 @@ async fn main {
           ..
         } &&
         distance > 20.0 &&
-        revision.contains("display-week04-4k-v2") else {
+        revision.contains(expected_revision) else {
         fail(
           "Native playback did not advance; original manifest restored and app restarted",
         )
+      }
+      if expected_revision.contains("cursor") {
+        guard value is { "cursorHidden": "true", "cursor": "none", .. } else {
+          fail("Native idle cursor is not hidden; inspect the receipt")
+        }
       }
       println(
         "Actual native WebView ticker advanced; original manifest restored and app restarted",

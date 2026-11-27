@@ -88,6 +88,19 @@ test('display playback across Chromium and WebKit', {timeout:180000}, async t =>
             await page.addInitScript(() => {window.lepusa = {invoke:async()=>({})};});
             await open();await moved();
           });
+          await t.test('native exhibition hides idle cursor over moving cards and restores it for deliberate movement', async () => {
+            const cursor=()=>page.locator('#motion').evaluate(node=>getComputedStyle(node).cursor);
+            await page.mouse.move(500,2050);await page.mouse.move(540,2050);
+            assert.notEqual(await cursor(),'none');
+            await page.waitForTimeout(2000);assert.equal(await cursor(),'none');
+            await page.mouse.move(541,2051);await page.waitForTimeout(100);assert.equal(await cursor(),'none');
+            await moved();
+            await page.mouse.move(580,2050);assert.notEqual(await cursor(),'none');
+            await page.locator('#motion').click();assert.equal(await page.locator('.display').getAttribute('data-paused'),'true');
+            await page.locator('#motion').click();await moved();
+            await page.keyboard.press('Tab');assert.equal(await cursor(),'none');
+            await page.mouse.move(620,2000);
+          });
           await t.test('4K image is decoded and mobile retains its small full-composition source', async () => {
             assert.deepEqual((await state()).hero,[3840,2160]);
             await page.mouse.move(0,0);

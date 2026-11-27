@@ -1,5 +1,21 @@
 # MoonTown handoff notes
 
+## 2026-11-27 · Exhibition idle cursor
+
+- Native Lepusa exhibition now hides the cursor initially and after1.8s idle;
+  deliberate mouse movement/click reveals it. Ignore displacement below4px
+  from the last accepted point so jitter/stationary layout events do not wake
+  it. The selector covers buttons too, avoiding cursor shape changes as moving
+  ticker cards pass underneath. Ordinary web visitors retain normal cursors.
+- Real .23 WebView probe verified cursorHidden=true and computed cursor=none
+  while ticker still advanced. Original native manifest restored and app
+  restarted. New CSS/JS are immutable cursor-v4 resources, HTTPS hashes pass.
+  Two browser engines cover reveal/idle/jitter/keyboard and continuing playback;
+  no global GNOME cursor settings, OS input devices or background agents changed.
+- Evidence: `output/coffee-display-cursor-20261127/`; publisher
+  `scripts/publish-coffee-display-cursor.mbtx`. Native probe accepts an optional
+  expected script revision, retaining the previous4k-v2 default for old checks.
+
 ## 2026-11-27 · Partner label refinement
 
 - Owner deferred native4K generation and requested only the label change.
